@@ -60,3 +60,6 @@ autom4te.cache
 /testsuite/expect/globals.*
 /testsuite/expect/*.log*
 TAGS
+
+.vscode
+.idea
