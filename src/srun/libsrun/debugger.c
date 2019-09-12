@@ -56,19 +56,18 @@ volatile int MPIR_debug_state;
 int MPIR_being_debugged;
 int MPIR_i_am_starter;
 int MPIR_acquired_pre_main;
-char *totalview_jobid  = NULL;
+char *totalview_jobid = NULL;
 char *totalview_stepid = NULL;
 
 #ifdef DEBUGGER_PARTIAL_ATTACH
-  int MPIR_partial_attach_ok;
+int MPIR_partial_attach_ok;
 #endif
 
-void MPIR_Breakpoint(srun_job_t *job)
-{
-	/*
-	 * This just notifies parallel debugger that some event of
-	 *  interest occurred.
-	 */
-	debug("In MPIR_Breakpoint");
-	launch_g_fwd_signal(SIG_DEBUG_WAKE);
+void MPIR_Breakpoint(srun_job_t *job) {
+    /*
+     * This just notifies parallel debugger that some event of
+     *  interest occurred.
+     */
+    debug("In MPIR_Breakpoint");
+    launch_g_fwd_signal(SIG_DEBUG_WAKE);
 }

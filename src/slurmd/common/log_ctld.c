@@ -38,44 +38,44 @@
 #include "src/common/slurm_protocol_api.h"
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
+
 /*
  * Log string at slurmctld daemon
  * IN level - message level, from src/common/log.h
  * IN string - the string to write
  * RET 0 on success, -1 on failure, see errno for details
  */
-extern int log_ctld(uint16_t level, char *string)
-{
-	int rc;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
-	slurm_event_log_msg_t req;
+extern int log_ctld(uint16_t level, char *string) {
+    int rc;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
+    slurm_event_log_msg_t req;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
-	memset(&req, 0, sizeof(req));
-	req.level = level;
-	req.string = string;
-	req_msg.msg_type = REQUEST_EVENT_LOG;
-	req_msg.data     = &req;
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
+    memset(&req, 0, sizeof(req));
+    req.level = level;
+    req.string = string;
+    req_msg.msg_type = REQUEST_EVENT_LOG;
+    req_msg.data = &req;
 
-	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					   working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                       working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	switch (resp_msg.msg_type) {
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		slurm_free_return_code_msg(resp_msg.data);
-		if (rc) {
-			slurm_seterrno_ret(rc);
-			return SLURM_ERROR;
-		}
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-		return SLURM_ERROR;
-	}
+    switch (resp_msg.msg_type) {
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            slurm_free_return_code_msg(resp_msg.data);
+            if (rc) {
+                slurm_seterrno_ret(rc);
+                return SLURM_ERROR;
+            }
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+            return SLURM_ERROR;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

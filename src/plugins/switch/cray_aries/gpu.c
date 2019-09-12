@@ -53,26 +53,26 @@ static int _get_mps_request(stepd_step_rec_t *job)
 
         char *envval;
 
-	// Determine what user wants the mps to be set at by the
-	// CRAY_CUDA_MPS and CRAY_CUDA_PROXY variables. If not set,
-	// do nothing.
-	if (!(envval = getenvp(job->env, CRAY_CUDA_MPS_ENV)) &&
-	    !(envval = getenvp(job->env, CRAY_CUDA_PROXY_ENV))) {
-		debug2("No GPU action requested");
-		return 2;
-	}
+    // Determine what user wants the mps to be set at by the
+    // CRAY_CUDA_MPS and CRAY_CUDA_PROXY variables. If not set,
+    // do nothing.
+    if (!(envval = getenvp(job->env, CRAY_CUDA_MPS_ENV)) &&
+        !(envval = getenvp(job->env, CRAY_CUDA_PROXY_ENV))) {
+        debug2("No GPU action requested");
+        return 2;
+    }
 
-	if (!xstrcasecmp(envval, "on") || !xstrcmp(envval, "1")) {
-		debug2("GPU mps requested on");
-		return 1;
-	} else if (!xstrcasecmp(envval, "off") || !xstrcmp(envval, "0")) {
-		debug2("GPU mps requested off");
-		return 0;
-	}
+    if (!xstrcasecmp(envval, "on") || !xstrcmp(envval, "1")) {
+        debug2("GPU mps requested on");
+        return 1;
+    } else if (!xstrcasecmp(envval, "off") || !xstrcmp(envval, "0")) {
+        debug2("GPU mps requested off");
+        return 0;
+    }
 
-	CRAY_ERR("Couldn't parse %s value %s, expected on,off,0,1",
-		 CRAY_CUDA_MPS_ENV, envval);
-	return 3;
+    CRAY_ERR("Couldn't parse %s value %s, expected on,off,0,1",
+         CRAY_CUDA_MPS_ENV, envval);
+    return 3;
 }
 
 /*
@@ -82,34 +82,34 @@ static int _get_mps_request(stepd_step_rec_t *job)
  */
 int setup_gpu(stepd_step_rec_t *job)
 {
-	int rc, gpu_enable;
-	char *err_msg;
+    int rc, gpu_enable;
+    char *err_msg;
 
-	gpu_enable = _get_mps_request(job);
-	if (gpu_enable > 1) {
-		// No action required, just exit with success
-		return SLURM_SUCCESS;
-	}
+    gpu_enable = _get_mps_request(job);
+    if (gpu_enable > 1) {
+        // No action required, just exit with success
+        return SLURM_SUCCESS;
+    }
 
-	// Establish GPU's default state
-	// NOTE: We have to redo this for every job because the job_init call
-	// is made from the stepd, so the default state in the slurmd is wiped
-	debug2("Getting default GPU mps state");
-	rc = alpsc_establish_GPU_mps_def_state(&err_msg);
-	ALPSC_CN_DEBUG("alpsc_establish_GPU_mps_def_state");
-	if (rc != 1) {
-		return SLURM_ERROR;
-	}
+    // Establish GPU's default state
+    // NOTE: We have to redo this for every job because the job_init call
+    // is made from the stepd, so the default state in the slurmd is wiped
+    debug2("Getting default GPU mps state");
+    rc = alpsc_establish_GPU_mps_def_state(&err_msg);
+    ALPSC_CN_DEBUG("alpsc_establish_GPU_mps_def_state");
+    if (rc != 1) {
+        return SLURM_ERROR;
+    }
 
-	// If the request is different than the default, perform the
-	// required action.
-	debug2("Setting GPU mps state to %d prior to launch", gpu_enable);
-	rc = alpsc_pre_launch_GPU_mps(&err_msg, gpu_enable);
-	ALPSC_CN_DEBUG("alpsc_pre_launch_GPU_mps");
-	if (rc != 1) {
-		return SLURM_ERROR;
-	}
-	return SLURM_SUCCESS;
+    // If the request is different than the default, perform the
+    // required action.
+    debug2("Setting GPU mps state to %d prior to launch", gpu_enable);
+    rc = alpsc_pre_launch_GPU_mps(&err_msg, gpu_enable);
+    ALPSC_CN_DEBUG("alpsc_pre_launch_GPU_mps");
+    if (rc != 1) {
+        return SLURM_ERROR;
+    }
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -118,22 +118,22 @@ int setup_gpu(stepd_step_rec_t *job)
  */
 int reset_gpu(stepd_step_rec_t *job)
 {
-	int rc, gpu_enable;
-	char *err_msg;
+    int rc, gpu_enable;
+    char *err_msg;
 
-	gpu_enable = _get_mps_request(job);
-	if (gpu_enable > 1) {
-		// No action required, return with success.
-		return SLURM_SUCCESS;
-	}
+    gpu_enable = _get_mps_request(job);
+    if (gpu_enable > 1) {
+        // No action required, return with success.
+        return SLURM_SUCCESS;
+    }
 
-	debug2("Resetting GPU mps state from %d after launch", gpu_enable);
-	rc = alpsc_post_launch_GPU_mps(&err_msg, gpu_enable);
-	ALPSC_CN_DEBUG("alpsc_post_launch_GPU_mps");
-	if (rc != 1) {
-		return SLURM_ERROR;
-	}
-	return SLURM_SUCCESS;
+    debug2("Resetting GPU mps state from %d after launch", gpu_enable);
+    rc = alpsc_post_launch_GPU_mps(&err_msg, gpu_enable);
+    ALPSC_CN_DEBUG("alpsc_post_launch_GPU_mps");
+    if (rc != 1) {
+        return SLURM_ERROR;
+    }
+    return SLURM_SUCCESS;
 }
 
 #endif

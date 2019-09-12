@@ -52,7 +52,7 @@
  *
  *  Returns 0 for valid status in pstatus, -1 on failure of waitpid(2).
  */
-int waitpid_timeout (const char *name, pid_t pid, int *pstatus, int timeout);
+int waitpid_timeout(const char *name, pid_t pid, int *pstatus, int timeout);
 
 /*
  * Run a prolog or epilog script (does NOT drop privileges)
@@ -65,7 +65,7 @@ int waitpid_timeout (const char *name, pid_t pid, int *pstatus, int timeout);
  * uid IN: user ID of job owner
  * RET 0 on success, -1 on failure.
  */
-int run_script(const char *name, const char *path, uint32_t jobid, 
-	       int max_wait, char **env, uid_t uid);
+int run_script(const char *name, const char *path, uint32_t jobid,
+               int max_wait, char **env, uid_t uid);
 
 #endif /* _RUN_SCRIPT_H */

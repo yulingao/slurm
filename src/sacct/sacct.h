@@ -50,6 +50,8 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <slurmdb.h>
+#include <smd_ns.h>
 
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
@@ -74,141 +76,142 @@
 #define FORMAT_STRING_SIZE 34
 
 #define SECONDS_IN_MINUTE 60
-#define SECONDS_IN_HOUR (60*SECONDS_IN_MINUTE)
-#define SECONDS_IN_DAY (24*SECONDS_IN_HOUR)
+#define SECONDS_IN_HOUR (60 * SECONDS_IN_MINUTE)
+#define SECONDS_IN_DAY (24 * SECONDS_IN_HOUR)
 
 /* On output, use fields 12-37 from JOB_STEP */
 
-typedef enum {	HEADLINE,
-		UNDERSCORE,
-		JOB,
-		JOBSTEP,
-		JOBCOMP
+typedef enum {
+    HEADLINE,
+    UNDERSCORE,
+    JOB,
+    JOBSTEP,
+    JOBCOMP
 } type_t;
 
 typedef enum {
-		PRINT_ACCOUNT,
-		PRINT_ADMIN_COMMENT,
-		PRINT_ALLOC_CPUS,
-		PRINT_ALLOC_GRES,
-		PRINT_ALLOC_NODES,
-		PRINT_TRESA,
-		PRINT_TRESR,
-		PRINT_ASSOCID,
-		PRINT_AVECPU,
-		PRINT_ACT_CPUFREQ,
-		PRINT_AVEDISKREAD,
-		PRINT_AVEDISKWRITE,
-		PRINT_AVEPAGES,
-		PRINT_AVERSS,
-		PRINT_AVEVSIZE,
-		PRINT_BLOCKID,
-		PRINT_CLUSTER,
-		PRINT_COMMENT,
-		PRINT_CONSTRAINTS,
-		PRINT_CONSUMED_ENERGY,
-		PRINT_CONSUMED_ENERGY_RAW,
-		PRINT_CPU_TIME,
-		PRINT_CPU_TIME_RAW,
-		PRINT_DERIVED_EC,
-		PRINT_ELAPSED,
-		PRINT_ELAPSED_RAW,
-		PRINT_ELIGIBLE,
-		PRINT_END,
-		PRINT_EXITCODE,
-		PRINT_FLAGS,
-		PRINT_GID,
-		PRINT_GROUP,
-		PRINT_JOBID,
-		PRINT_JOBIDRAW,
-		PRINT_JOBNAME,
-		PRINT_LAYOUT,
-		PRINT_MAXDISKREAD,
-		PRINT_MAXDISKREADNODE,
-		PRINT_MAXDISKREADTASK,
-		PRINT_MAXDISKWRITE,
-		PRINT_MAXDISKWRITENODE,
-		PRINT_MAXDISKWRITETASK,
-		PRINT_MAXPAGES,
-		PRINT_MAXPAGESNODE,
-		PRINT_MAXPAGESTASK,
-		PRINT_MAXRSS,
-		PRINT_MAXRSSNODE,
-		PRINT_MAXRSSTASK,
-		PRINT_MAXVSIZE,
-		PRINT_MAXVSIZENODE,
-		PRINT_MAXVSIZETASK,
-		PRINT_MCS_LABEL,
-		PRINT_MINCPU,
-		PRINT_MINCPUNODE,
-		PRINT_MINCPUTASK,
-		PRINT_NNODES,
-		PRINT_NODELIST,
-		PRINT_NTASKS,
-		PRINT_PARTITION,
-		PRINT_PRIO,
-		PRINT_QOS,
-		PRINT_QOSRAW,
-		PRINT_REASON,
-		PRINT_REQ_CPUFREQ_MIN,
-		PRINT_REQ_CPUFREQ_MAX,
-		PRINT_REQ_CPUFREQ_GOV,
-		PRINT_REQ_CPUS,
-		PRINT_REQ_GRES,
-		PRINT_REQ_MEM,
-		PRINT_REQ_NODES,
-		PRINT_RESERVATION,
-		PRINT_RESERVATION_ID,
-		PRINT_RESV,
-		PRINT_RESV_CPU,
-		PRINT_RESV_CPU_RAW,
-		PRINT_START,
-		PRINT_STATE,
-		PRINT_SUBMIT,
-		PRINT_SUSPENDED,
-		PRINT_SYSTEMCPU,
-		PRINT_SYSTEM_COMMENT,
-		PRINT_TIMELIMIT,
-		PRINT_TIMELIMIT_RAW,
-		PRINT_TOTALCPU,
-		PRINT_TRESUIA,
-		PRINT_TRESUIM,
-		PRINT_TRESUIMN,
-		PRINT_TRESUIMT,
-		PRINT_TRESUIMI,
-		PRINT_TRESUIMIN,
-		PRINT_TRESUIMIT,
-		PRINT_TRESUIT,
-		PRINT_TRESUOA,
-		PRINT_TRESUOM,
-		PRINT_TRESUOMN,
-		PRINT_TRESUOMT,
-		PRINT_TRESUOMI,
-		PRINT_TRESUOMIN,
-		PRINT_TRESUOMIT,
-		PRINT_TRESUOT,
-		PRINT_UID,
-		PRINT_USER,
-		PRINT_USERCPU,
-		PRINT_WCKEY,
-		PRINT_WCKEYID,
-		PRINT_WORK_DIR
+    PRINT_ACCOUNT,
+    PRINT_ADMIN_COMMENT,
+    PRINT_ALLOC_CPUS,
+    PRINT_ALLOC_GRES,
+    PRINT_ALLOC_NODES,
+    PRINT_TRESA,
+    PRINT_TRESR,
+    PRINT_ASSOCID,
+    PRINT_AVECPU,
+    PRINT_ACT_CPUFREQ,
+    PRINT_AVEDISKREAD,
+    PRINT_AVEDISKWRITE,
+    PRINT_AVEPAGES,
+    PRINT_AVERSS,
+    PRINT_AVEVSIZE,
+    PRINT_BLOCKID,
+    PRINT_CLUSTER,
+    PRINT_COMMENT,
+    PRINT_CONSTRAINTS,
+    PRINT_CONSUMED_ENERGY,
+    PRINT_CONSUMED_ENERGY_RAW,
+    PRINT_CPU_TIME,
+    PRINT_CPU_TIME_RAW,
+    PRINT_DERIVED_EC,
+    PRINT_ELAPSED,
+    PRINT_ELAPSED_RAW,
+    PRINT_ELIGIBLE,
+    PRINT_END,
+    PRINT_EXITCODE,
+    PRINT_FLAGS,
+    PRINT_GID,
+    PRINT_GROUP,
+    PRINT_JOBID,
+    PRINT_JOBIDRAW,
+    PRINT_JOBNAME,
+    PRINT_LAYOUT,
+    PRINT_MAXDISKREAD,
+    PRINT_MAXDISKREADNODE,
+    PRINT_MAXDISKREADTASK,
+    PRINT_MAXDISKWRITE,
+    PRINT_MAXDISKWRITENODE,
+    PRINT_MAXDISKWRITETASK,
+    PRINT_MAXPAGES,
+    PRINT_MAXPAGESNODE,
+    PRINT_MAXPAGESTASK,
+    PRINT_MAXRSS,
+    PRINT_MAXRSSNODE,
+    PRINT_MAXRSSTASK,
+    PRINT_MAXVSIZE,
+    PRINT_MAXVSIZENODE,
+    PRINT_MAXVSIZETASK,
+    PRINT_MCS_LABEL,
+    PRINT_MINCPU,
+    PRINT_MINCPUNODE,
+    PRINT_MINCPUTASK,
+    PRINT_NNODES,
+    PRINT_NODELIST,
+    PRINT_NTASKS,
+    PRINT_PARTITION,
+    PRINT_PRIO,
+    PRINT_QOS,
+    PRINT_QOSRAW,
+    PRINT_REASON,
+    PRINT_REQ_CPUFREQ_MIN,
+    PRINT_REQ_CPUFREQ_MAX,
+    PRINT_REQ_CPUFREQ_GOV,
+    PRINT_REQ_CPUS,
+    PRINT_REQ_GRES,
+    PRINT_REQ_MEM,
+    PRINT_REQ_NODES,
+    PRINT_RESERVATION,
+    PRINT_RESERVATION_ID,
+    PRINT_RESV,
+    PRINT_RESV_CPU,
+    PRINT_RESV_CPU_RAW,
+    PRINT_START,
+    PRINT_STATE,
+    PRINT_SUBMIT,
+    PRINT_SUSPENDED,
+    PRINT_SYSTEMCPU,
+    PRINT_SYSTEM_COMMENT,
+    PRINT_TIMELIMIT,
+    PRINT_TIMELIMIT_RAW,
+    PRINT_TOTALCPU,
+    PRINT_TRESUIA,
+    PRINT_TRESUIM,
+    PRINT_TRESUIMN,
+    PRINT_TRESUIMT,
+    PRINT_TRESUIMI,
+    PRINT_TRESUIMIN,
+    PRINT_TRESUIMIT,
+    PRINT_TRESUIT,
+    PRINT_TRESUOA,
+    PRINT_TRESUOM,
+    PRINT_TRESUOMN,
+    PRINT_TRESUOMT,
+    PRINT_TRESUOMI,
+    PRINT_TRESUOMIN,
+    PRINT_TRESUOMIT,
+    PRINT_TRESUOT,
+    PRINT_UID,
+    PRINT_USER,
+    PRINT_USERCPU,
+    PRINT_WCKEY,
+    PRINT_WCKEYID,
+    PRINT_WORK_DIR
 } sacct_print_types_t;
 
 typedef struct {
-	char *cluster_name;	/* Set if in federated cluster */
-	uint32_t convert_flags;	/* --noconvert */
-	slurmdb_job_cond_t *job_cond;
-	int opt_completion;	/* --completion */
-	bool opt_federation;	/* --federation */
-	char *opt_field_list;	/* --fields= */
-	char *opt_filein;	/* --file */
-	int opt_gid;		/* running persons gid */
-	int opt_help;		/* --help */
-	bool opt_local;		/* --local */
-	int opt_noheader;	/* can only be cleared */
-	int opt_uid;		/* running persons uid */
-	int units;		/* --units*/
+    char *cluster_name;        /* Set if in federated cluster */
+    uint32_t convert_flags; /* --noconvert */
+    slurmdb_job_cond_t *job_cond;
+    int opt_completion;   /* --completion */
+    bool opt_federation;  /* --federation */
+    char *opt_field_list; /* --fields= */
+    char *opt_filein;     /* --file */
+    int opt_gid;          /* running persons gid */
+    int opt_help;          /* --help */
+    bool opt_local;          /* --local */
+    int opt_noheader;     /* can only be cleared */
+    int opt_uid;          /* running persons uid */
+    int units;              /* --units*/
 } sacct_parameters_t;
 
 extern print_field_t fields[];
@@ -228,12 +231,18 @@ void aggregate_stats(slurmdb_stats_t *dest, slurmdb_stats_t *from);
 void print_fields(type_t type, void *object);
 
 /* options.c */
-int  get_data(void);
+int get_data(void);
+
 void parse_command_line(int argc, char **argv);
+
 void do_help(void);
+
 void do_list(void);
+
 void do_list_completion(void);
+
 void sacct_init(void);
+
 void sacct_fini(void);
 
 #endif /* !_SACCT_H */

@@ -34,55 +34,62 @@
 #include "src/plugins/topology/3d_torus/hilbert.h"
 
 extern void TransposetoAxes(
-coord_t* X,            // I O  position   [n]
-int      b,            // I    # bits
-int      n)            // I    dimension
+        coord_t *X,            // I O  position   [n]
+        int b,            // I    # bits
+        int n)            // I    dimension
 {
-    coord_t  M, P, Q, t;
-    int      i;
+    coord_t M, P, Q, t;
+    int i;
 
 // Gray decode by  H ^ (H/2)
-    t = X[n-1] >> 1;
-    for( i = n-1; i; i-- )
-        X[i] ^= X[i-1];
+    t = X[n - 1] >> 1;
+    for (i = n - 1; i; i--)
+        X[i] ^= X[i - 1];
     X[0] ^= t;
 
 // Undo excess work
     M = 2 << (b - 1);
-    for( Q = 2; Q != M; Q <<= 1 )
-    {
+    for (Q = 2; Q != M; Q <<= 1) {
         P = Q - 1;
-        for( i = n-1; i; i-- )
-            if ( X[i] & Q ) X[0] ^= P;                             // invert
-            else{ t = (X[0] ^ X[i]) & P;  X[0] ^= t;  X[i] ^= t; } // exchange
-        if ( X[0] & Q ) X[0] ^= P;                                 // invert
+        for (i = n - 1; i; i--)
+            if (X[i] & Q) X[0] ^= P;                             // invert
+            else {
+                t = (X[0] ^ X[i]) & P;
+                X[0] ^= t;
+                X[i] ^= t;
+            } // exchange
+        if (X[0] & Q) X[0] ^= P;                                 // invert
     }
 }
+
 extern void AxestoTranspose(
-coord_t* X,            // I O  position   [n]
-int      b,            // I    # bits
-int      n)            // I    dimension
+        coord_t *X,            // I O  position   [n]
+        int b,            // I    # bits
+        int n)            // I    dimension
 {
-    coord_t  P, Q, t;
-    int      i;
+    coord_t P, Q, t;
+    int i;
 
 // Inverse undo
-    for( Q = 1 << (b - 1); Q > 1; Q >>= 1 )
-    {
+    for (Q = 1 << (b - 1); Q > 1; Q >>= 1) {
         P = Q - 1;
-        if ( X[0] & Q ) X[0] ^= P;                                  // invert
-        for( i = 1; i < n; i++ )
-            if ( X[i] & Q ) X[0] ^= P;                              // invert
-            else{ t = (X[0] ^ X[i]) & P;  X[0] ^= t;  X[i] ^= t; } // exchange
+        if (X[0] & Q) X[0] ^= P;                                  // invert
+        for (i = 1; i < n; i++)
+            if (X[i] & Q) X[0] ^= P;                              // invert
+            else {
+                t = (X[0] ^ X[i]) & P;
+                X[0] ^= t;
+                X[i] ^= t;
+            } // exchange
     }
 
 // Gray encode (inverse of decode)
-    for( i = 1; i < n; i++ )
-        X[i] ^= X[i-1];
-    t = X[n-1];
-    for( i = 1; i < b; i <<= 1 )
-        X[n-1] ^= X[n-1] >> i;
-    t ^= X[n-1];
-    for( i = n-2; i >= 0; i-- )
+    for (i = 1; i < n; i++)
+        X[i] ^= X[i - 1];
+    t = X[n - 1];
+    for (i = 1; i < b; i <<= 1)
+        X[n - 1] ^= X[n - 1] >> i;
+    t ^= X[n - 1];
+    for (i = n - 2; i >= 0; i--)
         X[i] ^= t;
 }

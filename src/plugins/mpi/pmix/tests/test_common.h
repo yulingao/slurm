@@ -22,7 +22,8 @@
 /* WARNING: pmix_test_output_prepare is currently not threadsafe!
  * fix it once needed!
  */
-char *pmix_test_output_prepare(const char *fmt,...);
+char *pmix_test_output_prepare(const char *fmt, ...);
+
 extern int pmix_test_verbose;
 
 #define STRIPPED_FILE_NAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)

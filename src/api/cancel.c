@@ -54,31 +54,30 @@
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 extern int
-slurm_kill_job (uint32_t job_id, uint16_t signal, uint16_t flags)
-{
-	int rc;
-	slurm_msg_t msg;
-	job_step_kill_msg_t req;
+slurm_kill_job(uint32_t job_id, uint16_t signal, uint16_t flags) {
+    int rc;
+    slurm_msg_t msg;
+    job_step_kill_msg_t req;
 
-	slurm_msg_t_init(&msg);
-	/*
-	 * Request message:
-	 */
-	memset(&req, 0, sizeof(job_step_kill_msg_t));
-	req.job_id      = job_id;
-	req.sjob_id     = NULL;
-	req.job_step_id = NO_VAL;
-	req.signal      = signal;
-	req.flags       = flags;
-	msg.msg_type    = REQUEST_CANCEL_JOB_STEP;
-	msg.data        = &req;
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec)<0)
-		return SLURM_ERROR;
+    slurm_msg_t_init(&msg);
+    /*
+     * Request message:
+     */
+    memset(&req, 0, sizeof(job_step_kill_msg_t));
+    req.job_id = job_id;
+    req.sjob_id = NULL;
+    req.job_step_id = NO_VAL;
+    req.signal = signal;
+    req.flags = flags;
+    msg.msg_type = REQUEST_CANCEL_JOB_STEP;
+    msg.data = &req;
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -90,66 +89,64 @@ slurm_kill_job (uint32_t job_id, uint16_t signal, uint16_t flags)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 extern int
-slurm_kill_job_step (uint32_t job_id, uint32_t step_id, uint16_t signal)
-{
-	int rc;
-	slurm_msg_t msg;
-	job_step_kill_msg_t req;
+slurm_kill_job_step(uint32_t job_id, uint32_t step_id, uint16_t signal) {
+    int rc;
+    slurm_msg_t msg;
+    job_step_kill_msg_t req;
 
-	slurm_msg_t_init(&msg);
-	/*
-	 * Request message:
-	 */
-	memset(&req, 0, sizeof(job_step_kill_msg_t));
-	req.job_id      = job_id;
-	req.sjob_id     = NULL;
-	req.job_step_id = step_id;
-	req.signal      = signal;
-	req.flags	= 0;
-	msg.msg_type    = REQUEST_CANCEL_JOB_STEP;
-	msg.data        = &req;
+    slurm_msg_t_init(&msg);
+    /*
+     * Request message:
+     */
+    memset(&req, 0, sizeof(job_step_kill_msg_t));
+    req.job_id = job_id;
+    req.sjob_id = NULL;
+    req.job_step_id = step_id;
+    req.signal = signal;
+    req.flags = 0;
+    msg.msg_type = REQUEST_CANCEL_JOB_STEP;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec)<0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /* slurm_kill_job2()
  */
 int
-slurm_kill_job2(const char *job_id, uint16_t signal, uint16_t flags)
-{
-	int cc;
-	slurm_msg_t msg;
-	job_step_kill_msg_t req;
+slurm_kill_job2(const char *job_id, uint16_t signal, uint16_t flags) {
+    int cc;
+    slurm_msg_t msg;
+    job_step_kill_msg_t req;
 
-	if (job_id == NULL) {
-		errno = EINVAL;
-		return SLURM_ERROR;
-	}
+    if (job_id == NULL) {
+        errno = EINVAL;
+        return SLURM_ERROR;
+    }
 
-	slurm_msg_t_init(&msg);
+    slurm_msg_t_init(&msg);
 
-	memset(&req, 0, sizeof(job_step_kill_msg_t));
-	req.job_id      = NO_VAL;
-	req.sjob_id     = xstrdup(job_id);
-	req.job_step_id = NO_VAL;
-	req.signal      = signal;
-	req.flags	= flags;
-	msg.msg_type    = REQUEST_KILL_JOB;
-        msg.data        = &req;
+    memset(&req, 0, sizeof(job_step_kill_msg_t));
+    req.job_id = NO_VAL;
+    req.sjob_id = xstrdup(job_id);
+    req.job_step_id = NO_VAL;
+    req.signal = signal;
+    req.flags = flags;
+    msg.msg_type = REQUEST_KILL_JOB;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &cc, working_cluster_rec)<0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &cc, working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (cc)
-		slurm_seterrno_ret(cc);
+    if (cc)
+        slurm_seterrno_ret(cc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -159,20 +156,19 @@ slurm_kill_job2(const char *job_id, uint16_t signal, uint16_t flags)
  * IN kill_msg - job_step_kill_msg_t parameters.
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_kill_job_msg(uint16_t msg_type, job_step_kill_msg_t *kill_msg)
-{
-	int cc;
-	slurm_msg_t msg;
-	slurm_msg_t_init(&msg);
+extern int slurm_kill_job_msg(uint16_t msg_type, job_step_kill_msg_t *kill_msg) {
+    int cc;
+    slurm_msg_t msg;
+    slurm_msg_t_init(&msg);
 
-	msg.msg_type = msg_type;
-        msg.data     = kill_msg;
+    msg.msg_type = msg_type;
+    msg.data = kill_msg;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &cc, working_cluster_rec)<0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &cc, working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (cc)
-		slurm_seterrno_ret(cc);
+    if (cc)
+        slurm_seterrno_ret(cc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

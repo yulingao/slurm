@@ -43,22 +43,22 @@
 #include "accounting_storage_mysql.h"
 
 extern int as_mysql_add_users(mysql_conn_t *mysql_conn, uint32_t uid,
-			   List user_list);
+                              List user_list);
 
 extern int as_mysql_add_coord(mysql_conn_t *mysql_conn, uint32_t uid,
-			   List acct_list, slurmdb_user_cond_t *user_cond);
+                              List acct_list, slurmdb_user_cond_t *user_cond);
 
 extern List as_mysql_modify_users(mysql_conn_t *mysql_conn, uint32_t uid,
-			       slurmdb_user_cond_t *user_cond,
-			       slurmdb_user_rec_t *user);
+                                  slurmdb_user_cond_t *user_cond,
+                                  slurmdb_user_rec_t *user);
 
 extern List as_mysql_remove_users(mysql_conn_t *mysql_conn, uint32_t uid,
-			       slurmdb_user_cond_t *user_cond);
+                                  slurmdb_user_cond_t *user_cond);
 
 extern List as_mysql_remove_coord(mysql_conn_t *mysql_conn, uint32_t uid,
-			       List acct_list, slurmdb_user_cond_t *user_cond);
+                                  List acct_list, slurmdb_user_cond_t *user_cond);
 
 extern List as_mysql_get_users(mysql_conn_t *mysql_conn, uid_t uid,
-			    slurmdb_user_cond_t *user_cond);
+                               slurmdb_user_cond_t *user_cond);
 
 #endif

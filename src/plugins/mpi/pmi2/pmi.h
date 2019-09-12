@@ -240,6 +240,7 @@
 
 
 extern int handle_pmi1_cmd(int fd, int lrank);
+
 extern int handle_pmi2_cmd(int fd, int lrank);
 
 #endif /* _PMI_H */

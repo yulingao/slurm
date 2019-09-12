@@ -57,8 +57,11 @@
 extern int acct_gather_filesystem_init(void); /* load the plugin */
 extern int acct_gather_filesystem_fini(void); /* unload the plugin */
 extern int acct_gather_filesystem_startpoll(uint32_t);
+
 extern int acct_gather_filesystem_g_node_update(void);
+
 extern int acct_gather_filesystem_g_get_data(acct_gather_data_t *data);
+
 /*
  * Define plugin local conf for acct_gather.conf
  *
@@ -68,7 +71,8 @@ extern int acct_gather_filesystem_g_get_data(acct_gather_data_t *data);
  *      full_options_cnt -- count of plugin local definitions
  */
 extern int acct_gather_filesystem_g_conf_options(s_p_options_t **full_options,
-						  int *full_options_cnt);
+                                                 int *full_options_cnt);
+
 /*
  * set plugin local conf from acct_gather.conf into its structure
  *

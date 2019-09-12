@@ -45,8 +45,10 @@
 #include "src/common/slurm_protocol_defs.h"
 
 extern void msg_aggr_sender_init(char *host, uint16_t port, uint64_t window,
-				 uint64_t max_msg_cnt);
+                                 uint64_t max_msg_cnt);
+
 extern void msg_aggr_sender_reconfig(uint64_t window, uint64_t max_msg_cnt);
+
 extern void msg_aggr_sender_fini(void);
 
 /* add a message that needs to be sent.
@@ -55,8 +57,10 @@ extern void msg_aggr_sender_fini(void);
  * IN: resp_callback - function to process response
  */
 extern void msg_aggr_add_msg(slurm_msg_t *msg, bool wait,
-			     void (*resp_callback) (slurm_msg_t *msg));
+                             void (*resp_callback)(slurm_msg_t *msg));
+
 extern void msg_aggr_add_comp(Buf buffer, void *auth_cred, header_t *header);
+
 extern void msg_aggr_resp(slurm_msg_t *msg);
 
 #endif

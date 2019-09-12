@@ -55,8 +55,8 @@
 /* Retry getpwuid_r while return code is EINTR so we always get the
  * info.  Return return code of getpwuid_r.
  */
-extern int slurm_getpwuid_r (uid_t uid, struct passwd *pwd, char *buf,
-			     size_t bufsiz, struct passwd **result);
+extern int slurm_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
+                            size_t bufsiz, struct passwd **result);
 
 /*
  * Return validated uid_t for string in ``name'' which contains
@@ -71,7 +71,7 @@ int uid_from_string(const char *name, uid_t *uidp);
  * Return the primary group id for a given user id, or
  * (gid_t) -1 on failure.
  */
-gid_t gid_from_uid (uid_t uid);
+gid_t gid_from_uid(uid_t uid);
 
 /*
  * Same as uid_from_name(), but for group name/id.
@@ -89,7 +89,7 @@ char *uid_to_string_or_null(uid_t uid);
  * Translate uid to user name,
  * NOTE: xfree the return value
  */
-char *uid_to_string (uid_t uid);
+char *uid_to_string(uid_t uid);
 
 /* Free any memory allocated by uid_to_string_cached() */
 extern void uid_cache_clear(void);
@@ -104,6 +104,6 @@ extern char *uid_to_string_cached(uid_t uid);
  * Same as uid_to_string, but for group name.
  * NOTE: xfree the return value
  */
-char *gid_to_string (gid_t gid);
+char *gid_to_string(gid_t gid);
 
 #endif /*__SLURM_UID_UTILITY_H__*/

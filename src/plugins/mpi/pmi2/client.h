@@ -48,47 +48,59 @@
 #define PMI20_SUBVERSION 0
 
 typedef struct client_request {
-	int buf_len;
-	char *buf;
-	char sep;		/* cmd/value seperator */
-	char term;		/* request terminator */
-	int parse_idx;		/* ptr used in parsing */
-	char *cmd;		/* cmd points to buf or other static memory*/
-	char **pairs;		/* key-value in pairs always point to buf */
-	uint32_t pairs_size;
-	uint32_t pairs_cnt;
+    int buf_len;
+    char *buf;
+    char sep;        /* cmd/value seperator */
+    char term;        /* request terminator */
+    int parse_idx;        /* ptr used in parsing */
+    char *cmd;        /* cmd points to buf or other static memory*/
+    char **pairs;        /* key-value in pairs always point to buf */
+    uint32_t pairs_size;
+    uint32_t pairs_cnt;
 } client_req_t;
 
 typedef struct client_response {
-	char *buf;
+    char *buf;
 } client_resp_t;
 
 
 extern int get_pmi_version(int *version, int *subversion);
+
 extern int set_pmi_version(int version, int subversion);
+
 extern int is_pmi11(void);
+
 extern int is_pmi20(void);
 
 extern client_req_t *client_req_init(uint32_t len, char *buf);
+
 extern void client_req_free(client_req_t *req);
-extern int  client_req_parse_cmd(client_req_t *req);
-extern int  client_req_parse_body(client_req_t *req);
-extern bool  client_req_get_str(client_req_t *req, const char *key, char **val);
-extern bool  client_req_get_int(client_req_t *req, const char *key, int *val);
-extern bool  client_req_get_bool(client_req_t *req, const char *key, bool *val);
+
+extern int client_req_parse_cmd(client_req_t *req);
+
+extern int client_req_parse_body(client_req_t *req);
+
+extern bool client_req_get_str(client_req_t *req, const char *key, char **val);
+
+extern bool client_req_get_int(client_req_t *req, const char *key, int *val);
+
+extern bool client_req_get_bool(client_req_t *req, const char *key, bool *val);
 
 extern spawn_req_t *client_req_parse_spawn_req(client_req_t *req);
+
 extern spawn_subcmd_t *client_req_parse_spawn_subcmd(client_req_t *req);
 
 extern client_resp_t *client_resp_new(void);
-extern int  client_resp_send(client_resp_t *req, int fd);
+
+extern int client_resp_send(client_resp_t *req, int fd);
+
 extern void client_resp_free(client_resp_t *resp);
 /* XXX: this requires CPP */
 #define client_resp_append(msg, fmt, ...) do { \
-		xstrfmtcat(msg->buf, fmt, ## __VA_ARGS__);	\
-	} while (0)
+        xstrfmtcat(msg->buf, fmt, ## __VA_ARGS__);    \
+    } while (0)
 
 
 extern int send_kvs_fence_resp_to_clients(int rc, char *errmsg);
 
-#endif	/* _CLIENT_H */
+#endif    /* _CLIENT_H */

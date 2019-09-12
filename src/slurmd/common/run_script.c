@@ -57,39 +57,38 @@
  *  Same as waitpid(2) but kill process group for pid after timeout secs.
  *   Returns 0 for valid status in pstatus, -1 on failure of waitpid(2).
  */
-int waitpid_timeout (const char *name, pid_t pid, int *pstatus, int timeout)
-{
-	int timeout_ms = 1000 * timeout; /* timeout in ms                   */
-	int max_delay =  1000;           /* max delay between waitpid calls */
-	int delay = 10;                  /* initial delay                   */
-	int rc;
-	int options = WNOHANG;
+int waitpid_timeout(const char *name, pid_t pid, int *pstatus, int timeout) {
+    int timeout_ms = 1000 * timeout; /* timeout in ms                   */
+    int max_delay = 1000;           /* max delay between waitpid calls */
+    int delay = 10;                  /* initial delay                   */
+    int rc;
+    int options = WNOHANG;
 
-	if (timeout <= 0)
-		options = 0;
+    if (timeout <= 0)
+        options = 0;
 
-	while ((rc = waitpid (pid, pstatus, options)) <= 0) {
-		if (rc < 0) {
-			if (errno == EINTR)
-				continue;
-			error("waitpid: %m");
-			return (-1);
-		} else if (timeout_ms <= 0) {
-			info ("%s%stimeout after %ds: killing pgid %d",
-			      name != NULL ? name : "",
-			      name != NULL ? ": " : "",
-			      timeout, pid);
-			killpg(pid, SIGKILL);
-			options = 0;
-		} else {
-			(void) poll(NULL, 0, delay);
-			timeout_ms -= delay;
-			delay = MIN (timeout_ms, MIN(max_delay, delay*2));
-		}
-	}
+    while ((rc = waitpid(pid, pstatus, options)) <= 0) {
+        if (rc < 0) {
+            if (errno == EINTR)
+                continue;
+            error("waitpid: %m");
+            return (-1);
+        } else if (timeout_ms <= 0) {
+            info("%s%stimeout after %ds: killing pgid %d",
+                 name != NULL ? name : "",
+                 name != NULL ? ": " : "",
+                 timeout, pid);
+            killpg(pid, SIGKILL);
+            options = 0;
+        } else {
+            (void) poll(NULL, 0, delay);
+            timeout_ms -= delay;
+            delay = MIN(timeout_ms, MIN(max_delay, delay * 2));
+        }
+    }
 
-	killpg(pid, SIGKILL);  /* kill children too */
-	return (0);
+    killpg(pid, SIGKILL);  /* kill children too */
+    return (0);
 }
 
 /*
@@ -105,128 +104,123 @@ int waitpid_timeout (const char *name, pid_t pid, int *pstatus, int timeout)
  */
 static int
 _run_one_script(const char *name, const char *path, uint32_t job_id,
-		int max_wait, char **env, uid_t uid)
-{
-	int status;
-	pid_t cpid;
+                int max_wait, char **env, uid_t uid) {
+    int status;
+    pid_t cpid;
 
-	xassert(env);
-	if (path == NULL || path[0] == '\0')
-		return 0;
+    xassert(env);
+    if (path == NULL || path[0] == '\0')
+        return 0;
 
-	if (job_id) {
-		debug("[job %u] attempting to run %s [%s]",
-			job_id, name, path);
-	} else
-		debug("attempting to run %s [%s]", name, path);
+    if (job_id) {
+        debug("[job %u] attempting to run %s [%s]",
+              job_id, name, path);
+    } else
+        debug("attempting to run %s [%s]", name, path);
 
-	if (access(path, R_OK | X_OK) < 0) {
-		error("Can not run %s [%s]: %m", name, path);
-		return -1;
-	}
+    if (access(path, R_OK | X_OK) < 0) {
+        error("Can not run %s [%s]: %m", name, path);
+        return -1;
+    }
 
-	if ((cpid = fork()) < 0) {
-		error ("executing %s: fork: %m", name);
-		return -1;
-	}
-	if (cpid == 0) {
-		char *argv[2];
+    if ((cpid = fork()) < 0) {
+        error("executing %s: fork: %m", name);
+        return -1;
+    }
+    if (cpid == 0) {
+        char *argv[2];
 
-		/* container_g_join needs to be called in the
-		   forked process part of the fork to avoid a race
-		   condition where if this process makes a file or
-		   detacts itself from a child before we add the pid
-		   to the container in the parent of the fork.
-		*/
-		if (container_g_join(job_id, getuid())
-		    != SLURM_SUCCESS)
-			error("container_g_join(%u): %m", job_id);
+        /* container_g_join needs to be called in the
+           forked process part of the fork to avoid a race
+           condition where if this process makes a file or
+           detacts itself from a child before we add the pid
+           to the container in the parent of the fork.
+        */
+        if (container_g_join(job_id, getuid())
+            != SLURM_SUCCESS)
+            error("container_g_join(%u): %m", job_id);
 
-		argv[0] = (char *)xstrdup(path);
-		argv[1] = NULL;
+        argv[0] = (char *) xstrdup(path);
+        argv[1] = NULL;
 
-		setpgid(0, 0);
-		execve(path, argv, env);
-		error("execve(%s): %m", path);
-		exit(127);
-	}
+        setpgid(0, 0);
+        execve(path, argv, env);
+        error("execve(%s): %m", path);
+        exit(127);
+    }
 
-	if (waitpid_timeout(name, cpid, &status, max_wait) < 0)
-		return (-1);
-	return status;
+    if (waitpid_timeout(name, cpid, &status, max_wait) < 0)
+        return (-1);
+    return status;
 }
 
-static void _xfree_f (void *x)
-{
-	xfree (x);
+static void _xfree_f(void *x) {
+    xfree(x);
 }
 
 
-static int _ef (const char *p, int errnum)
-{
-	return error ("run_script: glob: %s: %s", p, strerror (errno));
+static int _ef(const char *p, int errnum) {
+    return error("run_script: glob: %s: %s", p, strerror(errno));
 }
 
-static List _script_list_create (const char *pattern)
-{
-	glob_t gl;
-	size_t i;
-	List l = NULL;
+static List _script_list_create(const char *pattern) {
+    glob_t gl;
+    size_t i;
+    List l = NULL;
 
-	if (pattern == NULL)
-		return (NULL);
+    if (pattern == NULL)
+        return (NULL);
 
-	int rc = glob (pattern, GLOB_ERR, _ef, &gl);
-	switch (rc) {
-	case 0:
-		l = list_create ((ListDelF) _xfree_f);
-		for (i = 0; i < gl.gl_pathc; i++)
-			list_push (l, xstrdup (gl.gl_pathv[i]));
-		break;
-	case GLOB_NOMATCH:
-		break;
-	case GLOB_NOSPACE:
-		error ("run_script: glob(3): Out of memory");
-		break;
-	case GLOB_ABORTED:
-		error ("run_script: cannot read dir %s: %m", pattern);
-		break;
-	default:
-		error ("Unknown glob(3) return code = %d", rc);
-		break;
-	}
+    int rc = glob(pattern, GLOB_ERR, _ef, &gl);
+    switch (rc) {
+        case 0:
+            l = list_create((ListDelF) _xfree_f);
+            for (i = 0; i < gl.gl_pathc; i++)
+                list_push(l, xstrdup(gl.gl_pathv[i]));
+            break;
+        case GLOB_NOMATCH:
+            break;
+        case GLOB_NOSPACE:
+            error("run_script: glob(3): Out of memory");
+            break;
+        case GLOB_ABORTED:
+            error("run_script: cannot read dir %s: %m", pattern);
+            break;
+        default:
+            error("Unknown glob(3) return code = %d", rc);
+            break;
+    }
 
-	globfree (&gl);
+    globfree(&gl);
 
-	return l;
+    return l;
 }
 
 int run_script(const char *name, const char *pattern, uint32_t job_id,
-	       int max_wait, char **env, uid_t uid)
-{
-	int rc = 0;
-	List l;
-	ListIterator i;
-	char *s;
+               int max_wait, char **env, uid_t uid) {
+    int rc = 0;
+    List l;
+    ListIterator i;
+    char *s;
 
-	if (pattern == NULL || pattern[0] == '\0')
-		return 0;
+    if (pattern == NULL || pattern[0] == '\0')
+        return 0;
 
-	l = _script_list_create (pattern);
-	if (l == NULL)
-		return error ("Unable to run %s [%s]", name, pattern);
+    l = _script_list_create(pattern);
+    if (l == NULL)
+        return error("Unable to run %s [%s]", name, pattern);
 
-	i = list_iterator_create (l);
-	while ((s = list_next (i))) {
-		rc = _run_one_script (name, s, job_id, max_wait, env, uid);
-		if (rc) {
-			error ("%s: exited with status 0x%04x\n", s, rc);
-			break;
-		}
+    i = list_iterator_create(l);
+    while ((s = list_next(i))) {
+        rc = _run_one_script(name, s, job_id, max_wait, env, uid);
+        if (rc) {
+            error("%s: exited with status 0x%04x\n", s, rc);
+            break;
+        }
 
-	}
-	list_iterator_destroy (i);
-	FREE_NULL_LIST (l);
+    }
+    list_iterator_destroy(i);
+    FREE_NULL_LIST(l);
 
-	return rc;
+    return rc;
 }

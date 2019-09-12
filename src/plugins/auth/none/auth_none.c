@@ -108,25 +108,23 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  *
  */
 typedef struct _slurm_auth_credential {
-	int index; /* MUST ALWAYS BE FIRST. DO NOT PACK. */
-	char *hostname;
-	uid_t uid;
-	gid_t gid;
+    int index; /* MUST ALWAYS BE FIRST. DO NOT PACK. */
+    char *hostname;
+    uid_t uid;
+    gid_t gid;
 } slurm_auth_credential_t;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	debug("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+extern int init(void) {
+    debug("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -138,31 +136,29 @@ extern int fini(void)
  * Allocate and initializes a credential.  This function should return
  * NULL if it cannot allocate a credential.
  */
-slurm_auth_credential_t *slurm_auth_create(char *auth_info)
-{
-	slurm_auth_credential_t *cred = xmalloc(sizeof(*cred));
+slurm_auth_credential_t *slurm_auth_create(char *auth_info) {
+    slurm_auth_credential_t *cred = xmalloc(sizeof(*cred));
 
-	cred->uid = geteuid();
-	cred->gid = getegid();
+    cred->uid = geteuid();
+    cred->gid = getegid();
 
-	cred->hostname = xshort_hostname();
+    cred->hostname = xshort_hostname();
 
-	return cred;
+    return cred;
 }
 
 /*
  * Free a credential that was allocated with slurm_auth_create() or
  * slurm_auth_unpack().
  */
-int slurm_auth_destroy(slurm_auth_credential_t *cred)
-{
-	if (!cred) {
-		slurm_seterrno(ESLURM_AUTH_MEMORY);
-		return SLURM_ERROR;
-	}
-	xfree(cred->hostname);
-	xfree(cred);
-	return SLURM_SUCCESS;
+int slurm_auth_destroy(slurm_auth_credential_t *cred) {
+    if (!cred) {
+        slurm_seterrno(ESLURM_AUTH_MEMORY);
+        return SLURM_ERROR;
+    }
+    xfree(cred->hostname);
+    xfree(cred);
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -170,51 +166,47 @@ int slurm_auth_destroy(slurm_auth_credential_t *cred)
  *
  * Return SLURM_SUCCESS if the credential is in order and valid.
  */
-int slurm_auth_verify(slurm_auth_credential_t *cred, char *auth_info)
-{
-	return SLURM_SUCCESS;
+int slurm_auth_verify(slurm_auth_credential_t *cred, char *auth_info) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * Obtain the Linux UID from the credential.  The accuracy of this data
  * is not assured until slurm_auth_verify() has been called for it.
  */
-uid_t slurm_auth_get_uid(slurm_auth_credential_t *cred)
-{
-	if (!cred) {
-		slurm_seterrno(ESLURM_AUTH_BADARG);
-		return SLURM_AUTH_NOBODY;
-	}
+uid_t slurm_auth_get_uid(slurm_auth_credential_t *cred) {
+    if (!cred) {
+        slurm_seterrno(ESLURM_AUTH_BADARG);
+        return SLURM_AUTH_NOBODY;
+    }
 
-	return cred->uid;
+    return cred->uid;
 }
 
 /*
  * Obtain the Linux GID from the credential.
  * See slurm_auth_get_uid() above for details on correct behavior.
  */
-gid_t slurm_auth_get_gid(slurm_auth_credential_t *cred)
-{
-	if (!cred) {
-		slurm_seterrno(ESLURM_AUTH_BADARG);
-		return SLURM_AUTH_NOBODY;
-	}
+gid_t slurm_auth_get_gid(slurm_auth_credential_t *cred) {
+    if (!cred) {
+        slurm_seterrno(ESLURM_AUTH_BADARG);
+        return SLURM_AUTH_NOBODY;
+    }
 
-	return cred->gid;
+    return cred->gid;
 }
 
 /*
  * Obtain the originating hostname from the credential.
  * See slurm_auth_get_uid() above for details on correct behavior.
  */
-char *slurm_auth_get_host(slurm_auth_credential_t *cred)
-{
-	if (!cred) {
-		slurm_seterrno(ESLURM_AUTH_BADARG);
-		return NULL;
-	}
+char *slurm_auth_get_host(slurm_auth_credential_t *cred) {
+    if (!cred) {
+        slurm_seterrno(ESLURM_AUTH_BADARG);
+        return NULL;
+    }
 
-	return xstrdup(cred->hostname);
+    return xstrdup(cred->hostname);
 }
 
 /*
@@ -222,86 +214,84 @@ char *slurm_auth_get_host(slurm_auth_credential_t *cred)
  * Slurm's marshalling protocol.
  */
 int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf,
-		    uint16_t protocol_version)
-{
-	if (!cred || !buf) {
-		slurm_seterrno(ESLURM_AUTH_BADARG);
-		return SLURM_ERROR;
-	}
+                    uint16_t protocol_version) {
+    if (!cred || !buf) {
+        slurm_seterrno(ESLURM_AUTH_BADARG);
+        return SLURM_ERROR;
+    }
 
-	if (protocol_version >= SLURM_19_05_PROTOCOL_VERSION) {
-		pack32((uint32_t) cred->uid, buf);
-		pack32((uint32_t) cred->gid, buf);
-		packstr(cred->hostname, buf);
-	} else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-		pack32((uint32_t) cred->uid, buf);
-		pack32((uint32_t) cred->gid, buf);
-	} else {
-		error("%s: Unknown protocol version %d",
-		      __func__, protocol_version);
-		return SLURM_ERROR;
-	}
+    if (protocol_version >= SLURM_19_05_PROTOCOL_VERSION) {
+        pack32((uint32_t) cred->uid, buf);
+        pack32((uint32_t) cred->gid, buf);
+        packstr(cred->hostname, buf);
+    } else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+        pack32((uint32_t) cred->uid, buf);
+        pack32((uint32_t) cred->gid, buf);
+    } else {
+        error("%s: Unknown protocol version %d",
+              __func__, protocol_version);
+        return SLURM_ERROR;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
  * Unmarshall a credential after transmission over the network according
  * to Slurm's marshalling protocol.
  */
-slurm_auth_credential_t *slurm_auth_unpack(Buf buf, uint16_t protocol_version)
-{
-	slurm_auth_credential_t *cred = NULL;
-	uint32_t tmpint;
-	uint32_t uint32_tmp = 0;
+slurm_auth_credential_t *slurm_auth_unpack(Buf buf, uint16_t protocol_version) {
+    slurm_auth_credential_t *cred = NULL;
+    uint32_t tmpint;
+    uint32_t uint32_tmp = 0;
 
-	if (!buf) {
-		slurm_seterrno(ESLURM_AUTH_BADARG);
-		return NULL;
-	}
+    if (!buf) {
+        slurm_seterrno(ESLURM_AUTH_BADARG);
+        return NULL;
+    }
 
-	/* Allocate a new credential. */
-	cred = xmalloc(sizeof(*cred));
+    /* Allocate a new credential. */
+    cred = xmalloc(sizeof(*cred));
 
-	if (protocol_version >= SLURM_19_05_PROTOCOL_VERSION) {
-		/*
-		 * We do it the hard way because we don't know anything about
-		 * the size of uid_t or gid_t, only that they are integer
-		 * values.  We pack them as 32-bit integers, but we can't pass
-		 * addresses to them directly to unpack as 32-bit integers
-		 * because there will be bad clobbering if they really aren't.
-		 * This technique ensures a warning at compile time if the sizes
-		 * are incompatible.
-		 */
-		safe_unpack32(&tmpint, buf);
-		cred->uid = tmpint;
-		safe_unpack32(&tmpint, buf);
-		cred->gid = tmpint;
-		safe_unpackstr_xmalloc(&cred->hostname, &uint32_tmp, buf);
-	} else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-		/*
-		 * We do it the hard way because we don't know anything about
-		 * the size of uid_t or gid_t, only that they are integer
-		 * values.  We pack them as 32-bit integers, but we can't pass
-		 * addresses to them directly to unpack as 32-bit integers
-		 * because there will be bad clobbering if they really aren't.
-		 * This technique ensures a warning at compile time if the sizes
-		 * are incompatible.
-		 */
-		safe_unpack32(&tmpint, buf);
-		cred->uid = tmpint;
-		safe_unpack32(&tmpint, buf);
-		cred->gid = tmpint;
-	} else {
-		error("%s: unknown protocol version %u",
-		      __func__, protocol_version);
-		goto unpack_error;
-	}
+    if (protocol_version >= SLURM_19_05_PROTOCOL_VERSION) {
+        /*
+         * We do it the hard way because we don't know anything about
+         * the size of uid_t or gid_t, only that they are integer
+         * values.  We pack them as 32-bit integers, but we can't pass
+         * addresses to them directly to unpack as 32-bit integers
+         * because there will be bad clobbering if they really aren't.
+         * This technique ensures a warning at compile time if the sizes
+         * are incompatible.
+         */
+        safe_unpack32(&tmpint, buf);
+        cred->uid = tmpint;
+        safe_unpack32(&tmpint, buf);
+        cred->gid = tmpint;
+        safe_unpackstr_xmalloc(&cred->hostname, &uint32_tmp, buf);
+    } else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+        /*
+         * We do it the hard way because we don't know anything about
+         * the size of uid_t or gid_t, only that they are integer
+         * values.  We pack them as 32-bit integers, but we can't pass
+         * addresses to them directly to unpack as 32-bit integers
+         * because there will be bad clobbering if they really aren't.
+         * This technique ensures a warning at compile time if the sizes
+         * are incompatible.
+         */
+        safe_unpack32(&tmpint, buf);
+        cred->uid = tmpint;
+        safe_unpack32(&tmpint, buf);
+        cred->gid = tmpint;
+    } else {
+        error("%s: unknown protocol version %u",
+              __func__, protocol_version);
+        goto unpack_error;
+    }
 
-	return cred;
+    return cred;
 
-unpack_error:
-	slurm_auth_destroy(cred);
-	slurm_seterrno(ESLURM_AUTH_UNPACK);
-	return NULL;
+    unpack_error:
+    slurm_auth_destroy(cred);
+    slurm_seterrno(ESLURM_AUTH_UNPACK);
+    return NULL;
 }

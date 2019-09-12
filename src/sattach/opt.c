@@ -29,14 +29,14 @@
 
 #define _GNU_SOURCE
 
-#include <ctype.h>		/* isdigit    */
+#include <ctype.h>        /* isdigit    */
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
-#include <stdarg.h>		/* va_start   */
+#include <stdarg.h>        /* va_start   */
 #include <stdio.h>
-#include <stdlib.h>		/* getenv     */
-#include <sys/param.h>		/* MAXPATHLEN */
+#include <stdlib.h>        /* getenv     */
+#include <sys/param.h>        /* MAXPATHLEN */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
@@ -72,7 +72,7 @@ int error_exit = 1;
 
 typedef struct env_vars env_vars_t;
 
-static void  _help(void);
+static void _help(void);
 
 /* fill in default options  */
 static void _opt_default(void);
@@ -83,7 +83,7 @@ static void _opt_env(void);
 static void _opt_args(int argc, char **argv);
 
 /* list known options and their settings  */
-static void  _opt_list(void);
+static void _opt_list(void);
 
 /* verify options sanity  */
 static bool _opt_verify(void);
@@ -91,27 +91,26 @@ static bool _opt_verify(void);
 static void _process_env_var(env_vars_t *e, const char *val);
 
 /* Get a POSITIVE decimal integer from arg */
-static int  _get_pos_int(const char *arg, const char *what);
+static int _get_pos_int(const char *arg, const char *what);
 
-static void  _usage(void);
+static void _usage(void);
 
 /*---[ end forward declarations of static functions ]---------------------*/
 
-int initialize_and_process_args(int argc, char **argv)
-{
-	/* initialize option defaults */
-	_opt_default();
+int initialize_and_process_args(int argc, char **argv) {
+    /* initialize option defaults */
+    _opt_default();
 
-	/* initialize options with env vars */
-	_opt_env();
+    /* initialize options with env vars */
+    _opt_env();
 
-	/* initialize options with argv */
-	_opt_args(argc, argv);
+    /* initialize options with argv */
+    _opt_args(argc, argv);
 
-	if (opt.verbose > 1)
-		_opt_list();
+    if (opt.verbose > 1)
+        _opt_list();
 
-	return 1;
+    return 1;
 
 }
 
@@ -122,62 +121,60 @@ int initialize_and_process_args(int argc, char **argv)
  *
  */
 static int
-_get_pos_int(const char *arg, const char *what)
-{
-	char *p;
-	long int result = strtol(arg, &p, 10);
+_get_pos_int(const char *arg, const char *what) {
+    char *p;
+    long int result = strtol(arg, &p, 10);
 
-	if (p == arg || !xstring_is_whitespace(p) || (result < 0L)) {
-		error ("Invalid numeric value \"%s\" for %s.", arg, what);
-		exit(error_exit);
-	}
+    if (p == arg || !xstring_is_whitespace(p) || (result < 0L)) {
+        error("Invalid numeric value \"%s\" for %s.", arg, what);
+        exit(error_exit);
+    }
 
-	if (result > INT_MAX) {
-		error ("Numeric argument %ld to big for %s.", result, what);
-		exit(error_exit);
-	}
+    if (result > INT_MAX) {
+        error("Numeric argument %ld to big for %s.", result, what);
+        exit(error_exit);
+    }
 
-	return (int) result;
+    return (int) result;
 }
 
 /*
  * _opt_default(): used by initialize_and_process_args to set defaults
  */
-static void _opt_default()
-{
-	static slurm_step_io_fds_t fds = SLURM_STEP_IO_FDS_INITIALIZER;
-	uid_t uid = getuid();
+static void _opt_default() {
+    static slurm_step_io_fds_t fds = SLURM_STEP_IO_FDS_INITIALIZER;
+    uid_t uid = getuid();
 
-	opt.user = uid_to_string(uid);
-	if (xstrcmp(opt.user, "nobody") == 0)
-		fatal("Invalid user id: %u", uid);
+    opt.user = uid_to_string(uid);
+    if (xstrcmp(opt.user, "nobody") == 0)
+        fatal("Invalid user id: %u", uid);
 
-	opt.uid = uid;
-	opt.gid = getgid();
+    opt.uid = uid;
+    opt.gid = getgid();
 
-	opt.progname = NULL;
+    opt.progname = NULL;
 
-	opt.jobid = NO_VAL;
-	opt.jobid_set = false;
+    opt.jobid = NO_VAL;
+    opt.jobid_set = false;
 
-	opt.quiet = 0;
-	opt.verbose = 0;
+    opt.quiet = 0;
+    opt.verbose = 0;
 
-	opt.euid = (uid_t) -1;
-	opt.egid = (gid_t) -1;
+    opt.euid = (uid_t) -1;
+    opt.egid = (gid_t) -1;
 
-	opt.labelio = false;
-	opt.ctrl_comm_ifhn  = xshort_hostname();
-	memcpy(&opt.fds, &fds, sizeof(fds));
-	opt.layout_only = false;
-	opt.debugger_test = false;
-	opt.input_filter = (uint32_t)-1;
-	opt.input_filter_set = false;
-	opt.output_filter = (uint32_t)-1;
-	opt.output_filter_set = false;
-	opt.error_filter = (uint32_t)-1;
-	opt.error_filter_set = false;
-	opt.pty = false;
+    opt.labelio = false;
+    opt.ctrl_comm_ifhn = xshort_hostname();
+    memcpy(&opt.fds, &fds, sizeof(fds));
+    opt.layout_only = false;
+    opt.debugger_test = false;
+    opt.input_filter = (uint32_t) -1;
+    opt.input_filter_set = false;
+    opt.output_filter = (uint32_t) -1;
+    opt.output_filter_set = false;
+    opt.error_filter = (uint32_t) -1;
+    opt.error_filter_set = false;
+    opt.pty = false;
 }
 
 /*---[ env var processing ]-----------------------------------------------*/
@@ -192,14 +189,14 @@ static void _opt_default()
  * option to set. Otherwise, process var based on "type" in _opt_env.
  */
 struct env_vars {
-	const char *var;
-	int type;
-	void *arg;
-	void *set_flag;
+    const char *var;
+    int type;
+    void *arg;
+    void *set_flag;
 };
 
 env_vars_t env_vars[] = {
-  {NULL, 0, NULL, NULL}
+        {NULL, 0, NULL, NULL}
 };
 
 
@@ -208,265 +205,256 @@ env_vars_t env_vars[] = {
  *            environment variables. See comments above for how to
  *            extend sattach to process different vars
  */
-static void _opt_env(void)
-{
-	char       *val = NULL;
-	env_vars_t *e   = env_vars;
+static void _opt_env(void) {
+    char *val = NULL;
+    env_vars_t *e = env_vars;
 
-	while (e->var) {
-		if ((val = getenv(e->var)) != NULL)
-			_process_env_var(e, val);
-		e++;
-	}
+    while (e->var) {
+        if ((val = getenv(e->var)) != NULL)
+            _process_env_var(e, val);
+        e++;
+    }
 }
 
 
 static void
-_process_env_var(env_vars_t *e, const char *val)
-{
-	debug2("now processing env var %s=%s", e->var, val);
+_process_env_var(env_vars_t *e, const char *val) {
+    debug2("now processing env var %s=%s", e->var, val);
 
-	if (e->set_flag) {
-		*((bool *) e->set_flag) = true;
-	}
+    if (e->set_flag) {
+        *((bool *) e->set_flag) = true;
+    }
 
-	switch (e->type) {
-	default:
-		/* do nothing */
-		break;
-	}
+    switch (e->type) {
+        default:
+            /* do nothing */
+            break;
+    }
 }
 
-void set_options(const int argc, char **argv)
-{
-	int opt_char, option_index = 0;
-	static struct option long_options[] = {
-		{"help", 	no_argument,       0, 'h'},
-		{"label",       no_argument,       0, 'l'},
-		{"quiet",       no_argument,       0, 'Q'},
-		{"usage",       no_argument,       0, 'u'},
-		{"verbose",     no_argument,       0, 'v'},
-		{"version",     no_argument,       0, 'V'},
-		{"layout",      no_argument,       0, LONG_OPT_LAYOUT_ONLY},
-		{"debugger-test",no_argument,      0, LONG_OPT_DEBUGGER_TEST},
-		{"input-filter", required_argument,0, LONG_OPT_IN_FILTER},
-		{"output-filter",required_argument,0, LONG_OPT_OUT_FILTER},
-		{"error-filter", required_argument,0, LONG_OPT_ERR_FILTER},
-		{"pty",          no_argument,      0, LONG_OPT_PTY},
-		{NULL}
-	};
-	char *opt_string = "+hlQuvV";
+void set_options(const int argc, char **argv) {
+    int opt_char, option_index = 0;
+    static struct option long_options[] = {
+            {"help",          no_argument,       0, 'h'},
+            {"label",         no_argument,       0, 'l'},
+            {"quiet",         no_argument,       0, 'Q'},
+            {"usage",         no_argument,       0, 'u'},
+            {"verbose",       no_argument,       0, 'v'},
+            {"version",       no_argument,       0, 'V'},
+            {"layout",        no_argument,       0, LONG_OPT_LAYOUT_ONLY},
+            {"debugger-test", no_argument,       0, LONG_OPT_DEBUGGER_TEST},
+            {"input-filter",  required_argument, 0, LONG_OPT_IN_FILTER},
+            {"output-filter", required_argument, 0, LONG_OPT_OUT_FILTER},
+            {"error-filter",  required_argument, 0, LONG_OPT_ERR_FILTER},
+            {"pty",           no_argument,       0, LONG_OPT_PTY},
+            {NULL}
+    };
+    char *opt_string = "+hlQuvV";
 
-	opt.progname = xbasename(argv[0]);
-	optind = 0;
-	while((opt_char = getopt_long(argc, argv, opt_string,
-				      long_options, &option_index)) != -1) {
-		switch (opt_char) {
+    opt.progname = xbasename(argv[0]);
+    optind = 0;
+    while ((opt_char = getopt_long(argc, argv, opt_string,
+                                   long_options, &option_index)) != -1) {
+        switch (opt_char) {
 
-		case '?':
-			fprintf(stderr, "Try \"sattach --help\" for more "
-				"information\n");
-			exit(error_exit);
-			break;
-		case 'h':
-			_help();
-			exit(0);
-		case 'l':
-			opt.labelio = true;
-			break;
-		case 'Q':
-			opt.quiet++;
-			break;
-		case 'u':
-			_usage();
-			exit(0);
-		case 'v':
-			opt.verbose++;
-			break;
-		case 'V':
-			print_slurm_version();
-			exit(0);
-			break;
-		case LONG_OPT_IN_FILTER:
-			if (xstrcmp(optarg, "-") != 0) {
-				opt.input_filter = (uint32_t)
-					_get_pos_int(optarg, "input-filter");
-			}
-			opt.input_filter_set = true;
-			break;
-		case LONG_OPT_OUT_FILTER:
-			if (xstrcmp(optarg, "-") != 0) {
-				opt.output_filter = (uint32_t)
-					_get_pos_int(optarg, "output-filter");
-			}
-			opt.output_filter_set = true;
-			break;
-		case LONG_OPT_ERR_FILTER:
-			if (xstrcmp(optarg, "-") != 0) {
-				opt.error_filter = (uint32_t)
-					_get_pos_int(optarg, "error-filter");
-			}
-			opt.error_filter_set = true;
-			break;
-		case LONG_OPT_LAYOUT_ONLY:
-			opt.layout_only = true;
-			break;
-		case LONG_OPT_DEBUGGER_TEST:
-			opt.debugger_test = true;
-			break;
-		case LONG_OPT_PTY:
+            case '?':
+                fprintf(stderr, "Try \"sattach --help\" for more "
+                                "information\n");
+                exit(error_exit);
+                break;
+            case 'h':
+                _help();
+                exit(0);
+            case 'l':
+                opt.labelio = true;
+                break;
+            case 'Q':
+                opt.quiet++;
+                break;
+            case 'u':
+                _usage();
+                exit(0);
+            case 'v':
+                opt.verbose++;
+                break;
+            case 'V':
+                print_slurm_version();
+                exit(0);
+                break;
+            case LONG_OPT_IN_FILTER:
+                if (xstrcmp(optarg, "-") != 0) {
+                    opt.input_filter = (uint32_t)
+                            _get_pos_int(optarg, "input-filter");
+                }
+                opt.input_filter_set = true;
+                break;
+            case LONG_OPT_OUT_FILTER:
+                if (xstrcmp(optarg, "-") != 0) {
+                    opt.output_filter = (uint32_t)
+                            _get_pos_int(optarg, "output-filter");
+                }
+                opt.output_filter_set = true;
+                break;
+            case LONG_OPT_ERR_FILTER:
+                if (xstrcmp(optarg, "-") != 0) {
+                    opt.error_filter = (uint32_t)
+                            _get_pos_int(optarg, "error-filter");
+                }
+                opt.error_filter_set = true;
+                break;
+            case LONG_OPT_LAYOUT_ONLY:
+                opt.layout_only = true;
+                break;
+            case LONG_OPT_DEBUGGER_TEST:
+                opt.debugger_test = true;
+                break;
+            case LONG_OPT_PTY:
 #ifdef HAVE_PTY_H
-			opt.pty = true;
+                opt.pty = true;
 #else
-			error("--pty not currently supported on this system "
-			      "type");
+                error("--pty not currently supported on this system "
+                      "type");
 #endif
-			break;
-		default:
-			error("Unrecognized command line parameter %c",
-			      opt_char);
-			exit(error_exit);
-		}
-	}
+                break;
+            default:
+                error("Unrecognized command line parameter %c",
+                      opt_char);
+                exit(error_exit);
+        }
+    }
 }
 
-static void _parse_jobid_stepid(char *jobid_str)
-{
-	char *ptr, *job, *step;
-	long jobid, stepid;
+static void _parse_jobid_stepid(char *jobid_str) {
+    char *ptr, *job, *step;
+    long jobid, stepid;
 
-	verbose("jobid/stepid string = %s\n", jobid_str);
-	job = xstrdup(jobid_str);
-	ptr = xstrchr(job, '.');
-	if (ptr == NULL) {
-		error("Did not find a period in the step ID string");
-		_usage();
-		xfree(job);
-		exit(error_exit);
-	} else {
-		*ptr = '\0';
-		step = ptr + 1;
-	}
+    verbose("jobid/stepid string = %s\n", jobid_str);
+    job = xstrdup(jobid_str);
+    ptr = xstrchr(job, '.');
+    if (ptr == NULL) {
+        error("Did not find a period in the step ID string");
+        _usage();
+        xfree(job);
+        exit(error_exit);
+    } else {
+        *ptr = '\0';
+        step = ptr + 1;
+    }
 
-	jobid = slurm_xlate_job_id(job);
-	if (jobid == 0) {
-		error("\"%s\" does not look like a jobid", job);
-		_usage();
-		xfree(job);
-		exit(error_exit);
-	}
+    jobid = slurm_xlate_job_id(job);
+    if (jobid == 0) {
+        error("\"%s\" does not look like a jobid", job);
+        _usage();
+        xfree(job);
+        exit(error_exit);
+    }
 
-	stepid = strtol(step, &ptr, 10);
-	if (!xstring_is_whitespace(ptr)) {
-		error("\"%s\" does not look like a stepid", step);
-		_usage();
-		xfree(job);
-		exit(error_exit);
-	}
+    stepid = strtol(step, &ptr, 10);
+    if (!xstring_is_whitespace(ptr)) {
+        error("\"%s\" does not look like a stepid", step);
+        _usage();
+        xfree(job);
+        exit(error_exit);
+    }
 
-	opt.jobid = (uint32_t) jobid;
-	opt.stepid = (uint32_t) stepid;
+    opt.jobid = (uint32_t) jobid;
+    opt.stepid = (uint32_t) stepid;
 
-	xfree(job);
+    xfree(job);
 }
 
 /*
  * _opt_args() : set options via commandline args and popt
  */
-static void _opt_args(int argc, char **argv)
-{
-	char **rest = NULL;
-	int leftover;
+static void _opt_args(int argc, char **argv) {
+    char **rest = NULL;
+    int leftover;
 
-	set_options(argc, argv);
+    set_options(argc, argv);
 
-	leftover = 0;
-	if (optind < argc) {
-		rest = argv + optind;
-		while (rest[leftover] != NULL)
-			leftover++;
-	}
-	if (leftover != 1) {
-		error("too many parameters");
-		_usage();
-		exit(error_exit);
-	}
+    leftover = 0;
+    if (optind < argc) {
+        rest = argv + optind;
+        while (rest[leftover] != NULL)
+            leftover++;
+    }
+    if (leftover != 1) {
+        error("too many parameters");
+        _usage();
+        exit(error_exit);
+    }
 
-	_parse_jobid_stepid(*(argv + optind));
+    _parse_jobid_stepid(*(argv + optind));
 
-	if (!_opt_verify())
-		exit(error_exit);
+    if (!_opt_verify())
+        exit(error_exit);
 }
 
 /*
  * _opt_verify : perform some post option processing verification
  *
  */
-static bool _opt_verify(void)
-{
-	bool verified = true;
+static bool _opt_verify(void) {
+    bool verified = true;
 
-	if (opt.quiet && opt.verbose) {
-		error ("don't specify both --verbose (-v) and --quiet (-Q)");
-		verified = false;
-	}
+    if (opt.quiet && opt.verbose) {
+        error("don't specify both --verbose (-v) and --quiet (-Q)");
+        verified = false;
+    }
 
-	/*
-	 * set up standard IO filters
-	 */
-	if ((opt.input_filter_set || opt.output_filter_set ||
-	     opt.error_filter_set) && opt.pty) {
-		error("don't specify both --pty and I/O filtering");
-		verified = false;
-	}
-	if (opt.input_filter_set)
-		opt.fds.input.taskid = opt.input_filter;
-	if (opt.output_filter_set)
-		opt.fds.out.taskid = opt.output_filter;
-	if (opt.error_filter_set) {
-		opt.fds.err.taskid = opt.error_filter;
-	} else if (opt.output_filter_set) {
-		opt.fds.err.taskid = opt.output_filter;
-	}
+    /*
+     * set up standard IO filters
+     */
+    if ((opt.input_filter_set || opt.output_filter_set ||
+         opt.error_filter_set) && opt.pty) {
+        error("don't specify both --pty and I/O filtering");
+        verified = false;
+    }
+    if (opt.input_filter_set)
+        opt.fds.input.taskid = opt.input_filter;
+    if (opt.output_filter_set)
+        opt.fds.out.taskid = opt.output_filter;
+    if (opt.error_filter_set) {
+        opt.fds.err.taskid = opt.error_filter;
+    } else if (opt.output_filter_set) {
+        opt.fds.err.taskid = opt.output_filter;
+    }
 
 
-	return verified;
+    return verified;
 }
 
 #define tf_(b) (b == true) ? "true" : "false"
 
-static void _opt_list()
-{
-	info("defined options for program `%s'", opt.progname);
-	info("--------------- ---------------------");
-	info("job ID         : %u", opt.jobid);
-	info("step ID        : %u", opt.stepid);
-	info("user           : `%s'", opt.user);
-	info("uid            : %ld", (long) opt.uid);
-	info("gid            : %ld", (long) opt.gid);
-	info("verbose        : %d", opt.verbose);
+static void _opt_list() {
+    info("defined options for program `%s'", opt.progname);
+    info("--------------- ---------------------");
+    info("job ID         : %u", opt.jobid);
+    info("step ID        : %u", opt.stepid);
+    info("user           : `%s'", opt.user);
+    info("uid            : %ld", (long) opt.uid);
+    info("gid            : %ld", (long) opt.gid);
+    info("verbose        : %d", opt.verbose);
 }
 
-static void _usage(void)
-{
- 	printf("Usage: sattach [options] <jobid.stepid>\n");
+static void _usage(void) {
+    printf("Usage: sattach [options] <jobid.stepid>\n");
 }
 
-static void _help(void)
-{
-        printf("Usage: sattach [options] <jobid.stepid>\n");
-	printf(
-"      --input-filter=taskid  send stdin to only the specified task\n"
-"      --output-filter=taskid only print stdout from the specified task\n"
-"      --error-filter=taskid  only print stderr from the specified task\n"
-"  -l, --label        prepend task number to lines of stdout & stderr\n"
-"      --layout       print task layout info and exit (does not attach to tasks)\n"
-"  -Q, --quiet        quiet mode (suppress informational messages)\n"
-"  -v, --verbose      verbose mode (multiple -v's increase verbosity)\n"
-"  -V, --version      print the Slurm version and exit\n\n"
-"Help options:\n"
-"  -h, --help         print this help message\n"
-"  -u, --usage        print a brief usage message\n"
+static void _help(void) {
+    printf("Usage: sattach [options] <jobid.stepid>\n");
+    printf(
+            "      --input-filter=taskid  send stdin to only the specified task\n"
+            "      --output-filter=taskid only print stdout from the specified task\n"
+            "      --error-filter=taskid  only print stderr from the specified task\n"
+            "  -l, --label        prepend task number to lines of stdout & stderr\n"
+            "      --layout       print task layout info and exit (does not attach to tasks)\n"
+            "  -Q, --quiet        quiet mode (suppress informational messages)\n"
+            "  -v, --verbose      verbose mode (multiple -v's increase verbosity)\n"
+            "  -V, --version      print the Slurm version and exit\n\n"
+            "Help options:\n"
+            "  -h, --help         print this help message\n"
+            "  -u, --usage        print a brief usage message\n"
 
-		);
+    );
 }

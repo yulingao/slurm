@@ -44,7 +44,9 @@
 #include "sreport.h"
 
 extern int job_sizes_grouped_by_acct(int argc, char **argv);
+
 extern int job_sizes_grouped_by_wckey(int argc, char **argv);
+
 extern int job_sizes_grouped_by_acct_and_wckey(int argc, char **argv);
 
 #endif

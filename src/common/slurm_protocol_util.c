@@ -56,56 +56,55 @@
  * IN header - the message header received
  * RET - Slurm error code
  */
-int check_header_version(header_t * header)
-{
-	uint16_t check_version = SLURM_PROTOCOL_VERSION;
+int check_header_version(header_t *header) {
+    uint16_t check_version = SLURM_PROTOCOL_VERSION;
 
-	if (working_cluster_rec)
-		check_version = working_cluster_rec->rpc_version;
+    if (working_cluster_rec)
+        check_version = working_cluster_rec->rpc_version;
 
-	if (slurmdbd_conf) {
-		if ((header->version != SLURM_PROTOCOL_VERSION)     &&
-		    (header->version != SLURM_ONE_BACK_PROTOCOL_VERSION) &&
-		    (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
-			debug("unsupported RPC version %hu msg type %s(%u)",
-			      header->version, rpc_num2string(header->msg_type),
-			      header->msg_type);
-			slurm_seterrno_ret(SLURM_PROTOCOL_VERSION_ERROR);
-		}
-	} else if (header->version != check_version) {
-		switch (header->msg_type) {
-		case REQUEST_LAUNCH_TASKS:
-		case REQUEST_RUN_JOB_STEP:
-		case RESPONSE_LAUNCH_TASKS:
-		case RESPONSE_RUN_JOB_STEP:
-			if (working_cluster_rec) {
-				/* Disable job step creation/launch
-				 * between major releases. Other RPCs
-				 * should all be supported. */
-				debug("unsupported RPC type %hu",
-				      header->msg_type);
-				slurm_seterrno_ret(
-					SLURM_PROTOCOL_VERSION_ERROR);
-				break;
-			}
-		default:
-			if ((header->version != SLURM_PROTOCOL_VERSION)     &&
-			    (header->version !=
-			     SLURM_ONE_BACK_PROTOCOL_VERSION) &&
-			    (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
-				debug("Unsupported RPC version %hu "
-				      "msg type %s(%u)", header->version,
-				      rpc_num2string(header->msg_type),
-				      header->msg_type);
-				slurm_seterrno_ret(
-					SLURM_PROTOCOL_VERSION_ERROR);
-			}
-			break;
+    if (slurmdbd_conf) {
+        if ((header->version != SLURM_PROTOCOL_VERSION) &&
+            (header->version != SLURM_ONE_BACK_PROTOCOL_VERSION) &&
+            (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
+            debug("unsupported RPC version %hu msg type %s(%u)",
+                  header->version, rpc_num2string(header->msg_type),
+                  header->msg_type);
+            slurm_seterrno_ret(SLURM_PROTOCOL_VERSION_ERROR);
+        }
+    } else if (header->version != check_version) {
+        switch (header->msg_type) {
+            case REQUEST_LAUNCH_TASKS:
+            case REQUEST_RUN_JOB_STEP:
+            case RESPONSE_LAUNCH_TASKS:
+            case RESPONSE_RUN_JOB_STEP:
+                if (working_cluster_rec) {
+                    /* Disable job step creation/launch
+                     * between major releases. Other RPCs
+                     * should all be supported. */
+                    debug("unsupported RPC type %hu",
+                          header->msg_type);
+                    slurm_seterrno_ret(
+                            SLURM_PROTOCOL_VERSION_ERROR);
+                    break;
+                }
+            default:
+                if ((header->version != SLURM_PROTOCOL_VERSION) &&
+                    (header->version !=
+                     SLURM_ONE_BACK_PROTOCOL_VERSION) &&
+                    (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
+                    debug("Unsupported RPC version %hu "
+                          "msg type %s(%u)", header->version,
+                          rpc_num2string(header->msg_type),
+                          header->msg_type);
+                    slurm_seterrno_ret(
+                            SLURM_PROTOCOL_VERSION_ERROR);
+                }
+                break;
 
-		}
-	}
+        }
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -115,37 +114,36 @@ int check_header_version(header_t * header)
  * IN msg_type - type of message to be send
  * IN flags - message flags to be send
  */
-void init_header(header_t *header, slurm_msg_t *msg, uint16_t flags)
-{
-	memset(header, 0, sizeof(header_t));
-	/* Since the slurmdbd could talk to a host of different
-	   versions of slurm this needs to be kept current when the
-	   protocol version changes. */
-	if (msg->protocol_version != NO_VAL16)
-		header->version = msg->protocol_version;
-	else if (working_cluster_rec)
-		msg->protocol_version = header->version =
-			working_cluster_rec->rpc_version;
-	else if ((msg->msg_type == ACCOUNTING_UPDATE_MSG) ||
-	         (msg->msg_type == ACCOUNTING_FIRST_REG)) {
-		uint16_t rpc_version =
-			((accounting_update_msg_t *)msg->data)->rpc_version;
-		msg->protocol_version = header->version = rpc_version;
-	} else
-		msg->protocol_version = header->version =
-			SLURM_PROTOCOL_VERSION;
+void init_header(header_t *header, slurm_msg_t *msg, uint16_t flags) {
+    memset(header, 0, sizeof(header_t));
+    /* Since the slurmdbd could talk to a host of different
+       versions of slurm this needs to be kept current when the
+       protocol version changes. */
+    if (msg->protocol_version != NO_VAL16)
+        header->version = msg->protocol_version;
+    else if (working_cluster_rec)
+        msg->protocol_version = header->version =
+                working_cluster_rec->rpc_version;
+    else if ((msg->msg_type == ACCOUNTING_UPDATE_MSG) ||
+             (msg->msg_type == ACCOUNTING_FIRST_REG)) {
+        uint16_t rpc_version =
+                ((accounting_update_msg_t *) msg->data)->rpc_version;
+        msg->protocol_version = header->version = rpc_version;
+    } else
+        msg->protocol_version = header->version =
+                SLURM_PROTOCOL_VERSION;
 
-	header->flags = flags;
-	header->msg_type = msg->msg_type;
-	header->body_length = 0;	/* over-written later */
-	header->forward = msg->forward;
-	if (msg->ret_list)
-		header->ret_cnt = list_count(msg->ret_list);
-	else
-		header->ret_cnt = 0;
-	header->ret_list = msg->ret_list;
-	header->msg_index = msg->msg_index;
-	header->orig_addr = msg->orig_addr;
+    header->flags = flags;
+    header->msg_type = msg->msg_type;
+    header->body_length = 0;    /* over-written later */
+    header->forward = msg->forward;
+    if (msg->ret_list)
+        header->ret_cnt = list_count(msg->ret_list);
+    else
+        header->ret_cnt = 0;
+    header->ret_list = msg->ret_list;
+    header->msg_index = msg->msg_index;
+    header->orig_addr = msg->orig_addr;
 }
 
 /*
@@ -153,44 +151,42 @@ void init_header(header_t *header, slurm_msg_t *msg, uint16_t flags)
  * OUT header - the message header to update
  * IN msg_length - length of message to be send
  */
-void update_header(header_t * header, uint32_t msg_length)
-{
-	header->body_length = msg_length;
+void update_header(header_t *header, uint32_t msg_length) {
+    header->body_length = msg_length;
 }
 
 
 /* log the supplied slurm task launch message as debug3() level */
-void slurm_print_launch_task_msg(launch_tasks_request_msg_t *msg, char *name)
-{
-	int i;
-	int node_id = nodelist_find(msg->complete_nodelist, name);
+void slurm_print_launch_task_msg(launch_tasks_request_msg_t *msg, char *name) {
+    int i;
+    int node_id = nodelist_find(msg->complete_nodelist, name);
 
-	debug3("job_id: %u", msg->job_id);
-	debug3("job_step_id: %u", msg->job_step_id);
-	if (msg->pack_step_cnt != NO_VAL)
-		debug3("pack_step_cnt: %u", msg->pack_step_cnt);
-	if (msg->pack_jobid != NO_VAL)
-		debug3("pack_jobid: %u", msg->pack_jobid);
-	if (msg->pack_offset != NO_VAL)
-		debug3("pack_offset: %u", msg->pack_offset);
-	debug3("uid: %u", msg->uid);
-	debug3("gid: %u", msg->gid);
-	debug3("tasks_to_launch: %u", *(msg->tasks_to_launch));
-	debug3("envc: %u", msg->envc);
-	for (i = 0; i < msg->envc; i++) {
-		debug3("env[%d]: %s", i, msg->env[i]);
-	}
-	debug3("cwd: %s", msg->cwd);
-	debug3("argc: %u", msg->argc);
-	for (i = 0; i < msg->argc; i++) {
-		debug3("argv[%d]: %s", i, msg->argv[i]);
-	}
-	debug3("msg -> resp_port  = %u", *(msg->resp_port));
-	debug3("msg -> io_port    = %u", *(msg->io_port));
-	debug3("msg -> flags      = %x", msg->flags);
+    debug3("job_id: %u", msg->job_id);
+    debug3("job_step_id: %u", msg->job_step_id);
+    if (msg->pack_step_cnt != NO_VAL)
+        debug3("pack_step_cnt: %u", msg->pack_step_cnt);
+    if (msg->pack_jobid != NO_VAL)
+        debug3("pack_jobid: %u", msg->pack_jobid);
+    if (msg->pack_offset != NO_VAL)
+        debug3("pack_offset: %u", msg->pack_offset);
+    debug3("uid: %u", msg->uid);
+    debug3("gid: %u", msg->gid);
+    debug3("tasks_to_launch: %u", *(msg->tasks_to_launch));
+    debug3("envc: %u", msg->envc);
+    for (i = 0; i < msg->envc; i++) {
+        debug3("env[%d]: %s", i, msg->env[i]);
+    }
+    debug3("cwd: %s", msg->cwd);
+    debug3("argc: %u", msg->argc);
+    for (i = 0; i < msg->argc; i++) {
+        debug3("argv[%d]: %s", i, msg->argv[i]);
+    }
+    debug3("msg -> resp_port  = %u", *(msg->resp_port));
+    debug3("msg -> io_port    = %u", *(msg->io_port));
+    debug3("msg -> flags      = %x", msg->flags);
 
-	for (i = 0; i < msg->tasks_to_launch[node_id]; i++) {
-		debug3("global_task_id[%d]: %u ", i,
-		       msg->global_task_ids[node_id][i]);
-	}
+    for (i = 0; i < msg->tasks_to_launch[node_id]; i++) {
+        debug3("global_task_id[%d]: %u ", i,
+               msg->global_task_ids[node_id][i]);
+    }
 }

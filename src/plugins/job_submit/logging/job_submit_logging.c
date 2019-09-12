@@ -73,9 +73,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[]       	= "Job submit logging plugin";
-const char plugin_type[]       	= "job_submit/logging";
-const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
+const char plugin_name[] = "Job submit logging plugin";
+const char plugin_type[] = "job_submit/logging";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 /*****************************************************************************\
  * We've provided a simple example of the type of things you can do with this
@@ -84,35 +84,33 @@ const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 \*****************************************************************************/
 
 extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
-		      char **err_msg)
-{
-	/* Log select fields from a job submit request. See slurm/slurm.h
-	 * for information about additional fields in struct job_descriptor.
-	 * Note that default values for most numbers is NO_VAL */
-	info("Job submit request: account:%s begin_time:%ld dependency:%s "
-	     "name:%s partition:%s qos:%s submit_uid:%u time_limit:%u "
-	     "user_id:%u",
-	     job_desc->account, (long)job_desc->begin_time,
-	     job_desc->dependency,
-	     job_desc->name, job_desc->partition, job_desc->qos,
-	     submit_uid, job_desc->time_limit, job_desc->user_id);
+                      char **err_msg) {
+    /* Log select fields from a job submit request. See slurm/slurm.h
+     * for information about additional fields in struct job_descriptor.
+     * Note that default values for most numbers is NO_VAL */
+    info("Job submit request: account:%s begin_time:%ld dependency:%s "
+         "name:%s partition:%s qos:%s submit_uid:%u time_limit:%u "
+         "user_id:%u",
+         job_desc->account, (long) job_desc->begin_time,
+         job_desc->dependency,
+         job_desc->name, job_desc->partition, job_desc->qos,
+         submit_uid, job_desc->time_limit, job_desc->user_id);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 extern int job_modify(struct job_descriptor *job_desc,
-		      struct job_record *job_ptr, uint32_t submit_uid)
-{
-	/* Log select fields from a job modify request. See slurm/slurm.h
-	 * for information about additional fields in struct job_descriptor.
-	 * Note that default values for most numbers is NO_VAL */
-	info("Job modify request: account:%s begin_time:%ld dependency:%s "
-	     "job_id:%u name:%s partition:%s qos:%s submit_uid:%u "
-	     "time_limit:%u",
-	     job_desc->account, (long)job_desc->begin_time,
-	     job_desc->dependency,
-	     job_desc->job_id, job_desc->name, job_desc->partition,
-	     job_desc->qos, submit_uid, job_desc->time_limit);
+                      struct job_record *job_ptr, uint32_t submit_uid) {
+    /* Log select fields from a job modify request. See slurm/slurm.h
+     * for information about additional fields in struct job_descriptor.
+     * Note that default values for most numbers is NO_VAL */
+    info("Job modify request: account:%s begin_time:%ld dependency:%s "
+         "job_id:%u name:%s partition:%s qos:%s submit_uid:%u "
+         "time_limit:%u",
+         job_desc->account, (long) job_desc->begin_time,
+         job_desc->dependency,
+         job_desc->job_id, job_desc->name, job_desc->partition,
+         job_desc->qos, submit_uid, job_desc->time_limit);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

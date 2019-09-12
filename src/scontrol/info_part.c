@@ -40,42 +40,41 @@
 
 /* Load current partiton table information into *part_buffer_pptr */
 extern int
-scontrol_load_partitions (partition_info_msg_t **part_buffer_pptr)
-{
-	int error_code;
-	static uint16_t last_show_flags = 0xffff;
-	uint16_t show_flags = 0;
-	partition_info_msg_t *part_info_ptr = NULL;
+scontrol_load_partitions(partition_info_msg_t **part_buffer_pptr) {
+    int error_code;
+    static uint16_t last_show_flags = 0xffff;
+    uint16_t show_flags = 0;
+    partition_info_msg_t *part_info_ptr = NULL;
 
-	if (all_flag)
-		show_flags |= SHOW_ALL;
+    if (all_flag)
+        show_flags |= SHOW_ALL;
 
-	if (old_part_info_ptr) {
-		if (last_show_flags != show_flags)
-			old_part_info_ptr->last_update = (time_t) 0;
-		error_code = slurm_load_partitions (
-			old_part_info_ptr->last_update,
-			&part_info_ptr, show_flags);
-		if (error_code == SLURM_SUCCESS)
-			slurm_free_partition_info_msg (old_part_info_ptr);
-		else if (slurm_get_errno () == SLURM_NO_CHANGE_IN_DATA) {
-			part_info_ptr = old_part_info_ptr;
-			error_code = SLURM_SUCCESS;
-			if (quiet_flag == -1)
-				printf ("slurm_load_part no change in data\n");
-		}
-	} else {
-		error_code = slurm_load_partitions((time_t) NULL,
-						   &part_info_ptr, show_flags);
-	}
+    if (old_part_info_ptr) {
+        if (last_show_flags != show_flags)
+            old_part_info_ptr->last_update = (time_t) 0;
+        error_code = slurm_load_partitions(
+                old_part_info_ptr->last_update,
+                &part_info_ptr, show_flags);
+        if (error_code == SLURM_SUCCESS)
+            slurm_free_partition_info_msg(old_part_info_ptr);
+        else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
+            part_info_ptr = old_part_info_ptr;
+            error_code = SLURM_SUCCESS;
+            if (quiet_flag == -1)
+                printf("slurm_load_part no change in data\n");
+        }
+    } else {
+        error_code = slurm_load_partitions((time_t) NULL,
+                                           &part_info_ptr, show_flags);
+    }
 
-	if (error_code == SLURM_SUCCESS) {
-		old_part_info_ptr = part_info_ptr;
-		last_show_flags = show_flags;
-		*part_buffer_pptr = part_info_ptr;
-	}
+    if (error_code == SLURM_SUCCESS) {
+        old_part_info_ptr = part_info_ptr;
+        last_show_flags = show_flags;
+        *part_buffer_pptr = part_info_ptr;
+    }
 
-	return error_code;
+    return error_code;
 }
 
 /*
@@ -83,47 +82,46 @@ scontrol_load_partitions (partition_info_msg_t **part_buffer_pptr)
  * IN partition_name - NULL to print information about all partition
  */
 extern void
-scontrol_print_part (char *partition_name)
-{
-	int error_code, i, print_cnt = 0;
-	partition_info_msg_t *part_info_ptr = NULL;
-	partition_info_t *part_ptr = NULL;
+scontrol_print_part(char *partition_name) {
+    int error_code, i, print_cnt = 0;
+    partition_info_msg_t *part_info_ptr = NULL;
+    partition_info_t *part_ptr = NULL;
 
-	error_code = scontrol_load_partitions(&part_info_ptr);
-	if (error_code) {
-		exit_code = 1;
-		if (quiet_flag != 1)
-			slurm_perror ("slurm_load_partitions error");
-		return;
-	}
+    error_code = scontrol_load_partitions(&part_info_ptr);
+    if (error_code) {
+        exit_code = 1;
+        if (quiet_flag != 1)
+            slurm_perror("slurm_load_partitions error");
+        return;
+    }
 
-	if (quiet_flag == -1) {
-		char time_str[32];
-		slurm_make_time_str ((time_t *)&part_info_ptr->last_update,
-			       time_str, sizeof(time_str));
-		printf ("last_update_time=%s, records=%d\n",
-			time_str, part_info_ptr->record_count);
-	}
+    if (quiet_flag == -1) {
+        char time_str[32];
+        slurm_make_time_str((time_t *) &part_info_ptr->last_update,
+                            time_str, sizeof(time_str));
+        printf("last_update_time=%s, records=%d\n",
+               time_str, part_info_ptr->record_count);
+    }
 
-	part_ptr = part_info_ptr->partition_array;
-	for (i = 0; i < part_info_ptr->record_count; i++) {
-		if (partition_name &&
-		    xstrcmp (partition_name, part_ptr[i].name) != 0)
-			continue;
-		print_cnt++;
-		slurm_print_partition_info (stdout, & part_ptr[i],
-		                            one_liner ) ;
-		if (partition_name)
-			break;
-	}
+    part_ptr = part_info_ptr->partition_array;
+    for (i = 0; i < part_info_ptr->record_count; i++) {
+        if (partition_name &&
+            xstrcmp(partition_name, part_ptr[i].name) != 0)
+            continue;
+        print_cnt++;
+        slurm_print_partition_info(stdout, &part_ptr[i],
+                                   one_liner);
+        if (partition_name)
+            break;
+    }
 
-	if (print_cnt == 0) {
-		if (partition_name) {
-			exit_code = 1;
-			if (quiet_flag != 1)
-				printf ("Partition %s not found\n",
-				        partition_name);
-		} else if (quiet_flag != 1)
-			printf ("No partitions in the system\n");
-	}
+    if (print_cnt == 0) {
+        if (partition_name) {
+            exit_code = 1;
+            if (quiet_flag != 1)
+                printf("Partition %s not found\n",
+                       partition_name);
+        } else if (quiet_flag != 1)
+            printf("No partitions in the system\n");
+    }
 }

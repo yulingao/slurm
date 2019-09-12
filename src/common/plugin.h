@@ -53,9 +53,9 @@
  *
  * Their meanings are described in the sample plugin.
  */
-#define PLUGIN_NAME		"plugin_name"
-#define PLUGIN_TYPE		"plugin_type"
-#define PLUGIN_VERSION		"plugin_version"
+#define PLUGIN_NAME        "plugin_name"
+#define PLUGIN_TYPE        "plugin_type"
+#define PLUGIN_VERSION        "plugin_version"
 
 /*
  * Opaque type for plugin handle.  Most plugin operations will want
@@ -69,23 +69,23 @@
 typedef void *plugin_handle_t;
 
 typedef struct {
-	plugin_handle_t	cur_plugin;
-	void *plugin_list;
-	char *type;
+    plugin_handle_t cur_plugin;
+    void *plugin_list;
+    char *type;
 } plugin_context_t;
 
 
 #define PLUGIN_INVALID_HANDLE ((void*)0)
 
 typedef enum {
-	EPLUGIN_SUCCESS = 0,     /* Success                             */
-	EPLUGIN_NOTFOUND,        /* Plugin file does not exist          */
-	EPLUGIN_ACCESS_ERROR,    /* Access denied                       */
-	EPLUGIN_DLOPEN_FAILED,   /* Dlopen not successful               */
-	EPLUGIN_INIT_FAILED,     /* Plugin's init() callback failed     */
-	EPLUGIN_MISSING_NAME,    /* plugin_name/type/version missing    */
-	EPLUGIN_MISSING_SYMBOL,  /* some symbol needed isn't found      */
-	EPLUGIN_BAD_VERSION,     /* incompatible plugin version         */
+    EPLUGIN_SUCCESS = 0,     /* Success                             */
+    EPLUGIN_NOTFOUND,        /* Plugin file does not exist          */
+    EPLUGIN_ACCESS_ERROR,    /* Access denied                       */
+    EPLUGIN_DLOPEN_FAILED,   /* Dlopen not successful               */
+    EPLUGIN_INIT_FAILED,     /* Plugin's init() callback failed     */
+    EPLUGIN_MISSING_NAME,    /* plugin_name/type/version missing    */
+    EPLUGIN_MISSING_SYMBOL,  /* some symbol needed isn't found      */
+    EPLUGIN_BAD_VERSION,     /* incompatible plugin version         */
 } plugin_err_t;
 
 const char *plugin_strerror(plugin_err_t err);
@@ -108,10 +108,10 @@ const char *plugin_strerror(plugin_err_t err);
  *
  * Returns a Slurm errno.
  */
-int plugin_peek( const char *fq_path,
-		 char *plugin_type,
-		 const size_t type_len,
-		 uint32_t *plugin_version );
+int plugin_peek(const char *fq_path,
+                char *plugin_type,
+                const size_t type_len,
+                uint32_t *plugin_version);
 
 
 /*
@@ -146,27 +146,29 @@ plugin_err_t plugin_load_from_file(plugin_handle_t *pph, const char *fq_path);
  * to this function's return.
  */
 plugin_handle_t plugin_load_and_link(const char *type_name, int n_syms,
-				     const char *names[], void *ptrs[]);
+                                     const char *names[], void *ptrs[]);
 
 /*
  * Unload a plugin from memory.
  */
-void plugin_unload( plugin_handle_t plug );
+void plugin_unload(plugin_handle_t plug);
 
 /*
  * Get the address of a named symbol in the plugin.
  *
  * Returns the address of the symbol or NULL if not found.
  */
-void *plugin_get_sym( plugin_handle_t plug, const char *name );
+void *plugin_get_sym(plugin_handle_t plug, const char *name);
 
 /*
  * Access functions to get the name, type, and version of a plugin
  * from the plugin itself.
  */
-const char *plugin_get_name( plugin_handle_t plug );
-const char *plugin_get_type( plugin_handle_t plug );
-uint32_t plugin_get_version( plugin_handle_t plug );
+const char *plugin_get_name(plugin_handle_t plug);
+
+const char *plugin_get_type(plugin_handle_t plug);
+
+uint32_t plugin_get_version(plugin_handle_t plug);
 
 /*
  * Get the addresses of several symbols from the plugin at once.
@@ -180,10 +182,10 @@ uint32_t plugin_get_version( plugin_handle_t plug );
  * Returns the number of symbols successfully resolved.  Pointers whose
  * associated symbol name was not found will be set to NULL.
  */
-int plugin_get_syms( plugin_handle_t plug,
-		     int n_syms,
-		     const char *names[],
-		     void *ptrs[] );
+int plugin_get_syms(plugin_handle_t plug,
+                    int n_syms,
+                    const char *names[],
+                    void *ptrs[]);
 
 
 /*
@@ -202,8 +204,8 @@ int plugin_get_syms( plugin_handle_t plug,
  * Free memory with plugin_context_destroy
  */
 extern plugin_context_t *plugin_context_create(
-	const char *plugin_type, const char *uler_type,
-	void *ptrs[], const char *names[], size_t names_size);
+        const char *plugin_type, const char *uler_type,
+        void *ptrs[], const char *names[], size_t names_size);
 
 /*
  * Destroy a context created from plugin_context_create.

@@ -62,15 +62,14 @@
 #define CONVERT_NUM_UNIT_RAW 0x00000004
 
 /* unit types */
-enum
-{
-	UNIT_NONE,
-	UNIT_KILO,
-	UNIT_MEGA,
-	UNIT_GIGA,
-	UNIT_TERA,
-	UNIT_PETA,
-	UNIT_UNKNOWN
+enum {
+    UNIT_NONE,
+    UNIT_KILO,
+    UNIT_MEGA,
+    UNIT_GIGA,
+    UNIT_TERA,
+    UNIT_PETA,
+    UNIT_UNKNOWN
 };
 
 /**********************************************************************\
@@ -1030,7 +1029,7 @@ extern int sock_bind_range(int, uint16_t *, bool local);
  * RET slurm_fd		- file descriptor of the connection created
  */
 extern int slurm_init_msg_engine_addrname_port(char *addr_name,
-											   uint16_t port);
+                                               uint16_t port);
 
 /* In the socket implementation it creates a socket, binds to it, and
  *	listens for connections.
@@ -1110,7 +1109,7 @@ List slurm_receive_msgs(int fd, int steps, int timeout);
  * RET int	- returns 0 on success, -1 on failure and sets errno
  */
 int slurm_receive_msg_and_forward(int fd, slurm_addr_t *orig_addr,
-								  slurm_msg_t *resp, int timeout);
+                                  slurm_msg_t *resp, int timeout);
 
 /**********************************************************************\
  * send message functions
@@ -1138,7 +1137,7 @@ int slurm_send_node_msg(int open_fd, slurm_msg_t *msg);
  * RET slurm_fd	- file descriptor of the connection created
  */
 extern int slurm_open_controller_conn(slurm_addr_t *addr, bool *use_backup,
-									  slurmdb_cluster_rec_t *comm_cluster_rec);
+                                      slurmdb_cluster_rec_t *comm_cluster_rec);
 
 /*
  * Calls connect to make a connection-less datagram connection to a specific
@@ -1148,7 +1147,7 @@ extern int slurm_open_controller_conn(slurm_addr_t *addr, bool *use_backup,
  * RET int      - file descriptor of the connection created
  */
 extern int slurm_open_controller_conn_spec(int dest,
-										   slurmdb_cluster_rec_t *comm_cluster_rec);
+                                           slurmdb_cluster_rec_t *comm_cluster_rec);
 
 /* In the bsd socket implementation it creates a SOCK_STREAM socket
  *	and calls connect on it a SOCK_DGRAM socket called with connect
@@ -1173,9 +1172,10 @@ extern int slurm_open_msg_conn(slurm_addr_t *slurm_address);
  * RET size_t		- bytes sent , or -1 on errror
  */
 extern size_t slurm_write_stream(int open_fd, char *buffer, size_t size);
+
 extern size_t slurm_write_stream_timeout(int open_fd,
-										 char *buffer, size_t size,
-										 int timeout);
+                                         char *buffer, size_t size,
+                                         int timeout);
 
 /* slurm_read_stream
  * read into buffer grom a stream file descriptor
@@ -1186,9 +1186,10 @@ extern size_t slurm_write_stream_timeout(int open_fd,
  * RET size_t		- bytes read , or -1 on errror
  */
 extern size_t slurm_read_stream(int open_fd, char *buffer, size_t size);
+
 extern size_t slurm_read_stream_timeout(int open_fd,
-										char *buffer, size_t size,
-										int timeout);
+                                        char *buffer, size_t size,
+                                        int timeout);
 
 /**********************************************************************\
  * address conversion and management functions
@@ -1201,7 +1202,7 @@ extern size_t slurm_read_stream_timeout(int open_fd,
  * IN host		- hostname or dns name
  */
 extern void slurm_set_addr(slurm_addr_t *slurm_address,
-						   uint16_t port, char *host);
+                           uint16_t port, char *host);
 
 /* slurm_get_ip_str
  * given a slurm_address it returns its port and ip address string
@@ -1211,7 +1212,7 @@ extern void slurm_set_addr(slurm_addr_t *slurm_address,
  * IN buf_len		- length of ip buffer
  */
 extern void slurm_get_ip_str(slurm_addr_t *slurm_address, uint16_t *port,
-							 char *ip, unsigned int buf_len);
+                             char *ip, unsigned int buf_len);
 
 /* slurm_get_peer_addr
  * get the slurm address of the peer connection, similar to getpeeraddr
@@ -1232,7 +1233,8 @@ extern int slurm_get_peer_addr(int fd, slurm_addr_t *slurm_address);
  * returns		- Slurm error code
  */
 extern void slurm_pack_slurm_addr_array(slurm_addr_t *slurm_address,
-										uint32_t size_val, Buf buffer);
+                                        uint32_t size_val, Buf buffer);
+
 /* slurm_unpack_slurm_addr_array
  * unpacks an array of slurm_addrs from a buffer
  * OUT slurm_address	- slurm_addr_t to unpack to
@@ -1241,7 +1243,7 @@ extern void slurm_pack_slurm_addr_array(slurm_addr_t *slurm_address,
  * returns		- Slurm error code
  */
 extern int slurm_unpack_slurm_addr_array(slurm_addr_t **slurm_address,
-										 uint32_t *size_val, Buf buffer);
+                                         uint32_t *size_val, Buf buffer);
 
 /**********************************************************************\
  * simplified communication routines
@@ -1285,8 +1287,8 @@ int slurm_send_rc_err_msg(slurm_msg_t *msg, int rc, char *err_msg);
  * RET int 		- returns 0 on success, -1 on failure and sets errno
  */
 extern int slurm_send_recv_controller_msg(slurm_msg_t *request_msg,
-										  slurm_msg_t *response_msg,
-										  slurmdb_cluster_rec_t *comm_cluster_rec);
+                                          slurm_msg_t *response_msg,
+                                          slurmdb_cluster_rec_t *comm_cluster_rec);
 
 /* slurm_send_recv_node_msg
  * opens a connection to node,
@@ -1297,8 +1299,8 @@ extern int slurm_send_recv_controller_msg(slurm_msg_t *request_msg,
  * RET int 		- returns 0 on success, -1 on failure and sets errno
  */
 int slurm_send_recv_node_msg(slurm_msg_t *request_msg,
-							 slurm_msg_t *response_msg,
-							 int timeout);
+                             slurm_msg_t *response_msg,
+                             int timeout);
 
 /*
  *  Send a message to the nodelist specificed using fanout
@@ -1312,7 +1314,7 @@ int slurm_send_recv_node_msg(slurm_msg_t *request_msg,
  *                    containing type (ret_types_t).
  */
 List slurm_send_recv_msgs(const char *nodelist, slurm_msg_t *msg, int timeout,
-						  bool quiet);
+                          bool quiet);
 
 /*
  * Sends back reroute_msg_t which directs the client to make the request to
@@ -1322,7 +1324,7 @@ List slurm_send_recv_msgs(const char *nodelist, slurm_msg_t *msg, int timeout,
  * IN cluster_rec - cluster to direct msg to.
  */
 int slurm_send_reroute_msg(slurm_msg_t *msg,
-						   slurmdb_cluster_rec_t *cluster_rec);
+                           slurmdb_cluster_rec_t *cluster_rec);
 
 /*
  *  Send a message to msg->address
@@ -1353,7 +1355,7 @@ int slurm_send_recv_rc_msg_only_one(slurm_msg_t *req, int *rc, int timeout);
  * RET - 0 on success, -1 on failure
  */
 extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
-											 slurmdb_cluster_rec_t *comm_cluster_rec);
+                                             slurmdb_cluster_rec_t *comm_cluster_rec);
 
 /* slurm_send_only_controller_msg
  * opens a connection to the controller, sends the controller a
@@ -1364,7 +1366,7 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
  * NOTE: NOT INTENDED TO BE CROSS-CLUSTER
  */
 extern int slurm_send_only_controller_msg(slurm_msg_t *req,
-										  slurmdb_cluster_rec_t *comm_cluster_rec);
+                                          slurmdb_cluster_rec_t *comm_cluster_rec);
 
 /* DO NOT USE THIS. See comment in slurm_protocol_api.c for further info. */
 extern int slurm_send_only_node_msg(slurm_msg_t *request_msg);
@@ -1386,7 +1388,7 @@ extern void slurm_send_msg_maybe(slurm_msg_t *request_msg);
  * RET int	- returns 0 on success, -1 on failure and sets errno
  */
 extern int slurm_send_recv_msg(int fd, slurm_msg_t *req,
-							   slurm_msg_t *resp, int timeout);
+                               slurm_msg_t *resp, int timeout);
 
 /* Slurm message functions */
 
@@ -1398,19 +1400,27 @@ extern int slurm_send_recv_msg(int fd, slurm_msg_t *req,
 extern int *set_span(int total, uint16_t tree_width);
 
 extern void slurm_free_msg_members(slurm_msg_t *msg);
+
 extern void slurm_free_msg(slurm_msg_t *msg);
 
 /* must free this memory with free not xfree */
 extern char *nodelist_nth_host(const char *nodelist, int inx);
+
 extern int nodelist_find(const char *nodelist, const char *name);
+
 extern void convert_num_unit2(double num, char *buf, int buf_size,
-							  int orig_type, int spec_type, int divisor,
-							  uint32_t flags);
+                              int orig_type, int spec_type, int divisor,
+                              uint32_t flags);
+
 extern void convert_num_unit(double num, char *buf, int buf_size,
-							 int orig_type, int spec_type, uint32_t flags);
+                             int orig_type, int spec_type, uint32_t flags);
+
 extern int revert_num_unit(const char *buf);
+
 extern int get_convert_unit_val(int base_type, char convert_to);
+
 extern int get_unit_type(char unit);
+
 extern void parse_int_to_array(int in, int *out);
 
 /*
@@ -1422,8 +1432,8 @@ extern void parse_int_to_array(int in, int *out);
  * NOTE: free the response using slurm_free_job_step_create_response_msg
  */
 extern int slurm_job_step_create(
-	job_step_create_request_msg_t *slurm_step_alloc_req_msg,
-	job_step_create_response_msg_t **slurm_step_alloc_resp_msg);
+        job_step_create_request_msg_t *slurm_step_alloc_req_msg,
+        job_step_create_response_msg_t **slurm_step_alloc_resp_msg);
 
 /* Should this be in <slurm/slurm.h> ? */
 /*
@@ -1436,7 +1446,7 @@ extern int slurm_job_step_create(
  * RET: error code
  */
 extern int slurm_forward_data(
-	char **nodelist, char *address, uint32_t len, const char *data);
+        char **nodelist, char *address, uint32_t len, const char *data);
 
 /*
  * slurm_setup_sockaddr - setup a sockaddr_in struct to be used for

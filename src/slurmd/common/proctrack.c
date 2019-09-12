@@ -66,28 +66,35 @@
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
 typedef struct slurm_proctrack_ops {
-	int              (*create)    (stepd_step_rec_t * job);
-	int              (*add)       (stepd_step_rec_t * job, pid_t pid);
-	int              (*signal)    (uint64_t id, int signal);
-	int              (*destroy)   (uint64_t id);
-	uint64_t         (*find_cont) (pid_t pid);
-	bool             (*has_pid)   (uint64_t id, pid_t pid);
-	int              (*wait)      (uint64_t id);
-	int              (*get_pids)  (uint64_t id, pid_t ** pids, int *npids);
+    int (*create)(stepd_step_rec_t *job);
+
+    int (*add)(stepd_step_rec_t *job, pid_t pid);
+
+    int (*signal)(uint64_t id, int signal);
+
+    int (*destroy)(uint64_t id);
+
+    uint64_t (*find_cont)(pid_t pid);
+
+    bool (*has_pid)(uint64_t id, pid_t pid);
+
+    int (*wait)(uint64_t id);
+
+    int (*get_pids)(uint64_t id, pid_t **pids, int *npids);
 } slurm_proctrack_ops_t;
 
 /*
  * Must be synchronized with slurm_proctrack_ops_t above.
  */
 static const char *syms[] = {
-	"proctrack_p_create",
-	"proctrack_p_add",
-	"proctrack_p_signal",
-	"proctrack_p_destroy",
-	"proctrack_p_find",
-	"proctrack_p_has_pid",
-	"proctrack_p_wait",
-	"proctrack_p_get_pids"
+        "proctrack_p_create",
+        "proctrack_p_add",
+        "proctrack_p_signal",
+        "proctrack_p_destroy",
+        "proctrack_p_find",
+        "proctrack_p_has_pid",
+        "proctrack_p_wait",
+        "proctrack_p_get_pids"
 };
 
 static slurm_proctrack_ops_t ops;
@@ -99,48 +106,46 @@ static bool init_run = false;
  * The proctrack plugin can only be changed by restarting slurmd
  * without preserving state (-c option).
  */
-extern int slurm_proctrack_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "proctrack";
-	char *type = NULL;
+extern int slurm_proctrack_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "proctrack";
+    char *type = NULL;
 
-	if (init_run && g_context)
-		return retval;
+    if (init_run && g_context)
+        return retval;
 
-	slurm_mutex_lock(&g_context_lock);
+    slurm_mutex_lock(&g_context_lock);
 
-	if (g_context)
-		goto done;
+    if (g_context)
+        goto done;
 
-	type = slurm_get_proctrack_type();
-	g_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    type = slurm_get_proctrack_type();
+    g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!g_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	slurm_mutex_unlock(&g_context_lock);
-	xfree(type);
-	return retval;
+    done:
+    slurm_mutex_unlock(&g_context_lock);
+    xfree(type);
+    return retval;
 }
 
-extern int slurm_proctrack_fini(void)
-{
-	int rc;
+extern int slurm_proctrack_fini(void) {
+    int rc;
 
-	if (!g_context)
-		return SLURM_SUCCESS;
+    if (!g_context)
+        return SLURM_SUCCESS;
 
-	init_run = false;
-	rc = plugin_context_destroy(g_context);
-	g_context = NULL;
-	return rc;
+    init_run = false;
+    rc = plugin_context_destroy(g_context);
+    g_context = NULL;
+    return rc;
 }
 
 /*
@@ -151,12 +156,11 @@ extern int slurm_proctrack_fini(void)
  *
  * Returns a Slurm errno.
  */
-extern int proctrack_g_create(stepd_step_rec_t * job)
-{
-	if (slurm_proctrack_init() < 0)
-		return 0;
+extern int proctrack_g_create(stepd_step_rec_t *job) {
+    if (slurm_proctrack_init() < 0)
+        return 0;
 
-	return (*(ops.create)) (job);
+    return (*(ops.create))(job);
 }
 
 /*
@@ -168,195 +172,191 @@ extern int proctrack_g_create(stepd_step_rec_t * job)
  *
  * Returns a Slurm errno.
  */
-extern int proctrack_g_add(stepd_step_rec_t * job, pid_t pid)
-{
-	int i = 0, max_retry = 3, rc;
+extern int proctrack_g_add(stepd_step_rec_t *job, pid_t pid) {
+    int i = 0, max_retry = 3, rc;
 
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	/* Sometimes a plugin is transient in adding a pid, so lets
-	 * try a few times before we call it quits.
-	 */
-	while ((rc = (*(ops.add)) (job, pid)) != SLURM_SUCCESS) {
-		if (i++ > max_retry)
-			break;
-		debug("%s: %u.%u couldn't add pid %u, sleeping and trying again",
-		      __func__, job->jobid, job->stepid, pid);
-		sleep(1);
-	}
+    /* Sometimes a plugin is transient in adding a pid, so lets
+     * try a few times before we call it quits.
+     */
+    while ((rc = (*(ops.add))(job, pid)) != SLURM_SUCCESS) {
+        if (i++ > max_retry)
+            break;
+        debug("%s: %u.%u couldn't add pid %u, sleeping and trying again",
+              __func__, job->jobid, job->stepid, pid);
+        sleep(1);
+    }
 
-	return rc;
+    return rc;
 }
 
 /* Determine if core dump in progress
  * stat_fname - Pathname of the form /proc/<PID>/stat
  * RET - True if core dump in progress, otherwise false
  */
-static bool _test_core_dumping(char* stat_fname)
-{
-	int pid, ppid, pgrp, session, tty, tpgid;
-	char cmd[16], state[1];
-	long unsigned flags, min_flt, cmin_flt, maj_flt, cmaj_flt;
-	long unsigned utime, stime;
-	long cutime, cstime, priority, nice, timeout, it_real_value;
-	long resident_set_size;
-	long unsigned start_time, vsize;
-	long unsigned resident_set_size_rlim, start_code, end_code;
-	long unsigned start_stack, kstk_esp, kstk_eip;
-	long unsigned w_chan, n_swap, sn_swap;
-	int  l_proc;
-	int num;
-	char *str_ptr, *proc_stat;
-	int proc_fd, proc_stat_size = BUF_SIZE;
-	bool dumping_results = false;
+static bool _test_core_dumping(char *stat_fname) {
+    int pid, ppid, pgrp, session, tty, tpgid;
+    char cmd[16], state[1];
+    long unsigned flags, min_flt, cmin_flt, maj_flt, cmaj_flt;
+    long unsigned utime, stime;
+    long cutime, cstime, priority, nice, timeout, it_real_value;
+    long resident_set_size;
+    long unsigned start_time, vsize;
+    long unsigned resident_set_size_rlim, start_code, end_code;
+    long unsigned start_stack, kstk_esp, kstk_eip;
+    long unsigned w_chan, n_swap, sn_swap;
+    int l_proc;
+    int num;
+    char *str_ptr, *proc_stat;
+    int proc_fd, proc_stat_size = BUF_SIZE;
+    bool dumping_results = false;
 
-	proc_fd = open(stat_fname, O_RDONLY, 0);
-	if (proc_fd == -1)
-		return false;  /* process is now gone */
-	proc_stat = xmalloc_nz(proc_stat_size + 1);
-	while (1) {
-		num = read(proc_fd, proc_stat, proc_stat_size);
-		if (num <= 0) {
-			proc_stat[0] = '\0';
-			break;
-		}
-		proc_stat[num] = '\0';
-		if (num < proc_stat_size)
-			break;
-		proc_stat_size += BUF_SIZE;
-		xrealloc_nz(proc_stat, proc_stat_size + 1);
-		if (lseek(proc_fd, (off_t) 0, SEEK_SET) != 0)
-			break;
-	}
-	close(proc_fd);
+    proc_fd = open(stat_fname, O_RDONLY, 0);
+    if (proc_fd == -1)
+        return false;  /* process is now gone */
+    proc_stat = xmalloc_nz(proc_stat_size + 1);
+    while (1) {
+        num = read(proc_fd, proc_stat, proc_stat_size);
+        if (num <= 0) {
+            proc_stat[0] = '\0';
+            break;
+        }
+        proc_stat[num] = '\0';
+        if (num < proc_stat_size)
+            break;
+        proc_stat_size += BUF_SIZE;
+        xrealloc_nz(proc_stat, proc_stat_size + 1);
+        if (lseek(proc_fd, (off_t) 0, SEEK_SET) != 0)
+            break;
+    }
+    close(proc_fd);
 
-	/* race condition at process termination */
-	if (proc_stat[0] == '\0') {
-		debug("%s: %s is empty", __func__, stat_fname);
-		xfree(proc_stat);
-		return false;
-	}
+    /* race condition at process termination */
+    if (proc_stat[0] == '\0') {
+        debug("%s: %s is empty", __func__, stat_fname);
+        xfree(proc_stat);
+        return false;
+    }
 
-	/* split into "PID (cmd" and "<rest>" */
-	str_ptr = (char *)strrchr(proc_stat, ')');
-	if (str_ptr == NULL) {
-		error("%s: unexpected format of %s (%s) bracket missing?",
-		      __func__, stat_fname, proc_stat);
-		xfree(proc_stat);
-		return false;
-	}
-	*str_ptr = '\0';		/* replace trailing ')' with NULL */
-	/* parse these two strings separately, skipping the leading "(". */
-	memset (cmd, 0, sizeof(cmd));
-	sscanf (proc_stat, "%d (%15c", &pid, cmd);   /* comm[16] in kernel */
-	num = sscanf(str_ptr + 2,		/* skip space after ')' too */
-		"%c "
-		"%d %d %d %d %d "
-		"%lu %lu %lu %lu %lu %lu %lu "
-		"%ld %ld %ld %ld %ld %ld "
-		"%lu %lu "
-		"%ld "
-		"%lu %lu %lu "
-		"%lu %lu %lu "
-		"%*s %*s %*s %*s " /* discard, no RT signals & Linux 2.1 used hex */
-		"%lu %lu %lu %*d %d",
-		state,
-		&ppid, &pgrp, &session, &tty, &tpgid,
-		&flags, &min_flt, &cmin_flt, &maj_flt, &cmaj_flt, &utime, &stime,
-		&cutime, &cstime, &priority, &nice, &timeout, &it_real_value,
-		&start_time, &vsize,
-		&resident_set_size,
-		&resident_set_size_rlim, &start_code, &end_code,
-		&start_stack, &kstk_esp, &kstk_eip,
+    /* split into "PID (cmd" and "<rest>" */
+    str_ptr = (char *) strrchr(proc_stat, ')');
+    if (str_ptr == NULL) {
+        error("%s: unexpected format of %s (%s) bracket missing?",
+              __func__, stat_fname, proc_stat);
+        xfree(proc_stat);
+        return false;
+    }
+    *str_ptr = '\0';        /* replace trailing ')' with NULL */
+    /* parse these two strings separately, skipping the leading "(". */
+    memset(cmd, 0, sizeof(cmd));
+    sscanf(proc_stat, "%d (%15c", &pid, cmd);   /* comm[16] in kernel */
+    num = sscanf(str_ptr + 2,        /* skip space after ')' too */
+                 "%c "
+                 "%d %d %d %d %d "
+                 "%lu %lu %lu %lu %lu %lu %lu "
+                 "%ld %ld %ld %ld %ld %ld "
+                 "%lu %lu "
+                 "%ld "
+                 "%lu %lu %lu "
+                 "%lu %lu %lu "
+                 "%*s %*s %*s %*s " /* discard, no RT signals & Linux 2.1 used hex */
+                 "%lu %lu %lu %*d %d",
+                 state,
+                 &ppid, &pgrp, &session, &tty, &tpgid,
+                 &flags, &min_flt, &cmin_flt, &maj_flt, &cmaj_flt, &utime, &stime,
+                 &cutime, &cstime, &priority, &nice, &timeout, &it_real_value,
+                 &start_time, &vsize,
+                 &resident_set_size,
+                 &resident_set_size_rlim, &start_code, &end_code,
+                 &start_stack, &kstk_esp, &kstk_eip,
 /*		&signal, &blocked, &sig_ignore, &sig_catch, */ /* can't use */
-		&w_chan, &n_swap, &sn_swap /* , &Exit_signal  */, &l_proc);
+                 &w_chan, &n_swap, &sn_swap /* , &Exit_signal  */, &l_proc);
 
-	if (num < 13)
-		error("/proc entry too short (%s)", proc_stat);
-	else if (flags & PF_DUMPCORE)
-		dumping_results = true;
-	xfree(proc_stat);
+    if (num < 13)
+        error("/proc entry too short (%s)", proc_stat);
+    else if (flags & PF_DUMPCORE)
+        dumping_results = true;
+    xfree(proc_stat);
 
-	return dumping_results;
+    return dumping_results;
 }
 
 typedef struct agent_arg {
-	uint64_t cont_id;
-	int signal;
+    uint64_t cont_id;
+    int signal;
 } agent_arg_t;
 
-static void *_sig_agent(void *args)
-{
-	bool hung_pids = false;
-	agent_arg_t *agent_arg_ptr = args;
+static void *_sig_agent(void *args) {
+    bool hung_pids = false;
+    agent_arg_t *agent_arg_ptr = args;
 
-	while (1) {
-		pid_t *pids = NULL;
-		int i, npids = 0;
-		char *stat_fname = NULL;
+    while (1) {
+        pid_t *pids = NULL;
+        int i, npids = 0;
+        char *stat_fname = NULL;
 
-		if (hung_pids)
-			sleep(5);
+        if (hung_pids)
+            sleep(5);
 
-		hung_pids = false;
+        hung_pids = false;
 
-		if (proctrack_g_get_pids(agent_arg_ptr->cont_id, &pids,
-					     &npids) == SLURM_SUCCESS) {
-			/*
-			 * Check if any processes are core dumping.
-			 * If so, do not signal any of them, instead
-			 * jump back to the sleep and wait for the core
-			 * dump to finish.
-			 *
-			 * This works around an issue with OpenMP
-			 * applications failing to write a full core
-			 * file out - only one of the processes will
-			 * be marked are core dumping, but killing any
-			 * of them will terminate the application.
-			 */
-			for (i = 0; i < npids; i++) {
-				xstrfmtcat(stat_fname, "/proc/%d/stat",
-					   (int) pids[i]);
-				if (_test_core_dumping(stat_fname)) {
-					debug("Process %d continuing core dump",
-					      (int) pids[i]);
-					hung_pids = true;
-					xfree(stat_fname);
-					break;
-				}
-				xfree(stat_fname);
-			}
+        if (proctrack_g_get_pids(agent_arg_ptr->cont_id, &pids,
+                                 &npids) == SLURM_SUCCESS) {
+            /*
+             * Check if any processes are core dumping.
+             * If so, do not signal any of them, instead
+             * jump back to the sleep and wait for the core
+             * dump to finish.
+             *
+             * This works around an issue with OpenMP
+             * applications failing to write a full core
+             * file out - only one of the processes will
+             * be marked are core dumping, but killing any
+             * of them will terminate the application.
+             */
+            for (i = 0; i < npids; i++) {
+                xstrfmtcat(stat_fname, "/proc/%d/stat",
+                           (int) pids[i]);
+                if (_test_core_dumping(stat_fname)) {
+                    debug("Process %d continuing core dump",
+                          (int) pids[i]);
+                    hung_pids = true;
+                    xfree(stat_fname);
+                    break;
+                }
+                xfree(stat_fname);
+            }
 
-			if (hung_pids) {
-				xfree(pids);
-				continue;
-			}
+            if (hung_pids) {
+                xfree(pids);
+                continue;
+            }
 
-			for (i = 0; i < npids; i++) {
-				/* Kill processes */
-				kill(pids[i], agent_arg_ptr->signal);
-			}
-			xfree(pids);
-		}
+            for (i = 0; i < npids; i++) {
+                /* Kill processes */
+                kill(pids[i], agent_arg_ptr->signal);
+            }
+            xfree(pids);
+        }
 
-		break;
-	}
+        break;
+    }
 
-	(void) (*(ops.signal)) (agent_arg_ptr->cont_id, agent_arg_ptr->signal);
-	xfree(args);
-	return NULL;
+    (void) (*(ops.signal))(agent_arg_ptr->cont_id, agent_arg_ptr->signal);
+    xfree(args);
+    return NULL;
 }
 
-static void _spawn_signal_thread(uint64_t cont_id, int signal)
-{
-	agent_arg_t *agent_arg_ptr;
+static void _spawn_signal_thread(uint64_t cont_id, int signal) {
+    agent_arg_t *agent_arg_ptr;
 
-	agent_arg_ptr = xmalloc(sizeof(agent_arg_t));
-	agent_arg_ptr->cont_id = cont_id;
-	agent_arg_ptr->signal  = signal;
+    agent_arg_ptr = xmalloc(sizeof(agent_arg_t));
+    agent_arg_ptr->cont_id = cont_id;
+    agent_arg_ptr->signal = signal;
 
-	slurm_thread_create_detached(NULL, _sig_agent, agent_arg_ptr);
+    slurm_thread_create_detached(NULL, _sig_agent, agent_arg_ptr);
 }
 
 /*
@@ -367,53 +367,52 @@ static void _spawn_signal_thread(uint64_t cont_id, int signal)
  *
  * Returns a Slurm errno.
  */
-extern int proctrack_g_signal(uint64_t cont_id, int signal)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern int proctrack_g_signal(uint64_t cont_id, int signal) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	if (signal == SIGKILL) {
-		pid_t *pids = NULL;
-		int i, j, npids = 0, hung_pids = 0;
-		char *stat_fname = NULL;
-		if (proctrack_g_get_pids(cont_id, &pids, &npids) ==
-		    SLURM_SUCCESS) {
-			/* NOTE: proctrack_g_get_pids() is not supported
-			 * by the proctrack/pgid plugin */
-			for (j = 0; j < 2; j++) {
-				if (j)
-					sleep(2);
-				hung_pids = 0;
-				for (i = 0; i < npids; i++) {
-					if (!pids[i])
-						continue;
-					xstrfmtcat(stat_fname, "/proc/%d/stat",
-						   (int) pids[i]);
-					if (_test_core_dumping(stat_fname)) {
-						debug("Process %d continuing "
-						      "core dump",
-						      (int) pids[i]);
-						hung_pids++;
-					} else {
-						/* Don't test this PID again */
-						pids[i] = 0;
-					}
-					xfree(stat_fname);
-				}
-				if (hung_pids == 0)
-					break;
-			}
-			xfree(pids);
-			if (hung_pids) {
-				info("Defering sending signal, processes in "
-				     "job are currently core dumping");
-				_spawn_signal_thread(cont_id, signal);
-				return SLURM_SUCCESS;
-			}
-		}
-	}
+    if (signal == SIGKILL) {
+        pid_t *pids = NULL;
+        int i, j, npids = 0, hung_pids = 0;
+        char *stat_fname = NULL;
+        if (proctrack_g_get_pids(cont_id, &pids, &npids) ==
+            SLURM_SUCCESS) {
+            /* NOTE: proctrack_g_get_pids() is not supported
+             * by the proctrack/pgid plugin */
+            for (j = 0; j < 2; j++) {
+                if (j)
+                    sleep(2);
+                hung_pids = 0;
+                for (i = 0; i < npids; i++) {
+                    if (!pids[i])
+                        continue;
+                    xstrfmtcat(stat_fname, "/proc/%d/stat",
+                               (int) pids[i]);
+                    if (_test_core_dumping(stat_fname)) {
+                        debug("Process %d continuing "
+                              "core dump",
+                              (int) pids[i]);
+                        hung_pids++;
+                    } else {
+                        /* Don't test this PID again */
+                        pids[i] = 0;
+                    }
+                    xfree(stat_fname);
+                }
+                if (hung_pids == 0)
+                    break;
+            }
+            xfree(pids);
+            if (hung_pids) {
+                info("Defering sending signal, processes in "
+                     "job are currently core dumping");
+                _spawn_signal_thread(cont_id, signal);
+                return SLURM_SUCCESS;
+            }
+        }
+    }
 
-	return (*(ops.signal)) (cont_id, signal);
+    return (*(ops.signal))(cont_id, signal);
 }
 
 /*
@@ -422,12 +421,11 @@ extern int proctrack_g_signal(uint64_t cont_id, int signal)
  *
  * Returns a Slurm errno.
 */
-extern int proctrack_g_destroy(uint64_t cont_id)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern int proctrack_g_destroy(uint64_t cont_id) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.destroy)) (cont_id);
+    return (*(ops.destroy))(cont_id);
 }
 
 /*
@@ -435,24 +433,22 @@ extern int proctrack_g_destroy(uint64_t cont_id)
  *
  * Returns zero if no container found for the given pid.
  */
-extern uint64_t proctrack_g_find(pid_t pid)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern uint64_t proctrack_g_find(pid_t pid) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.find_cont)) (pid);
+    return (*(ops.find_cont))(pid);
 }
 
 /*
  * Return "true" if the container "cont_id" contains the process with
  * ID "pid".
  */
-extern bool proctrack_g_has_pid(uint64_t cont_id, pid_t pid)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern bool proctrack_g_has_pid(uint64_t cont_id, pid_t pid) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.has_pid)) (cont_id, pid);
+    return (*(ops.has_pid))(cont_id, pid);
 }
 
 /*
@@ -465,12 +461,11 @@ extern bool proctrack_g_has_pid(uint64_t cont_id, pid_t pid)
  *
  * Return SLURM_SUCCESS or SLURM_ERROR.
  */
-extern int proctrack_g_wait(uint64_t cont_id)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern int proctrack_g_wait(uint64_t cont_id) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.wait)) (cont_id);
+    return (*(ops.wait))(cont_id);
 }
 
 /*
@@ -485,10 +480,9 @@ extern int proctrack_g_wait(uint64_t cont_id)
  *   pids NULL), return SLURM_ERROR if container does not exist, or
  *   plugin does not implement the call.
  */
-extern int proctrack_g_get_pids(uint64_t cont_id, pid_t **pids, int *npids)
-{
-	if (slurm_proctrack_init() < 0)
-		return SLURM_ERROR;
+extern int proctrack_g_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
+    if (slurm_proctrack_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.get_pids)) (cont_id, pids, npids);
+    return (*(ops.get_pids))(cont_id, pids, npids);
 }

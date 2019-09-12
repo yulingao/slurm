@@ -43,13 +43,18 @@
 
 #define INTERCONNECT_DEFAULT_PORT 1
 
-extern int init ( void );
-extern int fini ( void );
+extern int init(void);
+
+extern int fini(void);
+
 extern int acct_gather_interconnect_p_update_node(void);
+
 extern void acct_gather_interconnect_p_conf_options(
-	s_p_options_t **full_options,
-	int *full_options_cnt);
+        s_p_options_t **full_options,
+        int *full_options_cnt);
+
 extern void acct_gather_interconnect_p_conf_set(s_p_hashtbl_t *tbl);
+
 extern List acct_gather_interconnect_p_get_config(void);
 
 #endif

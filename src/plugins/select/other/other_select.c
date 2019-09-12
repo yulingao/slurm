@@ -61,130 +61,127 @@ uint16_t other_select_type_param = 0;
  * Must be synchronized with slurm_select_ops_t in node_select.h.
  */
 const char *node_select_syms[] = {
-	"plugin_id",
-	"select_p_state_save",
-	"select_p_state_restore",
-	"select_p_job_init",
-	"select_p_node_ranking",
-	"select_p_node_init",
-	"select_p_block_init",
-	"select_p_job_test",
-	"select_p_job_begin",
-	"select_p_job_ready",
-	"select_p_job_expand",
-	"select_p_job_resized",
-	"select_p_job_signal",
-	"select_p_job_mem_confirm",
-	"select_p_job_fini",
-	"select_p_job_suspend",
-	"select_p_job_resume",
-	"select_p_step_pick_nodes",
-	"select_p_step_start",
-	"select_p_step_finish",
-	"select_p_select_nodeinfo_pack",
-	"select_p_select_nodeinfo_unpack",
-	"select_p_select_nodeinfo_alloc",
-	"select_p_select_nodeinfo_free",
-	"select_p_select_nodeinfo_set_all",
-	"select_p_select_nodeinfo_set",
-	"select_p_select_nodeinfo_get",
-	"select_p_select_jobinfo_alloc",
-	"select_p_select_jobinfo_free",
-	"select_p_select_jobinfo_set",
-	"select_p_select_jobinfo_get",
-	"select_p_select_jobinfo_copy",
-	"select_p_select_jobinfo_pack",
-	"select_p_select_jobinfo_unpack",
-	"select_p_select_jobinfo_sprint",
-	"select_p_select_jobinfo_xstrdup",
-	"select_p_get_info_from_plugin",
-	"select_p_update_node_config",
-	"select_p_update_node_state",
-	"select_p_reconfigure",
-	"select_p_resv_test",
+        "plugin_id",
+        "select_p_state_save",
+        "select_p_state_restore",
+        "select_p_job_init",
+        "select_p_node_ranking",
+        "select_p_node_init",
+        "select_p_block_init",
+        "select_p_job_test",
+        "select_p_job_begin",
+        "select_p_job_ready",
+        "select_p_job_expand",
+        "select_p_job_resized",
+        "select_p_job_signal",
+        "select_p_job_mem_confirm",
+        "select_p_job_fini",
+        "select_p_job_suspend",
+        "select_p_job_resume",
+        "select_p_step_pick_nodes",
+        "select_p_step_start",
+        "select_p_step_finish",
+        "select_p_select_nodeinfo_pack",
+        "select_p_select_nodeinfo_unpack",
+        "select_p_select_nodeinfo_alloc",
+        "select_p_select_nodeinfo_free",
+        "select_p_select_nodeinfo_set_all",
+        "select_p_select_nodeinfo_set",
+        "select_p_select_nodeinfo_get",
+        "select_p_select_jobinfo_alloc",
+        "select_p_select_jobinfo_free",
+        "select_p_select_jobinfo_set",
+        "select_p_select_jobinfo_get",
+        "select_p_select_jobinfo_copy",
+        "select_p_select_jobinfo_pack",
+        "select_p_select_jobinfo_unpack",
+        "select_p_select_jobinfo_sprint",
+        "select_p_select_jobinfo_xstrdup",
+        "select_p_get_info_from_plugin",
+        "select_p_update_node_config",
+        "select_p_update_node_state",
+        "select_p_reconfigure",
+        "select_p_resv_test",
 };
 
 static slurm_select_ops_t ops;
 static plugin_context_t *g_context = NULL;
-static pthread_mutex_t	g_context_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 /*
  * Initialize context for node selection plugin
  */
-extern int other_select_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "select";
-	char *type = NULL;
-	int n_syms;
+extern int other_select_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "select";
+    char *type = NULL;
+    int n_syms;
 
-	if (init_run && g_context)
-		return retval;
+    if (init_run && g_context)
+        return retval;
 
-	slurm_mutex_lock(&g_context_lock);
+    slurm_mutex_lock(&g_context_lock);
 
-	if (g_context)
-		goto done;
+    if (g_context)
+        goto done;
 
-	if (!other_select_type_param)
-		other_select_type_param = slurm_get_select_type_param();
+    if (!other_select_type_param)
+        other_select_type_param = slurm_get_select_type_param();
 
-	if (other_select_type_param & CR_OTHER_CONS_RES)
-		type = "select/cons_res";
-	else if (other_select_type_param & CR_OTHER_CONS_TRES)
-		type = "select/cons_tres";
-	else
-		type = "select/linear";
+    if (other_select_type_param & CR_OTHER_CONS_RES)
+        type = "select/cons_res";
+    else if (other_select_type_param & CR_OTHER_CONS_TRES)
+        type = "select/cons_tres";
+    else
+        type = "select/linear";
 
-	n_syms = sizeof(node_select_syms);
-	if (n_syms != sizeof(ops))
-		fatal("For some reason node_select_syms in "
-		      "src/plugins/select/other/other_select.c differs from "
-		      "slurm_select_ops_t found in src/common/node_select.h.  "
-		      "node_select_syms should match what is in "
-		      "src/common/node_select.c");
+    n_syms = sizeof(node_select_syms);
+    if (n_syms != sizeof(ops))
+        fatal("For some reason node_select_syms in "
+              "src/plugins/select/other/other_select.c differs from "
+              "slurm_select_ops_t found in src/common/node_select.h.  "
+              "node_select_syms should match what is in "
+              "src/common/node_select.c");
 
-	if (!(g_context = plugin_context_create(
-		     plugin_type, type, (void **)&ops,
-		     node_select_syms, n_syms))) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!(g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops,
+            node_select_syms, n_syms))) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	slurm_mutex_unlock(&g_context_lock);
-	return retval;
+    done:
+    slurm_mutex_unlock(&g_context_lock);
+    return retval;
 }
 
-extern int other_select_fini(void)
-{
-	int rc = SLURM_SUCCESS;
+extern int other_select_fini(void) {
+    int rc = SLURM_SUCCESS;
 
-	slurm_mutex_lock(&g_context_lock);
-	init_run = false;
-	if (!g_context)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    init_run = false;
+    if (!g_context)
+        goto fini;
 
-	rc = plugin_context_destroy(g_context);
-	g_context = NULL;
-fini:
-	slurm_mutex_unlock(&g_context_lock);
-	return rc;
+    rc = plugin_context_destroy(g_context);
+    g_context = NULL;
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
+    return rc;
 }
 
 /*
  * Save any global state information
  * IN dir_name - directory into which the data can be stored
  */
-extern int other_state_save(char *dir_name)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_state_save(char *dir_name) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.state_save))(dir_name);
+    return (*(ops.state_save))(dir_name);
 }
 
 /*
@@ -192,24 +189,22 @@ extern int other_state_save(char *dir_name)
  * restore any global state information
  * IN dir_name - directory from which the data can be restored
  */
-extern int other_state_restore(char *dir_name)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_state_restore(char *dir_name) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.state_restore))(dir_name);
+    return (*(ops.state_restore))(dir_name);
 }
 
 /*
  * Note the initialization of job records, issued upon restart of
  * slurmctld and used to synchronize any job state.
  */
-extern int other_job_init(List job_list)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_init(List job_list) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_init))(job_list);
+    return (*(ops.job_init))(job_list);
 }
 
 /*
@@ -217,12 +212,11 @@ extern int other_job_init(List job_list)
  * IN node_ptr - current node data
  * IN node_count - number of node entries
  */
-extern int other_node_init(struct node_record *node_ptr, int node_cnt)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_node_init(struct node_record *node_ptr, int node_cnt) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.node_init))(node_ptr, node_cnt);
+    return (*(ops.node_init))(node_ptr, node_cnt);
 }
 
 
@@ -230,12 +224,11 @@ extern int other_node_init(struct node_record *node_ptr, int node_cnt)
  * Note re/initialization of block record data structure
  * IN block_list - list of partition records
  */
-extern int other_block_init(List block_list)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_block_init(List block_list) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.block_init))(block_list);
+    return (*(ops.block_init))(block_list);
 }
 
 /*
@@ -259,20 +252,19 @@ extern int other_block_init(List block_list)
  * RET zero on success, EINVAL otherwise
  */
 extern int other_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-			  uint32_t min_nodes, uint32_t max_nodes,
-			  uint32_t req_nodes, uint16_t mode,
-			  List preemptee_candidates, List *preemptee_job_list,
-			  bitstr_t *exc_core_bitmap)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                          uint32_t min_nodes, uint32_t max_nodes,
+                          uint32_t req_nodes, uint16_t mode,
+                          List preemptee_candidates, List *preemptee_job_list,
+                          bitstr_t *exc_core_bitmap) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_test))
-		(job_ptr, bitmap,
-		 min_nodes, max_nodes,
-		 req_nodes, mode,
-		 preemptee_candidates, preemptee_job_list,
-		 exc_core_bitmap);
+    return (*(ops.job_test))
+            (job_ptr, bitmap,
+             min_nodes, max_nodes,
+             req_nodes, mode,
+             preemptee_candidates, preemptee_job_list,
+             exc_core_bitmap);
 }
 
 /*
@@ -280,12 +272,11 @@ extern int other_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
  * after other_job_test(). Executed from slurmctld.
  * IN job_ptr - pointer to job being initiated
  */
-extern int other_job_begin(struct job_record *job_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_begin(struct job_record *job_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_begin))(job_ptr);
+    return (*(ops.job_begin))(job_ptr);
 }
 
 /*
@@ -294,12 +285,11 @@ extern int other_job_begin(struct job_record *job_ptr)
  * RET: -2 fatal error, -1 try again, 1 if ready to execute,
  *	0 not ready to execute
  */
-extern int other_job_ready(struct job_record *job_ptr)
-{
-	if (other_select_init() < 0)
-		return -1;
+extern int other_job_ready(struct job_record *job_ptr) {
+    if (other_select_init() < 0)
+        return -1;
 
-	return (*(ops.job_ready))(job_ptr);
+    return (*(ops.job_ready))(job_ptr);
 }
 
 /*
@@ -309,12 +299,11 @@ extern int other_job_ready(struct job_record *job_ptr)
  * RET: 0 or an error code
  */
 extern int other_job_expand(struct job_record *from_job_ptr,
-			    struct job_record *to_job_ptr)
-{
-	if (other_select_init() < 0)
-		return -1;
+                            struct job_record *to_job_ptr) {
+    if (other_select_init() < 0)
+        return -1;
 
-	return (*(ops.job_expand))(from_job_ptr, to_job_ptr);
+    return (*(ops.job_expand))(from_job_ptr, to_job_ptr);
 }
 
 /*
@@ -323,12 +312,11 @@ extern int other_job_expand(struct job_record *from_job_ptr,
  * RET: 0 or an error code
  */
 extern int other_job_resized(struct job_record *job_ptr,
-			     struct node_record *node_ptr)
-{
-	if (other_select_init() < 0)
-		return -1;
+                             struct node_record *node_ptr) {
+    if (other_select_init() < 0)
+        return -1;
 
-	return (*(ops.job_resized))(job_ptr, node_ptr);
+    return (*(ops.job_resized))(job_ptr, node_ptr);
 }
 
 /*
@@ -336,36 +324,33 @@ extern int other_job_resized(struct job_record *job_ptr,
  * IN job_ptr - job to be signaled
  * IN signal  - signal(7) number
  */
-extern int other_job_signal(struct job_record *job_ptr, int signal)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_signal(struct job_record *job_ptr, int signal) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_signal))(job_ptr, signal);
+    return (*(ops.job_signal))(job_ptr, signal);
 }
 
 /*
  * Pass job memory allocation confirmation request to other plugin.
  * IN job_ptr - job to be signaled
  */
-extern int other_job_mem_confirm(struct job_record *job_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_mem_confirm(struct job_record *job_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_mem_confirm))(job_ptr);
+    return (*(ops.job_mem_confirm))(job_ptr);
 }
 
 /*
  * Note termination of job is starting. Executed from slurmctld.
  * IN job_ptr - pointer to job being terminated
  */
-extern int other_job_fini(struct job_record *job_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_fini(struct job_record *job_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_fini))(job_ptr);
+    return (*(ops.job_fini))(job_ptr);
 }
 
 /*
@@ -375,12 +360,11 @@ extern int other_job_fini(struct job_record *job_ptr)
  *                or admin, otherwise suspended for gang scheduling
  * RET SLURM_SUCCESS or error code
  */
-extern int other_job_suspend(struct job_record *job_ptr, bool indf_susp)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_suspend(struct job_record *job_ptr, bool indf_susp) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_suspend))(job_ptr, indf_susp);
+    return (*(ops.job_suspend))(job_ptr, indf_susp);
 }
 
 /*
@@ -390,12 +374,11 @@ extern int other_job_suspend(struct job_record *job_ptr, bool indf_susp)
  * IN job_ptr - pointer to job being resumed
  * RET SLURM_SUCCESS or error code
  */
-extern int other_job_resume(struct job_record *job_ptr, bool indf_susp)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_job_resume(struct job_record *job_ptr, bool indf_susp) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.job_resume))(job_ptr, indf_susp);
+    return (*(ops.job_resume))(job_ptr, indf_susp);
 }
 
 /*
@@ -413,24 +396,22 @@ extern int other_job_resume(struct job_record *job_ptr, bool indf_susp)
  * RET map of slurm nodes to be used for step, NULL on failure
  */
 extern bitstr_t *other_step_pick_nodes(struct job_record *job_ptr,
-				       select_jobinfo_t *jobinfo,
-				       uint32_t node_count,
-				       bitstr_t **avail_nodes)
-{
-	if (other_select_init() < 0)
-		return NULL;
+                                       select_jobinfo_t *jobinfo,
+                                       uint32_t node_count,
+                                       bitstr_t **avail_nodes) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.step_pick_nodes))(job_ptr, jobinfo, node_count,
-					avail_nodes);
+    return (*(ops.step_pick_nodes))(job_ptr, jobinfo, node_count,
+                                    avail_nodes);
 }
 
-extern int other_step_start(struct step_record *step_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_step_start(struct step_record *step_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.step_start))
-		(step_ptr);
+    return (*(ops.step_start))
+            (step_ptr);
 }
 
 /*
@@ -439,104 +420,93 @@ extern int other_step_start(struct step_record *step_ptr)
  * IN killing_step - if true then we are just starting to kill the step
  *                   if false, the step is completely terminated
  */
-extern int other_step_finish(struct step_record *step_ptr, bool killing_step)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_step_finish(struct step_record *step_ptr, bool killing_step) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.step_finish))
-		(step_ptr, killing_step);
+    return (*(ops.step_finish))
+            (step_ptr, killing_step);
 }
 
 extern int other_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo,
-				      Buf buffer,
-				      uint16_t protocol_version)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                      Buf buffer,
+                                      uint16_t protocol_version) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_pack))(nodeinfo, buffer, protocol_version);
+    return (*(ops.nodeinfo_pack))(nodeinfo, buffer, protocol_version);
 }
 
 extern int other_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo,
-					Buf buffer,
-					uint16_t protocol_version)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                        Buf buffer,
+                                        uint16_t protocol_version) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_unpack))(nodeinfo, buffer, protocol_version);
+    return (*(ops.nodeinfo_unpack))(nodeinfo, buffer, protocol_version);
 }
 
-extern select_nodeinfo_t *other_select_nodeinfo_alloc(void)
-{
-	if (other_select_init() < 0)
-		return NULL;
+extern select_nodeinfo_t *other_select_nodeinfo_alloc(void) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.nodeinfo_alloc))();
+    return (*(ops.nodeinfo_alloc))();
 }
 
-extern int other_select_nodeinfo_free(select_nodeinfo_t *nodeinfo)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_select_nodeinfo_free(select_nodeinfo_t *nodeinfo) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_free))(nodeinfo);
+    return (*(ops.nodeinfo_free))(nodeinfo);
 }
 
-extern int other_select_nodeinfo_set_all(void)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_select_nodeinfo_set_all(void) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_set_all))();
+    return (*(ops.nodeinfo_set_all))();
 }
 
-extern int other_select_nodeinfo_set(struct job_record *job_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_select_nodeinfo_set(struct job_record *job_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_set))(job_ptr);
+    return (*(ops.nodeinfo_set))(job_ptr);
 }
 
 extern int other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
-					enum select_nodedata_type dinfo,
-					enum node_states state,
-					void *data)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                     enum select_nodedata_type dinfo,
+                                     enum node_states state,
+                                     void *data) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.nodeinfo_get))(nodeinfo, dinfo, state, data);
+    return (*(ops.nodeinfo_get))(nodeinfo, dinfo, state, data);
 }
 
-extern select_jobinfo_t *other_select_jobinfo_alloc(void)
-{
-	if (other_select_init() < 0)
-		return NULL;
+extern select_jobinfo_t *other_select_jobinfo_alloc(void) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.jobinfo_alloc))();;
+    return (*(ops.jobinfo_alloc))();;
 }
 
 /* free storage previously allocated for a select job credential
  * IN jobinfo  - the select job credential to be freed
  */
-extern int other_select_jobinfo_free(select_jobinfo_t *jobinfo)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
-	return (*(ops.jobinfo_free))(jobinfo);
+extern int other_select_jobinfo_free(select_jobinfo_t *jobinfo) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
+    return (*(ops.jobinfo_free))(jobinfo);
 }
 
 extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
-				       enum select_jobdata_type data_type,
-				       void *data)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                    enum select_jobdata_type data_type,
+                                    void *data) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.jobinfo_set))(jobinfo, data_type, data);
+    return (*(ops.jobinfo_set))(jobinfo, data_type, data);
 }
 
 /* get data from a select job credential
@@ -545,13 +515,12 @@ extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
  * IN/OUT data - the data to enter into job credential
  */
 extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo,
-				       enum select_jobdata_type data_type,
-				       void *data)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                    enum select_jobdata_type data_type,
+                                    void *data) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.jobinfo_get))(jobinfo, data_type, data);
+    return (*(ops.jobinfo_get))(jobinfo, data_type, data);
 }
 
 /* copy a select job credential
@@ -560,12 +529,11 @@ extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo,
  * NOTE: returned value must be freed using other_free_jobinfo
  */
 extern select_jobinfo_t *other_select_jobinfo_copy(
-	select_jobinfo_t *jobinfo)
-{
-	if (other_select_init() < 0)
-		return NULL;
+        select_jobinfo_t *jobinfo) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.jobinfo_copy))(jobinfo);
+    return (*(ops.jobinfo_copy))(jobinfo);
 }
 
 /* pack a select job credential into a buffer in machine independent form
@@ -574,13 +542,12 @@ extern select_jobinfo_t *other_select_jobinfo_copy(
  * RET         - slurm error code
  */
 extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
-				     Buf buffer,
-				     uint16_t protocol_version)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                     Buf buffer,
+                                     uint16_t protocol_version) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.jobinfo_pack))(jobinfo, buffer, protocol_version);
+    return (*(ops.jobinfo_pack))(jobinfo, buffer, protocol_version);
 }
 
 /* unpack a select job credential from a buffer
@@ -590,13 +557,12 @@ extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
  * NOTE: returned value must be freed using other_free_jobinfo
  */
 extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
-				       Buf buffer,
-				       uint16_t protocol_version)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+                                       Buf buffer,
+                                       uint16_t protocol_version) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.jobinfo_unpack))(jobinfo, buffer, protocol_version);
+    return (*(ops.jobinfo_unpack))(jobinfo, buffer, protocol_version);
 }
 
 /* write select job credential to a string
@@ -607,25 +573,24 @@ extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
  * RET        - the string, same as buf
  */
 extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
-					    char *buf, size_t size, int mode)
-{
-	if (other_select_init() < 0)
-		return NULL;
+                                         char *buf, size_t size, int mode) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.jobinfo_sprint))(jobinfo, buf, size, mode);
+    return (*(ops.jobinfo_sprint))(jobinfo, buf, size, mode);
 }
+
 /* write select job info to a string
  * IN jobinfo - a select job credential
  * IN mode    - print mode, see enum select_print_mode
  * RET        - char * containing string of request
  */
 extern char *other_select_jobinfo_xstrdup(
-	select_jobinfo_t *jobinfo, int mode)
-{
-	if (other_select_init() < 0)
-		return NULL;
+        select_jobinfo_t *jobinfo, int mode) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.jobinfo_xstrdup))(jobinfo, mode);
+    return (*(ops.jobinfo_xstrdup))(jobinfo, mode);
 }
 
 /*
@@ -634,14 +599,13 @@ extern char *other_select_jobinfo_xstrdup(
  *                (see enum select_plugindata_info)
  * IN/OUT data  - the data to get from node record
  */
-extern int other_get_info_from_plugin (enum select_plugindata_info dinfo,
-					  struct job_record *job_ptr,
-					  void *data)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_get_info_from_plugin(enum select_plugindata_info dinfo,
+                                      struct job_record *job_ptr,
+                                      void *data) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.get_info_from_plugin))(dinfo, job_ptr, data);
+    return (*(ops.get_info_from_plugin))(dinfo, job_ptr, data);
 }
 
 /*
@@ -650,13 +614,12 @@ extern int other_get_info_from_plugin (enum select_plugindata_info dinfo,
  * IN index  - index into the node record list
  * RETURN SLURM_SUCCESS on success || SLURM_ERROR else wise
  */
-extern int other_update_node_config (int index)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_update_node_config(int index) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.
-		  update_node_config))(index);
+    return (*(ops.
+            update_node_config))(index);
 }
 
 /*
@@ -666,33 +629,30 @@ extern int other_update_node_config (int index)
  * IN state  - state to update to
  * RETURN SLURM_SUCCESS on success || SLURM_ERROR else wise
  */
-extern int other_update_node_state (struct node_record *node_ptr)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_update_node_state(struct node_record *node_ptr) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.update_node_state))(node_ptr);
+    return (*(ops.update_node_state))(node_ptr);
 }
 
 /*
  * Note reconfiguration or change in partition configuration
  */
-extern int other_reconfigure (void)
-{
-	if (other_select_init() < 0)
-		return SLURM_ERROR;
+extern int other_reconfigure(void) {
+    if (other_select_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.reconfigure))();
+    return (*(ops.reconfigure))();
 }
 
-extern bitstr_t * other_resv_test(resv_desc_msg_t *resv_desc_ptr,
-				  uint32_t node_cnt,
-				  bitstr_t *avail_bitmap,
-				  bitstr_t **core_bitmap)
-{
-	if (other_select_init() < 0)
-		return NULL;
+extern bitstr_t *other_resv_test(resv_desc_msg_t *resv_desc_ptr,
+                                 uint32_t node_cnt,
+                                 bitstr_t *avail_bitmap,
+                                 bitstr_t **core_bitmap) {
+    if (other_select_init() < 0)
+        return NULL;
 
-	return (*(ops.resv_test))(resv_desc_ptr, node_cnt,
-				  avail_bitmap, core_bitmap);
+    return (*(ops.resv_test))(resv_desc_ptr, node_cnt,
+                              avail_bitmap, core_bitmap);
 }

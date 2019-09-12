@@ -62,231 +62,228 @@ static char *_remove_path_slashes(char *);
  * These options should mirror those used with "sbatch" (parsed in
  * _batch_path_check found in src/slurmd/common/fname.c)
  */
-extern fname_t *fname_create(srun_job_t *job, char *format, int task_count)
-{
-	unsigned int wid     = 0;
-	unsigned long int taskid  = 0;
-	fname_t *fname = NULL;
-	char *p, *q, *name, *tmp_env, *tmp_perc;
-	uint32_t array_job_id  = job->jobid;
-	uint32_t array_task_id = NO_VAL;
-	char *esc;
-	char *end;
-	bool double_p = false;
+extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
+    unsigned int wid = 0;
+    unsigned long int taskid = 0;
+    fname_t *fname = NULL;
+    char *p, *q, *name, *tmp_env, *tmp_perc;
+    uint32_t array_job_id = job->jobid;
+    uint32_t array_task_id = NO_VAL;
+    char *esc;
+    char *end;
+    bool double_p = false;
 
-	fname = xmalloc(sizeof(*fname));
-	fname->type = IO_ALL;
-	fname->name = NULL;
-	fname->taskid = -1;
+    fname = xmalloc(sizeof(*fname));
+    fname->type = IO_ALL;
+    fname->name = NULL;
+    fname->taskid = -1;
 
-	/* Handle special  cases
-	 */
+    /* Handle special  cases
+     */
 
-	if ((format == NULL)
-	    || (xstrncasecmp(format, "all", (size_t) 3) == 0)
-	    || (xstrncmp(format, "-", (size_t) 1) == 0)       ) {
-		/* "all" explicitly sets IO_ALL and is the default */
-		return fname;
-	}
+    if ((format == NULL)
+        || (xstrncasecmp(format, "all", (size_t) 3) == 0)
+        || (xstrncmp(format, "-", (size_t) 1) == 0)) {
+        /* "all" explicitly sets IO_ALL and is the default */
+        return fname;
+    }
 
-	if (xstrcasecmp(format, "none") == 0) {
-		/*
-		 * Set type to IO_PER_TASK so that /dev/null is opened
-		 *  on every node, which should be more efficient
-		 */
-		fname->type = IO_PER_TASK;
-		fname->name = xstrdup ("/dev/null");
-		return fname;
-	}
+    if (xstrcasecmp(format, "none") == 0) {
+        /*
+         * Set type to IO_PER_TASK so that /dev/null is opened
+         *  on every node, which should be more efficient
+         */
+        fname->type = IO_PER_TASK;
+        fname->name = xstrdup("/dev/null");
+        return fname;
+    }
 
-	taskid = strtoul(format, &p, 10);
-	if ((*p == '\0') && ((int) taskid < task_count)) {
-		fname->type   = IO_ONE;
-		fname->taskid = (uint32_t) taskid;
-		/* Set the name string to pass to slurmd
-		 *  to the taskid requested, so that tasks with
-		 *  no IO can open /dev/null.
-		 */
-		fname->name   = xstrdup (format);
-		return fname;
-	}
+    taskid = strtoul(format, &p, 10);
+    if ((*p == '\0') && ((int) taskid < task_count)) {
+        fname->type = IO_ONE;
+        fname->taskid = (uint32_t) taskid;
+        /* Set the name string to pass to slurmd
+         *  to the taskid requested, so that tasks with
+         *  no IO can open /dev/null.
+         */
+        fname->name = xstrdup(format);
+        return fname;
+    }
 
-	/* Check if path has escaped characters
-	 * in it and prevent them to be expanded.
-	 */
-	esc = _remove_path_slashes(format);
-	if (esc) {
-		fname->name = esc;
-		return fname;
-	}
+    /* Check if path has escaped characters
+     * in it and prevent them to be expanded.
+     */
+    esc = _remove_path_slashes(format);
+    if (esc) {
+        fname->name = esc;
+        return fname;
+    }
 
-	tmp_perc = NULL;
-	name = NULL;
-	q = p = format;
-	while (*p != '\0') {
-		if (*p == '%') {
-			if (*(p+1) == '%') {
-				p++;
-				double_p = true;
-				xmemcat(name, q, p);
-				/* Save the removed % just in case */
-				xstrcat(tmp_perc, "%");
-				q = ++p;
-				continue;
-			}
-			if (isdigit(*(++p))) {
-				unsigned long in_width = 0;
-				xmemcat(name, q, p - 1);
-				if ((in_width = strtoul(p, &p, 10)) > MAX_WIDTH)
-					wid = MAX_WIDTH;
-				else
-					wid = in_width;
-				q = p - 1;
-				if (*p == '\0')
-					break;
-			}
+    tmp_perc = NULL;
+    name = NULL;
+    q = p = format;
+    while (*p != '\0') {
+        if (*p == '%') {
+            if (*(p + 1) == '%') {
+                p++;
+                double_p = true;
+                xmemcat(name, q, p);
+                /* Save the removed % just in case */
+                xstrcat(tmp_perc, "%");
+                q = ++p;
+                continue;
+            }
+            if (isdigit(*(++p))) {
+                unsigned long in_width = 0;
+                xmemcat(name, q, p - 1);
+                if ((in_width = strtoul(p, &p, 10)) > MAX_WIDTH)
+                    wid = MAX_WIDTH;
+                else
+                    wid = in_width;
+                q = p - 1;
+                if (*p == '\0')
+                    break;
+            }
 
-			switch (*p) {
-			case 'a':  /* '%a' => array task id   */
-				tmp_env = getenv("SLURM_ARRAY_TASK_ID");
-				if (tmp_env)
-					array_task_id = strtoul(tmp_env, &end,
-								10);
-				xmemcat(name, q, p - 1);
-				xstrfmtcat(name, "%0*u", wid,
-					   array_task_id);
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				q = ++p;
-				break;
-			case 'A':  /* '%A' => array master job id */
-				tmp_env = getenv("SLURM_ARRAY_JOB_ID");
-				if (tmp_env)
-					array_job_id = strtoul(tmp_env, &end,
-							       10);
-				xmemcat(name, q, p - 1);
-				xstrfmtcat(name, "%0*u", wid,
-					   array_job_id);
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				q = ++p;
-				break;
-			case 'J':  /* '%J' => "jobid.stepid" */
-			case 'j':  /* '%j' => jobid          */
-				xmemcat(name, q, p - 1);
-				xstrfmtcat(name, "%0*d", wid,
-					   job->jobid);
+            switch (*p) {
+                case 'a':  /* '%a' => array task id   */
+                    tmp_env = getenv("SLURM_ARRAY_TASK_ID");
+                    if (tmp_env)
+                        array_task_id = strtoul(tmp_env, &end,
+                                                10);
+                    xmemcat(name, q, p - 1);
+                    xstrfmtcat(name, "%0*u", wid,
+                               array_task_id);
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    q = ++p;
+                    break;
+                case 'A':  /* '%A' => array master job id */
+                    tmp_env = getenv("SLURM_ARRAY_JOB_ID");
+                    if (tmp_env)
+                        array_job_id = strtoul(tmp_env, &end,
+                                               10);
+                    xmemcat(name, q, p - 1);
+                    xstrfmtcat(name, "%0*u", wid,
+                               array_job_id);
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    q = ++p;
+                    break;
+                case 'J':  /* '%J' => "jobid.stepid" */
+                case 'j':  /* '%j' => jobid          */
+                    xmemcat(name, q, p - 1);
+                    xstrfmtcat(name, "%0*d", wid,
+                               job->jobid);
 
-				if ((*p == 'J') && (job->stepid !=
-						    NO_VAL))
-					xstrfmtcat(name, ".%d",
-						   job->stepid);
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				q = ++p;
-				break;
-			case 's':  /* '%s' => stepid         */
-				xmemcat(name, q, p - 1);
-				xstrfmtcat(name, "%0*d", wid,
-					   job->stepid);
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				q = ++p;
-				break;
-			case 'u':  /* '%u' => username       */
-			case 't':  /* '%t' => taskid         */
-			case 'n':  /* '%n' => nodeid         */
-			case 'N':  /* '%N' => node name      */
-				fname->type = IO_PER_TASK;
-				if (double_p)
-					xstrcat(name, tmp_perc);
+                    if ((*p == 'J') && (job->stepid !=
+                                        NO_VAL))
+                        xstrfmtcat(name, ".%d",
+                                   job->stepid);
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    q = ++p;
+                    break;
+                case 's':  /* '%s' => stepid         */
+                    xmemcat(name, q, p - 1);
+                    xstrfmtcat(name, "%0*d", wid,
+                               job->stepid);
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    q = ++p;
+                    break;
+                case 'u':  /* '%u' => username       */
+                case 't':  /* '%t' => taskid         */
+                case 'n':  /* '%n' => nodeid         */
+                case 'N':  /* '%N' => node name      */
+                    fname->type = IO_PER_TASK;
+                    if (double_p)
+                        xstrcat(name, tmp_perc);
 
-				if (wid) { /* Put the width back and
+                    if (wid) { /* Put the width back and
 					    * the removed %, so the
 					    * slurmstepd can remove it */
-					xstrcat(name,
-						xstrdup_printf("%%%u", wid));
+                        xstrcat(name,
+                                xstrdup_printf("%%%u", wid));
 
-				} else {
-					xmemcat(name, q, p);
-				}
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				q = p;
-				p++;
-				break;
-			case 'x':
-				xmemcat(name, q, p - 1);
-				xstrfmtcat(name, "%s", getenv("SLURM_JOB_NAME"));
-				q = ++p;
-				break;
-			default:
-				break;
-			}
+                    } else {
+                        xmemcat(name, q, p);
+                    }
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    q = p;
+                    p++;
+                    break;
+                case 'x':
+                    xmemcat(name, q, p - 1);
+                    xstrfmtcat(name, "%s", getenv("SLURM_JOB_NAME"));
+                    q = ++p;
+                    break;
+                default:
+                    break;
+            }
 
-			double_p = false;
-		} else if (double_p) {
-			/* special case when there is a
-			 * double percent and a t, n, or N
-			 */
-			double_p = false;
+            double_p = false;
+        } else if (double_p) {
+            /* special case when there is a
+             * double percent and a t, n, or N
+             */
+            double_p = false;
 
-			if (isdigit(*p))
-				wid = strtoul(p, &p, 10);
+            if (isdigit(*p))
+                wid = strtoul(p, &p, 10);
 
-			switch (*p) {
-			case 'u':  /* '%u' => username       */
-			case 't':  /* '%t' => taskid         */
-			case 'n':  /* '%n' => nodeid         */
-			case 'N':  /* '%N' => node name      */
-				fname->type = IO_PER_TASK;
-				/* Put back all the removed % */
-				xstrcat(name, tmp_perc);
-				if (wid) { /* Put the width back and
+            switch (*p) {
+                case 'u':  /* '%u' => username       */
+                case 't':  /* '%t' => taskid         */
+                case 'n':  /* '%n' => nodeid         */
+                case 'N':  /* '%N' => node name      */
+                    fname->type = IO_PER_TASK;
+                    /* Put back all the removed % */
+                    xstrcat(name, tmp_perc);
+                    if (wid) { /* Put the width back and
 					    * the removed %, so the
 					    * step can remove it
 					    */
-					xstrcat(name,
-						xstrdup_printf("%u", wid));
-					q = p;
-				}
-				xfree(tmp_perc);
-				tmp_perc = NULL;
-				p++;
-				break;
-			default:
-				break;
-			}
+                        xstrcat(name,
+                                xstrdup_printf("%u", wid));
+                        q = p;
+                    }
+                    xfree(tmp_perc);
+                    tmp_perc = NULL;
+                    p++;
+                    break;
+                default:
+                    break;
+            }
 
 
-		} else
-			p++;
-		wid = 0;
-	}
+        } else
+            p++;
+        wid = 0;
+    }
 
-	if (q != p)
-		xmemcat(name, q, p);
+    if (q != p)
+        xmemcat(name, q, p);
 
-	xfree(tmp_perc);
-	fname->name = name;
-	return fname;
+    xfree(tmp_perc);
+    fname->name = name;
+    return fname;
 }
 
 void
-fname_destroy(fname_t *f)
-{
-	if (f->name)
-		xfree(f->name);
-	xfree(f);
+fname_destroy(fname_t *f) {
+    if (f->name)
+        xfree(f->name);
+    xfree(f);
 }
 
 char *
-fname_remote_string (fname_t *f)
-{
-	if ((f->type == IO_PER_TASK) || (f->type == IO_ONE))
-		return (xstrdup (f->name));
+fname_remote_string(fname_t *f) {
+    if ((f->type == IO_PER_TASK) || (f->type == IO_ONE))
+        return (xstrdup(f->name));
 
-	return (NULL);
+    return (NULL);
 }
 
 /* remove_path_slashes()
@@ -296,33 +293,32 @@ fname_remote_string (fname_t *f)
  * translate escaped characters.
  */
 static char *
-_remove_path_slashes(char *p)
-{
-	char *buf;
-	bool t;
-	int i;
+_remove_path_slashes(char *p) {
+    char *buf;
+    bool t;
+    int i;
 
-	if (p == NULL)
-		return NULL;
+    if (p == NULL)
+        return NULL;
 
-	buf = xmalloc(strlen(p) + 1);
-	t = false;
-	i = 0;
+    buf = xmalloc(strlen(p) + 1);
+    t = false;
+    i = 0;
 
-	while (*p) {
-		if (*p == '\\') {
-			t = true;
-			++p;
-			continue;
-		}
-		buf[i] = *p;
-		++i;
-		++p;
-	}
+    while (*p) {
+        if (*p == '\\') {
+            t = true;
+            ++p;
+            continue;
+        }
+        buf[i] = *p;
+        ++i;
+        ++p;
+    }
 
-	if (t == false) {
-		xfree(buf);
-		return NULL;
-	}
-	return buf;
+    if (t == false) {
+        xfree(buf);
+        return NULL;
+    }
+    return buf;
 }

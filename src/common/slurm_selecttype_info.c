@@ -42,146 +42,145 @@
 #include "src/common/xstring.h"
 #include "src/common/xassert.h"
 #include "src/common/xmalloc.h"
+
 /*
  * Parse a comma separated list of SelectType Parameters
  *
  * Return SLURM_SUCCESS on success, or SLURM_ERROR otherwise
  */
-int parse_select_type_param(char *select_type_parameters, uint16_t *param)
-{
-	int rc = SLURM_SUCCESS;
-	char *str_parameters, *st_str = NULL;
-	int param_cnt = 0;
+int parse_select_type_param(char *select_type_parameters, uint16_t *param) {
+    int rc = SLURM_SUCCESS;
+    char *str_parameters, *st_str = NULL;
+    int param_cnt = 0;
 
-	*param = 0;
-	st_str = xstrdup(select_type_parameters);
-	str_parameters = strtok(st_str,",");
-	while (str_parameters) {
-		if (!xstrcasecmp(str_parameters, "CR_Socket")) {
-			*param |= CR_SOCKET;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_Socket_Memory")) {
-			*param |= CR_SOCKET;
-			*param |= CR_MEMORY;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_Core")) {
-			*param |= CR_CORE;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_Core_Memory")) {
-			*param |= CR_CORE;
-			*param |= CR_MEMORY;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_Memory")) {
-			*param |= CR_MEMORY;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_CPU")) {
-			*param |= CR_CPU;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "CR_CPU_Memory")) {
-			*param |= CR_CPU;
-			*param |= CR_MEMORY;
-			param_cnt++;
-		} else if (!xstrcasecmp(str_parameters, "other_cons_res")) {
-			*param |= CR_OTHER_CONS_RES;
-		} else if (!xstrcasecmp(str_parameters, "other_cons_tres")) {
-			*param |= CR_OTHER_CONS_TRES;
-		} else if (!xstrcasecmp(str_parameters,
-				       "CR_ALLOCATE_FULL_SOCKET")) {
-			verbose("CR_ALLOCATE_FULL_SOCKET is deprecated.  "
-				"It is now the default for CR_SOCKET*.  "
-				"It is safe to remove it "
-				"from your slurm.conf");
-		} else if (!xstrcasecmp(str_parameters,
-				       "CR_ONE_TASK_PER_CORE")) {
-			*param |= CR_ONE_TASK_PER_CORE;
-		} else if (!xstrcasecmp(str_parameters,
-				       "CR_CORE_DEFAULT_DIST_BLOCK")) {
-			*param |= CR_CORE_DEFAULT_DIST_BLOCK;
-		} else if (!xstrcasecmp(str_parameters, "CR_LLN")) {
-			*param |= CR_LLN;
-		} else if (!xstrcasecmp(str_parameters, "CR_PACK_NODES")) {
-			*param |= CR_PACK_NODES;
-		} else {
-			error("Bad SelectTypeParameter: %s", str_parameters);
-			rc = SLURM_ERROR;
-			xfree(st_str);
-			return rc;
-		}
+    *param = 0;
+    st_str = xstrdup(select_type_parameters);
+    str_parameters = strtok(st_str, ",");
+    while (str_parameters) {
+        if (!xstrcasecmp(str_parameters, "CR_Socket")) {
+            *param |= CR_SOCKET;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_Socket_Memory")) {
+            *param |= CR_SOCKET;
+            *param |= CR_MEMORY;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_Core")) {
+            *param |= CR_CORE;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_Core_Memory")) {
+            *param |= CR_CORE;
+            *param |= CR_MEMORY;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_Memory")) {
+            *param |= CR_MEMORY;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_CPU")) {
+            *param |= CR_CPU;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "CR_CPU_Memory")) {
+            *param |= CR_CPU;
+            *param |= CR_MEMORY;
+            param_cnt++;
+        } else if (!xstrcasecmp(str_parameters, "other_cons_res")) {
+            *param |= CR_OTHER_CONS_RES;
+        } else if (!xstrcasecmp(str_parameters, "other_cons_tres")) {
+            *param |= CR_OTHER_CONS_TRES;
+        } else if (!xstrcasecmp(str_parameters,
+                                "CR_ALLOCATE_FULL_SOCKET")) {
+            verbose("CR_ALLOCATE_FULL_SOCKET is deprecated.  "
+                    "It is now the default for CR_SOCKET*.  "
+                    "It is safe to remove it "
+                    "from your slurm.conf");
+        } else if (!xstrcasecmp(str_parameters,
+                                "CR_ONE_TASK_PER_CORE")) {
+            *param |= CR_ONE_TASK_PER_CORE;
+        } else if (!xstrcasecmp(str_parameters,
+                                "CR_CORE_DEFAULT_DIST_BLOCK")) {
+            *param |= CR_CORE_DEFAULT_DIST_BLOCK;
+        } else if (!xstrcasecmp(str_parameters, "CR_LLN")) {
+            *param |= CR_LLN;
+        } else if (!xstrcasecmp(str_parameters, "CR_PACK_NODES")) {
+            *param |= CR_PACK_NODES;
+        } else {
+            error("Bad SelectTypeParameter: %s", str_parameters);
+            rc = SLURM_ERROR;
+            xfree(st_str);
+            return rc;
+        }
 
-		if ((*param & CR_CPU) && (*param & CR_ONE_TASK_PER_CORE)) {
-			error("CR_ONE_TASK_PER_CORE is not compatible with CR_CPU*, please change to use CR_CORE* instead.");
-			rc = SLURM_ERROR;
-			xfree(st_str);
-			return rc;
-		}
+        if ((*param & CR_CPU) && (*param & CR_ONE_TASK_PER_CORE)) {
+            error("CR_ONE_TASK_PER_CORE is not compatible with CR_CPU*, please change to use CR_CORE* instead.");
+            rc = SLURM_ERROR;
+            xfree(st_str);
+            return rc;
+        }
 
-		str_parameters = strtok(NULL,",");
-	}
-	xfree(st_str);
+        str_parameters = strtok(NULL, ",");
+    }
+    xfree(st_str);
 
-	if (param_cnt > 1)
-		rc = SLURM_ERROR;
+    if (param_cnt > 1)
+        rc = SLURM_ERROR;
 
-	return rc;
+    return rc;
 }
 
 /* Convert SelectTypeParameter to equivalent string
  * NOTE: Not reentrant */
-extern char *select_type_param_string(uint16_t select_type_param)
-{
-	static char select_str[1024];
+extern char *select_type_param_string(uint16_t select_type_param) {
+    static char select_str[1024];
 
-	select_str[0] = '\0';
-	if ((select_type_param & CR_CPU) &&
-	    (select_type_param & CR_MEMORY))
-		strcat(select_str, "CR_CPU_MEMORY");
-	else if ((select_type_param & CR_CORE) &&
-		 (select_type_param & CR_MEMORY))
-		strcat(select_str, "CR_CORE_MEMORY");
-	else if ((select_type_param & CR_SOCKET) &&
-		 (select_type_param & CR_MEMORY))
-		strcat(select_str, "CR_SOCKET_MEMORY");
-	else if (select_type_param & CR_CPU)
-		strcat(select_str, "CR_CPU");
-	else if (select_type_param & CR_CORE)
-		strcat(select_str, "CR_CORE");
-	else if (select_type_param & CR_SOCKET)
-		strcat(select_str, "CR_SOCKET");
-	else if (select_type_param & CR_MEMORY)
-		strcat(select_str, "CR_MEMORY");
+    select_str[0] = '\0';
+    if ((select_type_param & CR_CPU) &&
+        (select_type_param & CR_MEMORY))
+        strcat(select_str, "CR_CPU_MEMORY");
+    else if ((select_type_param & CR_CORE) &&
+             (select_type_param & CR_MEMORY))
+        strcat(select_str, "CR_CORE_MEMORY");
+    else if ((select_type_param & CR_SOCKET) &&
+             (select_type_param & CR_MEMORY))
+        strcat(select_str, "CR_SOCKET_MEMORY");
+    else if (select_type_param & CR_CPU)
+        strcat(select_str, "CR_CPU");
+    else if (select_type_param & CR_CORE)
+        strcat(select_str, "CR_CORE");
+    else if (select_type_param & CR_SOCKET)
+        strcat(select_str, "CR_SOCKET");
+    else if (select_type_param & CR_MEMORY)
+        strcat(select_str, "CR_MEMORY");
 
-	if (select_type_param & CR_OTHER_CONS_RES) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "OTHER_CONS_RES");
-	}
-	if (select_type_param & CR_OTHER_CONS_TRES) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "OTHER_CONS_TRES");
-	}
-	if (select_type_param & CR_ONE_TASK_PER_CORE) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "CR_ONE_TASK_PER_CORE");
-	}
-	if (select_type_param & CR_CORE_DEFAULT_DIST_BLOCK) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "CR_CORE_DEFAULT_DIST_BLOCK");
-	}
-	if (select_type_param & CR_LLN) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "CR_LLN");
-	}
-	if (select_type_param & CR_PACK_NODES) {
-		if (select_str[0])
-			strcat(select_str, ",");
-		strcat(select_str, "CR_PACK_NODES");
-	}
-	if (select_str[0] == '\0')
-		strcat(select_str, "NONE");
+    if (select_type_param & CR_OTHER_CONS_RES) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "OTHER_CONS_RES");
+    }
+    if (select_type_param & CR_OTHER_CONS_TRES) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "OTHER_CONS_TRES");
+    }
+    if (select_type_param & CR_ONE_TASK_PER_CORE) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "CR_ONE_TASK_PER_CORE");
+    }
+    if (select_type_param & CR_CORE_DEFAULT_DIST_BLOCK) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "CR_CORE_DEFAULT_DIST_BLOCK");
+    }
+    if (select_type_param & CR_LLN) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "CR_LLN");
+    }
+    if (select_type_param & CR_PACK_NODES) {
+        if (select_str[0])
+            strcat(select_str, ",");
+        strcat(select_str, "CR_PACK_NODES");
+    }
+    if (select_str[0] == '\0')
+        strcat(select_str, "NONE");
 
-	return select_str;
+    return select_str;
 }

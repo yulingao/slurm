@@ -61,147 +61,149 @@
 
 /* Collection of data for printing reports. Like data is combined here */
 typedef struct {
-	uint16_t port;
-	uint32_t node_state;
+    uint16_t port;
+    uint32_t node_state;
 
-	uint32_t nodes_alloc;
-	uint32_t nodes_idle;
-	uint32_t nodes_other;
-	uint32_t nodes_total;
+    uint32_t nodes_alloc;
+    uint32_t nodes_idle;
+    uint32_t nodes_other;
+    uint32_t nodes_total;
 
-	uint32_t cpus_alloc;
-	uint32_t cpus_idle;
-	uint32_t cpus_other;
-	uint32_t cpus_total;
+    uint32_t cpus_alloc;
+    uint32_t cpus_idle;
+    uint32_t cpus_other;
+    uint32_t cpus_total;
 
-	uint32_t min_cpus;
-	uint32_t max_cpus;
-	uint32_t min_sockets;
-	uint32_t max_sockets;
-	uint32_t min_cores;
-	uint32_t max_cores;
-	uint32_t min_threads;
-	uint32_t max_threads;
-	uint32_t min_disk;
-	uint32_t max_disk;
-	uint64_t min_mem;
-	uint64_t max_mem;
-	uint32_t min_weight;
-	uint32_t max_weight;
-	uint32_t min_cpu_load;
-	uint32_t max_cpu_load;
-	uint64_t min_free_mem;
-	uint64_t max_free_mem;
+    uint32_t min_cpus;
+    uint32_t max_cpus;
+    uint32_t min_sockets;
+    uint32_t max_sockets;
+    uint32_t min_cores;
+    uint32_t max_cores;
+    uint32_t min_threads;
+    uint32_t max_threads;
+    uint32_t min_disk;
+    uint32_t max_disk;
+    uint64_t min_mem;
+    uint64_t max_mem;
+    uint32_t min_weight;
+    uint32_t max_weight;
+    uint32_t min_cpu_load;
+    uint32_t max_cpu_load;
+    uint64_t min_free_mem;
+    uint64_t max_free_mem;
 
-	uint32_t max_cpus_per_node;
-	uint64_t alloc_memory;
+    uint32_t max_cpus_per_node;
+    uint64_t alloc_memory;
 
-	char *features;
-	char *features_act;
-	char *gres;
-	char *gres_used;
-	char *cluster_name;
-	char *reason;
-	time_t reason_time;
-	uint32_t reason_uid;
-	char *version;
+    char *features;
+    char *features_act;
+    char *gres;
+    char *gres_used;
+    char *cluster_name;
+    char *reason;
+    time_t reason_time;
+    uint32_t reason_uid;
+    char *version;
 
-	hostlist_t hostnames;
-	hostlist_t node_addr;
-	hostlist_t nodes;
+    hostlist_t hostnames;
+    hostlist_t node_addr;
+    hostlist_t nodes;
 
-	/* part_info contains partition, avail, max_time, job_size,
-	 * root, share/oversubscribe, groups, priority */
-	partition_info_t* part_info;
-	uint16_t part_inx;
+    /* part_info contains partition, avail, max_time, job_size,
+     * root, share/oversubscribe, groups, priority */
+    partition_info_t *part_info;
+    uint16_t part_inx;
 } sinfo_data_t;
 
 /* Identify what fields must match for a node's information to be
  * combined into a single sinfo_data entry based upon output format */
 struct sinfo_match_flags {
-	bool alloc_mem_flag;
-	bool avail_flag;
-	bool cpus_flag;
-	bool sockets_flag;
-	bool cores_flag;
-	bool threads_flag;
-	bool sct_flag;
-	bool disk_flag;
-	bool features_flag;
-	bool features_act_flag;
-	bool groups_flag;
-	bool gres_flag;
-	bool gres_used_flag;
-	bool hostnames_flag;
-	bool job_size_flag;
-	bool default_time_flag;
-	bool max_time_flag;
-	bool memory_flag;
-	bool node_addr_flag;
-	bool partition_flag;
-	bool port_flag;
-	bool preempt_mode_flag;
-	bool priority_job_factor_flag;
-	bool priority_tier_flag;
-	bool reason_flag;
-	bool root_flag;
-	bool oversubscribe_flag;
-	bool state_flag;
-	bool weight_flag;
-	bool reason_timestamp_flag;
-	bool reason_user_flag;
-	bool cpu_load_flag;
-	bool free_mem_flag;
-	bool max_cpus_per_node_flag;
-	bool version_flag;
+    bool alloc_mem_flag;
+    bool avail_flag;
+    bool cpus_flag;
+    bool sockets_flag;
+    bool cores_flag;
+    bool threads_flag;
+    bool sct_flag;
+    bool disk_flag;
+    bool features_flag;
+    bool features_act_flag;
+    bool groups_flag;
+    bool gres_flag;
+    bool gres_used_flag;
+    bool hostnames_flag;
+    bool job_size_flag;
+    bool default_time_flag;
+    bool max_time_flag;
+    bool memory_flag;
+    bool node_addr_flag;
+    bool partition_flag;
+    bool port_flag;
+    bool preempt_mode_flag;
+    bool priority_job_factor_flag;
+    bool priority_tier_flag;
+    bool reason_flag;
+    bool root_flag;
+    bool oversubscribe_flag;
+    bool state_flag;
+    bool weight_flag;
+    bool reason_timestamp_flag;
+    bool reason_user_flag;
+    bool cpu_load_flag;
+    bool free_mem_flag;
+    bool max_cpus_per_node_flag;
+    bool version_flag;
 };
 
 /* Input parameters */
 struct sinfo_parameters {
-	bool all_flag;
-	List clusters;
-	uint32_t cluster_flags;
-	uint32_t convert_flags;
-	bool dead_nodes;
-	bool def_format;
-	bool exact_match;
-	bool federation_flag;
-	bool filtering;
-	bool local;
-	bool long_output;
-	bool no_header;
-	bool node_field_flag;
-	bool node_flag;
-	bool node_name_single;
-	bool part_field_flag;
-	bool reservation_flag;
-	bool responding_nodes;
-	bool list_reasons;
-	bool summarize;
-	struct sinfo_match_flags match_flags;
+    bool all_flag;
+    List clusters;
+    uint32_t cluster_flags;
+    uint32_t convert_flags;
+    bool dead_nodes;
+    bool def_format;
+    bool exact_match;
+    bool federation_flag;
+    bool filtering;
+    bool local;
+    bool long_output;
+    bool no_header;
+    bool node_field_flag;
+    bool node_flag;
+    bool node_name_single;
+    bool part_field_flag;
+    bool reservation_flag;
+    bool responding_nodes;
+    bool list_reasons;
+    bool summarize;
+    struct sinfo_match_flags match_flags;
 
-	char* format;
-	char* nodes;
-	char* partition;
-	char* sort;
-	char* states;
+    char *format;
+    char *nodes;
+    char *partition;
+    char *sort;
+    char *states;
 
-	int iterate;
-	int node_field_size;
-	int part_field_size;
-	int verbose;
+    int iterate;
+    int node_field_size;
+    int part_field_size;
+    int verbose;
 
-	List  part_list;
-	List  format_list;
-	List  state_list;
+    List part_list;
+    List format_list;
+    List state_list;
 
-	slurmdb_federation_rec_t *fed;
+    slurmdb_federation_rec_t *fed;
 };
 
 extern struct sinfo_parameters params;
 
-extern void parse_command_line( int argc, char* *argv );
-extern int  parse_state( char* str, uint16_t* states );
-extern void sort_sinfo_list( List sinfo_list );
+extern void parse_command_line(int argc, char **argv);
+
+extern int parse_state(char *str, uint16_t *states);
+
+extern void sort_sinfo_list(List sinfo_list);
 
 #endif

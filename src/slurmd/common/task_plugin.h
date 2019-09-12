@@ -53,7 +53,7 @@ typedef cpuset_t cpu_set_t;
  *
  * RET - slurm error code
  */
-extern int slurmd_task_init( void );
+extern int slurmd_task_init(void);
 
 /*
  * Terminate the task plugin, free memory.
@@ -81,7 +81,7 @@ extern int task_g_slurmd_batch_request(batch_job_launch_msg_t *req);
  * RET - slurm error code
  */
 extern int task_g_slurmd_launch_request(launch_tasks_request_msg_t *req,
-					uint32_t node_id);
+                                        uint32_t node_id);
 
 /*
  * Slurmd is reserving resources for the task.
@@ -89,7 +89,7 @@ extern int task_g_slurmd_launch_request(launch_tasks_request_msg_t *req,
  * RET - slurm error code
  */
 extern int task_g_slurmd_reserve_resources(launch_tasks_request_msg_t *req,
-					   uint32_t node_id );
+                                           uint32_t node_id);
 
 /*
  * Slurmd is suspending a job.
@@ -140,7 +140,7 @@ extern int task_g_pre_launch(stepd_step_rec_t *job);
  * RET - slurm error code
  */
 extern int task_g_post_term(stepd_step_rec_t *job,
-			    stepd_step_task_info_t *task);
+                            stepd_step_task_info_t *task);
 
 /*
  * Note that a step has terminated.
@@ -158,9 +158,10 @@ extern int task_g_add_pid(pid_t pid);
 
 
 extern void task_slurm_chkaffinity(cpu_set_t *mask, stepd_step_rec_t *job,
-				   int statval);
+                                   int statval);
+
 extern char *task_cpuset_to_str(const cpu_set_t *mask, char *str);
 
-extern int task_str_to_cpuset(cpu_set_t *mask, const char* str);
+extern int task_str_to_cpuset(cpu_set_t *mask, const char *str);
 
 #endif /* _SLURMD_TASK_PLUGIN_H_ */

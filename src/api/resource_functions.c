@@ -47,12 +47,11 @@
  * IN:  res_list List of char *
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_res_add(void *db_conn, List res_list)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+extern int slurmdb_res_add(void *db_conn, List res_list) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_add_res(db_conn, db_api_uid, res_list);
+    return acct_storage_g_add_res(db_conn, db_api_uid, res_list);
 }
 
 /*
@@ -62,12 +61,11 @@ extern int slurmdb_res_add(void *db_conn, List res_list)
  * note List needs to be freed with slurm_list_destroy() when called
  */
 extern List slurmdb_res_get(void *db_conn,
-			    slurmdb_res_cond_t *res_cond)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                            slurmdb_res_cond_t *res_cond) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_get_res(db_conn, db_api_uid, res_cond);
+    return acct_storage_g_get_res(db_conn, db_api_uid, res_cond);
 }
 
 /*
@@ -78,13 +76,12 @@ extern List slurmdb_res_get(void *db_conn,
  * note List needs to be freed with slurm_list_destroy() when called
  */
 extern List slurmdb_res_modify(void *db_conn,
-			       slurmdb_res_cond_t *res_cond,
-			       slurmdb_res_rec_t *res)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                               slurmdb_res_cond_t *res_cond,
+                               slurmdb_res_rec_t *res) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_modify_res(db_conn, db_api_uid, res_cond, res);
+    return acct_storage_g_modify_res(db_conn, db_api_uid, res_cond, res);
 }
 
 /*
@@ -94,10 +91,9 @@ extern List slurmdb_res_modify(void *db_conn,
  * note List needs to be freed with slurm_list_destroy() when called
  */
 extern List slurmdb_res_remove(void *db_conn,
-			       slurmdb_res_cond_t *res_cond)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                               slurmdb_res_cond_t *res_cond) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_remove_res(db_conn, db_api_uid, res_cond);
+    return acct_storage_g_remove_res(db_conn, db_api_uid, res_cond);
 }

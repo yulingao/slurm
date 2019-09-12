@@ -44,118 +44,114 @@
 
 #include "fair_tree.h"
 
-static int  _ft_decay_apply_new_usage(struct job_record *job, time_t *start);
+static int _ft_decay_apply_new_usage(struct job_record *job, time_t *start);
+
 static void _apply_priority_fs(void);
 
 /* Fair Tree code called from the decay thread loop */
-extern void fair_tree_decay(List jobs, time_t start)
-{
-	slurmctld_lock_t job_write_lock =
-		{ NO_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK, NO_LOCK };
-	assoc_mgr_lock_t locks =
-		{ WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
-		  NO_LOCK, NO_LOCK, NO_LOCK };
+extern void fair_tree_decay(List jobs, time_t start) {
+    slurmctld_lock_t job_write_lock =
+            {NO_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK, NO_LOCK};
+    assoc_mgr_lock_t locks =
+            {WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
+             NO_LOCK, NO_LOCK, NO_LOCK};
 
-	/* apply decayed usage */
-	lock_slurmctld(job_write_lock);
-	list_for_each(jobs, (ListForF) _ft_decay_apply_new_usage, &start);
-	unlock_slurmctld(job_write_lock);
+    /* apply decayed usage */
+    lock_slurmctld(job_write_lock);
+    list_for_each(jobs, (ListForF) _ft_decay_apply_new_usage, &start);
+    unlock_slurmctld(job_write_lock);
 
-	/* calculate fs factor for associations */
-	assoc_mgr_lock(&locks);
-	_apply_priority_fs();
-	assoc_mgr_unlock(&locks);
+    /* calculate fs factor for associations */
+    assoc_mgr_lock(&locks);
+    _apply_priority_fs();
+    assoc_mgr_unlock(&locks);
 
-	/* assign job priorities */
-	lock_slurmctld(job_write_lock);
-	list_for_each(jobs, (ListForF) decay_apply_weighted_factors, &start);
-	unlock_slurmctld(job_write_lock);
+    /* assign job priorities */
+    lock_slurmctld(job_write_lock);
+    list_for_each(jobs, (ListForF) decay_apply_weighted_factors, &start);
+    unlock_slurmctld(job_write_lock);
 }
 
 
 /* In Fair Tree, usage_efctv is the normalized usage within the account */
-static void _ft_set_assoc_usage_efctv(slurmdb_assoc_rec_t *assoc)
-{
-	slurmdb_assoc_rec_t *parent = assoc->usage->fs_assoc_ptr;
+static void _ft_set_assoc_usage_efctv(slurmdb_assoc_rec_t *assoc) {
+    slurmdb_assoc_rec_t *parent = assoc->usage->fs_assoc_ptr;
 
-	if (!parent || !parent->usage->usage_raw) {
-		assoc->usage->usage_efctv = 0L;
-		return;
-	}
+    if (!parent || !parent->usage->usage_raw) {
+        assoc->usage->usage_efctv = 0L;
+        return;
+    }
 
-	assoc->usage->usage_efctv =
-		assoc->usage->usage_raw / parent->usage->usage_raw;
+    assoc->usage->usage_efctv =
+            assoc->usage->usage_raw / parent->usage->usage_raw;
 }
 
 
 /* Apply usage with decay factor. Call standard functions */
-static int _ft_decay_apply_new_usage(struct job_record *job, time_t *start)
-{
-	/* Always return SUCCESS so that list_for_each will
-	 * continue processing list of jobs. For this reason,
-	 * don't call decay_apply_new_usage() directly. */
-	decay_apply_new_usage(job, start);
+static int _ft_decay_apply_new_usage(struct job_record *job, time_t *start) {
+    /* Always return SUCCESS so that list_for_each will
+     * continue processing list of jobs. For this reason,
+     * don't call decay_apply_new_usage() directly. */
+    decay_apply_new_usage(job, start);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 
 static void _ft_debug(slurmdb_assoc_rec_t *assoc,
-		      uint16_t assoc_level, bool tied)
-{
-	int spaces;
-	char *name;
-	int tie_char_count = tied ? 1 : 0;
+                      uint16_t assoc_level, bool tied) {
+    int spaces;
+    char *name;
+    int tie_char_count = tied ? 1 : 0;
 
-	spaces = (assoc_level + 1) * 4;
-	name = assoc->user ? assoc->user : assoc->acct;
+    spaces = (assoc_level + 1) * 4;
+    name = assoc->user ? assoc->user : assoc->acct;
 
-	if (assoc->shares_raw == SLURMDB_FS_USE_PARENT) {
-		info("%*s%.*s%s (%s):  parent",
-		     spaces,
-		     "",
-		     tie_char_count,
-		     "=",
-		     name,
-		     assoc->acct);
-	} else {
-		info("%*s%.*s%s (%s):  %.20Lf",
-		     spaces,
-		     "",
-		     tie_char_count,
-		     "=",
-		     name,
-		     assoc->acct,
-		     assoc->usage->level_fs);
-	}
+    if (assoc->shares_raw == SLURMDB_FS_USE_PARENT) {
+        info("%*s%.*s%s (%s):  parent",
+             spaces,
+             "",
+             tie_char_count,
+             "=",
+             name,
+             assoc->acct);
+    } else {
+        info("%*s%.*s%s (%s):  %.20Lf",
+             spaces,
+             "",
+             tie_char_count,
+             "=",
+             name,
+             assoc->acct,
+             assoc->usage->level_fs);
+    }
 
 }
 
 
 /* Sort so that higher level_fs values are first in the list */
 static int _cmp_level_fs(const void *x,
-			 const void *y)
-{
-	/* We sort based on the following critereon:
-	 *  1. level_fs value
-	 *  2. Prioritize users over accounts (required for tie breakers when
-	 *     comparing users and accounts)
-	 */
-	slurmdb_assoc_rec_t **a = (slurmdb_assoc_rec_t **)x;
-	slurmdb_assoc_rec_t **b = (slurmdb_assoc_rec_t **)y;
+                         const void *y) {
+    /* We sort based on the following critereon:
+     *  1. level_fs value
+     *  2. Prioritize users over accounts (required for tie breakers when
+     *     comparing users and accounts)
+     */
+    slurmdb_assoc_rec_t **a = (slurmdb_assoc_rec_t **) x;
+    slurmdb_assoc_rec_t **b = (slurmdb_assoc_rec_t **) y;
 
-	/* 1. level_fs value */
-	if ((*a)->usage->level_fs != (*b)->usage->level_fs)
-		return (*a)->usage->level_fs < (*b)->usage->level_fs ? 1 : -1;
+    /* 1. level_fs value */
+    if ((*a)->usage->level_fs != (*b)->usage->level_fs)
+        return (*a)->usage->level_fs < (*b)->usage->level_fs ? 1 : -1;
 
-	/* 2. Prioritize users over accounts */
+    /* 2. Prioritize users over accounts */
 
-	/* a and b are both users or both accounts */
-	if (!(*a)->user == !(*b)->user)
-		return 0;
+    /* a and b are both users or both accounts */
+    if (!(*a)->user == !(*b)->user)
+        return 0;
 
-	/* -1 if a is user, 1 if b is user */
-	return (*a)->user ? -1 : 1;
+    /* -1 if a is user, 1 if b is user */
+    return (*a)->user ? -1 : 1;
 }
 
 
@@ -168,41 +164,40 @@ static int _cmp_level_fs(const void *x,
  * If LF > 1.0, the association is under-served.
  * If LF < 1.0, the association is over-served.
  */
-static void _calc_assoc_fs(slurmdb_assoc_rec_t *assoc)
-{
-	long double U; /* long double U != long W */
-	long double S;
+static void _calc_assoc_fs(slurmdb_assoc_rec_t *assoc) {
+    long double U; /* long double U != long W */
+    long double S;
 
-	_ft_set_assoc_usage_efctv(assoc);
+    _ft_set_assoc_usage_efctv(assoc);
 
-	/* Fair Tree doesn't use usage_norm but we will set it anyway */
-	set_assoc_usage_norm(assoc);
+    /* Fair Tree doesn't use usage_norm but we will set it anyway */
+    set_assoc_usage_norm(assoc);
 
-	U = assoc->usage->usage_efctv;
-	S = assoc->usage->shares_norm;
+    U = assoc->usage->usage_efctv;
+    S = assoc->usage->shares_norm;
 
-	/* Users marked as USE_PARENT are assigned the maximum level_fs so they
-	 * rank highest in their account, subject to ties.
-	 * Accounts marked as USE_PARENT do not use level_fs */
-	if (assoc->shares_raw == SLURMDB_FS_USE_PARENT) {
-		if (assoc->user)
-			assoc->usage->level_fs = INFINITY;
-		else
-			assoc->usage->level_fs = (long double) NO_VAL;
-		return;
-	}
+    /* Users marked as USE_PARENT are assigned the maximum level_fs so they
+     * rank highest in their account, subject to ties.
+     * Accounts marked as USE_PARENT do not use level_fs */
+    if (assoc->shares_raw == SLURMDB_FS_USE_PARENT) {
+        if (assoc->user)
+            assoc->usage->level_fs = INFINITY;
+        else
+            assoc->usage->level_fs = (long double) NO_VAL;
+        return;
+    }
 
-	/* If S is 0, the assoc is assigned the lowest possible LF value. If
-	 * U==0 && S!=0, assoc is assigned the highest possible value,
-	 * infinity.
-	 * Checking for U==0 then setting level_fs=INFINITY is not the same
-	 * since you would still have to check for S==0 then set level_fs=0.
-	 *
-	 * NOT A BUG: U can be 0. The result is infinity, a valid value. */
-	if (S == 0L)
-		assoc->usage->level_fs = 0L;
-	else
-		assoc->usage->level_fs = S / U;
+    /* If S is 0, the assoc is assigned the lowest possible LF value. If
+     * U==0 && S!=0, assoc is assigned the highest possible value,
+     * infinity.
+     * Checking for U==0 then setting level_fs=INFINITY is not the same
+     * since you would still have to check for S==0 then set level_fs=0.
+     *
+     * NOT A BUG: U can be 0. The result is infinity, a valid value. */
+    if (S == 0L)
+        assoc->usage->level_fs = 0L;
+    else
+        assoc->usage->level_fs = S / U;
 }
 
 /* Append list of associations to array
@@ -211,28 +206,27 @@ static void _calc_assoc_fs(slurmdb_assoc_rec_t *assoc)
  * IN/OUT merged_size - number of associations in merged array
  * RET - New array. Must be freed.
  */
-static slurmdb_assoc_rec_t** _append_list_to_array(
-	List list, slurmdb_assoc_rec_t** merged,
-	size_t *merged_size)
-{
-	ListIterator itr;
-	slurmdb_assoc_rec_t *next;
-	size_t bytes;
-	size_t i = *merged_size;
-	*merged_size += list_count(list);
+static slurmdb_assoc_rec_t **_append_list_to_array(
+        List list, slurmdb_assoc_rec_t **merged,
+        size_t *merged_size) {
+    ListIterator itr;
+    slurmdb_assoc_rec_t *next;
+    size_t bytes;
+    size_t i = *merged_size;
+    *merged_size += list_count(list);
 
-	/* must be null-terminated, so add one extra slot */
-	bytes = sizeof(slurmdb_assoc_rec_t*) * (*merged_size + 1);
-	merged = xrealloc(merged, bytes);
+    /* must be null-terminated, so add one extra slot */
+    bytes = sizeof(slurmdb_assoc_rec_t * ) * (*merged_size + 1);
+    merged = xrealloc(merged, bytes);
 
-	itr = list_iterator_create(list);
-	while ((next = list_next(itr)))
-		merged[i++] = next;
-	list_iterator_destroy(itr);
+    itr = list_iterator_create(list);
+    while ((next = list_next(itr)))
+        merged[i++] = next;
+    list_iterator_destroy(itr);
 
-	/* null terminate the array */
-	merged[*merged_size] = NULL;
-	return merged;
+    /* null terminate the array */
+    merged[*merged_size] = NULL;
+    return merged;
 }
 
 /* Returns number of tied sibling accounts.
@@ -240,23 +234,22 @@ static slurmdb_assoc_rec_t** _append_list_to_array(
  * IN begin_ndx - begin looking for ties at this index
  * RET - number of sibling accounts with equal level_fs values
  */
-static size_t _count_tied_accounts(slurmdb_assoc_rec_t** assocs,
-				   size_t begin_ndx)
-{
-	slurmdb_assoc_rec_t* next_assoc;
-	slurmdb_assoc_rec_t* assoc = assocs[begin_ndx];
-	size_t i = begin_ndx;
-	size_t tied_accounts = 0;
-	while ((next_assoc = assocs[++i])) {
-		/* Users are sorted to the left of accounts, so no user we
-		 * encounter here will be equal to this account */
-		if (!next_assoc->user)
-			break;
-		if (assoc->usage->level_fs != next_assoc->usage->level_fs)
-			break;
-		tied_accounts++;
-	}
-	return tied_accounts;
+static size_t _count_tied_accounts(slurmdb_assoc_rec_t **assocs,
+                                   size_t begin_ndx) {
+    slurmdb_assoc_rec_t *next_assoc;
+    slurmdb_assoc_rec_t *assoc = assocs[begin_ndx];
+    size_t i = begin_ndx;
+    size_t tied_accounts = 0;
+    while ((next_assoc = assocs[++i])) {
+        /* Users are sorted to the left of accounts, so no user we
+         * encounter here will be equal to this account */
+        if (!next_assoc->user)
+            break;
+        if (assoc->usage->level_fs != next_assoc->usage->level_fs)
+            break;
+        tied_accounts++;
+    }
+    return tied_accounts;
 }
 
 
@@ -267,32 +260,31 @@ static size_t _count_tied_accounts(slurmdb_assoc_rec_t** assocs,
  * IN assoc_level - depth in the tree (root is 0)
  * RET - Array of the children. Must be freed.
  */
-static slurmdb_assoc_rec_t** _merge_accounts(
-	slurmdb_assoc_rec_t** siblings,
-	size_t begin, size_t end, uint16_t assoc_level)
-{
-	size_t i;
-	/* number of associations in merged array */
-	size_t merged_size = 0;
-	/* merged is a null terminated array */
-	slurmdb_assoc_rec_t** merged = (slurmdb_assoc_rec_t **)
-		xmalloc(sizeof(slurmdb_assoc_rec_t *));
-	merged[0] = NULL;
+static slurmdb_assoc_rec_t **_merge_accounts(
+        slurmdb_assoc_rec_t **siblings,
+        size_t begin, size_t end, uint16_t assoc_level) {
+    size_t i;
+    /* number of associations in merged array */
+    size_t merged_size = 0;
+    /* merged is a null terminated array */
+    slurmdb_assoc_rec_t **merged = (slurmdb_assoc_rec_t **)
+            xmalloc(sizeof(slurmdb_assoc_rec_t * ));
+    merged[0] = NULL;
 
-	for (i = begin; i <= end; i++) {
-		List children = siblings[i]->usage->children_list;
+    for (i = begin; i <= end; i++) {
+        List children = siblings[i]->usage->children_list;
 
-		/* the first account's debug was already printed */
-		if (priority_debug && i > begin)
-			_ft_debug(siblings[i], assoc_level, true);
+        /* the first account's debug was already printed */
+        if (priority_debug && i > begin)
+            _ft_debug(siblings[i], assoc_level, true);
 
-		if (!children || list_is_empty(children)) {
-			continue;
-		}
+        if (!children || list_is_empty(children)) {
+            continue;
+        }
 
-		merged = _append_list_to_array(children, merged, &merged_size);
-	}
-	return merged;
+        merged = _append_list_to_array(children, merged, &merged_size);
+    }
+    return merged;
 }
 
 
@@ -316,94 +308,92 @@ static slurmdb_assoc_rec_t** _merge_accounts(
  * IN/OUT rnt - rank, no ties (what rank would be if no tie exists)
  * IN account_tied - is this account tied with the previous user
  */
-static void _calc_tree_fs(slurmdb_assoc_rec_t** siblings,
-			  uint16_t assoc_level, uint32_t *rank,
-			  uint32_t *rnt, bool account_tied)
-{
-	slurmdb_assoc_rec_t *assoc = NULL;
-	long double prev_level_fs = (long double) NO_VAL;
-	bool tied = false;
-	size_t i;
+static void _calc_tree_fs(slurmdb_assoc_rec_t **siblings,
+                          uint16_t assoc_level, uint32_t *rank,
+                          uint32_t *rnt, bool account_tied) {
+    slurmdb_assoc_rec_t *assoc = NULL;
+    long double prev_level_fs = (long double) NO_VAL;
+    bool tied = false;
+    size_t i;
 
-	/* Calculate level_fs for each child */
-	for (i = 0; (assoc = siblings[i]); i++)
-		_calc_assoc_fs(assoc);
+    /* Calculate level_fs for each child */
+    for (i = 0; (assoc = siblings[i]); i++)
+        _calc_assoc_fs(assoc);
 
-	/* Sort children by level_fs */
-	qsort(siblings, i, sizeof(slurmdb_assoc_rec_t *), _cmp_level_fs);
+    /* Sort children by level_fs */
+    qsort(siblings, i, sizeof(slurmdb_assoc_rec_t * ), _cmp_level_fs);
 
-	/* Iterate through children in sorted order. If it's a user, calculate
-	 * fs_factor, otherwise recurse. */
-	for (i = 0; (assoc = siblings[i]); i++) {
-		/* tied is used while iterating across siblings.
-		 * account_tied preserves ties while recursing */
-		if (i == 0 && account_tied) {
-			/* The parent was tied so this level starts out tied */
-			tied = true;
-		} else {
-			tied = prev_level_fs == assoc->usage->level_fs;
-		}
+    /* Iterate through children in sorted order. If it's a user, calculate
+     * fs_factor, otherwise recurse. */
+    for (i = 0; (assoc = siblings[i]); i++) {
+        /* tied is used while iterating across siblings.
+         * account_tied preserves ties while recursing */
+        if (i == 0 && account_tied) {
+            /* The parent was tied so this level starts out tied */
+            tied = true;
+        } else {
+            tied = prev_level_fs == assoc->usage->level_fs;
+        }
 
-		if (priority_debug)
-			_ft_debug(assoc, assoc_level, tied);
+        if (priority_debug)
+            _ft_debug(assoc, assoc_level, tied);
 
-		/* If user, set their final fairshare factor and
-		 * handle ranking.
-		 * If account, merge any tied accounts then recurse with the
-		 * merged children array. */
-		if (assoc->user) {
-			if (!tied)
-				*rank = *rnt;
+        /* If user, set their final fairshare factor and
+         * handle ranking.
+         * If account, merge any tied accounts then recurse with the
+         * merged children array. */
+        if (assoc->user) {
+            if (!tied)
+                *rank = *rnt;
 
-			assoc->usage->fs_factor =
-				*rank / (double) g_user_assoc_count;
+            assoc->usage->fs_factor =
+                    *rank / (double) g_user_assoc_count;
 
-			(*rnt)--;
-		} else {
-			slurmdb_assoc_rec_t** children;
-			size_t merge_count = _count_tied_accounts(siblings, i);
+            (*rnt)--;
+        } else {
+            slurmdb_assoc_rec_t **children;
+            size_t merge_count = _count_tied_accounts(siblings, i);
 
-			/* Merging does not affect child level_fs calculations
-			 * since the necessary information is stored on each
-			 * assoc's usage struct */
-			children = _merge_accounts(siblings, i,
-						   i + merge_count,
-						   assoc_level);
+            /* Merging does not affect child level_fs calculations
+             * since the necessary information is stored on each
+             * assoc's usage struct */
+            children = _merge_accounts(siblings, i,
+                                       i + merge_count,
+                                       assoc_level);
 
-			_calc_tree_fs(children, assoc_level+1,
-				      rank, rnt, tied);
+            _calc_tree_fs(children, assoc_level + 1,
+                          rank, rnt, tied);
 
-			/* Skip over any merged accounts */
-			i += merge_count;
+            /* Skip over any merged accounts */
+            i += merge_count;
 
-			xfree(children);
-		}
-		prev_level_fs = assoc->usage->level_fs;
-	}
+            xfree(children);
+        }
+        prev_level_fs = assoc->usage->level_fs;
+    }
 
 }
 
 
 /* Start fairshare calculations at root. Call assoc_mgr_lock before this. */
-static void _apply_priority_fs(void)
-{
-	slurmdb_assoc_rec_t** children = NULL;
-	uint32_t rank = g_user_assoc_count;
-	uint32_t rnt = rank;
-	size_t child_count = 0;
+static void _apply_priority_fs(void) {
+    slurmdb_assoc_rec_t **children = NULL;
+    uint32_t rank = g_user_assoc_count;
+    uint32_t rnt = rank;
+    size_t child_count = 0;
 
-	if (priority_debug)
-		info("Fair Tree fairshare algorithm, starting at root:");
+    if (priority_debug)
+        info("Fair Tree fairshare algorithm, starting at root:");
 
-	assoc_mgr_root_assoc->usage->level_fs = (long double) NO_VAL;
+    assoc_mgr_root_assoc->usage->level_fs = (long double) NO_VAL;
 
-	/* _calc_tree_fs requires an array instead of List */
-	children = _append_list_to_array(
-		assoc_mgr_root_assoc->usage->children_list,
-		children,
-		&child_count);
+    /* _calc_tree_fs requires an array instead of List */
+    children = _append_list_to_array(
+            assoc_mgr_root_assoc->usage->children_list,
+            children,
+            &child_count);
 
-	_calc_tree_fs(children, 0, &rank, &rnt, false);
+    _calc_tree_fs(children, 0, &rank, &rnt, false);
 
-	xfree(children);
+    xfree(children);
 }

@@ -74,7 +74,7 @@ void pdebug_wake_process(stepd_step_rec_t *job, pid_t pid);
 #  ifdef PTRACE_FIVE_ARGS
 #    define _PTRACE(r,p,a,d) ptrace((r),(p),(a),(d),NULL)
 #  elif defined BSD
-#    define _PTRACE(r,p,a,d) ptrace((r),(p),(a),(d))
+#    define _PTRACE(r, p, a, d) ptrace((r),(p),(a),(d))
 #  else
 #    define _PTRACE(r,p,a,d) ptrace((r),(p),(a),(void *)(d))
 #  endif

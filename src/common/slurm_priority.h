@@ -50,8 +50,11 @@
 extern int priority_sort_part_tier(void *x, void *y);
 
 extern int slurm_priority_init(void);
+
 extern int slurm_priority_fini(void);
+
 extern uint32_t priority_g_set(uint32_t last_prio, struct job_record *job_ptr);
+
 extern void priority_g_reconfig(bool assoc_clear);
 
 /* sets up the normalized usage and the effective usage of an
@@ -59,10 +62,12 @@ extern void priority_g_reconfig(bool assoc_clear);
  * IN/OUT: assoc - association to have usage set.
  */
 extern void priority_g_set_assoc_usage(slurmdb_assoc_rec_t *assoc);
+
 extern double priority_g_calc_fs_factor(long double usage_efctv,
-					long double shares_norm);
+                                        long double shares_norm);
+
 extern List priority_g_get_priority_factors_list(
-	priority_factors_request_msg_t *req_msg, uid_t uid);
+        priority_factors_request_msg_t *req_msg, uid_t uid);
 
 /* Call at end of job to remove decayable limits at the end of the job
  * at least slurmctld_lock_t job_write_lock = { NO_LOCK, WRITE_LOCK,

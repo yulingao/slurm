@@ -69,28 +69,26 @@ const char plugin_type[] = "job_submit/require_timelimit";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
-		      char **err_msg)
-{
-	// NOTE: no job id actually exists yet (=NO_VAL)
+                      char **err_msg) {
+    // NOTE: no job id actually exists yet (=NO_VAL)
 
-	if (job_desc->time_limit == NO_VAL) {
-		info("Missing time limit for job by uid:%u", submit_uid);
-		return ESLURM_MISSING_TIME_LIMIT;
-	} else if (job_desc->time_limit == INFINITE) {
-		info("Bad time limit for job by uid:%u", submit_uid);
-		return ESLURM_INVALID_TIME_LIMIT;
-	}
+    if (job_desc->time_limit == NO_VAL) {
+        info("Missing time limit for job by uid:%u", submit_uid);
+        return ESLURM_MISSING_TIME_LIMIT;
+    } else if (job_desc->time_limit == INFINITE) {
+        info("Bad time limit for job by uid:%u", submit_uid);
+        return ESLURM_INVALID_TIME_LIMIT;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr,
-	       uint32_t submit_uid)
-{
-	if (job_desc->time_limit == INFINITE) {
-		info("Bad replacement time limit for %u", job_desc->job_id);
-		return ESLURM_INVALID_TIME_LIMIT;
-	}
+               uint32_t submit_uid) {
+    if (job_desc->time_limit == INFINITE) {
+        info("Bad replacement time limit for %u", job_desc->job_id);
+        return ESLURM_INVALID_TIME_LIMIT;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

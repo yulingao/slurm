@@ -80,6 +80,7 @@
 #include "config.h"
 
 #include <errno.h>
+
 #if defined(__NetBSD__)
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,12 +93,14 @@
 #include <stdlib.h>
 #endif
 #ifndef HAVE_SETPROCTITLE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
 #include "src/common/strlcpy.h"
+
 #ifdef HAVE_SYS_PSTAT_H
 #include <sys/pstat.h>		/* for HP-UX */
 #endif
@@ -126,18 +129,18 @@
  *	   (This is the default, as it is safest.)
  */
 
-#define PS_USE_NONE			0
-#define PS_USE_PSTAT			1
-#define PS_USE_PS_STRINGS		2
-#define PS_USE_CHANGE_ARGV		3
-#define PS_USE_CLOBBER_ARGV		4
+#define PS_USE_NONE            0
+#define PS_USE_PSTAT            1
+#define PS_USE_PS_STRINGS        2
+#define PS_USE_CHANGE_ARGV        3
+#define PS_USE_CLOBBER_ARGV        4
 
 #ifndef SETPROCTITLE_STRATEGY
-# define SETPROCTITLE_STRATEGY	PS_USE_NONE
+# define SETPROCTITLE_STRATEGY    PS_USE_NONE
 #endif
 
 #ifndef SETPROCTITLE_PS_PADDING
-# define SETPROCTITLE_PS_PADDING	' '
+# define SETPROCTITLE_PS_PADDING    ' '
 #endif
 #endif /* HAVE_SETPROCTITLE */
 
@@ -156,7 +159,7 @@ static char **new_environ = (char **) NULL;
 #endif
 
 /* save the original *argv location here */
-static int	save_argc;
+static int save_argc;
 static char **save_argv;
 
 #if HAVE__PROGNAME
@@ -166,82 +169,81 @@ static char __progname[64];
 #endif
 
 #ifndef HAVE_SETPROCTITLE
+
 /*
  * Call this to update the ps status display to a fixed prefix plus an
  * indication of what you're currently doing passed in the argument.
  */
 void
-setproctitle(const char *fmt, ...)
-{
+setproctitle(const char *fmt, ...) {
 #if SETPROCTITLE_STRATEGY == PS_USE_PSTAT
-	union pstun pst;
+    union pstun pst;
 #endif
 #if SETPROCTITLE_STRATEGY != PS_USE_NONE
-	ssize_t used;
-	va_list ap;
+    ssize_t used;
+    va_list ap;
 
-	/* no ps display if you didn't call save_ps_display_args() */
-	if (save_argv == NULL)
-		return;
+    /* no ps display if you didn't call save_ps_display_args() */
+    if (save_argv == NULL)
+        return;
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	/* If ps_buffer is a pointer, it might still be null */
-	if (ps_buffer == NULL)
-		return;
+    /* If ps_buffer is a pointer, it might still be null */
+    if (ps_buffer == NULL)
+        return;
 #endif /* PS_USE_CLOBBER_ARGV */
 
-	/*
-	 * Overwrite *argv to point at appropriate space, if needed
-	 */
+    /*
+     * Overwrite *argv to point at appropriate space, if needed
+     */
 #if SETPROCTITLE_STRATEGY == PS_USE_CHANGE_ARGV
-	save_argv[0] = ps_buffer;
-	save_argv[1] = NULL;
+    save_argv[0] = ps_buffer;
+    save_argv[1] = NULL;
 #endif /* PS_USE_CHANGE_ARGV */
 
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	save_argv[1] = NULL;
+    save_argv[1] = NULL;
 #endif /* PS_USE_CLOBBER_ARGV */
 
-	/*
-	 * Make fixed prefix of ps display.
-	 */
+    /*
+     * Make fixed prefix of ps display.
+     */
 
-	va_start(ap, fmt);
-	if (fmt == NULL)
-		snprintf(ps_buffer, ps_buffer_size, "%s", __progname);
-	else {
-		used = snprintf(ps_buffer, ps_buffer_size, "%s: ", __progname);
-		if (used == -1 || used >= ps_buffer_size)
-			used = ps_buffer_size;
-		vsnprintf(ps_buffer + used, ps_buffer_size - used, fmt, ap);
-	}
-	va_end(ap);
+    va_start(ap, fmt);
+    if (fmt == NULL)
+        snprintf(ps_buffer, ps_buffer_size, "%s", __progname);
+    else {
+        used = snprintf(ps_buffer, ps_buffer_size, "%s: ", __progname);
+        if (used == -1 || used >= ps_buffer_size)
+            used = ps_buffer_size;
+        vsnprintf(ps_buffer + used, ps_buffer_size - used, fmt, ap);
+    }
+    va_end(ap);
 
 #if SETPROCTITLE_STRATEGY == PS_USE_PSTAT
-	pst.pst_command = ps_buffer;
-	pstat(PSTAT_SETCMD, pst, strlen(ps_buffer), 0, 0);
+    pst.pst_command = ps_buffer;
+    pstat(PSTAT_SETCMD, pst, strlen(ps_buffer), 0, 0);
 #endif   /* PS_USE_PSTAT */
 
 #if SETPROCTITLE_STRATEGY == PS_USE_PS_STRINGS
-	PS_STRINGS->ps_nargvstr = 1;
-	PS_STRINGS->ps_argvstr = ps_buffer;
+    PS_STRINGS->ps_nargvstr = 1;
+    PS_STRINGS->ps_argvstr = ps_buffer;
 #endif   /* PS_USE_PS_STRINGS */
 
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	/* pad unused memory */
-	used = strlen(ps_buffer);
-	memset(ps_buffer + used, SETPROCTITLE_PS_PADDING,
-	    ps_buffer_size - used);
+    /* pad unused memory */
+    used = strlen(ps_buffer);
+    memset(ps_buffer + used, SETPROCTITLE_PS_PADDING,
+        ps_buffer_size - used);
 #endif   /* PS_USE_CLOBBER_ARGV */
 
 #endif /* PS_USE_NONE */
 }
 
-static void _init__progname (const char *argv0)
-{
+static void _init__progname(const char *argv0) {
 #if !HAVE__PROGNAME
-	char *start = strrchr (argv0, '/');
-	strlcpy (__progname, start ? (start + 1) : argv0, sizeof (__progname));
-	return;
+    char *start = strrchr(argv0, '/');
+    strlcpy(__progname, start ? (start + 1) : argv0, sizeof(__progname));
+    return;
 #endif /* !HAVE__PROGNAME */
 }
 
@@ -256,87 +258,85 @@ static void _init__progname (const char *argv0)
  * might try to hang onto a getenv() result.
  */
 void
-init_setproctitle(int argc, char **argv)
-{
+init_setproctitle(int argc, char **argv) {
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	char *end_of_area = NULL;
-	int i;
+    char *end_of_area = NULL;
+    int i;
 #endif
 
-	save_argc = argc;
-	save_argv = argv;
+    save_argc = argc;
+    save_argv = argv;
 
 #if defined(__NetBSD__) || defined(__FreeBSD__)
-	setprogname (argv[0]);
+    setprogname (argv[0]);
 #else
-	_init__progname (argv[0]);
+    _init__progname(argv[0]);
 #endif
 
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	/*
-	 * If we're going to overwrite the argv area, count the available
-	 * space.  Also move the environment to make additional room.
-	 */
+    /*
+     * If we're going to overwrite the argv area, count the available
+     * space.  Also move the environment to make additional room.
+     */
 
-	/*
-	 * check for contiguous argv strings
-	 */
-	for (i = 0; i < argc; i++) {
-		if (i == 0 || end_of_area + 1 == argv[i])
-			end_of_area = argv[i] + strlen(argv[i]);
-	}
+    /*
+     * check for contiguous argv strings
+     */
+    for (i = 0; i < argc; i++) {
+        if (i == 0 || end_of_area + 1 == argv[i])
+            end_of_area = argv[i] + strlen(argv[i]);
+    }
 
-	/* probably can't happen? */
-	if (end_of_area == NULL) {
-		ps_buffer = NULL;
-		ps_buffer_size = 0;
-		return;
-	}
+    /* probably can't happen? */
+    if (end_of_area == NULL) {
+        ps_buffer = NULL;
+        ps_buffer_size = 0;
+        return;
+    }
 
-	/*
-	 * check for contiguous environ strings following argv
-	 */
-	for (i = 0; environ[i] != NULL; i++) {
-		if (end_of_area + 1 == environ[i])
-			end_of_area = environ[i] + strlen(environ[i]);
-	}
+    /*
+     * check for contiguous environ strings following argv
+     */
+    for (i = 0; environ[i] != NULL; i++) {
+        if (end_of_area + 1 == environ[i])
+            end_of_area = environ[i] + strlen(environ[i]);
+    }
 
-	ps_buffer = argv[0];
-	ps_buffer_size = end_of_area - argv[0] - 1;
+    ps_buffer = argv[0];
+    ps_buffer_size = end_of_area - argv[0] - 1;
 
-	/*
-	 * Duplicate and move the environment out of the way
-	 */
-	new_environ = malloc(sizeof(char *) * (i + 1));
-	if (!new_environ) {
-		fprintf(stderr, "ERROR: [%s:%d] %s: %s\n",
-			__FILE__, __LINE__, "init_setproctitle",
-			strerror(errno));
-		abort();
-	}
-	for (i = 0; environ[i] != NULL; i++) {
-		new_environ[i] = strdup(environ[i]);
-	}
-	new_environ[i] = NULL;
-	environ = new_environ;
+    /*
+     * Duplicate and move the environment out of the way
+     */
+    new_environ = malloc(sizeof(char *) * (i + 1));
+    if (!new_environ) {
+        fprintf(stderr, "ERROR: [%s:%d] %s: %s\n",
+            __FILE__, __LINE__, "init_setproctitle",
+            strerror(errno));
+        abort();
+    }
+    for (i = 0; environ[i] != NULL; i++) {
+        new_environ[i] = strdup(environ[i]);
+    }
+    new_environ[i] = NULL;
+    environ = new_environ;
 #endif /* PS_USE_CLOBBER_ARGV */
 }
 
 /* Free memory allocated by init_setproctitle.
  * Used to verify that all allocated memory gets freed */
-void fini_setproctitle(void)
-{
+void fini_setproctitle(void) {
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
-	int i;
+    int i;
 
-	if (!new_environ)
-		return;
+    if (!new_environ)
+        return;
 
-	for (i = 0; new_environ[i] != NULL; i++) {
-		free(new_environ[i]);
-	}
-	free(new_environ);
-	new_environ = (char **) NULL;
-	environ = new_environ;
+    for (i = 0; new_environ[i] != NULL; i++) {
+        free(new_environ[i]);
+    }
+    free(new_environ);
+    new_environ = (char **) NULL;
+    environ = new_environ;
 #endif /* PS_USE_CLOBBER_ARGV */
 }

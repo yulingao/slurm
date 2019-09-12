@@ -50,18 +50,18 @@
  * CCM will be used to provide app ssh launch using the Cray network
  * interconnect.
  */
-#define CCM_MAX_EPILOG_DELAY	30
+#define CCM_MAX_EPILOG_DELAY    30
 #define CCM_MAX_PTHREAD_RETRIES  6
-#define CCM_PARTITION_MAX	32
+#define CCM_PARTITION_MAX    32
 #define CCM_CRAY_UNIQUE_FILENAME  "/tmp/crayCCMXXXXXX"
-#define CCM_PROLOG_PATH		"/opt/cray/ccm/default/etc/ccm-prologue"
-#define CCM_EPILOG_PATH		"/opt/cray/ccm/default/etc/ccm-epilogue"
+#define CCM_PROLOG_PATH        "/opt/cray/ccm/default/etc/ccm-prologue"
+#define CCM_EPILOG_PATH        "/opt/cray/ccm/default/etc/ccm-epilogue"
 #define CCM_CONF_PATH           "/etc/opt/cray/ccm/ccm.conf"
 
 typedef struct {
-	char *ccm_partition[CCM_PARTITION_MAX];
-	int num_ccm_partitions;
-	int ccm_enabled;
+    char *ccm_partition[CCM_PARTITION_MAX];
+    int num_ccm_partitions;
+    int ccm_enabled;
 } ccm_config_t;
 
 extern ccm_config_t ccm_config;
@@ -70,25 +70,28 @@ extern const char *ccm_epilog_path;
 
 
 typedef struct {
-	uint32_t  job_id;
-	uint32_t  user_id;
-	uint32_t  node_cnt;		/* Number of allocated nodes */
-	uint32_t  num_tasks;		/* Number of app PEs/tasks to exec */
-	uint32_t  num_cpu_groups;	/* Number of entries in cpus arrays */
-	uint32_t *cpu_count_reps;	/* Number of reps of each cpu count */
-	uint16_t *cpus_per_node;	/* Number of cpus per node */
-	uint16_t  cpus_per_task;	/* Number of cpus per app task/PE */
-	uint16_t  task_dist;
-	uint16_t  plane_size;
-	char    *nodelist;		/* Allocated node hostname list */
+    uint32_t job_id;
+    uint32_t user_id;
+    uint32_t node_cnt;        /* Number of allocated nodes */
+    uint32_t num_tasks;        /* Number of app PEs/tasks to exec */
+    uint32_t num_cpu_groups;    /* Number of entries in cpus arrays */
+    uint32_t *cpu_count_reps;    /* Number of reps of each cpu count */
+    uint16_t *cpus_per_node;    /* Number of cpus per node */
+    uint16_t cpus_per_task;    /* Number of cpus per app task/PE */
+    uint16_t task_dist;
+    uint16_t plane_size;
+    char *nodelist;        /* Allocated node hostname list */
 } ccm_info_t;
 
 #define CRAY_ERR(fmt, ...) error("(%s: %d: %s) "fmt, THIS_FILE, __LINE__, \
-				 __FUNCTION__, ##__VA_ARGS__);
+                 __FUNCTION__, ##__VA_ARGS__);
 
 extern void ccm_get_config(void);
+
 extern int ccm_check_partitions(struct job_record *job_ptr);
+
 extern void *ccm_begin(void *args);
+
 extern void *ccm_fini(void *args);
 
 #endif /* CRAY_SELECT_CCM_H */

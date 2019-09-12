@@ -52,60 +52,58 @@
  * slurm_set_trigger - Set an event trigger
  * RET 0 or a slurm error code
  */
-extern int slurm_set_trigger (trigger_info_t *trigger_set)
-{
-	int rc;
-	slurm_msg_t msg;
-	trigger_info_msg_t req;
+extern int slurm_set_trigger(trigger_info_t *trigger_set) {
+    int rc;
+    slurm_msg_t msg;
+    trigger_info_msg_t req;
 
-	slurm_msg_t_init(&msg);
-	/*
-	 * Request message:
-	 */
-	memset(&req, 0, sizeof(req));
-	req.record_count  = 1;
-	req.trigger_array = trigger_set;
-	msg.msg_type      = REQUEST_TRIGGER_SET;
-        msg.data          = &req;
+    slurm_msg_t_init(&msg);
+    /*
+     * Request message:
+     */
+    memset(&req, 0, sizeof(req));
+    req.record_count = 1;
+    req.trigger_array = trigger_set;
+    msg.msg_type = REQUEST_TRIGGER_SET;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
-					      working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc,
+                                          working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
  * slurm_clear_trigger - Clear (remove) an existing event trigger
  * RET 0 or a slurm error code
  */
-extern int slurm_clear_trigger (trigger_info_t *trigger_clear)
-{
-	int rc;
-	slurm_msg_t msg;
-	trigger_info_msg_t req;
+extern int slurm_clear_trigger(trigger_info_t *trigger_clear) {
+    int rc;
+    slurm_msg_t msg;
+    trigger_info_msg_t req;
 
-	slurm_msg_t_init(&msg);
-	/*
-	 * Request message:
-	 */
-	memset(&req, 0, sizeof(req));
-	req.record_count  = 1;
-	req.trigger_array = trigger_clear;
-	msg.msg_type      = REQUEST_TRIGGER_CLEAR;
-        msg.data          = &req;
+    slurm_msg_t_init(&msg);
+    /*
+     * Request message:
+     */
+    memset(&req, 0, sizeof(req));
+    req.record_count = 1;
+    req.trigger_array = trigger_clear;
+    msg.msg_type = REQUEST_TRIGGER_CLEAR;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
-					      working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc,
+                                          working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -113,69 +111,67 @@ extern int slurm_clear_trigger (trigger_info_t *trigger_clear)
  * Use slurm_free_trigger() to free the memory allocated by this function
  * RET 0 or a slurm error code
  */
-extern int slurm_get_triggers (trigger_info_msg_t ** trigger_get)
-{
-	int rc;
-	slurm_msg_t resp_msg;
-	slurm_msg_t req_msg;
-	trigger_info_msg_t req;
+extern int slurm_get_triggers(trigger_info_msg_t **trigger_get) {
+    int rc;
+    slurm_msg_t resp_msg;
+    slurm_msg_t req_msg;
+    trigger_info_msg_t req;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
 
-	memset(&req, 0, sizeof(req));
-	req.record_count  = 0;
-	req.trigger_array = NULL;
-	req_msg.msg_type  = REQUEST_TRIGGER_GET;
-	req_msg.data      = &req;
+    memset(&req, 0, sizeof(req));
+    req.record_count = 0;
+    req.trigger_array = NULL;
+    req_msg.msg_type = REQUEST_TRIGGER_GET;
+    req_msg.data = &req;
 
-	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					   working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                       working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	switch (resp_msg.msg_type) {
-	case RESPONSE_TRIGGER_GET:
-		*trigger_get = (trigger_info_msg_t *)resp_msg.data;
-		break;
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		slurm_free_return_code_msg(resp_msg.data);
-		if (rc)
-			slurm_seterrno_ret(rc);
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-		break;
-	}
+    switch (resp_msg.msg_type) {
+        case RESPONSE_TRIGGER_GET:
+            *trigger_get = (trigger_info_msg_t *) resp_msg.data;
+            break;
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            slurm_free_return_code_msg(resp_msg.data);
+            if (rc)
+                slurm_seterrno_ret(rc);
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+            break;
+    }
 
-	return SLURM_SUCCESS ;
+    return SLURM_SUCCESS;
 }
 
 /*
  * slurm_pull_trigger - Pull (fire) an event trigger
  * RET 0 or a slurm error code
  */
-extern int slurm_pull_trigger (trigger_info_t *trigger_pull)
-{
-	int rc;
-	slurm_msg_t msg;
-	trigger_info_msg_t req;
+extern int slurm_pull_trigger(trigger_info_t *trigger_pull) {
+    int rc;
+    slurm_msg_t msg;
+    trigger_info_msg_t req;
 
-	/*
-	 * Request message:
-	 */
-	slurm_msg_t_init(&msg);
-	memset(&req, 0, sizeof(req));
-	req.record_count  = 1;
-	req.trigger_array = trigger_pull;
-	msg.msg_type      = REQUEST_TRIGGER_PULL;
-	msg.data	  = &req;
+    /*
+     * Request message:
+     */
+    slurm_msg_t_init(&msg);
+    memset(&req, 0, sizeof(req));
+    req.record_count = 1;
+    req.trigger_array = trigger_pull;
+    msg.msg_type = REQUEST_TRIGGER_PULL;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
-					      working_cluster_rec) < 0)
-		return SLURM_ERROR;
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc,
+                                          working_cluster_rec) < 0)
+        return SLURM_ERROR;
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

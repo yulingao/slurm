@@ -64,61 +64,61 @@
  * path that does not vary regardless of where Slurm is installed.
  */
 #ifndef LEGACY_SPOOL_DIR
-#define LEGACY_SPOOL_DIR	"/var/opt/cray/alps/spool/"
+#define LEGACY_SPOOL_DIR    "/var/opt/cray/alps/spool/"
 #endif
 
 // Magic value signifying that jobinfo wasn't NULL
-#define CRAY_JOBINFO_MAGIC	0xCAFECAFE
+#define CRAY_JOBINFO_MAGIC    0xCAFECAFE
 
 // Magic value signifying that jobinfo was NULL, don't unpack
-#define CRAY_NULL_JOBINFO_MAGIC	0xDEAFDEAF
+#define CRAY_NULL_JOBINFO_MAGIC    0xDEAFDEAF
 
 // Maximum network resource scaling (in percent)
-#define MAX_SCALING		100
+#define MAX_SCALING        100
 
 // Minimum network resource scaling (in percent)
-#define MIN_SCALING		1
+#define MIN_SCALING        1
 
 // Maximum concurrent job steps per node (based on network limits)
-#define MAX_STEPS_PER_NODE	4
+#define MAX_STEPS_PER_NODE    4
 
 // alpsc_pre_suspend() timeout
-#define SUSPEND_TIMEOUT_MSEC	(10*1000)
+#define SUSPEND_TIMEOUT_MSEC    (10*1000)
 
 // Environment variables set for each task
-#define CRAY_NUM_COOKIES_ENV	"CRAY_NUM_COOKIES"
-#define CRAY_COOKIES_ENV	"CRAY_COOKIES"
-#define PMI_CONTROL_PORT_ENV	"PMI_CONTROL_PORT"
-#define PMI_CRAY_NO_SMP_ENV	"PMI_CRAY_NO_SMP_ORDER"
+#define CRAY_NUM_COOKIES_ENV    "CRAY_NUM_COOKIES"
+#define CRAY_COOKIES_ENV    "CRAY_COOKIES"
+#define PMI_CONTROL_PORT_ENV    "PMI_CONTROL_PORT"
+#define PMI_CRAY_NO_SMP_ENV    "PMI_CRAY_NO_SMP_ORDER"
 
 /**********************************************************
  * Type definitions
  **********************************************************/
 // Opaque Cray jobinfo structure
 typedef struct slurm_cray_jobinfo {
-	uint32_t magic;
-	uint32_t num_cookies;	/* The number of cookies sent to configure the
+    uint32_t magic;
+    uint32_t num_cookies;    /* The number of cookies sent to configure the
 	                           HSN */
-	/* Double pointer to an array of cookie strings.
-	 * cookie values here as NULL-terminated strings.
-	 * There are num_cookies elements in the array.
-	 * The caller is responsible for free()ing
-	 * the array contents and the array itself.  */
-	char     **cookies;
-	/* The array itself must be free()d when this struct is destroyed. */
-	uint32_t *cookie_ids;
+    /* Double pointer to an array of cookie strings.
+     * cookie values here as NULL-terminated strings.
+     * There are num_cookies elements in the array.
+     * The caller is responsible for free()ing
+     * the array contents and the array itself.  */
+    char **cookies;
+    /* The array itself must be free()d when this struct is destroyed. */
+    uint32_t *cookie_ids;
 
-	// Number of ptags allocated
-	int num_ptags;
+    // Number of ptags allocated
+    int num_ptags;
 
-	// Array of ptags
-	int *ptags;
+    // Array of ptags
+    int *ptags;
 
-	// Port (for compatibility with 14.03, remove in the future)
-	uint32_t port;
+    // Port (for compatibility with 14.03, remove in the future)
+    uint32_t port;
 
-	// Cray Application ID (Slurm hash)
-	uint64_t apid;
+    // Cray Application ID (Slurm hash)
+    uint64_t apid;
 } slurm_cray_jobinfo_t;
 
 /**********************************************************
@@ -133,25 +133,31 @@ extern uint64_t debug_flags;
 // Implemented in pe_info.c
 #if defined(HAVE_NATIVE_CRAY) || defined(HAVE_CRAY_NETWORK)
 extern int build_alpsc_pe_info(stepd_step_rec_t *job,
-			       alpsc_peInfo_t *alpsc_pe_info, int *cmd_index);
+                   alpsc_peInfo_t *alpsc_pe_info, int *cmd_index);
 extern void free_alpsc_pe_info(alpsc_peInfo_t *alpsc_pe_info);
 #endif
 
 // Implemented in gpu.c
 extern int setup_gpu(stepd_step_rec_t *job);
+
 extern int reset_gpu(stepd_step_rec_t *job);
 
 // Implemented in scaling.c
 extern int get_cpu_scaling(stepd_step_rec_t *job);
+
 extern int get_mem_scaling(stepd_step_rec_t *job);
 
 // Implemented in util.c
 extern int list_str_to_array(char *list, int *cnt, int32_t **numbers);
+
 extern void alpsc_debug(const char *file, int line, const char *func,
-			int rc, int expected_rc, const char *alpsc_func,
-			char **err_msg);
+                        int rc, int expected_rc, const char *alpsc_func,
+                        char **err_msg);
+
 extern int remove_spool_files(uint64_t apid);
+
 extern int create_apid_dir(uint64_t apid, uid_t uid, gid_t gid);
+
 extern int set_job_env(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job);
 
 extern void print_jobinfo(slurm_cray_jobinfo_t *job);
@@ -159,14 +165,14 @@ extern void print_jobinfo(slurm_cray_jobinfo_t *job);
 // Implemented in iaa.c
 #if defined(HAVE_NATIVE_CRAY) || defined(HAVE_CRAY_NETWORK)
 extern int write_iaa_file(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job,
-		   int *ptags, int num_ptags, alpsc_peInfo_t *alpsc_pe_info);
+           int *ptags, int num_ptags, alpsc_peInfo_t *alpsc_pe_info);
 extern void unlink_iaa_file(slurm_cray_jobinfo_t *job);
 
 // Implemented in cookies.c
 extern int start_lease_extender(void);
 extern int cleanup_lease_extender(void);
 extern int lease_cookies(slurm_cray_jobinfo_t *job, int32_t *nodes,
-			 int32_t num_nodes);
+             int32_t num_nodes);
 extern int track_cookies(slurm_cray_jobinfo_t *job);
 extern int release_cookies(slurm_cray_jobinfo_t *job);
 #endif /* HAVE_NATIVE_CRAY || HAVE_CRAY_NETWORK */
@@ -175,14 +181,14 @@ extern int release_cookies(slurm_cray_jobinfo_t *job);
  * Macros
  **********************************************************/
 #define ALPSC_CN_DEBUG(f) alpsc_debug(THIS_FILE, __LINE__, __func__, \
-					rc, 1, f, &err_msg);
+                    rc, 1, f, &err_msg);
 #define ALPSC_SN_DEBUG(f) alpsc_debug(THIS_FILE, __LINE__, __func__, \
-					rc, 0, f, &err_msg);
+                    rc, 0, f, &err_msg);
 #define CRAY_ERR(fmt, ...) error("(%s: %d: %s) "fmt, THIS_FILE, __LINE__, \
-				 __func__, ##__VA_ARGS__);
+                 __func__, ##__VA_ARGS__);
 #define CRAY_DEBUG(fmt, ...) debug2("(%s: %d: %s) "fmt, THIS_FILE, __LINE__, \
-				    __func__, ##__VA_ARGS__);
+                    __func__, ##__VA_ARGS__);
 #define CRAY_INFO(fmt, ...) info("(%s: %d: %s) "fmt, THIS_FILE, __LINE__, \
-				 __func__, ##__VA_ARGS__);
+                 __func__, ##__VA_ARGS__);
 
 #endif /* SWITCH_CRAY_ARIES_H */

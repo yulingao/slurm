@@ -57,19 +57,21 @@
 #include "src/common/xstring.h"
 
 typedef struct cli_filter_ops {
-	int		(*setup_defaults)(slurm_opt_t *opt, bool early);
-	int		(*pre_submit)	 (slurm_opt_t *opt, int offset);
-	void		(*post_submit)	 (int offset, uint32_t jobid,
-					  uint32_t stepid);
+    int (*setup_defaults)(slurm_opt_t *opt, bool early);
+
+    int (*pre_submit)(slurm_opt_t *opt, int offset);
+
+    void (*post_submit)(int offset, uint32_t jobid,
+                        uint32_t stepid);
 } cli_filter_ops_t;
 
 /*
  * Must be synchronized with cli_filter_ops_t above.
  */
 static const char *syms[] = {
-	"setup_defaults",
-	"pre_submit",
-	"post_submit"
+        "setup_defaults",
+        "pre_submit",
+        "post_submit"
 };
 
 static int g_context_cnt = -1;
@@ -84,58 +86,57 @@ static bool init_run = false;
  *
  * Returns a SLURM errno.
  */
-extern int cli_filter_plugin_init(void)
-{
-	int rc = SLURM_SUCCESS;
-	char *last = NULL, *names;
-	char *plugin_type = "cli_filter";
-	char *type;
+extern int cli_filter_plugin_init(void) {
+    int rc = SLURM_SUCCESS;
+    char *last = NULL, *names;
+    char *plugin_type = "cli_filter";
+    char *type;
 
-	if (init_run && (g_context_cnt >= 0))
-		return rc;
+    if (init_run && (g_context_cnt >= 0))
+        return rc;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt >= 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt >= 0)
+        goto fini;
 
-	clifilter_plugin_list = slurm_get_cli_filter_plugins();
-	g_context_cnt = 0;
-	if ((clifilter_plugin_list == NULL) || (clifilter_plugin_list[0] == '\0'))
-		goto fini;
+    clifilter_plugin_list = slurm_get_cli_filter_plugins();
+    g_context_cnt = 0;
+    if ((clifilter_plugin_list == NULL) || (clifilter_plugin_list[0] == '\0'))
+        goto fini;
 
-	names = clifilter_plugin_list;
-	while ((type = strtok_r(names, ",", &last))) {
-		xrecalloc(ops, g_context_cnt + 1, sizeof(cli_filter_ops_t));
-		xrecalloc(g_context, g_context_cnt + 1,
-			  sizeof(plugin_context_t *));
-		/* Permit both prefix and no-prefix for plugin names. */
-		if (xstrncmp(type, "cli_filter/", 11) == 0)
-			type += 11;
-		type = xstrdup_printf("cli_filter/%s", type);
-		g_context[g_context_cnt] = plugin_context_create(
-			plugin_type, type, (void **)&ops[g_context_cnt],
-			syms, sizeof(syms));
-		if (!g_context[g_context_cnt]) {
-			error("cannot create %s context for %s",
-			      plugin_type, type);
-			rc = SLURM_ERROR;
-			xfree(type);
-			break;
-		}
+    names = clifilter_plugin_list;
+    while ((type = strtok_r(names, ",", &last))) {
+        xrecalloc(ops, g_context_cnt + 1, sizeof(cli_filter_ops_t));
+        xrecalloc(g_context, g_context_cnt + 1,
+                  sizeof(plugin_context_t * ));
+        /* Permit both prefix and no-prefix for plugin names. */
+        if (xstrncmp(type, "cli_filter/", 11) == 0)
+            type += 11;
+        type = xstrdup_printf("cli_filter/%s", type);
+        g_context[g_context_cnt] = plugin_context_create(
+                plugin_type, type, (void **) &ops[g_context_cnt],
+                syms, sizeof(syms));
+        if (!g_context[g_context_cnt]) {
+            error("cannot create %s context for %s",
+                  plugin_type, type);
+            rc = SLURM_ERROR;
+            xfree(type);
+            break;
+        }
 
-		xfree(type);
-		g_context_cnt++;
-		names = NULL; /* for next strtok_r() iteration */
-	}
-	init_run = true;
+        xfree(type);
+        g_context_cnt++;
+        names = NULL; /* for next strtok_r() iteration */
+    }
+    init_run = true;
 
-fini:
-	slurm_mutex_unlock(&g_context_lock);
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
 
-	if (rc != SLURM_SUCCESS)
-		cli_filter_plugin_fini();
+    if (rc != SLURM_SUCCESS)
+        cli_filter_plugin_fini();
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -143,30 +144,29 @@ fini:
  *
  * Returns a SLURM errno.
  */
-extern int cli_filter_plugin_fini(void)
-{
-	int i, j, rc = SLURM_SUCCESS;
+extern int cli_filter_plugin_fini(void) {
+    int i, j, rc = SLURM_SUCCESS;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt < 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt < 0)
+        goto fini;
 
-	init_run = false;
-	for (i = 0; i < g_context_cnt; i++) {
-		if (g_context[i]) {
-			j = plugin_context_destroy(g_context[i]);
-			if (j != SLURM_SUCCESS)
-				rc = j;
-		}
-	}
-	xfree(ops);
-	xfree(g_context);
-	xfree(clifilter_plugin_list);
-	g_context_cnt = -1;
+    init_run = false;
+    for (i = 0; i < g_context_cnt; i++) {
+        if (g_context[i]) {
+            j = plugin_context_destroy(g_context[i]);
+            if (j != SLURM_SUCCESS)
+                rc = j;
+        }
+    }
+    xfree(ops);
+    xfree(g_context);
+    xfree(clifilter_plugin_list);
+    g_context_cnt = -1;
 
-fini:
-	slurm_mutex_unlock(&g_context_lock);
-	return rc;
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
+    return rc;
 }
 
 /*
@@ -175,49 +175,46 @@ fini:
  **************************************************************************
  */
 
-extern int cli_filter_plugin_setup_defaults(slurm_opt_t *opt, bool early)
-{
-	DEF_TIMERS;
-	int i, rc;
+extern int cli_filter_plugin_setup_defaults(slurm_opt_t *opt, bool early) {
+    DEF_TIMERS;
+    int i, rc;
 
-	START_TIMER;
-	rc = cli_filter_plugin_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
-		rc = (*(ops[i].setup_defaults))(opt, early);
-	slurm_mutex_unlock(&g_context_lock);
-	END_TIMER2(__func__);
+    START_TIMER;
+    rc = cli_filter_plugin_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
+        rc = (*(ops[i].setup_defaults))(opt, early);
+    slurm_mutex_unlock(&g_context_lock);
+    END_TIMER2(__func__);
 
-	return rc;
+    return rc;
 }
 
-extern int cli_filter_plugin_pre_submit(slurm_opt_t *opt, int offset)
-{
-	DEF_TIMERS;
-	int i, rc;
+extern int cli_filter_plugin_pre_submit(slurm_opt_t *opt, int offset) {
+    DEF_TIMERS;
+    int i, rc;
 
-	START_TIMER;
-	rc = cli_filter_plugin_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
-		rc = (*(ops[i].pre_submit))(opt, offset);
-	slurm_mutex_unlock(&g_context_lock);
-	END_TIMER2(__func__);
+    START_TIMER;
+    rc = cli_filter_plugin_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
+        rc = (*(ops[i].pre_submit))(opt, offset);
+    slurm_mutex_unlock(&g_context_lock);
+    END_TIMER2(__func__);
 
-	return rc;
+    return rc;
 }
 
 extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid,
-					  uint32_t stepid)
-{
-	DEF_TIMERS;
-	int i, rc;
+                                          uint32_t stepid) {
+    DEF_TIMERS;
+    int i, rc;
 
-	START_TIMER;
-	rc = cli_filter_plugin_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
-		(*(ops[i].post_submit))(offset, jobid, stepid);
-	slurm_mutex_unlock(&g_context_lock);
-	END_TIMER2(__func__);
+    START_TIMER;
+    rc = cli_filter_plugin_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++)
+        (*(ops[i].post_submit))(offset, jobid, stepid);
+    slurm_mutex_unlock(&g_context_lock);
+    END_TIMER2(__func__);
 }

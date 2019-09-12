@@ -44,18 +44,18 @@
 #include "src/common/pack.h"
 #include "src/common/slurm_protocol_defs.h"
 
-#define PMI_MAX_ID_LEN       16	/* Maximim size of PMI process group ID */
-#define PMI_MAX_KEY_LEN     256	/* Maximum size of a PMI key */
-#define PMI_MAX_KVSNAME_LEN 256	/* Maximum size of KVS name */
+#define PMI_MAX_ID_LEN       16    /* Maximim size of PMI process group ID */
+#define PMI_MAX_KEY_LEN     256    /* Maximum size of a PMI key */
+#define PMI_MAX_KVSNAME_LEN 256    /* Maximum size of KVS name */
 #define PMI_MAX_VAL_LEN     1024 /* Maximum size of a PMI value */
 
 /* Transmit PMI Keyval space data */
 int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr,
-		int pmi_rank, int pmi_size);
+                            int pmi_rank, int pmi_size);
 
 /* Wait for barrier and get full PMI Keyval space data */
-int  slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr,
-		int pmi_rank, int pmi_size);
+int slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr,
+                           int pmi_rank, int pmi_size);
 
 /* Finalization processing */
 void slurm_pmi_finalize(void);

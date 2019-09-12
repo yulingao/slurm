@@ -48,11 +48,12 @@
  * for details.
  */
 void __xassert_failed(char *expr, const char *file, int line, char *func);
-strong_alias(__xassert_failed,	slurm_xassert_failed);
 
-void __xassert_failed(char *expr, const char *file, int line, char *func)
-{
-	error("%s:%d: %s(): Assertion (%s) failed.", file, line, func, expr);
-	log_flush();
-	abort();
+strong_alias(__xassert_failed, slurm_xassert_failed
+);
+
+void __xassert_failed(char *expr, const char *file, int line, char *func) {
+    error("%s:%d: %s(): Assertion (%s) failed.", file, line, func, expr);
+    log_flush();
+    abort();
 }

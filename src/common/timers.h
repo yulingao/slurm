@@ -41,16 +41,16 @@
 
 #include <sys/time.h>
 
-#define DEF_TIMERS	struct timeval tv1, tv2; char tv_str[20] = ""; long delta_t;
-#define START_TIMER	gettimeofday(&tv1, NULL)
-#define END_TIMER	gettimeofday(&tv2, NULL); \
-	slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, NULL, 0, &delta_t)
+#define DEF_TIMERS    struct timeval tv1, tv2; char tv_str[20] = ""; long delta_t;
+#define START_TIMER    gettimeofday(&tv1, NULL)
+#define END_TIMER    gettimeofday(&tv2, NULL); \
+    slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, NULL, 0, &delta_t)
 #define END_TIMER2(from) gettimeofday(&tv2, NULL); \
-	slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, from, 0, &delta_t)
+    slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, from, 0, &delta_t)
 #define END_TIMER3(from, limit) gettimeofday(&tv2, NULL); \
-	slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, from, limit, &delta_t)
-#define DELTA_TIMER	delta_t
-#define TIME_STR 	tv_str
+    slurm_diff_tv_str(&tv1, &tv2, tv_str, 20, from, limit, &delta_t)
+#define DELTA_TIMER    delta_t
+#define TIME_STR    tv_str
 
 /* Return the number of micro-seconds between now and argument "tv",
  * Initialize tv to NOW if zero on entry */
@@ -67,8 +67,8 @@ extern int slurm_delta_tv(struct timeval *tv);
  * IN limit - limit to wait
  * OUT delta_t - raw time difference in usec
  */
-extern void slurm_diff_tv_str(struct timeval *tv1,struct timeval *tv2,
-			      char *tv_str, int len_tv_str, const char *from,
-			      long limit, long *delta_t);
+extern void slurm_diff_tv_str(struct timeval *tv1, struct timeval *tv2,
+                              char *tv_str, int len_tv_str, const char *from,
+                              long limit, long *delta_t);
 
 #endif

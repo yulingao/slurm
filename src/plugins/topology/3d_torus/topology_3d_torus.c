@@ -72,9 +72,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[]        = "topology 3d_torus plugin";
-const char plugin_type[]        = "topology/3d_torus";
-const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
+const char plugin_name[] = "topology 3d_torus plugin";
+const char plugin_type[] = "topology/3d_torus";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 extern void nodes_to_hilbert_curve(void);
 
@@ -82,37 +82,33 @@ extern void nodes_to_hilbert_curve(void);
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	verbose("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+extern int init(void) {
+    verbose("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * topo_build_config - build or rebuild system topology information
  *	after a system startup or reconfiguration.
  */
-extern int topo_build_config(void)
-{
-	return SLURM_SUCCESS;
+extern int topo_build_config(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * topo_generate_node_ranking  -  populate node_rank fields
  */
-extern bool topo_generate_node_ranking(void)
-{
-	nodes_to_hilbert_curve();
-	return true;
+extern bool topo_generate_node_ranking(void) {
+    nodes_to_hilbert_curve();
+    return true;
 }
 
 /*
@@ -121,14 +117,13 @@ extern bool topo_generate_node_ranking(void)
  *
  * in 3d_torus plugin, only use node name as the topology address
  */
-extern int topo_get_node_addr(char* node_name, char** paddr, char** ppattern)
-{
+extern int topo_get_node_addr(char *node_name, char **paddr, char **ppattern) {
 #ifndef HAVE_FRONT_END
-	if (find_node_record(node_name) == NULL)
-		return SLURM_ERROR;
+    if (find_node_record(node_name) == NULL)
+        return SLURM_ERROR;
 #endif
 
-	*paddr = xstrdup(node_name);
-	*ppattern = xstrdup("node");
-	return SLURM_SUCCESS;
+    *paddr = xstrdup(node_name);
+    *ppattern = xstrdup("node");
+    return SLURM_SUCCESS;
 }

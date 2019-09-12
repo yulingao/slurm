@@ -43,23 +43,23 @@
 #include "accounting_storage_mysql.h"
 
 extern int as_mysql_get_modified_lfts(mysql_conn_t *mysql_conn,
-				      char *cluster_name, uint32_t start_lft);
+                                      char *cluster_name, uint32_t start_lft);
 
 extern int as_mysql_add_assocs(mysql_conn_t *mysql_conn,
-			       uint32_t uid,
-			       List assoc_list);
+                               uint32_t uid,
+                               List assoc_list);
 
 extern List as_mysql_modify_assocs(mysql_conn_t *mysql_conn, uint32_t uid,
-				   slurmdb_assoc_cond_t *assoc_cond,
-				   slurmdb_assoc_rec_t *assoc);
+                                   slurmdb_assoc_cond_t *assoc_cond,
+                                   slurmdb_assoc_rec_t *assoc);
 
 extern List as_mysql_remove_assocs(mysql_conn_t *mysql_conn, uint32_t uid,
-				   slurmdb_assoc_cond_t *assoc_cond);
+                                   slurmdb_assoc_cond_t *assoc_cond);
 
 extern List as_mysql_get_assocs(mysql_conn_t *mysql_conn, uid_t uid,
-				slurmdb_assoc_cond_t *assoc_cond);
+                                slurmdb_assoc_cond_t *assoc_cond);
 
 extern int as_mysql_reset_lft_rgt(mysql_conn_t *mysql_conn, uid_t uid,
-				  List cluster_list);
+                                  List cluster_list);
 
 #endif

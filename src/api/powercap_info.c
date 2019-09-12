@@ -56,38 +56,37 @@
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_powercap_info_msg
  */
-extern int slurm_load_powercap(powercap_info_msg_t **resp)
-{
-	int rc;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
+extern int slurm_load_powercap(powercap_info_msg_t **resp) {
+    int rc;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
-	req_msg.msg_type = REQUEST_POWERCAP_INFO;
-	req_msg.data     = NULL;
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
+    req_msg.msg_type = REQUEST_POWERCAP_INFO;
+    req_msg.data = NULL;
 
-	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					   working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                       working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	switch (resp_msg.msg_type) {
-	case RESPONSE_POWERCAP_INFO:
-		*resp = (powercap_info_msg_t *) resp_msg.data;
-		break;
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		slurm_free_return_code_msg(resp_msg.data);
-		if (rc)
-			slurm_seterrno_ret(rc);
-		*resp = NULL;
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-		break;
-	}
+    switch (resp_msg.msg_type) {
+        case RESPONSE_POWERCAP_INFO:
+            *resp = (powercap_info_msg_t *) resp_msg.data;
+            break;
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            slurm_free_return_code_msg(resp_msg.data);
+            if (rc)
+                slurm_seterrno_ret(rc);
+            *resp = NULL;
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+            break;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -97,33 +96,32 @@ extern int slurm_load_powercap(powercap_info_msg_t **resp)
  * IN powercap_info_msg_ptr - powercapping information message pointer
  * IN one_liner - print as a single line if not zero
  */
-extern void slurm_print_powercap_info_msg(FILE * out, powercap_info_msg_t *ptr,
-					  int one_liner)
-{
-	char *out_buf = NULL;
+extern void slurm_print_powercap_info_msg(FILE *out, powercap_info_msg_t *ptr,
+                                          int one_liner) {
+    char *out_buf = NULL;
 
-	if (ptr->power_cap == 0) {
-		/****** Line 1 ******/
-		xstrcat(out_buf, "Powercapping disabled by configuration."
-			" See PowerParameters in `man slurm.conf'\n");
-		fprintf(out, "%s", out_buf);
-		xfree(out_buf);
-	} else {
-		/****** Line 1 ******/
-		xstrfmtcat(out_buf, "MinWatts=%u CurrentWatts=%u ",
-			   ptr->min_watts, ptr->cur_max_watts);
-		if (ptr->power_cap == INFINITE) {
-			xstrcat(out_buf, "PowerCap=INFINITE ");
-		} else {
-			xstrfmtcat(out_buf, "PowerCap=%u ", ptr->power_cap);
-		}
-		xstrfmtcat(out_buf, "PowerFloor=%u PowerChangeRate=%u",
-			   ptr->power_floor, ptr->power_change);
-		xstrfmtcat(out_buf, "AdjustedMaxWatts=%u MaxWatts=%u",
-			   ptr->adj_max_watts, ptr->max_watts);
+    if (ptr->power_cap == 0) {
+        /****** Line 1 ******/
+        xstrcat(out_buf, "Powercapping disabled by configuration."
+                         " See PowerParameters in `man slurm.conf'\n");
+        fprintf(out, "%s", out_buf);
+        xfree(out_buf);
+    } else {
+        /****** Line 1 ******/
+        xstrfmtcat(out_buf, "MinWatts=%u CurrentWatts=%u ",
+                   ptr->min_watts, ptr->cur_max_watts);
+        if (ptr->power_cap == INFINITE) {
+            xstrcat(out_buf, "PowerCap=INFINITE ");
+        } else {
+            xstrfmtcat(out_buf, "PowerCap=%u ", ptr->power_cap);
+        }
+        xstrfmtcat(out_buf, "PowerFloor=%u PowerChangeRate=%u",
+                   ptr->power_floor, ptr->power_change);
+        xstrfmtcat(out_buf, "AdjustedMaxWatts=%u MaxWatts=%u",
+                   ptr->adj_max_watts, ptr->max_watts);
 
-		xstrcat(out_buf, "\n");
-		fprintf(out, "%s", out_buf);
-		xfree(out_buf);
-	}
+        xstrcat(out_buf, "\n");
+        fprintf(out, "%s", out_buf);
+        xfree(out_buf);
+    }
 }

@@ -46,223 +46,217 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static inline int int_pow(int num, int power)
-{
-	int res;
-	int i;
+static inline int int_pow(int num, int power) {
+    int res;
+    int i;
 
-	if (power == 0)
-		res = 1;
-	else if (power == 1)
-		res = num;
-	else {
-		res = num;
-		for (i = 1; i < power; i++)
-			res *= num;
-	}
+    if (power == 0)
+        res = 1;
+    else if (power == 1)
+        res = num;
+    else {
+        res = num;
+        for (i = 1; i < power; i++)
+            res *= num;
+    }
 
-	return res;
+    return res;
 }
 
-static inline int geometric_series(int width, int depth)
-{
-	/*
-	 * the main idea behind this formula is the following math base:
-	 * a^n - b^n = (a-b)*(a^(n-1) + b*a^(n-2) + b^2*a^(n-3) ... +b^(n-1))
-	 * if we set a = 1, b = w (width) we will turn it to:
-	 *
-	 *        1 - w^n = (1-w)*(1 + w + w^2 + ... +w^(n-1))     (1)
-	 *        C = (1 + w + w^2 + ... +w^(n-1))                 (2)
-	 *
-	 * is perfectly a number of children in the tree with width w.
-	 * So we can calculate C from (1):
-	 *
-	 *        1 - w^n = (1-w)*C =>  C = (1-w^n)/(1-w)          (3)
-	 *
-	 * (2) takes (n-1) sums and (n-2) multiplication (or (n-2) exponentiations).
-	 * (3) takes n+1 multiplications (or one exponentiation), 2 subtractions,
-	 * 1 division.
-	 * However if more optimal exponentiation algorithm is used like this
-	 * (https://en.wikipedia.org/wiki/Exponentiation_by_squaring) number of
-	 * multiplications will be O(log(n)).
-	 * In case of (2) we will still need all the intermediate powers which
-	 * doesn't allow to benefit from efficient exponentiation.
-	 * As it is now - int_pow(x, n) is a primitive O(n) algorithm.
-	 *
-	 * w = 1 is a special case that will lead to divide by 0.
-	 * as C (2) corresponds to a full number of nodes in the tree including
-	 * the root - we need to return analog in the w=1 tree which is
-	 * (depth+1).
-	 */
-	return (width == 1) ?
-		(depth+1) : (1 - (int_pow(width, (depth+1)))) / (1 - width);
+static inline int geometric_series(int width, int depth) {
+    /*
+     * the main idea behind this formula is the following math base:
+     * a^n - b^n = (a-b)*(a^(n-1) + b*a^(n-2) + b^2*a^(n-3) ... +b^(n-1))
+     * if we set a = 1, b = w (width) we will turn it to:
+     *
+     *        1 - w^n = (1-w)*(1 + w + w^2 + ... +w^(n-1))     (1)
+     *        C = (1 + w + w^2 + ... +w^(n-1))                 (2)
+     *
+     * is perfectly a number of children in the tree with width w.
+     * So we can calculate C from (1):
+     *
+     *        1 - w^n = (1-w)*C =>  C = (1-w^n)/(1-w)          (3)
+     *
+     * (2) takes (n-1) sums and (n-2) multiplication (or (n-2) exponentiations).
+     * (3) takes n+1 multiplications (or one exponentiation), 2 subtractions,
+     * 1 division.
+     * However if more optimal exponentiation algorithm is used like this
+     * (https://en.wikipedia.org/wiki/Exponentiation_by_squaring) number of
+     * multiplications will be O(log(n)).
+     * In case of (2) we will still need all the intermediate powers which
+     * doesn't allow to benefit from efficient exponentiation.
+     * As it is now - int_pow(x, n) is a primitive O(n) algorithm.
+     *
+     * w = 1 is a special case that will lead to divide by 0.
+     * as C (2) corresponds to a full number of nodes in the tree including
+     * the root - we need to return analog in the w=1 tree which is
+     * (depth+1).
+     */
+    return (width == 1) ?
+           (depth + 1) : (1 - (int_pow(width, (depth + 1)))) / (1 - width);
 }
 
-static inline int dep(int total, int width)
-{
-	int i;
-	int x = 0;
+static inline int dep(int total, int width) {
+    int i;
+    int x = 0;
 
-	for (i = 1; x < total-1; i++) {
-		x += int_pow(width, i);
-	}
+    for (i = 1; x < total - 1; i++) {
+        x += int_pow(width, i);
+    }
 
-	return i-1;
+    return i - 1;
 }
 
 static int search_tree(int id, int node, int max_children, int width,
-		       int *parent_id, int *next_max_children, int *depth)
-{
-	int current, next, next_children;
-	int i;
+                       int *parent_id, int *next_max_children, int *depth) {
+    int current, next, next_children;
+    int i;
 
-	*depth = *depth + 1;
-	current = node + 1;
-	next_children = (max_children / width) - 1;
+    *depth = *depth + 1;
+    current = node + 1;
+    next_children = (max_children / width) - 1;
 
-	if (id == current) {
-		*parent_id = node;
-		*next_max_children = next_children;
-		return 1;
-	}
+    if (id == current) {
+        *parent_id = node;
+        *next_max_children = next_children;
+        return 1;
+    }
 
-	for (i = 1; i <= width; i++) {
-		next = current + next_children + 1;
-		if (id == next) {
-			*parent_id = node;
-			*next_max_children = next_children;
-			return 1;
-		}
-		if (id > current && id < next) {
-			return search_tree(id, current, next_children, width,
-					   parent_id, next_max_children,
-					   depth);
-		}
-		current = next;
-	}
-	*parent_id = -1;
-	*next_max_children = -1;
-	return 0;
+    for (i = 1; i <= width; i++) {
+        next = current + next_children + 1;
+        if (id == next) {
+            *parent_id = node;
+            *next_max_children = next_children;
+            return 1;
+        }
+        if (id > current && id < next) {
+            return search_tree(id, current, next_children, width,
+                               parent_id, next_max_children,
+                               depth);
+        }
+        current = next;
+    }
+    *parent_id = -1;
+    *next_max_children = -1;
+    return 0;
 }
 
 void
 reverse_tree_info(int rank, int num_nodes, int width,
-		  int *parent, int *num_children,
-		  int *depth, int *max_depth)
-{
-	int max_children;
-	int p, c;
+                  int *parent, int *num_children,
+                  int *depth, int *max_depth) {
+    int max_children;
+    int p, c;
 
-	/* sanity check */
-	if (rank >= num_nodes) {
-		*parent = -1;
-		*num_children = -1;
-		*depth = -1;
-		*max_depth = -1;
-		return;
-	}
+    /* sanity check */
+    if (rank >= num_nodes) {
+        *parent = -1;
+        *num_children = -1;
+        *depth = -1;
+        *max_depth = -1;
+        return;
+    }
 
-	*max_depth = dep(num_nodes, width);
-	if (rank == 0) {
-		*parent = -1;
-		*num_children = num_nodes - 1;
-		*depth = 0;
-		return;
-	}
+    *max_depth = dep(num_nodes, width);
+    if (rank == 0) {
+        *parent = -1;
+        *num_children = num_nodes - 1;
+        *depth = 0;
+        return;
+    }
 
-	max_children = geometric_series(width, *max_depth);
-	*depth = 0;
-	search_tree(rank, 0, max_children, width, &p, &c, depth);
+    max_children = geometric_series(width, *max_depth);
+    *depth = 0;
+    search_tree(rank, 0, max_children, width, &p, &c, depth);
 
-	if ((rank + c) >= num_nodes)
-		c = num_nodes - rank - 1;
+    if ((rank + c) >= num_nodes)
+        c = num_nodes - rank - 1;
 
-	*parent = p;
-	*num_children = c;
-	return;
+    *parent = p;
+    *num_children = c;
+    return;
 }
 
 int reverse_tree_direct_children(int rank, int num_nodes, int width,
-				 int depth, int *children)
-{
-	int current, child_distance;
-	int max_depth, sub_depth, max_rank_children;
-	int i;
+                                 int depth, int *children) {
+    int current, child_distance;
+    int max_depth, sub_depth, max_rank_children;
+    int i;
 
-	max_depth = dep(num_nodes, width);
-	sub_depth = max_depth - depth;
-	if( sub_depth == 0 ){
-		return 0;
-	}
-	max_rank_children = geometric_series(width, sub_depth);
-	current = rank + 1;
-	child_distance = (max_rank_children / width);
-	for (i = 0; i < width && current < num_nodes; i++) {
-		children[i] = current;
-		current += child_distance;
-	}
-	return i;
+    max_depth = dep(num_nodes, width);
+    sub_depth = max_depth - depth;
+    if (sub_depth == 0) {
+        return 0;
+    }
+    max_rank_children = geometric_series(width, sub_depth);
+    current = rank + 1;
+    child_distance = (max_rank_children / width);
+    for (i = 0; i < width && current < num_nodes; i++) {
+        children[i] = current;
+        current += child_distance;
+    }
+    return i;
 }
 
 #if 0
 
 // Dumb brute force function
 static int dumb_direct_children(int *children, int width, int id,
-				int max_node_id)
+                int max_node_id)
 {
-	int child;
-	int count = 0;
-	for(child = id+1; child < max_node_id; child++){
-		int parent_id, child_num, depth, max_depth;
-		reverse_tree_info(child, max_node_id, width,
-				  &parent_id, &child_num,
-				  &depth, &max_depth);
-		if( parent_id == id ){
-			children[count++] = child;
-		}
-	}
-	return count;
+    int child;
+    int count = 0;
+    for(child = id+1; child < max_node_id; child++){
+        int parent_id, child_num, depth, max_depth;
+        reverse_tree_info(child, max_node_id, width,
+                  &parent_id, &child_num,
+                  &depth, &max_depth);
+        if( parent_id == id ){
+            children[count++] = child;
+        }
+    }
+    return count;
 }
 
 int
 main(int argc, char **argv)
 {
-	int i, j;
-	int n = 8192;
-	int w = 5;
+    int i, j;
+    int n = 8192;
+    int w = 5;
 
-	int parent, children, depth, maxdepth;
+    int parent, children, depth, maxdepth;
 
-	for (i = 0; i < n; i++) {
-		int children1[w], children2[w];
-		int cnt1, cnt2;
+    for (i = 0; i < n; i++) {
+        int children1[w], children2[w];
+        int cnt1, cnt2;
 
-		reverse_tree_info(i, n, w, &parent,
-				  &children, &depth, &maxdepth);
-		printf("\
+        reverse_tree_info(i, n, w, &parent,
+                  &children, &depth, &maxdepth);
+        printf("\
 %d : par: %d nchild: %d depth: %d, maxdepth: %d\n",
-		       i, parent, children, depth, maxdepth);
-		cnt1 = dumb_direct_children(children1, w, i, n);
-		cnt2 = reverce_tree_direct_children(i, n, w, depth, children2);
-		if (cnt1 != cnt2 ) {
-			printf("\
+               i, parent, children, depth, maxdepth);
+        cnt1 = dumb_direct_children(children1, w, i, n);
+        cnt2 = reverce_tree_direct_children(i, n, w, depth, children2);
+        if (cnt1 != cnt2 ) {
+            printf("\
 Direct children sanity check error: cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
-			return -1;
-		}
+            return -1;
+        }
 
-		for(j = 0; j < cnt1; j++){
+        for(j = 0; j < cnt1; j++){
 
-			if (children1[j] != children2[j]) {
-				printf("\
+            if (children1[j] != children2[j]) {
+                printf("\
 Direct children sanity check error: cnt1 = %d, cnt2 = %d\n", cnt1, cnt2);
-				printf("\
+                printf("\
 Failed on %d'th element: children1[%d] = %d, children2[%d] = %d\n",
-				       j, j, children1[j], j, children2[j]);
-				return -1;
-			}
-		}
-	}
+                       j, j, children1[j], j, children2[j]);
+                return -1;
+            }
+        }
+    }
 
-	return 0;
+    return 0;
 }
 #endif

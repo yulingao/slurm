@@ -62,42 +62,54 @@
 
 /* to lock or not */
 typedef struct {
-	lock_level_t assoc;
-	lock_level_t file;
-	lock_level_t qos;
-	lock_level_t res;
-	lock_level_t tres;
-	lock_level_t user;
-	lock_level_t wckey;
+    lock_level_t assoc;
+    lock_level_t file;
+    lock_level_t qos;
+    lock_level_t res;
+    lock_level_t tres;
+    lock_level_t user;
+    lock_level_t wckey;
 } assoc_mgr_lock_t;
 
 typedef enum {
-	ASSOC_LOCK,
-	FILE_LOCK,
-	QOS_LOCK,
-	RES_LOCK,
-	TRES_LOCK,
-	USER_LOCK,
-	WCKEY_LOCK,
-	ASSOC_MGR_ENTITY_COUNT
+    ASSOC_LOCK,
+    FILE_LOCK,
+    QOS_LOCK,
+    RES_LOCK,
+    TRES_LOCK,
+    USER_LOCK,
+    WCKEY_LOCK,
+    ASSOC_MGR_ENTITY_COUNT
 } assoc_mgr_lock_datatype_t;
 
 typedef struct {
- 	uint16_t cache_level;
-	uint16_t enforce;
-	uint16_t *running_cache;
-	void (*add_license_notify) (slurmdb_res_rec_t *rec);
-	void (*resize_qos_notify) (void);
-	void (*remove_assoc_notify) (slurmdb_assoc_rec_t *rec);
-	void (*remove_license_notify) (slurmdb_res_rec_t *rec);
-	void (*remove_qos_notify) (slurmdb_qos_rec_t *rec);
-	char **state_save_location;
-	void (*sync_license_notify) (List clus_res_list);
-	void (*update_assoc_notify) (slurmdb_assoc_rec_t *rec);
-	void (*update_cluster_tres) (void);
-	void (*update_license_notify) (slurmdb_res_rec_t *rec);
-	void (*update_qos_notify) (slurmdb_qos_rec_t *rec);
-	void (*update_resvs) ();
+    uint16_t cache_level;
+    uint16_t enforce;
+    uint16_t *running_cache;
+
+    void (*add_license_notify)(slurmdb_res_rec_t *rec);
+
+    void (*resize_qos_notify)(void);
+
+    void (*remove_assoc_notify)(slurmdb_assoc_rec_t *rec);
+
+    void (*remove_license_notify)(slurmdb_res_rec_t *rec);
+
+    void (*remove_qos_notify)(slurmdb_qos_rec_t *rec);
+
+    char **state_save_location;
+
+    void (*sync_license_notify)(List clus_res_list);
+
+    void (*update_assoc_notify)(slurmdb_assoc_rec_t *rec);
+
+    void (*update_cluster_tres)(void);
+
+    void (*update_license_notify)(slurmdb_res_rec_t *rec);
+
+    void (*update_qos_notify)(slurmdb_qos_rec_t *rec);
+
+    void (*update_resvs)();
 } assoc_init_args_t;
 
 extern List assoc_mgr_tres_list;
@@ -119,13 +131,18 @@ extern uint32_t g_tres_count; /* Number of TRES from the database
 			       * in the assoc_mgr_tres_array */
 
 extern int assoc_mgr_init(void *db_conn, assoc_init_args_t *args,
-			  int db_conn_errno);
+                          int db_conn_errno);
+
 extern int assoc_mgr_fini(bool save_state);
+
 extern void assoc_mgr_lock(assoc_mgr_lock_t *locks);
+
 extern void assoc_mgr_unlock(assoc_mgr_lock_t *locks);
 
 #ifndef NDEBUG
+
 extern bool verify_assoc_lock(assoc_mgr_lock_datatype_t datatype, lock_level_t level);
+
 #endif
 
 /* ran after a new tres_list is given */
@@ -150,9 +167,9 @@ extern int assoc_mgr_post_tres_list(List new_list);
  *       handling it after a return.
  */
 extern int assoc_mgr_get_user_assocs(void *db_conn,
-				     slurmdb_assoc_rec_t *assoc,
-				     int enforce,
-				     List assoc_list);
+                                     slurmdb_assoc_rec_t *assoc,
+                                     int enforce,
+                                     List assoc_list);
 
 /*
  * get info from the storage
@@ -170,10 +187,10 @@ extern int assoc_mgr_get_user_assocs(void *db_conn,
  * RET: SLURM_SUCCESS on success, else SLURM_ERROR
  */
 extern int assoc_mgr_fill_in_tres(void *db_conn,
-				   slurmdb_tres_rec_t *tres,
-				   int enforce,
-				   slurmdb_tres_rec_t **tres_pptr,
-				   bool locked);
+                                  slurmdb_tres_rec_t *tres,
+                                  int enforce,
+                                  slurmdb_tres_rec_t **tres_pptr,
+                                  bool locked);
 
 /*
  * get info from the storage
@@ -193,10 +210,10 @@ extern int assoc_mgr_fill_in_tres(void *db_conn,
  * RET: SLURM_SUCCESS on success, else SLURM_ERROR
  */
 extern int assoc_mgr_fill_in_assoc(void *db_conn,
-				   slurmdb_assoc_rec_t *assoc,
-				   int enforce,
-				   slurmdb_assoc_rec_t **assoc_pptr,
-				   bool locked);
+                                   slurmdb_assoc_rec_t *assoc,
+                                   int enforce,
+                                   slurmdb_assoc_rec_t **assoc_pptr,
+                                   bool locked);
 
 /*
  * get info from the storage
@@ -214,8 +231,8 @@ extern int assoc_mgr_fill_in_assoc(void *db_conn,
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
 extern int assoc_mgr_fill_in_user(void *db_conn, slurmdb_user_rec_t *user,
-				  int enforce,
-				  slurmdb_user_rec_t **user_pptr, bool locked);
+                                  int enforce,
+                                  slurmdb_user_rec_t **user_pptr, bool locked);
 
 /*
  * get info from the storage
@@ -231,8 +248,9 @@ extern int assoc_mgr_fill_in_user(void *db_conn, slurmdb_user_rec_t *user,
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
 extern int assoc_mgr_fill_in_qos(void *db_conn, slurmdb_qos_rec_t *qos,
-				 int enforce,
-				 slurmdb_qos_rec_t **qos_pptr, bool locked);
+                                 int enforce,
+                                 slurmdb_qos_rec_t **qos_pptr, bool locked);
+
 /*
  * get info from the storage
  * IN/OUT:  wckey - slurmdb_wckey_rec_t with the name, cluster and user
@@ -249,10 +267,10 @@ extern int assoc_mgr_fill_in_qos(void *db_conn, slurmdb_qos_rec_t *qos,
  * RET: SLURM_SUCCESS on success, else SLURM_ERROR
  */
 extern int assoc_mgr_fill_in_wckey(void *db_conn,
-				   slurmdb_wckey_rec_t *wckey,
-				   int enforce,
-				   slurmdb_wckey_rec_t **wckey_pptr,
-				   bool locked);
+                                   slurmdb_wckey_rec_t *wckey,
+                                   int enforce,
+                                   slurmdb_wckey_rec_t **wckey_pptr,
+                                   bool locked);
 
 /*
  * get admin_level of uid
@@ -260,7 +278,7 @@ extern int assoc_mgr_fill_in_wckey(void *db_conn,
  * RET: admin level SLURMDB_ADMIN_NOTSET on error
  */
 extern slurmdb_admin_level_t assoc_mgr_get_admin_level(void *db_conn,
-						       uint32_t uid);
+                                                       uint32_t uid);
 
 /*
  * see if user is coordinator of given acct
@@ -269,7 +287,7 @@ extern slurmdb_admin_level_t assoc_mgr_get_admin_level(void *db_conn,
  * RET: true or false
  */
 extern bool assoc_mgr_is_user_acct_coord(void *db_conn, uint32_t uid,
-					char *acct);
+                                         char *acct);
 
 /*
  * get the share information from the association list
@@ -278,8 +296,8 @@ extern bool assoc_mgr_is_user_acct_coord(void *db_conn, uint32_t uid,
  * IN/OUT: resp_msg: message filled in with assoc_mgr info
  */
 extern void assoc_mgr_get_shares(void *db_conn,
-				 uid_t uid, shares_request_msg_t *req_msg,
-				 shares_response_msg_t *resp_msg);
+                                 uid_t uid, shares_request_msg_t *req_msg,
+                                 shares_response_msg_t *resp_msg);
 
 /*
  * get the state of the association manager and pack it up in buffer
@@ -291,9 +309,9 @@ extern void assoc_mgr_get_shares(void *db_conn,
  * IN: protocol_version: version of Slurm we are sending to.
  */
 extern void assoc_mgr_info_get_pack_msg(
-	char **buffer_ptr, int *buffer_size,
-	assoc_mgr_info_request_msg_t *msg, uid_t uid,
-	void *db_conn, uint16_t protocol_version);
+        char **buffer_ptr, int *buffer_size,
+        assoc_mgr_info_request_msg_t *msg, uid_t uid,
+        void *db_conn, uint16_t protocol_version);
 
 /*
  * unpack the packing of the above assoc_mgr_get_pack_state_msg function.
@@ -303,7 +321,7 @@ extern void assoc_mgr_info_get_pack_msg(
  * RET: SLURM_SUCCESS on SUCCESS, SLURM_ERROR else
  */
 extern int assoc_mgr_info_unpack_msg(
-	assoc_mgr_info_msg_t **object, Buf buffer, uint16_t protocol_version);
+        assoc_mgr_info_msg_t **object, Buf buffer, uint16_t protocol_version);
 
 /*
  * assoc_mgr_update - update the association manager
@@ -321,7 +339,7 @@ extern int assoc_mgr_update(List update_list, bool locked);
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_assocs(slurmdb_update_object_t *update,
-				   bool locked);
+                                   bool locked);
 
 /*
  * update wckeys in cache
@@ -330,7 +348,7 @@ extern int assoc_mgr_update_assocs(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_wckeys(slurmdb_update_object_t *update,
-				   bool locked);
+                                   bool locked);
 
 /*
  * update qos in cache
@@ -339,7 +357,7 @@ extern int assoc_mgr_update_wckeys(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_qos(slurmdb_update_object_t *update,
-				bool locked);
+                                bool locked);
 
 /*
  * update cluster resources in cache
@@ -348,7 +366,7 @@ extern int assoc_mgr_update_qos(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_res(slurmdb_update_object_t *update,
-				bool locked);
+                                bool locked);
 
 /*
  * update cluster tres in cache
@@ -357,7 +375,7 @@ extern int assoc_mgr_update_res(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_tres(slurmdb_update_object_t *update,
-				 bool locked);
+                                 bool locked);
 
 /*
  * update users in cache
@@ -366,7 +384,7 @@ extern int assoc_mgr_update_tres(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success (or not found) SLURM_ERROR else
  */
 extern int assoc_mgr_update_users(slurmdb_update_object_t *update,
-				  bool locked);
+                                  bool locked);
 
 /*
  * validate that an association ID is still valid
@@ -376,8 +394,8 @@ extern int assoc_mgr_update_users(slurmdb_update_object_t *update,
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
 extern int assoc_mgr_validate_assoc_id(void *db_conn,
-				       uint32_t assoc_id,
-				       int enforce);
+                                       uint32_t assoc_id,
+                                       int enforce);
 
 /*
  * clear the used_* fields from every association,
@@ -464,7 +482,7 @@ extern int assoc_mgr_find_tres_pos2(slurmdb_tres_rec_t *tres_rec, bool locked);
  * function and while using the returned record.
  */
 extern slurmdb_tres_rec_t *assoc_mgr_find_tres_rec(
-	slurmdb_tres_rec_t *tres_rec);
+        slurmdb_tres_rec_t *tres_rec);
 
 /*
  * Calls assoc_mgr_find_tres_pos and returns the pointer in the
@@ -473,7 +491,7 @@ extern slurmdb_tres_rec_t *assoc_mgr_find_tres_rec(
  * function and while using the returned record.
  */
 extern slurmdb_tres_rec_t *assoc_mgr_find_tres_rec2(
-		slurmdb_tres_rec_t *tres_rec);
+        slurmdb_tres_rec_t *tres_rec);
 
 /* fills in allocates and sets tres_cnt based off tres_str
  * OUT tres_cnt - array to be filled in g_tres_cnt in length
@@ -483,7 +501,7 @@ extern slurmdb_tres_rec_t *assoc_mgr_find_tres_rec2(
  * RET if positions changed in array from string 1 if nothing changed 0
  */
 extern int assoc_mgr_set_tres_cnt_array(uint64_t **tres_cnt, char *tres_str,
-					uint64_t init_val, bool locked);
+                                        uint64_t init_val, bool locked);
 
 /* Creates all the tres arrays for an association.
  * NOTE: The assoc_mgr tres read lock needs to be locked before this
@@ -502,7 +520,7 @@ extern void assoc_mgr_set_qos_tres_cnt(slurmdb_qos_rec_t *qos);
  * RET char * of simple tres string
  */
 extern char *assoc_mgr_make_tres_str_from_array(
-	uint64_t *tres_cnt, uint32_t flags, bool locked);
+        uint64_t *tres_cnt, uint32_t flags, bool locked);
 
 /* Fill in the default qos id or name given an association record.  If
  * none is given it gives the default qos for the system.
@@ -511,7 +529,7 @@ extern char *assoc_mgr_make_tres_str_from_array(
  * NOTE: READ lock needs to be set on associations and QOS before
  * calling this. */
 extern void assoc_mgr_get_default_qos_info(
-	slurmdb_assoc_rec_t *assoc_ptr, slurmdb_qos_rec_t *qos_rec);
+        slurmdb_assoc_rec_t *assoc_ptr, slurmdb_qos_rec_t *qos_rec);
 
 /* Calcuate a weighted tres value.
  * IN: tres_cnt - array of tres values of size g_tres_count.
@@ -521,7 +539,7 @@ extern void assoc_mgr_get_default_qos_info(
  * RET: returns the calcuated tres weight.
  */
 extern double assoc_mgr_tres_weighted(uint64_t *tres_cnt, double *weights,
-				      uint16_t flags, bool locked);
+                                      uint16_t flags, bool locked);
 
 /* Get TRES's old position.
  * IN: cur_pos - the current position in the tres array.

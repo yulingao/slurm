@@ -38,23 +38,22 @@
 
 #include "src/scontrol/scontrol.h"
 
-extern int scontrol_cancel_reboot(char *nodes)
-{
-	int rc = SLURM_SUCCESS;
-	update_node_msg_t node_msg;
+extern int scontrol_cancel_reboot(char *nodes) {
+    int rc = SLURM_SUCCESS;
+    update_node_msg_t node_msg;
 
-	slurm_init_update_node_msg(&node_msg);
+    slurm_init_update_node_msg(&node_msg);
 
-	node_msg.node_names = nodes;
-	node_msg.node_state = NODE_STATE_CANCEL_REBOOT;
+    node_msg.node_names = nodes;
+    node_msg.node_state = NODE_STATE_CANCEL_REBOOT;
 
-	if (slurm_update_node(&node_msg)) {
-		exit_code = 1;
-		rc = slurm_get_errno();
-		slurm_perror ("slurm_update error");
-	}
+    if (slurm_update_node(&node_msg)) {
+        exit_code = 1;
+        rc = slurm_get_errno();
+        slurm_perror("slurm_update error");
+    }
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -68,39 +67,38 @@ extern int scontrol_cancel_reboot(char *nodes)
  * RET SLURM_SUCCESS or a slurm error code
  */
 extern int scontrol_reboot_nodes(char *node_list, bool asap,
-				 uint32_t next_state, char *reason)
-{
-	slurm_ctl_conf_t *conf;
-	int rc;
-	slurm_msg_t msg;
-	reboot_msg_t req;
+                                 uint32_t next_state, char *reason) {
+    slurm_ctl_conf_t *conf;
+    int rc;
+    slurm_msg_t msg;
+    reboot_msg_t req;
 
-	conf = slurm_conf_lock();
-	if (conf->reboot_program == NULL) {
-		error("RebootProgram isn't defined");
-		slurm_conf_unlock();
-		slurm_seterrno(SLURM_ERROR);
-		return SLURM_ERROR;
-	}
-	slurm_conf_unlock();
+    conf = slurm_conf_lock();
+    if (conf->reboot_program == NULL) {
+        error("RebootProgram isn't defined");
+        slurm_conf_unlock();
+        slurm_seterrno(SLURM_ERROR);
+        return SLURM_ERROR;
+    }
+    slurm_conf_unlock();
 
-	slurm_msg_t_init(&msg);
+    slurm_msg_t_init(&msg);
 
-	slurm_init_reboot_msg(&req, true);
-	req.next_state = next_state;
-	req.node_list  = node_list;
-	req.reason     = reason;
-	if (asap)
-		req.flags |= REBOOT_FLAGS_ASAP;
-	msg.msg_type = REQUEST_REBOOT_NODES;
-	msg.data = &req;
+    slurm_init_reboot_msg(&req, true);
+    req.next_state = next_state;
+    req.node_list = node_list;
+    req.reason = reason;
+    if (asap)
+        req.flags |= REBOOT_FLAGS_ASAP;
+    msg.msg_type = REQUEST_REBOOT_NODES;
+    msg.data = &req;
 
-	if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec)<0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&msg, &rc, working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc)
-		slurm_seterrno_ret(rc);
+    if (rc)
+        slurm_seterrno_ret(rc);
 
-	return rc;
+    return rc;
 }
 

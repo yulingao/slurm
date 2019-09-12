@@ -69,7 +69,7 @@ extern void srun_exec(struct step_record *step_ptr, char **argv);
  * srun_job_complete - notify srun of a job's termination
  * IN job_ptr - pointer to the slurmctld job record
  */
-extern void srun_job_complete (struct job_record *job_ptr);
+extern void srun_job_complete(struct job_record *job_ptr);
 
 
 /*
@@ -78,13 +78,13 @@ extern void srun_job_complete (struct job_record *job_ptr);
  * IN op - SUSPEND_JOB or RESUME_JOB (enum suspend_opts from slurm.h)
  * RET - true if message send, otherwise false
  */
-extern bool srun_job_suspend (struct job_record *job_ptr, uint16_t op);
+extern bool srun_job_suspend(struct job_record *job_ptr, uint16_t op);
 
 /*
  * srun_step_complete - notify srun of a job step's termination
  * IN step_ptr - pointer to the slurmctld job step record
  */
-extern void srun_step_complete (struct step_record *step_ptr);
+extern void srun_step_complete(struct step_record *step_ptr);
 
 /*
  * srun_step_missing - notify srun that a job step is missing from
@@ -92,8 +92,8 @@ extern void srun_step_complete (struct step_record *step_ptr);
  * IN step_ptr  - pointer to the slurmctld job step record
  * IN node_list - name of nodes we did not find the step on
  */
-extern void srun_step_missing (struct step_record *step_ptr,
-			       char *node_list);
+extern void srun_step_missing(struct step_record *step_ptr,
+                              char *node_list);
 
 /*
  * srun_step_signal - notify srun that a job step should be signaled
@@ -101,7 +101,7 @@ extern void srun_step_missing (struct step_record *step_ptr,
  * IN step_ptr  - pointer to the slurmctld job step record
  * IN signal - signal number
  */
-extern void srun_step_signal (struct step_record *step_ptr, uint16_t signal);
+extern void srun_step_signal(struct step_record *step_ptr, uint16_t signal);
 
 /*
  * srun_node_fail - notify srun of a node's failure
@@ -111,7 +111,7 @@ extern void srun_step_signal (struct step_record *step_ptr, uint16_t signal);
 extern void srun_node_fail(struct job_record *job_ptr, char *node_name);
 
 /* srun_ping - ping all srun commands that have not been heard from recently */
-extern void srun_ping (void);
+extern void srun_ping(void);
 
 /*
  * srun_response - note that srun has responded
@@ -131,7 +131,7 @@ extern void srun_step_timeout(struct step_record *step_ptr, time_t timeout_val);
  * srun_timeout - notify srun of a job's timeout
  * IN job_ptr - pointer to the slurmctld job record
  */
-extern void srun_timeout (struct job_record *job_ptr);
+extern void srun_timeout(struct job_record *job_ptr);
 
 /*
  * srun_user_message - Send arbitrary message to an srun job (no job steps)

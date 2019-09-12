@@ -62,311 +62,280 @@ int max_line_size;
  * Functions *
  *************/
 static int _get_info(bool clear_old, bool log_cluster_name);
+
 static int _get_window_width(void);
+
 static void _print_date(void);
+
 static int _multi_cluster(List clusters);
+
 static int _print_job(bool clear_old, bool log_cluster_name);
+
 static int _print_job_steps(bool clear_old);
 
-int main(int argc, char **argv)
-{
-	log_options_t opts = LOG_OPTS_STDERR_ONLY;
-	int error_code = SLURM_SUCCESS;
+int main(int argc, char **argv) {
+    log_options_t opts = LOG_OPTS_STDERR_ONLY;
+    int error_code = SLURM_SUCCESS;
 
-	slurm_conf_init(NULL);
-	log_init(xbasename(argv[0]), opts, SYSLOG_FACILITY_USER, NULL);
-	parse_command_line(argc, argv);
-	if (params.verbose)
-	{ /* 如果是verbose模式 */
-		opts.stderr_level += params.verbose;
-		log_alter(opts, SYSLOG_FACILITY_USER, NULL);
-	}
-	max_line_size = _get_window_width(); /* 得到窗口宽度 */
+    slurm_conf_init(NULL);
+    log_init(xbasename(argv[0]), opts, SYSLOG_FACILITY_USER, NULL);
+    parse_command_line(argc, argv);
+    if (params.verbose) { /* 如果是verbose模式 */
+        opts.stderr_level += params.verbose;
+        log_alter(opts, SYSLOG_FACILITY_USER, NULL);
+    }
+    max_line_size = _get_window_width(); /* 得到窗口宽度 */
 
-	if (params.clusters)
-		working_cluster_rec = list_peek(params.clusters);
+    if (params.clusters)
+        working_cluster_rec = list_peek(params.clusters);
 
-	while (1) /* 打印作业 */
-	{
-		if ((!params.no_header) &&
-			(params.iterate || params.verbose || params.long_list))
-			_print_date();
+    while (1) /* 打印作业 */
+    {
+        if ((!params.no_header) &&
+            (params.iterate || params.verbose || params.long_list))
+            _print_date();
 
-		if (!params.clusters) /* 不是集群模式 */
-		{
-			if (_get_info(false, false))
-				error_code = 1;
-		}
-		else if (_multi_cluster(params.clusters) != 0)
-			error_code = 1;
+        if (!params.clusters) /* 不是集群模式 */
+        {
+            if (_get_info(false, false))
+                error_code = 1;
+        } else if (_multi_cluster(params.clusters) != 0)
+            error_code = 1;
 
-		if (params.iterate) /* 以iterate秒间隔自动更新显示信息 */
-		{
-			printf("\n");
-			sleep(params.iterate);
-		}
-		else
-			break;
-	}
+        if (params.iterate) /* 以iterate秒间隔自动更新显示信息 */
+        {
+            printf("\n");
+            sleep(params.iterate);
+        } else
+            break;
+    }
 
-	if (error_code != SLURM_SUCCESS)
-		exit(error_code);
-	else
-		exit(0);
+    if (error_code != SLURM_SUCCESS)
+        exit(error_code);
+    else
+        exit(0);
 }
 
-static int _multi_cluster(List clusters)
-{
-	ListIterator itr;
-	bool log_cluster_name = false, first = true;
-	int rc = 0, rc2;
+static int _multi_cluster(List clusters) {
+    ListIterator itr;
+    bool log_cluster_name = false, first = true;
+    int rc = 0, rc2;
 
-	if ((list_count(clusters) > 1) && params.no_header)
-		log_cluster_name = true;
-	itr = list_iterator_create(clusters);
-	while ((working_cluster_rec = list_next(itr)))
-	{
-		if (!params.no_header) /* 显示头信息 */
-		{
-			if (first)
-				first = false;
-			else
-				printf("\n");
-			printf("CLUSTER: %s\n", working_cluster_rec->name);
-		}
-		rc2 = _get_info(true, log_cluster_name);
-		rc = MAX(rc, rc2);
-	}
-	list_iterator_destroy(itr);
+    if ((list_count(clusters) > 1) && params.no_header)
+        log_cluster_name = true;
+    itr = list_iterator_create(clusters);
+    while ((working_cluster_rec = list_next(itr))) {
+        if (!params.no_header) /* 显示头信息 */
+        {
+            if (first)
+                first = false;
+            else
+                printf("\n");
+            printf("CLUSTER: %s\n", working_cluster_rec->name);
+        }
+        rc2 = _get_info(true, log_cluster_name);
+        rc = MAX(rc, rc2);
+    }
+    list_iterator_destroy(itr);
 
-	return rc;
+    return rc;
 }
 
-static int _get_info(bool clear_old, bool log_cluster_name)
-{
-	if (params.step_flag) /* 如果指定了特定的作业步 */
-		return _print_job_steps(clear_old);
-	else /* 打印全部作业的信息 */
-		return _print_job(clear_old, log_cluster_name);
+static int _get_info(bool clear_old, bool log_cluster_name) {
+    if (params.step_flag) /* 如果指定了特定的作业步 */
+        return _print_job_steps(clear_old);
+    else /* 打印全部作业的信息 */
+        return _print_job(clear_old, log_cluster_name);
 }
 
 /* get_window_width - return the size of the window STDOUT goes to */
 static int
-_get_window_width(void)
-{
-	int width = 80;
+_get_window_width(void) {
+    int width = 80;
 
 #ifdef TIOCGSIZE
-	struct ttysize win;
-	if (ioctl(STDOUT_FILENO, TIOCGSIZE, &win) == 0)
-		width = win.ts_cols;
+    struct ttysize win;
+    if (ioctl(STDOUT_FILENO, TIOCGSIZE, &win) == 0)
+        width = win.ts_cols;
 #elif defined TIOCGWINSZ
-	struct winsize win;
-	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &win) == 0)
-		width = win.ws_col;
+    struct winsize win;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &win) == 0)
+        width = win.ws_col;
 #else
-	const char *s;
-	s = getenv("COLUMNS");
-	if (s)
-		width = strtol(s, NULL, 10);
+    const char *s;
+    s = getenv("COLUMNS");
+    if (s)
+        width = strtol(s, NULL, 10);
 #endif
-	return width;
+    return width;
 }
 
 /* _print_job 
 -打印指定作业的信息
 - print the specified job's information */
-static int _print_job(bool clear_old, bool log_cluster_name)
-{
-	static job_info_msg_t *old_job_ptr;
-	job_info_msg_t *new_job_ptr = NULL;
-	int error_code;
-	uint16_t show_flags = 0;
+static int _print_job(bool clear_old, bool log_cluster_name) {
+    static job_info_msg_t *old_job_ptr;
+    job_info_msg_t *new_job_ptr = NULL;
+    int error_code;
+    uint16_t show_flags = 0;
 
-	if (params.all_flag || (params.job_list && list_count(params.job_list)))
-		show_flags |= SHOW_ALL;
-	if (params.federation_flag)
-		show_flags |= SHOW_FEDERATION;
-	if (params.local_flag)
-		show_flags |= SHOW_LOCAL;
-	if (params.sibling_flag)
-		show_flags |= SHOW_FEDERATION | SHOW_SIBLING;
+    if (params.all_flag || (params.job_list && list_count(params.job_list)))
+        show_flags |= SHOW_ALL;
+    if (params.federation_flag)
+        show_flags |= SHOW_FEDERATION;
+    if (params.local_flag)
+        show_flags |= SHOW_LOCAL;
+    if (params.sibling_flag)
+        show_flags |= SHOW_FEDERATION | SHOW_SIBLING;
 
-	/* We require detail data when CPUs are requested */
-	if (params.format && strstr(params.format, "C"))
-		show_flags |= SHOW_DETAIL;
+    /* We require detail data when CPUs are requested */
+    if (params.format && strstr(params.format, "C"))
+        show_flags |= SHOW_DETAIL;
 
-	if (old_job_ptr)
-	{
-		if (clear_old)
-			old_job_ptr->last_update = 0;
-		if (params.job_id)
-		{
-			error_code = slurm_load_job(
-				&new_job_ptr, params.job_id,
-				show_flags);
-		}
-		else if (params.user_id)
-		{
-			error_code = slurm_load_job_user(&new_job_ptr,
-											 params.user_id,
-											 show_flags);
-		}
-		else
-		{
-			if (params.clusters)
-				show_flags |= SHOW_LOCAL;
-			error_code = slurm_load_jobs(
-				old_job_ptr->last_update,
-				&new_job_ptr, show_flags);
-		}
-		if (error_code == SLURM_SUCCESS)
-			slurm_free_job_info_msg(old_job_ptr);
-		else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA)
-		{
-			error_code = SLURM_SUCCESS;
-			new_job_ptr = old_job_ptr;
-		}
-	}
-	else if (params.job_id)
-	{
-		error_code = slurm_load_job(&new_job_ptr, params.job_id,
-									show_flags);
-	}
-	else if (params.user_id)
-	{
-		error_code = slurm_load_job_user(&new_job_ptr, params.user_id,
-										 show_flags);
-	}
-	else
-	{
-		error_code = slurm_load_jobs((time_t)NULL, &new_job_ptr,
-									 show_flags);
-	}
+    if (old_job_ptr) {
+        if (clear_old)
+            old_job_ptr->last_update = 0;
+        if (params.job_id) {
+            error_code = slurm_load_job(
+                    &new_job_ptr, params.job_id,
+                    show_flags);
+        } else if (params.user_id) {
+            error_code = slurm_load_job_user(&new_job_ptr,
+                                             params.user_id,
+                                             show_flags);
+        } else {
+            if (params.clusters)
+                show_flags |= SHOW_LOCAL;
+            error_code = slurm_load_jobs(
+                    old_job_ptr->last_update,
+                    &new_job_ptr, show_flags);
+        }
+        if (error_code == SLURM_SUCCESS)
+            slurm_free_job_info_msg(old_job_ptr);
+        else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
+            error_code = SLURM_SUCCESS;
+            new_job_ptr = old_job_ptr;
+        }
+    } else if (params.job_id) {
+        error_code = slurm_load_job(&new_job_ptr, params.job_id,
+                                    show_flags);
+    } else if (params.user_id) {
+        error_code = slurm_load_job_user(&new_job_ptr, params.user_id,
+                                         show_flags);
+    } else {
+        error_code = slurm_load_jobs((time_t) NULL, &new_job_ptr,
+                                     show_flags);
+    }
 
-	if (error_code)
-	{
-		slurm_perror("slurm_load_jobs error");
-		return SLURM_ERROR;
-	}
-	old_job_ptr = new_job_ptr;
-	if (params.job_id || params.user_id)
-		old_job_ptr->last_update = (time_t)0;
+    if (error_code) {
+        slurm_perror("slurm_load_jobs error");
+        return SLURM_ERROR;
+    }
+    old_job_ptr = new_job_ptr;
+    if (params.job_id || params.user_id)
+        old_job_ptr->last_update = (time_t) 0;
 
-	if (params.verbose)
-	{
-		printf("last_update_time=%ld records=%u\n",
-			   (long)new_job_ptr->last_update,
-			   new_job_ptr->record_count);
-	}
+    if (params.verbose) {
+        printf("last_update_time=%ld records=%u\n",
+               (long) new_job_ptr->last_update,
+               new_job_ptr->record_count);
+    }
 
-	if (!params.format && !params.format_long)
-	{
-		if (log_cluster_name)
-			xstrcat(params.format_long, "cluster:10 ,");
-		if (params.long_list)
-		{
-			xstrcat(params.format_long,
-					"jobarrayid:.18 ,partition:.10 ,username:.9 ,"
-					"state:.9 ,timeused:.11 ,timelimit:.10 ,"
-					"numnodes:.7 ,reasonlist:0");
-		}
-		else
-		{
-			xstrcat(params.format_long,
-					"jobarrayid:.18 ,partition:.10 ,username:.9 ,"
-					"statecompact:.3 ,timeused:.11 ,"
-					"numnodes:.7 ,reasonlist:0");
-		}
-	}
+    if (!params.format && !params.format_long) {
+        if (log_cluster_name)
+            xstrcat(params.format_long, "cluster:10 ,");
+        if (params.long_list) {
+            xstrcat(params.format_long,
+                    "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
+                    "state:.9 ,timeused:.11 ,timelimit:.10 ,"
+                    "numnodes:.7 ,reasonlist:0");
+        } else {
+            xstrcat(params.format_long,
+                    "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
+                    "statecompact:.3 ,timeused:.11 ,"
+                    "numnodes:.7 ,reasonlist:0");
+        }
+    }
 
-	if (!params.format_list)
-	{
-		if (params.format)
-			parse_format(params.format);
-		else if (params.format_long)
-			parse_long_format(params.format_long);
-	}
+    if (!params.format_list) {
+        if (params.format)
+            parse_format(params.format);
+        else if (params.format_long)
+            parse_long_format(params.format_long);
+    }
 
-	print_jobs_array(new_job_ptr->job_array, new_job_ptr->record_count,
-					 params.format_list);
-	return SLURM_SUCCESS;
+    print_jobs_array(new_job_ptr->job_array, new_job_ptr->record_count,
+                     params.format_list);
+    return SLURM_SUCCESS;
 }
 
 /* _print_job_step
 -打印指定作业步骤的信息
  - print the specified job step's information */
 static int
-_print_job_steps(bool clear_old)
-{
-	int error_code;
-	static job_step_info_response_msg_t *old_step_ptr = NULL;
-	static job_step_info_response_msg_t *new_step_ptr;
-	uint16_t show_flags = 0;
+_print_job_steps(bool clear_old) {
+    int error_code;
+    static job_step_info_response_msg_t *old_step_ptr = NULL;
+    static job_step_info_response_msg_t *new_step_ptr;
+    uint16_t show_flags = 0;
 
-	if (params.all_flag)
-		show_flags |= SHOW_ALL;
-	if (params.local_flag)
-		show_flags |= SHOW_LOCAL;
+    if (params.all_flag)
+        show_flags |= SHOW_ALL;
+    if (params.local_flag)
+        show_flags |= SHOW_LOCAL;
 
-	if (old_step_ptr)
-	{
-		if (clear_old)
-			old_step_ptr->last_update = 0;
-		/* Use a last_update time of 0 so that we can get an updated
-		 * run_time for jobs rather than just its start_time */
-		/* 使用last_update时间为0，这样我们就可以获得作业的更新run_time而不仅仅是start_time */
-		error_code = slurm_get_job_steps((time_t)0, NO_VAL, NO_VAL,
-										 &new_step_ptr, show_flags);
-		if (error_code == SLURM_SUCCESS)
-			slurm_free_job_step_info_response_msg(old_step_ptr);
-		else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) /* 没有数据改变 */
-		{
-			error_code = SLURM_SUCCESS;
-			new_step_ptr = old_step_ptr;
-		}
-	}
-	else
-	{
-		error_code = slurm_get_job_steps((time_t)0, NO_VAL, NO_VAL,
-										 &new_step_ptr, show_flags);
-	}
-	if (error_code)
-	{
-		slurm_perror("slurm_get_job_steps error");
-		return SLURM_ERROR;
-	}
-	old_step_ptr = new_step_ptr;
+    if (old_step_ptr) {
+        if (clear_old)
+            old_step_ptr->last_update = 0;
+        /* Use a last_update time of 0 so that we can get an updated
+         * run_time for jobs rather than just its start_time */
+        /* 使用last_update时间为0，这样我们就可以获得作业的更新run_time而不仅仅是start_time */
+        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL,
+                                         &new_step_ptr, show_flags);
+        if (error_code == SLURM_SUCCESS)
+            slurm_free_job_step_info_response_msg(old_step_ptr);
+        else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) /* 没有数据改变 */
+        {
+            error_code = SLURM_SUCCESS;
+            new_step_ptr = old_step_ptr;
+        }
+    } else {
+        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL,
+                                         &new_step_ptr, show_flags);
+    }
+    if (error_code) {
+        slurm_perror("slurm_get_job_steps error");
+        return SLURM_ERROR;
+    }
+    old_step_ptr = new_step_ptr;
 
-	if (params.verbose) /* 如果是verbose模式 */
-	{
-		printf("last_update_time=%ld records=%u\n",
-			   (long)new_step_ptr->last_update,
-			   new_step_ptr->job_step_count);
-	}
+    if (params.verbose) /* 如果是verbose模式 */
+    {
+        printf("last_update_time=%ld records=%u\n",
+               (long) new_step_ptr->last_update,
+               new_step_ptr->job_step_count);
+    }
 
-	if (!params.format && !params.format_long)
-		params.format = "%.15i %.8j %.9P %.8u %.9M %N"; /* 默认显示信息的格式 */
+    if (!params.format && !params.format_long)
+        params.format = "%.15i %.8j %.9P %.8u %.9M %N"; /* 默认显示信息的格式 */
 
-	if (!params.format_list)
-	{
-		if (params.format)
-			parse_format(params.format);
-		else if (params.format_long)
-			parse_long_format(params.format_long);
-	}
+    if (!params.format_list) {
+        if (params.format)
+            parse_format(params.format);
+        else if (params.format_long)
+            parse_long_format(params.format_long);
+    }
 
-	/* 打印信息 */
-	print_steps_array(new_step_ptr->job_steps,
-					  new_step_ptr->job_step_count,
-					  params.format_list);
-	return SLURM_SUCCESS;
+    /* 打印信息 */
+    print_steps_array(new_step_ptr->job_steps,
+                      new_step_ptr->job_step_count,
+                      params.format_list);
+    return SLURM_SUCCESS;
 }
 
-static void _print_date(void)
-{
-	time_t now;
+static void _print_date(void) {
+    time_t now;
 
-	now = time(NULL);
-	printf("%s", slurm_ctime(&now));
+    now = time(NULL);
+    printf("%s", slurm_ctime(&now));
 }

@@ -83,82 +83,78 @@ const char plugin_type[] = "jobacct_gather/linux";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 
-static int _list_find_prec_by_pid(void *x, void *key)
-{
-        jag_prec_t *j = (jag_prec_t *) x;
-        pid_t pid = *(pid_t *) key;
+static int _list_find_prec_by_pid(void *x, void *key) {
+    jag_prec_t *j = (jag_prec_t *) x;
+    pid_t pid = *(pid_t *) key;
 
-        if (!j->visited && (j->pid == pid))
-                return 1;
-        return 0;
+    if (!j->visited && (j->pid == pid))
+        return 1;
+    return 0;
 }
 
-static int _list_find_prec_by_ppid(void *x, void *key)
-{
-        jag_prec_t *j = (jag_prec_t *) x;
-        pid_t pid = *(pid_t *) key;
+static int _list_find_prec_by_ppid(void *x, void *key) {
+    jag_prec_t *j = (jag_prec_t *) x;
+    pid_t pid = *(pid_t *) key;
 
-        if (!j->visited && (j->ppid == pid))
-                return 1;
-        return 0;
+    if (!j->visited && (j->ppid == pid))
+        return 1;
+    return 0;
 }
 
-static void _aggregate_prec(jag_prec_t *prec, jag_prec_t *ancestor)
-{
-	int i;
+static void _aggregate_prec(jag_prec_t *prec, jag_prec_t *ancestor) {
+    int i;
 #if _DEBUG
-	info("pid:%u ppid:%u rss:%"PRIu64" B",
-	     prec->pid, prec->ppid,
-	     prec->tres_data[TRES_ARRAY_MEM].size_read);
+    info("pid:%u ppid:%u rss:%"PRIu64" B",
+         prec->pid, prec->ppid,
+         prec->tres_data[TRES_ARRAY_MEM].size_read);
 #endif
-	ancestor->usec += prec->usec;
-	ancestor->ssec += prec->ssec;
+    ancestor->usec += prec->usec;
+    ancestor->ssec += prec->ssec;
 
-	for (i = 0; i < prec->tres_count; i++) {
-		if (prec->tres_data[i].num_reads != INFINITE64) {
-			if (ancestor->tres_data[i].num_reads == INFINITE64)
-				ancestor->tres_data[i].num_reads =
-					prec->tres_data[i].num_reads;
-			else
-				ancestor->tres_data[i].num_reads +=
-					prec->tres_data[i].num_reads;
-		}
+    for (i = 0; i < prec->tres_count; i++) {
+        if (prec->tres_data[i].num_reads != INFINITE64) {
+            if (ancestor->tres_data[i].num_reads == INFINITE64)
+                ancestor->tres_data[i].num_reads =
+                        prec->tres_data[i].num_reads;
+            else
+                ancestor->tres_data[i].num_reads +=
+                        prec->tres_data[i].num_reads;
+        }
 
-		if (prec->tres_data[i].num_writes != INFINITE64) {
-			if (ancestor->tres_data[i].num_writes == INFINITE64)
-				ancestor->tres_data[i].num_writes =
-					prec->tres_data[i].num_writes;
-			else
-				ancestor->tres_data[i].num_writes +=
-					prec->tres_data[i].num_writes;
-		}
+        if (prec->tres_data[i].num_writes != INFINITE64) {
+            if (ancestor->tres_data[i].num_writes == INFINITE64)
+                ancestor->tres_data[i].num_writes =
+                        prec->tres_data[i].num_writes;
+            else
+                ancestor->tres_data[i].num_writes +=
+                        prec->tres_data[i].num_writes;
+        }
 
-		if (prec->tres_data[i].size_read != INFINITE64) {
-			if (ancestor->tres_data[i].size_read == INFINITE64)
-				ancestor->tres_data[i].size_read =
-					prec->tres_data[i].size_read;
-			else
-				ancestor->tres_data[i].size_read +=
-					prec->tres_data[i].size_read;
-		}
+        if (prec->tres_data[i].size_read != INFINITE64) {
+            if (ancestor->tres_data[i].size_read == INFINITE64)
+                ancestor->tres_data[i].size_read =
+                        prec->tres_data[i].size_read;
+            else
+                ancestor->tres_data[i].size_read +=
+                        prec->tres_data[i].size_read;
+        }
 
-		if (prec->tres_data[i].size_write != INFINITE64) {
-			if (ancestor->tres_data[i].size_write == INFINITE64)
-				ancestor->tres_data[i].size_write =
-					prec->tres_data[i].size_write;
-			else
-				ancestor->tres_data[i].size_write +=
-					prec->tres_data[i].size_write;
-		}
-	}
-	prec->visited = true;
+        if (prec->tres_data[i].size_write != INFINITE64) {
+            if (ancestor->tres_data[i].size_write == INFINITE64)
+                ancestor->tres_data[i].size_write =
+                        prec->tres_data[i].size_write;
+            else
+                ancestor->tres_data[i].size_write +=
+                        prec->tres_data[i].size_write;
+        }
+    }
+    prec->visited = true;
 }
 
-static int _reset_visited(jag_prec_t *prec, void *empty)
-{
-	prec->visited = false;
+static int _reset_visited(jag_prec_t *prec, void *empty) {
+    prec->visited = false;
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -182,73 +178,69 @@ static int _reset_visited(jag_prec_t *prec, void *empty)
  *
  * THREADSAFE! Only one thread ever gets here.
  */
-static void _get_offspring_data(List prec_list, jag_prec_t *ancestor, pid_t pid)
-{
-	jag_prec_t *prec = NULL;
-	jag_prec_t *prec_tmp = NULL;
-	List tmp_list = NULL;
+static void _get_offspring_data(List prec_list, jag_prec_t *ancestor, pid_t pid) {
+    jag_prec_t *prec = NULL;
+    jag_prec_t *prec_tmp = NULL;
+    List tmp_list = NULL;
 
-	/* reset all precs to be not visited */
-	(void)list_for_each(prec_list, (ListForF)_reset_visited, NULL);
+    /* reset all precs to be not visited */
+    (void) list_for_each(prec_list, (ListForF) _reset_visited, NULL);
 
-	/* See if we can find a prec from the given pid */
-	if (!(prec = list_find_first(prec_list, _list_find_prec_by_pid, &pid)))
-		return;
+    /* See if we can find a prec from the given pid */
+    if (!(prec = list_find_first(prec_list, _list_find_prec_by_pid, &pid)))
+        return;
 
-	prec->visited = true;
+    prec->visited = true;
 
-	tmp_list = list_create(NULL);
-	list_append(tmp_list, prec);
+    tmp_list = list_create(NULL);
+    list_append(tmp_list, prec);
 
-	while ((prec_tmp = list_dequeue(tmp_list))) {
-		while ((prec = list_find_first(prec_list,
-					      _list_find_prec_by_ppid,
-					       &(prec_tmp->pid)))) {
-			_aggregate_prec(prec, ancestor);
-			list_append(tmp_list, prec);
-		}
-	}
-	FREE_NULL_LIST(tmp_list);
+    while ((prec_tmp = list_dequeue(tmp_list))) {
+        while ((prec = list_find_first(prec_list,
+                                       _list_find_prec_by_ppid,
+                                       &(prec_tmp->pid)))) {
+            _aggregate_prec(prec, ancestor);
+            list_append(tmp_list, prec);
+        }
+    }
+    FREE_NULL_LIST(tmp_list);
 
-	return;
+    return;
 }
 
-static bool _run_in_daemon(void)
-{
-	static bool set = false;
-	static bool run = false;
+static bool _run_in_daemon(void) {
+    static bool set = false;
+    static bool run = false;
 
-	if (!set) {
-		set = 1;
-		run = run_in_daemon("slurmstepd");
-	}
+    if (!set) {
+        set = 1;
+        run = run_in_daemon("slurmstepd");
+    }
 
-	return run;
+    return run;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init (void)
-{
-	if (_run_in_daemon()) {
-		jag_common_init(0);
-	}
-	debug("%s loaded", plugin_name);
+extern int init(void) {
+    if (_run_in_daemon()) {
+        jag_common_init(0);
+    }
+    debug("%s loaded", plugin_name);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int fini (void)
-{
-	if (_run_in_daemon()) {
-		/* just to make sure it closes things up since we call it
-		 * from here */
-		acct_gather_energy_fini();
-	}
+extern int fini(void) {
+    if (_run_in_daemon()) {
+        /* just to make sure it closes things up since we call it
+         * from here */
+        acct_gather_energy_fini();
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -269,32 +261,29 @@ extern int fini (void)
  *    wrong.
  */
 extern void jobacct_gather_p_poll_data(
-	List task_list, bool pgid_plugin, uint64_t cont_id, bool profile)
-{
-	static jag_callbacks_t callbacks;
-	static bool first = 1;
+        List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
+    static jag_callbacks_t callbacks;
+    static bool first = 1;
 
-	xassert(_run_in_daemon());
+    xassert(_run_in_daemon());
 
-	if (first) {
-		memset(&callbacks, 0, sizeof(jag_callbacks_t));
-		first = 0;
-		callbacks.get_offspring_data = _get_offspring_data;
-	}
+    if (first) {
+        memset(&callbacks, 0, sizeof(jag_callbacks_t));
+        first = 0;
+        callbacks.get_offspring_data = _get_offspring_data;
+    }
 
-	jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
-			     profile);
-	return;
+    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
+                         profile);
+    return;
 }
 
-extern int jobacct_gather_p_endpoll(void)
-{
-	jag_common_fini();
+extern int jobacct_gather_p_endpoll(void) {
+    jag_common_fini();
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id)
-{
-	return SLURM_SUCCESS;
+extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id) {
+    return SLURM_SUCCESS;
 }

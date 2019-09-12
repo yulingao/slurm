@@ -47,10 +47,10 @@
  * are given to us.  So if you need something from the header just
  * copy it here.
  */
-#define	fatal			slurm_fatal
-#define	error			slurm_error
-#define	info			slurm_info
-#define	verbose			slurm_verbose
+#define    fatal            slurm_fatal
+#define    error            slurm_error
+#define    info            slurm_info
+#define    verbose            slurm_verbose
 
 /*
  * Allow up to 999 static TRES
@@ -118,83 +118,92 @@ extern uint64_t debug_flags;
 extern bool backup_dbd;
 
 typedef enum {
-	QOS_LEVEL_NONE,
-	QOS_LEVEL_SET,
-	QOS_LEVEL_MODIFY
+    QOS_LEVEL_NONE,
+    QOS_LEVEL_SET,
+    QOS_LEVEL_MODIFY
 } qos_level_t;
 
 #define DB_DEBUG(conn, fmt, ...) \
-	info("%d(%s:%d) "fmt, conn, THIS_FILE, __LINE__, ##__VA_ARGS__);
+    info("%d(%s:%d) "fmt, conn, THIS_FILE, __LINE__, ##__VA_ARGS__);
 
 /*global functions */
 extern int check_connection(mysql_conn_t *mysql_conn);
+
 extern char *fix_double_quotes(char *str);
+
 extern int last_affected_rows(mysql_conn_t *mysql_conn);
+
 extern void reset_mysql_conn(mysql_conn_t *mysql_conn);
+
 extern int create_cluster_assoc_table(
-	mysql_conn_t *mysql_conn, char *cluster_name);
+        mysql_conn_t *mysql_conn, char *cluster_name);
+
 extern int create_cluster_tables(mysql_conn_t *mysql_conn, char *cluster_name);
+
 extern int remove_cluster_tables(mysql_conn_t *mysql_conn, char *cluster_name);
+
 extern int setup_assoc_limits(slurmdb_assoc_rec_t *assoc,
-				    char **cols, char **vals,
-				    char **extra, qos_level_t qos_level,
-				    bool for_add);
+                              char **cols, char **vals,
+                              char **extra, qos_level_t qos_level,
+                              bool for_add);
+
 extern int modify_common(mysql_conn_t *mysql_conn,
-			 uint16_t type,
-			 time_t now,
-			 char *user_name,
-			 char *table,
-			 char *cond_char,
-			 char *vals,
-			 char *cluster_name);
+                         uint16_t type,
+                         time_t now,
+                         char *user_name,
+                         char *table,
+                         char *cond_char,
+                         char *vals,
+                         char *cluster_name);
+
 extern int remove_common(mysql_conn_t *mysql_conn,
-			 uint16_t type,
-			 time_t now,
-			 char *user_name,
-			 char *table,
-			 char *name_char,
-			 char *assoc_char,
-			 char *cluster_name,
-			 List ret_list,
-			 bool *jobs_running);
+                         uint16_t type,
+                         time_t now,
+                         char *user_name,
+                         char *table,
+                         char *name_char,
+                         char *assoc_char,
+                         char *cluster_name,
+                         List ret_list,
+                         bool *jobs_running);
 
 extern void mod_tres_str(char **out, char *mod, char *cur,
-			 char *cur_par, char *name, char **vals,
-			 uint32_t id, bool assoc);
+                         char *cur_par, char *name, char **vals,
+                         uint32_t id, bool assoc);
 
 
 /*local api functions */
 extern int acct_storage_p_commit(mysql_conn_t *mysql_conn, bool commit);
 
 extern int acct_storage_p_add_assocs(mysql_conn_t *mysql_conn,
-					   uint32_t uid,
-					   List assoc_list);
+                                     uint32_t uid,
+                                     List assoc_list);
 
 extern int acct_storage_p_add_wckeys(mysql_conn_t *mysql_conn, uint32_t uid,
-				     List wckey_list);
+                                     List wckey_list);
 
 extern List acct_storage_p_get_assocs(
-	mysql_conn_t *mysql_conn, uid_t uid,
-	slurmdb_assoc_cond_t *assoc_cond);
+        mysql_conn_t *mysql_conn, uid_t uid,
+        slurmdb_assoc_cond_t *assoc_cond);
 
 extern List acct_storage_p_get_wckeys(mysql_conn_t *mysql_conn, uid_t uid,
-				      slurmdb_wckey_cond_t *wckey_cond);
+                                      slurmdb_wckey_cond_t *wckey_cond);
 
 extern int acct_storage_p_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
-				    void *in, slurmdbd_msg_type_t type,
-				    time_t start, time_t end);
+                                    void *in, slurmdbd_msg_type_t type,
+                                    time_t start, time_t end);
 
 extern int clusteracct_storage_p_get_usage(
-	mysql_conn_t *mysql_conn, uid_t uid,
-	slurmdb_cluster_rec_t *cluster_rec,  slurmdbd_msg_type_t type,
-	time_t start, time_t end);
+        mysql_conn_t *mysql_conn, uid_t uid,
+        slurmdb_cluster_rec_t *cluster_rec, slurmdbd_msg_type_t type,
+        time_t start, time_t end);
 
 extern List acct_storage_p_remove_coord(mysql_conn_t *mysql_conn, uint32_t uid,
-					List acct_list,
-					slurmdb_user_cond_t *user_cond);
+                                        List acct_list,
+                                        slurmdb_user_cond_t *user_cond);
 
 extern List acct_storage_p_remove_wckeys(mysql_conn_t *mysql_conn,
-					 uint32_t uid,
-					 slurmdb_wckey_cond_t *wckey_cond);
+                                         uint32_t uid,
+                                         slurmdb_wckey_cond_t *wckey_cond);
 
 #endif

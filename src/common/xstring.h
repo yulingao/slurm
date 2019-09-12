@@ -102,7 +102,7 @@ void _xrfc5424timecat(char **str, bool);
 ** return value is result from vsnprintf(3)
 */
 int _xstrfmtcat(char **str, const char *fmt, ...)
-    __attribute__((format(printf, 2, 3)));
+__attribute__((format(printf, 2, 3)));
 
 /*
 ** concatenate range of memory from start to end (not including end)
@@ -119,7 +119,7 @@ char *xstrdup(const char *str);
 ** strdup formatted which uses xmalloc routines
 */
 char *xstrdup_printf(const char *fmt, ...)
-    __attribute__((format(printf, 1, 2)));
+__attribute__((format(printf, 1, 2)));
 
 /*
 ** strndup which uses xmalloc routines

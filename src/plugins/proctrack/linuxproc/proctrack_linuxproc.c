@@ -37,7 +37,7 @@
 \*****************************************************************************/
 
 #include <inttypes.h>
-#include <signal.h>	/* SIGKILL */
+#include <signal.h>    /* SIGKILL */
 #include <sys/types.h>
 
 #include "slurm/slurm.h"
@@ -71,8 +71,8 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[]      = "Process tracking via linux /proc";
-const char plugin_type[]      = "proctrack/linuxproc";
+const char plugin_name[] = "Process tracking via linux /proc";
+const char plugin_type[] = "proctrack/linuxproc";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 
@@ -80,69 +80,59 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init ( void )
-{
-	return SLURM_SUCCESS;
+extern int init(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int fini ( void )
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * Uses slurmd job-step manager's pid as the unique container id.
  */
-extern int proctrack_p_create ( stepd_step_rec_t *job )
-{
-	job->cont_id = (uint64_t)job->jmgr_pid;
-	return SLURM_SUCCESS;
+extern int proctrack_p_create(stepd_step_rec_t *job) {
+    job->cont_id = (uint64_t) job->jmgr_pid;
+    return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_add ( stepd_step_rec_t *job, pid_t pid )
-{
-	return SLURM_SUCCESS;
+extern int proctrack_p_add(stepd_step_rec_t *job, pid_t pid) {
+    return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_signal ( uint64_t id, int signal )
-{
-	return kill_proc_tree((pid_t)id, signal);
+extern int proctrack_p_signal(uint64_t id, int signal) {
+    return kill_proc_tree((pid_t) id, signal);
 }
 
-extern int proctrack_p_destroy ( uint64_t id )
-{
-	return SLURM_SUCCESS;
+extern int proctrack_p_destroy(uint64_t id) {
+    return SLURM_SUCCESS;
 }
 
-extern uint64_t proctrack_p_find(pid_t pid)
-{
-	return (uint64_t) find_ancestor(pid, "slurmstepd");
+extern uint64_t proctrack_p_find(pid_t pid) {
+    return (uint64_t) find_ancestor(pid, "slurmstepd");
 }
 
-extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid)
-{
-	uint64_t cont;
+extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid) {
+    uint64_t cont;
 
-	cont = (uint64_t) find_ancestor(pid, "slurmstepd");
-	if (cont == cont_id)
-		return true;
+    cont = (uint64_t) find_ancestor(pid, "slurmstepd");
+    if (cont == cont_id)
+        return true;
 
-	return false;
+    return false;
 }
 
 extern int
-proctrack_p_wait(uint64_t cont_id)
-{
-	if (cont_id == 0 || cont_id == 1) {
-		errno = EINVAL;
-		return SLURM_ERROR;
-	}
+proctrack_p_wait(uint64_t cont_id) {
+    if (cont_id == 0 || cont_id == 1) {
+        errno = EINVAL;
+        return SLURM_ERROR;
+    }
 
-	return proctrack_p_destroy(cont_id);
+    return proctrack_p_destroy(cont_id);
 }
 
 extern int
-proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids)
-{
-	return proctrack_linuxproc_get_pids((pid_t)cont_id, pids, npids);
+proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
+    return proctrack_linuxproc_get_pids((pid_t) cont_id, pids, npids);
 }

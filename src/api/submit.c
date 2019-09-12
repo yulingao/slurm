@@ -42,6 +42,7 @@
 #include <unistd.h>
 
 #ifndef __USE_XOPEN_EXTENDED
+
 extern pid_t getsid(pid_t pid); /* missing from <unistd.h> */
 #endif
 
@@ -60,45 +61,43 @@ extern pid_t getsid(pid_t pid); /* missing from <unistd.h> */
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 extern int slurm_submit_batch_job(job_desc_msg_t *req,
-								  submit_response_msg_t **resp)
-{
-	int rc;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
+                                  submit_response_msg_t **resp) {
+    int rc;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
 
-	/*
-	 * set Node and session id for this request
-	 */
-	if (req->alloc_sid == NO_VAL)
-		req->alloc_sid = getsid(0);
+    /*
+     * set Node and session id for this request
+     */
+    if (req->alloc_sid == NO_VAL)
+        req->alloc_sid = getsid(0);
 
-	req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB;
-	req_msg.data = req;
+    req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB;
+    req_msg.data = req;
 
-	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-										working_cluster_rec);
-	if (rc == SLURM_ERROR)
-		return SLURM_ERROR;
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                        working_cluster_rec);
+    if (rc == SLURM_ERROR)
+        return SLURM_ERROR;
 
-	switch (resp_msg.msg_type)
-	{
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *)resp_msg.data)->return_code;
-		if (rc)
-			slurm_seterrno_ret(rc);
-		*resp = NULL;
-		break;
-	case RESPONSE_SUBMIT_BATCH_JOB:
-		*resp = (submit_response_msg_t *)resp_msg.data;
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-	}
+    switch (resp_msg.msg_type) {
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            if (rc)
+                slurm_seterrno_ret(rc);
+            *resp = NULL;
+            break;
+        case RESPONSE_SUBMIT_BATCH_JOB:
+            *resp = (submit_response_msg_t *) resp_msg.data;
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -117,49 +116,46 @@ extern int slurm_submit_batch_job(job_desc_msg_t *req,
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 extern int slurm_submit_batch_pack_job(List job_req_list,
-									   submit_response_msg_t **resp)
-{
-	int rc;
-	job_desc_msg_t *req;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
-	ListIterator iter;
+                                       submit_response_msg_t **resp) {
+    int rc;
+    job_desc_msg_t *req;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
+    ListIterator iter;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
 
-	/*
-	 * set session id for this request
-	 */
-	iter = list_iterator_create(job_req_list);
-	while ((req = (job_desc_msg_t *)list_next(iter)))
-	{
-		if (req->alloc_sid == NO_VAL)
-			req->alloc_sid = getsid(0);
-	}
-	list_iterator_destroy(iter);
+    /*
+     * set session id for this request
+     */
+    iter = list_iterator_create(job_req_list);
+    while ((req = (job_desc_msg_t *) list_next(iter))) {
+        if (req->alloc_sid == NO_VAL)
+            req->alloc_sid = getsid(0);
+    }
+    list_iterator_destroy(iter);
 
-	req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB_PACK;
-	req_msg.data = job_req_list;
+    req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB_PACK;
+    req_msg.data = job_req_list;
 
-	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-										working_cluster_rec);
-	if (rc == SLURM_ERROR)
-		return SLURM_ERROR;
-	switch (resp_msg.msg_type)
-	{
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *)resp_msg.data)->return_code;
-		if (rc)
-			slurm_seterrno_ret(rc);
-		*resp = NULL;
-		break;
-	case RESPONSE_SUBMIT_BATCH_JOB:
-		*resp = (submit_response_msg_t *)resp_msg.data;
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-	}
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                        working_cluster_rec);
+    if (rc == SLURM_ERROR)
+        return SLURM_ERROR;
+    switch (resp_msg.msg_type) {
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            if (rc)
+                slurm_seterrno_ret(rc);
+            *resp = NULL;
+            break;
+        case RESPONSE_SUBMIT_BATCH_JOB:
+            *resp = (submit_response_msg_t *) resp_msg.data;
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

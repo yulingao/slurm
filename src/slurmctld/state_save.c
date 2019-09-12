@@ -53,77 +53,70 @@
 
 /* Maximum delay for pending state save to be processed, in seconds */
 #ifndef SAVE_MAX_WAIT
-#define SAVE_MAX_WAIT	5
+#define SAVE_MAX_WAIT    5
 #endif
 
 static pthread_mutex_t state_save_lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t  state_save_cond = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t state_save_cond = PTHREAD_COND_INITIALIZER;
 static int save_jobs = 0, save_nodes = 0, save_parts = 0;
 static int save_front_end = 0, save_triggers = 0, save_resv = 0;
 static bool run_save_thread = true;
 
 
 /* Queue saving of front_end state information */
-extern void schedule_front_end_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_front_end++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_front_end_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_front_end++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* Queue saving of job state information */
-extern void schedule_job_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_jobs++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_job_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_jobs++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* Queue saving of node state information */
-extern void schedule_node_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_nodes++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_node_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_nodes++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* Queue saving of partition state information */
-extern void schedule_part_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_parts++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_part_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_parts++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* Queue saving of reservation state information */
-extern void schedule_resv_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_resv++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_resv_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_resv++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* Queue saving of trigger state information */
-extern void schedule_trigger_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	save_triggers++;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void schedule_trigger_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    save_triggers++;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /* shutdown the slurmctld_state_save thread */
-extern void shutdown_state_save(void)
-{
-	slurm_mutex_lock(&state_save_lock);
-	run_save_thread = false;
-	slurm_cond_broadcast(&state_save_cond);
-	slurm_mutex_unlock(&state_save_lock);
+extern void shutdown_state_save(void) {
+    slurm_mutex_lock(&state_save_lock);
+    run_save_thread = false;
+    slurm_cond_broadcast(&state_save_cond);
+    slurm_mutex_unlock(&state_save_lock);
 }
 
 /*
@@ -133,115 +126,114 @@ extern void shutdown_state_save(void)
  * no_data IN - unused
  * RET - NULL
  */
-extern void *slurmctld_state_save(void *no_data)
-{
-	time_t last_save = 0, now;
-	double save_delay;
-	bool run_save;
-	int save_count;
+extern void *slurmctld_state_save(void *no_data) {
+    time_t last_save = 0, now;
+    double save_delay;
+    bool run_save;
+    int save_count;
 
 #if HAVE_SYS_PRCTL_H
-	if (prctl(PR_SET_NAME, "sstate", NULL, NULL, NULL) < 0) {
-		error("%s: cannot set my name to %s %m", __func__, "sstate");
-	}
+    if (prctl(PR_SET_NAME, "sstate", NULL, NULL, NULL) < 0) {
+        error("%s: cannot set my name to %s %m", __func__, "sstate");
+    }
 #endif
 
-	if (test_config)	/* Should be redundant, but just to be safe */
-		return NULL;
+    if (test_config)    /* Should be redundant, but just to be safe */
+        return NULL;
 
-	while (1) {
-		/* wait for work to perform */
-		slurm_mutex_lock(&state_save_lock);
-		while (1) {
-			save_count = save_jobs + save_nodes + save_parts +
-				     save_front_end + save_resv +
-				     save_triggers;
-			now = time(NULL);
-			save_delay = difftime(now, last_save);
-			if (save_count &&
-			    (!run_save_thread ||
-			     (save_delay >= SAVE_MAX_WAIT))) {
-				last_save = now;
-				break;		/* do the work */
-			} else if (!run_save_thread) {
-				run_save_thread = true;
-				slurm_mutex_unlock(&state_save_lock);
-				return NULL;	/* shutdown */
-			} else if (save_count) { /* wait for a timeout */
-				struct timespec ts = {0, 0};
-				ts.tv_sec = now + 1;
-				slurm_cond_timedwait(&state_save_cond,
-					  	     &state_save_lock, &ts);
-			} else {		/* wait for more work */
-				slurm_cond_wait(&state_save_cond,
-					  	&state_save_lock);
-			}
-		}
+    while (1) {
+        /* wait for work to perform */
+        slurm_mutex_lock(&state_save_lock);
+        while (1) {
+            save_count = save_jobs + save_nodes + save_parts +
+                         save_front_end + save_resv +
+                         save_triggers;
+            now = time(NULL);
+            save_delay = difftime(now, last_save);
+            if (save_count &&
+                (!run_save_thread ||
+                 (save_delay >= SAVE_MAX_WAIT))) {
+                last_save = now;
+                break;        /* do the work */
+            } else if (!run_save_thread) {
+                run_save_thread = true;
+                slurm_mutex_unlock(&state_save_lock);
+                return NULL;    /* shutdown */
+            } else if (save_count) { /* wait for a timeout */
+                struct timespec ts = {0, 0};
+                ts.tv_sec = now + 1;
+                slurm_cond_timedwait(&state_save_cond,
+                                     &state_save_lock, &ts);
+            } else {        /* wait for more work */
+                slurm_cond_wait(&state_save_cond,
+                                &state_save_lock);
+            }
+        }
 
-		/* save front_end node info if necessary */
-		run_save = false;
-		/* slurm_mutex_lock(&state_save_lock); done above */
-		if (save_front_end) {
-			run_save = true;
-			save_front_end = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)dump_all_front_end_state();
+        /* save front_end node info if necessary */
+        run_save = false;
+        /* slurm_mutex_lock(&state_save_lock); done above */
+        if (save_front_end) {
+            run_save = true;
+            save_front_end = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) dump_all_front_end_state();
 
-		/* save job info if necessary */
-		run_save = false;
-		slurm_mutex_lock(&state_save_lock);
-		if (save_jobs) {
-			run_save = true;
-			save_jobs = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)dump_all_job_state();
+        /* save job info if necessary */
+        run_save = false;
+        slurm_mutex_lock(&state_save_lock);
+        if (save_jobs) {
+            run_save = true;
+            save_jobs = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) dump_all_job_state();
 
-		/* save node info if necessary */
-		run_save = false;
-		slurm_mutex_lock(&state_save_lock);
-		if (save_nodes) {
-			run_save = true;
-			save_nodes = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)dump_all_node_state();
+        /* save node info if necessary */
+        run_save = false;
+        slurm_mutex_lock(&state_save_lock);
+        if (save_nodes) {
+            run_save = true;
+            save_nodes = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) dump_all_node_state();
 
-		/* save partition info if necessary */
-		run_save = false;
-		slurm_mutex_lock(&state_save_lock);
-		if (save_parts) {
-			run_save = true;
-			save_parts = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)dump_all_part_state();
+        /* save partition info if necessary */
+        run_save = false;
+        slurm_mutex_lock(&state_save_lock);
+        if (save_parts) {
+            run_save = true;
+            save_parts = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) dump_all_part_state();
 
-		/* save reservation info if necessary */
-		run_save = false;
-		slurm_mutex_lock(&state_save_lock);
-		if (save_resv) {
-			run_save = true;
-			save_resv = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)dump_all_resv_state();
+        /* save reservation info if necessary */
+        run_save = false;
+        slurm_mutex_lock(&state_save_lock);
+        if (save_resv) {
+            run_save = true;
+            save_resv = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) dump_all_resv_state();
 
-		/* save trigger info if necessary */
-		run_save = false;
-		slurm_mutex_lock(&state_save_lock);
-		if (save_triggers) {
-			run_save = true;
-			save_triggers = 0;
-		}
-		slurm_mutex_unlock(&state_save_lock);
-		if (run_save)
-			(void)trigger_state_save();
-	}
+        /* save trigger info if necessary */
+        run_save = false;
+        slurm_mutex_lock(&state_save_lock);
+        if (save_triggers) {
+            run_save = true;
+            save_triggers = 0;
+        }
+        slurm_mutex_unlock(&state_save_lock);
+        if (run_save)
+            (void) trigger_state_save();
+    }
 }

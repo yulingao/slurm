@@ -55,157 +55,149 @@
  * Define slurm-specific aliases for use by plugins, see slurm_xlator.h 
  * for details. 
  */
-strong_alias(fd_set_blocking,	slurm_fd_set_blocking);
-strong_alias(fd_set_nonblocking,slurm_fd_set_nonblocking);
-strong_alias(fd_get_socket_error, slurm_fd_get_socket_error);
+strong_alias(fd_set_blocking, slurm_fd_set_blocking
+);
+strong_alias(fd_set_nonblocking, slurm_fd_set_nonblocking
+);
+strong_alias(fd_get_socket_error, slurm_fd_get_socket_error
+);
 
 static int fd_get_lock(int fd, int cmd, int type);
+
 static pid_t fd_test_lock(int fd, int type);
 
 
-void fd_set_close_on_exec(int fd)
-{
-	xassert(fd >= 0);
+void fd_set_close_on_exec(int fd) {
+    xassert(fd >= 0);
 
-	if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
-		error("fcntl(F_SETFD) failed: %m");
-	return;
+    if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0)
+        error("fcntl(F_SETFD) failed: %m");
+    return;
 }
 
-void fd_set_noclose_on_exec(int fd)
-{
-	xassert(fd >= 0);
+void fd_set_noclose_on_exec(int fd) {
+    xassert(fd >= 0);
 
-	if (fcntl(fd, F_SETFD, 0) < 0)
-		error("fcntl(F_SETFD) failed: %m");
-	return;
+    if (fcntl(fd, F_SETFD, 0) < 0)
+        error("fcntl(F_SETFD) failed: %m");
+    return;
 }
 
-void fd_set_nonblocking(int fd)
-{
-	int fval;
+void fd_set_nonblocking(int fd) {
+    int fval;
 
-	xassert(fd >= 0);
+    xassert(fd >= 0);
 
-	if ((fval = fcntl(fd, F_GETFL, 0)) < 0)
-		error("fcntl(F_GETFL) failed: %m");
-	if (fcntl(fd, F_SETFL, fval | O_NONBLOCK) < 0)
-		error("fcntl(F_SETFL) failed: %m");
-	return;
+    if ((fval = fcntl(fd, F_GETFL, 0)) < 0)
+        error("fcntl(F_GETFL) failed: %m");
+    if (fcntl(fd, F_SETFL, fval | O_NONBLOCK) < 0)
+        error("fcntl(F_SETFL) failed: %m");
+    return;
 }
 
-void fd_set_blocking(int fd)
-{
-	int fval;
+void fd_set_blocking(int fd) {
+    int fval;
 
-	xassert(fd >= 0);
+    xassert(fd >= 0);
 
-	if ((fval = fcntl(fd, F_GETFL, 0)) < 0)
-		error("fcntl(F_GETFL) failed: %m");
-	if (fcntl(fd, F_SETFL, fval & ~O_NONBLOCK) < 0)
-		error("fcntl(F_SETFL) failed: %m");
-	return;
+    if ((fval = fcntl(fd, F_GETFL, 0)) < 0)
+        error("fcntl(F_GETFL) failed: %m");
+    if (fcntl(fd, F_SETFL, fval & ~O_NONBLOCK) < 0)
+        error("fcntl(F_SETFL) failed: %m");
+    return;
 }
 
-int fd_get_readw_lock(int fd)
-{
-	return(fd_get_lock(fd, F_SETLKW, F_RDLCK));
+int fd_get_readw_lock(int fd) {
+    return (fd_get_lock(fd, F_SETLKW, F_RDLCK));
 }
 
 
-int fd_get_write_lock(int fd)
-{
-	return(fd_get_lock(fd, F_SETLK, F_WRLCK));
+int fd_get_write_lock(int fd) {
+    return (fd_get_lock(fd, F_SETLK, F_WRLCK));
 }
 
-int fd_release_lock(int fd)
-{
-	return(fd_get_lock(fd, F_SETLK, F_UNLCK));
-}
-
-
-pid_t fd_is_read_lock_blocked(int fd)
-{
-	return(fd_test_lock(fd, F_RDLCK));
-}
-
-int fd_get_socket_error(int fd, int *err)
-{
-	socklen_t errlen = sizeof(err);
-
-	xassert(fd >= 0);
-
-	if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *)&err, &errlen))
-		return errno;
-	else
-		return SLURM_SUCCESS;
-}
-
-static int fd_get_lock(int fd, int cmd, int type)
-{
-	struct flock lock;
-
-	xassert(fd >= 0);
-
-	lock.l_type = type;
-	lock.l_start = 0;
-	lock.l_whence = SEEK_SET;
-	lock.l_len = 0;
-
-	return(fcntl(fd, cmd, &lock));
+int fd_release_lock(int fd) {
+    return (fd_get_lock(fd, F_SETLK, F_UNLCK));
 }
 
 
-static pid_t fd_test_lock(int fd, int type)
-{
-	struct flock lock;
+pid_t fd_is_read_lock_blocked(int fd) {
+    return (fd_test_lock(fd, F_RDLCK));
+}
 
-	xassert(fd >= 0);
+int fd_get_socket_error(int fd, int *err) {
+    socklen_t errlen = sizeof(err);
 
-	lock.l_type = type;
-	lock.l_start = 0;
-	lock.l_whence = SEEK_SET;
-	lock.l_len = 0;
-	lock.l_pid = 0;	/* avoid valgrind error */
+    xassert(fd >= 0);
 
-	if (fcntl(fd, F_GETLK, &lock) < 0)
-		error("Unable to test for file lock: %m");
-	if (lock.l_type == F_UNLCK)
-		return(0);
-	return(lock.l_pid);
+    if (getsockopt(fd, SOL_SOCKET, SO_ERROR, (void *) &err, &errlen))
+        return errno;
+    else
+        return SLURM_SUCCESS;
+}
+
+static int fd_get_lock(int fd, int cmd, int type) {
+    struct flock lock;
+
+    xassert(fd >= 0);
+
+    lock.l_type = type;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+
+    return (fcntl(fd, cmd, &lock));
+}
+
+
+static pid_t fd_test_lock(int fd, int type) {
+    struct flock lock;
+
+    xassert(fd >= 0);
+
+    lock.l_type = type;
+    lock.l_start = 0;
+    lock.l_whence = SEEK_SET;
+    lock.l_len = 0;
+    lock.l_pid = 0;    /* avoid valgrind error */
+
+    if (fcntl(fd, F_GETLK, &lock) < 0)
+        error("Unable to test for file lock: %m");
+    if (lock.l_type == F_UNLCK)
+        return (0);
+    return (lock.l_pid);
 }
 
 
 /* Wait for a file descriptor to be readable (up to time_limit seconds).
  * Return 0 when readable or -1 on error */
-extern int wait_fd_readable(int fd, int time_limit)
-{
-	struct pollfd ufd;
-	time_t start;
-	int rc, time_left;
+extern int wait_fd_readable(int fd, int time_limit) {
+    struct pollfd ufd;
+    time_t start;
+    int rc, time_left;
 
-	start = time(NULL);
-	time_left = time_limit;
-	ufd.fd = fd;
-	ufd.events = POLLIN;
-	ufd.revents = 0;
-	while (1) {
-		rc = poll(&ufd, 1, time_left * 1000);
-		if (rc > 0) {	/* activity on this fd */
-			if (ufd.revents & POLLIN)
-				return 0;
-			else	/* Exception */
-				return -1;
-		} else if (rc == 0) {
-			error("Timeout waiting for slurmstepd");
-			return -1;
-		} else if (errno != EINTR) {
-			error("poll(): %m");
-			return -1;
-		} else {
-			time_left = time_limit - (time(NULL) - start);
-		}
-	}
+    start = time(NULL);
+    time_left = time_limit;
+    ufd.fd = fd;
+    ufd.events = POLLIN;
+    ufd.revents = 0;
+    while (1) {
+        rc = poll(&ufd, 1, time_left * 1000);
+        if (rc > 0) {    /* activity on this fd */
+            if (ufd.revents & POLLIN)
+                return 0;
+            else    /* Exception */
+                return -1;
+        } else if (rc == 0) {
+            error("Timeout waiting for slurmstepd");
+            return -1;
+        } else if (errno != EINTR) {
+            error("poll(): %m");
+            return -1;
+        } else {
+            time_left = time_limit - (time(NULL) - start);
+        }
+    }
 }
 
 /*
@@ -213,38 +205,37 @@ extern int wait_fd_readable(int fd, int time_limit)
  * Execute fsync() and close() multiple times if necessary and log failures
  * RET 0 on success or -1 on error
  */
-extern int fsync_and_close(int fd, const char *file_type)
-{
-	int rc = 0, retval, pos;
-	DEF_TIMERS;
+extern int fsync_and_close(int fd, const char *file_type) {
+    int rc = 0, retval, pos;
+    DEF_TIMERS;
 
-	/*
-	 * Slurm state save files are commonly stored on shared filesystems,
-	 * so lets give fsync() three tries to sync the data to disk.
-	 */
-	START_TIMER;
-	for (retval = 1, pos = 1; retval && pos < 4; pos++) {
-		retval = fsync(fd);
-		if (retval && (errno != EINTR)) {
-			error("fsync() error writing %s state save file: %m",
-			      file_type);
-		}
-	}
-	END_TIMER2("fsync_and_close:fsync");
-	if (retval)
-		rc = retval;
+    /*
+     * Slurm state save files are commonly stored on shared filesystems,
+     * so lets give fsync() three tries to sync the data to disk.
+     */
+    START_TIMER;
+    for (retval = 1, pos = 1; retval && pos < 4; pos++) {
+        retval = fsync(fd);
+        if (retval && (errno != EINTR)) {
+            error("fsync() error writing %s state save file: %m",
+                  file_type);
+        }
+    }
+    END_TIMER2("fsync_and_close:fsync");
+    if (retval)
+        rc = retval;
 
-	START_TIMER;
-	for (retval = 1, pos = 1; retval && pos < 4; pos++) {
-		retval = close(fd);
-		if (retval && (errno != EINTR)) {
-			error("close () error on %s state save file: %m",
-			      file_type);
-		}
-	}
-	END_TIMER2("fsync_and_close:close");
-	if (retval)
-		rc = retval;
+    START_TIMER;
+    for (retval = 1, pos = 1; retval && pos < 4; pos++) {
+        retval = close(fd);
+        if (retval && (errno != EINTR)) {
+            error("close () error on %s state save file: %m",
+                  file_type);
+        }
+    }
+    END_TIMER2("fsync_and_close:close");
+    if (retval)
+        rc = retval;
 
-	return rc;
+    return rc;
 }

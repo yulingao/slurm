@@ -150,34 +150,38 @@
 #define SLURM_PMIXP_FENCE_BARRIER "SLURM_PMIX_FENCE_BARRIER"
 
 typedef enum {
-	PMIXP_P2P_INLINE,
-	PMIXP_P2P_REGULAR
+    PMIXP_P2P_INLINE,
+    PMIXP_P2P_REGULAR
 } pmixp_p2p_ctx_t;
 
 /* Message access callbacks */
 typedef int (*pmixp_p2p_hdr_unpack_cb_t)(void *hdr_net, void *hdr_host);
+
 typedef void *(*pmixp_p2p_buf_ptr_cb_t)(void *msg);
 
 typedef uint32_t (*pmixp_2p2_payload_size_cb_t)(void *hdr);
+
 typedef size_t (*pmixp_p2p_buf_size_cb_t)(void *msg);
+
 typedef void (*pmixp_p2p_send_complete_cb_t)(void *msg,
-					     pmixp_p2p_ctx_t ctx, int rc);
+                                             pmixp_p2p_ctx_t ctx, int rc);
+
 typedef void (*pmixp_p2p_msg_return_cb_t)(void *hdr, Buf buf);
 
 typedef struct {
-	/* receiver-related fields */
-	bool recv_on;
-	uint32_t rhdr_host_size;
-	uint32_t rhdr_net_size;
-	pmixp_2p2_payload_size_cb_t payload_size_cb;
-	pmixp_p2p_hdr_unpack_cb_t hdr_unpack_cb;
-	pmixp_p2p_msg_return_cb_t new_msg;
-	uint32_t recv_padding;
-	/* transmitter-related fields */
-	bool send_on;
-	pmixp_p2p_buf_ptr_cb_t  buf_ptr;
-	pmixp_p2p_buf_size_cb_t buf_size;
-	pmixp_p2p_send_complete_cb_t send_complete;
+    /* receiver-related fields */
+    bool recv_on;
+    uint32_t rhdr_host_size;
+    uint32_t rhdr_net_size;
+    pmixp_2p2_payload_size_cb_t payload_size_cb;
+    pmixp_p2p_hdr_unpack_cb_t hdr_unpack_cb;
+    pmixp_p2p_msg_return_cb_t new_msg;
+    uint32_t recv_padding;
+    /* transmitter-related fields */
+    bool send_on;
+    pmixp_p2p_buf_ptr_cb_t buf_ptr;
+    pmixp_p2p_buf_size_cb_t buf_size;
+    pmixp_p2p_send_complete_cb_t send_complete;
 } pmixp_p2p_data_t;
 
 #define PMIXP_MAX_NSLEN     255
@@ -189,7 +193,7 @@ typedef struct {
 #define PMIXP_ERR_INVALID_NAMESPACE            -44
 
 typedef struct {
-    char nspace[PMIXP_MAX_NSLEN+1];
+    char nspace[PMIXP_MAX_NSLEN + 1];
     uint32_t rank;
 } pmixp_proc_t;
 

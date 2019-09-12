@@ -38,12 +38,16 @@
 #ifndef _NAME_SERV_H
 #define _NAME_SERV_H
 
-extern int    name_publish_local (char *name, char *port);
-extern int    name_unpublish_local (char *name);
-extern char * name_lookup_local (char *name);
+extern int name_publish_local(char *name, char *port);
 
-extern int    name_publish_up (char *name, char *port);
-extern int    name_unpublish_up (char *name);
-extern char * name_lookup_up (char *name);
+extern int name_unpublish_local(char *name);
+
+extern char *name_lookup_local(char *name);
+
+extern int name_publish_up(char *name, char *port);
+
+extern int name_unpublish_up(char *name);
+
+extern char *name_lookup_up(char *name);
 
 #endif

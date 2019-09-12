@@ -43,60 +43,74 @@
 #include "src/common/pack.h"
 
 typedef struct spawn_subcmd {
-	char *cmd;
-	uint32_t max_procs;
-	uint32_t argc;
-	char **argv;
-	uint32_t info_cnt;
-	char **info_keys;
-	char **info_vals;
+    char *cmd;
+    uint32_t max_procs;
+    uint32_t argc;
+    char **argv;
+    uint32_t info_cnt;
+    char **info_keys;
+    char **info_vals;
 } spawn_subcmd_t;
 
 typedef struct spawn_req {
-	uint32_t seq;
-	char *from_node;
-	uint32_t subcmd_cnt;
-	uint32_t preput_cnt;
-	char **pp_keys;
-	char **pp_vals;
-	spawn_subcmd_t **subcmds;
-	/* TODO: Slurm specific job control info */
+    uint32_t seq;
+    char *from_node;
+    uint32_t subcmd_cnt;
+    uint32_t preput_cnt;
+    char **pp_keys;
+    char **pp_vals;
+    spawn_subcmd_t **subcmds;
+    /* TODO: Slurm specific job control info */
 } spawn_req_t;
 
 typedef struct spawn_resp {
-	uint32_t seq;
-	int rc;
-	char *jobid;
-	uint16_t pmi_port;
-	uint32_t error_cnt;
-	int *error_codes;
+    uint32_t seq;
+    int rc;
+    char *jobid;
+    uint16_t pmi_port;
+    uint32_t error_cnt;
+    int *error_codes;
 } spawn_resp_t;
 
 extern spawn_subcmd_t *spawn_subcmd_new(void);
+
 extern void spawn_subcmd_free(spawn_subcmd_t *subcmd);
+
 extern spawn_req_t *spawn_req_new(void);
+
 extern void spawn_req_free(spawn_req_t *req);
+
 extern void spawn_req_pack(spawn_req_t *req, Buf buf);
-extern int  spawn_req_unpack(spawn_req_t **req_ptr, Buf buf);
-extern int  spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr);
+
+extern int spawn_req_unpack(spawn_req_t **req_ptr, Buf buf);
+
+extern int spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr);
 
 extern spawn_resp_t *spawn_resp_new(void);
-extern void spawn_resp_free(spawn_resp_t *resp);
-extern void spawn_resp_pack(spawn_resp_t *resp, Buf buf);
-extern int  spawn_resp_unpack(spawn_resp_t **resp_ptr, Buf buf);
-extern int  spawn_resp_send_to_stepd(spawn_resp_t *resp, char *node);
-extern int  spawn_resp_send_to_fd(spawn_resp_t *resp, int fd);
-extern int  spawn_resp_send_to_srun(spawn_resp_t *resp);
 
-extern int  spawn_psr_enqueue(uint32_t seq, int fd, int lrank,
-			      char *from_node);
-extern int  spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank,
-			      char **from_node);
+extern void spawn_resp_free(spawn_resp_t *resp);
+
+extern void spawn_resp_pack(spawn_resp_t *resp, Buf buf);
+
+extern int spawn_resp_unpack(spawn_resp_t **resp_ptr, Buf buf);
+
+extern int spawn_resp_send_to_stepd(spawn_resp_t *resp, char *node);
+
+extern int spawn_resp_send_to_fd(spawn_resp_t *resp, int fd);
+
+extern int spawn_resp_send_to_srun(spawn_resp_t *resp);
+
+extern int spawn_psr_enqueue(uint32_t seq, int fd, int lrank,
+                             char *from_node);
+
+extern int spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank,
+                             char **from_node);
 
 extern uint32_t spawn_seq_next(void);
 
-extern int  spawn_job_do_spawn(spawn_req_t *req);
+extern int spawn_job_do_spawn(spawn_req_t *req);
+
 extern void spawn_job_wait(void);
 
 
-#endif	/* _SPAWN_H */
+#endif    /* _SPAWN_H */

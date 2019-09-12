@@ -46,7 +46,7 @@
 
 #include "src/common/slurm_protocol_api.h"
 
-static int _slurm_update (void * data, slurm_msg_type_t msg_type);
+static int _slurm_update(void *data, slurm_msg_type_t msg_type);
 
 /*
  * slurm_update_front_end - issue RPC to a front_end node's configuration per
@@ -55,9 +55,8 @@ static int _slurm_update (void * data, slurm_msg_type_t msg_type);
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_front_end (update_front_end_msg_t * front_end_msg)
-{
-	return _slurm_update ((void *) front_end_msg, REQUEST_UPDATE_FRONT_END);
+slurm_update_front_end(update_front_end_msg_t *front_end_msg) {
+    return _slurm_update((void *) front_end_msg, REQUEST_UPDATE_FRONT_END);
 }
 
 /*
@@ -67,14 +66,13 @@ slurm_update_front_end (update_front_end_msg_t * front_end_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_job (job_desc_msg_t * job_msg)
-{
-	if (job_msg->job_id_str) {
-		error("Use slurm_update_job2() rather than slurm_update_job() "
-		      "with job_msg->job_id_str to get multiple error codes "
-		      "for various job array task and avoid memory leaks");
-	}
-	return _slurm_update ((void *) job_msg, REQUEST_UPDATE_JOB);
+slurm_update_job(job_desc_msg_t *job_msg) {
+    if (job_msg->job_id_str) {
+        error("Use slurm_update_job2() rather than slurm_update_job() "
+              "with job_msg->job_id_str to get multiple error codes "
+              "for various job array task and avoid memory leaks");
+    }
+    return _slurm_update((void *) job_msg, REQUEST_UPDATE_JOB);
 }
 
 /*
@@ -86,56 +84,54 @@ slurm_update_job (job_desc_msg_t * job_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 extern int
-slurm_update_job2 (job_desc_msg_t * job_msg, job_array_resp_msg_t **resp)
-{
-	int rc = SLURM_SUCCESS;
-	slurm_msg_t req_msg, resp_msg;
-	slurmdb_cluster_rec_t *save_working_cluster_rec = working_cluster_rec;
+slurm_update_job2(job_desc_msg_t *job_msg, job_array_resp_msg_t **resp) {
+    int rc = SLURM_SUCCESS;
+    slurm_msg_t req_msg, resp_msg;
+    slurmdb_cluster_rec_t *save_working_cluster_rec = working_cluster_rec;
 
-	slurm_msg_t_init(&req_msg);
-	req_msg.msg_type	= REQUEST_UPDATE_JOB;
-	req_msg.data		= job_msg;
+    slurm_msg_t_init(&req_msg);
+    req_msg.msg_type = REQUEST_UPDATE_JOB;
+    req_msg.data = job_msg;
 
-tryagain:
-	slurm_msg_t_init(&resp_msg);
+    tryagain:
+    slurm_msg_t_init(&resp_msg);
 
-	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					    working_cluster_rec);
-	switch (resp_msg.msg_type) {
-	case RESPONSE_SLURM_REROUTE_MSG:
-	{
-		reroute_msg_t *rr_msg = (reroute_msg_t *)resp_msg.data;
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                        working_cluster_rec);
+    switch (resp_msg.msg_type) {
+        case RESPONSE_SLURM_REROUTE_MSG: {
+            reroute_msg_t *rr_msg = (reroute_msg_t *) resp_msg.data;
 
-		/* Don't expect mutliple hops but in the case it does
-		 * happen, free the previous rr cluster_rec. */
-		if (working_cluster_rec &&
-		    working_cluster_rec != save_working_cluster_rec)
-			slurmdb_destroy_cluster_rec(
-						working_cluster_rec);
+            /* Don't expect mutliple hops but in the case it does
+             * happen, free the previous rr cluster_rec. */
+            if (working_cluster_rec &&
+                working_cluster_rec != save_working_cluster_rec)
+                slurmdb_destroy_cluster_rec(
+                        working_cluster_rec);
 
-		working_cluster_rec = rr_msg->working_cluster_rec;
-		slurmdb_setup_cluster_rec(working_cluster_rec);
-		rr_msg->working_cluster_rec = NULL;
-		goto tryagain;
-	}
-	case RESPONSE_JOB_ARRAY_ERRORS:
-		*resp = (job_array_resp_msg_t *) resp_msg.data;
-		break;
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		if (rc)
-			slurm_seterrno(rc);
-		break;
-	default:
-		slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
-	}
+            working_cluster_rec = rr_msg->working_cluster_rec;
+            slurmdb_setup_cluster_rec(working_cluster_rec);
+            rr_msg->working_cluster_rec = NULL;
+            goto tryagain;
+        }
+        case RESPONSE_JOB_ARRAY_ERRORS:
+            *resp = (job_array_resp_msg_t *) resp_msg.data;
+            break;
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            if (rc)
+                slurm_seterrno(rc);
+            break;
+        default:
+            slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
+    }
 
-	if (working_cluster_rec != save_working_cluster_rec) {
-		slurmdb_destroy_cluster_rec(working_cluster_rec);
-		working_cluster_rec = save_working_cluster_rec;
-	}
+    if (working_cluster_rec != save_working_cluster_rec) {
+        slurmdb_destroy_cluster_rec(working_cluster_rec);
+        working_cluster_rec = save_working_cluster_rec;
+    }
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -145,10 +141,10 @@ tryagain:
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_node ( update_node_msg_t * node_msg)
-{
-	return _slurm_update ((void *) node_msg, REQUEST_UPDATE_NODE);
+slurm_update_node(update_node_msg_t *node_msg) {
+    return _slurm_update((void *) node_msg, REQUEST_UPDATE_NODE);
 }
+
 /*
  * slurm_update_layout - issue RPC to a layout's configuration per request,
  *	only usable by user root
@@ -156,9 +152,8 @@ slurm_update_node ( update_node_msg_t * node_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_layout ( update_layout_msg_t * layout_msg)
-{
-	return _slurm_update ((void *) layout_msg, REQUEST_UPDATE_LAYOUT);
+slurm_update_layout(update_layout_msg_t *layout_msg) {
+    return _slurm_update((void *) layout_msg, REQUEST_UPDATE_LAYOUT);
 }
 
 /*
@@ -167,9 +162,8 @@ slurm_update_layout ( update_layout_msg_t * layout_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_create_partition ( update_part_msg_t * part_msg)
-{
-	return _slurm_update ((void *) part_msg, REQUEST_CREATE_PARTITION);
+slurm_create_partition(update_part_msg_t *part_msg) {
+    return _slurm_update((void *) part_msg, REQUEST_CREATE_PARTITION);
 }
 
 /*
@@ -179,9 +173,8 @@ slurm_create_partition ( update_part_msg_t * part_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_partition ( update_part_msg_t * part_msg )
-{
-	return _slurm_update ((void *) part_msg, REQUEST_UPDATE_PARTITION);
+slurm_update_partition(update_part_msg_t *part_msg) {
+    return _slurm_update((void *) part_msg, REQUEST_UPDATE_PARTITION);
 }
 
 /*
@@ -191,9 +184,8 @@ slurm_update_partition ( update_part_msg_t * part_msg )
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_delete_partition ( delete_part_msg_t * part_msg )
-{
-	return _slurm_update ((void *) part_msg, REQUEST_DELETE_PARTITION);
+slurm_delete_partition(delete_part_msg_t *part_msg) {
+    return _slurm_update((void *) part_msg, REQUEST_DELETE_PARTITION);
 }
 
 /*
@@ -202,9 +194,8 @@ slurm_delete_partition ( delete_part_msg_t * part_msg )
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_update_powercap ( update_powercap_msg_t * powercap_msg )
-{
-	return _slurm_update ((void *) powercap_msg, REQUEST_UPDATE_POWERCAP);
+slurm_update_powercap(update_powercap_msg_t *powercap_msg) {
+    return _slurm_update((void *) powercap_msg, REQUEST_UPDATE_POWERCAP);
 }
 
 /*
@@ -214,39 +205,38 @@ slurm_update_powercap ( update_powercap_msg_t * powercap_msg )
  *	otherwise return NULL and set errno to indicate the error
  */
 char *
-slurm_create_reservation (resv_desc_msg_t * resv_msg)
-{
-	int rc;
-	char *resv_name = NULL;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
-	reservation_name_msg_t *resp;
+slurm_create_reservation(resv_desc_msg_t *resv_msg) {
+    int rc;
+    char *resv_name = NULL;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
+    reservation_name_msg_t *resp;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
 
-	req_msg.msg_type = REQUEST_CREATE_RESERVATION;
-	req_msg.data     = resv_msg;
+    req_msg.msg_type = REQUEST_CREATE_RESERVATION;
+    req_msg.data = resv_msg;
 
-	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					    working_cluster_rec);
-	if (rc)
-		slurm_seterrno(rc);
-	switch (resp_msg.msg_type) {
-	case RESPONSE_CREATE_RESERVATION:
-		resp = (reservation_name_msg_t *) resp_msg.data;
-		resv_name = strdup(resp->name);
-		break;
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		if (rc)
-			slurm_seterrno(rc);
-		break;
-	default:
-		slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
-	}
-	slurm_free_msg_data(resp_msg.msg_type, resp_msg.data);
-	return resv_name;
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                        working_cluster_rec);
+    if (rc)
+        slurm_seterrno(rc);
+    switch (resp_msg.msg_type) {
+        case RESPONSE_CREATE_RESERVATION:
+            resp = (reservation_name_msg_t *) resp_msg.data;
+            resv_name = strdup(resp->name);
+            break;
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            if (rc)
+                slurm_seterrno(rc);
+            break;
+        default:
+            slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
+    }
+    slurm_free_msg_data(resp_msg.msg_type, resp_msg.data);
+    return resv_name;
 }
 
 /*
@@ -255,9 +245,8 @@ slurm_create_reservation (resv_desc_msg_t * resv_msg)
  * IN resv_msg - description of reservation
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_update_reservation (resv_desc_msg_t * resv_msg)
-{
-	return _slurm_update ((void *) resv_msg, REQUEST_UPDATE_RESERVATION);
+extern int slurm_update_reservation(resv_desc_msg_t *resv_msg) {
+    return _slurm_update((void *) resv_msg, REQUEST_UPDATE_RESERVATION);
 }
 
 /*
@@ -267,18 +256,16 @@ extern int slurm_update_reservation (resv_desc_msg_t * resv_msg)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
 int
-slurm_delete_reservation (reservation_name_msg_t * resv_msg)
-{
-	return _slurm_update ((void *) resv_msg, REQUEST_DELETE_RESERVATION);
+slurm_delete_reservation(reservation_name_msg_t *resv_msg) {
+    return _slurm_update((void *) resv_msg, REQUEST_DELETE_RESERVATION);
 }
 
 /* Update the time limit of a job step,
  * step_id == NO_VAL updates all job steps of the specified job_id
  * RET 0 or -1 on error */
 int
-slurm_update_step (step_update_request_msg_t * step_msg)
-{
-	return _slurm_update ((void *) step_msg, REQUEST_UPDATE_JOB_STEP);
+slurm_update_step(step_update_request_msg_t *step_msg) {
+    return _slurm_update((void *) step_msg, REQUEST_UPDATE_JOB_STEP);
 }
 
 /*
@@ -287,43 +274,41 @@ slurm_update_step (step_update_request_msg_t * step_msg)
  * IN job_id_str - a job id
  * RET 0 or -1 on error */
 extern int
-slurm_top_job(char *job_id_str)
-{
-	int rc = SLURM_SUCCESS;
-	top_job_msg_t top_job_req;
-	slurm_msg_t req_msg;
+slurm_top_job(char *job_id_str) {
+    int rc = SLURM_SUCCESS;
+    top_job_msg_t top_job_req;
+    slurm_msg_t req_msg;
 
-	slurm_msg_t_init(&req_msg);
-	memset(&top_job_req, 0, sizeof(top_job_req));
-	top_job_req.job_id_str = job_id_str;
-	req_msg.msg_type       = REQUEST_TOP_JOB;
-	req_msg.data           = &top_job_req;
+    slurm_msg_t_init(&req_msg);
+    memset(&top_job_req, 0, sizeof(top_job_req));
+    top_job_req.job_id_str = job_id_str;
+    req_msg.msg_type = REQUEST_TOP_JOB;
+    req_msg.data = &top_job_req;
 
-	if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-					      working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
+                                          working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	slurm_seterrno(rc);
-	return rc;
+    slurm_seterrno(rc);
+    return rc;
 }
 
 /* _slurm_update - issue RPC for all update requests */
 static int
-_slurm_update (void *data, slurm_msg_type_t msg_type)
-{
-	int rc;
-	slurm_msg_t req_msg;
+_slurm_update(void *data, slurm_msg_type_t msg_type) {
+    int rc;
+    slurm_msg_t req_msg;
 
-	slurm_msg_t_init(&req_msg);
-	req_msg.msg_type = msg_type;
-	req_msg.data     = data;
+    slurm_msg_t_init(&req_msg);
+    req_msg.msg_type = msg_type;
+    req_msg.data = data;
 
-	if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-					      working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
+                                          working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	if (rc != SLURM_SUCCESS)
-		slurm_seterrno_ret(rc);
+    if (rc != SLURM_SUCCESS)
+        slurm_seterrno_ret(rc);
 
-        return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

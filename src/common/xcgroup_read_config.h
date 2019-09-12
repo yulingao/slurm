@@ -51,32 +51,32 @@ extern pthread_mutex_t xcgroup_config_read_mutex;
 /* Slurm cgroup plugins configuration parameters */
 typedef struct slurm_cgroup_conf {
 
-	bool      cgroup_automount;
-	char *    cgroup_mountpoint;
+    bool cgroup_automount;
+    char *cgroup_mountpoint;
 
-	char *    cgroup_prepend;
+    char *cgroup_prepend;
 
-	bool      constrain_cores;
-	bool      task_affinity;
+    bool constrain_cores;
+    bool task_affinity;
 
-	bool      constrain_ram_space;
-	float     allowed_ram_space;
-	float     max_ram_percent;       /* Upper bound on memory as % of RAM*/
+    bool constrain_ram_space;
+    float allowed_ram_space;
+    float max_ram_percent;       /* Upper bound on memory as % of RAM*/
 
-	uint64_t  min_ram_space;         /* Lower bound on memory limit (MB) */
+    uint64_t min_ram_space;         /* Lower bound on memory limit (MB) */
 
-	bool      constrain_kmem_space;
-	float     allowed_kmem_space;
-	float     max_kmem_percent;
-	uint64_t  min_kmem_space;
+    bool constrain_kmem_space;
+    float allowed_kmem_space;
+    float max_kmem_percent;
+    uint64_t min_kmem_space;
 
-	bool      constrain_swap_space;
-	float     allowed_swap_space;
-	float     max_swap_percent;      /* Upper bound on swap as % of RAM  */
-	uint64_t  memory_swappiness;
+    bool constrain_swap_space;
+    float allowed_swap_space;
+    float max_swap_percent;      /* Upper bound on swap as % of RAM  */
+    uint64_t memory_swappiness;
 
-	bool      constrain_devices;
-	char *    allowed_devices_file;
+    bool constrain_devices;
+    char *allowed_devices_file;
 
 } slurm_cgroup_conf_t;
 

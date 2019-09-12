@@ -47,8 +47,8 @@
  * and address with port
  */
 typedef struct connection_arg {
-	int newsockfd;
-	slurm_addr_t cli_addr;
+    int newsockfd;
+    slurm_addr_t cli_addr;
 } connection_arg_t;
 
 /* Free memory used to track RPC usage by type and user */
@@ -58,7 +58,7 @@ extern void free_rpc_stats(void);
  * slurmctld_req  - Process an individual RPC request
  * IN/OUT msg - the request message, data associated with the message is freed
  */
-void slurmctld_req(slurm_msg_t * msg, connection_arg_t *);
+void slurmctld_req(slurm_msg_t *msg, connection_arg_t *);
 
 /*
  * Initialize a response slurm_msg_t to an inbound msg,
@@ -78,11 +78,11 @@ extern void response_init(slurm_msg_t *resp, slurm_msg_t *msg);
  *	own locks.
  */
 extern int slurm_drain_nodes(char *node_list, char *reason,
-			     uint32_t reason_uid);
+                             uint32_t reason_uid);
 
 /* Copy an array of type char **, xmalloc() the array and xstrdup() the
  * strings in the array */
-extern char **xduparray(uint32_t size, char ** array);
+extern char **xduparray(uint32_t size, char **array);
 
 /*
  * build_alloc_msg - Fill in resource_allocation_response_msg_t off job_record.
@@ -92,6 +92,6 @@ extern char **xduparray(uint32_t size, char ** array);
  * RET resource_allocation_response_msg_t filled in.
  */
 extern resource_allocation_response_msg_t *build_alloc_msg(
-	struct job_record *job_ptr, int error_code, char *job_submit_user_msg);
+        struct job_record *job_ptr, int error_code, char *job_submit_user_msg);
 
 #endif /* !_HAVE_PROC_REQ_H */

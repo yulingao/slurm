@@ -70,6 +70,7 @@ extern void cluster_rec_free(void);
 extern int read_slurm_conf(int recover, bool reconfig);
 
 extern int dump_config_state_lite(void);
+
 extern int load_config_state_lite(void);
 
 /* For a configuration where available_features == active_features,
@@ -85,6 +86,6 @@ extern void build_feature_list_ne(void);
  * new_features IN - New active_features
  * node_bitmap IN - Nodes with the new active_features value */
 extern void update_feature_list(List feature_list, char *new_features,
-				bitstr_t *node_bitmap);
+                                bitstr_t *node_bitmap);
 
 #endif /* !_HAVE_READ_CONFIG_H */

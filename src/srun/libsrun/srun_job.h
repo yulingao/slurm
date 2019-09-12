@@ -53,118 +53,119 @@
 #include "src/srun/libsrun/opt.h"
 
 typedef enum {
-	SRUN_JOB_INIT = 0,         /* Job's initial state                   */
-	SRUN_JOB_LAUNCHING,        /* Launch thread is running              */
-	SRUN_JOB_STARTING,         /* Launch thread is complete             */
-	SRUN_JOB_RUNNING,          /* Launch thread complete                */
-	SRUN_JOB_CANCELLED,        /* CTRL-C cancelled                      */
-	SRUN_JOB_FORCETERM         /* Forced termination of IO thread       */
+    SRUN_JOB_INIT = 0,         /* Job's initial state                   */
+    SRUN_JOB_LAUNCHING,        /* Launch thread is running              */
+    SRUN_JOB_STARTING,         /* Launch thread is complete             */
+    SRUN_JOB_RUNNING,          /* Launch thread complete                */
+    SRUN_JOB_CANCELLED,        /* CTRL-C cancelled                      */
+    SRUN_JOB_FORCETERM         /* Forced termination of IO thread       */
 } srun_job_state_t;
 
 enum io_t {
-	IO_ALL          = 0, /* multiplex output from all/bcast stdin to all */
-	IO_ONE          = 1, /* output from only one task/stdin to one task  */
-	IO_PER_TASK     = 2, /* separate output/input file per task          */
-	IO_NONE         = 3, /* close output/close stdin                     */
+    IO_ALL = 0, /* multiplex output from all/bcast stdin to all */
+    IO_ONE = 1, /* output from only one task/stdin to one task  */
+    IO_PER_TASK = 2, /* separate output/input file per task          */
+    IO_NONE = 3, /* close output/close stdin                     */
 };
 
 #define format_io_t(t) (t == IO_ONE) ? "one" : (t == IO_ALL) ? \
                                                      "all" : "per task"
 
 typedef struct fname {
-	char      *name;
-	enum io_t  type;
-	int        taskid;  /* taskid for IO if IO_ONE */
+    char *name;
+    enum io_t type;
+    int taskid;  /* taskid for IO if IO_ONE */
 } fname_t;
 
 typedef struct srun_job {
-	int fir_nodeid;
-	uint32_t jobid;		/* assigned job id 	                  */
-	uint32_t stepid;	/* assigned step id 	                  */
-	uint32_t node_offset;	/* pack job node offset or NO_VAL */
+    int fir_nodeid;
+    uint32_t jobid;        /* assigned job id 	                  */
+    uint32_t stepid;    /* assigned step id 	                  */
+    uint32_t node_offset;    /* pack job node offset or NO_VAL */
 
-	uint32_t pack_jobid;	/* pack job leader or NO_VAL */
-	char    *pack_node_list;/* node list for combined pack job */
-	uint32_t pack_nnodes;	/* total node count for entire pack job */
-	uint32_t pack_ntasks;	/* total task count for entire pack job */
-	uint32_t pack_offset;	/* pack job offset or NO_VAL */
-	uint32_t pack_task_offset;/* pack job task offset or NO_VAL */
-	uint16_t *pack_task_cnts; /* tasks invoked on each node of pack job */
-	uint32_t **pack_tids;	/* Task IDs on each node of pack job */
-	uint32_t *pack_tid_offsets;/* map of tasks (by id) to originating pack*/
+    uint32_t pack_jobid;    /* pack job leader or NO_VAL */
+    char *pack_node_list;/* node list for combined pack job */
+    uint32_t pack_nnodes;    /* total node count for entire pack job */
+    uint32_t pack_ntasks;    /* total task count for entire pack job */
+    uint32_t pack_offset;    /* pack job offset or NO_VAL */
+    uint32_t pack_task_offset;/* pack job task offset or NO_VAL */
+    uint16_t *pack_task_cnts; /* tasks invoked on each node of pack job */
+    uint32_t **pack_tids;    /* Task IDs on each node of pack job */
+    uint32_t *pack_tid_offsets;/* map of tasks (by id) to originating pack*/
 
-	uint32_t cpu_count;	/* allocated CPUs */
-	uint32_t nhosts;	/* node count */
-	uint32_t ntasks;	/* task count */
-	uint16_t ntasks_per_board;/* number of tasks to invoke on each board */
-	uint16_t ntasks_per_core; /* number of tasks to invoke on each core */
-	uint16_t ntasks_per_socket;/* number of tasks to invoke on
+    uint32_t cpu_count;    /* allocated CPUs */
+    uint32_t nhosts;    /* node count */
+    uint32_t ntasks;    /* task count */
+    uint16_t ntasks_per_board;/* number of tasks to invoke on each board */
+    uint16_t ntasks_per_core; /* number of tasks to invoke on each core */
+    uint16_t ntasks_per_socket;/* number of tasks to invoke on
 				    * each socket */
 
-	srun_job_state_t state;	/* job state	   	                  */
-	pthread_mutex_t state_mutex;
-	pthread_cond_t  state_cond;
+    srun_job_state_t state;    /* job state	   	                  */
+    pthread_mutex_t state_mutex;
+    pthread_cond_t state_cond;
 
-	int  rc;                /* srun return code                       */
+    int rc;                /* srun return code                       */
 
-	char *alias_list;	/* node name/address/hostname aliases */
-	char **env;		/* pack-job specific environment */
-	char *nodelist;		/* nodelist in string form */
-	char *partition;	/* name of partition running job */
+    char *alias_list;    /* node name/address/hostname aliases */
+    char **env;        /* pack-job specific environment */
+    char *nodelist;        /* nodelist in string form */
+    char *partition;    /* name of partition running job */
 
-	fname_t *ifname;
-	fname_t *ofname;
-	fname_t *efname;
+    fname_t *ifname;
+    fname_t *ofname;
+    fname_t *efname;
 
-	/* Output streams and stdin fileno */
-	dynamic_plugin_data_t *select_jobinfo;
+    /* Output streams and stdin fileno */
+    dynamic_plugin_data_t *select_jobinfo;
 
-	/* Pseudo terminial support */
-	int pty_fd;		/* file to communicate window size changes */
-	uint16_t pty_port;	/* used to communicate window size changes */
-	uint16_t ws_col;	/* window size, columns */
-	uint16_t ws_row;	/* window size, row count */
-	slurm_step_ctx_t *step_ctx;
-	slurm_step_ctx_params_t ctx_params;
-	char *account;    /* account of this job */
-	char *qos;        /* job's qos */
-	char *resv_name;  /* reservation the job is using */
+    /* Pseudo terminial support */
+    int pty_fd;        /* file to communicate window size changes */
+    uint16_t pty_port;    /* used to communicate window size changes */
+    uint16_t ws_col;    /* window size, columns */
+    uint16_t ws_row;    /* window size, row count */
+    slurm_step_ctx_t *step_ctx;
+    slurm_step_ctx_params_t ctx_params;
+    char *account;    /* account of this job */
+    char *qos;        /* job's qos */
+    char *resv_name;  /* reservation the job is using */
 } srun_job_t;
 
-void    update_job_state(srun_job_t *job, srun_job_state_t newstate);
-void    job_force_termination(srun_job_t *job);
+void update_job_state(srun_job_t *job, srun_job_state_t newstate);
+
+void job_force_termination(srun_job_t *job);
 
 srun_job_state_t job_state(srun_job_t *job);
 
-extern srun_job_t * job_create_noalloc(void);
+extern srun_job_t *job_create_noalloc(void);
 
 /*
  * Create an srun job structure for a step w/out an allocation response msg.
  * (i.e. inside an allocation)
  */
 extern srun_job_t *job_step_create_allocation(
-			resource_allocation_response_msg_t *resp,
-			slurm_opt_t *opt_local);
+        resource_allocation_response_msg_t *resp,
+        slurm_opt_t *opt_local);
 
 /*
  * Create an srun job structure from a resource allocation response msg
  */
 extern srun_job_t *job_create_allocation(
-			resource_allocation_response_msg_t *resp,
-			slurm_opt_t *opt_local);
+        resource_allocation_response_msg_t *resp,
+        slurm_opt_t *opt_local);
 
 extern void init_srun(int argc, char **argv,
-		      log_options_t *logopt, int debug_level,
-		      bool handle_signals);
+                      log_options_t *logopt, int debug_level,
+                      bool handle_signals);
 
 extern void create_srun_job(void **p_job, bool *got_alloc,
-			    bool slurm_started, bool handle_signals);
+                            bool slurm_started, bool handle_signals);
 
 extern void pre_launch_srun_job(srun_job_t *job, bool slurm_started,
-				bool handle_signals, slurm_opt_t *opt_local);
+                                bool handle_signals, slurm_opt_t *opt_local);
 
 extern void fini_srun(srun_job_t *job, bool got_alloc, uint32_t *global_rc,
-		      bool slurm_started);
+                      bool slurm_started);
 
 /*
  *  Update job filenames and modes for stderr, stdout, and stdin.

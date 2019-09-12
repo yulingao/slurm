@@ -94,193 +94,189 @@ const char plugin_name[] = "Job accounting gather cgroup plugin";
 const char plugin_type[] = "jobacct_gather/cgroup";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
-static void _prec_extra(jag_prec_t *prec, uint32_t taskid)
-{
-	unsigned long utime, stime, total_rss, total_pgpgin;
-	char *cpu_time = NULL, *memory_stat = NULL, *ptr;
-	size_t cpu_time_size = 0, memory_stat_size = 0;
-	xcgroup_t *task_cpuacct_cg = NULL;;
-	xcgroup_t *task_memory_cg = NULL;
-	bool exit_early = false;
+static void _prec_extra(jag_prec_t *prec, uint32_t taskid) {
+    unsigned long utime, stime, total_rss, total_pgpgin;
+    char *cpu_time = NULL, *memory_stat = NULL, *ptr;
+    size_t cpu_time_size = 0, memory_stat_size = 0;
+    xcgroup_t *task_cpuacct_cg = NULL;;
+    xcgroup_t *task_memory_cg = NULL;
+    bool exit_early = false;
 
-	/* Find which task cgroups to use */
-	task_memory_cg = list_find_first(task_memory_cg_list,
-					 find_task_cg_info,
-					 &taskid);
-	task_cpuacct_cg = list_find_first(task_cpuacct_cg_list,
-					  find_task_cg_info,
-					  &taskid);
+    /* Find which task cgroups to use */
+    task_memory_cg = list_find_first(task_memory_cg_list,
+                                     find_task_cg_info,
+                                     &taskid);
+    task_cpuacct_cg = list_find_first(task_cpuacct_cg_list,
+                                      find_task_cg_info,
+                                      &taskid);
 
-	/*
-	 * We should always find the task cgroups; if we don't for some reason,
-	 * just print an error and return.
-	 */
-	if (!task_cpuacct_cg) {
-		error("%s: Could not find task_cpuacct_cg, this should never happen",
-		      __func__);
-		exit_early = true;
-	}
-	if (!task_memory_cg) {
-		error("%s: Could not find task_memory_cg, this should never happen",
-		      __func__);
-		exit_early = true;
-	}
-	if (exit_early)
-		return;
+    /*
+     * We should always find the task cgroups; if we don't for some reason,
+     * just print an error and return.
+     */
+    if (!task_cpuacct_cg) {
+        error("%s: Could not find task_cpuacct_cg, this should never happen",
+              __func__);
+        exit_early = true;
+    }
+    if (!task_memory_cg) {
+        error("%s: Could not find task_memory_cg, this should never happen",
+              __func__);
+        exit_early = true;
+    }
+    if (exit_early)
+        return;
 
-	//DEF_TIMERS;
-	//START_TIMER;
-	/* info("before"); */
-	/* print_jag_prec(prec); */
-	xcgroup_get_param(task_cpuacct_cg, "cpuacct.stat",
-			  &cpu_time, &cpu_time_size);
-	if (cpu_time == NULL) {
-		debug2("%s: failed to collect cpuacct.stat pid %d ppid %d",
-		       __func__, prec->pid, prec->ppid);
-	} else {
-		sscanf(cpu_time, "%*s %lu %*s %lu", &utime, &stime);
-		/*
-		 * Store unnormalized times, we will normalize in when
-		 * transfering to a struct jobacctinfo in job_common_poll_data()
-		 */
-		prec->usec = utime;
-		prec->ssec = stime;
-	}
+    //DEF_TIMERS;
+    //START_TIMER;
+    /* info("before"); */
+    /* print_jag_prec(prec); */
+    xcgroup_get_param(task_cpuacct_cg, "cpuacct.stat",
+                      &cpu_time, &cpu_time_size);
+    if (cpu_time == NULL) {
+        debug2("%s: failed to collect cpuacct.stat pid %d ppid %d",
+               __func__, prec->pid, prec->ppid);
+    } else {
+        sscanf(cpu_time, "%*s %lu %*s %lu", &utime, &stime);
+        /*
+         * Store unnormalized times, we will normalize in when
+         * transfering to a struct jobacctinfo in job_common_poll_data()
+         */
+        prec->usec = utime;
+        prec->ssec = stime;
+    }
 
-	xcgroup_get_param(task_memory_cg, "memory.stat",
-			  &memory_stat, &memory_stat_size);
-	if (memory_stat == NULL) {
-		debug2("%s: failed to collect memory.stat  pid %d ppid %d",
-		       __func__, prec->pid, prec->ppid);
-	} else {
-		/*
-		 * This number represents the amount of "dirty" private memory
-		 * used by the cgroup.  From our experience this is slightly
-		 * different than what proc presents, but is probably more
-		 * accurate on what the user is actually using.
-		 */
-		if ((ptr = strstr(memory_stat, "total_rss"))) {
-			sscanf(ptr, "total_rss %lu", &total_rss);
-			prec->tres_data[TRES_ARRAY_MEM].size_read = total_rss;
-		}
+    xcgroup_get_param(task_memory_cg, "memory.stat",
+                      &memory_stat, &memory_stat_size);
+    if (memory_stat == NULL) {
+        debug2("%s: failed to collect memory.stat  pid %d ppid %d",
+               __func__, prec->pid, prec->ppid);
+    } else {
+        /*
+         * This number represents the amount of "dirty" private memory
+         * used by the cgroup.  From our experience this is slightly
+         * different than what proc presents, but is probably more
+         * accurate on what the user is actually using.
+         */
+        if ((ptr = strstr(memory_stat, "total_rss"))) {
+            sscanf(ptr, "total_rss %lu", &total_rss);
+            prec->tres_data[TRES_ARRAY_MEM].size_read = total_rss;
+        }
 
-		/*
-		 * total_pgmajfault is what is reported in proc, so we use
-		 * the same thing here.
-		 */
-		if ((ptr = strstr(memory_stat, "total_pgmajfault"))) {
-			sscanf(ptr, "total_pgmajfault %lu", &total_pgpgin);
-			prec->tres_data[TRES_ARRAY_PAGES].size_read =
-				total_pgpgin;
-		}
-	}
+        /*
+         * total_pgmajfault is what is reported in proc, so we use
+         * the same thing here.
+         */
+        if ((ptr = strstr(memory_stat, "total_pgmajfault"))) {
+            sscanf(ptr, "total_pgmajfault %lu", &total_pgpgin);
+            prec->tres_data[TRES_ARRAY_PAGES].size_read =
+                    total_pgpgin;
+        }
+    }
 
-	xfree(cpu_time);
-	xfree(memory_stat);
+    xfree(cpu_time);
+    xfree(memory_stat);
 
-	/* FIXME: Enable when kernel support ready.
-	 *
-	 * "Read" and "Write" from blkio.throttle.io_service_bytes are
-	 * counts of bytes read and written for physical disk I/Os only.
-	 * These counts do not include disk I/Os satisfied from cache.
-	 */
-	/* int dev_major; */
-	/* uint64_t read_bytes, write_bytes, tot_read, tot_write; */
-	/* char *blkio_bytes, *next_device; */
-	/* size_t blkio_bytes_size; */
-	/* xcgroup_get_param(&task_blkio_cg, "blkio.throttle.io_service_bytes", */
-	/*                   &blkio_bytes, &blkio_bytes_size); */
-	/* next_device = blkio_bytes; */
-	/* tot_read = tot_write = 0; */
-	/* while ((sscanf(next_device, "%d:", &dev_major)) > 0) { */
-	/* 	if ((dev_major > 239) && (dev_major < 255)) */
-	/* 		/\* skip experimental device codes *\/ */
-	/* 		continue; */
-	/* 	next_device = strstr(next_device, "Read"); */
-	/* 	sscanf(next_device, "%*s %"PRIu64"", &read_bytes); */
-	/* 	next_device = strstr(next_device, "Write"); */
-	/* 	sscanf(next_device, "%*s %"PRIu64"", &write_bytes); */
-	/* 	tot_read+=read_bytes; */
-	/* 	tot_write+=write_bytes; */
-	/* 	next_device = strstr(next_device, "Total"); */
-	/* } */
-	/* prec->disk_read = (double)tot_read / (double)1048576; */
-	/* prec->disk_write = (double)tot_write / (double)1048576; */
+    /* FIXME: Enable when kernel support ready.
+     *
+     * "Read" and "Write" from blkio.throttle.io_service_bytes are
+     * counts of bytes read and written for physical disk I/Os only.
+     * These counts do not include disk I/Os satisfied from cache.
+     */
+    /* int dev_major; */
+    /* uint64_t read_bytes, write_bytes, tot_read, tot_write; */
+    /* char *blkio_bytes, *next_device; */
+    /* size_t blkio_bytes_size; */
+    /* xcgroup_get_param(&task_blkio_cg, "blkio.throttle.io_service_bytes", */
+    /*                   &blkio_bytes, &blkio_bytes_size); */
+    /* next_device = blkio_bytes; */
+    /* tot_read = tot_write = 0; */
+    /* while ((sscanf(next_device, "%d:", &dev_major)) > 0) { */
+    /* 	if ((dev_major > 239) && (dev_major < 255)) */
+    /* 		/\* skip experimental device codes *\/ */
+    /* 		continue; */
+    /* 	next_device = strstr(next_device, "Read"); */
+    /* 	sscanf(next_device, "%*s %"PRIu64"", &read_bytes); */
+    /* 	next_device = strstr(next_device, "Write"); */
+    /* 	sscanf(next_device, "%*s %"PRIu64"", &write_bytes); */
+    /* 	tot_read+=read_bytes; */
+    /* 	tot_write+=write_bytes; */
+    /* 	next_device = strstr(next_device, "Total"); */
+    /* } */
+    /* prec->disk_read = (double)tot_read / (double)1048576; */
+    /* prec->disk_write = (double)tot_write / (double)1048576; */
 
-	/* info("after %d %d", total_rss); */
-	/* print_jag_prec(prec); */
-	//END_TIMER;
-	//info("took %s", TIME_STR);
-	return;
+    /* info("after %d %d", total_rss); */
+    /* print_jag_prec(prec); */
+    //END_TIMER;
+    //info("took %s", TIME_STR);
+    return;
 
 }
 
-static bool _run_in_daemon(void)
-{
-	static bool set = false;
-	static bool run = false;
+static bool _run_in_daemon(void) {
+    static bool set = false;
+    static bool run = false;
 
-	if (!set) {
-		set = 1;
-		run = run_in_daemon("slurmstepd");
-	}
+    if (!set) {
+        set = 1;
+        run = run_in_daemon("slurmstepd");
+    }
 
-	return run;
+    return run;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init (void)
-{
-	/* If running on the slurmctld don't do any of this since it
-	   isn't needed.
-	*/
-	if (_run_in_daemon()) {
-		jag_common_init(0);
+extern int init(void) {
+    /* If running on the slurmctld don't do any of this since it
+       isn't needed.
+    */
+    if (_run_in_daemon()) {
+        jag_common_init(0);
 
-		/* initialize cpuinfo internal data */
-		if (xcpuinfo_init() != XCPUINFO_SUCCESS) {
-			return SLURM_ERROR;
-		}
+        /* initialize cpuinfo internal data */
+        if (xcpuinfo_init() != XCPUINFO_SUCCESS) {
+            return SLURM_ERROR;
+        }
 
-		/* enable cpuacct cgroup subsystem */
-		if (jobacct_gather_cgroup_cpuacct_init() != SLURM_SUCCESS) {
-			xcpuinfo_fini();
-			return SLURM_ERROR;
-		}
+        /* enable cpuacct cgroup subsystem */
+        if (jobacct_gather_cgroup_cpuacct_init() != SLURM_SUCCESS) {
+            xcpuinfo_fini();
+            return SLURM_ERROR;
+        }
 
-		/* enable memory cgroup subsystem */
-		if (jobacct_gather_cgroup_memory_init() != SLURM_SUCCESS) {
-			xcpuinfo_fini();
-			return SLURM_ERROR;
-		}
+        /* enable memory cgroup subsystem */
+        if (jobacct_gather_cgroup_memory_init() != SLURM_SUCCESS) {
+            xcpuinfo_fini();
+            return SLURM_ERROR;
+        }
 
-		/* FIXME: Enable when kernel support ready.
-		 *
-		 * Enable blkio subsystem.
-		 */
-		/* if (jobacct_gather_cgroup_blkio_init() */
-		/*     != SLURM_SUCCESS) { */
-		/* 	xcpuinfo_fini(); */
-		/* 	return SLURM_ERROR; */
-		/* } */
-	}
+        /* FIXME: Enable when kernel support ready.
+         *
+         * Enable blkio subsystem.
+         */
+        /* if (jobacct_gather_cgroup_blkio_init() */
+        /*     != SLURM_SUCCESS) { */
+        /* 	xcpuinfo_fini(); */
+        /* 	return SLURM_ERROR; */
+        /* } */
+    }
 
-	debug("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+    debug("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
-extern int fini (void)
-{
-	if (_run_in_daemon()) {
-		jobacct_gather_cgroup_cpuacct_fini();
-		jobacct_gather_cgroup_memory_fini();
-		/* jobacct_gather_cgroup_blkio_fini(); */
-		acct_gather_energy_fini();
-	}
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    if (_run_in_daemon()) {
+        jobacct_gather_cgroup_cpuacct_fini();
+        jobacct_gather_cgroup_memory_fini();
+        /* jobacct_gather_cgroup_blkio_fini(); */
+        acct_gather_energy_fini();
+    }
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -301,109 +297,103 @@ extern int fini (void)
  *    wrong.
  */
 extern void jobacct_gather_p_poll_data(
-	List task_list, bool pgid_plugin, uint64_t cont_id, bool profile)
-{
-	static jag_callbacks_t callbacks;
-	static bool first = 1;
+        List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
+    static jag_callbacks_t callbacks;
+    static bool first = 1;
 
-	if (first) {
-		memset(&callbacks, 0, sizeof(jag_callbacks_t));
-		first = 0;
-		callbacks.prec_extra = _prec_extra;
-	}
+    if (first) {
+        memset(&callbacks, 0, sizeof(jag_callbacks_t));
+        first = 0;
+        callbacks.prec_extra = _prec_extra;
+    }
 
-	jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
-			     profile);
+    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
+                         profile);
 
-	return;
+    return;
 }
 
-extern int jobacct_gather_p_endpoll(void)
-{
-	jag_common_fini();
+extern int jobacct_gather_p_endpoll(void) {
+    jag_common_fini();
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id)
-{
-	if (jobacct_gather_cgroup_cpuacct_attach_task(pid, jobacct_id) !=
-	    SLURM_SUCCESS)
-		return SLURM_ERROR;
+extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id) {
+    if (jobacct_gather_cgroup_cpuacct_attach_task(pid, jobacct_id) !=
+        SLURM_SUCCESS)
+        return SLURM_ERROR;
 
-	if (jobacct_gather_cgroup_memory_attach_task(pid, jobacct_id) !=
-	    SLURM_SUCCESS)
-		return SLURM_ERROR;
+    if (jobacct_gather_cgroup_memory_attach_task(pid, jobacct_id) !=
+        SLURM_SUCCESS)
+        return SLURM_ERROR;
 
-	/* if (jobacct_gather_cgroup_blkio_attach_task(pid, jobacct_id) != */
-	/*     SLURM_SUCCESS) */
-	/* 	return SLURM_ERROR; */
+    /* if (jobacct_gather_cgroup_blkio_attach_task(pid, jobacct_id) != */
+    /*     SLURM_SUCCESS) */
+    /* 	return SLURM_ERROR; */
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern char* jobacct_cgroup_create_slurm_cg(xcgroup_ns_t* ns)
- {
-	/* we do it here as we do not have access to the conf structure */
-	/* in libslurm (src/common/xcgroup.c) */
-	xcgroup_t slurm_cg;
-	char *pre;
-	slurm_cgroup_conf_t *cg_conf;
+extern char *jobacct_cgroup_create_slurm_cg(xcgroup_ns_t *ns) {
+    /* we do it here as we do not have access to the conf structure */
+    /* in libslurm (src/common/xcgroup.c) */
+    xcgroup_t slurm_cg;
+    char *pre;
+    slurm_cgroup_conf_t *cg_conf;
 
-	/* read cgroup configuration */
-	slurm_mutex_lock(&xcgroup_config_read_mutex);
-	cg_conf = xcgroup_get_slurm_cgroup_conf();
+    /* read cgroup configuration */
+    slurm_mutex_lock(&xcgroup_config_read_mutex);
+    cg_conf = xcgroup_get_slurm_cgroup_conf();
 
-	pre = xstrdup(cg_conf->cgroup_prepend);
+    pre = xstrdup(cg_conf->cgroup_prepend);
 
-	slurm_mutex_unlock(&xcgroup_config_read_mutex);
+    slurm_mutex_unlock(&xcgroup_config_read_mutex);
 
 #ifdef MULTIPLE_SLURMD
-	if (conf->node_name != NULL) {
-		xstrsubstitute(pre, "%n", conf->node_name);
-	} else {
-		xfree(pre);
-		pre = (char*) xstrdup("/slurm");
-	}
+    if (conf->node_name != NULL) {
+        xstrsubstitute(pre, "%n", conf->node_name);
+    } else {
+        xfree(pre);
+        pre = (char*) xstrdup("/slurm");
+    }
 #endif
 
-	/* create slurm cgroup in the ns (it could already exist) */
-	if (xcgroup_create(ns, &slurm_cg, pre,
-			   getuid(), getgid()) != XCGROUP_SUCCESS) {
-		return pre;
-	}
+    /* create slurm cgroup in the ns (it could already exist) */
+    if (xcgroup_create(ns, &slurm_cg, pre,
+                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+        return pre;
+    }
 
-	if (xcgroup_instantiate(&slurm_cg) != XCGROUP_SUCCESS) {
-		error("unable to build slurm cgroup for ns %s: %m",
-		      ns->subsystems);
-		xcgroup_destroy(&slurm_cg);
-		return pre;
-	} else {
-		debug3("slurm cgroup %s successfully created for ns %s: %m",
-		       pre, ns->subsystems);
-		xcgroup_destroy(&slurm_cg);
-	}
+    if (xcgroup_instantiate(&slurm_cg) != XCGROUP_SUCCESS) {
+        error("unable to build slurm cgroup for ns %s: %m",
+              ns->subsystems);
+        xcgroup_destroy(&slurm_cg);
+        return pre;
+    } else {
+        debug3("slurm cgroup %s successfully created for ns %s: %m",
+               pre, ns->subsystems);
+        xcgroup_destroy(&slurm_cg);
+    }
 
-	return pre;
+    return pre;
 }
 
-extern int find_task_cg_info(void *x, void *key)
-{
-	task_cg_info_t *task_cg = (task_cg_info_t*)x;
-	uint32_t taskid = *(uint32_t*)key;
+extern int find_task_cg_info(void *x, void *key) {
+    task_cg_info_t *task_cg = (task_cg_info_t *) x;
+    uint32_t taskid = *(uint32_t *) key;
 
-	if (task_cg->taskid == taskid)
-		return 1;
+    if (task_cg->taskid == taskid)
+        return 1;
 
-	return 0;
+    return 0;
 }
 
-extern void free_task_cg_info(void *object)
-{
-	task_cg_info_t *task_cg = (task_cg_info_t *)object;
+extern void free_task_cg_info(void *object) {
+    task_cg_info_t *task_cg = (task_cg_info_t *) object;
 
-	if (task_cg) {
-		xcgroup_destroy(&task_cg->task_cg);
-		xfree(task_cg);
-	}
+    if (task_cg) {
+        xcgroup_destroy(&task_cg->task_cg);
+        xfree(task_cg);
+    }
 }

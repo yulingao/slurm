@@ -55,6 +55,7 @@ void gids_cache_purge(void);
 extern void record_launched_jobs(void);
 
 void file_bcast_init(void);
+
 void file_bcast_purge(void);
 
 /*

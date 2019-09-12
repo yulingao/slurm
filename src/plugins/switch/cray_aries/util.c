@@ -57,41 +57,41 @@ static void _recursive_rmdir(const char *dirnm);
  */
 int create_apid_dir(uint64_t apid, uid_t uid, gid_t gid)
 {
-	int rc = 0;
-	char *apid_dir = NULL;
+    int rc = 0;
+    char *apid_dir = NULL;
 
-	apid_dir = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64, apid);
+    apid_dir = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64, apid);
 
-	rc = mkdir(apid_dir, 0700);
-	if (rc) {
-		CRAY_ERR("mkdir %s failed: %m", apid_dir);
-		xfree(apid_dir);
-		return SLURM_ERROR;
-	}
+    rc = mkdir(apid_dir, 0700);
+    if (rc) {
+        CRAY_ERR("mkdir %s failed: %m", apid_dir);
+        xfree(apid_dir);
+        return SLURM_ERROR;
+    }
 
-	rc = chown(apid_dir, uid, gid);
-	if (rc) {
-		CRAY_ERR("chown %s, %d, %d failed: %m",
-			 apid_dir, (int)uid, (int)gid);
-		xfree(apid_dir);
-		return SLURM_ERROR;
-	}
+    rc = chown(apid_dir, uid, gid);
+    if (rc) {
+        CRAY_ERR("chown %s, %d, %d failed: %m",
+             apid_dir, (int)uid, (int)gid);
+        xfree(apid_dir);
+        return SLURM_ERROR;
+    }
 
-	if (apid != SLURM_ID_HASH_LEGACY(apid)) {
-		char *oldapid_dir = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64,
-						   SLURM_ID_HASH_LEGACY(apid));
-		if (symlink(apid_dir, oldapid_dir)) {
-			CRAY_ERR("symlink %s, %s failed: %m",
-				apid_dir, oldapid_dir);
-			xfree(apid_dir);
-			xfree(oldapid_dir);
-			return SLURM_ERROR;
-		}
-		xfree(oldapid_dir);
-	}
+    if (apid != SLURM_ID_HASH_LEGACY(apid)) {
+        char *oldapid_dir = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64,
+                           SLURM_ID_HASH_LEGACY(apid));
+        if (symlink(apid_dir, oldapid_dir)) {
+            CRAY_ERR("symlink %s, %s failed: %m",
+                apid_dir, oldapid_dir);
+            xfree(apid_dir);
+            xfree(oldapid_dir);
+            return SLURM_ERROR;
+        }
+        xfree(oldapid_dir);
+    }
 
-	xfree(apid_dir);
-	return SLURM_SUCCESS;
+    xfree(apid_dir);
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -99,47 +99,47 @@ int create_apid_dir(uint64_t apid, uid_t uid, gid_t gid)
  */
 int remove_spool_files(uint64_t apid)
 {
-	char *path_name = NULL;
-	uint64_t oldapid = SLURM_ID_HASH_LEGACY(apid);
+    char *path_name = NULL;
+    uint64_t oldapid = SLURM_ID_HASH_LEGACY(apid);
 
-	// Remove the backwards compatibility apid directory symlink
-	if (apid != oldapid) {
-		path_name = xstrdup_printf(
-			LEGACY_SPOOL_DIR "%" PRIu64, oldapid);
-		if (remove(path_name)) {
-			CRAY_ERR("remove %s failed: %m", path_name);
-			xfree(path_name);
-			return SLURM_ERROR;
-		}
-		xfree(path_name);
-	}
+    // Remove the backwards compatibility apid directory symlink
+    if (apid != oldapid) {
+        path_name = xstrdup_printf(
+            LEGACY_SPOOL_DIR "%" PRIu64, oldapid);
+        if (remove(path_name)) {
+            CRAY_ERR("remove %s failed: %m", path_name);
+            xfree(path_name);
+            return SLURM_ERROR;
+        }
+        xfree(path_name);
+    }
 
-	// Remove the apid directory LEGACY_SPOOL_DIR/<APID>
-	path_name = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64, apid);
-	_recursive_rmdir(path_name);
-	xfree(path_name);
+    // Remove the apid directory LEGACY_SPOOL_DIR/<APID>
+    path_name = xstrdup_printf(LEGACY_SPOOL_DIR "%" PRIu64, apid);
+    _recursive_rmdir(path_name);
+    xfree(path_name);
 
-	// Remove the backwards compatibility ALPS placement file
-	if (apid != oldapid) {
-		path_name = xstrdup_printf(LEGACY_SPOOL_DIR "places%" PRIu64,
-					   oldapid);
-		if (remove(path_name)) {
-			CRAY_ERR("remove %s failed: %m", path_name);
-			xfree(path_name);
-			return SLURM_ERROR;
-		}
-	}
+    // Remove the backwards compatibility ALPS placement file
+    if (apid != oldapid) {
+        path_name = xstrdup_printf(LEGACY_SPOOL_DIR "places%" PRIu64,
+                       oldapid);
+        if (remove(path_name)) {
+            CRAY_ERR("remove %s failed: %m", path_name);
+            xfree(path_name);
+            return SLURM_ERROR;
+        }
+    }
 
-	// Remove the ALPS placement file LEGACY_SPOOL_DIR/places<APID>
-	path_name = xstrdup_printf(LEGACY_SPOOL_DIR "places%" PRIu64, apid);
-	if (remove(path_name)) {
-		CRAY_ERR("remove %s failed: %m", path_name);
-		xfree(path_name);
-		return SLURM_ERROR;
-	}
+    // Remove the ALPS placement file LEGACY_SPOOL_DIR/places<APID>
+    path_name = xstrdup_printf(LEGACY_SPOOL_DIR "places%" PRIu64, apid);
+    if (remove(path_name)) {
+        CRAY_ERR("remove %s failed: %m", path_name);
+        xfree(path_name);
+        return SLURM_ERROR;
+    }
 
-	xfree(path_name);
-	return SLURM_SUCCESS;
+    xfree(path_name);
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -147,70 +147,70 @@ int remove_spool_files(uint64_t apid)
  */
 int set_job_env(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job)
 {
-	int rc, i;
-	char *buff = NULL, *resv_ports = NULL, *tmp = NULL;
+    int rc, i;
+    char *buff = NULL, *resv_ports = NULL, *tmp = NULL;
 
-	/*
-	 * Write the CRAY_NUM_COOKIES and CRAY_COOKIES variables out
-	 */
-	rc = env_array_overwrite_fmt(&job->env, CRAY_NUM_COOKIES_ENV,
-				     "%"PRIu32, sw_job->num_cookies);
-	if (rc == 0) {
-		CRAY_ERR("Failed to set env var " CRAY_NUM_COOKIES_ENV);
-		return SLURM_ERROR;
-	}
+    /*
+     * Write the CRAY_NUM_COOKIES and CRAY_COOKIES variables out
+     */
+    rc = env_array_overwrite_fmt(&job->env, CRAY_NUM_COOKIES_ENV,
+                     "%"PRIu32, sw_job->num_cookies);
+    if (rc == 0) {
+        CRAY_ERR("Failed to set env var " CRAY_NUM_COOKIES_ENV);
+        return SLURM_ERROR;
+    }
 
-	/*
-	 * Create the CRAY_COOKIES environment variable in the application's
-	 * environment.
-	 * Create one string containing a comma separated list of cookies.
-	 */
-	for (i = 0; i < sw_job->num_cookies; i++) {
-		if (i > 0) {
-			xstrfmtcat(buff, ",%s", sw_job->cookies[i]);
-		} else
-			xstrcat(buff, sw_job->cookies[i]);
-	}
+    /*
+     * Create the CRAY_COOKIES environment variable in the application's
+     * environment.
+     * Create one string containing a comma separated list of cookies.
+     */
+    for (i = 0; i < sw_job->num_cookies; i++) {
+        if (i > 0) {
+            xstrfmtcat(buff, ",%s", sw_job->cookies[i]);
+        } else
+            xstrcat(buff, sw_job->cookies[i]);
+    }
 
-	rc = env_array_overwrite(&job->env, CRAY_COOKIES_ENV, buff);
-	if (rc == 0) {
-		CRAY_ERR("Failed to set env var " CRAY_COOKIES_ENV);
-		xfree(buff);
-		return SLURM_ERROR;
-	}
-	xfree(buff);
+    rc = env_array_overwrite(&job->env, CRAY_COOKIES_ENV, buff);
+    if (rc == 0) {
+        CRAY_ERR("Failed to set env var " CRAY_COOKIES_ENV);
+        xfree(buff);
+        return SLURM_ERROR;
+    }
+    xfree(buff);
 
-	/*
-	 * Write the PMI_CONTROL_PORT
-	 * Cray's PMI uses this is the port to communicate its control tree
-	 * information.
-	 */
-	resv_ports = getenvp(job->env, "SLURM_STEP_RESV_PORTS");
-	if (resv_ports != NULL) {
-		buff = xstrdup(resv_ports);
-		tmp = strchr(buff, '-');
-		if (tmp != NULL) {
-			*tmp = '\0';
-		}
-		rc = env_array_overwrite(&job->env, PMI_CONTROL_PORT_ENV,
-					 buff);
-		xfree(buff);
-		if (rc == 0) {
-			CRAY_ERR("Failed to set env var "PMI_CONTROL_PORT_ENV);
-			return SLURM_ERROR;
-		}
+    /*
+     * Write the PMI_CONTROL_PORT
+     * Cray's PMI uses this is the port to communicate its control tree
+     * information.
+     */
+    resv_ports = getenvp(job->env, "SLURM_STEP_RESV_PORTS");
+    if (resv_ports != NULL) {
+        buff = xstrdup(resv_ports);
+        tmp = strchr(buff, '-');
+        if (tmp != NULL) {
+            *tmp = '\0';
+        }
+        rc = env_array_overwrite(&job->env, PMI_CONTROL_PORT_ENV,
+                     buff);
+        xfree(buff);
+        if (rc == 0) {
+            CRAY_ERR("Failed to set env var "PMI_CONTROL_PORT_ENV);
+            return SLURM_ERROR;
+        }
 
-	}
+    }
 
-	/* Set if task IDs are not monotonically increasing across all nodes */
-	rc = env_array_overwrite_fmt(&job->env, PMI_CRAY_NO_SMP_ENV,
-				     "%d", job->non_smp);
-	if (rc == 0) {
-		CRAY_ERR("Failed to set env var "PMI_CRAY_NO_SMP_ENV);
-		return SLURM_ERROR;
-	}
+    /* Set if task IDs are not monotonically increasing across all nodes */
+    rc = env_array_overwrite_fmt(&job->env, PMI_CRAY_NO_SMP_ENV,
+                     "%d", job->non_smp);
+    if (rc == 0) {
+        CRAY_ERR("Failed to set env var "PMI_CRAY_NO_SMP_ENV);
+        return SLURM_ERROR;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -218,19 +218,19 @@ int set_job_env(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job)
  * err_msg is freed and NULLed
  */
 void alpsc_debug(const char *file, int line, const char *func,
-		  int rc, int expected_rc, const char *alpsc_func,
-		  char **err_msg)
+          int rc, int expected_rc, const char *alpsc_func,
+          char **err_msg)
 {
-	if (rc != expected_rc) {
-		error("(%s: %d: %s) %s failed: %s", file, line, func,
-		      alpsc_func,
-		      *err_msg ? *err_msg : "No error message present");
-	} else if (*err_msg) {
-		info("(%s: %d: %s) %s: %s", file, line, func,
-		     alpsc_func, *err_msg);
-	}
-	free(*err_msg);
-	*err_msg = NULL;
+    if (rc != expected_rc) {
+        error("(%s: %d: %s) %s failed: %s", file, line, func,
+              alpsc_func,
+              *err_msg ? *err_msg : "No error message present");
+    } else if (*err_msg) {
+        info("(%s: %d: %s) %s: %s", file, line, func,
+             alpsc_func, *err_msg);
+    }
+    free(*err_msg);
+    *err_msg = NULL;
 }
 
 
@@ -253,50 +253,50 @@ void alpsc_debug(const char *file, int line, const char *func,
 int list_str_to_array(char *list, int *cnt, int32_t **numbers)
 {
 
-	int32_t *item_ptr = NULL;
-	hostlist_t hl;
-	int i, ret = 0;
-	char *str, *cptr = NULL;
+    int32_t *item_ptr = NULL;
+    hostlist_t hl;
+    int i, ret = 0;
+    char *str, *cptr = NULL;
 
-	/*
-	 * Create a hostlist
-	 */
-	if (!(hl = hostlist_create(list))) {
-		CRAY_ERR("hostlist_create error on %s", list);
-		error("hostlist_create error on %s", list);
-		return -1;
-	}
+    /*
+     * Create a hostlist
+     */
+    if (!(hl = hostlist_create(list))) {
+        CRAY_ERR("hostlist_create error on %s", list);
+        error("hostlist_create error on %s", list);
+        return -1;
+    }
 
-	*cnt = hostlist_count(hl);
+    *cnt = hostlist_count(hl);
 
-	if (!*cnt) {
-		*numbers = NULL;
-		return 0;
-	}
+    if (!*cnt) {
+        *numbers = NULL;
+        return 0;
+    }
 
-	/*
-	 * Create an integer array of item_ptr in the same order as in the list.
-	 */
-	i = 0;
-	item_ptr = *numbers = xmalloc((*cnt) * sizeof(int32_t));
-	while ((str = hostlist_shift(hl))) {
-		if (!(cptr = strpbrk(str, "0123456789"))) {
-			CRAY_ERR("Error: Node was not recognizable: %s", str);
-			free(str);
-			xfree(item_ptr);
-			*numbers = NULL;
-			hostlist_destroy(hl);
-			return -1;
-		}
-		item_ptr[i] = atoll(cptr);
-		i++;
-		free(str);
-	}
+    /*
+     * Create an integer array of item_ptr in the same order as in the list.
+     */
+    i = 0;
+    item_ptr = *numbers = xmalloc((*cnt) * sizeof(int32_t));
+    while ((str = hostlist_shift(hl))) {
+        if (!(cptr = strpbrk(str, "0123456789"))) {
+            CRAY_ERR("Error: Node was not recognizable: %s", str);
+            free(str);
+            xfree(item_ptr);
+            *numbers = NULL;
+            hostlist_destroy(hl);
+            return -1;
+        }
+        item_ptr[i] = atoll(cptr);
+        i++;
+        free(str);
+    }
 
-	// Clean up
-	hostlist_destroy(hl);
+    // Clean up
+    hostlist_destroy(hl);
 
-	return ret;
+    return ret;
 }
 
 /*
@@ -309,92 +309,92 @@ int list_str_to_array(char *list, int *cnt, int32_t **numbers)
  */
 static void _recursive_rmdir(const char *dirnm)
 {
-	int st;
-	size_t dirnm_len, fnm_len, name_len;
-	char *fnm = 0;
-	DIR *dirp;
-	struct dirent *dir;
-	struct stat st_buf;
+    int st;
+    size_t dirnm_len, fnm_len, name_len;
+    char *fnm = 0;
+    DIR *dirp;
+    struct dirent *dir;
+    struct stat st_buf;
 
-	/* Don't do anything if there is no directory name */
-	if (!dirnm) {
-		return;
-	}
-	dirp = opendir(dirnm);
-	if (!dirp) {
-		if (errno == ENOTDIR)
-			goto fileDel;
-		CRAY_ERR("Error opening directory %s", dirnm);
-		return;
-	}
+    /* Don't do anything if there is no directory name */
+    if (!dirnm) {
+        return;
+    }
+    dirp = opendir(dirnm);
+    if (!dirp) {
+        if (errno == ENOTDIR)
+            goto fileDel;
+        CRAY_ERR("Error opening directory %s", dirnm);
+        return;
+    }
 
-	dirnm_len = strlen(dirnm);
-	if (dirnm_len == 0)
-		return;
-	while ((dir = readdir(dirp))) {
-		name_len = strlen(dir->d_name);
-		if (name_len == 1 && dir->d_name[0] == '.')
-			continue;
-		if (name_len == 2 && xstrcmp(dir->d_name, "..") == 0)
-			continue;
-		fnm_len = dirnm_len + name_len + 2;
-		free(fnm);
-		fnm = malloc(fnm_len);
-		snprintf(fnm, fnm_len, "%s/%s", dirnm, dir->d_name);
-		st = stat(fnm, &st_buf);
-		if (st < 0) {
-			CRAY_ERR("stat of %s", fnm);
-			continue;
-		}
-		if (st_buf.st_mode & S_IFDIR) {
-			_recursive_rmdir(fnm);
-		} else {
+    dirnm_len = strlen(dirnm);
+    if (dirnm_len == 0)
+        return;
+    while ((dir = readdir(dirp))) {
+        name_len = strlen(dir->d_name);
+        if (name_len == 1 && dir->d_name[0] == '.')
+            continue;
+        if (name_len == 2 && xstrcmp(dir->d_name, "..") == 0)
+            continue;
+        fnm_len = dirnm_len + name_len + 2;
+        free(fnm);
+        fnm = malloc(fnm_len);
+        snprintf(fnm, fnm_len, "%s/%s", dirnm, dir->d_name);
+        st = stat(fnm, &st_buf);
+        if (st < 0) {
+            CRAY_ERR("stat of %s", fnm);
+            continue;
+        }
+        if (st_buf.st_mode & S_IFDIR) {
+            _recursive_rmdir(fnm);
+        } else {
 
-			st = unlink(fnm);
-			if (st < 0 && errno == EISDIR)
-				st = rmdir(fnm);
-			if (st < 0 && errno != ENOENT) {
-				CRAY_ERR("Error removing %s", fnm);
-			}
-		}
-	}
-	free(fnm);
-	closedir(dirp);
+            st = unlink(fnm);
+            if (st < 0 && errno == EISDIR)
+                st = rmdir(fnm);
+            if (st < 0 && errno != ENOENT) {
+                CRAY_ERR("Error removing %s", fnm);
+            }
+        }
+    }
+    free(fnm);
+    closedir(dirp);
 fileDel: st = unlink(dirnm);
-	if (st < 0 && errno == EISDIR)
-		st = rmdir(dirnm);
-	if (st < 0 && errno != ENOENT) {
-		CRAY_ERR("Error removing %s", dirnm);
-	}
+    if (st < 0 && errno == EISDIR)
+        st = rmdir(dirnm);
+    if (st < 0 && errno != ENOENT) {
+        CRAY_ERR("Error removing %s", dirnm);
+    }
 }
 
 void print_jobinfo(slurm_cray_jobinfo_t *job)
 {
-	int i;
-	char *cookie_str = NULL, *cookie_id_str = NULL;
+    int i;
+    char *cookie_str = NULL, *cookie_id_str = NULL;
 
-	if (!job || (job->magic == CRAY_NULL_JOBINFO_MAGIC)) {
-		CRAY_ERR("job pointer was NULL");
-		return;
-	}
+    if (!job || (job->magic == CRAY_NULL_JOBINFO_MAGIC)) {
+        CRAY_ERR("job pointer was NULL");
+        return;
+    }
 
-	xassert(job->magic == CRAY_JOBINFO_MAGIC);
+    xassert(job->magic == CRAY_JOBINFO_MAGIC);
 
-	// Create cookie strings
-	for (i = 0; i < job->num_cookies; i++) {
-		xstrfmtcat(cookie_str, "%s%s", i ? "," : "", job->cookies[i]);
-		xstrfmtcat(cookie_id_str, "%s%"PRIu32,
-			   i ? "," : "", job->cookie_ids[i]);
-	}
+    // Create cookie strings
+    for (i = 0; i < job->num_cookies; i++) {
+        xstrfmtcat(cookie_str, "%s%s", i ? "," : "", job->cookies[i]);
+        xstrfmtcat(cookie_id_str, "%s%"PRIu32,
+               i ? "," : "", job->cookie_ids[i]);
+    }
 
-	// Log jobinfo
-	info("jobinfo magic=%"PRIx32" apid=%"PRIu64
-	     " num_cookies=%"PRIu32" cookies=%s cookie_ids=%s",
-	     job->magic, job->apid,
-	     job->num_cookies, cookie_str, cookie_id_str);
+    // Log jobinfo
+    info("jobinfo magic=%"PRIx32" apid=%"PRIu64
+         " num_cookies=%"PRIu32" cookies=%s cookie_ids=%s",
+         job->magic, job->apid,
+         job->num_cookies, cookie_str, cookie_id_str);
 
-	// Cleanup
-	xfree(cookie_str);
-	xfree(cookie_id_str);
+    // Cleanup
+    xfree(cookie_str);
+    xfree(cookie_id_str);
 }
 #endif /* HAVE_NATIVE_CRAY || HAVE_CRAY_NETWORK */

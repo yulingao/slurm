@@ -41,12 +41,16 @@
 
 /* Gres symbols provided by the plugin */
 typedef struct slurm_ops {
-	void    (*reconfig)		(void);
-	List	(*get_system_gpu_list) 	(node_config_load_t *node_conf);
-	void	(*step_hardware_init)	(bitstr_t *usable_gpus,
-					 char *tres_freq);
-	void	(*step_hardware_fini)	(void);
-	char   *(*test_cpu_conv)	(char *cpu_range);
+    void (*reconfig)(void);
+
+    List (*get_system_gpu_list)(node_config_load_t *node_conf);
+
+    void (*step_hardware_init)(bitstr_t *usable_gpus,
+                               char *tres_freq);
+
+    void (*step_hardware_fini)(void);
+
+    char *(*test_cpu_conv)(char *cpu_range);
 } slurm_ops_t;
 
 /*
@@ -54,41 +58,40 @@ typedef struct slurm_ops {
  * declared for slurm_ops_t.
  */
 static const char *syms[] = {
-	"gpu_p_reconfig",
-	"gpu_p_get_system_gpu_list",
-	"gpu_p_step_hardware_init",
-	"gpu_p_step_hardware_fini",
-	"gpu_p_test_cpu_conv",
+        "gpu_p_reconfig",
+        "gpu_p_get_system_gpu_list",
+        "gpu_p_step_hardware_init",
+        "gpu_p_step_hardware_fini",
+        "gpu_p_test_cpu_conv",
 };
 
 /* Local variables */
 static slurm_ops_t ops;
 static plugin_context_t *g_context = NULL;
-static pthread_mutex_t g_context_lock =	PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 /*
  *  Common function to dlopen() the appropriate gpu libraries, and
  *   report back type needed.
  */
-static char *_get_gpu_type(void)
-{
-	/*
-	 *  Here we are dlopening the gpu .so to verify it exists on this node.
-	 */
-	uint32_t autodetect_types = gres_get_autodetect_types();
+static char *_get_gpu_type(void) {
+    /*
+     *  Here we are dlopening the gpu .so to verify it exists on this node.
+     */
+    uint32_t autodetect_types = gres_get_autodetect_types();
 
-	if (autodetect_types & GRES_AUTODETECT_NVML) {
+    if (autodetect_types & GRES_AUTODETECT_NVML) {
 #ifdef HAVE_NVML
-		if (!dlopen("libnvidia-ml.so", RTLD_NOW | RTLD_GLOBAL))
-			fatal("We were configured with nvml functionality, but that lib wasn't found on the system.");
-		else
-			return "gpu/nvml";
+        if (!dlopen("libnvidia-ml.so", RTLD_NOW | RTLD_GLOBAL))
+            fatal("We were configured with nvml functionality, but that lib wasn't found on the system.");
+        else
+            return "gpu/nvml";
 #else
-		fatal("We were configured to autodetect nvml functionality, but we weren't able to find that lib when Slurm was configured.");
+        fatal("We were configured to autodetect nvml functionality, but we weren't able to find that lib when Slurm was configured.");
 #endif
-	}
-	return "gpu/generic";
+    }
+    return "gpu/generic";
 }
 
 
@@ -97,87 +100,80 @@ static char *_get_gpu_type(void)
  *
  * Returns a Slurm errno.
  */
-extern int gpu_plugin_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "gpu";
-	char *type = NULL;
+extern int gpu_plugin_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "gpu";
+    char *type = NULL;
 
-	if (init_run && g_context)
-		return retval;
+    if (init_run && g_context)
+        return retval;
 
-	slurm_mutex_lock(&g_context_lock);
+    slurm_mutex_lock(&g_context_lock);
 
-	if (g_context)
-		goto done;
+    if (g_context)
+        goto done;
 
-	type = _get_gpu_type();
+    type = _get_gpu_type();
 
-	g_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!g_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	slurm_mutex_unlock(&g_context_lock);
+    done:
+    slurm_mutex_unlock(&g_context_lock);
 
-	return retval;
+    return retval;
 }
 
-extern int gpu_plugin_fini(void)
-{
-	int rc;
+extern int gpu_plugin_fini(void) {
+    int rc;
 
-	if (!g_context)
-		return SLURM_SUCCESS;
+    if (!g_context)
+        return SLURM_SUCCESS;
 
-	slurm_mutex_lock(&g_context_lock);
-	init_run = false;
-	rc = plugin_context_destroy(g_context);
-	g_context = NULL;
-	slurm_mutex_unlock(&g_context_lock);
+    slurm_mutex_lock(&g_context_lock);
+    init_run = false;
+    rc = plugin_context_destroy(g_context);
+    g_context = NULL;
+    slurm_mutex_unlock(&g_context_lock);
 
-	return rc;
+    return rc;
 }
 
-extern void gpu_g_reconfig(void)
-{
-	if (gpu_plugin_init() < 0)
-		return;
-	(*(ops.reconfig))();
+extern void gpu_g_reconfig(void) {
+    if (gpu_plugin_init() < 0)
+        return;
+    (*(ops.reconfig))();
 }
 
-extern List gpu_g_get_system_gpu_list(node_config_load_t *node_conf)
-{
-	if (gpu_plugin_init() < 0)
-		return NULL;
+extern List gpu_g_get_system_gpu_list(node_config_load_t *node_conf) {
+    if (gpu_plugin_init() < 0)
+        return NULL;
 
-	return (*(ops.get_system_gpu_list))(node_conf);
+    return (*(ops.get_system_gpu_list))(node_conf);
 }
 
-extern void gpu_g_step_hardware_init(bitstr_t *usable_gpus, char *tres_freq)
-{
-	if (gpu_plugin_init() < 0)
-		return;
-	(*(ops.step_hardware_init))(usable_gpus, tres_freq);
+extern void gpu_g_step_hardware_init(bitstr_t *usable_gpus, char *tres_freq) {
+    if (gpu_plugin_init() < 0)
+        return;
+    (*(ops.step_hardware_init))(usable_gpus, tres_freq);
 }
 
-extern void gpu_g_step_hardware_fini(void)
-{
-	if (gpu_plugin_init() < 0)
-		return;
-	(*(ops.step_hardware_fini))();
+extern void gpu_g_step_hardware_fini(void) {
+    if (gpu_plugin_init() < 0)
+        return;
+    (*(ops.step_hardware_fini))();
 }
 
-extern char *gpu_g_test_cpu_conv(char *cpu_range)
-{
-	if (gpu_plugin_init() < 0)
-		return NULL;
-	return (*(ops.test_cpu_conv))(cpu_range);
+extern char *gpu_g_test_cpu_conv(char *cpu_range) {
+    if (gpu_plugin_init() < 0)
+        return NULL;
+    return (*(ops.test_cpu_conv))(cpu_range);
 
 }

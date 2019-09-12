@@ -56,14 +56,21 @@
 extern int ext_sensors_init(void); /* load the plugin */
 extern int ext_sensors_fini(void); /* unload the plugin */
 extern ext_sensors_data_t *ext_sensors_alloc(void);
+
 extern void ext_sensors_destroy(ext_sensors_data_t *ext_sensors);
+
 extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer,
-				    uint16_t protocol_version);
+                                  uint16_t protocol_version);
+
 extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer,
-				     uint16_t protocol_version);
+                                   uint16_t protocol_version);
 
 extern int ext_sensors_g_update_component_data(void);
+
 extern int ext_sensors_g_get_stepstartdata(struct step_record *step_rec);
+
 extern int ext_sensors_g_get_stependdata(struct step_record *step_rec);
+
 extern int ext_sensors_g_get_config(void *data);
+
 #endif /*__SLURM_EXT_SENSORS_H__*/

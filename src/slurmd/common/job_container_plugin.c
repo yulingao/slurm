@@ -47,12 +47,17 @@
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
 typedef struct job_container_ops {
-	int	(*container_p_create)	(uint32_t job_id);
-	int	(*container_p_add_cont)	(uint32_t job_id, uint64_t cont_id);
-	int	(*container_p_join)	(uint32_t job_id, uid_t uid);
-	int	(*container_p_delete)	(uint32_t job_id);
-	int	(*container_p_restore)	(char *dir_name, bool recover);
-	void	(*container_p_reconfig)	(void);
+    int (*container_p_create)(uint32_t job_id);
+
+    int (*container_p_add_cont)(uint32_t job_id, uint64_t cont_id);
+
+    int (*container_p_join)(uint32_t job_id, uid_t uid);
+
+    int (*container_p_delete)(uint32_t job_id);
+
+    int (*container_p_restore)(char *dir_name, bool recover);
+
+    void (*container_p_reconfig)(void);
 
 } job_container_ops_t;
 
@@ -60,19 +65,19 @@ typedef struct job_container_ops {
  * Must be synchronized with job_container_ops_t above.
  */
 static const char *syms[] = {
-	"container_p_create",
-	"container_p_add_cont",
-	"container_p_join",
-	"container_p_delete",
-	"container_p_restore",
-	"container_p_reconfig",
+        "container_p_create",
+        "container_p_add_cont",
+        "container_p_join",
+        "container_p_delete",
+        "container_p_restore",
+        "container_p_reconfig",
 };
 
-static job_container_ops_t	*ops = NULL;
-static plugin_context_t		**g_container_context = NULL;
-static int			g_container_context_num = -1;
-static pthread_mutex_t		g_container_context_lock =
-					PTHREAD_MUTEX_INITIALIZER;
+static job_container_ops_t *ops = NULL;
+static plugin_context_t **g_container_context = NULL;
+static int g_container_context_num = -1;
+static pthread_mutex_t g_container_context_lock =
+        PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 /*
@@ -80,66 +85,65 @@ static bool init_run = false;
  *
  * RET - slurm error code
  */
-extern int job_container_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "job_container";
-	char *container_plugin_type = NULL;
-	char *last = NULL, *job_container_plugin_list, *job_container = NULL;
+extern int job_container_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "job_container";
+    char *container_plugin_type = NULL;
+    char *last = NULL, *job_container_plugin_list, *job_container = NULL;
 
-	if (init_run && (g_container_context_num >= 0))
-		return retval;
+    if (init_run && (g_container_context_num >= 0))
+        return retval;
 
-	slurm_mutex_lock(&g_container_context_lock);
+    slurm_mutex_lock(&g_container_context_lock);
 
-	if (g_container_context_num >= 0)
-		goto done;
+    if (g_container_context_num >= 0)
+        goto done;
 
-	container_plugin_type = slurm_get_job_container_plugin();
-	g_container_context_num = 0; /* mark it before anything else */
-	if ((container_plugin_type == NULL) ||
-	    (container_plugin_type[0] == '\0'))
-		goto done;
+    container_plugin_type = slurm_get_job_container_plugin();
+    g_container_context_num = 0; /* mark it before anything else */
+    if ((container_plugin_type == NULL) ||
+        (container_plugin_type[0] == '\0'))
+        goto done;
 
-	job_container_plugin_list = container_plugin_type;
-	while ((job_container =
-		strtok_r(job_container_plugin_list, ",", &last))) {
-		xrealloc(ops,
-			 sizeof(job_container_ops_t) *
-			 (g_container_context_num + 1));
-		xrealloc(g_container_context, (sizeof(plugin_context_t *)
-					  * (g_container_context_num + 1)));
-		if (xstrncmp(job_container, "job_container/", 14) == 0)
-			job_container += 14; /* backward compatibility */
-		job_container = xstrdup_printf("job_container/%s",
-					       job_container);
-		g_container_context[g_container_context_num] =
-			plugin_context_create(
-				plugin_type, job_container,
-				(void **)&ops[g_container_context_num],
-				syms, sizeof(syms));
-		if (!g_container_context[g_container_context_num]) {
-			error("cannot create %s context for %s",
-			      plugin_type, job_container);
-			xfree(job_container);
-			retval = SLURM_ERROR;
-			break;
-		}
+    job_container_plugin_list = container_plugin_type;
+    while ((job_container =
+                    strtok_r(job_container_plugin_list, ",", &last))) {
+        xrealloc(ops,
+                 sizeof(job_container_ops_t) *
+                 (g_container_context_num + 1));
+        xrealloc(g_container_context, (sizeof(plugin_context_t * )
+                                       * (g_container_context_num + 1)));
+        if (xstrncmp(job_container, "job_container/", 14) == 0)
+            job_container += 14; /* backward compatibility */
+        job_container = xstrdup_printf("job_container/%s",
+                                       job_container);
+        g_container_context[g_container_context_num] =
+                plugin_context_create(
+                        plugin_type, job_container,
+                        (void **) &ops[g_container_context_num],
+                        syms, sizeof(syms));
+        if (!g_container_context[g_container_context_num]) {
+            error("cannot create %s context for %s",
+                  plugin_type, job_container);
+            xfree(job_container);
+            retval = SLURM_ERROR;
+            break;
+        }
 
-		xfree(job_container);
-		g_container_context_num++;
-		job_container_plugin_list = NULL; /* for next iteration */
-	}
-	init_run = true;
+        xfree(job_container);
+        g_container_context_num++;
+        job_container_plugin_list = NULL; /* for next iteration */
+    }
+    init_run = true;
 
- done:
-	slurm_mutex_unlock(&g_container_context_lock);
-	xfree(container_plugin_type);
+    done:
+    slurm_mutex_unlock(&g_container_context_lock);
+    xfree(container_plugin_type);
 
-	if (retval != SLURM_SUCCESS)
-		job_container_fini();
+    if (retval != SLURM_SUCCESS)
+        job_container_fini();
 
-	return retval;
+    return retval;
 }
 
 /*
@@ -147,47 +151,45 @@ extern int job_container_init(void)
  *
  * RET - slurm error code
  */
-extern int job_container_fini(void)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int job_container_fini(void) {
+    int i, rc = SLURM_SUCCESS;
 
-	slurm_mutex_lock(&g_container_context_lock);
-	if (!g_container_context)
-		goto done;
+    slurm_mutex_lock(&g_container_context_lock);
+    if (!g_container_context)
+        goto done;
 
-	init_run = false;
-	for (i = 0; i < g_container_context_num; i++) {
-		if (g_container_context[i]) {
-			if (plugin_context_destroy(g_container_context[i])
-			    != SLURM_SUCCESS) {
-				rc = SLURM_ERROR;
-			}
-		}
-	}
+    init_run = false;
+    for (i = 0; i < g_container_context_num; i++) {
+        if (g_container_context[i]) {
+            if (plugin_context_destroy(g_container_context[i])
+                != SLURM_SUCCESS) {
+                rc = SLURM_ERROR;
+            }
+        }
+    }
 
-	xfree(ops);
-	xfree(g_container_context);
-	g_container_context_num = -1;
+    xfree(ops);
+    xfree(g_container_context);
+    g_container_context_num = -1;
 
-done:
-	slurm_mutex_unlock(&g_container_context_lock);
-	return rc;
+    done:
+    slurm_mutex_unlock(&g_container_context_lock);
+    return rc;
 }
 
 /* Create a container for the specified job */
-extern int container_g_create(uint32_t job_id)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int container_g_create(uint32_t job_id) {
+    int i, rc = SLURM_SUCCESS;
 
-	if (job_container_init())
-		return SLURM_ERROR;
+    if (job_container_init())
+        return SLURM_ERROR;
 
-	for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
-	     i++) {
-		rc = (*(ops[i].container_p_create))(job_id);
-	}
+    for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
+         i++) {
+        rc = (*(ops[i].container_p_create))(job_id);
+    }
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -195,80 +197,75 @@ extern int container_g_create(uint32_t job_id)
  * A proctrack container will be generated containing the process
  * before container_g_add_cont() is called (see below).
  */
-extern int container_g_join(uint32_t job_id, uid_t uid)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int container_g_join(uint32_t job_id, uid_t uid) {
+    int i, rc = SLURM_SUCCESS;
 
-	if (job_container_init())
-		return SLURM_ERROR;
+    if (job_container_init())
+        return SLURM_ERROR;
 
-	for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
-	     i++) {
-		rc = (*(ops[i].container_p_join))(job_id, uid);
-	}
+    for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
+         i++) {
+        rc = (*(ops[i].container_p_join))(job_id, uid);
+    }
 
-	return rc;
+    return rc;
 }
 
 /* Add a proctrack container (PAGG) to the specified job's container
  * The PAGG will be the job's cont_id returned by proctrack/sgi_job */
-extern int container_g_add_cont(uint32_t job_id, uint64_t cont_id)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int container_g_add_cont(uint32_t job_id, uint64_t cont_id) {
+    int i, rc = SLURM_SUCCESS;
 
-	if (job_container_init())
-		return SLURM_ERROR;
+    if (job_container_init())
+        return SLURM_ERROR;
 
-	for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
-	     i++) {
-		rc = (*(ops[i].container_p_add_cont))(job_id, cont_id);
-	}
+    for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
+         i++) {
+        rc = (*(ops[i].container_p_add_cont))(job_id, cont_id);
+    }
 
-	return rc;
+    return rc;
 }
 
 /* Delete the container for the specified job */
-extern int container_g_delete(uint32_t job_id)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int container_g_delete(uint32_t job_id) {
+    int i, rc = SLURM_SUCCESS;
 
-	if (job_container_init())
-		return SLURM_ERROR;
+    if (job_container_init())
+        return SLURM_ERROR;
 
-	for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
-	     i++) {
-		rc = (*(ops[i].container_p_delete))(job_id);
-	}
+    for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
+         i++) {
+        rc = (*(ops[i].container_p_delete))(job_id);
+    }
 
-	return rc;
+    return rc;
 }
 
 /* Restore container information */
-extern int container_g_restore(char * dir_name, bool recover)
-{
-	int i, rc = SLURM_SUCCESS;
+extern int container_g_restore(char *dir_name, bool recover) {
+    int i, rc = SLURM_SUCCESS;
 
-	if (job_container_init())
-		return SLURM_ERROR;
+    if (job_container_init())
+        return SLURM_ERROR;
 
-	for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
-	     i++) {
-		rc = (*(ops[i].container_p_restore))(dir_name, recover);
-	}
+    for (i = 0; ((i < g_container_context_num) && (rc == SLURM_SUCCESS));
+         i++) {
+        rc = (*(ops[i].container_p_restore))(dir_name, recover);
+    }
 
-	return rc;
+    return rc;
 }
 
 /* Note change in configuration (e.g. "DebugFlag=JobContainer" set) */
-extern void container_g_reconfig(void)
-{
-	int i;
+extern void container_g_reconfig(void) {
+    int i;
 
-	(void) job_container_init();
+    (void) job_container_init();
 
-	for (i = 0; i < g_container_context_num;i++) {
-		(*(ops[i].container_p_reconfig))();
-	}
+    for (i = 0; i < g_container_context_num; i++) {
+        (*(ops[i].container_p_reconfig))();
+    }
 
-	return;
+    return;
 }

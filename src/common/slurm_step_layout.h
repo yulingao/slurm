@@ -45,7 +45,7 @@
  * NOTE: allocates memory that should be xfreed by caller
  */
 extern slurm_step_layout_t *slurm_step_layout_create(
-	slurm_step_layout_req_t *step_layout_req);
+        slurm_step_layout_req_t *step_layout_req);
 
 /*
  * fake_slurm_step_layout_create - used when you don't allocate a job from the
@@ -62,28 +62,31 @@ extern slurm_step_layout_t *slurm_step_layout_create(
  * NOTE: allocates memory that should be xfreed by caller
  */
 extern slurm_step_layout_t *fake_slurm_step_layout_create(
-	const char *tlist,
-	uint16_t *cpus_per_node,
-	uint32_t *cpu_count_reps,
-	uint32_t node_cnt,
-	uint32_t task_cnt);
+        const char *tlist,
+        uint16_t *cpus_per_node,
+        uint32_t *cpu_count_reps,
+        uint32_t node_cnt,
+        uint32_t task_cnt);
 
 /* copys structure for step layout */
 extern slurm_step_layout_t *slurm_step_layout_copy(
-	slurm_step_layout_t *step_layout);
+        slurm_step_layout_t *step_layout);
 
 /* pack and unpack structure */
 extern void pack_slurm_step_layout(slurm_step_layout_t *step_layout,
-				   Buf buffer, uint16_t protocol_version);
+                                   Buf buffer, uint16_t protocol_version);
+
 extern int unpack_slurm_step_layout(slurm_step_layout_t **layout, Buf buffer,
-				    uint16_t protocol_version);
+                                    uint16_t protocol_version);
 
 /* destroys structure for step layout */
 extern int slurm_step_layout_destroy(slurm_step_layout_t *step_layout);
 
 /* get info from the structure */
-extern int slurm_step_layout_host_id (slurm_step_layout_t *s, int taskid);
-extern char *slurm_step_layout_host_name (slurm_step_layout_t *s, int hostid);
+extern int slurm_step_layout_host_id(slurm_step_layout_t *s, int taskid);
+
+extern char *slurm_step_layout_host_name(slurm_step_layout_t *s, int hostid);
 
 extern char *slurm_step_layout_type_name(task_dist_states_t task_dist);
+
 #endif /* !_SLURM_STEP_LAYOUT_H */

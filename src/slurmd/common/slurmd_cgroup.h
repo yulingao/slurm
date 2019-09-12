@@ -70,4 +70,4 @@ extern bool check_corespec_cgroup_job_confinement(void);
 /* Attach a pid to the system cgroups */
 extern void attach_system_cgroup_pid(pid_t pid);
 
-#endif	/* _SLURMD_CGROUP_H */
+#endif    /* _SLURMD_CGROUP_H */

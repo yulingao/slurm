@@ -48,11 +48,10 @@
  * IN:  account_list List of slurmdb_account_rec_t *
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_accounts_add(void *db_conn, List acct_list)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
-	return acct_storage_g_add_accounts(db_conn, db_api_uid, acct_list);
+extern int slurmdb_accounts_add(void *db_conn, List acct_list) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
+    return acct_storage_g_add_accounts(db_conn, db_api_uid, acct_list);
 }
 
 /*
@@ -63,12 +62,11 @@ extern int slurmdb_accounts_add(void *db_conn, List acct_list)
  * note List needs to be freed when called
  */
 extern List slurmdb_accounts_get(void *db_conn,
-				 slurmdb_account_cond_t *acct_cond)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                                 slurmdb_account_cond_t *acct_cond) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_get_accounts(db_conn, db_api_uid, acct_cond);
+    return acct_storage_g_get_accounts(db_conn, db_api_uid, acct_cond);
 }
 
 /*
@@ -78,14 +76,13 @@ extern List slurmdb_accounts_get(void *db_conn,
  * RET: List containing (char *'s) else NULL on error
  */
 extern List slurmdb_accounts_modify(void *db_conn,
-				    slurmdb_account_cond_t *acct_cond,
-				    slurmdb_account_rec_t *acct)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                                    slurmdb_account_cond_t *acct_cond,
+                                    slurmdb_account_rec_t *acct) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_modify_accounts(db_conn, db_api_uid,
-					      acct_cond, acct);
+    return acct_storage_g_modify_accounts(db_conn, db_api_uid,
+                                          acct_cond, acct);
 }
 
 /*
@@ -94,10 +91,9 @@ extern List slurmdb_accounts_modify(void *db_conn,
  * RET: List containing (char *'s) else NULL on error
  */
 extern List slurmdb_accounts_remove(void *db_conn,
-				    slurmdb_account_cond_t *acct_cond)
-{
-	if (db_api_uid == -1)
-		db_api_uid = getuid();
+                                    slurmdb_account_cond_t *acct_cond) {
+    if (db_api_uid == -1)
+        db_api_uid = getuid();
 
-	return acct_storage_g_remove_accounts(db_conn, db_api_uid, acct_cond);
+    return acct_storage_g_remove_accounts(db_conn, db_api_uid, acct_cond);
 }

@@ -61,55 +61,52 @@
 #define NGROUPS_START 64
 
 typedef struct gids_cache {
-	uid_t uid;
-	gid_t gid;
-	char *username;
-	int ngids;
-	gid_t *gids;
-	time_t expiration;
+    uid_t uid;
+    gid_t gid;
+    char *username;
+    int ngids;
+    gid_t *gids;
+    time_t expiration;
 } gids_cache_t;
 
 typedef struct gids_cache_needle {
-	uid_t uid;		/* required */
-	gid_t gid;		/* required */
-	char *username;		/* optional, will be looked up if needed */
-	time_t now;		/* automatically filled in */
+    uid_t uid;        /* required */
+    gid_t gid;        /* required */
+    char *username;        /* optional, will be looked up if needed */
+    time_t now;        /* automatically filled in */
 } gids_cache_needle_t;
 
 static pthread_mutex_t gids_mutex = PTHREAD_MUTEX_INITIALIZER;
 static List gids_cache_list = NULL;
 
-static void _group_cache_list_delete(void *x)
-{
-	gids_cache_t *entry = (gids_cache_t *) x;
-	xfree(entry->gids);
-	xfree(entry->username);
-	xfree(entry);
+static void _group_cache_list_delete(void *x) {
+    gids_cache_t *entry = (gids_cache_t *) x;
+    xfree(entry->gids);
+    xfree(entry->username);
+    xfree(entry);
 }
 
 /* call on daemon shutdown to cleanup properly */
-void group_cache_purge(void)
-{
-	slurm_mutex_lock(&gids_mutex);
-	if (gids_cache_list)
-		list_destroy(gids_cache_list);
-	gids_cache_list = NULL;
-	slurm_mutex_unlock(&gids_mutex);
+void group_cache_purge(void) {
+    slurm_mutex_lock(&gids_mutex);
+    if (gids_cache_list)
+        list_destroy(gids_cache_list);
+    gids_cache_list = NULL;
+    slurm_mutex_unlock(&gids_mutex);
 }
 
-static int _find_entry(void *x, void *key)
-{
-	gids_cache_t *entry = (gids_cache_t *) x;
-	gids_cache_needle_t *needle = (gids_cache_needle_t *) key;
+static int _find_entry(void *x, void *key) {
+    gids_cache_t *entry = (gids_cache_t *) x;
+    gids_cache_needle_t *needle = (gids_cache_needle_t *) key;
 
-	if (needle->uid != entry->uid)
-		return 0;
+    if (needle->uid != entry->uid)
+        return 0;
 
-	if (needle->gid != entry->gid)
-		return 0;
+    if (needle->gid != entry->gid)
+        return 0;
 
-	/* success! all checks passed, we've found it */
-	return 1;
+    /* success! all checks passed, we've found it */
+    return 1;
 }
 
 /*
@@ -118,83 +115,82 @@ static int _find_entry(void *x, void *key)
  * IN: primary group id (will always exist first in gids list)
  * IN/OUT: gids - xmalloc'd gid_t * structure with ngids elements
  */
-static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gids)
-{
-	gids_cache_t *entry;
-	int ngids; /* need a copy to safely return outside the lock */
-	DEF_TIMERS;
-	START_TIMER;
+static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gids) {
+    gids_cache_t *entry;
+    int ngids; /* need a copy to safely return outside the lock */
+    DEF_TIMERS;
+    START_TIMER;
 
-	slurm_mutex_lock(&gids_mutex);
-	if (!gids_cache_list)
-		gids_cache_list = list_create(_group_cache_list_delete);
+    slurm_mutex_lock(&gids_mutex);
+    if (!gids_cache_list)
+        gids_cache_list = list_create(_group_cache_list_delete);
 
-	needle->now = time(NULL);
-	entry = list_find_first(gids_cache_list, _find_entry, needle);
+    needle->now = time(NULL);
+    entry = list_find_first(gids_cache_list, _find_entry, needle);
 
-	if (entry && (entry->expiration > needle->now)) {
-		debug2("%s: found valid entry for %s",
-		       __func__, entry->username);
-		goto out;
-	}
+    if (entry && (entry->expiration > needle->now)) {
+        debug2("%s: found valid entry for %s",
+               __func__, entry->username);
+        goto out;
+    }
 
-	if (entry) {
-		debug2("%s: found old entry for %s, looking up again",
-		       __func__, entry->username);
-		/*
-		 * The timestamp is too old, need to replace the values.
-		 * Reuse the same gids_cache_t entry, just reset the
-		 * ngids to the largest the gids field can store.
-		 */
-		entry->ngids = xsize(entry->gids) / sizeof(gid_t);
-	} else {
-		/* no result, allocate and add to list */
-		entry = xmalloc(sizeof(gids_cache_t));
-		if (!needle->username)
-			entry->username = uid_to_string(needle->uid);
-		else
-			entry->username = xstrdup(needle->username);
-		entry->uid = needle->uid;
-		entry->gid = needle->gid;
-		entry->ngids = NGROUPS_START;
-		entry->gids = xmalloc(sizeof(gid_t) * entry->ngids);
-		list_prepend(gids_cache_list, entry);
+    if (entry) {
+        debug2("%s: found old entry for %s, looking up again",
+               __func__, entry->username);
+        /*
+         * The timestamp is too old, need to replace the values.
+         * Reuse the same gids_cache_t entry, just reset the
+         * ngids to the largest the gids field can store.
+         */
+        entry->ngids = xsize(entry->gids) / sizeof(gid_t);
+    } else {
+        /* no result, allocate and add to list */
+        entry = xmalloc(sizeof(gids_cache_t));
+        if (!needle->username)
+            entry->username = uid_to_string(needle->uid);
+        else
+            entry->username = xstrdup(needle->username);
+        entry->uid = needle->uid;
+        entry->gid = needle->gid;
+        entry->ngids = NGROUPS_START;
+        entry->gids = xmalloc(sizeof(gid_t) * entry->ngids);
+        list_prepend(gids_cache_list, entry);
 
-		debug2("%s: no entry found for %s",
-		       __func__, entry->username);
-	}
+        debug2("%s: no entry found for %s",
+               __func__, entry->username);
+    }
 
-	entry->expiration = needle->now + slurmctld_conf.group_time;
+    entry->expiration = needle->now + slurmctld_conf.group_time;
 
-	/* Cache lookup failed or entry value was too old, fetch new
-	 * value and insert it into cache.  */
+    /* Cache lookup failed or entry value was too old, fetch new
+     * value and insert it into cache.  */
 #if defined(__APPLE__)
-	/*
-	 * macOS has (int *) for the third argument instead
-	 * of (gid_t *) like FreeBSD, NetBSD, and Linux.
-	 */
-	while (getgrouplist(entry->username, entry->gid,
-			    (int *)entry->gids, &entry->ngids) == -1) {
+    /*
+     * macOS has (int *) for the third argument instead
+     * of (gid_t *) like FreeBSD, NetBSD, and Linux.
+     */
+    while (getgrouplist(entry->username, entry->gid,
+                        (int *) entry->gids, &entry->ngids) == -1) {
 #else
-	while (getgrouplist(entry->username, entry->gid,
-			    entry->gids, &entry->ngids) == -1) {
+        while (getgrouplist(entry->username, entry->gid,
+                    entry->gids, &entry->ngids) == -1) {
 #endif
-		/* group list larger than array, resize array to fit */
-		entry->gids = xrealloc(entry->gids,
-				       entry->ngids * sizeof(gid_t));
-	}
+        /* group list larger than array, resize array to fit */
+        entry->gids = xrealloc(entry->gids,
+                               entry->ngids * sizeof(gid_t));
+    }
 
-out:
-	ngids = entry->ngids;
-	xfree(*gids);
-	*gids = copy_gids(entry->ngids, entry->gids);
+    out:
+    ngids = entry->ngids;
+    xfree(*gids);
+    *gids = copy_gids(entry->ngids, entry->gids);
 
-	slurm_mutex_unlock(&gids_mutex);
+    slurm_mutex_unlock(&gids_mutex);
 
-	END_TIMER3("group_cache_lookup() took",
-		   3000000);
+    END_TIMER3("group_cache_lookup() took",
+               3000000);
 
-	return ngids;
+    return ngids;
 }
 
 /*
@@ -204,66 +200,61 @@ out:
  * IN: (optional) username, will be looked up if NULL and is needed
  * IN/OUT: gids - xmalloc'd gid_t * structure with ngids elements
  */
-extern int group_cache_lookup(uid_t uid, gid_t gid, char *username, gid_t **gids)
-{
-	gids_cache_needle_t needle = {0};
+extern int group_cache_lookup(uid_t uid, gid_t gid, char *username, gid_t **gids) {
+    gids_cache_needle_t needle = {0};
 
-	needle.username = username;
-	needle.uid = uid;
-	needle.gid = gid;
+    needle.username = username;
+    needle.uid = uid;
+    needle.gid = gid;
 
-	return _group_cache_lookup_internal(&needle, gids);
+    return _group_cache_lookup_internal(&needle, gids);
 }
 
-static int _cleanup_search(void *x, void *key)
-{
-	gids_cache_t *cached = (gids_cache_t *) x;
-	time_t *now = (time_t *) key;
+static int _cleanup_search(void *x, void *key) {
+    gids_cache_t *cached = (gids_cache_t *) x;
+    time_t *now = (time_t *) key;
 
-	if (cached->expiration < *now)
-		return 1;
+    if (cached->expiration < *now)
+        return 1;
 
-	return 0;
+    return 0;
 }
 
 /*
  * Call periodically to remove old records.
  */
-extern void group_cache_cleanup(void)
-{
-	time_t now = time(NULL);
+extern void group_cache_cleanup(void) {
+    time_t now = time(NULL);
 
-	slurm_mutex_lock(&gids_mutex);
-	if (gids_cache_list)
-		list_delete_all(gids_cache_list, _cleanup_search, &now);
-	slurm_mutex_unlock(&gids_mutex);
+    slurm_mutex_lock(&gids_mutex);
+    if (gids_cache_list)
+        list_delete_all(gids_cache_list, _cleanup_search, &now);
+    slurm_mutex_unlock(&gids_mutex);
 }
 
-extern gid_t *copy_gids(int ngids, gid_t *gids)
-{
-	int size;
-	gid_t *result;
+extern gid_t *copy_gids(int ngids, gid_t *gids) {
+    int size;
+    gid_t *result;
 
-	if (!ngids || !gids)
-		return NULL;
+    if (!ngids || !gids)
+        return NULL;
 
-	size = ngids * sizeof(gid_t);
-	result = xmalloc(size);
-	memcpy(result, gids, size);
+    size = ngids * sizeof(gid_t);
+    result = xmalloc(size);
+    memcpy(result, gids, size);
 
-	return result;
+    return result;
 }
 
-extern char **copy_gr_names(int ngids, char **gr_names)
-{
-	char **result;
+extern char **copy_gr_names(int ngids, char **gr_names) {
+    char **result;
 
-	if (!ngids || !gr_names)
-		return NULL;
+    if (!ngids || !gr_names)
+        return NULL;
 
-	result = xcalloc(ngids, sizeof(char *));
-	for (int i = 0; i < ngids; i++)
-		result[i] = xstrdup(gr_names[i]);
+    result = xcalloc(ngids, sizeof(char *));
+    for (int i = 0; i < ngids; i++)
+        result[i] = xstrdup(gr_names[i]);
 
-	return result;
+    return result;
 }

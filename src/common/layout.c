@@ -39,74 +39,67 @@
 #include "src/common/xstring.h"
 #include "src/common/xmalloc.h"
 
-void layout_init(layout_t* layout, const char* name, const char* type,
-		 uint32_t priority, int struct_type)
-{
-	layout->name = xstrdup(name);
-	layout->type = xstrdup(type);
-	layout->priority = priority;
-	layout->struct_type = struct_type;
-	switch(layout->struct_type) {
-	case LAYOUT_STRUCT_TREE:
-		layout->tree = (xtree_t*)xmalloc(sizeof(xtree_t));
-		xtree_init(layout->tree, NULL);
-		break;
-	}
+void layout_init(layout_t *layout, const char *name, const char *type,
+                 uint32_t priority, int struct_type) {
+    layout->name = xstrdup(name);
+    layout->type = xstrdup(type);
+    layout->priority = priority;
+    layout->struct_type = struct_type;
+    switch (layout->struct_type) {
+        case LAYOUT_STRUCT_TREE:
+            layout->tree = (xtree_t *) xmalloc(sizeof(xtree_t));
+            xtree_init(layout->tree, NULL);
+            break;
+    }
 }
 
-void layout_free(layout_t* layout)
-{
-	xfree(layout->name);
-	xfree(layout->type);
-	switch(layout->struct_type) {
-	case LAYOUT_STRUCT_TREE:
-		xtree_free(layout->tree);
-		xfree(layout->tree);
-		break;
-	}
+void layout_free(layout_t *layout) {
+    xfree(layout->name);
+    xfree(layout->type);
+    switch (layout->struct_type) {
+        case LAYOUT_STRUCT_TREE:
+            xtree_free(layout->tree);
+            xfree(layout->tree);
+            break;
+    }
 }
 
-const char* layout_get_name(const layout_t* layout)
-{
-	return layout->name;
+const char *layout_get_name(const layout_t *layout) {
+    return layout->name;
 }
 
-const char* layout_get_type(const layout_t* layout)
-{
-	return layout->type;
+const char *layout_get_type(const layout_t *layout) {
+    return layout->type;
 }
 
-uint32_t layout_get_priority(const layout_t* layout)
-{
-	return layout->priority;
+uint32_t layout_get_priority(const layout_t *layout) {
+    return layout->priority;
 }
 
-void layout_node_delete(layout_t* layout, void* node)
-{
-	switch(layout->struct_type) {
-	case LAYOUT_STRUCT_TREE:
-		xtree_delete(layout->tree, (xtree_node_t*)node);
-		break;
-	}
+void layout_node_delete(layout_t *layout, void *node) {
+    switch (layout->struct_type) {
+        case LAYOUT_STRUCT_TREE:
+            xtree_delete(layout->tree, (xtree_node_t *) node);
+            break;
+    }
 }
 
-xtree_t* layout_get_tree(layout_t* layout)
-{
-	if (layout->struct_type == LAYOUT_STRUCT_TREE) {
-		return layout->tree;
-	}
-	fatal("layout has unknown relationnal structure type");
-	return NULL;
+xtree_t *layout_get_tree(layout_t *layout) {
+    if (layout->struct_type == LAYOUT_STRUCT_TREE) {
+        return layout->tree;
+    }
+    fatal("layout has unknown relationnal structure type");
+    return NULL;
 }
 
-const char* layout_hashable_identify(void* item) {
-	layout_t* l = (layout_t*)item;
-	return l->name;
+const char *layout_hashable_identify(void *item) {
+    layout_t *l = (layout_t *) item;
+    return l->name;
 }
 
-void layout_hashable_identify_by_type(void* item, const char** key,
-				      uint32_t* key_len) {
-	layout_t* l = (layout_t*)item;
-	*key = l->type;
-	*key_len = strlen(l->type);
+void layout_hashable_identify_by_type(void *item, const char **key,
+                                      uint32_t *key_len) {
+    layout_t *l = (layout_t *) item;
+    *key = l->type;
+    *key_len = strlen(l->type);
 }

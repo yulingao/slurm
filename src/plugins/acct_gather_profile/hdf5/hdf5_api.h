@@ -82,7 +82,7 @@ void profile_fini(void);
  *
  * Returns - handle for attribute (or -1 when not found), caller must close
  */
-hid_t get_attribute_handle(hid_t parent, char* name);
+hid_t get_attribute_handle(hid_t parent, char *name);
 
 /*
  * get group by name.
@@ -93,7 +93,7 @@ hid_t get_attribute_handle(hid_t parent, char* name);
  *
  * Returns - handle for group (or -1 when not found), caller must close
  */
-hid_t get_group(hid_t parent, const char* name);
+hid_t get_group(hid_t parent, const char *name);
 
 /*
  * make group by name.
@@ -104,7 +104,7 @@ hid_t get_group(hid_t parent, const char* name);
  *
  * Returns - handle for group (or -1 on error), caller must close
  */
-hid_t make_group(hid_t parent, const char* name);
+hid_t make_group(hid_t parent, const char *name);
 
 /*
  * Put string attribute
@@ -114,7 +114,7 @@ hid_t make_group(hid_t parent, const char* name);
  *	name	- name of the attribute
  *	value	- value of the attribute
  */
-void put_string_attribute(hid_t parent, char* name, char* value);
+void put_string_attribute(hid_t parent, char *name, char *value);
 
 /*
  * Put integer attribute
@@ -124,6 +124,6 @@ void put_string_attribute(hid_t parent, char* name, char* value);
  *	name	- name of the attribute
  *	value	- value of the attribute
  */
-void put_int_attribute(hid_t parent, char* name, int value);
+void put_int_attribute(hid_t parent, char *name, int value);
 
 #endif /*__ACCT_GATHER_HDF5_API_H__*/

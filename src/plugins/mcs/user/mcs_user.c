@@ -63,9 +63,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[]        = "mcs user plugin";
-const char plugin_type[]        = "mcs/user";
-const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
+const char plugin_name[] = "mcs user plugin";
+const char plugin_type[] = "mcs/user";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 /*********************** local variables *********************/
 
@@ -73,67 +73,62 @@ const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	debug("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+extern int init(void) {
+    debug("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * mcs_p_set_mcs_label() is called to obtain mcs_label.
  */
-extern int mcs_p_set_mcs_label (struct job_record *job_ptr, char *label)
-{
-	char *user = NULL;
-	int rc = SLURM_SUCCESS;
+extern int mcs_p_set_mcs_label(struct job_record *job_ptr, char *label) {
+    char *user = NULL;
+    int rc = SLURM_SUCCESS;
 
-	user = uid_to_string((uid_t) job_ptr->user_id);
-	xfree(job_ptr->mcs_label);
+    user = uid_to_string((uid_t) job_ptr->user_id);
+    xfree(job_ptr->mcs_label);
 
-	if (label != NULL) {
-		/* test label param */
-		if (xstrcmp(label, user) == 0)
-			job_ptr->mcs_label = xstrdup(user);
-		else
-			rc = SLURM_ERROR;
-	} else {
-		if ((slurm_mcs_get_enforced() == 0) && job_ptr->details &&
-		    (job_ptr->details->whole_node != WHOLE_NODE_MCS))
-			;
-		else
-			job_ptr->mcs_label = xstrdup(user);
-	}
+    if (label != NULL) {
+        /* test label param */
+        if (xstrcmp(label, user) == 0)
+            job_ptr->mcs_label = xstrdup(user);
+        else
+            rc = SLURM_ERROR;
+    } else {
+        if ((slurm_mcs_get_enforced() == 0) && job_ptr->details &&
+            (job_ptr->details->whole_node != WHOLE_NODE_MCS));
+        else
+            job_ptr->mcs_label = xstrdup(user);
+    }
 
-	xfree(user);
-	return rc;
+    xfree(user);
+    return rc;
 }
 
 /*
  * mcs_p_check_mcs_label() is called to check mcs_label.
  */
-extern int mcs_p_check_mcs_label (uint32_t user_id, char *mcs_label)
-{
-	char *user = NULL;
-	int rc = SLURM_SUCCESS;
+extern int mcs_p_check_mcs_label(uint32_t user_id, char *mcs_label) {
+    char *user = NULL;
+    int rc = SLURM_SUCCESS;
 
-	user = uid_to_string((uid_t) user_id);
-	if (mcs_label != NULL) {
-		if (xstrcmp(mcs_label, user) == 0)
-			rc = SLURM_SUCCESS;
-		else
-			rc = SLURM_ERROR;
-	} else
-		rc = SLURM_SUCCESS;
+    user = uid_to_string((uid_t) user_id);
+    if (mcs_label != NULL) {
+        if (xstrcmp(mcs_label, user) == 0)
+            rc = SLURM_SUCCESS;
+        else
+            rc = SLURM_ERROR;
+    } else
+        rc = SLURM_SUCCESS;
 
-	xfree(user);
-	return rc;
+    xfree(user);
+    return rc;
 }

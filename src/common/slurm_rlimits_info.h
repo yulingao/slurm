@@ -46,19 +46,19 @@
 #define PROPAGATE_RLIMITS_NOT_SET -1
 
 struct slurm_rlimits_info {
-        int  resource;          /* Values:  RLIMIT_NPROC, RLIMIT_MEMLOCK, ... */
-        char *name;             /* String: "NPROC",      "MEMLOCK", ...       */
-	int  propagate_flag;    /* PROPAGATE_RLIMITS or NO_PROPAGATE_RLIMITS  */
+    int resource;          /* Values:  RLIMIT_NPROC, RLIMIT_MEMLOCK, ... */
+    char *name;             /* String: "NPROC",      "MEMLOCK", ...       */
+    int propagate_flag;    /* PROPAGATE_RLIMITS or NO_PROPAGATE_RLIMITS  */
 };
 
 typedef struct slurm_rlimits_info slurm_rlimits_info_t;
 
 
-extern slurm_rlimits_info_t *get_slurm_rlimits_info( void );
+extern slurm_rlimits_info_t *get_slurm_rlimits_info(void);
 
-extern int parse_rlimits( char *rlimits_str, int propagate_flag );
+extern int parse_rlimits(char *rlimits_str, int propagate_flag);
 
-extern void print_rlimits( void );
+extern void print_rlimits(void);
 
 /*
  * Max out the RLIMIT_NOFILE setting.

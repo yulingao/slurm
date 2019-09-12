@@ -46,6 +46,7 @@
 
 /* convert a --x11 argument into flags */
 uint16_t x11_str2flags(const char *str);
+
 /* reverse the above */
 const char *x11_flags2str(uint16_t flags);
 
@@ -67,7 +68,7 @@ extern void x11_get_display(uint16_t *port, char **target);
 extern char *x11_get_xauth(void);
 
 extern int x11_set_xauth(char *xauthority, char *cookie,
-			 char *host, uint16_t display);
+                         char *host, uint16_t display);
 
 extern int x11_delete_xauth(char *xauthority, char *host, uint16_t display);
 

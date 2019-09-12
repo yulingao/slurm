@@ -53,30 +53,32 @@ int switch_record_cnt = 0;
 int switch_levels = 0;               /* number of switch levels     */
 
 /* defined here but is really hypercube plugin related */
-int hypercube_dimensions = 0; 
-struct hypercube_switch *hypercube_switch_table = NULL; 
+int hypercube_dimensions = 0;
+struct hypercube_switch *hypercube_switch_table = NULL;
 int hypercube_switch_cnt = 0;
-struct hypercube_switch ***hypercube_switches = NULL; 
+struct hypercube_switch ***hypercube_switches = NULL;
 
 typedef struct slurm_topo_ops {
-	int		(*build_config)		( void );
-	bool		(*node_ranking)		( void );
-	int		(*get_node_addr)	( char* node_name,
-						  char** addr,
-						  char** pattern );
+    int (*build_config)(void);
+
+    bool (*node_ranking)(void);
+
+    int (*get_node_addr)(char *node_name,
+                         char **addr,
+                         char **pattern);
 } slurm_topo_ops_t;
 
 /*
  * Must be synchronized with slurm_topo_ops_t above.
  */
 static const char *syms[] = {
-	"topo_build_config",
-	"topo_generate_node_ranking",
-	"topo_get_node_addr",
+        "topo_build_config",
+        "topo_generate_node_ranking",
+        "topo_get_node_addr",
 };
 
 static slurm_topo_ops_t ops;
-static plugin_context_t	*g_context = NULL;
+static plugin_context_t *g_context = NULL;
 static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
@@ -86,84 +88,79 @@ static bool init_run = false;
  * be restarted and job priority changes may be required to change
  * the topology type.
  */
-extern int slurm_topo_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "topo";
-	char *type = NULL;
+extern int slurm_topo_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "topo";
+    char *type = NULL;
 
-	if (init_run && g_context)
-		return retval;
+    if (init_run && g_context)
+        return retval;
 
-	slurm_mutex_lock(&g_context_lock);
+    slurm_mutex_lock(&g_context_lock);
 
-	if (g_context)
-		goto done;
+    if (g_context)
+        goto done;
 
-	type = slurm_get_topology_plugin();
+    type = slurm_get_topology_plugin();
 
-	g_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!g_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	slurm_mutex_unlock(&g_context_lock);
-	xfree(type);
-	return retval;
+    done:
+    slurm_mutex_unlock(&g_context_lock);
+    xfree(type);
+    return retval;
 }
 
-extern int slurm_topo_fini(void)
-{
-	int rc;
+extern int slurm_topo_fini(void) {
+    int rc;
 
-	if (!g_context)
-		return SLURM_SUCCESS;
+    if (!g_context)
+        return SLURM_SUCCESS;
 
-	init_run = false;
-	rc = plugin_context_destroy(g_context);
-	g_context = NULL;
-	return rc;
+    init_run = false;
+    rc = plugin_context_destroy(g_context);
+    g_context = NULL;
+    return rc;
 }
 
-extern int slurm_topo_build_config(void)
-{
-	int rc;
-	DEF_TIMERS;
+extern int slurm_topo_build_config(void) {
+    int rc;
+    DEF_TIMERS;
 
-	if ( slurm_topo_init() < 0 )
-		return SLURM_ERROR;
+    if (slurm_topo_init() < 0)
+        return SLURM_ERROR;
 
-	START_TIMER;
-	rc = (*(ops.build_config))();
-	END_TIMER3("slurm_topo_build_config", 20000);
+    START_TIMER;
+    rc = (*(ops.build_config))();
+    END_TIMER3("slurm_topo_build_config", 20000);
 
-	return rc;
+    return rc;
 }
 
 /*
  * This operation is only supported by those topology plugins for
  * which the node ordering between slurmd and slurmctld is invariant.
  */
-extern bool slurm_topo_generate_node_ranking(void)
-{
-	if ( slurm_topo_init() < 0 )
-		return SLURM_ERROR;
+extern bool slurm_topo_generate_node_ranking(void) {
+    if (slurm_topo_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.node_ranking))();
+    return (*(ops.node_ranking))();
 }
 
-extern int slurm_topo_get_node_addr(char* node_name,
-				    char **addr,
-				    char **pattern)
-{
-	if ( slurm_topo_init() < 0 )
-		return SLURM_ERROR;
+extern int slurm_topo_get_node_addr(char *node_name,
+                                    char **addr,
+                                    char **pattern) {
+    if (slurm_topo_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.get_node_addr))(node_name,addr,pattern);
+    return (*(ops.get_node_addr))(node_name, addr, pattern);
 }

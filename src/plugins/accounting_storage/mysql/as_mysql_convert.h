@@ -52,6 +52,6 @@ extern int as_mysql_convert_tables_post_create(mysql_conn_t *mysql_conn);
  * functions in this deal with.
  */
 extern int as_mysql_convert_non_cluster_tables_post_create(
-	mysql_conn_t *mysql_conn);
+        mysql_conn_t *mysql_conn);
 
 #endif

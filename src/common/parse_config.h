@@ -241,24 +241,24 @@
  */
 
 typedef struct s_p_values s_p_values_t;
-typedef s_p_values_t * s_p_hashtbl_t;
+typedef s_p_values_t *s_p_hashtbl_t;
 
 typedef enum slurm_parser_enum {
-	S_P_IGNORE = 0,
-	S_P_STRING,
-	S_P_LONG,
-	S_P_UINT16,
-	S_P_UINT32,
-	S_P_UINT64,
-	S_P_POINTER,
-	S_P_ARRAY,
-	S_P_BOOLEAN,
-	S_P_LINE,
-	S_P_EXPLINE,
-	S_P_PLAIN_STRING /* useful only within S_P_EXPLINE */,
-	S_P_FLOAT,
-	S_P_DOUBLE,
-	S_P_LONG_DOUBLE
+    S_P_IGNORE = 0,
+    S_P_STRING,
+    S_P_LONG,
+    S_P_UINT16,
+    S_P_UINT32,
+    S_P_UINT64,
+    S_P_POINTER,
+    S_P_ARRAY,
+    S_P_BOOLEAN,
+    S_P_LINE,
+    S_P_EXPLINE,
+    S_P_PLAIN_STRING /* useful only within S_P_EXPLINE */,
+    S_P_FLOAT,
+    S_P_DOUBLE,
+    S_P_LONG_DOUBLE
 
 } slurm_parser_enum_t;
 
@@ -277,28 +277,32 @@ typedef enum slurm_parser_enum {
  *
  */
 typedef enum slurm_parser_operator {
-	S_P_OPERATOR_SET = 0,
-	S_P_OPERATOR_ADD,
-	S_P_OPERATOR_SUB,
-	S_P_OPERATOR_MUL,
-	S_P_OPERATOR_DIV,
-	S_P_OPERATOR_SET_IF_MIN,
-	S_P_OPERATOR_SET_IF_MAX,
-	S_P_OPERATOR_AVG
+    S_P_OPERATOR_SET = 0,
+    S_P_OPERATOR_ADD,
+    S_P_OPERATOR_SUB,
+    S_P_OPERATOR_MUL,
+    S_P_OPERATOR_DIV,
+    S_P_OPERATOR_SET_IF_MIN,
+    S_P_OPERATOR_SET_IF_MAX,
+    S_P_OPERATOR_AVG
 } slurm_parser_operator_t;
 
 typedef struct conf_file_options {
-	char *key;
-	slurm_parser_enum_t type;
-	int (*handler)(void **data, slurm_parser_enum_t type,
-		       const char *key, const char *value,
-		       const char *line, char **leftover);
-	void (*destroy)(void *data);
-	struct conf_file_options* line_options;
+    char *key;
+    slurm_parser_enum_t type;
+
+    int (*handler)(void **data, slurm_parser_enum_t type,
+                   const char *key, const char *value,
+                   const char *line, char **leftover);
+
+    void (*destroy)(void *data);
+
+    struct conf_file_options *line_options;
 } s_p_options_t;
 
 
 s_p_hashtbl_t *s_p_hashtbl_create(const struct conf_file_options options[]);
+
 void s_p_hashtbl_destroy(s_p_hashtbl_t *hashtbl);
 
 /* Returns SLURM_SUCCESS if file was opened and parse correctly
@@ -308,7 +312,7 @@ void s_p_hashtbl_destroy(s_p_hashtbl_t *hashtbl);
  *                 print debug() message and continue
  */
 int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
-		   bool ignore_new);
+                   bool ignore_new);
 
 /* Returns SLURM_SUCCESS if buffer was opened and parse correctly.
  * buffer must be a valid Buf bufferonly containing strings.The parsing
@@ -319,7 +323,7 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
  *                 print debug() message and continue
  */
 int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
-		     Buf buffer, bool ignore_new);
+                     Buf buffer, bool ignore_new);
 
 /*
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
@@ -331,7 +335,7 @@ int s_p_parse_pair(s_p_hashtbl_t *hashtbl, const char *key, const char *value);
  * Set the operator of the updated s_p_values_t to the provided one.
  */
 int s_p_parse_pair_with_op(s_p_hashtbl_t *hashtbl, const char *key,
-			   const char *value, slurm_parser_operator_t opt);
+                           const char *value, slurm_parser_operator_t opt);
 
 /*
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
@@ -355,18 +359,18 @@ void s_p_hashtbl_merge(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl);
  * is swapped.
  */
 void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl,
-				s_p_hashtbl_t *from_hashtbl);
+                                s_p_hashtbl_t *from_hashtbl);
 
 /*
  * Mainly to enable a generic set of option to be merged with a specific set
  * of options.
  */
 void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl,
-			    s_p_hashtbl_t *from_hashtbl);
+                            s_p_hashtbl_t *from_hashtbl);
 
 int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
-		const char* key, const char* value,
-		const char *line, char **leftover);
+                            const char *key, const char *value,
+                            const char *line, char **leftover);
 
 /*
  * s_p_parse_line_expanded
@@ -392,9 +396,9 @@ int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
  * IN leftover - used by s_p_parse_line
  */
 int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
-		s_p_hashtbl_t*** data, int* data_count,
-		const char* key, const char* value,
-		const char *line, char **leftover);
+                            s_p_hashtbl_t ***data, int *data_count,
+                            const char *key, const char *value,
+                            const char *line, char **leftover);
 
 /*
  * s_p_get_string
@@ -446,7 +450,7 @@ int s_p_get_long(long *num, const char *key, const s_p_hashtbl_t *hashtbl);
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_uint16(uint16_t *num, const char *key,
-		   const s_p_hashtbl_t *hashtbl);
+                   const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_uint32
@@ -463,7 +467,7 @@ int s_p_get_uint16(uint16_t *num, const char *key,
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_uint32(uint32_t *num, const char *key,
-		   const s_p_hashtbl_t *hashtbl);
+                   const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_uint64
@@ -480,7 +484,7 @@ int s_p_get_uint32(uint32_t *num, const char *key,
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_uint64(uint64_t *num, const char *key,
-		   const s_p_hashtbl_t *hashtbl);
+                   const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_float
@@ -497,7 +501,7 @@ int s_p_get_uint64(uint64_t *num, const char *key,
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_float(float *num, const char *key,
-		  const s_p_hashtbl_t *hashtbl);
+                  const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_double
@@ -514,7 +518,7 @@ int s_p_get_float(float *num, const char *key,
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_double(double *num, const char *key,
-		   const s_p_hashtbl_t *hashtbl);
+                   const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_long_double
@@ -531,7 +535,7 @@ int s_p_get_double(double *num, const char *key,
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_long_double(long double *num, const char *key,
-			const s_p_hashtbl_t *hashtbl);
+                        const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_operator
@@ -549,7 +553,7 @@ int s_p_get_long_double(long double *num, const char *key,
  *     "operator" was successfully set, otherwise returns 0;
  */
 int s_p_get_operator(slurm_parser_operator_t *opt, const char *key,
-		     const s_p_hashtbl_t *hashtbl);
+                     const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_pointer
@@ -586,15 +590,15 @@ int s_p_get_pointer(void **ptr, const char *key, const s_p_hashtbl_t *hashtbl);
  *   was successfully set, otherwise returns 0;
  */
 int s_p_get_array(void **ptr_array[], int *count,
-		  const char *key, const s_p_hashtbl_t *hashtbl);
+                  const char *key, const s_p_hashtbl_t *hashtbl);
 
 /** works like s_p_get_array but each item of the array is a s_p_hashtbl_t */
 int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count,
-		  const char *key, const s_p_hashtbl_t *hashtbl);
+                 const char *key, const s_p_hashtbl_t *hashtbl);
 
 /** works like s_p_get_array but each item of the array is a s_p_hashtbl_t */
 int s_p_get_expline(s_p_hashtbl_t **ptr_array[], int *count,
-		  const char *key, const s_p_hashtbl_t *hashtbl);
+                    const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_boolean
@@ -619,7 +623,7 @@ int s_p_get_boolean(bool *flag, const char *key, const s_p_hashtbl_t *hashtbl);
  * Primarily for debugging purposes.
  */
 void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
-		     const s_p_options_t options[]);
+                     const s_p_options_t options[]);
 
 
 /*
@@ -630,8 +634,8 @@ void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
  * file in.
  */
 extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl,
-			   const s_p_options_t options[],
-			   const uint32_t cnt);
+                            const s_p_options_t options[],
+                            const uint32_t cnt);
 
 /*
  * Given a buffer, unpack key, type, op and value into a hashtbl.
@@ -647,7 +651,7 @@ extern s_p_hashtbl_t *s_p_unpack_hashtbl(Buf buffer);
  * Used if the full set of options are not available from one location.
  */
 extern void transfer_s_p_options(s_p_options_t **full_options,
-				 s_p_options_t *options,
-				 int *full_options_cnt);
+                                 s_p_options_t *options,
+                                 int *full_options_cnt);
 
 #endif /* !_PARSE_CONFIG_H */

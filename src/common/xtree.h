@@ -43,23 +43,23 @@
  * stops at root when going up, will either crash or go to an infinite loop).
  */
 typedef struct xtree_node_st {
-        void*                 data;     /* data of the node          */
-        struct xtree_node_st* parent;   /* parent node, level up     */
-        struct xtree_node_st* start;    /* first node, level below   */
-        struct xtree_node_st* end;      /* last node, level below    */
-        struct xtree_node_st* next;     /* next node, same level     */
-        struct xtree_node_st* previous; /* previous node, same level */
+    void *data;     /* data of the node          */
+    struct xtree_node_st *parent;   /* parent node, level up     */
+    struct xtree_node_st *start;    /* first node, level below   */
+    struct xtree_node_st *end;      /* last node, level below    */
+    struct xtree_node_st *next;     /* next node, same level     */
+    struct xtree_node_st *previous; /* previous node, same level */
 } xtree_node_t;
 
 /* function prototype to deallocate data stored in tree nodes */
-typedef void (*xtree_free_data_function_t)(xtree_node_t* node);
+typedef void (*xtree_free_data_function_t)(xtree_node_t *node);
 
 typedef struct xtree_st {
-        xtree_node_t*              root;  /* root node of the tree    */
-        xtree_free_data_function_t free;  /* frees nodes data or null */
-        uint32_t                   count; /* always: number of nodes  */
-        uint32_t                   depth; /* cached depth             */
-        uint32_t                   state; /* see XTREE_STATE_*        */
+    xtree_node_t *root;  /* root node of the tree    */
+    xtree_free_data_function_t free;  /* frees nodes data or null */
+    uint32_t count; /* always: number of nodes  */
+    uint32_t depth; /* cached depth             */
+    uint32_t state; /* see XTREE_STATE_*        */
 } xtree_t;
 
 /* free a complete tree whatever the `tree` entry point, it can be a leaf for
@@ -72,7 +72,7 @@ typedef struct xtree_st {
  *
  * @param tree is the tree entry point.
  */
-void xtree_free(xtree_t* tree);
+void xtree_free(xtree_t *tree);
 
 /**
  * initialize a xtree_t structure with an empty tree
@@ -85,7 +85,7 @@ void xtree_free(xtree_t* tree);
  * @param tree is the structure to initialize
  *
  */
-void xtree_init(xtree_t* tree, xtree_free_data_function_t freefunc);
+void xtree_init(xtree_t *tree, xtree_free_data_function_t freefunc);
 
 /**
  * Sets the functions which will be used to free data member for each node or
@@ -93,7 +93,7 @@ void xtree_init(xtree_t* tree, xtree_free_data_function_t freefunc);
  * already been added to the tree.
  * @param freefunc is the freeing function.
  */
-void xtree_set_freefunc(xtree_t* tree, xtree_free_data_function_t freefunc);
+void xtree_set_freefunc(xtree_t *tree, xtree_free_data_function_t freefunc);
 
 #define XTREE_STATE_DEPTHCACHED 1
 
@@ -102,7 +102,7 @@ void xtree_set_freefunc(xtree_t* tree, xtree_free_data_function_t freefunc);
 #define XTREE_REFRESH_DEPTH  4 /** default: don't refresh at insertion */
 
 /** convenient function to get the parent of a node */
-xtree_node_t* xtree_get_parent(xtree_t* tree, xtree_node_t* node);
+xtree_node_t *xtree_get_parent(xtree_t *tree, xtree_node_t *node);
 
 #define xtree_node_get_data(node) ((node) ? (node)->data : NULL)
 
@@ -112,7 +112,7 @@ xtree_node_t* xtree_get_parent(xtree_t* tree, xtree_node_t* node);
  * @returns the count of node inside the tree, constant time, or UINT32_MAX
  * if tree is NULL.
  */
-uint32_t xtree_get_count(xtree_t* tree);
+uint32_t xtree_get_count(xtree_t *tree);
 
 /** Add a child to a node of a tree.
  * @param tree the tree to manage, `parent` belongs to it.
@@ -127,10 +127,10 @@ uint32_t xtree_get_count(xtree_t* tree);
  * @returns the new child node added or NULL if parent is NULL but tree has
  * root node. This function assumes a flag is given or abort o/w.
  */
-xtree_node_t* xtree_add_child(xtree_t* tree,
-			      xtree_node_t* parent,
-			      void* data,
-			      uint8_t flags);
+xtree_node_t *xtree_add_child(xtree_t *tree,
+                              xtree_node_t *parent,
+                              void *data,
+                              uint8_t flags);
 
 /** Add a sibling to a node.
  * @param tree is the tree to manage, NULL tree is illegal.
@@ -145,10 +145,10 @@ xtree_node_t* xtree_add_child(xtree_t* tree,
  * XTREE_REFRESH_DEPTH: refresh the cached depth of the tree.
  * @returns the new child node added or NULL for illegal parameter.
  */
-xtree_node_t* xtree_add_sibling(xtree_t* tree,
-				xtree_node_t* node,
-				void* data,
-				uint8_t flags);
+xtree_node_t *xtree_add_sibling(xtree_t *tree,
+                                xtree_node_t *node,
+                                void *data,
+                                uint8_t flags);
 
 /** Calculate a tree depth by calling xtree_walk to browse the tree.
  * This function browse the complete tree to determine the greatest depth of
@@ -157,29 +157,29 @@ xtree_node_t* xtree_add_sibling(xtree_t* tree,
  * @returns the depth of a given tree, a return value of 0 means the tree has
  *          no nodes, even not a root node, it is an empty tree.
  */
-uint32_t xtree_depth_const(const xtree_t* tree);
+uint32_t xtree_depth_const(const xtree_t *tree);
 
 /** Calculate depth starting from node (call xtree_walk).
  * @param tree the tree to calculate depth from.
  * @param node the starting point for calculating depth.
  */
-uint32_t xtree_depth_const_node(const xtree_t* tree, const xtree_node_t* node);
+uint32_t xtree_depth_const_node(const xtree_t *tree, const xtree_node_t *node);
 
 /** Calculate a tree depth, caching its result inside the tree (call
  * xtree_walk).
  * @see xtree_depth_const
  */
-uint32_t xtree_depth(xtree_t* tree);
+uint32_t xtree_depth(xtree_t *tree);
 
 /** Calculate tree depth with xtree_depth and cache it.
  * @param tree is the tree to refresh.
  */
-void xtree_refresh_depth(xtree_t* tree);
+void xtree_refresh_depth(xtree_t *tree);
 
 /** Convenient function which go upward to the root node to calculate node
  * depth passed in argument.
  */
-uint32_t xtree_node_depth(const xtree_node_t* node);
+uint32_t xtree_node_depth(const xtree_node_t *node);
 
 /** see function prototype for xtree_walk for description */
 #define XTREE_PREORDER 1
@@ -208,10 +208,10 @@ uint32_t xtree_node_depth(const xtree_node_t* node);
  * @returns 0 to indicate that xtree_walk do not need to continue to go
  *          through the tree, nonzero value continue the browsing.
  */
-typedef uint8_t (*xtree_walk_function_t)(xtree_node_t* node,
-					 uint8_t which,
-					 uint32_t level,
-					 void* arg);
+typedef uint8_t (*xtree_walk_function_t)(xtree_node_t *node,
+                                         uint8_t which,
+                                         uint32_t level,
+                                         void *arg);
 
 /** Browse the tree depth-first, left-to-right. It mimics the C twalk
  * function.
@@ -232,16 +232,16 @@ typedef uint8_t (*xtree_walk_function_t)(xtree_node_t* node,
  * @param arg is the user data to pass unmodified to the user function.
  * @returns the lastest node for which action was aborted or NULL.
  */
-xtree_node_t* xtree_walk(xtree_t* tree,
-			 xtree_node_t* node,
-			 uint32_t min_level,
-			 uint32_t max_level,
-			 xtree_walk_function_t action,
-			 void* arg);
+xtree_node_t *xtree_walk(xtree_t *tree,
+                         xtree_node_t *node,
+                         uint32_t min_level,
+                         uint32_t max_level,
+                         xtree_walk_function_t action,
+                         void *arg);
 
 /** @see xtree_find */
-typedef uint8_t (*xtree_find_compare_t)(const void* node_data,
-					const void* arg);
+typedef uint8_t (*xtree_find_compare_t)(const void *node_data,
+                                        const void *arg);
 
 /** Convenient function which calls xtree_walk to find a node according to
  * a compare function.
@@ -254,9 +254,9 @@ typedef uint8_t (*xtree_find_compare_t)(const void* node_data,
  *            the user function needs to find the searched element.
  * @returns the found node or NULL.
  */
-xtree_node_t* xtree_find(xtree_t* tree,
-			 xtree_find_compare_t compare,
-			 const void* arg);
+xtree_node_t *xtree_find(xtree_t *tree,
+                         xtree_find_compare_t compare,
+                         const void *arg);
 
 /** Deletes a node from the tree. You can use xtree_find or xtree_walk to
  * find the wanted node. This function frees the node data thanks to the
@@ -268,7 +268,7 @@ xtree_node_t* xtree_find(xtree_t* tree,
  * @returns the parent node of the deleted node or NULL if bad argument/tree
  *          or the node was the tree's root node.
  */
-xtree_node_t* xtree_delete(xtree_t* tree, xtree_node_t* node);
+xtree_node_t *xtree_delete(xtree_t *tree, xtree_node_t *node);
 
 /** Gets recursive parents list from a node or NULL for bad tree/parameters
  * or root node.
@@ -283,9 +283,9 @@ xtree_node_t* xtree_delete(xtree_t* tree, xtree_node_t* node);
  * @returns the `xmalloc`ed parents array or NULL. Although size contains the
  *          array number of elements, the array is null terminated.
  */
-xtree_node_t** xtree_get_parents(xtree_t* tree,
-				 xtree_node_t* node,
-				 uint32_t* size);
+xtree_node_t **xtree_get_parents(xtree_t *tree,
+                                 xtree_node_t *node,
+                                 uint32_t *size);
 
 /** Get common ancestor of all given nodes.
  * Example: 1 -> 2 -> 7, common ancestor of 2 and 7 is 1.
@@ -301,9 +301,9 @@ xtree_node_t** xtree_get_parents(xtree_t* tree,
  *          exists (if root node is listed, returns null since root node has
  *          no ancestor).
  */
-xtree_node_t* xtree_common(xtree_t* tree,
-			   const xtree_node_t* const* nodes,
-			   uint32_t size);
+xtree_node_t *xtree_common(xtree_t *tree,
+                           const xtree_node_t *const *nodes,
+                           uint32_t size);
 
 /** Get recursive list of leaves starting from node.
  * User is responsible for `xfree`'ing the returned list.
@@ -316,8 +316,8 @@ xtree_node_t* xtree_common(xtree_t* tree,
  *          tree or bad parameters. Although size contains the
  *          array number of elements, the array is null terminated.
  */
-xtree_node_t** xtree_get_leaves(xtree_t* tree,
-				xtree_node_t* node,
-				uint32_t* size);
+xtree_node_t **xtree_get_leaves(xtree_t *tree,
+                                xtree_node_t *node,
+                                uint32_t *size);
 
 #endif

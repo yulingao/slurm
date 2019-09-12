@@ -50,21 +50,22 @@
 #include "src/slurmctld/slurmctld.h"
 
 typedef struct slurm_sched_ops {
-	uint32_t	(*initial_priority)	( uint32_t,
-						  struct job_record * );
-	int		(*reconfig)		( void );
+    uint32_t (*initial_priority)(uint32_t,
+                                 struct job_record *);
+
+    int (*reconfig)(void);
 } slurm_sched_ops_t;
 
 /*
  * Must be synchronized with slurm_sched_ops_t above.
  */
 static const char *syms[] = {
-	"slurm_sched_p_initial_priority",
-	"slurm_sched_p_reconfig",
+        "slurm_sched_p_initial_priority",
+        "slurm_sched_p_reconfig",
 };
 
 static slurm_sched_ops_t ops;
-static plugin_context_t	*g_context = NULL;
+static plugin_context_t *g_context = NULL;
 static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
@@ -74,68 +75,64 @@ static bool init_run = false;
  * slurmctld must be restarted and job priority changes may be
  * required to change the scheduler type.
  */
-extern int slurm_sched_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "sched";
-	char *type = NULL;
+extern int slurm_sched_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "sched";
+    char *type = NULL;
 
-	if ( init_run && g_context )
-		return retval;
+    if (init_run && g_context)
+        return retval;
 
-	slurm_mutex_lock( &g_context_lock );
+    slurm_mutex_lock(&g_context_lock);
 
-	if ( g_context )
-		goto done;
+    if (g_context)
+        goto done;
 
-	type = slurm_get_sched_type();
-	g_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    type = slurm_get_sched_type();
+    g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!g_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	slurm_mutex_unlock( &g_context_lock );
-	xfree(type);
-	return retval;
+    done:
+    slurm_mutex_unlock(&g_context_lock);
+    xfree(type);
+    return retval;
 }
 
-extern int slurm_sched_fini(void)
-{
-	int rc;
+extern int slurm_sched_fini(void) {
+    int rc;
 
-	if (!g_context)
-		return SLURM_SUCCESS;
+    if (!g_context)
+        return SLURM_SUCCESS;
 
-	init_run = false;
-	rc = plugin_context_destroy(g_context);
-	g_context = NULL;
+    init_run = false;
+    rc = plugin_context_destroy(g_context);
+    g_context = NULL;
 
-	gs_fini();
+    gs_fini();
 
-	return rc;
+    return rc;
 }
 
-extern int slurm_sched_g_reconfig(void)
-{
-	if ( slurm_sched_init() < 0 )
-		return SLURM_ERROR;
+extern int slurm_sched_g_reconfig(void) {
+    if (slurm_sched_init() < 0)
+        return SLURM_ERROR;
 
-	gs_reconfig();
+    gs_reconfig();
 
-	return (*(ops.reconfig))();
+    return (*(ops.reconfig))();
 }
 
 uint32_t slurm_sched_g_initial_priority(uint32_t last_prio,
-					struct job_record *job_ptr)
-{
-	if ( slurm_sched_init() < 0 )
-		return SLURM_ERROR;
+                                        struct job_record *job_ptr) {
+    if (slurm_sched_init() < 0)
+        return SLURM_ERROR;
 
-	return (*(ops.initial_priority))( last_prio, job_ptr );
+    return (*(ops.initial_priority))(last_prio, job_ptr);
 }

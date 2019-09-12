@@ -85,47 +85,39 @@ const char plugin_type[] = "ext_sensors/none";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 
-extern int ext_sensors_read_conf(void)
-{
-	return SLURM_SUCCESS;
+extern int ext_sensors_read_conf(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int ext_sensors_free_conf(void)
-{
-	return SLURM_SUCCESS;
+extern int ext_sensors_free_conf(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int ext_sensors_p_update_component_data(void)
-{
-	return SLURM_SUCCESS;
+extern int ext_sensors_p_update_component_data(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int ext_sensors_p_get_stepstartdata(struct step_record *step_rec)
-{
-	return SLURM_SUCCESS;
+extern int ext_sensors_p_get_stepstartdata(struct step_record *step_rec) {
+    return SLURM_SUCCESS;
 }
 
-extern int ext_sensors_p_get_stependdata(struct step_record *step_rec)
-{
-	return SLURM_SUCCESS;
+extern int ext_sensors_p_get_stependdata(struct step_record *step_rec) {
+    return SLURM_SUCCESS;
 }
 
-extern List ext_sensors_p_get_config(void)
-{
-	return SLURM_SUCCESS;
+extern List ext_sensors_p_get_config(void) {
+    return SLURM_SUCCESS;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	verbose("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+extern int init(void) {
+    verbose("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }

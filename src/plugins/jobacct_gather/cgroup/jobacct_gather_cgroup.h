@@ -48,8 +48,8 @@
  * track every task cgroup and which taskid it belongs to.
  */
 typedef struct task_cg_info {
-	xcgroup_t task_cg;
-	uint32_t taskid;
+    xcgroup_t task_cg;
+    uint32_t taskid;
 } task_cg_info_t;
 
 extern List task_memory_cg_list;
@@ -60,17 +60,17 @@ extern int jobacct_gather_cgroup_cpuacct_init(void);
 extern int jobacct_gather_cgroup_cpuacct_fini(void);
 
 extern int jobacct_gather_cgroup_cpuacct_attach_task(
-	pid_t pid, jobacct_id_t *jobacct_id);
+        pid_t pid, jobacct_id_t *jobacct_id);
 
 extern int jobacct_gather_cgroup_memory_init(void);
 
 extern int jobacct_gather_cgroup_memory_fini(void);
 
 extern int jobacct_gather_cgroup_memory_attach_task(
-	pid_t pid, jobacct_id_t *jobacct_id);
+        pid_t pid, jobacct_id_t *jobacct_id);
 
 /* FIXME: Enable when kernel support ready. */
- /* extern xcgroup_t task_blkio_cg; */
+/* extern xcgroup_t task_blkio_cg; */
 /* extern int jobacct_gather_cgroup_blkio_init( */
 /* 	slurm_cgroup_conf_t *slurm_cgroup_conf); */
 
@@ -80,7 +80,7 @@ extern int jobacct_gather_cgroup_memory_attach_task(
 /* extern int jobacct_gather_cgroup_blkio_attach_task( */
 /* 	pid_t pid, jobacct_id_t *jobacct_id); */
 
-extern char* jobacct_cgroup_create_slurm_cg (xcgroup_ns_t* ns);
+extern char *jobacct_cgroup_create_slurm_cg(xcgroup_ns_t *ns);
 
 extern int find_task_cg_info(void *x, void *key);
 

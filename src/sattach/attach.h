@@ -32,9 +32,9 @@
  * them, and will be confused if you change them.
  */
 typedef struct {
-  char * host_name;           /* Something we can pass to inet_addr */
-  char * executable_name;     /* The name of the image */
-  int    pid;		      /* The pid of the process */
+    char *host_name;           /* Something we can pass to inet_addr */
+    char *executable_name;     /* The name of the image */
+    int pid;              /* The pid of the process */
 } MPIR_PROCDESC;
 
 /* Array of procdescs for debugging purposes */
@@ -49,7 +49,7 @@ extern int MPIR_proctable_size;
  */
 extern volatile int MPIR_debug_state;
 extern volatile int MPIR_debug_gate;
-extern int          MPIR_being_debugged; /* Cause extra info on internal state
+extern int MPIR_being_debugged; /* Cause extra info on internal state
 					  * to be maintained
 					  */
 

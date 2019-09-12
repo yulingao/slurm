@@ -38,10 +38,12 @@
 #ifndef _HAVE_NONSTOP_SOCK_COMM_H
 #define _HAVE_NONSTOP_SOCK_COMM_H
 
-extern int  spawn_msg_thread(void);
+extern int spawn_msg_thread(void);
+
 extern void term_msg_thread(void);
 
 extern void init_job_db(void);
+
 extern void term_job_db(void);
 
-#endif	/* _HAVE_NONSTOP_SOCK_COMM_H */
+#endif    /* _HAVE_NONSTOP_SOCK_COMM_H */

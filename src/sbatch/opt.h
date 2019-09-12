@@ -53,27 +53,25 @@
 #include "src/common/slurmdb_defs.h"
 #include "src/common/slurm_opt.h"
 
-enum wrappers
-{
-	WRPR_START,
-	WRPR_BSUB,
-	WRPR_PBS,
-	WRPR_CNT
+enum wrappers {
+    WRPR_START,
+    WRPR_BSUB,
+    WRPR_PBS,
+    WRPR_CNT
 };
 
-typedef struct sbatch_env_opts
-{
-	uint32_t cpus_per_task;
-	char *dist;
-	char *dist_lllp;
-	char *mem_bind;
-	char *mem_bind_sort;
-	char *mem_bind_verbose;
-	uint32_t ntasks;
-	uint32_t ntasks_per_core;
-	uint32_t ntasks_per_node;
-	uint32_t ntasks_per_socket;
-	uint32_t plane_size;
+typedef struct sbatch_env_opts {
+    uint32_t cpus_per_task;
+    char *dist;
+    char *dist_lllp;
+    char *mem_bind;
+    char *mem_bind_sort;
+    char *mem_bind_verbose;
+    uint32_t ntasks;
+    uint32_t ntasks_per_core;
+    uint32_t ntasks_per_node;
+    uint32_t ntasks_per_socket;
+    uint32_t plane_size;
 } sbatch_env_t;
 
 extern slurm_opt_t opt;
@@ -134,27 +132,32 @@ process options:
  * more_packs OUT - more packs job specifications in script to process
  */
 extern void process_options_second_pass(int argc, char **argv, int *argc_off,
-										int pack_inx, bool *more_packs,
-										const char *file,
-										const void *script_body,
-										int script_size);
+                                        int pack_inx, bool *more_packs,
+                                        const char *file,
+                                        const void *script_body,
+                                        int script_size);
 
 /* external functions available for SPANK plugins to modify the environment
  * exported to the Slurm Prolog and Epilog programs */
 extern char *spank_get_job_env(const char *name);
+
 extern int spank_set_job_env(const char *name, const char *value,
-							 int overwrite);
+                             int overwrite);
+
 extern int spank_unset_job_env(const char *name);
 
 extern void init_envs(sbatch_env_t *local_env);
+
 extern void set_envs(char ***array_ptr, sbatch_env_t *local_env,
-					 int pack_offset);
+                     int pack_offset);
 
 extern char *get_argument(const char *file, int lineno, const char *line,
-						  int *skipped);
+                          int *skipped);
+
 extern char *next_line(const void *buf, int size, void **state);
 
 /* Translate #BSUB and #PBS directives in job script */
 extern bool xlate_batch_script(const char *file, const void *body,
-							   int size, int magic);
+                               int size, int magic);
+
 #endif /* _HAVE_OPT_H */

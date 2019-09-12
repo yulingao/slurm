@@ -70,45 +70,45 @@ static pam_handle_t *pam_h = NULL;
 int
 pam_setup (char *user, char *host)
 {
-	/*
-	 * Any application using PAM must provide a conversation function, which
-	 * is used for direct communication between a loaded module and the
-	 * application. In this case, Slurm does not need a communication mechanism,
-	 * so the default (or null) conversation function may be used.
-	 */
-	struct pam_conv conv = {misc_conv, NULL};
+    /*
+     * Any application using PAM must provide a conversation function, which
+     * is used for direct communication between a loaded module and the
+     * application. In this case, Slurm does not need a communication mechanism,
+     * so the default (or null) conversation function may be used.
+     */
+    struct pam_conv conv = {misc_conv, NULL};
         int             rc = 0;
 
-	if (!conf->use_pam)
-		return SLURM_SUCCESS;
-	/*
-	 * Slurm uses PAM to obtain resource limits established by the system
-	 * administrator. PAM's session management library is responsible for
-	 * handling resource limits. When a PAM session is opened on behalf of
-	 * a user, the limits imposed by the sys admin are picked up. Opening
-	 * a PAM session requires a PAM handle, which is obtained when the PAM
-	 * interface is initialized. (PAM handles are required with essentially
-	 * all PAM calls.) It's also necessary to have the user's PAM credentials
-	 * to open a user session.
- 	 */
+    if (!conf->use_pam)
+        return SLURM_SUCCESS;
+    /*
+     * Slurm uses PAM to obtain resource limits established by the system
+     * administrator. PAM's session management library is responsible for
+     * handling resource limits. When a PAM session is opened on behalf of
+     * a user, the limits imposed by the sys admin are picked up. Opening
+     * a PAM session requires a PAM handle, which is obtained when the PAM
+     * interface is initialized. (PAM handles are required with essentially
+     * all PAM calls.) It's also necessary to have the user's PAM credentials
+     * to open a user session.
+      */
         if ((rc = pam_start (SLURM_SERVICE_PAM, user, &conv, &pam_h))
-			!= PAM_SUCCESS) {
+            != PAM_SUCCESS) {
                 error ("pam_start: %s", pam_strerror(NULL, rc));
                 goto fail1;
         } else if ((rc = pam_set_item (pam_h, PAM_USER, user))
-			!= PAM_SUCCESS) {
+            != PAM_SUCCESS) {
                 error ("pam_set_item USER: %s", pam_strerror(pam_h, rc));
                 goto fail2;
         } else if ((rc = pam_set_item (pam_h, PAM_RUSER, user))
-			!= PAM_SUCCESS) {
+            != PAM_SUCCESS) {
                 error ("pam_set_item RUSER: %s", pam_strerror(pam_h, rc));
                 goto fail2;
         } else if ((rc = pam_set_item (pam_h, PAM_RHOST, host))
-			!= PAM_SUCCESS) {
+            != PAM_SUCCESS) {
                 error ("pam_set_item HOST: %s", pam_strerror(pam_h, rc));
                 goto fail2;
         } else if ((rc = pam_setcred (pam_h, PAM_ESTABLISH_CRED))
-			!= PAM_SUCCESS) {
+            != PAM_SUCCESS) {
                 error ("pam_setcred ESTABLISH: %s", pam_strerror(pam_h, rc));
                 goto fail2;
         } else if ((rc = pam_open_session (pam_h, 0)) != PAM_SUCCESS) {
@@ -116,7 +116,7 @@ pam_setup (char *user, char *host)
                 goto fail3;
         }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 
 fail3:
         pam_setcred (pam_h, PAM_DELETE_CRED);
@@ -135,18 +135,18 @@ pam_finish ()
 {
         int             rc = 0;
 
-	/* 
-	 * Allow PAM to clean up its state by closing the user session and
-	 * ending the association with PAM.
-	 */
+    /*
+     * Allow PAM to clean up its state by closing the user session and
+     * ending the association with PAM.
+     */
 
-	if (!conf->use_pam)
-		return;
+    if (!conf->use_pam)
+        return;
 
         if (pam_h != NULL) {
-		/*
-		 * Log any errors, but there's no need to return a Slurm error.
-		 */
+        /*
+         * Log any errors, but there's no need to return a Slurm error.
+         */
                 if ((rc = pam_close_session (pam_h, 0)) != PAM_SUCCESS) {
                         error("pam_close_session: %s", pam_strerror(pam_h, rc));
                 }
@@ -162,15 +162,13 @@ pam_finish ()
 
 #else  /* HAVE_PAM */
 
-int pam_setup (char *user, char *host)
-{
-	/* Don't have PAM support, do nothing. */
-	return SLURM_SUCCESS;
+int pam_setup(char *user, char *host) {
+    /* Don't have PAM support, do nothing. */
+    return SLURM_SUCCESS;
 }
 
-void pam_finish ()
-{
-	/* Don't have PAM support, do nothing. */
+void pam_finish() {
+    /* Don't have PAM support, do nothing. */
 }
 
 #endif /* HAVE_PAM */

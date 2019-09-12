@@ -53,10 +53,13 @@
 #include "src/slurmctld/slurmctld.h"
 
 typedef struct slurm_jobcomp_ops {
-	int          (*set_loc)   ( char *loc );
-	int          (*job_write) ( struct job_record *job_ptr);
-	List         (*get_jobs)  ( slurmdb_job_cond_t *params );
-	int          (*archive)   ( slurmdb_archive_cond_t *params );
+    int (*set_loc)(char *loc);
+
+    int (*job_write)(struct job_record *job_ptr);
+
+    List (*get_jobs)(slurmdb_job_cond_t *params);
+
+    int (*archive)(slurmdb_archive_cond_t *params);
 } slurm_jobcomp_ops_t;
 
 /*
@@ -64,10 +67,10 @@ typedef struct slurm_jobcomp_ops {
  * declared for slurm_jobcomp_ops_t.
  */
 static const char *syms[] = {
-	"slurm_jobcomp_set_location",
-	"slurm_jobcomp_log_record",
-	"slurm_jobcomp_get_jobs",
-	"slurm_jobcomp_archive"
+        "slurm_jobcomp_set_location",
+        "slurm_jobcomp_log_record",
+        "slurm_jobcomp_get_jobs",
+        "slurm_jobcomp_archive"
 };
 
 static slurm_jobcomp_ops_t ops;
@@ -76,132 +79,126 @@ static pthread_mutex_t context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 extern void
-jobcomp_destroy_job(void *object)
-{
-	jobcomp_job_rec_t *job = (jobcomp_job_rec_t *)object;
-	if (job) {
-		xfree(job->partition);
-		xfree(job->start_time);
-		xfree(job->end_time);
-		xfree(job->uid_name);
-		xfree(job->gid_name);
-		xfree(job->nodelist);
-		xfree(job->jobname);
-		xfree(job->state);
-		xfree(job->timelimit);
-		xfree(job->blockid);
-		xfree(job->connection);
-		xfree(job->reboot);
-		xfree(job->rotate);
-		xfree(job->geo);
-		xfree(job->bg_start_point);
-		xfree(job->work_dir);
-		xfree(job->resv_name);
-		xfree(job->req_gres);
-		xfree(job->account);
-		xfree(job->qos_name);
-		xfree(job->wckey);
-		xfree(job->cluster);
-		xfree(job->submit_time);
-		xfree(job->eligible_time);
-		xfree(job->exit_code);
-		xfree(job->derived_ec);
-		xfree(job);
-	}
+jobcomp_destroy_job(void *object) {
+    jobcomp_job_rec_t *job = (jobcomp_job_rec_t *) object;
+    if (job) {
+        xfree(job->partition);
+        xfree(job->start_time);
+        xfree(job->end_time);
+        xfree(job->uid_name);
+        xfree(job->gid_name);
+        xfree(job->nodelist);
+        xfree(job->jobname);
+        xfree(job->state);
+        xfree(job->timelimit);
+        xfree(job->blockid);
+        xfree(job->connection);
+        xfree(job->reboot);
+        xfree(job->rotate);
+        xfree(job->geo);
+        xfree(job->bg_start_point);
+        xfree(job->work_dir);
+        xfree(job->resv_name);
+        xfree(job->req_gres);
+        xfree(job->account);
+        xfree(job->qos_name);
+        xfree(job->wckey);
+        xfree(job->cluster);
+        xfree(job->submit_time);
+        xfree(job->eligible_time);
+        xfree(job->exit_code);
+        xfree(job->derived_ec);
+        xfree(job);
+    }
 }
 
 
 extern int
-g_slurm_jobcomp_init( char *jobcomp_loc )
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "jobcomp";
-	char *type = NULL;
+g_slurm_jobcomp_init(char *jobcomp_loc) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "jobcomp";
+    char *type = NULL;
 
-	slurm_mutex_lock( &context_lock );
+    slurm_mutex_lock(&context_lock);
 
-	if (init_run && g_context)
-		goto done;
+    if (init_run && g_context)
+        goto done;
 
-	if (g_context)
-		plugin_context_destroy(g_context);
+    if (g_context)
+        plugin_context_destroy(g_context);
 
-	type = slurm_get_jobcomp_type();
-	g_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    type = slurm_get_jobcomp_type();
+    g_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
-	init_run = true;
+    if (!g_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
+    init_run = true;
 
-done:
-	xfree(type);
-	if (g_context)
-		retval = (*(ops.set_loc))(jobcomp_loc);
-	slurm_mutex_unlock( &context_lock );
-	return retval;
+    done:
+    xfree(type);
+    if (g_context)
+        retval = (*(ops.set_loc))(jobcomp_loc);
+    slurm_mutex_unlock(&context_lock);
+    return retval;
 }
 
 extern int
-g_slurm_jobcomp_fini(void)
-{
-	slurm_mutex_lock( &context_lock );
+g_slurm_jobcomp_fini(void) {
+    slurm_mutex_lock(&context_lock);
 
-	if ( !g_context)
-		goto done;
+    if (!g_context)
+        goto done;
 
-	init_run = false;
-	plugin_context_destroy ( g_context );
-	g_context = NULL;
+    init_run = false;
+    plugin_context_destroy(g_context);
+    g_context = NULL;
 
-done:
-	slurm_mutex_unlock( &context_lock );
-	return SLURM_SUCCESS;
+    done:
+    slurm_mutex_unlock(&context_lock);
+    return SLURM_SUCCESS;
 }
 
 extern int
-g_slurm_jobcomp_write(struct job_record *job_ptr)
-{
-	int retval = SLURM_SUCCESS;
+g_slurm_jobcomp_write(struct job_record *job_ptr) {
+    int retval = SLURM_SUCCESS;
 
-	slurm_mutex_lock( &context_lock );
-	if ( g_context )
-		retval = (*(ops.job_write))(job_ptr);
-	else {
-		error ("slurm_jobcomp plugin context not initialized");
-		retval = ENOENT;
-	}
-	slurm_mutex_unlock( &context_lock );
-	return retval;
+    slurm_mutex_lock(&context_lock);
+    if (g_context)
+        retval = (*(ops.job_write))(job_ptr);
+    else {
+        error("slurm_jobcomp plugin context not initialized");
+        retval = ENOENT;
+    }
+    slurm_mutex_unlock(&context_lock);
+    return retval;
 }
 
 extern List
-g_slurm_jobcomp_get_jobs(slurmdb_job_cond_t *job_cond)
-{
-	List job_list = NULL;
+g_slurm_jobcomp_get_jobs(slurmdb_job_cond_t *job_cond) {
+    List job_list = NULL;
 
-	slurm_mutex_lock( &context_lock );
-	if ( g_context )
-		job_list = (*(ops.get_jobs))(job_cond);
-	else
-		error ("slurm_jobcomp plugin context not initialized");
-	slurm_mutex_unlock( &context_lock );
-	return job_list;
+    slurm_mutex_lock(&context_lock);
+    if (g_context)
+        job_list = (*(ops.get_jobs))(job_cond);
+    else
+        error("slurm_jobcomp plugin context not initialized");
+    slurm_mutex_unlock(&context_lock);
+    return job_list;
 }
 
 extern int
-g_slurm_jobcomp_archive(slurmdb_archive_cond_t *arch_cond)
-{
-	int rc = SLURM_ERROR;
+g_slurm_jobcomp_archive(slurmdb_archive_cond_t *arch_cond) {
+    int rc = SLURM_ERROR;
 
-	slurm_mutex_lock( &context_lock );
-	if ( g_context )
-		rc = (*(ops.archive))(arch_cond);
-	else
-		error ("slurm_jobcomp plugin context not initialized");
-	slurm_mutex_unlock( &context_lock );
-	return rc;
+    slurm_mutex_lock(&context_lock);
+    if (g_context)
+        rc = (*(ops.archive))(arch_cond);
+    else
+        error("slurm_jobcomp plugin context not initialized");
+    slurm_mutex_unlock(&context_lock);
+    return rc;
 }

@@ -85,13 +85,13 @@ static bool _in_slurmctld(void);
  */
 extern int start_lease_extender(void)
 {
-	// Start lease extender in the slurmctld
-	if (!_in_slurmctld())
-		return SLURM_SUCCESS;
+    // Start lease extender in the slurmctld
+    if (!_in_slurmctld())
+        return SLURM_SUCCESS;
 
-	slurm_thread_create_detached(NULL, _lease_extender, NULL);
+    slurm_thread_create_detached(NULL, _lease_extender, NULL);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -99,19 +99,19 @@ extern int start_lease_extender(void)
  */
 extern int cleanup_lease_extender(void)
 {
-	// Cleanup lease extender in the slurmctld
-	if (!_in_slurmctld())
-		return SLURM_SUCCESS;
+    // Cleanup lease extender in the slurmctld
+    if (!_in_slurmctld())
+        return SLURM_SUCCESS;
 
-	lease_extender_running = false;
+    lease_extender_running = false;
 
-	slurm_mutex_lock(&cookie_id_mutex);
-	xfree(cookie_id_list);
-	cookie_id_list_size = 0;
-	cookie_id_list_capacity = 0;
-	slurm_mutex_unlock(&cookie_id_mutex);
+    slurm_mutex_lock(&cookie_id_mutex);
+    xfree(cookie_id_list);
+    cookie_id_list_size = 0;
+    cookie_id_list_capacity = 0;
+    slurm_mutex_unlock(&cookie_id_mutex);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -119,57 +119,57 @@ extern int cleanup_lease_extender(void)
  * Leased cookies will periodically have their lease extended.
  */
 extern int lease_cookies(slurm_cray_jobinfo_t *job, int32_t *nodes,
-			 int32_t num_nodes)
+             int32_t num_nodes)
 {
-	int rc;
-	uint32_t i;
-	char *err_msg = NULL;
-	int32_t *cookie_ids = NULL;
-	char **cookies = NULL;
+    int rc;
+    uint32_t i;
+    char *err_msg = NULL;
+    int32_t *cookie_ids = NULL;
+    char **cookies = NULL;
 
-	if (!_in_slurmctld())
-		return SLURM_SUCCESS;
+    if (!_in_slurmctld())
+        return SLURM_SUCCESS;
 
-	/*
-	 * Lease some cookies
-	 *
-	 * TODO: I could ensure that the nodes list was sorted either by doing
-	 * some research to see if it comes in sorted or calling a sort
-	 * routine.
-	 */
-	rc = alpsc_lease_cookies(&err_msg, COOKIE_OWNER, job->apid,
-				 COOKIE_LEASE_TIME, nodes,
-				 num_nodes, NUM_COOKIES,
-				 &cookies, &cookie_ids);
-	ALPSC_SN_DEBUG("alpsc_lease_cookies");
-	if (rc != 0) {
-		return SLURM_ERROR;
-	}
+    /*
+     * Lease some cookies
+     *
+     * TODO: I could ensure that the nodes list was sorted either by doing
+     * some research to see if it comes in sorted or calling a sort
+     * routine.
+     */
+    rc = alpsc_lease_cookies(&err_msg, COOKIE_OWNER, job->apid,
+                 COOKIE_LEASE_TIME, nodes,
+                 num_nodes, NUM_COOKIES,
+                 &cookies, &cookie_ids);
+    ALPSC_SN_DEBUG("alpsc_lease_cookies");
+    if (rc != 0) {
+        return SLURM_ERROR;
+    }
 
-	/*
-	 * xmalloc the space for the cookies and cookie_ids, so it can be freed
-	 * with xfree later, which is consistent with Slurm practices and how
-	 * the rest of the structure will be freed.
-	 * We must free() the ALPS Common library allocated memory using free(),
-	 * not xfree().
-	 */
-	job->num_cookies = NUM_COOKIES;
-	job->cookie_ids = (uint32_t *) xmalloc(sizeof(uint32_t) * NUM_COOKIES);
-	memcpy(job->cookie_ids, cookie_ids, sizeof(uint32_t) * NUM_COOKIES);
-	free(cookie_ids);
+    /*
+     * xmalloc the space for the cookies and cookie_ids, so it can be freed
+     * with xfree later, which is consistent with Slurm practices and how
+     * the rest of the structure will be freed.
+     * We must free() the ALPS Common library allocated memory using free(),
+     * not xfree().
+     */
+    job->num_cookies = NUM_COOKIES;
+    job->cookie_ids = (uint32_t *) xmalloc(sizeof(uint32_t) * NUM_COOKIES);
+    memcpy(job->cookie_ids, cookie_ids, sizeof(uint32_t) * NUM_COOKIES);
+    free(cookie_ids);
 
-	job->cookies = (char **) xmalloc(sizeof(char **) * NUM_COOKIES);
-	for (i = 0; i < NUM_COOKIES; i++) {
-		job->cookies[i] = xstrdup(cookies[i]);
-		free(cookies[i]);
-	}
-	free(cookies);
+    job->cookies = (char **) xmalloc(sizeof(char **) * NUM_COOKIES);
+    for (i = 0; i < NUM_COOKIES; i++) {
+        job->cookies[i] = xstrdup(cookies[i]);
+        free(cookies[i]);
+    }
+    free(cookies);
 
-	// Add them to the list
-	for (i = 0; i < job->num_cookies; i++) {
-		_add_cookie(job->cookie_ids[i]);
-	}
-	return SLURM_SUCCESS;
+    // Add them to the list
+    for (i = 0; i < job->num_cookies; i++) {
+        _add_cookie(job->cookie_ids[i]);
+    }
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -179,16 +179,16 @@ extern int lease_cookies(slurm_cray_jobinfo_t *job, int32_t *nodes,
  */
 extern int track_cookies(slurm_cray_jobinfo_t *job)
 {
-	uint32_t i;
+    uint32_t i;
 
-	if (!_in_slurmctld())
-		return SLURM_SUCCESS;
+    if (!_in_slurmctld())
+        return SLURM_SUCCESS;
 
-	// Add cookies to the list
-	for (i = 0; i < job->num_cookies; i++) {
-		_add_cookie(job->cookie_ids[i]);
-	}
-	return SLURM_SUCCESS;
+    // Add cookies to the list
+    for (i = 0; i < job->num_cookies; i++) {
+        _add_cookie(job->cookie_ids[i]);
+    }
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -196,27 +196,27 @@ extern int track_cookies(slurm_cray_jobinfo_t *job)
  */
 extern int release_cookies(slurm_cray_jobinfo_t *job)
 {
-	uint32_t i;
-	int rc;
-	char *err_msg = NULL;
+    uint32_t i;
+    int rc;
+    char *err_msg = NULL;
 
-	if (!_in_slurmctld())
-		return SLURM_SUCCESS;
+    if (!_in_slurmctld())
+        return SLURM_SUCCESS;
 
-	// Remove cookies from the list
-	for (i = 0; i < job->num_cookies; i++) {
-		_remove_cookie(job->cookie_ids[i]);
-	}
+    // Remove cookies from the list
+    for (i = 0; i < job->num_cookies; i++) {
+        _remove_cookie(job->cookie_ids[i]);
+    }
 
-	// Release them
-	rc = alpsc_release_cookies(&err_msg, (int32_t *) job->cookie_ids,
-				   (int32_t) job->num_cookies);
-	ALPSC_SN_DEBUG("alpsc_release_cookies");
-	if (rc != 0) {
-		return SLURM_ERROR;
-	}
+    // Release them
+    rc = alpsc_release_cookies(&err_msg, (int32_t *) job->cookie_ids,
+                   (int32_t) job->num_cookies);
+    ALPSC_SN_DEBUG("alpsc_release_cookies");
+    if (rc != 0) {
+        return SLURM_ERROR;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -224,39 +224,39 @@ extern int release_cookies(slurm_cray_jobinfo_t *job)
  */
 static void _add_cookie(int32_t cookie_id)
 {
-	int32_t i;
+    int32_t i;
 
-	// Lock the mutex
-	slurm_mutex_lock(&cookie_id_mutex);
+    // Lock the mutex
+    slurm_mutex_lock(&cookie_id_mutex);
 
-	// If the cookie is already in the list, skip
-	for (i = 0; i < cookie_id_list_size; i++) {
-		if (cookie_id_list[i] == cookie_id) {
-			slurm_mutex_unlock(&cookie_id_mutex);
-			CRAY_INFO("Duplicate cookie %"PRId32" found in tracked"
-				  " cookie list", cookie_id);
-			return;
-		}
-	}
+    // If the cookie is already in the list, skip
+    for (i = 0; i < cookie_id_list_size; i++) {
+        if (cookie_id_list[i] == cookie_id) {
+            slurm_mutex_unlock(&cookie_id_mutex);
+            CRAY_INFO("Duplicate cookie %"PRId32" found in tracked"
+                  " cookie list", cookie_id);
+            return;
+        }
+    }
 
-	// Extend id list if necessary
-	if (cookie_id_list_size + 1 > cookie_id_list_capacity) {
-		if (cookie_id_list_capacity == 0) {
-			cookie_id_list_capacity = 2048;
-		} else {
-			cookie_id_list_capacity *= 2;
-		}
-		cookie_id_list = xrealloc(cookie_id_list,
-					  (cookie_id_list_capacity
-					   * sizeof(int32_t)));
-	}
+    // Extend id list if necessary
+    if (cookie_id_list_size + 1 > cookie_id_list_capacity) {
+        if (cookie_id_list_capacity == 0) {
+            cookie_id_list_capacity = 2048;
+        } else {
+            cookie_id_list_capacity *= 2;
+        }
+        cookie_id_list = xrealloc(cookie_id_list,
+                      (cookie_id_list_capacity
+                       * sizeof(int32_t)));
+    }
 
-	// Set value
-	cookie_id_list[cookie_id_list_size] = cookie_id;
-	cookie_id_list_size++;
+    // Set value
+    cookie_id_list[cookie_id_list_size] = cookie_id;
+    cookie_id_list_size++;
 
-	// Unlock the mutex
-	slurm_mutex_unlock(&cookie_id_mutex);
+    // Unlock the mutex
+    slurm_mutex_unlock(&cookie_id_mutex);
 }
 
 /*
@@ -264,83 +264,83 @@ static void _add_cookie(int32_t cookie_id)
  */
 static void _remove_cookie(int32_t cookie_id)
 {
-	int32_t i;
-	int found = 0;
+    int32_t i;
+    int found = 0;
 
-	// Lock the mutex
-	slurm_mutex_lock(&cookie_id_mutex);
+    // Lock the mutex
+    slurm_mutex_lock(&cookie_id_mutex);
 
-	// Find a match in the list
-	for (i = 0; i < cookie_id_list_size; i++) {
-		if (cookie_id_list[i] == cookie_id) {
-			// Copy the last id to this spot
-			if (i < cookie_id_list_size - 1) {
-				cookie_id_list[i] =
-					cookie_id_list[cookie_id_list_size - 1];
-			}
+    // Find a match in the list
+    for (i = 0; i < cookie_id_list_size; i++) {
+        if (cookie_id_list[i] == cookie_id) {
+            // Copy the last id to this spot
+            if (i < cookie_id_list_size - 1) {
+                cookie_id_list[i] =
+                    cookie_id_list[cookie_id_list_size - 1];
+            }
 
-			found = 1;
-			cookie_id_list_size--;
-			break;
-		}
-	}
-	if (!found) {
-		CRAY_INFO("Cookie %"PRId32" not found in tracked cookie list",
-			  cookie_id);
-	}
+            found = 1;
+            cookie_id_list_size--;
+            break;
+        }
+    }
+    if (!found) {
+        CRAY_INFO("Cookie %"PRId32" not found in tracked cookie list",
+              cookie_id);
+    }
 
-	// Unlock the mutex
-	slurm_mutex_unlock(&cookie_id_mutex);
+    // Unlock the mutex
+    slurm_mutex_unlock(&cookie_id_mutex);
 }
 
 static void *_lease_extender(void *args)
 {
-	int rc;
-	char *err_msg = NULL;
+    int rc;
+    char *err_msg = NULL;
 
-	CRAY_INFO("Leasing cookies for %ds, renewing every %ds",
-		  COOKIE_LEASE_TIME, COOKIE_LEASE_INTERVAL);
+    CRAY_INFO("Leasing cookies for %ds, renewing every %ds",
+          COOKIE_LEASE_TIME, COOKIE_LEASE_INTERVAL);
 
-	lease_extender_running = true;
+    lease_extender_running = true;
 
-	while (lease_extender_running) {
-		// Lock the mutex
-		slurm_mutex_lock(&cookie_id_mutex);
+    while (lease_extender_running) {
+        // Lock the mutex
+        slurm_mutex_lock(&cookie_id_mutex);
 
-		// If there are cookies, extend their leases
-		if (cookie_id_list_size > 0) {
-			// Extend the cookie leases
-			CRAY_INFO("Extending leases for %"PRId32" cookies",
-				  cookie_id_list_size);
+        // If there are cookies, extend their leases
+        if (cookie_id_list_size > 0) {
+            // Extend the cookie leases
+            CRAY_INFO("Extending leases for %"PRId32" cookies",
+                  cookie_id_list_size);
 
-			rc = alpsc_set_cookie_lease(&err_msg, cookie_id_list,
-						    cookie_id_list_size,
-						    COOKIE_LEASE_TIME);
-			ALPSC_SN_DEBUG("alpsc_set_cookie_lease");
+            rc = alpsc_set_cookie_lease(&err_msg, cookie_id_list,
+                            cookie_id_list_size,
+                            COOKIE_LEASE_TIME);
+            ALPSC_SN_DEBUG("alpsc_set_cookie_lease");
 
-			// Just ignore errors, not much we can do about them
-		}
+            // Just ignore errors, not much we can do about them
+        }
 
-		// Unlock the mutex
-		slurm_mutex_unlock(&cookie_id_mutex);
+        // Unlock the mutex
+        slurm_mutex_unlock(&cookie_id_mutex);
 
-		// Wait until we want to extend leases again
-		sleep(COOKIE_LEASE_INTERVAL);
-	}
-	return NULL;
+        // Wait until we want to extend leases again
+        sleep(COOKIE_LEASE_INTERVAL);
+    }
+    return NULL;
 }
 
 static bool _in_slurmctld(void)
 {
-	static bool set = false;
-	static bool run = false;
+    static bool set = false;
+    static bool run = false;
 
-	if (!set) {
-		set = 1;
-		run = run_in_daemon("slurmctld");
-	}
+    if (!set) {
+        set = 1;
+        run = run_in_daemon("slurmctld");
+    }
 
-	return run;
+    return run;
 }
 
 #endif

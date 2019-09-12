@@ -46,35 +46,39 @@
 #include "src/common/macros.h"
 
 /* close all FDs >= a specified value */
-static inline void closeall(int fd)
-{
-	int fdlimit = sysconf(_SC_OPEN_MAX);
+static inline void closeall(int fd) {
+    int fdlimit = sysconf(_SC_OPEN_MAX);
 
-	while (fd < fdlimit)
-		close(fd++);
+    while (fd < fdlimit)
+        close(fd++);
 }
 
 void fd_set_close_on_exec(int fd);
+
 /*
  *  Sets the file descriptor (fd) to be closed on exec().
  */
 
 void fd_set_noclose_on_exec(int fd);
+
 /*
  *  Sets the file descriptor (fd) to NOT be closed on exec().
  */
 
 void fd_set_nonblocking(int fd);
+
 /*
  *  Sets the file descriptor (fd) for non-blocking I/O.
  */
 
 void fd_set_blocking(int fd);
+
 /*
  * Sets the file descriptor (fd) for blocking I/O.
  */
 
 int fd_get_readw_lock(int fd);
+
 /*
  *  Obtain a read lock on the file specified by (fd),
  *    blocking until one becomes available.
@@ -82,18 +86,21 @@ int fd_get_readw_lock(int fd);
  */
 
 int fd_get_write_lock(int fd);
+
 /*
  *  Obtain a write lock on the file specified by (fd).
  *  Returns 0 on success, or -1 if prevented from obtaining the lock.
  */
 
 int fd_release_lock(int fd);
+
 /*
  *  Release a lock held on the file specified by (fd).
  *  Returns 0 on success, or -1 on error.
  */
 
 pid_t fd_is_read_lock_blocked(int fd);
+
 /*
  *  If a lock exists the would block a request for a read-lock
  *    (ie, if a write-lock is already being held on the file),
@@ -101,6 +108,7 @@ pid_t fd_is_read_lock_blocked(int fd);
  */
 
 ssize_t fd_read_line(int fd, void *buf, size_t maxlen);
+
 /*
  *  Reads at most (maxlen-1) bytes up to a newline from (fd) into (buf).
  *  The (buf) is guaranteed to be NUL-terminated and will contain the

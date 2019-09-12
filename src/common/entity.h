@@ -49,27 +49,27 @@
 
 /* definition of the entity itself, main structure of this file. */
 typedef struct entity_st {
-	char* name;     /* unique name of this entity */
-	char* type;     /* basic type of entity */
-	xhash_t* data;  /* data table, stores data items */
-	List nodes;     /* list of nodes where this entity
+    char *name;     /* unique name of this entity */
+    char *type;     /* basic type of entity */
+    xhash_t *data;  /* data table, stores data items */
+    List nodes;     /* list of nodes where this entity
 			   appears */
-	void *ptr;      /* private data for arbitraty ptr */
+    void *ptr;      /* private data for arbitraty ptr */
 } entity_t;
 
 /* definition of the key-value structure used internaly by entities */
 typedef struct entity_data_st {
-	const char* key; /* memory not owned, see layouts_keydef */
-	void* value;
+    const char *key; /* memory not owned, see layouts_keydef */
+    void *value;
 } entity_data_t;
 
 /* definition of the entity node structure used internaly by entities
  * to represent the layout nodes that are linked to them */
 typedef struct entity_node_st {
-	layout_t* layout; /* layout containing a relationnal structure holding
+    layout_t *layout; /* layout containing a relationnal structure holding
 			   * a reference to the entity */
-	entity_t* entity; /* pointer to the associated entity */
-	void* node;       /* pointer to the relational node referencing
+    entity_t *entity; /* pointer to the associated entity */
+    void *node;       /* pointer to the relational node referencing
 			     this entity node */
 } entity_node_t;
 
@@ -84,14 +84,14 @@ typedef struct entity_node_st {
  * IN name - the name of the entity
  * IN type - the type of the entity
  */
-void entity_init(entity_t* entity, const char* name, const char* type);
+void entity_init(entity_t *entity, const char *name, const char *type);
 
 /*
  * entity_free - free entity internals
  *
  * IN entity - the entity struct to fee internals from
  */
-void entity_free(entity_t* entity);
+void entity_free(entity_t *entity);
 
 /*
  * entity_get_name - get the name of an entity
@@ -100,7 +100,7 @@ void entity_free(entity_t* entity);
  *
  * Return value is the name of the entity
  */
-const char* entity_get_name(const entity_t* entity);
+const char *entity_get_name(const entity_t *entity);
 
 /*
  * entity_get_type - get the type of an entity
@@ -109,7 +109,7 @@ const char* entity_get_name(const entity_t* entity);
  *
  * Return value is the type of the entity
  */
-const char* entity_get_type(const entity_t* entity);
+const char *entity_get_type(const entity_t *entity);
 
 /*
  * entity_get_data - copy the content of the data associated to a particular key
@@ -122,8 +122,8 @@ const char* entity_get_type(const entity_t* entity);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR if no element found
  */
-int entity_get_data(const entity_t* entity, const char* key,
-		    void* value, size_t size);
+int entity_get_data(const entity_t *entity, const char *key,
+                    void *value, size_t size);
 
 /*
  * entity_get_data_ref - get the address of the pointer to the data associated
@@ -135,7 +135,7 @@ int entity_get_data(const entity_t* entity, const char* key,
  * Return value is the address of the (void*) pointer to the data associated to
  *       the key or NULL in case of error
  */
-void* entity_get_data_ref(const entity_t* entity, const char* key);
+void *entity_get_data_ref(const entity_t *entity, const char *key);
 
 /*
  * entity_set_data - copy the content of the input buffer up to the requested
@@ -150,8 +150,8 @@ void* entity_get_data_ref(const entity_t* entity, const char* key);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR if no element found
  */
-int entity_set_data(const entity_t* entity, const char* key,
-		    void* value, size_t size);
+int entity_set_data(const entity_t *entity, const char *key,
+                    void *value, size_t size);
 
 /*
  * entity_set_data_ref - associate a particular key of an entity with the
@@ -167,8 +167,8 @@ int entity_set_data(const entity_t* entity, const char* key,
  *
  * Return SLURM_SUCCESS or SLURM_ERROR in case of error
  */
-int entity_set_data_ref(const entity_t* entity, const char* key, void* value,
-			void (*_free)(void*));
+int entity_set_data_ref(const entity_t *entity, const char *key, void *value,
+                        void (*_free)(void *));
 
 /*
  * entity_delete_data - delete the data associated with a particular key
@@ -177,7 +177,7 @@ int entity_set_data_ref(const entity_t* entity, const char* key, void* value,
  * IN entity - the entity struct to use
  * IN key - the key the data must be deleted from
  */
-void entity_delete_data(entity_t* entity, const char* key);
+void entity_delete_data(entity_t *entity, const char *key);
 
 /*
  * entity_clear_data - removes all the entity key/value pairs
@@ -187,7 +187,7 @@ void entity_delete_data(entity_t* entity, const char* key);
  * Notes: does not free value, user is responsible for it, if the data_freefunc
  *       is null.
  */
-void entity_clear_data(entity_t* entity);
+void entity_clear_data(entity_t *entity);
 
 /*
  * entity_add_node - add a per layout entity node to the list of nodes referring
@@ -201,7 +201,7 @@ void entity_clear_data(entity_t* entity);
  *          be associated to the underlying relational node afterwards.
  *        - the entity node will not own the memory of the relationnal node.
  */
-entity_node_t* entity_add_node(entity_t* entity, layout_t* layout);
+entity_node_t *entity_add_node(entity_t *entity, layout_t *layout);
 
 /*
  * entity_get_node - get the entity node referring to a particular layout in
@@ -212,7 +212,7 @@ entity_node_t* entity_add_node(entity_t* entity, layout_t* layout);
  *
  * Return value is the entity node of the layout or NULL if not found
  */
-entity_node_t* entity_get_node(entity_t* entity, layout_t* layout);
+entity_node_t *entity_get_node(entity_t *entity, layout_t *layout);
 
 /*
  * entity_delete_node - remove the entity node referring to a particular layout
@@ -223,7 +223,7 @@ entity_node_t* entity_get_node(entity_t* entity, layout_t* layout);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR
  */
-int entity_delete_node(entity_t* entity, layout_t* layout);
+int entity_delete_node(entity_t *entity, layout_t *layout);
 
 /*
  * entity_clear_nodes - remove all the entity node associated to an entity
@@ -232,7 +232,7 @@ int entity_delete_node(entity_t* entity, layout_t* layout);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR
  */
-int entity_clear_nodes(entity_t* entity);
+int entity_clear_nodes(entity_t *entity);
 
 /*
  * entity_nodes_walk - iterate over the nodes referring to this entity
@@ -246,9 +246,9 @@ int entity_clear_nodes(entity_t* entity);
  *       and the third one will be the arg passed to the function.
  * IN arg - the arg to pass to the callback function for every node.
  */
-void entity_nodes_walk(entity_t* entity,
-		       void (*callback)(layout_t*, entity_node_t*, void*),
-		       void* arg);
+void entity_nodes_walk(entity_t *entity,
+                       void (*callback)(layout_t *, entity_node_t *, void *),
+                       void *arg);
 
 /*
  * entity_hashable_identify - defines a hashable identifying function to
@@ -256,6 +256,6 @@ void entity_nodes_walk(entity_t* entity,
  *
  * Note: it currently just returns the name of the entity
  */
-void entity_hashable_identify(void* item, const char** key, uint32_t* key_len);
+void entity_hashable_identify(void *item, const char **key, uint32_t *key_len);
 
 #endif /* end of include guard: __ENTITY_GDBZJYZL_INC__ */

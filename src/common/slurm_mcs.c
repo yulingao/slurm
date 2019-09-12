@@ -40,16 +40,17 @@
 #include "src/common/xstring.h"
 
 typedef struct slurm_mcs_ops {
-	int (*set)		(struct job_record *job_ptr,char *label);
-	int (*check)		(uint32_t user_id, char *mcs_label);
+    int (*set)(struct job_record *job_ptr, char *label);
+
+    int (*check)(uint32_t user_id, char *mcs_label);
 } slurm_mcs_ops_t;
 
 /*
  * Must be synchronized with slurm_mcs_ops_t above.
  */
 static const char *syms[] = {
-	"mcs_p_set_mcs_label",
-	"mcs_p_check_mcs_label"
+        "mcs_p_set_mcs_label",
+        "mcs_p_check_mcs_label"
 };
 
 static slurm_mcs_ops_t ops;
@@ -64,186 +65,175 @@ static char *mcs_params_common = NULL;
 static char *mcs_params_specific = NULL;
 
 static int _slurm_mcs_check_and_load_enforced(char *params);
+
 static int _slurm_mcs_check_and_load_select(char *params);
+
 static int _slurm_mcs_check_and_load_privatedata(char *params);
 
 /*
  * Initialize context for mcs plugin
  */
-extern int slurm_mcs_init(void)
-{
-	int retval = SLURM_SUCCESS;
-	char *plugin_type = "mcs";
-	char *type = NULL;
-	char *sep;
+extern int slurm_mcs_init(void) {
+    int retval = SLURM_SUCCESS;
+    char *plugin_type = "mcs";
+    char *type = NULL;
+    char *sep;
 
-	if (init_run && g_mcs_context)
-		return retval;
+    if (init_run && g_mcs_context)
+        return retval;
 
-	slurm_mutex_lock(&g_mcs_context_lock);
-	if (g_mcs_context)
-		goto done;
+    slurm_mutex_lock(&g_mcs_context_lock);
+    if (g_mcs_context)
+        goto done;
 
-	xfree(mcs_params);
-	xfree(mcs_params_common);
-	xfree(mcs_params_specific);
-	type = slurm_get_mcs_plugin();
-	mcs_params = slurm_get_mcs_plugin_params();
+    xfree(mcs_params);
+    xfree(mcs_params_common);
+    xfree(mcs_params_specific);
+    type = slurm_get_mcs_plugin();
+    mcs_params = slurm_get_mcs_plugin_params();
 
-	if (mcs_params == NULL)
-		info("No parameter for mcs plugin, default values set");
-	else {
-		mcs_params_common = xstrdup(mcs_params);
-		sep = xstrchr(mcs_params_common, ':');
-		if (sep != NULL) {
-			if (sep[1] != '\0')
-				mcs_params_specific = xstrdup(sep + 1);
-			*sep = '\0';
-		}
-	}
+    if (mcs_params == NULL)
+        info("No parameter for mcs plugin, default values set");
+    else {
+        mcs_params_common = xstrdup(mcs_params);
+        sep = xstrchr(mcs_params_common, ':');
+        if (sep != NULL) {
+            if (sep[1] != '\0')
+                mcs_params_specific = xstrdup(sep + 1);
+            *sep = '\0';
+        }
+    }
 
-	_slurm_mcs_check_and_load_privatedata(mcs_params_common);
-	_slurm_mcs_check_and_load_enforced(mcs_params_common);
-	_slurm_mcs_check_and_load_select(mcs_params_common);
+    _slurm_mcs_check_and_load_privatedata(mcs_params_common);
+    _slurm_mcs_check_and_load_enforced(mcs_params_common);
+    _slurm_mcs_check_and_load_select(mcs_params_common);
 
-	g_mcs_context = plugin_context_create(
-		plugin_type, type, (void **)&ops, syms, sizeof(syms));
+    g_mcs_context = plugin_context_create(
+            plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
-	if (!g_mcs_context) {
-		error("cannot create %s context for %s", plugin_type, type);
-		retval = SLURM_ERROR;
-		goto done;
-	}
+    if (!g_mcs_context) {
+        error("cannot create %s context for %s", plugin_type, type);
+        retval = SLURM_ERROR;
+        goto done;
+    }
 
-	init_run = true;
-done:
-	slurm_mutex_unlock(&g_mcs_context_lock);
-	xfree(type);
-	return retval;
+    init_run = true;
+    done:
+    slurm_mutex_unlock(&g_mcs_context_lock);
+    xfree(type);
+    return retval;
 }
 
-extern int slurm_mcs_fini(void)
-{
-	int rc = SLURM_SUCCESS;
+extern int slurm_mcs_fini(void) {
+    int rc = SLURM_SUCCESS;
 
-	if (!g_mcs_context)
-		return rc;
+    if (!g_mcs_context)
+        return rc;
 
-	init_run = false;
-	rc = plugin_context_destroy(g_mcs_context);
-	g_mcs_context = NULL;
-	xfree(mcs_params_common);
-	xfree(mcs_params_specific);
-	xfree(mcs_params);
-	return rc;
+    init_run = false;
+    rc = plugin_context_destroy(g_mcs_context);
+    g_mcs_context = NULL;
+    xfree(mcs_params_common);
+    xfree(mcs_params_specific);
+    xfree(mcs_params);
+    return rc;
 }
 
-extern int slurm_mcs_reconfig(void)
-{
-	slurm_mcs_fini();
-	return slurm_mcs_init();
+extern int slurm_mcs_reconfig(void) {
+    slurm_mcs_fini();
+    return slurm_mcs_init();
 }
 
 /* slurm_mcs_get_params_specific
  * RET mcs_params_common_spec, must be xfreed by caller
  */
 
-extern char *slurm_mcs_get_params_specific(void)
-{
-	char *mcs_params_common_spec = NULL;
-	mcs_params_common_spec = xstrdup(mcs_params_specific);
-	return mcs_params_common_spec;
+extern char *slurm_mcs_get_params_specific(void) {
+    char *mcs_params_common_spec = NULL;
+    mcs_params_common_spec = xstrdup(mcs_params_specific);
+    return mcs_params_common_spec;
 }
 
-static int _slurm_mcs_check_and_load_enforced(char *params)
-{
-	label_strict_enforced = false;
+static int _slurm_mcs_check_and_load_enforced(char *params) {
+    label_strict_enforced = false;
 
-	if ((params != NULL) && xstrcasestr(params, "enforced"))
-		label_strict_enforced = true;
-	else
-		info("mcs: MCSParameters = %s. ondemand set.", params);
+    if ((params != NULL) && xstrcasestr(params, "enforced"))
+        label_strict_enforced = true;
+    else
+        info("mcs: MCSParameters = %s. ondemand set.", params);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-static int _slurm_mcs_check_and_load_select(char *params)
-{
-	select_value = MCS_SELECT_ONDEMANDSELECT;
+static int _slurm_mcs_check_and_load_select(char *params) {
+    select_value = MCS_SELECT_ONDEMANDSELECT;
 
-	if (params == NULL) {
-		return SLURM_SUCCESS;
-	}
+    if (params == NULL) {
+        return SLURM_SUCCESS;
+    }
 
-	if (xstrcasestr(params, "noselect"))
-		select_value = MCS_SELECT_NOSELECT;
-	else if (xstrcasestr(params, "ondemandselect"))
-		select_value = MCS_SELECT_ONDEMANDSELECT;
-	else if (xstrcasestr(params, "select"))
-		select_value = MCS_SELECT_SELECT;
-	else
-		info("mcs: MCSParameters = %s. ondemandselect set.", params);
+    if (xstrcasestr(params, "noselect"))
+        select_value = MCS_SELECT_NOSELECT;
+    else if (xstrcasestr(params, "ondemandselect"))
+        select_value = MCS_SELECT_ONDEMANDSELECT;
+    else if (xstrcasestr(params, "select"))
+        select_value = MCS_SELECT_SELECT;
+    else
+        info("mcs: MCSParameters = %s. ondemandselect set.", params);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-static int _slurm_mcs_check_and_load_privatedata(char *params)
-{
-	if (params == NULL) {
-		private_data = false;
-		return SLURM_SUCCESS;
-	}
+static int _slurm_mcs_check_and_load_privatedata(char *params) {
+    if (params == NULL) {
+        private_data = false;
+        return SLURM_SUCCESS;
+    }
 
-	if (xstrcasestr(params, "privatedata"))
-		private_data = true;
-	else
-		private_data = false;
+    if (xstrcasestr(params, "privatedata"))
+        private_data = true;
+    else
+        private_data = false;
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int slurm_mcs_reset_params(void)
-{
-	label_strict_enforced = false;
-	select_value = MCS_SELECT_ONDEMANDSELECT;
-	private_data = false;
+extern int slurm_mcs_reset_params(void) {
+    label_strict_enforced = false;
+    select_value = MCS_SELECT_ONDEMANDSELECT;
+    private_data = false;
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int slurm_mcs_get_enforced(void)
-{
-	return label_strict_enforced;
+extern int slurm_mcs_get_enforced(void) {
+    return label_strict_enforced;
 }
 
-extern int slurm_mcs_get_select(struct job_record *job_ptr)
-{
-	if ((select_value == MCS_SELECT_SELECT) ||
-	    ((select_value == MCS_SELECT_ONDEMANDSELECT) &&
-	    job_ptr->details &&
-	    (job_ptr->details->whole_node == WHOLE_NODE_MCS)))
-		return 1;
-	else
-		return 0;
+extern int slurm_mcs_get_select(struct job_record *job_ptr) {
+    if ((select_value == MCS_SELECT_SELECT) ||
+        ((select_value == MCS_SELECT_ONDEMANDSELECT) &&
+         job_ptr->details &&
+         (job_ptr->details->whole_node == WHOLE_NODE_MCS)))
+        return 1;
+    else
+        return 0;
 }
 
-extern int slurm_mcs_get_privatedata(void)
-{
-	return private_data;
+extern int slurm_mcs_get_privatedata(void) {
+    return private_data;
 }
 
-extern int mcs_g_set_mcs_label(struct job_record *job_ptr, char *label)
-{
-	if (slurm_mcs_init() < 0)
-		return 0;
+extern int mcs_g_set_mcs_label(struct job_record *job_ptr, char *label) {
+    if (slurm_mcs_init() < 0)
+        return 0;
 
-	return (int) (*(ops.set))(job_ptr, label);
+    return (int) (*(ops.set))(job_ptr, label);
 }
 
-extern int mcs_g_check_mcs_label(uint32_t user_id, char *mcs_label)
-{
-	if (slurm_mcs_init() < 0)
-		return 0;
+extern int mcs_g_check_mcs_label(uint32_t user_id, char *mcs_label) {
+    if (slurm_mcs_init() < 0)
+        return 0;
 
-	return (int)(*(ops.check))(user_id, mcs_label);
+    return (int) (*(ops.check))(user_id, mcs_label);
 }

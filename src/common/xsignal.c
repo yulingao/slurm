@@ -50,39 +50,43 @@
  * Define slurm-specific aliases for use by plugins, see slurm_xlator.h
  * for details.
  */
-strong_alias(xsignal, slurm_xsignal);
-strong_alias(xsignal_save_mask, slurm_xsignal_save_mask);
-strong_alias(xsignal_set_mask, slurm_xsignal_set_mask);
-strong_alias(xsignal_block, slurm_xsignal_block);
-strong_alias(xsignal_unblock, slurm_xsignal_unblock);
-strong_alias(xsignal_sigset_create, slurm_xsignal_sigset_create);
+strong_alias(xsignal, slurm_xsignal
+);
+strong_alias(xsignal_save_mask, slurm_xsignal_save_mask
+);
+strong_alias(xsignal_set_mask, slurm_xsignal_set_mask
+);
+strong_alias(xsignal_block, slurm_xsignal_block
+);
+strong_alias(xsignal_unblock, slurm_xsignal_unblock
+);
+strong_alias(xsignal_sigset_create, slurm_xsignal_sigset_create
+);
 
 SigFunc *
-xsignal(int signo, SigFunc *f)
-{
-	struct sigaction sa, old_sa;
+xsignal(int signo, SigFunc *f) {
+    struct sigaction sa, old_sa;
 
-	sa.sa_handler = f;
-	sigemptyset(&sa.sa_mask);
-	sigaddset(&sa.sa_mask, signo);
-	sa.sa_flags = 0;
-	if (sigaction(signo, &sa, &old_sa) < 0)
-		error("xsignal(%d) failed: %m", signo);
-	return (old_sa.sa_handler);
+    sa.sa_handler = f;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, signo);
+    sa.sa_flags = 0;
+    if (sigaction(signo, &sa, &old_sa) < 0)
+        error("xsignal(%d) failed: %m", signo);
+    return (old_sa.sa_handler);
 }
 
 /*
  *  Wrapper for pthread_sigmask.
  */
 static int
-_sigmask(int how, sigset_t *set, sigset_t *oset)
-{
-	int err;
+_sigmask(int how, sigset_t *set, sigset_t *oset) {
+    int err;
 
-	if ((err = pthread_sigmask(how, set, oset)))
-		return error("pthread_sigmask: %s", slurm_strerror(err));
+    if ((err = pthread_sigmask(how, set, oset)))
+        return error("pthread_sigmask: %s", slurm_strerror(err));
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
@@ -91,31 +95,27 @@ _sigmask(int how, sigset_t *set, sigset_t *oset)
  * 
  * 用信号“sigarray”(零终止)数组中的信号列表填充sigset_t。
  */
-int xsignal_sigset_create(int sigarray[], sigset_t *setp)
-{
-	int i = 0, sig;
+int xsignal_sigset_create(int sigarray[], sigset_t *setp) {
+    int i = 0, sig;
 
-	if (sigemptyset(setp) < 0)
-		error("sigemptyset: %m");
+    if (sigemptyset(setp) < 0)
+        error("sigemptyset: %m");
 
-	while ((sig = sigarray[i++]))
-	{
-		if (sigaddset(setp, sig) < 0)
-			return error("sigaddset(%d): %m", sig);
-	}
+    while ((sig = sigarray[i++])) {
+        if (sigaddset(setp, sig) < 0)
+            return error("sigaddset(%d): %m", sig);
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-int xsignal_save_mask(sigset_t *set)
-{
-	sigemptyset(set);
-	return _sigmask(SIG_SETMASK, NULL, set);
+int xsignal_save_mask(sigset_t *set) {
+    sigemptyset(set);
+    return _sigmask(SIG_SETMASK, NULL, set);
 }
 
-int xsignal_set_mask(sigset_t *set)
-{
-	return _sigmask(SIG_SETMASK, set, NULL);
+int xsignal_set_mask(sigset_t *set) {
+    return _sigmask(SIG_SETMASK, set, NULL);
 }
 
 /* 
@@ -126,26 +126,24 @@ sigarray是一个零终止的信号数数组，
 
 返回SLURM_SUCCESS或SLURM_ERROR。
  */
-int xsignal_block(int sigarray[])
-{
-	sigset_t set;
+int xsignal_block(int sigarray[]) {
+    sigset_t set;
 
-	xassert(sigarray != NULL);
+    xassert(sigarray != NULL);
 
-	if (xsignal_sigset_create(sigarray, &set) < 0)
-		return SLURM_ERROR;
+    if (xsignal_sigset_create(sigarray, &set) < 0)
+        return SLURM_ERROR;
 
-	return _sigmask(SIG_BLOCK, &set, NULL);
+    return _sigmask(SIG_BLOCK, &set, NULL);
 }
 
-int xsignal_unblock(int sigarray[])
-{
-	sigset_t set;
+int xsignal_unblock(int sigarray[]) {
+    sigset_t set;
 
-	xassert(sigarray != NULL);
+    xassert(sigarray != NULL);
 
-	if (xsignal_sigset_create(sigarray, &set) < 0)
-		return SLURM_ERROR;
+    if (xsignal_sigset_create(sigarray, &set) < 0)
+        return SLURM_ERROR;
 
-	return _sigmask(SIG_UNBLOCK, &set, NULL);
+    return _sigmask(SIG_UNBLOCK, &set, NULL);
 }

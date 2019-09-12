@@ -52,17 +52,17 @@
 #include "src/common/xstring.h"
 #include "src/slurmctld/slurmctld_plugstack.h"
 
-slurm_nonstop_ops_t nonstop_ops = { NULL, NULL, NULL };
+slurm_nonstop_ops_t nonstop_ops = {NULL, NULL, NULL};
 
 typedef struct slurmctld_plugstack_ops {
-	void	(*get_config)	(config_plugin_params_t *p);
+    void (*get_config)(config_plugin_params_t *p);
 } slurmctld_plugstack_ops_t;
 
 /*
  * Must be synchronized with slurmctld_plugstack_t above.
  */
 static const char *syms[] = {
-	"slurmctld_plugstack_p_get_config"
+        "slurmctld_plugstack_p_get_config"
 };
 
 static int g_context_cnt = -1;
@@ -77,59 +77,58 @@ static bool init_run = false;
  *
  * Returns a Slurm errno.
  */
-extern int slurmctld_plugstack_init(void)
-{
-	int rc = SLURM_SUCCESS;
-	char *last = NULL, *names;
-	char *plugin_type = "slurmctld_plugstack";
-	char *type;
+extern int slurmctld_plugstack_init(void) {
+    int rc = SLURM_SUCCESS;
+    char *last = NULL, *names;
+    char *plugin_type = "slurmctld_plugstack";
+    char *type;
 
-	if (init_run && (g_context_cnt >= 0))
-		return rc;
+    if (init_run && (g_context_cnt >= 0))
+        return rc;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt >= 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt >= 0)
+        goto fini;
 
-	slurmctld_plugstack_list = slurm_get_slurmctld_plugstack();
-	g_context_cnt = 0;
-	if ((slurmctld_plugstack_list == NULL) ||
-	    (slurmctld_plugstack_list[0] == '\0'))
-		goto fini;
+    slurmctld_plugstack_list = slurm_get_slurmctld_plugstack();
+    g_context_cnt = 0;
+    if ((slurmctld_plugstack_list == NULL) ||
+        (slurmctld_plugstack_list[0] == '\0'))
+        goto fini;
 
-	names = slurmctld_plugstack_list;
-	while ((type = strtok_r(names, ",", &last))) {
-		xrealloc(ops, (sizeof(slurmctld_plugstack_ops_t) *
-			      (g_context_cnt + 1)));
-		xrealloc(g_context,
-			 (sizeof(plugin_context_t *) * (g_context_cnt + 1)));
-		if (xstrncmp(type, "slurmctld/", 10) == 0)
-			type += 10; /* backward compatibility */
-		type = xstrdup_printf("slurmctld/%s", type);
-		g_context[g_context_cnt] = plugin_context_create(
-			plugin_type, type, (void **)&ops[g_context_cnt],
-			syms, sizeof(syms));
-		if (!g_context[g_context_cnt]) {
-			error("cannot create %s context for %s",
-			      plugin_type, type);
-			rc = SLURM_ERROR;
-			xfree(type);
-			break;
-		}
+    names = slurmctld_plugstack_list;
+    while ((type = strtok_r(names, ",", &last))) {
+        xrealloc(ops, (sizeof(slurmctld_plugstack_ops_t) *
+                       (g_context_cnt + 1)));
+        xrealloc(g_context,
+                 (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
+        if (xstrncmp(type, "slurmctld/", 10) == 0)
+            type += 10; /* backward compatibility */
+        type = xstrdup_printf("slurmctld/%s", type);
+        g_context[g_context_cnt] = plugin_context_create(
+                plugin_type, type, (void **) &ops[g_context_cnt],
+                syms, sizeof(syms));
+        if (!g_context[g_context_cnt]) {
+            error("cannot create %s context for %s",
+                  plugin_type, type);
+            rc = SLURM_ERROR;
+            xfree(type);
+            break;
+        }
 
-		xfree(type);
-		g_context_cnt++;
-		names = NULL; /* for next iteration */
-	}
-	init_run = true;
+        xfree(type);
+        g_context_cnt++;
+        names = NULL; /* for next iteration */
+    }
+    init_run = true;
 
-fini:
-	slurm_mutex_unlock(&g_context_lock);
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
 
-	if (rc != SLURM_SUCCESS)
-		slurmctld_plugstack_fini();
+    if (rc != SLURM_SUCCESS)
+        slurmctld_plugstack_fini();
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -137,29 +136,29 @@ fini:
  *
  * Returns a Slurm errno.
  */
-extern int slurmctld_plugstack_fini(void)
-{
-	int i, j, rc = SLURM_SUCCESS;
+extern int slurmctld_plugstack_fini(void) {
+    int i, j, rc = SLURM_SUCCESS;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt < 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt < 0)
+        goto fini;
 
-	init_run = false;
-	for (i=0; i<g_context_cnt; i++) {
-		if (g_context[i]) {
-			j = plugin_context_destroy(g_context[i]);
-			if (j != SLURM_SUCCESS)
-				rc = j;
-		}
-	}
-	xfree(ops);
-	xfree(g_context);
-	xfree(slurmctld_plugstack_list);
-	g_context_cnt = -1;
+    init_run = false;
+    for (i = 0; i < g_context_cnt; i++) {
+        if (g_context[i]) {
+            j = plugin_context_destroy(g_context[i]);
+            if (j != SLURM_SUCCESS)
+                rc = j;
+        }
+    }
+    xfree(ops);
+    xfree(g_context);
+    xfree(slurmctld_plugstack_list);
+    g_context_cnt = -1;
 
-fini:	slurm_mutex_unlock(&g_context_lock);
-	return rc;
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
+    return rc;
 }
 
 /*
@@ -169,34 +168,33 @@ fini:	slurm_mutex_unlock(&g_context_lock);
  * - List of key,pairs
  * Returns List or NULL.
  */
-extern List slurmctld_plugstack_g_get_config(void)
-{
-	DEF_TIMERS;
-	int i, rc;
-	List conf_list = NULL;
-	config_plugin_params_t *p;
+extern List slurmctld_plugstack_g_get_config(void) {
+    DEF_TIMERS;
+    int i, rc;
+    List conf_list = NULL;
+    config_plugin_params_t *p;
 
-	START_TIMER;
-	rc = slurmctld_plugstack_init();
+    START_TIMER;
+    rc = slurmctld_plugstack_init();
 
-	if (g_context_cnt > 0)
-		conf_list = list_create(destroy_config_plugin_params);
+    if (g_context_cnt > 0)
+        conf_list = list_create(destroy_config_plugin_params);
 
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++) {
-		p = xmalloc(sizeof(config_plugin_params_t));
-		p->key_pairs = list_create(destroy_config_key_pair);
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; ((i < g_context_cnt) && (rc == SLURM_SUCCESS)); i++) {
+        p = xmalloc(sizeof(config_plugin_params_t));
+        p->key_pairs = list_create(destroy_config_key_pair);
 
-		(*(ops[i].get_config))(p);
+        (*(ops[i].get_config))(p);
 
-		if (!p->name)
-			destroy_config_plugin_params(p);
-		else
-			list_append(conf_list, p);
-	}
-	slurm_mutex_unlock(&g_context_lock);
+        if (!p->name)
+            destroy_config_plugin_params(p);
+        else
+            list_append(conf_list, p);
+    }
+    slurm_mutex_unlock(&g_context_lock);
 
-	END_TIMER2("slurmctld_plugstack_g_get_config");
+    END_TIMER2("slurmctld_plugstack_g_get_config");
 
-	return conf_list;
+    return conf_list;
 }

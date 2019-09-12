@@ -66,58 +66,50 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[]        = "job_container none plugin";
-const char plugin_type[]        = "job_container/none";
-const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
+const char plugin_name[] = "job_container none plugin";
+const char plugin_type[] = "job_container/none";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
-extern void container_p_reconfig(void)
-{
-	return;
+extern void container_p_reconfig(void) {
+    return;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	debug("%s loaded", plugin_name);
+extern int init(void) {
+    debug("%s loaded", plugin_name);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int container_p_restore(char *dir_name, bool recover)
-{
-	return SLURM_SUCCESS;
+extern int container_p_restore(char *dir_name, bool recover) {
+    return SLURM_SUCCESS;
 }
 
-extern int container_p_create(uint32_t job_id)
-{
-	return SLURM_SUCCESS;
+extern int container_p_create(uint32_t job_id) {
+    return SLURM_SUCCESS;
 }
 
 /* Add proctrack container (PAGG) to a job container */
-extern int container_p_add_cont(uint32_t job_id, uint64_t cont_id)
-{
-	return SLURM_SUCCESS;
+extern int container_p_add_cont(uint32_t job_id, uint64_t cont_id) {
+    return SLURM_SUCCESS;
 }
 
 /* Add a process to a job container, create the proctrack container to add */
-extern int container_p_join(uint32_t job_id, uid_t uid)
-{
-	return SLURM_SUCCESS;
+extern int container_p_join(uint32_t job_id, uid_t uid) {
+    return SLURM_SUCCESS;
 }
 
-extern int container_p_delete(uint32_t job_id)
-{
-	return SLURM_SUCCESS;
+extern int container_p_delete(uint32_t job_id) {
+    return SLURM_SUCCESS;
 }

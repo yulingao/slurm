@@ -49,15 +49,21 @@ extern int children_to_wait;
 extern int kvs_seq;
 extern int waiting_kvs_resp;
 
-extern int   temp_kvs_init(void);
-extern int   temp_kvs_add(char *key, char *val);
-extern int   temp_kvs_merge(Buf buf);
-extern int   temp_kvs_send(void);
+extern int temp_kvs_init(void);
 
-extern int   kvs_init(void);
+extern int temp_kvs_add(char *key, char *val);
+
+extern int temp_kvs_merge(Buf buf);
+
+extern int temp_kvs_send(void);
+
+extern int kvs_init(void);
+
 extern char *kvs_get(char *key);
-extern int   kvs_put(char *key, char *val);
-extern int   kvs_clear(void);
+
+extern int kvs_put(char *key, char *val);
+
+extern int kvs_clear(void);
 
 
-#endif	/* _KVS_H */
+#endif    /* _KVS_H */

@@ -135,9 +135,9 @@ cpu_freq_verify_def(const char *arg, uint32_t *freq);
  */
 extern int
 cpu_freq_verify_cmdline(const char *arg,
-		uint32_t *cpu_freq_min,
-		uint32_t *cpu_freq_max,
-		uint32_t *cpu_freq_gov);
+                        uint32_t *cpu_freq_min,
+                        uint32_t *cpu_freq_max,
+                        uint32_t *cpu_freq_gov);
 
 /* Convert a composite cpu governor enum to its equivalent string
  *
@@ -146,7 +146,7 @@ cpu_freq_verify_cmdline(const char *arg,
  *         - gpvs  - composite enum of governors
  */
 extern void
-cpu_freq_govlist_to_string(char* buf, uint16_t bufsz, uint32_t govs);
+cpu_freq_govlist_to_string(char *buf, uint16_t bufsz, uint32_t govs);
 
 /*
  * Return an xmalloc()'d string representing the original input to --cpu-freq.
@@ -157,7 +157,7 @@ extern char *cpu_freq_to_cmdline(uint32_t min, uint32_t max, uint32_t gov);
  * Set environment variables associated with the frequency variables.
  */
 extern int
-cpu_freq_set_env(char* var, uint32_t min, uint32_t max, uint32_t gov);
+cpu_freq_set_env(char *var, uint32_t min, uint32_t max, uint32_t gov);
 
 /* Convert a cpu_freq number to its equivalent string */
 extern void
@@ -190,7 +190,7 @@ cpu_freq_reset(stepd_step_rec_t *job);
  * Returns 0 if all parameters are NO_VAL (or 0)
  */
 extern int
-cpu_freq_debug(char* label, char* noval_str, char* freq_str, int freq_len,
-		  uint32_t gov, uint32_t min, uint32_t max, uint32_t freq);
+cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len,
+               uint32_t gov, uint32_t min, uint32_t max, uint32_t freq);
 
 #endif /* _CPU_FREQUENCY_H_ */

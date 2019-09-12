@@ -72,16 +72,16 @@
  */
 
 typedef enum layouts_keydef_types_en {
-	L_T_ERROR = 0,
-	L_T_STRING,
-	L_T_LONG,
-	L_T_UINT16,
-	L_T_UINT32,
-	L_T_BOOLEAN,
-	L_T_FLOAT,
-	L_T_DOUBLE,
-	L_T_LONG_DOUBLE,
-	L_T_CUSTOM,
+    L_T_ERROR = 0,
+    L_T_STRING,
+    L_T_LONG,
+    L_T_UINT16,
+    L_T_UINT32,
+    L_T_BOOLEAN,
+    L_T_FLOAT,
+    L_T_DOUBLE,
+    L_T_LONG_DOUBLE,
+    L_T_CUSTOM,
 } layouts_keydef_types_t;
 
 /* keyspec flags */
@@ -102,23 +102,24 @@ typedef enum layouts_keydef_types_en {
 #define KEYSPEC_UPDATE_PARENTS_MASK   0xFF000000
 
 typedef struct layouts_keyspec_st {
-	char*			key;
-	layouts_keydef_types_t	type;
-	uint32_t                flags;
-	char*			ref_key; /* reference key to use for update
+    char *key;
+    layouts_keydef_types_t type;
+    uint32_t flags;
+    char *ref_key; /* reference key to use for update
 					  * NULL means use the same key in my
 					  * neighborhood */
-	void			(*custom_destroy)(void*);
-	char*			(*custom_dump)(void*);
+    void (*custom_destroy)(void *);
+
+    char *(*custom_dump)(void *);
 } layouts_keyspec_t;
 
 typedef struct layouts_plugin_spec_st {
-	const s_p_options_t*		options;
-	const layouts_keyspec_t*	keyspec;
-	int				struct_type;
-	const char**			etypes;
-	bool				automerge;
-	bool				autoupdate;
+    const s_p_options_t *options;
+    const layouts_keyspec_t *keyspec;
+    int struct_type;
+    const char **etypes;
+    bool automerge;
+    bool autoupdate;
 } layouts_plugin_spec_t;
 
 /*****************************************************************************\
@@ -170,14 +171,14 @@ int layouts_load_config(int recover);
  *
  * Return a pointer to the layout_t struct of the layout or NULL if not found
  */
-layout_t* layouts_get_layout(const char* type);
+layout_t *layouts_get_layout(const char *type);
 
 /*
  * layouts_get_entity - return the entity from a given name
  *
  * Return a pointer to the entity_t struct of the entity or NULL if not found
  */
-entity_t* layouts_get_entity(const char* name);
+entity_t *layouts_get_entity(const char *name);
 
 /*
  * layouts_pack_layout - pack the layout of the target type into the provided
@@ -189,7 +190,7 @@ entity_t* layouts_get_entity(const char* name);
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
 int layouts_pack_layout(char *l_type, char *entities, char *type,
-			uint32_t flags, Buf buffer);
+                        uint32_t flags, Buf buffer);
 
 /*
  * layouts_update_layout - update a particular layout loading the information
@@ -216,7 +217,7 @@ int layouts_update_layout(char *l_type, Buf buffer);
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_state_save_layout(char* l_type);
+int layouts_state_save_layout(char *l_type);
 
 /*
  * layouts_state_save - save the state of all the loaded layouts iterating
@@ -235,8 +236,8 @@ int layouts_state_save(void);
  *
  * Return the requested type or SLURM_ERROR in case of failure
  */
-int layouts_entity_get_kv_type(char* layout, char* entity,
-			       char* key);
+int layouts_entity_get_kv_type(char *layout, char *entity,
+                               char *key);
 
 /*
  * layouts_entity_get_kv_flags - get the keyspec flags associated with the
@@ -244,8 +245,8 @@ int layouts_entity_get_kv_type(char* layout, char* entity,
  *
  * Return the associated flags or SLURM_ERROR in case of failure
  */
-int layouts_entity_get_kv_flags(char* layout, char* entity,
-				char* key);
+int layouts_entity_get_kv_flags(char *layout, char *entity,
+                                char *key);
 
 /*
  * layouts_entity_push_kv - update the layout internal states to take into
@@ -261,8 +262,8 @@ int layouts_entity_get_kv_flags(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_push_kv(char* layout, char* entity,
-			   char* key);
+int layouts_entity_push_kv(char *layout, char *entity,
+                           char *key);
 
 /*
  * layouts_entity_pull_kv - synchronize the targeted key/value pair based on
@@ -277,8 +278,8 @@ int layouts_entity_push_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_pull_kv(char* layout, char* entity,
-			   char* key);
+int layouts_entity_pull_kv(char *layout, char *entity,
+                           char *key);
 
 /*
  * layouts_entity_set_kv - update an entity with a new value for a particular
@@ -295,9 +296,9 @@ int layouts_entity_pull_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_set_kv(char* layout, char* entity,
-			  char* key, void* value,
-			  layouts_keydef_types_t key_type);
+int layouts_entity_set_kv(char *layout, char *entity,
+                          char *key, void *value,
+                          layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_set_kv_ref - replace an entity key value with a new memory
@@ -315,9 +316,9 @@ int layouts_entity_set_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_set_kv_ref(char* layout, char* entity,
-			      char* key, void* value,
-			      layouts_keydef_types_t key_type);
+int layouts_entity_set_kv_ref(char *layout, char *entity,
+                              char *key, void *value,
+                              layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_setpush_kv - combination of layouts_entity_set_kv and
@@ -332,9 +333,9 @@ int layouts_entity_set_kv_ref(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_setpush_kv(char* layout, char* entity,
-			      char* key, void* value,
-			      layouts_keydef_types_t key_type);
+int layouts_entity_setpush_kv(char *layout, char *entity,
+                              char *key, void *value,
+                              layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_setpush_kv - combination of layouts_entity_set_kv_ref and
@@ -350,9 +351,9 @@ int layouts_entity_setpush_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_setpush_kv_ref(char* layout, char* entity,
-				  char* key, void* value,
-				  layouts_keydef_types_t key_type);
+int layouts_entity_setpush_kv_ref(char *layout, char *entity,
+                                  char *key, void *value,
+                                  layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_get_kv - get the value associated with a key of an entity
@@ -375,9 +376,9 @@ int layouts_entity_setpush_kv_ref(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_get_kv(char* layout, char* entity,
-			  char* key, void* value,
-			  layouts_keydef_types_t key_type);
+int layouts_entity_get_kv(char *layout, char *entity,
+                          char *key, void *value,
+                          layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_get_kv_ref - get a pointer to the value associated with a key
@@ -393,9 +394,9 @@ int layouts_entity_get_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_get_kv_ref(char* layout, char* entity,
-			      char* key, void** pvalue,
-			      layouts_keydef_types_t key_type);
+int layouts_entity_get_kv_ref(char *layout, char *entity,
+                              char *key, void **pvalue,
+                              layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_pullget_kv - combination of layouts_entity_pull_kv and
@@ -410,9 +411,9 @@ int layouts_entity_get_kv_ref(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_pullget_kv(char* layout, char* entity,
-			      char* key, void* value,
-			      layouts_keydef_types_t key_type);
+int layouts_entity_pullget_kv(char *layout, char *entity,
+                              char *key, void *value,
+                              layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_pullget_kv - combination of layouts_entity_pull_kv_ref and
@@ -427,9 +428,9 @@ int layouts_entity_pullget_kv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or SLURM_ERROR in case of failure
  */
-int layouts_entity_pullget_kv_ref(char* layout, char* entity,
-				  char* key, void** value,
-				  layouts_keydef_types_t key_type);
+int layouts_entity_pullget_kv_ref(char *layout, char *entity,
+                                  char *key, void **value,
+                                  layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_get_mkv - get the values associated with a set of keys of an
@@ -463,9 +464,9 @@ int layouts_entity_pullget_kv_ref(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or the count of missed keys/references
  */
-int layouts_entity_get_mkv(char* layout, char* entity,
-			   char* keys, void* value, size_t length,
-			   layouts_keydef_types_t key_type);
+int layouts_entity_get_mkv(char *layout, char *entity,
+                           char *keys, void *value, size_t length,
+                           layouts_keydef_types_t key_type);
 
 /*
  * layouts_entity_get_mkv_ref - get a set of pointers to the values associated
@@ -491,8 +492,8 @@ int layouts_entity_get_mkv(char* layout, char* entity,
  *
  * Return SLURM_SUCCES or the count of missed keys/references
  */
-int layouts_entity_get_mkv_ref(char* layout, char* entity,
-			       char* keys, void* buffer, size_t length,
-			       layouts_keydef_types_t key_type);
+int layouts_entity_get_mkv_ref(char *layout, char *entity,
+                               char *keys, void *buffer, size_t length,
+                               layouts_keydef_types_t key_type);
 
 #endif /* end of include guard: __LAYOUTS_MGR_1NRINRSD__INC__ */

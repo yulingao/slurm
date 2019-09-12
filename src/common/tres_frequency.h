@@ -77,7 +77,7 @@ extern void tres_freq_cpuset_validate(stepd_step_rec_t *job);
  * Called from task cgroup code
  */
 extern void tres_freq_cgroup_validate(stepd_step_rec_t *job,
-				      char *step_alloc_cores);
+                                      char *step_alloc_cores);
 
 #if 0
 //FIXME: Not applicable
@@ -145,7 +145,7 @@ extern void tres_freq_reset(stepd_step_rec_t *job);
  */
 extern int
 cpu_freq_debug(char* label, char* noval_str, char* freq_str, int freq_len,
-		  uint32_t gov, uint32_t min, uint32_t max, uint32_t freq);
+          uint32_t gov, uint32_t min, uint32_t max, uint32_t freq);
 #endif
 
 #endif /* _TRES_FREQUENCY_H_ */

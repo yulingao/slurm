@@ -62,24 +62,23 @@
  * IN one_liner - print as a single line if true
  */
 void
-slurm_print_front_end_info_msg (FILE * out,
-				front_end_info_msg_t * front_end_info_msg_ptr,
-				int one_liner)
-{
-	int i;
-	front_end_info_t *front_end_ptr;
-	char time_str[32];
+slurm_print_front_end_info_msg(FILE *out,
+                               front_end_info_msg_t *front_end_info_msg_ptr,
+                               int one_liner) {
+    int i;
+    front_end_info_t *front_end_ptr;
+    char time_str[32];
 
-	front_end_ptr = front_end_info_msg_ptr->front_end_array;
-	slurm_make_time_str((time_t *)&front_end_info_msg_ptr->last_update,
-			    time_str, sizeof(time_str));
-	fprintf(out, "front_end data as of %s, record count %d\n",
-		time_str, front_end_info_msg_ptr->record_count);
+    front_end_ptr = front_end_info_msg_ptr->front_end_array;
+    slurm_make_time_str((time_t *) &front_end_info_msg_ptr->last_update,
+                        time_str, sizeof(time_str));
+    fprintf(out, "front_end data as of %s, record count %d\n",
+            time_str, front_end_info_msg_ptr->record_count);
 
-	for (i = 0; i < front_end_info_msg_ptr-> record_count; i++) {
-		slurm_print_front_end_table(out, &front_end_ptr[i],
-					    one_liner ) ;
-	}
+    for (i = 0; i < front_end_info_msg_ptr->record_count; i++) {
+        slurm_print_front_end_table(out, &front_end_ptr[i],
+                                    one_liner);
+    }
 }
 
 
@@ -91,13 +90,12 @@ slurm_print_front_end_info_msg (FILE * out,
  * IN one_liner - print as a single line if true
  */
 void
-slurm_print_front_end_table (FILE * out, front_end_info_t * front_end_ptr,
-			     int one_liner)
-{
-	char *print_this = slurm_sprint_front_end_table(front_end_ptr,
-							one_liner);
-	fprintf(out, "%s", print_this);
-	xfree(print_this);
+slurm_print_front_end_table(FILE *out, front_end_info_t *front_end_ptr,
+                            int one_liner) {
+    char *print_this = slurm_sprint_front_end_table(front_end_ptr,
+                                                    one_liner);
+    fprintf(out, "%s", print_this);
+    xfree(print_this);
 }
 
 /*
@@ -109,81 +107,80 @@ slurm_print_front_end_table (FILE * out, front_end_info_t * front_end_ptr,
  *           NULL is returned on failure.
  */
 char *
-slurm_sprint_front_end_table (front_end_info_t * front_end_ptr,
-			      int one_liner)
-{
-	uint32_t my_state = front_end_ptr->node_state;
-	char *drain_str = "";
-	char time_str[32];
-	char *out = NULL;
+slurm_sprint_front_end_table(front_end_info_t *front_end_ptr,
+                             int one_liner) {
+    uint32_t my_state = front_end_ptr->node_state;
+    char *drain_str = "";
+    char time_str[32];
+    char *out = NULL;
 
-	if (my_state & NODE_STATE_DRAIN) {
-		my_state &= (~NODE_STATE_DRAIN);
-		drain_str = "+DRAIN";
-	}
+    if (my_state & NODE_STATE_DRAIN) {
+        my_state &= (~NODE_STATE_DRAIN);
+        drain_str = "+DRAIN";
+    }
 
-	/****** Line 1 ******/
-	xstrfmtcat(out, "FrontendName=%s ", front_end_ptr->name);
-	xstrfmtcat(out, "State=%s%s ", node_state_string(my_state), drain_str);
-	xstrfmtcat(out, "Version=%s ", front_end_ptr->version);
-	if (front_end_ptr->reason_time) {
-		char *user_name = uid_to_string(front_end_ptr->reason_uid);
-		slurm_make_time_str((time_t *)&front_end_ptr->reason_time,
-				    time_str, sizeof(time_str));
-		xstrfmtcat(out, "Reason=%s [%s@%s]",
-			   front_end_ptr->reason, user_name, time_str);
-		xfree(user_name);
-	} else {
-		xstrfmtcat(out, "Reason=%s", front_end_ptr->reason);
-	}
-	if (one_liner)
-		xstrcat(out, " ");
-	else
-		xstrcat(out, "\n   ");
+    /****** Line 1 ******/
+    xstrfmtcat(out, "FrontendName=%s ", front_end_ptr->name);
+    xstrfmtcat(out, "State=%s%s ", node_state_string(my_state), drain_str);
+    xstrfmtcat(out, "Version=%s ", front_end_ptr->version);
+    if (front_end_ptr->reason_time) {
+        char *user_name = uid_to_string(front_end_ptr->reason_uid);
+        slurm_make_time_str((time_t *) &front_end_ptr->reason_time,
+                            time_str, sizeof(time_str));
+        xstrfmtcat(out, "Reason=%s [%s@%s]",
+                   front_end_ptr->reason, user_name, time_str);
+        xfree(user_name);
+    } else {
+        xstrfmtcat(out, "Reason=%s", front_end_ptr->reason);
+    }
+    if (one_liner)
+        xstrcat(out, " ");
+    else
+        xstrcat(out, "\n   ");
 
-	/****** Line 2 ******/
-	slurm_make_time_str((time_t *)&front_end_ptr->boot_time,
-			    time_str, sizeof(time_str));
-	xstrfmtcat(out, "BootTime=%s ", time_str);
-	slurm_make_time_str((time_t *)&front_end_ptr->slurmd_start_time,
-			    time_str, sizeof(time_str));
-	xstrfmtcat(out, "SlurmdStartTime=%s", time_str);
-	if (one_liner)
-		xstrcat(out, " ");
-	else
-		xstrcat(out, "\n   ");
+    /****** Line 2 ******/
+    slurm_make_time_str((time_t *) &front_end_ptr->boot_time,
+                        time_str, sizeof(time_str));
+    xstrfmtcat(out, "BootTime=%s ", time_str);
+    slurm_make_time_str((time_t *) &front_end_ptr->slurmd_start_time,
+                        time_str, sizeof(time_str));
+    xstrfmtcat(out, "SlurmdStartTime=%s", time_str);
+    if (one_liner)
+        xstrcat(out, " ");
+    else
+        xstrcat(out, "\n   ");
 
-	/****** Line 3 (optional) ******/
-	if (front_end_ptr->allow_groups || front_end_ptr->allow_users ||
-	    front_end_ptr->deny_groups  || front_end_ptr->deny_users) {
-		if (one_liner)
-			xstrcat(out, " ");
-		else
-			xstrcat(out, "\n   ");
-		if (front_end_ptr->allow_groups) {
-			xstrfmtcat(out, "AllowGroups=%s ",
-				   front_end_ptr->allow_groups);
-		}
-		if (front_end_ptr->allow_users) {
-			xstrfmtcat(out, "AllowUsers=%s ",
-				   front_end_ptr->allow_users);
-		}
-		if (front_end_ptr->deny_groups) {
-			xstrfmtcat(out, "DenyGroups=%s ",
-				   front_end_ptr->deny_groups);
-		}
-		if (front_end_ptr->deny_users) {
-			xstrfmtcat(out, "DenyUsers=%s ",
-				   front_end_ptr->deny_users);
-		}
-	}
+    /****** Line 3 (optional) ******/
+    if (front_end_ptr->allow_groups || front_end_ptr->allow_users ||
+        front_end_ptr->deny_groups || front_end_ptr->deny_users) {
+        if (one_liner)
+            xstrcat(out, " ");
+        else
+            xstrcat(out, "\n   ");
+        if (front_end_ptr->allow_groups) {
+            xstrfmtcat(out, "AllowGroups=%s ",
+                       front_end_ptr->allow_groups);
+        }
+        if (front_end_ptr->allow_users) {
+            xstrfmtcat(out, "AllowUsers=%s ",
+                       front_end_ptr->allow_users);
+        }
+        if (front_end_ptr->deny_groups) {
+            xstrfmtcat(out, "DenyGroups=%s ",
+                       front_end_ptr->deny_groups);
+        }
+        if (front_end_ptr->deny_users) {
+            xstrfmtcat(out, "DenyUsers=%s ",
+                       front_end_ptr->deny_users);
+        }
+    }
 
-	if (one_liner)
-		xstrcat(out, "\n");
-	else
-		xstrcat(out, "\n\n");
+    if (one_liner)
+        xstrcat(out, "\n");
+    else
+        xstrcat(out, "\n\n");
 
-	return out;
+    return out;
 }
 
 
@@ -196,39 +193,38 @@ slurm_sprint_front_end_table (front_end_info_t * front_end_ptr,
  * NOTE: free the response using slurm_free_front_end_info_msg
  */
 int
-slurm_load_front_end (time_t update_time, front_end_info_msg_t **resp)
-{
-	int rc;
-	slurm_msg_t req_msg;
-	slurm_msg_t resp_msg;
-	front_end_info_request_msg_t req;
+slurm_load_front_end(time_t update_time, front_end_info_msg_t **resp) {
+    int rc;
+    slurm_msg_t req_msg;
+    slurm_msg_t resp_msg;
+    front_end_info_request_msg_t req;
 
-	slurm_msg_t_init(&req_msg);
-	slurm_msg_t_init(&resp_msg);
-	memset(&req, 0, sizeof(req));
-	req.last_update  = update_time;
-	req_msg.msg_type = REQUEST_FRONT_END_INFO;
-	req_msg.data     = &req;
+    slurm_msg_t_init(&req_msg);
+    slurm_msg_t_init(&resp_msg);
+    memset(&req, 0, sizeof(req));
+    req.last_update = update_time;
+    req_msg.msg_type = REQUEST_FRONT_END_INFO;
+    req_msg.data = &req;
 
-	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-					   working_cluster_rec) < 0)
-		return SLURM_ERROR;
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+                                       working_cluster_rec) < 0)
+        return SLURM_ERROR;
 
-	switch (resp_msg.msg_type) {
-	case RESPONSE_FRONT_END_INFO:
-		*resp = (front_end_info_msg_t *) resp_msg.data;
-		break;
-	case RESPONSE_SLURM_RC:
-		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-		slurm_free_return_code_msg(resp_msg.data);
-		if (rc)
-			slurm_seterrno_ret(rc);
-		*resp = NULL;
-		break;
-	default:
-		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-		break;
-	}
+    switch (resp_msg.msg_type) {
+        case RESPONSE_FRONT_END_INFO:
+            *resp = (front_end_info_msg_t *) resp_msg.data;
+            break;
+        case RESPONSE_SLURM_RC:
+            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+            slurm_free_return_code_msg(resp_msg.data);
+            if (rc)
+                slurm_seterrno_ret(rc);
+            *resp = NULL;
+            break;
+        default:
+            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+            break;
+    }
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }

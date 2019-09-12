@@ -60,6 +60,7 @@ extern void mpmd_free(stepd_step_rec_t *job);
  * "task_rank" is the task's GLOBAL rank within the job step.
  */
 extern int multi_prog_get_argv(char *config_data, char **prog_env,
-			       int task_rank, uint32_t *argc, char ***argv,
-			       int global_argc, char **global_argv);
+                               int task_rank, uint32_t *argc, char ***argv,
+                               int global_argc, char **global_argv);
+
 #endif /* !_SLURMD_MULTI_PROG_H */

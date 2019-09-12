@@ -64,45 +64,41 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char	*plugin_name		= "NULL site_factor plugin";
-const char	*plugin_type		= "site_factor/none";
-const uint32_t	plugin_version		= SLURM_VERSION_NUMBER;
+const char *plugin_name = "NULL site_factor plugin";
+const char *plugin_type = "site_factor/none";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
-extern int init(void)
-{
-	debug("%s: %s loaded", __func__, plugin_name);
+extern int init(void) {
+    debug("%s: %s loaded", __func__, plugin_name);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int fini(void)
-{
-	debug("%s: unloading %s", __func__, plugin_name);
+extern int fini(void) {
+    debug("%s: unloading %s", __func__, plugin_name);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern void site_factor_p_reconfig(void)
-{
-	/*
-	 * Handle any reconfiguration, such as potential changes to
-	 * PrioritySiteFactorParameters, here.
-	 */
+extern void site_factor_p_reconfig(void) {
+    /*
+     * Handle any reconfiguration, such as potential changes to
+     * PrioritySiteFactorParameters, here.
+     */
 
-	return;
+    return;
 }
 
-extern void site_factor_p_set(struct job_record *job_ptr)
-{
-	/*
-	 * Set initial value for the admin_factor here.
-	 *
-	 * E.g.:
-	 */
+extern void site_factor_p_set(struct job_record *job_ptr) {
+    /*
+     * Set initial value for the admin_factor here.
+     *
+     * E.g.:
+     */
 
-	/* job_ptr->site_factor = (lrand48() % range) + NICE_OFFSET; */
+    /* job_ptr->site_factor = (lrand48() % range) + NICE_OFFSET; */
 
-	return;
+    return;
 }
 
 #if 0
@@ -111,30 +107,29 @@ extern void site_factor_p_set(struct job_record *job_ptr)
  */
 static int _update(void *x, void *ignored)
 {
-	struct job_record *job_ptr = (struct job_record *) x;
+    struct job_record *job_ptr = (struct job_record *) x;
 
-	/*
-	 * You will usually only want to change the priority for
-	 * pending jobs, and ignore all other states.
-	 */
-	if (IS_JOB_PENDING(job_ptr))
-		job_ptr->site_factor = (lrand48() % range) + NICE_OFFSET;
+    /*
+     * You will usually only want to change the priority for
+     * pending jobs, and ignore all other states.
+     */
+    if (IS_JOB_PENDING(job_ptr))
+        job_ptr->site_factor = (lrand48() % range) + NICE_OFFSET;
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 #endif
 
-extern void site_factor_p_update(void)
-{
-	/*
-	 * For a real plugin, it is expected that you'll run a list_for_each()
-	 * against the job_list here, and update the admin_factor values as
-	 * desired.
-	 *
-	 * E.g.:
-	 */
+extern void site_factor_p_update(void) {
+    /*
+     * For a real plugin, it is expected that you'll run a list_for_each()
+     * against the job_list here, and update the admin_factor values as
+     * desired.
+     *
+     * E.g.:
+     */
 
-	/* list_for_each(job_list, _update, NULL); */
+    /* list_for_each(job_list, _update, NULL); */
 
-	return;
+    return;
 }

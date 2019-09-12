@@ -61,7 +61,7 @@
  * in label mode.
  */
 extern int write_labelled_message(int fd, void *buf, int len, int task_id,
-				  uint32_t pack_offset, uint32_t task_offset,
-				  bool label, int task_id_width);
+                                  uint32_t pack_offset, uint32_t task_offset,
+                                  bool label, int task_id_width);
 
 #endif

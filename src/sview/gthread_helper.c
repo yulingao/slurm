@@ -27,39 +27,35 @@
 
 #include "gthread_helper.h"
 
-void sview_thread_init(gpointer vtable)
-{
+void sview_thread_init(gpointer vtable) {
 #ifndef GLIB_NEW_THREADS
-	g_thread_init(vtable);
+    g_thread_init(vtable);
 #endif
 }
 
 GThread *sview_thread_new(GThreadFunc func, gpointer data,
-			  gboolean joinable, GError **error)
-{
+                          gboolean joinable, GError **error) {
 #ifndef GLIB_NEW_THREADS
-	return g_thread_create(func, data, joinable, error);
+    return g_thread_create(func, data, joinable, error);
 #else
-	return g_thread_try_new(NULL, func, data, error);
+    return g_thread_try_new(NULL, func, data, error);
 #endif
 }
 
-void sview_mutex_new(GMutex **mutex)
-{
+void sview_mutex_new(GMutex **mutex) {
 #ifndef GLIB_NEW_THREADS
-	*mutex = g_mutex_new();
+    *mutex = g_mutex_new();
 #else
-	*mutex = g_new(GMutex, 1);
-	g_mutex_init(*mutex);
+    *mutex = g_new(GMutex, 1);
+    g_mutex_init(*mutex);
 #endif
 }
 
-void sview_cond_new(GCond **cond)
-{
+void sview_cond_new(GCond **cond) {
 #ifndef GLIB_NEW_THREADS
-	*cond = g_cond_new();
+    *cond = g_cond_new();
 #else
-	*cond = g_new(GCond, 1);
-	g_cond_init(*cond);
+    *cond = g_new(GCond, 1);
+    g_cond_init(*cond);
 #endif
 }

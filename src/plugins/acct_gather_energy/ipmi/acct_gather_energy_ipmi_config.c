@@ -57,41 +57,40 @@
 #define TIMEOUT 10
 
 /* Local functions */
-extern void reset_slurm_ipmi_conf(slurm_ipmi_conf_t *slurm_ipmi_conf)
-{
-	if (slurm_ipmi_conf) {
-		slurm_ipmi_conf->power_sensor_num = -1;
-		xfree(slurm_ipmi_conf->power_sensors);
-		slurm_ipmi_conf->power_sensors = NULL;
-		slurm_ipmi_conf->freq = DEFAULT_IPMI_FREQ;
-		slurm_ipmi_conf->adjustment = false;
-		slurm_ipmi_conf->timeout = TIMEOUT;
-		slurm_ipmi_conf->driver_type = -1;
-		slurm_ipmi_conf->disable_auto_probe = 0;
-		slurm_ipmi_conf->driver_address = 0;
-		slurm_ipmi_conf->register_spacing = 0;
-		xfree(slurm_ipmi_conf->driver_device);
-		slurm_ipmi_conf->protocol_version = -1;
-		xfree(slurm_ipmi_conf->username);
-		xfree(slurm_ipmi_conf->password);
-		xfree(slurm_ipmi_conf->k_g);
-		slurm_ipmi_conf->k_g_len = 0;
-		slurm_ipmi_conf->privilege_level = -1;
-		slurm_ipmi_conf->authentication_type = -1;
-		slurm_ipmi_conf->cipher_suite_id = 0;
-		slurm_ipmi_conf->session_timeout = 0;
-		slurm_ipmi_conf->retransmission_timeout = 0;
-		slurm_ipmi_conf->workaround_flags = 0;
-		slurm_ipmi_conf->reread_sdr_cache = false;
-		slurm_ipmi_conf->ignore_non_interpretable_sensors = true;
-		slurm_ipmi_conf->bridge_sensors = false;
-		slurm_ipmi_conf->interpret_oem_data = false;
-		slurm_ipmi_conf->shared_sensors = false;
-		slurm_ipmi_conf->discrete_reading = false;
-		slurm_ipmi_conf->ignore_scanning_disabled = false;
-		slurm_ipmi_conf->assume_bmc_owner = false;
-		slurm_ipmi_conf->entity_sensor_names = false;
-		slurm_ipmi_conf->variable = IPMI_MONITORING_SENSOR_UNITS_WATTS;
+extern void reset_slurm_ipmi_conf(slurm_ipmi_conf_t *slurm_ipmi_conf) {
+    if (slurm_ipmi_conf) {
+        slurm_ipmi_conf->power_sensor_num = -1;
+        xfree(slurm_ipmi_conf->power_sensors);
+        slurm_ipmi_conf->power_sensors = NULL;
+        slurm_ipmi_conf->freq = DEFAULT_IPMI_FREQ;
+        slurm_ipmi_conf->adjustment = false;
+        slurm_ipmi_conf->timeout = TIMEOUT;
+        slurm_ipmi_conf->driver_type = -1;
+        slurm_ipmi_conf->disable_auto_probe = 0;
+        slurm_ipmi_conf->driver_address = 0;
+        slurm_ipmi_conf->register_spacing = 0;
+        xfree(slurm_ipmi_conf->driver_device);
+        slurm_ipmi_conf->protocol_version = -1;
+        xfree(slurm_ipmi_conf->username);
+        xfree(slurm_ipmi_conf->password);
+        xfree(slurm_ipmi_conf->k_g);
+        slurm_ipmi_conf->k_g_len = 0;
+        slurm_ipmi_conf->privilege_level = -1;
+        slurm_ipmi_conf->authentication_type = -1;
+        slurm_ipmi_conf->cipher_suite_id = 0;
+        slurm_ipmi_conf->session_timeout = 0;
+        slurm_ipmi_conf->retransmission_timeout = 0;
+        slurm_ipmi_conf->workaround_flags = 0;
+        slurm_ipmi_conf->reread_sdr_cache = false;
+        slurm_ipmi_conf->ignore_non_interpretable_sensors = true;
+        slurm_ipmi_conf->bridge_sensors = false;
+        slurm_ipmi_conf->interpret_oem_data = false;
+        slurm_ipmi_conf->shared_sensors = false;
+        slurm_ipmi_conf->discrete_reading = false;
+        slurm_ipmi_conf->ignore_scanning_disabled = false;
+        slurm_ipmi_conf->assume_bmc_owner = false;
+        slurm_ipmi_conf->entity_sensor_names = false;
+        slurm_ipmi_conf->variable = IPMI_MONITORING_SENSOR_UNITS_WATTS;
 
-	}
+    }
 }

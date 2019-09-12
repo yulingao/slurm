@@ -87,93 +87,78 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	debug("%s loaded", plugin_name);
-	return SLURM_SUCCESS;
+extern int init(void) {
+    debug("%s loaded", plugin_name);
+    return SLURM_SUCCESS;
 }
 
-extern int fini(void)
-{
-	return SLURM_SUCCESS;
+extern int fini(void) {
+    return SLURM_SUCCESS;
 }
 
-extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl)
-{
-	return;
+extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl) {
+    return;
 }
 
 extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options,
-					       int *full_options_cnt)
-{
-	return;
+                                               int *full_options_cnt) {
+    return;
 }
 
 extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
-				      void *data)
-{
-	uint32_t *uint32 = (uint32_t *) data;
+                                      void *data) {
+    uint32_t *uint32 = (uint32_t *) data;
 
-	switch (info_type) {
-	case ACCT_GATHER_PROFILE_DEFAULT:
-	case ACCT_GATHER_PROFILE_RUNNING:
-		*uint32 = ACCT_GATHER_PROFILE_NONE;
-		break;
-	default:
-		break;
-	}
+    switch (info_type) {
+        case ACCT_GATHER_PROFILE_DEFAULT:
+        case ACCT_GATHER_PROFILE_RUNNING:
+            *uint32 = ACCT_GATHER_PROFILE_NONE;
+            break;
+        default:
+            break;
+    }
 
-	return;
+    return;
 }
 
-extern int acct_gather_profile_p_node_step_start(stepd_step_rec_t* job)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_node_step_start(stepd_step_rec_t *job) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_child_forked(void)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_child_forked(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_node_step_end(void)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_node_step_end(void) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_task_start(uint32_t taskid)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_task_start(uint32_t taskid) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_task_end(pid_t taskpid)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_task_end(pid_t taskpid) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_create_group(const char* name)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_create_group(const char *name) {
+    return SLURM_SUCCESS;
 }
 
 extern int acct_gather_profile_p_create_dataset(
-	const char* name, int parent, acct_gather_profile_dataset_t *dataset)
-{
-	return SLURM_SUCCESS;
+        const char *name, int parent, acct_gather_profile_dataset_t *dataset) {
+    return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_add_sample_data(int dataset_id, void* data,
-						 time_t sample_time)
-{
-	return SLURM_SUCCESS;
+extern int acct_gather_profile_p_add_sample_data(int dataset_id, void *data,
+                                                 time_t sample_time) {
+    return SLURM_SUCCESS;
 }
 
-extern void acct_gather_profile_p_conf_values(List *data)
-{
-	return;
+extern void acct_gather_profile_p_conf_values(List *data) {
+    return;
 }
 
-extern bool acct_gather_profile_p_is_active(uint32_t type)
-{
-	return false;
+extern bool acct_gather_profile_p_is_active(uint32_t type) {
+    return false;
 }

@@ -45,10 +45,11 @@
 
 #define OPT_LONG_USAGE 0x101
 
-static void  _help( void );
-static void  _usage( void );
+static void _help(void);
 
-extern int  sdiag_param;
+static void _usage(void);
+
+extern int sdiag_param;
 extern bool sort_by_id;
 extern bool sort_by_time;
 extern bool sort_by_time2;
@@ -56,65 +57,62 @@ extern bool sort_by_time2;
 /*
  * parse_command_line, fill in params data structure with data
  */
-extern void parse_command_line(int argc, char **argv)
-{
-	int opt_char;
-	int option_index;
-	static struct option long_options[] = {
-		{"all",		no_argument,	0,	'a'},
-		{"help",	no_argument,	0,	'h'},
-		{"reset",	no_argument,	0,	'r'},
-		{"sort-by-id",	no_argument,	0,	'i'},
-		{"sort-by-time",no_argument,	0,	't'},
-		{"sort-by-time2",no_argument,	0,	'T'},
-		{"usage",	no_argument,	0,	OPT_LONG_USAGE},
-		{"version",     no_argument,	0,	'V'},
-		{NULL,		0,		0,	0}
-	};
+extern void parse_command_line(int argc, char **argv) {
+    int opt_char;
+    int option_index;
+    static struct option long_options[] = {
+            {"all",           no_argument, 0, 'a'},
+            {"help",          no_argument, 0, 'h'},
+            {"reset",         no_argument, 0, 'r'},
+            {"sort-by-id",    no_argument, 0, 'i'},
+            {"sort-by-time",  no_argument, 0, 't'},
+            {"sort-by-time2", no_argument, 0, 'T'},
+            {"usage",         no_argument, 0, OPT_LONG_USAGE},
+            {"version",       no_argument, 0, 'V'},
+            {NULL, 0,                      0, 0}
+    };
 
-	while ((opt_char = getopt_long(argc, argv, "ahirtTV", long_options,
-				       &option_index)) != -1) {
-		switch (opt_char) {
-			case (int)'a':
-				sdiag_param = STAT_COMMAND_GET;
-				break;
-			case (int)'h':
-				_help();
-				exit(0);
-				break;
-			case (int)'i':
-				sort_by_id = true;
-				break;
-			case (int)'r':
-				sdiag_param = STAT_COMMAND_RESET;
-				break;
-			case (int)'t':
-				sort_by_time = true;
-				break;
-			case (int)'T':
-				sort_by_time2 = true;
-				break;
-			case (int) 'V':
-				print_slurm_version();
-				exit(0);
-				break;
-			case (int)OPT_LONG_USAGE:
-				_usage();
-				exit(0);
-				break;
-		}
-	}
+    while ((opt_char = getopt_long(argc, argv, "ahirtTV", long_options,
+                                   &option_index)) != -1) {
+        switch (opt_char) {
+            case (int) 'a':
+                sdiag_param = STAT_COMMAND_GET;
+                break;
+            case (int) 'h':
+                _help();
+                exit(0);
+                break;
+            case (int) 'i':
+                sort_by_id = true;
+                break;
+            case (int) 'r':
+                sdiag_param = STAT_COMMAND_RESET;
+                break;
+            case (int) 't':
+                sort_by_time = true;
+                break;
+            case (int) 'T':
+                sort_by_time2 = true;
+                break;
+            case (int) 'V':
+                print_slurm_version();
+                exit(0);
+                break;
+            case (int) OPT_LONG_USAGE:
+                _usage();
+                exit(0);
+                break;
+        }
+    }
 }
 
 
-static void _usage( void )
-{
-	printf("\nUsage: sdiag [-ar] \n");
+static void _usage(void) {
+    printf("\nUsage: sdiag [-ar] \n");
 }
 
-static void _help( void )
-{
-	printf ("\
+static void _help(void) {
+    printf("\
 Usage: sdiag [OPTIONS]\n\
   -a              all statistics\n\
   -r              reset statistics\n\

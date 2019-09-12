@@ -43,6 +43,7 @@ extern "C" {
 #endif
 
 #include <slurm/slurm.h>
+#include "slurm.h"
 
 typedef enum {
 	SLURMDB_ADMIN_NOTSET,

@@ -90,12 +90,19 @@ extern int slurm_auth_index(void *cred);
  * Static bindings for the global authentication context.
  */
 extern void *g_slurm_auth_create(int index, char *auth_info);
+
 extern int g_slurm_auth_destroy(void *cred);
+
 extern int g_slurm_auth_verify(void *cred, char *auth_info);
+
 extern uid_t g_slurm_auth_get_uid(void *cred);
+
 extern gid_t g_slurm_auth_get_gid(void *cred);
+
 extern char *g_slurm_auth_get_host(void *cred);
+
 extern int g_slurm_auth_pack(void *cred, Buf buf, uint16_t protocol_version);
+
 extern void *g_slurm_auth_unpack(Buf buf, uint16_t protocol_version);
 
 #endif /*__SLURM_AUTHENTICATION_H__*/

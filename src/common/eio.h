@@ -31,6 +31,7 @@
 #include "src/common/list.h"
 #include "src/common/macros.h"
 #include "src/common/slurm_protocol_defs.h"
+
 typedef struct eio_obj eio_obj_t;
 
 typedef struct eio_handle_components eio_handle_t;
@@ -52,24 +53,32 @@ typedef struct eio_handle_components eio_handle_t;
  * file descriptor will continue to be polled.
  */
 struct io_operations {
-	bool (*readable    )(eio_obj_t *);
-	bool (*writable    )(eio_obj_t *);
-	void (*handle_msg  )(void *arg, slurm_msg_t *msg);
-	int  (*handle_read )(eio_obj_t *, List);
-	int  (*handle_write)(eio_obj_t *, List);
-	int  (*handle_error)(eio_obj_t *, List);
-	int  (*handle_close)(eio_obj_t *, List);
-	int  timeout;
+    bool (*readable    )(eio_obj_t *);
+
+    bool (*writable    )(eio_obj_t *);
+
+    void (*handle_msg  )(void *arg, slurm_msg_t *msg);
+
+    int (*handle_read )(eio_obj_t *, List);
+
+    int (*handle_write)(eio_obj_t *, List);
+
+    int (*handle_error)(eio_obj_t *, List);
+
+    int (*handle_close)(eio_obj_t *, List);
+
+    int timeout;
 };
 
 struct eio_obj {
-	int fd;                           /* fd to operate on                */
-	void *arg;                        /* application-specific data       */
-	struct io_operations *ops;        /* pointer to ops struct for obj   */
-	bool shutdown;
+    int fd;                           /* fd to operate on                */
+    void *arg;                        /* application-specific data       */
+    struct io_operations *ops;        /* pointer to ops struct for obj   */
+    bool shutdown;
 };
 
 eio_handle_t *eio_handle_create(uint16_t);
+
 void eio_handle_destroy(eio_handle_t *eio);
 
 /*
@@ -108,12 +117,15 @@ bool eio_remove_obj(eio_obj_t *obj, List objs);
 int eio_handle_mainloop(eio_handle_t *eio);
 
 bool eio_message_socket_readable(eio_obj_t *obj);
+
 int eio_message_socket_accept(eio_obj_t *obj, List objs);
 
 int eio_signal_wakeup(eio_handle_t *eio);
+
 int eio_signal_shutdown(eio_handle_t *eio);
 
 eio_obj_t *eio_obj_create(int fd, struct io_operations *ops, void *arg);
+
 void eio_obj_destroy(void *arg);
 
 #endif /* !_EIO_H */

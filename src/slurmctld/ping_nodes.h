@@ -47,7 +47,7 @@
  *	previous one completes
  * RET true if ping process is done, false otherwise
  */
-extern bool is_ping_done (void);
+extern bool is_ping_done(void);
 
 /*
  * ping_begin - record that a ping cycle has begin. This can be called more
@@ -55,7 +55,7 @@ extern bool is_ping_done (void);
  *	for selected nodes). Matching ping_end calls must be made for each
  *	before is_ping_done returns true.
  */
-extern void ping_begin (void);
+extern void ping_begin(void);
 
 /*
  * ping_end - record that a ping cycle has ended. This can be called more
@@ -63,12 +63,12 @@ extern void ping_begin (void);
  *	for selected nodes). Matching ping_end calls must be made for each
  *	before is_ping_done returns true.
  */
-extern void ping_end (void);
+extern void ping_end(void);
 
 /*
  * ping_nodes - check that all nodes and daemons are alive,
  *	get nodes in UNKNOWN state to register
  */
-extern void ping_nodes (void);
+extern void ping_nodes(void);
 
 #endif /* !_HAVE_PING_NODES_H */

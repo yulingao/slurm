@@ -49,9 +49,11 @@
 #include "src/slurmctld/slurmctld.h"
 
 typedef struct slurm_power_ops {
-	void		(*job_resume)	(struct job_record *job_ptr);
-	void		(*job_start)	(struct job_record *job_ptr);
-	void		(*reconfig)	(void);
+    void (*job_resume)(struct job_record *job_ptr);
+
+    void (*job_start)(struct job_record *job_ptr);
+
+    void (*reconfig)(void);
 } slurm_power_ops_t;
 
 /*
@@ -59,9 +61,9 @@ typedef struct slurm_power_ops {
  * declared for slurm_power_ops_t.
  */
 static const char *syms[] = {
-	"power_p_job_resume",
-	"power_p_job_start",
-	"power_p_reconfig"
+        "power_p_job_resume",
+        "power_p_job_start",
+        "power_p_reconfig"
 };
 
 static int g_context_cnt = -1;
@@ -72,148 +74,141 @@ static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 /* Initialize the power plugin */
-extern int power_g_init(void)
-{
-	int rc = SLURM_SUCCESS;
-	char *last = NULL, *names;
-	char *plugin_type = "power";
-	char *type;
+extern int power_g_init(void) {
+    int rc = SLURM_SUCCESS;
+    char *last = NULL, *names;
+    char *plugin_type = "power";
+    char *type;
 
-	if (init_run && (g_context_cnt >= 0))
-		return rc;
+    if (init_run && (g_context_cnt >= 0))
+        return rc;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt >= 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt >= 0)
+        goto fini;
 
-	power_plugin_list = slurm_get_power_plugin();
-	g_context_cnt = 0;
-	if ((power_plugin_list == NULL) || (power_plugin_list[0] == '\0'))
-		goto fini;
+    power_plugin_list = slurm_get_power_plugin();
+    g_context_cnt = 0;
+    if ((power_plugin_list == NULL) || (power_plugin_list[0] == '\0'))
+        goto fini;
 
-	names = power_plugin_list;
-	while ((type = strtok_r(names, ",", &last))) {
-		xrealloc(ops, (sizeof(slurm_power_ops_t)*(g_context_cnt + 1)));
-		xrealloc(g_context,
-			 (sizeof(plugin_context_t *) * (g_context_cnt + 1)));
-		if (xstrncmp(type, "power/", 6) == 0)
-			type += 6; /* backward compatibility */
-		type = xstrdup_printf("power/%s", type);
-		g_context[g_context_cnt] = plugin_context_create(
-			plugin_type, type, (void **)&ops[g_context_cnt],
-			syms, sizeof(syms));
-		if (!g_context[g_context_cnt]) {
-			error("cannot create %s context for %s",
-			      plugin_type, type);
-			rc = SLURM_ERROR;
-			xfree(type);
-			break;
-		}
+    names = power_plugin_list;
+    while ((type = strtok_r(names, ",", &last))) {
+        xrealloc(ops, (sizeof(slurm_power_ops_t) * (g_context_cnt + 1)));
+        xrealloc(g_context,
+                 (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
+        if (xstrncmp(type, "power/", 6) == 0)
+            type += 6; /* backward compatibility */
+        type = xstrdup_printf("power/%s", type);
+        g_context[g_context_cnt] = plugin_context_create(
+                plugin_type, type, (void **) &ops[g_context_cnt],
+                syms, sizeof(syms));
+        if (!g_context[g_context_cnt]) {
+            error("cannot create %s context for %s",
+                  plugin_type, type);
+            rc = SLURM_ERROR;
+            xfree(type);
+            break;
+        }
 
-		xfree(type);
-		g_context_cnt++;
-		names = NULL; /* for next iteration */
-	}
-	init_run = true;
+        xfree(type);
+        g_context_cnt++;
+        names = NULL; /* for next iteration */
+    }
+    init_run = true;
 
-fini:
-	slurm_mutex_unlock(&g_context_lock);
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
 
-	if (rc != SLURM_SUCCESS)
-		power_g_fini();
+    if (rc != SLURM_SUCCESS)
+        power_g_fini();
 
-	return rc;
+    return rc;
 }
 
 /* Terminate the power plugin and free all memory */
-extern void power_g_fini(void)
-{
-	int i;
+extern void power_g_fini(void) {
+    int i;
 
-	slurm_mutex_lock(&g_context_lock);
-	if (g_context_cnt < 0)
-		goto fini;
+    slurm_mutex_lock(&g_context_lock);
+    if (g_context_cnt < 0)
+        goto fini;
 
-	init_run = false;
-	for (i = 0; i < g_context_cnt; i++) {
-		if (g_context[i])
-			plugin_context_destroy(g_context[i]);
-	}
-	xfree(ops);
-	xfree(g_context);
-	xfree(power_plugin_list);
-	g_context_cnt = -1;
+    init_run = false;
+    for (i = 0; i < g_context_cnt; i++) {
+        if (g_context[i])
+            plugin_context_destroy(g_context[i]);
+    }
+    xfree(ops);
+    xfree(g_context);
+    xfree(power_plugin_list);
+    g_context_cnt = -1;
 
-fini:	slurm_mutex_unlock(&g_context_lock);
-	return;
+    fini:
+    slurm_mutex_unlock(&g_context_lock);
+    return;
 }
 
 /* Read the configuration file */
-extern void power_g_reconfig(void)
-{
-	int i;
+extern void power_g_reconfig(void) {
+    int i;
 
-	(void) power_g_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; i < g_context_cnt; i++)
-		(*(ops[i].reconfig))();
-	slurm_mutex_unlock(&g_context_lock);
+    (void) power_g_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; i < g_context_cnt; i++)
+        (*(ops[i].reconfig))();
+    slurm_mutex_unlock(&g_context_lock);
 }
 
 /* Note that a suspended job has been resumed */
-extern void power_g_job_resume(struct job_record *job_ptr)
-{
-	int i;
+extern void power_g_job_resume(struct job_record *job_ptr) {
+    int i;
 
-	(void) power_g_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; i < g_context_cnt; i++)
-		(*(ops[i].job_resume))(job_ptr);
-	slurm_mutex_unlock(&g_context_lock);
+    (void) power_g_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; i < g_context_cnt; i++)
+        (*(ops[i].job_resume))(job_ptr);
+    slurm_mutex_unlock(&g_context_lock);
 }
 
 /* Note that a job has been allocated resources and is ready to start */
-extern void power_g_job_start(struct job_record *job_ptr)
-{
-	int i;
+extern void power_g_job_start(struct job_record *job_ptr) {
+    int i;
 
-	(void) power_g_init();
-	slurm_mutex_lock(&g_context_lock);
-	for (i = 0; i < g_context_cnt; i++)
-		(*(ops[i].job_start))(job_ptr);
-	slurm_mutex_unlock(&g_context_lock);
+    (void) power_g_init();
+    slurm_mutex_lock(&g_context_lock);
+    for (i = 0; i < g_context_cnt; i++)
+        (*(ops[i].job_start))(job_ptr);
+    slurm_mutex_unlock(&g_context_lock);
 }
 
 /* Pack a power management data structure */
 extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer,
-				 uint16_t protocol_version)
-{
-	if (!power) {
-		pack32(NO_VAL, buffer);
-	} else {
-		pack32(power->cap_watts, buffer);
-	}
+                                 uint16_t protocol_version) {
+    if (!power) {
+        pack32(NO_VAL, buffer);
+    } else {
+        pack32(power->cap_watts, buffer);
+    }
 }
 
 /* Unpack a power management data structure
  * Use power_mgmt_data_free() to free the returned structure */
 extern int power_mgmt_data_unpack(power_mgmt_data_t **power, Buf buffer,
-				  uint16_t protocol_version)
-{
-	power_mgmt_data_t *power_ptr = xmalloc(sizeof(power_mgmt_data_t));
+                                  uint16_t protocol_version) {
+    power_mgmt_data_t *power_ptr = xmalloc(sizeof(power_mgmt_data_t));
 
-	safe_unpack32(&power_ptr->cap_watts, buffer);
-	*power = power_ptr;
-	return SLURM_SUCCESS;
+    safe_unpack32(&power_ptr->cap_watts, buffer);
+    *power = power_ptr;
+    return SLURM_SUCCESS;
 
-unpack_error:
-	xfree(power_ptr);
-	*power = NULL;
-	return SLURM_ERROR;
+    unpack_error:
+    xfree(power_ptr);
+    *power = NULL;
+    return SLURM_ERROR;
 }
 
 /* Free a power management data structure */
-extern void power_mgmt_data_free(power_mgmt_data_t *power)
-{
-	xfree(power);
+extern void power_mgmt_data_free(power_mgmt_data_t *power) {
+    xfree(power);
 }

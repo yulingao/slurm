@@ -56,4 +56,5 @@ extern int task_cgroup_cpuset_set_task_affinity(stepd_step_rec_t *job);
 
 /* add a pid to the cgroup */
 extern int task_cgroup_cpuset_add_pid(pid_t pid);
+
 #endif

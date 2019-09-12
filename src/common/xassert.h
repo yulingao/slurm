@@ -39,7 +39,7 @@
 \*****************************************************************************/
 
 #ifndef _XASSERT_H
-#define _XASSERT_H	1
+#define _XASSERT_H    1
 
 #include "config.h"
 
@@ -61,7 +61,7 @@
  *  (messages go to stderr if log is not initialized)
  */
 extern void __xassert_failed(char *, const char *, int, const char *)
-	    __NORETURN_ATTR;
+__NORETURN_ATTR;
 
 #endif /* NDEBUG. */
 

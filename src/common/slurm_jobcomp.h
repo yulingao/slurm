@@ -49,45 +49,46 @@
 #include "src/common/slurm_accounting_storage.h"
 
 typedef struct {
-	uint32_t jobid;
-	char *partition;
-	char *start_time;
-	char *end_time;
-	time_t elapsed_time;
-	uint32_t uid;
-	char *uid_name;
-	uint32_t gid;
-	char *gid_name;
-	uint32_t node_cnt;
-	uint32_t proc_cnt;
-	char *nodelist;
-	char *jobname;
-	char *state;
-	char *timelimit;
-	char *blockid;
-	char *connection;
-	char *reboot;
-	char *rotate;
-	uint32_t max_procs;
-	char *geo;
-	char *bg_start_point;
-	char *work_dir;
-	char *resv_name;
-	char *req_gres;
-	char *account;
-	char *qos_name;
-	char *wckey;
-	char *cluster;
-	char *submit_time;
-	char *eligible_time;
-	char *derived_ec;
-	char *exit_code;
+    uint32_t jobid;
+    char *partition;
+    char *start_time;
+    char *end_time;
+    time_t elapsed_time;
+    uint32_t uid;
+    char *uid_name;
+    uint32_t gid;
+    char *gid_name;
+    uint32_t node_cnt;
+    uint32_t proc_cnt;
+    char *nodelist;
+    char *jobname;
+    char *state;
+    char *timelimit;
+    char *blockid;
+    char *connection;
+    char *reboot;
+    char *rotate;
+    uint32_t max_procs;
+    char *geo;
+    char *bg_start_point;
+    char *work_dir;
+    char *resv_name;
+    char *req_gres;
+    char *account;
+    char *qos_name;
+    char *wckey;
+    char *cluster;
+    char *submit_time;
+    char *eligible_time;
+    char *derived_ec;
+    char *exit_code;
 } jobcomp_job_rec_t;
 
-typedef struct slurm_jobcomp_context * slurm_jobcomp_context_t;
+typedef struct slurm_jobcomp_context *slurm_jobcomp_context_t;
 
 extern void jobcomp_destroy_job(void *object);
 
+/*初始化作业完成记录*/
 /* initialization of job completion logging */
 extern int g_slurm_jobcomp_init(char *jobcomp_loc);
 

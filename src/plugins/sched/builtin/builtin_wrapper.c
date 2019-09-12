@@ -50,53 +50,49 @@
 #include "src/slurmctld/slurmctld.h"
 #include "src/plugins/sched/builtin/builtin.h"
 
-const char		plugin_name[]	= "Slurm Built-in Scheduler plugin";
-const char		plugin_type[]	= "sched/builtin";
-const uint32_t		plugin_version	= SLURM_VERSION_NUMBER;
+const char plugin_name[] = "Slurm Built-in Scheduler plugin";
+const char plugin_type[] = "sched/builtin";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 static pthread_t builtin_thread = 0;
 static pthread_mutex_t thread_flag_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-int init(void)
-{
-	sched_verbose("Built-in scheduler plugin loaded");
+int init(void) {
+    sched_verbose("Built-in scheduler plugin loaded");
 
-	slurm_mutex_lock( &thread_flag_mutex );
-	if ( builtin_thread ) {
-		debug2( "Built-in scheduler thread already running, "
-			"not starting another" );
-		slurm_mutex_unlock( &thread_flag_mutex );
-		return SLURM_ERROR;
-	}
+    slurm_mutex_lock(&thread_flag_mutex);
+    if (builtin_thread) {
+        debug2("Built-in scheduler thread already running, "
+               "not starting another");
+        slurm_mutex_unlock(&thread_flag_mutex);
+        return SLURM_ERROR;
+    }
 
-	/* since we do a join on this later we don't make it detached */
-	slurm_thread_create(&builtin_thread, builtin_agent, NULL);
+    /* since we do a join on this later we don't make it detached */
+    slurm_thread_create(&builtin_thread, builtin_agent, NULL);
 
-	slurm_mutex_unlock( &thread_flag_mutex );
+    slurm_mutex_unlock(&thread_flag_mutex);
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-void fini(void)
-{
-	slurm_mutex_lock( &thread_flag_mutex );
-	if ( builtin_thread ) {
-		verbose( "Built-in scheduler plugin shutting down" );
-		stop_builtin_agent();
-		pthread_join(builtin_thread, NULL);
-		builtin_thread = 0;
-	}
-	slurm_mutex_unlock( &thread_flag_mutex );
+void fini(void) {
+    slurm_mutex_lock(&thread_flag_mutex);
+    if (builtin_thread) {
+        verbose("Built-in scheduler plugin shutting down");
+        stop_builtin_agent();
+        pthread_join(builtin_thread, NULL);
+        builtin_thread = 0;
+    }
+    slurm_mutex_unlock(&thread_flag_mutex);
 }
 
-int slurm_sched_p_reconfig(void)
-{
-	builtin_reconfig();
-	return SLURM_SUCCESS;
+int slurm_sched_p_reconfig(void) {
+    builtin_reconfig();
+    return SLURM_SUCCESS;
 }
 
 uint32_t slurm_sched_p_initial_priority(uint32_t last_prio,
-					struct job_record *job_ptr)
-{
-	return priority_g_set(last_prio, job_ptr);
+                                        struct job_record *job_ptr) {
+    return priority_g_set(last_prio, job_ptr);
 }

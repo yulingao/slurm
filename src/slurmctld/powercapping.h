@@ -97,7 +97,7 @@ uint32_t powercap_get_cluster_current_max_watts(void);
  * IN bitstr_t* idle_bitmap
  * RET uint32_t - the max consumption in watts
  */
-uint32_t powercap_get_node_bitmap_maxwatts(bitstr_t* select_bitmap);
+uint32_t powercap_get_node_bitmap_maxwatts(bitstr_t *select_bitmap);
 
 /**
  * powercap_get_job_cap
@@ -110,7 +110,7 @@ uint32_t powercap_get_node_bitmap_maxwatts(bitstr_t* select_bitmap);
  * RET - The power cap this job is restricted to
  */
 uint32_t powercap_get_job_cap(struct job_record *job_ptr, time_t when,
-			      bool reboot);
+                              bool reboot);
 
 /**
  * power_layout_ready
@@ -139,8 +139,8 @@ int which_power_layout(void);
  * RET int* - an array of allowed frequency positions 
  *            and in 0 the number of total allowed frequencies
  */
-int* powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap,
-			uint32_t cpu_freq_min, uint32_t cpu_freq_max);
+int *powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap,
+                                    uint32_t cpu_freq_min, uint32_t cpu_freq_max);
 
 /**
  * powercap_get_node_bitmap_maxwatts_dvfs
@@ -155,8 +155,9 @@ int* powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap,
  * RET uint32_t - the max consumption in watts
  */
 uint32_t powercap_get_node_bitmap_maxwatts_dvfs(bitstr_t *idle_bitmap,
-			bitstr_t *select_bitmap, uint32_t *max_watts_dvfs,
-			int* allowed_freqs, uint32_t num_cpus);
+                                                bitstr_t *select_bitmap, uint32_t *max_watts_dvfs,
+                                                int *allowed_freqs, uint32_t num_cpus);
+
 /**
  * powercap_get_job_optimal_cpufreq
  * return the position upon the allowed_freqs array that gives us the optimal
@@ -166,7 +167,7 @@ uint32_t powercap_get_node_bitmap_maxwatts_dvfs(bitstr_t *idle_bitmap,
  * IN int* allowed_freqs
  * RET int - the position on the allowed_freqs array for the optimal cpufreq
  */
-int powercap_get_job_optimal_cpufreq(uint32_t powercap, int* allowed_freqs);
+int powercap_get_job_optimal_cpufreq(uint32_t powercap, int *allowed_freqs);
 
 /**
  * powercap_get_cpufreq

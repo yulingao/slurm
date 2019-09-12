@@ -45,56 +45,55 @@
 #include "src/common/log.h"
 
 #if !defined(__FreeBSD__)
-extern int set_oom_adj(int adj)
-{
-	int fd;
-	char oom_adj[16];
-	char *oom_adj_file = "/proc/self/oom_score_adj";
 
-	fd = open(oom_adj_file, O_WRONLY);
-	if (fd < 0) {
-		if (errno == ENOENT) {
-			debug("%s not found. Falling back to oom_adj",
-			      oom_adj_file);
-			oom_adj_file = "/proc/self/oom_adj";
-			fd = open(oom_adj_file, O_WRONLY);
-			if (fd < 0) {
-				if (errno == ENOENT)
-					error("%s not found", oom_adj_file);
-				else
-					error("failed to open %s: %m",
-					      oom_adj_file);
-				return -1;
-			}
-			/* Convert range from [-1000,1000] to [-17,15]
-			 * for use with older Linux kernel before 2.6.36 */
-			if (adj < 0)
-				adj = (adj * 17) / 1000;
-			else if (adj > 0)
-				adj = (adj * 15) / 1000;
-		} else {
-			error("failed to open %s: %m", oom_adj_file);
-			return -1;
-		}
-	}
-	if (snprintf(oom_adj, 16, "%d", adj) >= 16) {
-		close(fd);
-		return -1;
-	}
-	while ((write(fd, oom_adj, strlen(oom_adj)) < 0) && (errno == EINTR))
-		;
-	close(fd);
+extern int set_oom_adj(int adj) {
+    int fd;
+    char oom_adj[16];
+    char *oom_adj_file = "/proc/self/oom_score_adj";
 
-	return 0;
+    fd = open(oom_adj_file, O_WRONLY);
+    if (fd < 0) {
+        if (errno == ENOENT) {
+            debug("%s not found. Falling back to oom_adj",
+                  oom_adj_file);
+            oom_adj_file = "/proc/self/oom_adj";
+            fd = open(oom_adj_file, O_WRONLY);
+            if (fd < 0) {
+                if (errno == ENOENT)
+                    error("%s not found", oom_adj_file);
+                else
+                    error("failed to open %s: %m",
+                          oom_adj_file);
+                return -1;
+            }
+            /* Convert range from [-1000,1000] to [-17,15]
+             * for use with older Linux kernel before 2.6.36 */
+            if (adj < 0)
+                adj = (adj * 17) / 1000;
+            else if (adj > 0)
+                adj = (adj * 15) / 1000;
+        } else {
+            error("failed to open %s: %m", oom_adj_file);
+            return -1;
+        }
+    }
+    if (snprintf(oom_adj, 16, "%d", adj) >= 16) {
+        close(fd);
+        return -1;
+    }
+    while ((write(fd, oom_adj, strlen(oom_adj)) < 0) && (errno == EINTR));
+    close(fd);
+
+    return 0;
 }
 
 #else /* __FreeBSD__ */
 
 extern int set_oom_adj(int adj)
 {
-	/* FreeBSD does not handle OOM the same way Linux does */
-	(void) adj; /* unused argument */
-	return 0;
+    /* FreeBSD does not handle OOM the same way Linux does */
+    (void) adj; /* unused argument */
+    return 0;
 }
 
 #endif

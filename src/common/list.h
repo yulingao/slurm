@@ -37,12 +37,12 @@
 #define LSD_LIST_H
 
 #define FREE_NULL_LIST(_X)    \
-	do                        \
-	{                         \
-		if (_X)               \
-			list_destroy(_X); \
-		_X = NULL;            \
-	} while (0)
+    do                        \
+    {                         \
+        if (_X)               \
+            list_destroy(_X); \
+        _X = NULL;            \
+    } while (0)
 
 /****************
  *  Data Types  *

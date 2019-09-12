@@ -64,31 +64,30 @@
  * Copyright (C) 2004 Robert Love
  */
 
-int str_to_cnt(const char* str)
-{
-	int len = strlen(str);
-	const char *ptr = str + len - 1;
-	int cnt = 0;
+int str_to_cnt(const char *str) {
+    int len = strlen(str);
+    const char *ptr = str + len - 1;
+    int cnt = 0;
 
-	/* skip 0x, it's all hex anyway */
-	if (len > 1 && !memcmp(str, "0x", 2L))
-		str += 2;
+    /* skip 0x, it's all hex anyway */
+    if (len > 1 && !memcmp(str, "0x", 2L))
+        str += 2;
 
-	while (ptr >= str) {
-		char val = slurm_char_to_hex(*ptr);
-		if (val == (char) -1)
-			return -1;
-		if (val & 1)
-			cnt++;
-		if (val & 2)
-			cnt++;
-		if (val & 4)
-			cnt++;
-		if (val & 8)
-			cnt++;
-		len--;
-		ptr--;
-	}
+    while (ptr >= str) {
+        char val = slurm_char_to_hex(*ptr);
+        if (val == (char) -1)
+            return -1;
+        if (val & 1)
+            cnt++;
+        if (val & 2)
+            cnt++;
+        if (val & 4)
+            cnt++;
+        if (val & 8)
+            cnt++;
+        len--;
+        ptr--;
+    }
 
-	return cnt;
+    return cnt;
 }

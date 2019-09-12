@@ -51,6 +51,6 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count);
 
 void fname_destroy(fname_t *fname);
 
-char * fname_remote_string (fname_t *fname);
+char *fname_remote_string(fname_t *fname);
 
 #endif /* !_FNAME_H */

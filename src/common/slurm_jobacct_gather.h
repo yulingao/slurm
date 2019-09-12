@@ -73,55 +73,55 @@
 #define CPU_TIME_ADJ 1000
 
 typedef struct {
-	uint32_t taskid; /* contains which task number it was on */
-	uint32_t nodeid; /* contains which node number it was on */
-	stepd_step_rec_t *job; /* contains stepd job pointer */
+    uint32_t taskid; /* contains which task number it was on */
+    uint32_t nodeid; /* contains which node number it was on */
+    stepd_step_rec_t *job; /* contains stepd job pointer */
 } jobacct_id_t;
 
 struct jobacctinfo {
-	pid_t pid;
-	uint32_t sys_cpu_sec;
-	uint32_t sys_cpu_usec;
-	uint32_t user_cpu_sec;
-	uint32_t user_cpu_usec;
-	uint32_t act_cpufreq; /* actual cpu frequency */
-	acct_gather_energy_t energy;
-	double last_total_cputime;
-	double this_sampled_cputime;
-	uint32_t current_weighted_freq;
-	uint32_t current_weighted_power;
-	uint32_t tres_count; /* count of tres in the usage array's */
-	uint32_t *tres_ids; /* array of tres_count of the tres id's */
-	List tres_list; /* list of tres we are dealing with */
-	uint64_t *tres_usage_in_max; /* tres max usage in data */
-	uint64_t *tres_usage_in_max_nodeid; /* tres max usage in data node id */
-	uint64_t *tres_usage_in_max_taskid; /* tres max usage in data task id */
-	uint64_t *tres_usage_in_min; /* tres min usage in data */
-	uint64_t *tres_usage_in_min_nodeid; /* tres min usage in data node id */
-	uint64_t *tres_usage_in_min_taskid; /* tres min usage in data task id */
-	uint64_t *tres_usage_in_tot; /* total usage in, in megabytes */
-	uint64_t *tres_usage_out_max; /* tres max usage out data */
-	uint64_t *tres_usage_out_max_nodeid; /* tres max usage data node id */
-	uint64_t *tres_usage_out_max_taskid; /* tres max usage data task id */
-	uint64_t *tres_usage_out_min; /* tres min usage out data */
-	uint64_t *tres_usage_out_min_nodeid; /* tres min usage data node id */
-	uint64_t *tres_usage_out_min_taskid; /* tres min usage data task id */
-	uint64_t *tres_usage_out_tot; /* total usage out, in megabytes */
+    pid_t pid;
+    uint32_t sys_cpu_sec;
+    uint32_t sys_cpu_usec;
+    uint32_t user_cpu_sec;
+    uint32_t user_cpu_usec;
+    uint32_t act_cpufreq; /* actual cpu frequency */
+    acct_gather_energy_t energy;
+    double last_total_cputime;
+    double this_sampled_cputime;
+    uint32_t current_weighted_freq;
+    uint32_t current_weighted_power;
+    uint32_t tres_count; /* count of tres in the usage array's */
+    uint32_t *tres_ids; /* array of tres_count of the tres id's */
+    List tres_list; /* list of tres we are dealing with */
+    uint64_t *tres_usage_in_max; /* tres max usage in data */
+    uint64_t *tres_usage_in_max_nodeid; /* tres max usage in data node id */
+    uint64_t *tres_usage_in_max_taskid; /* tres max usage in data task id */
+    uint64_t *tres_usage_in_min; /* tres min usage in data */
+    uint64_t *tres_usage_in_min_nodeid; /* tres min usage in data node id */
+    uint64_t *tres_usage_in_min_taskid; /* tres min usage in data task id */
+    uint64_t *tres_usage_in_tot; /* total usage in, in megabytes */
+    uint64_t *tres_usage_out_max; /* tres max usage out data */
+    uint64_t *tres_usage_out_max_nodeid; /* tres max usage data node id */
+    uint64_t *tres_usage_out_max_taskid; /* tres max usage data task id */
+    uint64_t *tres_usage_out_min; /* tres min usage out data */
+    uint64_t *tres_usage_out_min_nodeid; /* tres min usage data node id */
+    uint64_t *tres_usage_out_min_taskid; /* tres min usage data task id */
+    uint64_t *tres_usage_out_tot; /* total usage out, in megabytes */
 
-	jobacct_id_t id;
-	int dataset_id; /* dataset associated to this task when profiling */
+    jobacct_id_t id;
+    int dataset_id; /* dataset associated to this task when profiling */
 
-	/* FIXME: these need to be arrays like above */
-	double last_tres_usage_in_tot;
-	double last_tres_usage_out_tot;
-	time_t cur_time;
-	time_t last_time;
+    /* FIXME: these need to be arrays like above */
+    double last_tres_usage_in_tot;
+    double last_tres_usage_out_tot;
+    time_t cur_time;
+    time_t last_time;
 };
 
 /* Define jobacctinfo_t below to avoid including extraneous slurm headers */
 #ifndef __jobacctinfo_t_defined
 #  define  __jobacctinfo_t_defined
-   typedef struct jobacctinfo jobacctinfo_t;     /* opaque data type */
+typedef struct jobacctinfo jobacctinfo_t;     /* opaque data type */
 #endif
 
 /*
@@ -134,39 +134,51 @@ extern char *make_tres_usage_str_from_array(uint64_t *tres_cnt);
 extern int jobacct_gather_init(void); /* load the plugin */
 extern int jobacct_gather_fini(void); /* unload the plugin */
 
-extern int  jobacct_gather_startpoll(uint16_t frequency);
-extern int  jobacct_gather_endpoll(void);
+extern int jobacct_gather_startpoll(uint16_t frequency);
+
+extern int jobacct_gather_endpoll(void);
+
 extern void jobacct_gather_suspend_poll(void);
+
 extern void jobacct_gather_resume_poll(void);
 
 extern int jobacct_gather_add_task(pid_t pid, jobacct_id_t *jobacct_id,
-				   int poll);
+                                   int poll);
+
 /* must free jobacctinfo_t if not NULL */
 extern jobacctinfo_t *jobacct_gather_stat_task(pid_t pid);
+
 /* must free jobacctinfo_t if not NULL */
 extern jobacctinfo_t *jobacct_gather_remove_task(pid_t pid);
 
 extern int jobacct_gather_set_proctrack_container_id(uint64_t id);
+
 extern int jobacct_gather_set_mem_limit(uint32_t job_id,
-					uint32_t step_id,
-					uint64_t mem_limit);
+                                        uint32_t step_id,
+                                        uint64_t mem_limit);
+
 extern void jobacct_gather_handle_mem_limit(uint64_t total_job_mem,
-					    uint64_t total_job_vsize);
+                                            uint64_t total_job_vsize);
 
 extern jobacctinfo_t *jobacctinfo_create(jobacct_id_t *jobacct_id);
+
 extern void jobacctinfo_destroy(void *object);
+
 extern int jobacctinfo_setinfo(jobacctinfo_t *jobacct,
-			       enum jobacct_data_type type, void *data,
-			       uint16_t protocol_version);
+                               enum jobacct_data_type type, void *data,
+                               uint16_t protocol_version);
+
 extern int jobacctinfo_getinfo(jobacctinfo_t *jobacct,
-			       enum jobacct_data_type type, void *data,
-			       uint16_t protocol_version);
+                               enum jobacct_data_type type, void *data,
+                               uint16_t protocol_version);
+
 extern void jobacctinfo_pack(jobacctinfo_t *jobacct,
-			     uint16_t rpc_version,
-			     uint16_t protocol_type, Buf buffer);
+                             uint16_t rpc_version,
+                             uint16_t protocol_type, Buf buffer);
+
 extern int jobacctinfo_unpack(jobacctinfo_t **jobacct,
-			      uint16_t rpc_version,
-			      uint16_t protocol_type, Buf buffer, bool alloc);
+                              uint16_t rpc_version,
+                              uint16_t protocol_type, Buf buffer, bool alloc);
 
 extern void jobacctinfo_aggregate(jobacctinfo_t *dest, jobacctinfo_t *from);
 

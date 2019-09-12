@@ -54,8 +54,7 @@
 #include "src/common/xstring.h"
 
 extern int slurm_get_select_nodeinfo(dynamic_plugin_data_t *nodeinfo,
-				     enum select_nodedata_type data_type,
-				     enum node_states state, void *data)
-{
-	return select_g_select_nodeinfo_get(nodeinfo, data_type, state, data);
+                                     enum select_nodedata_type data_type,
+                                     enum node_states state, void *data) {
+    return select_g_select_nodeinfo_get(nodeinfo, data_type, state, data);
 }

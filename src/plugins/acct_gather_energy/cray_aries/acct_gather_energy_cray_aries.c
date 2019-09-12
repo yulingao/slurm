@@ -80,295 +80,285 @@ static acct_gather_energy_t *local_energy = NULL;
 static uint64_t debug_flags = 0;
 
 enum {
-	GET_ENERGY,
-	GET_POWER
+    GET_ENERGY,
+    GET_POWER
 };
 
 extern void acct_gather_energy_p_conf_set(s_p_hashtbl_t *tbl);
 
-static uint64_t _get_latest_stats(int type)
-{
-	uint64_t data = 0;
-	int fd;
-	FILE *fp = NULL;
-	char *file_name;
-	char sbuf[72];
-	int num_read;
+static uint64_t _get_latest_stats(int type) {
+    uint64_t data = 0;
+    int fd;
+    FILE *fp = NULL;
+    char *file_name;
+    char sbuf[72];
+    int num_read;
 
-	switch (type) {
-	case GET_ENERGY:
-		file_name = "/sys/cray/pm_counters/energy";
-		break;
-	case GET_POWER:
-		file_name = "/sys/cray/pm_counters/power";
-		break;
-	default:
-		error("unknown type %d", type);
-		return 0;
-		break;
-	}
+    switch (type) {
+        case GET_ENERGY:
+            file_name = "/sys/cray/pm_counters/energy";
+            break;
+        case GET_POWER:
+            file_name = "/sys/cray/pm_counters/power";
+            break;
+        default:
+            error("unknown type %d", type);
+            return 0;
+            break;
+    }
 
-	if (!(fp = fopen(file_name, "r"))) {
-		error("%s: unable to open %s", __func__, file_name);
-		return data;
-	}
+    if (!(fp = fopen(file_name, "r"))) {
+        error("%s: unable to open %s", __func__, file_name);
+        return data;
+    }
 
-	fd = fileno(fp);
-	if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
-		error("%s: fcntl(%s): %m", __func__, file_name);
-	num_read = read(fd, sbuf, (sizeof(sbuf) - 1));
-	if (num_read > 0) {
-		sbuf[num_read] = '\0';
-		sscanf(sbuf, "%"PRIu64, &data);
-	}
-	fclose(fp);
+    fd = fileno(fp);
+    if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
+        error("%s: fcntl(%s): %m", __func__, file_name);
+    num_read = read(fd, sbuf, (sizeof(sbuf) - 1));
+    if (num_read > 0) {
+        sbuf[num_read] = '\0';
+        sscanf(sbuf, "%"
+        PRIu64, &data);
+    }
+    fclose(fp);
 
-	return data;
+    return data;
 }
 
-static bool _run_in_daemon(void)
-{
-	static bool set = false;
-	static bool run = false;
+static bool _run_in_daemon(void) {
+    static bool set = false;
+    static bool run = false;
 
-	if (!set) {
-		set = 1;
-		run = run_in_daemon("slurmd,slurmstepd");
-	}
+    if (!set) {
+        set = 1;
+        run = run_in_daemon("slurmd,slurmstepd");
+    }
 
-	return run;
+    return run;
 }
 
-static void _get_joules_task(acct_gather_energy_t *energy)
-{
-	uint64_t curr_energy, diff_energy = 0;
-	uint32_t curr_power;
-	time_t now;
-	static uint32_t readings = 0;
+static void _get_joules_task(acct_gather_energy_t *energy) {
+    uint64_t curr_energy, diff_energy = 0;
+    uint32_t curr_power;
+    time_t now;
+    static uint32_t readings = 0;
 
-	if (energy->current_watts == NO_VAL)
-		return;
+    if (energy->current_watts == NO_VAL)
+        return;
 
-	now = time(NULL);
-	curr_energy = _get_latest_stats(GET_ENERGY);
-	curr_power = (uint32_t) _get_latest_stats(GET_POWER);
+    now = time(NULL);
+    curr_energy = _get_latest_stats(GET_ENERGY);
+    curr_power = (uint32_t) _get_latest_stats(GET_POWER);
 
-	if (energy->previous_consumed_energy) {
-		diff_energy = curr_energy - energy->previous_consumed_energy;
+    if (energy->previous_consumed_energy) {
+        diff_energy = curr_energy - energy->previous_consumed_energy;
 
-		energy->consumed_energy += diff_energy;
-		energy->ave_watts =  ((energy->ave_watts * readings) +
-				       energy->current_watts) / (readings + 1);
-	} else {
-		energy->base_consumed_energy = curr_energy;
-		energy->ave_watts = 0;
-	}
-	readings++;
-	energy->current_watts = curr_power;
+        energy->consumed_energy += diff_energy;
+        energy->ave_watts = ((energy->ave_watts * readings) +
+                             energy->current_watts) / (readings + 1);
+    } else {
+        energy->base_consumed_energy = curr_energy;
+        energy->ave_watts = 0;
+    }
+    readings++;
+    energy->current_watts = curr_power;
 
-	if (debug_flags & DEBUG_FLAG_ENERGY)
-		info("_get_joules_task: %"PRIu64" Joules consumed over last"
-		     " %ld secs. Currently at %u watts, ave watts %u",
-		     diff_energy,
-		     energy->poll_time ? now - energy->poll_time : 0,
-		     curr_power, energy->ave_watts);
+    if (debug_flags & DEBUG_FLAG_ENERGY)
+        info("_get_joules_task: %"
+    PRIu64
+    " Joules consumed over last"
+    " %ld secs. Currently at %u watts, ave watts %u",
+            diff_energy,
+            energy->poll_time ? now - energy->poll_time : 0,
+            curr_power, energy->ave_watts);
 
-	energy->previous_consumed_energy = curr_energy;
-	energy->poll_time = now;
+    energy->previous_consumed_energy = curr_energy;
+    energy->poll_time = now;
 }
 
-static int _running_profile(void)
-{
-	static bool run = false;
-	static uint32_t profile_opt = ACCT_GATHER_PROFILE_NOT_SET;
+static int _running_profile(void) {
+    static bool run = false;
+    static uint32_t profile_opt = ACCT_GATHER_PROFILE_NOT_SET;
 
-	if (profile_opt == ACCT_GATHER_PROFILE_NOT_SET) {
-		acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING,
-					  &profile_opt);
-		if (profile_opt & ACCT_GATHER_PROFILE_ENERGY)
-			run = true;
-	}
+    if (profile_opt == ACCT_GATHER_PROFILE_NOT_SET) {
+        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING,
+                                  &profile_opt);
+        if (profile_opt & ACCT_GATHER_PROFILE_ENERGY)
+            run = true;
+    }
 
-	return run;
+    return run;
 }
 
-static int _send_profile(void)
-{
-	uint64_t curr_watts;
-	acct_gather_profile_dataset_t dataset[] = {
-		{ "Power", PROFILE_FIELD_UINT64 },
-		{ NULL, PROFILE_FIELD_NOT_SET }
-	};
+static int _send_profile(void) {
+    uint64_t curr_watts;
+    acct_gather_profile_dataset_t dataset[] = {
+            {"Power", PROFILE_FIELD_UINT64},
+            {NULL,    PROFILE_FIELD_NOT_SET}
+    };
 
-	static int dataset_id = -1; /* id of the dataset for profile data */
+    static int dataset_id = -1; /* id of the dataset for profile data */
 
-	if (!_running_profile())
-		return SLURM_SUCCESS;
+    if (!_running_profile())
+        return SLURM_SUCCESS;
 
-	if (debug_flags & DEBUG_FLAG_ENERGY)
-		info("_send_profile: consumed %d watts",
-		     local_energy->current_watts);
+    if (debug_flags & DEBUG_FLAG_ENERGY)
+        info("_send_profile: consumed %d watts",
+             local_energy->current_watts);
 
-	if (dataset_id < 0) {
-		dataset_id = acct_gather_profile_g_create_dataset(
-			"Energy", NO_PARENT, dataset);
-		if (debug_flags & DEBUG_FLAG_ENERGY)
-			debug("Energy: dataset created (id = %d)", dataset_id);
-		if (dataset_id == SLURM_ERROR) {
-			error("Energy: Failed to create the dataset for RAPL");
-			return SLURM_ERROR;
-		}
-	}
+    if (dataset_id < 0) {
+        dataset_id = acct_gather_profile_g_create_dataset(
+                "Energy", NO_PARENT, dataset);
+        if (debug_flags & DEBUG_FLAG_ENERGY)
+            debug("Energy: dataset created (id = %d)", dataset_id);
+        if (dataset_id == SLURM_ERROR) {
+            error("Energy: Failed to create the dataset for RAPL");
+            return SLURM_ERROR;
+        }
+    }
 
-	curr_watts = (uint64_t)local_energy->current_watts;
+    curr_watts = (uint64_t) local_energy->current_watts;
 
-	if (debug_flags & DEBUG_FLAG_PROFILE) {
-		info("PROFILE-Energy: power=%u", local_energy->current_watts);
-	}
+    if (debug_flags & DEBUG_FLAG_PROFILE) {
+        info("PROFILE-Energy: power=%u", local_energy->current_watts);
+    }
 
-	return acct_gather_profile_g_add_sample_data(dataset_id,
-	                                             (void *)&curr_watts,
-						     local_energy->poll_time);
+    return acct_gather_profile_g_add_sample_data(dataset_id,
+                                                 (void *) &curr_watts,
+                                                 local_energy->poll_time);
 }
 
-extern int acct_gather_energy_p_update_node_energy(void)
-{
-	int rc = SLURM_SUCCESS;
+extern int acct_gather_energy_p_update_node_energy(void) {
+    int rc = SLURM_SUCCESS;
 
-	xassert(_run_in_daemon());
+    xassert(_run_in_daemon());
 
-	if (!local_energy || local_energy->current_watts == NO_VAL)
-		return rc;
+    if (!local_energy || local_energy->current_watts == NO_VAL)
+        return rc;
 
-	_get_joules_task(local_energy);
+    _get_joules_task(local_energy);
 
-	return rc;
+    return rc;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void)
-{
-	debug_flags = slurm_get_debug_flags();
+extern int init(void) {
+    debug_flags = slurm_get_debug_flags();
 
-	/* put anything that requires the .conf being read in
-	   acct_gather_energy_p_conf_parse
-	*/
+    /* put anything that requires the .conf being read in
+       acct_gather_energy_p_conf_parse
+    */
 
-	return SLURM_SUCCESS;
+    return SLURM_SUCCESS;
 }
 
-extern int fini(void)
-{
-	if (!_run_in_daemon())
-		return SLURM_SUCCESS;
+extern int fini(void) {
+    if (!_run_in_daemon())
+        return SLURM_SUCCESS;
 
-	acct_gather_energy_destroy(local_energy);
-	local_energy = NULL;
-	return SLURM_SUCCESS;
+    acct_gather_energy_destroy(local_energy);
+    local_energy = NULL;
+    return SLURM_SUCCESS;
 }
 
 extern int acct_gather_energy_p_get_data(enum acct_energy_type data_type,
-					 void *data)
-{
-	int rc = SLURM_SUCCESS;
-	acct_gather_energy_t *energy = (acct_gather_energy_t *)data;
-	time_t *last_poll = (time_t *)data;
-	uint16_t *sensor_cnt = (uint16_t *)data;
+                                         void *data) {
+    int rc = SLURM_SUCCESS;
+    acct_gather_energy_t *energy = (acct_gather_energy_t *) data;
+    time_t *last_poll = (time_t *) data;
+    uint16_t *sensor_cnt = (uint16_t *) data;
 
-	xassert(_run_in_daemon());
+    xassert(_run_in_daemon());
 
-	if (!local_energy) {
-		debug("%s: trying to get data %d, but no local_energy yet.",
-		      __func__, data_type);
-		acct_gather_energy_p_conf_set(NULL);
-	}
+    if (!local_energy) {
+        debug("%s: trying to get data %d, but no local_energy yet.",
+              __func__, data_type);
+        acct_gather_energy_p_conf_set(NULL);
+    }
 
-	switch (data_type) {
-	case ENERGY_DATA_JOULES_TASK:
-	case ENERGY_DATA_NODE_ENERGY_UP:
-		if (local_energy->current_watts == NO_VAL)
-			energy->consumed_energy = NO_VAL64;
-		else
-			_get_joules_task(energy);
-		break;
-	case ENERGY_DATA_STRUCT:
-	case ENERGY_DATA_NODE_ENERGY:
-		memcpy(energy, local_energy, sizeof(acct_gather_energy_t));
-		break;
-	case ENERGY_DATA_LAST_POLL:
-		*last_poll = local_energy->poll_time;
-		break;
-	case ENERGY_DATA_SENSOR_CNT:
-		*sensor_cnt = 1;
-		break;
-	default:
-		error("acct_gather_energy_p_get_data: unknown enum %d",
-		      data_type);
-		rc = SLURM_ERROR;
-		break;
-	}
-	return rc;
+    switch (data_type) {
+        case ENERGY_DATA_JOULES_TASK:
+        case ENERGY_DATA_NODE_ENERGY_UP:
+            if (local_energy->current_watts == NO_VAL)
+                energy->consumed_energy = NO_VAL64;
+            else
+                _get_joules_task(energy);
+            break;
+        case ENERGY_DATA_STRUCT:
+        case ENERGY_DATA_NODE_ENERGY:
+            memcpy(energy, local_energy, sizeof(acct_gather_energy_t));
+            break;
+        case ENERGY_DATA_LAST_POLL:
+            *last_poll = local_energy->poll_time;
+            break;
+        case ENERGY_DATA_SENSOR_CNT:
+            *sensor_cnt = 1;
+            break;
+        default:
+            error("acct_gather_energy_p_get_data: unknown enum %d",
+                  data_type);
+            rc = SLURM_ERROR;
+            break;
+    }
+    return rc;
 }
 
 extern int acct_gather_energy_p_set_data(enum acct_energy_type data_type,
-					 void *data)
-{
-	int rc = SLURM_SUCCESS;
+                                         void *data) {
+    int rc = SLURM_SUCCESS;
 
-	xassert(_run_in_daemon());
+    xassert(_run_in_daemon());
 
-	switch (data_type) {
-	case ENERGY_DATA_RECONFIG:
-		debug_flags = slurm_get_debug_flags();
-		break;
-	case ENERGY_DATA_PROFILE:
-		_get_joules_task(local_energy);
-		_send_profile();
-		break;
-	default:
-		error("acct_gather_energy_p_set_data: unknown enum %d",
-		      data_type);
-		rc = SLURM_ERROR;
-		break;
-	}
-	return rc;
+    switch (data_type) {
+        case ENERGY_DATA_RECONFIG:
+            debug_flags = slurm_get_debug_flags();
+            break;
+        case ENERGY_DATA_PROFILE:
+            _get_joules_task(local_energy);
+            _send_profile();
+            break;
+        default:
+            error("acct_gather_energy_p_set_data: unknown enum %d",
+                  data_type);
+            rc = SLURM_ERROR;
+            break;
+    }
+    return rc;
 }
 
 extern void acct_gather_energy_p_conf_options(s_p_options_t **full_options,
-					      int *full_options_cnt)
-{
-	return;
+                                              int *full_options_cnt) {
+    return;
 }
 
-extern void acct_gather_energy_p_conf_set(s_p_hashtbl_t *tbl)
-{
-	static bool flag_init = 0;
+extern void acct_gather_energy_p_conf_set(s_p_hashtbl_t *tbl) {
+    static bool flag_init = 0;
 
-	if (!_run_in_daemon())
-		return;
+    if (!_run_in_daemon())
+        return;
 
-	/* Already been here, we shouldn't need to visit again */
-	if (local_energy)
-		return;
+    /* Already been here, we shouldn't need to visit again */
+    if (local_energy)
+        return;
 
-	if (!flag_init) {
-		flag_init = 1;
-		local_energy = acct_gather_energy_alloc(1);
-		if (!_get_latest_stats(GET_ENERGY))
-			local_energy->current_watts = NO_VAL;
-		else
-			_get_joules_task(local_energy);
-	}
+    if (!flag_init) {
+        flag_init = 1;
+        local_energy = acct_gather_energy_alloc(1);
+        if (!_get_latest_stats(GET_ENERGY))
+            local_energy->current_watts = NO_VAL;
+        else
+            _get_joules_task(local_energy);
+    }
 
-	debug("%s loaded", plugin_name);
+    debug("%s loaded", plugin_name);
 
-	return;
+    return;
 }
 
-extern void acct_gather_energy_p_conf_values(List *data)
-{
-	return;
+extern void acct_gather_energy_p_conf_values(List *data) {
+    return;
 }

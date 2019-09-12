@@ -75,7 +75,7 @@ extern void acct_policy_job_fini(struct job_record *job_ptr);
  * while running was already handled in the job_pre|post_resize_acctg functions.
  */
 extern void acct_policy_alter_job(struct job_record *job_ptr,
-				  uint32_t new_time_limit);
+                                  uint32_t new_time_limit);
 
 /*
  * acct_policy_validate - validate that a job request can be satisfied without
@@ -91,12 +91,12 @@ extern void acct_policy_alter_job(struct job_record *job_ptr,
  * RET true if valid
  */
 extern bool acct_policy_validate(job_desc_msg_t *job_desc,
-				 struct part_record *part_ptr,
-				 slurmdb_assoc_rec_t *assoc_in,
-				 slurmdb_qos_rec_t *qos_ptr,
-				 uint32_t *state_reason,
-				 acct_policy_limit_set_t *acct_policy_limit_set,
-				 bool update_call);
+                                 struct part_record *part_ptr,
+                                 slurmdb_assoc_rec_t *assoc_in,
+                                 slurmdb_qos_rec_t *qos_ptr,
+                                 uint32_t *state_reason,
+                                 acct_policy_limit_set_t *acct_policy_limit_set,
+                                 bool update_call);
 
 /*
  * acct_policy_validate_pack - validate that a pack job as a whole (all
@@ -115,15 +115,15 @@ extern bool acct_policy_validate_pack(List submit_job_list);
  *	limits since job submission), then cancel the job.
  */
 extern bool acct_policy_job_runnable_pre_select(struct job_record *job_ptr,
-						bool assoc_mgr_locked);
+                                                bool assoc_mgr_locked);
 
 /*
  * acct_policy_job_runnable_post_select - After nodes have been
  *	selected for the job verify the counts don't exceed aggregated limits.
  */
 extern bool acct_policy_job_runnable_post_select(
-	struct job_record *job_ptr, uint64_t *tres_req_cnt,
-	bool assoc_mgr_locked);
+        struct job_record *job_ptr, uint64_t *tres_req_cnt,
+        bool assoc_mgr_locked);
 
 /*
  * Determine of the specified job can execute right now or is currently
@@ -135,7 +135,7 @@ extern bool acct_policy_job_runnable_state(struct job_record *job_ptr);
  * Using the limits on the job get the max nodes possible.
  */
 extern uint32_t acct_policy_get_max_nodes(struct job_record *job_ptr,
-					  uint32_t *wait_reason);
+                                          uint32_t *wait_reason);
 
 /*
  * acct_policy_update_pending_job - Make sure the limits imposed on a
@@ -159,20 +159,20 @@ extern bool acct_policy_job_time_out(struct job_record *job_ptr);
  * individually.
  */
 extern int acct_policy_handle_accrue_time(struct job_record *job_ptr,
-					  bool assoc_mgr_locked);
+                                          bool assoc_mgr_locked);
 
 /*
  * acct_policy_add_accrue_time - Implicitly add job to the accrue_cnt of the
  * assoc and QOS of the job/part.
  */
 extern void acct_policy_add_accrue_time(struct job_record *job_ptr,
-					bool assoc_mgr_locked);
+                                        bool assoc_mgr_locked);
 
 extern void acct_policy_remove_accrue_time(struct job_record *job_ptr,
-					   bool assoc_mgr_locked);
+                                           bool assoc_mgr_locked);
 
 extern uint32_t acct_policy_get_prio_thresh(struct job_record *job_ptr,
-					    bool assoc_mgr_locked);
+                                            bool assoc_mgr_locked);
 
 /*
  * acct_policy_get_preemptable_time - get the time the job becomes preemptable
@@ -188,13 +188,13 @@ extern time_t acct_policy_get_preemptable_time(struct job_record *job_ptr);
 extern bool acct_policy_is_job_preempt_exempt(struct job_record *job_ptr);
 
 extern void acct_policy_set_qos_order(struct job_record *job_ptr,
-				      slurmdb_qos_rec_t **qos_ptr_1,
-				      slurmdb_qos_rec_t **qos_ptr_2);
+                                      slurmdb_qos_rec_t **qos_ptr_1,
+                                      slurmdb_qos_rec_t **qos_ptr_2);
 
 extern slurmdb_used_limits_t *acct_policy_get_acct_used_limits(
-	List *acct_limit_list, char *acct);
+        List *acct_limit_list, char *acct);
 
 extern slurmdb_used_limits_t *acct_policy_get_user_used_limits(
-	 List *user_limit_list, uint32_t user_id);
+        List *user_limit_list, uint32_t user_id);
 
 #endif /* !_HAVE_ACCT_POLICY_H */

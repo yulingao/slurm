@@ -51,29 +51,30 @@
 #define STDIO_MAX_MSG_CACHE 128
 
 struct io_buf {
-	int ref_count;
-	uint32_t length;
-	void *data;
+    int ref_count;
+    uint32_t length;
+    void *data;
 };
 
 /* For each task's ofname and efname, are all the names NULL,
    one null and the others "/dev/null", all non-null and unique,
    or all non-null and identical. */
 typedef enum {
-	SLURMD_ALL_NULL,   /* output from all tasks goes to the client (srun) */
-	SLURMD_ONE_NULL,   /* output from one task goes to the client, output
+    SLURMD_ALL_NULL,   /* output from all tasks goes to the client (srun) */
+    SLURMD_ONE_NULL,   /* output from one task goes to the client, output
 			      from other tasks is discarded */
-	SLURMD_ALL_UNIQUE, /* separate output files per task.  written from
+    SLURMD_ALL_UNIQUE, /* separate output files per task.  written from
 			      tasks unless stepd_step_rec_t->labelio == true, in
 			      which case the slurmstepd does the write */
-	SLURMD_ALL_SAME,   /* all tasks write to the same file.  written from
+    SLURMD_ALL_SAME,   /* all tasks write to the same file.  written from
 			      tasks unless stepd_step_rec_t->labelio == true, in
 			      which case the slurmstepd does the write */
-	SLURMD_UNKNOWN
+    SLURMD_UNKNOWN
 } slurmd_filename_pattern_t;
 
 
 struct io_buf *alloc_io_buf(void);
+
 void free_io_buf(struct io_buf *buf);
 
 /*
@@ -84,7 +85,7 @@ void free_io_buf(struct io_buf *buf);
  * directly add the eio_obj_t to the eio handle with eio_new_initial_handle.
  */
 int io_initial_client_connect(srun_info_t *srun, stepd_step_rec_t *job,
-			      int stdout_tasks, int stderr_tasks);
+                              int stdout_tasks, int stderr_tasks);
 
 /*
  * Initiate a TCP connection back to a waiting client (e.g. srun).
@@ -101,8 +102,8 @@ int io_client_connect(srun_info_t *srun, stepd_step_rec_t *job);
  */
 int
 io_create_local_client(const char *filename, int file_flags,
-		       stepd_step_rec_t *job, bool labelio,
-		       int stdout_tasks, int stderr_tasks);
+                       stepd_step_rec_t *job, bool labelio,
+                       int stdout_tasks, int stderr_tasks);
 
 /*
  * Initialize each task's standard I/O file descriptors.  The file descriptors
@@ -137,10 +138,10 @@ void io_close_local_fds(stepd_step_rec_t *job);
  *  if stdout and stderr point to the same file(s).
  *  See comments above for slurmd_filename_pattern_t.
  */
-void io_find_filename_pattern(  stepd_step_rec_t *job,
-				slurmd_filename_pattern_t *outpattern,
-				slurmd_filename_pattern_t *errpattern,
-				bool *same_out_err_files );
+void io_find_filename_pattern(stepd_step_rec_t *job,
+                              slurmd_filename_pattern_t *outpattern,
+                              slurmd_filename_pattern_t *errpattern,
+                              bool *same_out_err_files);
 
 /*
  *  Get the flags to be used with the open call to create output files.
@@ -152,6 +153,6 @@ int io_get_file_flags(stepd_step_rec_t *job);
  *  socket end point shared on stdin, stdout, and stderr.
  */
 int user_managed_io_client_connect(int ntasks, srun_info_t *srun,
-				   stepd_step_task_info_t **tasks);
+                                   stepd_step_task_info_t **tasks);
 
 #endif /* !_IO_H */

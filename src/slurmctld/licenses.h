@@ -43,10 +43,10 @@
 #include "src/slurmctld/slurmctld.h"
 
 typedef struct licenses {
-	char *		name;		/* name associated with a license */
-	uint32_t	total;		/* total license configued */
-	uint32_t	used;		/* used licenses */
-	uint8_t         remote;	        /* non-zero if remote (from database) */
+    char *name;        /* name associated with a license */
+    uint32_t total;        /* total license configued */
+    uint32_t used;        /* used licenses */
+    uint8_t remote;            /* non-zero if remote (from database) */
 } licenses_t;
 
 extern List license_list;
@@ -64,8 +64,11 @@ extern int license_init(char *licenses);
 extern int license_update(char *licenses);
 
 extern void license_add_remote(slurmdb_res_rec_t *rec);
+
 extern void license_update_remote(slurmdb_res_rec_t *rec);
+
 extern void license_remove_remote(slurmdb_res_rec_t *rec);
+
 extern void license_sync_remote(List res_list);
 
 /* Free memory associated with licenses on this system */
@@ -111,7 +114,7 @@ extern int license_job_return(struct job_record *job_ptr);
  * RET: SLURM_SUCCESS, EAGAIN (not available now), SLURM_ERROR (never runnable)
  */
 extern int license_job_test(struct job_record *job_ptr, time_t when,
-			    bool reboot);
+                            bool reboot);
 
 /*
  * license_validate - Test if the required licenses are valid
@@ -126,8 +129,8 @@ extern int license_job_test(struct job_record *job_ptr, time_t when,
  * RET license_list, must be destroyed by caller
  */
 extern List license_validate(char *licenses, bool validate_configured,
-			     bool validate_existing,
-			     uint64_t *tres_req_cnt, bool *valid);
+                             bool validate_existing,
+                             uint64_t *tres_req_cnt, bool *valid);
 
 /*
  * license_list_overlap - test if there is any overlap in licenses
@@ -175,7 +178,7 @@ extern char *licenses_2_tres_str(List license_list);
  * locked if assoc_mgr tres read lock is locked or not.
  */
 extern void license_set_job_tres_cnt(List license_list,
-				     uint64_t *tres_cnt,
-				     bool locked);
+                                     uint64_t *tres_cnt,
+                                     bool locked);
 
 #endif /* !_LICENSES_H */

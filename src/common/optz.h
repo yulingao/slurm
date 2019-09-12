@@ -42,12 +42,12 @@
 
 #include <getopt.h>
 
-struct option * optz_create (void);
+struct option *optz_create(void);
 
-void optz_destroy (struct option *optz);
+void optz_destroy(struct option *optz);
 
-int optz_add (struct option **optz, const struct option *opt);
+int optz_add(struct option **optz, const struct option *opt);
 
-int optz_append (struct option **optz, const struct option *);
+int optz_append(struct option **optz, const struct option *);
 
 #endif /* !_OPTZ_H */

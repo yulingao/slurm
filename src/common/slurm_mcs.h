@@ -41,20 +41,30 @@
 
 #include "src/slurmctld/slurmctld.h"
 
-#define MCS_SELECT_NOSELECT		0x00
-#define MCS_SELECT_ONDEMANDSELECT	0x01
-#define MCS_SELECT_SELECT		0x02
+#define MCS_SELECT_NOSELECT        0x00
+#define MCS_SELECT_ONDEMANDSELECT    0x01
+#define MCS_SELECT_SELECT        0x02
 
 extern int slurm_mcs_init(void);
+
 extern int slurm_mcs_fini(void);
+
 extern int slurm_mcs_reconfig(void);
+
 extern char *slurm_mcs_get_params_specific(void);
+
 extern int slurm_mcs_reset_params(void);
+
 extern int slurm_mcs_get_select(struct job_record *job_ptr);
+
 extern int slurm_mcs_get_enforced(void);
+
 extern int slurm_mcs_get_privatedata(void);
+
 extern char *slurm_mcs_get_params_specific(void);
+
 extern int mcs_g_set_mcs_label(struct job_record *job_ptr, char *label);
+
 extern int mcs_g_check_mcs_label(uint32_t user_id, char *mcs_label);
 
 #endif /*_SLURM_MCS_H */

@@ -12,7 +12,6 @@
 
 extern int srun(int argc, char **argv);
 
-int main(int argc, char **argv)
-{
-	return srun(argc, argv);
+int main(int argc, char **argv) {
+    return srun(argc, argv);
 }

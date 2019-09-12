@@ -36,28 +36,29 @@
 #include "src/common/list.h"
 #include "src/common/bitstring.h"
 #include "src/common/slurm_step_layout.h"
+
 struct step_launch_state;
 
 
 struct client_io {
-	/* input parameters - set (indirectly) by user */
-	int num_tasks;
-	int num_nodes;
-	bool label;
-	int taskid_width;	/* characters needed for task_id label */
-	uint32_t pack_offset;	/* offset within a pack-job or NO_VAL */
-	uint32_t task_offset;	/* task offset within a pack-job or NO_VAL */
+    /* input parameters - set (indirectly) by user */
+    int num_tasks;
+    int num_nodes;
+    bool label;
+    int taskid_width;    /* characters needed for task_id label */
+    uint32_t pack_offset;    /* offset within a pack-job or NO_VAL */
+    uint32_t task_offset;    /* task offset within a pack-job or NO_VAL */
 
-	char *io_key;
+    char *io_key;
 
-	/* internal variables */
-	pthread_t ioid;		/* stdio thread id 		  */
-	int num_listen;		/* Number of stdio listen sockets */
-	int *listensock;	/* Array of stdio listen sockets  */
-	uint16_t *listenport;	/* Array of stdio listen port numbers */
+    /* internal variables */
+    pthread_t ioid;        /* stdio thread id 		  */
+    int num_listen;        /* Number of stdio listen sockets */
+    int *listensock;    /* Array of stdio listen sockets  */
+    uint16_t *listenport;    /* Array of stdio listen port numbers */
 
-	eio_handle_t *eio;      /* Event IO handle for stdio traffic */
-	pthread_mutex_t ioservers_lock; /* This lock protects
+    eio_handle_t *eio;      /* Event IO handle for stdio traffic */
+    pthread_mutex_t ioservers_lock; /* This lock protects
 				   ioservers_ready_bits, ioservers_ready,
 				   pointers in ioserver, all the msg_queues
 				   in each ioserver's server_io_info, and
@@ -65,30 +66,30 @@ struct client_io {
 				   are used both for normal writes
 				   and writes that verify a connection to
 				   a remote host. */
-	bitstr_t *ioservers_ready_bits; /* length "num_nodes" */
-	int ioservers_ready;    /* Number of servers that established contact */
-	eio_obj_t **ioserver;	/* Array of nhosts pointers to eio_obj_t */
-	eio_obj_t *stdin_obj;
-	eio_obj_t *stdout_obj;
-	eio_obj_t *stderr_obj;
-	List free_incoming;     /* List of free struct io_buf * for incoming
+    bitstr_t *ioservers_ready_bits; /* length "num_nodes" */
+    int ioservers_ready;    /* Number of servers that established contact */
+    eio_obj_t **ioserver;    /* Array of nhosts pointers to eio_obj_t */
+    eio_obj_t *stdin_obj;
+    eio_obj_t *stdout_obj;
+    eio_obj_t *stderr_obj;
+    List free_incoming;     /* List of free struct io_buf * for incoming
 				 * traffic. "incoming" means traffic from the
 				 * client to the tasks.
 				 */
-	List free_outgoing;     /* List of free struct io_buf * for outgoing
+    List free_outgoing;     /* List of free struct io_buf * for outgoing
 				 * traffic "outgoing" means traffic from the
 				 * tasks to the client.
 				 */
-	int incoming_count;     /* Count of total incoming message buffers
+    int incoming_count;     /* Count of total incoming message buffers
 			         * including free_incoming buffers and
 			         * buffers in use.
 			         */
-	int outgoing_count;     /* Count of total incoming message buffers
+    int outgoing_count;     /* Count of total incoming message buffers
 			         * including free_incoming buffers and
 			         * buffers in use.
 			         */
 
-	struct step_launch_state *sls; /* Used to notify the main thread of an
+    struct step_launch_state *sls; /* Used to notify the main thread of an
 				       I/O problem.  */
 };
 
@@ -104,9 +105,9 @@ typedef struct client_io client_io_t;
  *	of validity check.
  */
 client_io_t *client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks,
-				      int num_nodes, slurm_cred_t *cred,
-				      bool label, uint32_t pack_offset,
-				      uint32_t task_offset);
+                                      int num_nodes, slurm_cred_t *cred,
+                                      bool label, uint32_t pack_offset,
+                                      uint32_t task_offset);
 
 int client_io_handler_start(client_io_t *cio);
 
@@ -122,7 +123,7 @@ int client_io_handler_start(client_io_t *cio);
  * IN num_node_ids - the length of the node_ids array
  */
 void client_io_handler_downnodes(client_io_t *cio,
-				 const int *node_ids, int num_node_ids);
+                                 const int *node_ids, int num_node_ids);
 
 /*
  * Tell the client IO handler to test the communication path to a
@@ -131,7 +132,7 @@ void client_io_handler_downnodes(client_io_t *cio,
  * will be notified.
  */
 int client_io_handler_send_test_message(client_io_t *cio, int node_id,
-					bool *sent_message);
+                                        bool *sent_message);
 
 /*
  * Tell the client IO handler that the step has been aborted, and if

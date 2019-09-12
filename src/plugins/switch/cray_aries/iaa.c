@@ -48,43 +48,43 @@
  * Write the IAA file and set the filename in the job's environment
  */
 int write_iaa_file(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job,
-		   int *ptags, int num_ptags, alpsc_peInfo_t *alpsc_pe_info)
+           int *ptags, int num_ptags, alpsc_peInfo_t *alpsc_pe_info)
 {
-	char *fname = xstrdup_printf(CRAY_IAA_FILE, sw_job->apid);
-	int rc, ret = SLURM_ERROR;
-	char *err_msg = NULL;
+    char *fname = xstrdup_printf(CRAY_IAA_FILE, sw_job->apid);
+    int rc, ret = SLURM_ERROR;
+    char *err_msg = NULL;
 
-	do {
-		// Write the file
-		rc = alpsc_write_iaa_info(&err_msg, fname, sw_job->num_cookies,
-					  (const char **)sw_job->cookies,
-					  num_ptags, ptags, alpsc_pe_info);
-		ALPSC_CN_DEBUG("alpsc_write_iaa_info");
-		if (rc != 1) {
-			break;
-		}
+    do {
+        // Write the file
+        rc = alpsc_write_iaa_info(&err_msg, fname, sw_job->num_cookies,
+                      (const char **)sw_job->cookies,
+                      num_ptags, ptags, alpsc_pe_info);
+        ALPSC_CN_DEBUG("alpsc_write_iaa_info");
+        if (rc != 1) {
+            break;
+        }
 
-		// chown the file to the job user
-		rc = chown(fname, job->uid, job->gid);
-		if (rc == -1) {
-			CRAY_ERR("chown(%s, %d, %d) failed: %m",
-				 fname, (int)job->uid, (int)job->gid);
-			break;
-		}
+        // chown the file to the job user
+        rc = chown(fname, job->uid, job->gid);
+        if (rc == -1) {
+            CRAY_ERR("chown(%s, %d, %d) failed: %m",
+                 fname, (int)job->uid, (int)job->gid);
+            break;
+        }
 
-		// Write the environment variable
-		rc = env_array_overwrite(&job->env, CRAY_IAA_INFO_FILE_ENV,
-					 fname);
-		if (rc == 0) {
-			CRAY_ERR("Failed to set env variable %s",
-				 CRAY_IAA_INFO_FILE_ENV);
-			break;
-		}
-		ret = SLURM_SUCCESS;
-	} while(0);
+        // Write the environment variable
+        rc = env_array_overwrite(&job->env, CRAY_IAA_INFO_FILE_ENV,
+                     fname);
+        if (rc == 0) {
+            CRAY_ERR("Failed to set env variable %s",
+                 CRAY_IAA_INFO_FILE_ENV);
+            break;
+        }
+        ret = SLURM_SUCCESS;
+    } while(0);
 
-	xfree(fname);
-	return ret;
+    xfree(fname);
+    return ret;
 }
 
 /*
@@ -92,9 +92,9 @@ int write_iaa_file(stepd_step_rec_t *job, slurm_cray_jobinfo_t *sw_job,
  */
 void unlink_iaa_file(slurm_cray_jobinfo_t *job)
 {
-	char *fname = xstrdup_printf(CRAY_IAA_FILE, job->apid);
-	unlink(fname);
-	xfree(fname);
+    char *fname = xstrdup_printf(CRAY_IAA_FILE, job->apid);
+    unlink(fname);
+    xfree(fname);
 }
 
 #endif

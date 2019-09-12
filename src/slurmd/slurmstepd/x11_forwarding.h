@@ -38,6 +38,6 @@
 #define _X11_FORWARDING_H_
 
 extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
-			     char **tmp_xauthority);
+                             char **tmp_xauthority);
 
 #endif /* _X11_FORWARDING_H_ */

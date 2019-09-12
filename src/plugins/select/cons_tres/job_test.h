@@ -42,7 +42,7 @@
  * Add job resource use to the partition data structure
  */
 extern void add_job_to_row(struct job_resources *job,
-			   struct part_row_data *r_ptr);
+                           struct part_row_data *r_ptr);
 
 /*
  * Build an empty array of bitmaps, one per node
@@ -60,11 +60,11 @@ extern bitstr_t **build_core_array(void);
  * IN job_ptr - pointer to single job removed, pass NULL to completely rebuild
  */
 extern void build_row_bitmaps(struct part_res_record *p_ptr,
-			      struct job_record *job_ptr);
+                              struct job_record *job_ptr);
 
 /* test for conflicting core bitmap elements */
 extern int can_job_fit_in_row(struct job_resources *job,
-			      struct part_row_data *r_ptr);
+                              struct part_row_data *r_ptr);
 
 /* Clear all elements of an array of bitmaps, one per node */
 extern void clear_core_array(bitstr_t **core_array);
@@ -121,7 +121,7 @@ extern uint64_t get_def_mem_per_gpu(List job_defaults_list);
 
 /* Return TRUE if identified job is preemptable */
 extern bool is_preemptable(struct job_record *job_ptr,
-			   List preemptee_candidates);
+                           List preemptee_candidates);
 
 /*
  * Return true if job is in the processing of cleaning up.
@@ -132,7 +132,7 @@ extern bool is_preemptable(struct job_record *job_ptr,
 extern bool job_cleaning(struct job_record *job_ptr);
 
 extern void log_tres_state(struct node_use_record *node_usage,
-			   struct part_res_record *part_record_ptr);
+                           struct part_res_record *part_record_ptr);
 
 /*
  * Bit a core bitmap array of available cores
@@ -157,20 +157,20 @@ extern bitstr_t **mark_avail_cores(bitstr_t *node_bitmap, uint16_t core_spec);
  * See also: _add_job_to_res() in select_cons_tres.c
  */
 extern int rm_job_res(struct part_res_record *part_record_ptr,
-		      struct node_use_record *node_usage,
-		      struct job_record *job_ptr, int action, bool job_fini);
+                      struct node_use_record *node_usage,
+                      struct job_record *job_ptr, int action, bool job_fini);
 
 /* Allocate resources for a job now, if possible */
 extern int run_now(struct job_record *job_ptr, bitstr_t *node_bitmap,
-		   uint32_t min_nodes, uint32_t max_nodes,
-		   uint32_t req_nodes, uint16_t job_node_req,
-		   List preemptee_candidates, List *preemptee_job_list,
-		   bitstr_t **exc_cores);
+                   uint32_t min_nodes, uint32_t max_nodes,
+                   uint32_t req_nodes, uint16_t job_node_req,
+                   List preemptee_candidates, List *preemptee_job_list,
+                   bitstr_t **exc_cores);
 
 /* Determine if a job can ever run */
 extern int test_only(struct job_record *job_ptr, bitstr_t *node_bitmap,
-		     uint32_t min_nodes, uint32_t max_nodes,
-		     uint32_t req_nodes, uint16_t job_node_req);
+                     uint32_t min_nodes, uint32_t max_nodes,
+                     uint32_t req_nodes, uint16_t job_node_req);
 
 /*
  * Determine where and when the job at job_ptr can begin execution by updating
@@ -179,9 +179,9 @@ extern int test_only(struct job_record *job_ptr, bitstr_t *node_bitmap,
  * will begin execution. Used by Slurm's sched/backfill plugin.
  */
 extern int will_run_test(struct job_record *job_ptr, bitstr_t *node_bitmap,
-			 uint32_t min_nodes, uint32_t max_nodes,
-			 uint32_t req_nodes, uint16_t job_node_req,
-			 List preemptee_candidates, List *preemptee_job_list,
-			 bitstr_t **exc_cores);
+                         uint32_t min_nodes, uint32_t max_nodes,
+                         uint32_t req_nodes, uint16_t job_node_req,
+                         List preemptee_candidates, List *preemptee_job_list,
+                         bitstr_t **exc_cores);
 
 #endif /* !_CONS_TRES_JOB_TEST_H */

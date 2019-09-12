@@ -50,4 +50,4 @@ extern void stop_builtin_agent(void);
 /* Note that slurm.conf has changed */
 extern void builtin_reconfig(void);
 
-#endif	/* _SLURM_BUILTIN_H */
+#endif    /* _SLURM_BUILTIN_H */

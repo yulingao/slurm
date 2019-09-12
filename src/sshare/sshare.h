@@ -65,8 +65,8 @@
 #include "src/common/print_fields.h"
 #include "src/common/slurmdb_defs.h"
 
-#define CKPT_WAIT	10
-#define	MAX_INPUT_FIELDS 128
+#define CKPT_WAIT    10
+#define    MAX_INPUT_FIELDS 128
 
 /* Print only the users and not the hierarchy.
  */
@@ -77,31 +77,31 @@
 #define PRINT_PARTITIONS 0x02
 
 typedef enum {
-	SSHARE_TIME_SECS,
-	SSHARE_TIME_MINS,
-	SSHARE_TIME_HOURS,
+    SSHARE_TIME_SECS,
+    SSHARE_TIME_MINS,
+    SSHARE_TIME_HOURS,
 } sshare_time_format_t;
 
 enum {
-	PRINT_ACCOUNT,
-	PRINT_CLUSTER,
-	PRINT_TRESMINS,
-	PRINT_EUSED,
-	PRINT_FSFACTOR,
-	PRINT_ID,
-	PRINT_NORMS,
-	PRINT_NORMU,
-	PRINT_PART,
-	PRINT_RAWS,
-	PRINT_RAWU,
-	PRINT_RUNMINS,
-	PRINT_USER,
-	PRINT_LEVELFS,
-	PRINT_GRPTRESRAW
+    PRINT_ACCOUNT,
+    PRINT_CLUSTER,
+    PRINT_TRESMINS,
+    PRINT_EUSED,
+    PRINT_FSFACTOR,
+    PRINT_ID,
+    PRINT_NORMS,
+    PRINT_NORMU,
+    PRINT_PART,
+    PRINT_RAWS,
+    PRINT_RAWU,
+    PRINT_RUNMINS,
+    PRINT_USER,
+    PRINT_LEVELFS,
+    PRINT_GRPTRESRAW
 };
 
-extern int exit_code;	/* sshare's exit code, =1 on any error at any time */
-extern int quiet_flag;	/* quiet=1, verbose=-1, normal=0 */
+extern int exit_code;    /* sshare's exit code, =1 on any error at any time */
+extern int quiet_flag;    /* quiet=1, verbose=-1, normal=0 */
 extern uint32_t my_uid;
 extern sshare_time_format_t time_format;
 extern char *time_format_string;

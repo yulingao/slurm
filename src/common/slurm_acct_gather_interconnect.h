@@ -57,9 +57,11 @@
 extern int acct_gather_interconnect_init(void); /* load the plugin */
 extern int acct_gather_interconnect_fini(void); /* unload the plugin */
 extern int acct_gather_interconnect_startpoll(uint32_t frequency);
+
 extern int acct_gather_interconnect_g_get_data(acct_gather_data_t *data);
 
 extern int acct_gather_interconnect_g_node_update(void);
+
 /*
  * Define plugin local conf for acct_gather.conf
  *
@@ -69,7 +71,8 @@ extern int acct_gather_interconnect_g_node_update(void);
  *      full_options_cnt -- count of plugin local definitions
  */
 extern int acct_gather_interconnect_g_conf_options(s_p_options_t **full_options,
-						   int *full_options_cnt);
+                                                   int *full_options_cnt);
+
 /*
  * set plugin local conf from acct_gather.conf into its structure
  *

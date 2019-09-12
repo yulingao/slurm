@@ -55,14 +55,14 @@
  */
 
 #ifndef _BITSTRING_H_
-#define	_BITSTRING_H_
+#define    _BITSTRING_H_
 
 #include <inttypes.h>
 
-#define BITSTR_SHIFT_WORD8	3
-#define BITSTR_SHIFT_WORD64	6
+#define BITSTR_SHIFT_WORD8    3
+#define BITSTR_SHIFT_WORD64    6
 #define BITSTR_MAXVAL           0xffffffffffffffff
-#define BITSTR_FMT		PRId64
+#define BITSTR_FMT        PRId64
 
 /* Below are also defined in src/slurm/slurm.h.in.  If it changes please update
  * that as well.
@@ -71,7 +71,7 @@
 #  define __bitstr_datatypes_defined
 
 typedef int64_t bitstr_t;
-#define BITSTR_SHIFT 		BITSTR_SHIFT_WORD64
+#define BITSTR_SHIFT        BITSTR_SHIFT_WORD64
 
 typedef bitstr_t bitoff_t;
 
@@ -82,76 +82,123 @@ typedef bitstr_t bitoff_t;
  */
 
 /* 2 words used for magic cookie and size */
-#define BITSTR_OVERHEAD 	2
+#define BITSTR_OVERHEAD    2
 
 /* bitstr_t signature in first word */
-#define BITSTR_MAGIC 		0x42434445
-#define BITSTR_MAGIC_STACK	0x42434446 /* signature if on stack */
+#define BITSTR_MAGIC        0x42434445
+#define BITSTR_MAGIC_STACK    0x42434446 /* signature if on stack */
 
 /* max bit position in word */
-#define BITSTR_MAXPOS		(sizeof(bitstr_t)*8 - 1)
+#define BITSTR_MAXPOS        (sizeof(bitstr_t)*8 - 1)
 
 /* compat with Vixie macros */
 bitstr_t *bit_alloc(bitoff_t nbits);
+
 int bit_test(bitstr_t *b, bitoff_t bit);
+
 void bit_set(bitstr_t *b, bitoff_t bit);
+
 void bit_clear(bitstr_t *b, bitoff_t bit);
+
 void bit_nclear(bitstr_t *b, bitoff_t start, bitoff_t stop);
+
 void bit_nset(bitstr_t *b, bitoff_t start, bitoff_t stop);
+
 void bit_set_all(bitstr_t *b);
+
 void bit_clear_all(bitstr_t *b);
 
 /* changed interface from Vixie macros */
 bitoff_t bit_ffc(bitstr_t *b);
+
 bitoff_t bit_ffs(bitstr_t *b);
 
 /* new */
 bitoff_t bit_nffs(bitstr_t *b, int32_t n);
-bitoff_t bit_nffc(bitstr_t *b, int32_t n);
-bitoff_t bit_noc(bitstr_t *b, int32_t n, int32_t seed);
-void	bit_free(bitstr_t *b);
-bitstr_t *bit_realloc(bitstr_t *b, bitoff_t nbits);
-bitoff_t bit_size(bitstr_t *b);
-void	bit_and(bitstr_t *b1, bitstr_t *b2);
-void	bit_and_not(bitstr_t *b1, bitstr_t *b2);
-void	bit_not(bitstr_t *b);
-void	bit_or(bitstr_t *b1, bitstr_t *b2);
-void	bit_or_not(bitstr_t *b1, bitstr_t *b2);
-int32_t	bit_set_count(bitstr_t *b);
-int32_t	bit_set_count_range(bitstr_t *b, int32_t start, int32_t end);
-int32_t	bit_clear_count(bitstr_t *b);
-int32_t	bit_clear_count_range(bitstr_t *b, int32_t start, int32_t end);
-int32_t	bit_nset_max_count(bitstr_t *b);
-bitstr_t *bit_rotate_copy(bitstr_t *b1, int32_t n, bitoff_t nbits);
-void	bit_rotate(bitstr_t *b1, int32_t n);
-char	*bit_fmt(char *str, int32_t len, bitstr_t *b);
-char    *bit_fmt_full(bitstr_t *b);
-char    *bit_fmt_range(bitstr_t *b, int offset, int len);
-int	bit_unfmt(bitstr_t *b, char *str);
-int32_t	*bitfmt2int (char *bit_str_ptr);
-char *  inx2bitfmt (int32_t *inx);
-int     inx2bitstr(bitstr_t *b, int32_t *inx);
-int32_t *bitstr2inx(bitstr_t *b);
-char	*bit_fmt_hexmask(bitstr_t *b);
-int 	bit_unfmt_hexmask(bitstr_t *b, const char *str);
-char	*bit_fmt_binmask(bitstr_t *b);
-void 	bit_unfmt_binmask(bitstr_t *b, const char *str);
-bitoff_t bit_fls(bitstr_t *b);
-void	bit_fill_gaps(bitstr_t *b);
-int	bit_super_set(bitstr_t *b1, bitstr_t *b2);
-int     bit_overlap(bitstr_t *b1, bitstr_t *b2);
-int     bit_equal(bitstr_t *b1, bitstr_t *b2);
-void    bit_copybits(bitstr_t *dest, bitstr_t *src);
-bitstr_t *bit_copy(bitstr_t *b);
-bitstr_t *bit_pick_cnt(bitstr_t *b, bitoff_t nbits);
-bitoff_t bit_get_bit_num(bitstr_t *b, int32_t pos);
-int32_t	bit_get_pos_num(bitstr_t *b, bitoff_t pos);
 
-#define FREE_NULL_BITMAP(_X)		\
-	do {				\
-		if (_X) bit_free (_X);	\
-		_X	= NULL; 	\
-	} while (0)
+bitoff_t bit_nffc(bitstr_t *b, int32_t n);
+
+bitoff_t bit_noc(bitstr_t *b, int32_t n, int32_t seed);
+
+void bit_free(bitstr_t *b);
+
+bitstr_t *bit_realloc(bitstr_t *b, bitoff_t nbits);
+
+bitoff_t bit_size(bitstr_t *b);
+
+void bit_and(bitstr_t *b1, bitstr_t *b2);
+
+void bit_and_not(bitstr_t *b1, bitstr_t *b2);
+
+void bit_not(bitstr_t *b);
+
+void bit_or(bitstr_t *b1, bitstr_t *b2);
+
+void bit_or_not(bitstr_t *b1, bitstr_t *b2);
+
+int32_t bit_set_count(bitstr_t *b);
+
+int32_t bit_set_count_range(bitstr_t *b, int32_t start, int32_t end);
+
+int32_t bit_clear_count(bitstr_t *b);
+
+int32_t bit_clear_count_range(bitstr_t *b, int32_t start, int32_t end);
+
+int32_t bit_nset_max_count(bitstr_t *b);
+
+bitstr_t *bit_rotate_copy(bitstr_t *b1, int32_t n, bitoff_t nbits);
+
+void bit_rotate(bitstr_t *b1, int32_t n);
+
+char *bit_fmt(char *str, int32_t len, bitstr_t *b);
+
+char *bit_fmt_full(bitstr_t *b);
+
+char *bit_fmt_range(bitstr_t *b, int offset, int len);
+
+int bit_unfmt(bitstr_t *b, char *str);
+
+int32_t *bitfmt2int(char *bit_str_ptr);
+
+char *inx2bitfmt(int32_t *inx);
+
+int inx2bitstr(bitstr_t *b, int32_t *inx);
+
+int32_t *bitstr2inx(bitstr_t *b);
+
+char *bit_fmt_hexmask(bitstr_t *b);
+
+int bit_unfmt_hexmask(bitstr_t *b, const char *str);
+
+char *bit_fmt_binmask(bitstr_t *b);
+
+void bit_unfmt_binmask(bitstr_t *b, const char *str);
+
+bitoff_t bit_fls(bitstr_t *b);
+
+void bit_fill_gaps(bitstr_t *b);
+
+int bit_super_set(bitstr_t *b1, bitstr_t *b2);
+
+int bit_overlap(bitstr_t *b1, bitstr_t *b2);
+
+int bit_equal(bitstr_t *b1, bitstr_t *b2);
+
+void bit_copybits(bitstr_t *dest, bitstr_t *src);
+
+bitstr_t *bit_copy(bitstr_t *b);
+
+bitstr_t *bit_pick_cnt(bitstr_t *b, bitoff_t nbits);
+
+bitoff_t bit_get_bit_num(bitstr_t *b, int32_t pos);
+
+int32_t bit_get_pos_num(bitstr_t *b, bitoff_t pos);
+
+#define FREE_NULL_BITMAP(_X)        \
+    do {                \
+        if (_X) bit_free (_X);    \
+        _X    = NULL;    \
+    } while (0)
 
 
 #endif /* !_BITSTRING_H_ */

@@ -76,7 +76,7 @@
  *
  */
 extern ssize_t slurm_msg_recvfrom_timeout(int fd, char **buf,
-		size_t *len, uint32_t flags, int timeout);
+                                          size_t *len, uint32_t flags, int timeout);
 
 /* slurm_msg_sendto
  * Send message over the given connection, default timeout value
@@ -86,14 +86,15 @@ extern ssize_t slurm_msg_recvfrom_timeout(int fd, char **buf,
  * RET number of bytes written
  */
 extern ssize_t slurm_msg_sendto(int open_fd,
-				char *buffer,
-				size_t size);
+                                char *buffer,
+                                size_t size);
+
 /* slurm_msg_sendto_timeout is identical to _slurm_msg_sendto except
  * IN timeout - maximum time to wait for a message in milliseconds */
 extern ssize_t slurm_msg_sendto_timeout(int open_fd,
-					char *buffer,
-					size_t size,
-					int timeout);
+                                        char *buffer,
+                                        size_t size,
+                                        int timeout);
 
 /********************/
 /* stream functions */
@@ -131,9 +132,10 @@ extern int slurm_open_stream(slurm_addr_t *slurm_address, bool retry);
 extern int slurm_get_stream_addr(int open_fd, slurm_addr_t *address);
 
 extern int slurm_send_timeout(int open_fd, char *buffer, size_t size,
-			      uint32_t flags, int timeout);
+                              uint32_t flags, int timeout);
+
 extern int slurm_recv_timeout(int open_fd, char *buffer, size_t size,
-			      uint32_t flags, int timeout);
+                              uint32_t flags, int timeout);
 
 /***************************/
 /* slurm address functions */
@@ -143,8 +145,8 @@ extern int slurm_recv_timeout(int open_fd, char *buffer, size_t size,
  * IN port - port to be used
  * IN host - name of host to connect with
  */
-extern void slurm_set_addr_char ( slurm_addr_t * slurm_address ,
-				  uint16_t port , char * host ) ;
+extern void slurm_set_addr_char(slurm_addr_t *slurm_address,
+                                uint16_t port, char *host);
 
 /* given a slurm_address it returns its port and hostname
  * IN slurm_address	- slurm_addr_t to be queried
@@ -152,17 +154,17 @@ extern void slurm_set_addr_char ( slurm_addr_t * slurm_address ,
  * OUT host		- hostname
  * IN buf_len		- length of hostname buffer
  */
-extern void slurm_get_addr ( slurm_addr_t * slurm_address ,
-			     uint16_t * port , char * host ,
-			     uint32_t buf_len ) ;
+extern void slurm_get_addr(slurm_addr_t *slurm_address,
+                           uint16_t *port, char *host,
+                           uint32_t buf_len);
 
 /* prints a slurm_addr_t into a buf
  * IN address		- slurm_addr_t to print
  * IN buf		- space for string representation of slurm_addr
  * IN n			- max number of bytes to write (including NUL)
  */
-extern void slurm_print_slurm_addr ( slurm_addr_t * address,
-				     char *buf, size_t n ) ;
+extern void slurm_print_slurm_addr(slurm_addr_t *address,
+                                   char *buf, size_t n);
 
 /*****************************/
 /* slurm addr pack functions */
@@ -173,8 +175,8 @@ extern void slurm_print_slurm_addr ( slurm_addr_t * address,
  * IN slurm_address	- slurm_addr_t to pack
  * IN/OUT buffer	- buffer to pack the slurm_addr_t into
  */
-extern void slurm_pack_slurm_addr ( slurm_addr_t * slurm_address ,
-				    Buf buffer ) ;
+extern void slurm_pack_slurm_addr(slurm_addr_t *slurm_address,
+                                  Buf buffer);
 
 /* slurm_unpack_slurm_addr_no_alloc
  * unpacks a buffer into a slurm_addr_t after serialization transport
@@ -182,7 +184,7 @@ extern void slurm_pack_slurm_addr ( slurm_addr_t * slurm_address ,
  * IN/OUT buffer	- buffer to upack the slurm_addr_t from
  * returns 		- Slurm error code
  */
-extern int slurm_unpack_slurm_addr_no_alloc (
-	slurm_addr_t * slurm_address , Buf buffer ) ;
+extern int slurm_unpack_slurm_addr_no_alloc(
+        slurm_addr_t *slurm_address, Buf buffer);
 
 #endif /* !_SLURM_PROTOCOL_INTERFACE_H */

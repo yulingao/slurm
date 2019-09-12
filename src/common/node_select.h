@@ -51,111 +51,151 @@
 #define NOT_FROM_CONTROLLER -2
 
 typedef struct {
-	bitstr_t *avail_nodes;      /* usable nodes are set on input, nodes
+    bitstr_t *avail_nodes;      /* usable nodes are set on input, nodes
 				     * not required to satisfy the request
 				     * are cleared, other left set */
-	struct job_record *job_ptr; /* pointer to job being scheduled
+    struct job_record *job_ptr; /* pointer to job being scheduled
 				     * start_time is set when we can
 				     * possibly start job. Or must not
 				     * increase for success of running
 				     * other jobs.
 				     */
-	uint32_t max_nodes;         /* maximum count of nodes (0==don't care) */
-	uint32_t min_nodes;         /* minimum count of nodes */
-	uint32_t req_nodes;         /* requested (or desired) count of nodes */
+    uint32_t max_nodes;         /* maximum count of nodes (0==don't care) */
+    uint32_t min_nodes;         /* minimum count of nodes */
+    uint32_t req_nodes;         /* requested (or desired) count of nodes */
 } select_will_run_t;
 
 /*
  * Local data
  */
 typedef struct slurm_select_ops {
-	uint32_t	(*plugin_id);
-	int		(*state_save)		(char *dir_name);
-	int		(*state_restore)	(char *dir_name);
-	int		(*job_init)		(List job_list);
-	int		(*node_ranking)		(struct node_record *node_ptr,
-						 int node_cnt);
-	int		(*node_init)		(struct node_record *node_ptr,
-						 int node_cnt);
-	int		(*block_init)		(List block_list);
-	int		(*job_test)		(struct job_record *job_ptr,
-						 bitstr_t *bitmap,
-						 uint32_t min_nodes,
-						 uint32_t max_nodes,
-						 uint32_t req_nodes,
-						 uint16_t mode,
-						 List preeemptee_candidates,
-						 List *preemptee_job_list,
-						 bitstr_t *exc_core_bitmap);
-	int		(*job_begin)		(struct job_record *job_ptr);
-	int		(*job_ready)		(struct job_record *job_ptr);
-	int		(*job_expand)		(struct job_record *from_job_ptr,
-						 struct job_record *to_job_ptr);
-	int		(*job_resized)		(struct job_record *job_ptr,
-						 struct node_record *node_ptr);
-	int		(*job_signal)		(struct job_record *job_ptr,
-						 int signal);
-	int		(*job_mem_confirm)	(struct job_record *job_ptr);
-	int		(*job_fini)		(struct job_record *job_ptr);
-	int		(*job_suspend)		(struct job_record *job_ptr,
-						 bool indf_susp);
-	int		(*job_resume)		(struct job_record *job_ptr,
-						 bool indf_susp);
-	bitstr_t *      (*step_pick_nodes)      (struct job_record *job_ptr,
-						 select_jobinfo_t *step_jobinfo,
-						 uint32_t node_count,
-						 bitstr_t **avail_nodes);
-	int             (*step_start)           (struct step_record *step_ptr);
-	int             (*step_finish)          (struct step_record *step_ptr,
-						 bool killing_step);
-	int		(*nodeinfo_pack)	(select_nodeinfo_t *nodeinfo,
-						 Buf buffer,
-						 uint16_t protocol_version);
-	int		(*nodeinfo_unpack)	(select_nodeinfo_t **nodeinfo,
-						 Buf buffer,
-						 uint16_t protocol_version);
-	select_nodeinfo_t *(*nodeinfo_alloc)	(void);
-	int		(*nodeinfo_free)	(select_nodeinfo_t *nodeinfo);
-	int		(*nodeinfo_set_all)	(void);
-	int		(*nodeinfo_set)		(struct job_record *job_ptr);
-	int		(*nodeinfo_get)		(select_nodeinfo_t *nodeinfo,
-						 enum
-						 select_nodedata_type dinfo,
-						 enum node_states state,
-						 void *data);
-	select_jobinfo_t *(*jobinfo_alloc)	(void);
-	int		(*jobinfo_free)		(select_jobinfo_t *jobinfo);
-	int		(*jobinfo_set)		(select_jobinfo_t *jobinfo,
-						 enum
-						 select_jobdata_type data_type,
-						 void *data);
-	int		(*jobinfo_get)		(select_jobinfo_t *jobinfo,
-						 enum
-						 select_jobdata_type data_type,
-						 void *data);
-	select_jobinfo_t *(*jobinfo_copy)	(select_jobinfo_t *jobinfo);
-	int		(*jobinfo_pack)		(select_jobinfo_t *jobinfo,
-						 Buf buffer,
-						 uint16_t protocol_version);
-	int		(*jobinfo_unpack)	(select_jobinfo_t **jobinfo_pptr,
-						 Buf buffer,
-						 uint16_t protocol_version);
-	char *		(*jobinfo_sprint)	(select_jobinfo_t *jobinfo,
-						 char *buf, size_t size,
-						 int mode);
-	char *		(*jobinfo_xstrdup)	(select_jobinfo_t *jobinfo,
-						 int mode);
-	int		(*get_info_from_plugin)	(enum
-						 select_plugindata_info dinfo,
-						 struct job_record *job_ptr,
-						 void *data);
-	int		(*update_node_config)	(int index);
-	int		(*update_node_state)	(struct node_record *node_ptr);
-	int		(*reconfigure)		(void);
-	bitstr_t *      (*resv_test)            (resv_desc_msg_t *resv_desc_ptr,
-						 uint32_t node_cnt,
-						 bitstr_t *avail_bitmap,
-						 bitstr_t **core_bitmap);
+    uint32_t    (*plugin_id);
+
+    int (*state_save)(char *dir_name);
+
+    int (*state_restore)(char *dir_name);
+
+    int (*job_init)(List job_list);
+
+    int (*node_ranking)(struct node_record *node_ptr,
+                        int node_cnt);
+
+    int (*node_init)(struct node_record *node_ptr,
+                     int node_cnt);
+
+    int (*block_init)(List block_list);
+
+    int (*job_test)(struct job_record *job_ptr,
+                    bitstr_t *bitmap,
+                    uint32_t min_nodes,
+                    uint32_t max_nodes,
+                    uint32_t req_nodes,
+                    uint16_t mode,
+                    List preeemptee_candidates,
+                    List *preemptee_job_list,
+                    bitstr_t *exc_core_bitmap);
+
+    int (*job_begin)(struct job_record *job_ptr);
+
+    int (*job_ready)(struct job_record *job_ptr);
+
+    int (*job_expand)(struct job_record *from_job_ptr,
+                      struct job_record *to_job_ptr);
+
+    int (*job_resized)(struct job_record *job_ptr,
+                       struct node_record *node_ptr);
+
+    int (*job_signal)(struct job_record *job_ptr,
+                      int signal);
+
+    int (*job_mem_confirm)(struct job_record *job_ptr);
+
+    int (*job_fini)(struct job_record *job_ptr);
+
+    int (*job_suspend)(struct job_record *job_ptr,
+                       bool indf_susp);
+
+    int (*job_resume)(struct job_record *job_ptr,
+                      bool indf_susp);
+
+    bitstr_t *(*step_pick_nodes)(struct job_record *job_ptr,
+                                 select_jobinfo_t *step_jobinfo,
+                                 uint32_t node_count,
+                                 bitstr_t **avail_nodes);
+
+    int (*step_start)(struct step_record *step_ptr);
+
+    int (*step_finish)(struct step_record *step_ptr,
+                       bool killing_step);
+
+    int (*nodeinfo_pack)(select_nodeinfo_t *nodeinfo,
+                         Buf buffer,
+                         uint16_t protocol_version);
+
+    int (*nodeinfo_unpack)(select_nodeinfo_t **nodeinfo,
+                           Buf buffer,
+                           uint16_t protocol_version);
+
+    select_nodeinfo_t *(*nodeinfo_alloc)(void);
+
+    int (*nodeinfo_free)(select_nodeinfo_t *nodeinfo);
+
+    int (*nodeinfo_set_all)(void);
+
+    int (*nodeinfo_set)(struct job_record *job_ptr);
+
+    int (*nodeinfo_get)(select_nodeinfo_t *nodeinfo,
+                        enum
+                                select_nodedata_type dinfo,
+                        enum node_states state,
+                        void *data);
+
+    select_jobinfo_t *(*jobinfo_alloc)(void);
+
+    int (*jobinfo_free)(select_jobinfo_t *jobinfo);
+
+    int (*jobinfo_set)(select_jobinfo_t *jobinfo,
+                       enum
+                               select_jobdata_type data_type,
+                       void *data);
+
+    int (*jobinfo_get)(select_jobinfo_t *jobinfo,
+                       enum
+                               select_jobdata_type data_type,
+                       void *data);
+
+    select_jobinfo_t *(*jobinfo_copy)(select_jobinfo_t *jobinfo);
+
+    int (*jobinfo_pack)(select_jobinfo_t *jobinfo,
+                        Buf buffer,
+                        uint16_t protocol_version);
+
+    int (*jobinfo_unpack)(select_jobinfo_t **jobinfo_pptr,
+                          Buf buffer,
+                          uint16_t protocol_version);
+
+    char *(*jobinfo_sprint)(select_jobinfo_t *jobinfo,
+                            char *buf, size_t size,
+                            int mode);
+
+    char *(*jobinfo_xstrdup)(select_jobinfo_t *jobinfo,
+                             int mode);
+
+    int (*get_info_from_plugin)(enum
+                                        select_plugindata_info dinfo,
+                                struct job_record *job_ptr,
+                                void *data);
+
+    int (*update_node_config)(int index);
+
+    int (*update_node_state)(struct node_record *node_ptr);
+
+    int (*reconfigure)(void);
+
+    bitstr_t *(*resv_test)(resv_desc_msg_t *resv_desc_ptr,
+                           uint32_t node_cnt,
+                           bitstr_t *avail_bitmap,
+                           bitstr_t **core_bitmap);
 } slurm_select_ops_t;
 
 /*
@@ -252,8 +292,8 @@ extern dynamic_plugin_data_t *select_g_select_nodeinfo_alloc(void);
  * IN protocol_version - Version used for packing the record
  */
 extern int select_g_select_nodeinfo_pack(dynamic_plugin_data_t *nodeinfo,
-					 Buf buffer,
-					 uint16_t protocol_version);
+                                         Buf buffer,
+                                         uint16_t protocol_version);
 
 /*
  * Unpack a select plugin node record from a buffer.
@@ -265,8 +305,8 @@ extern int select_g_select_nodeinfo_pack(dynamic_plugin_data_t *nodeinfo,
  * returned value
  */
 extern int select_g_select_nodeinfo_unpack(dynamic_plugin_data_t **nodeinfo,
-					   Buf buffer,
-					   uint16_t protocol_version);
+                                           Buf buffer,
+                                           uint16_t protocol_version);
 
 /* Free the memory allocated for a select plugin node record */
 extern int select_g_select_nodeinfo_free(dynamic_plugin_data_t *nodeinfo);
@@ -288,9 +328,9 @@ extern int select_g_select_nodeinfo_set_all(void);
  * OUT data - The retrieved data
  */
 extern int select_g_select_nodeinfo_get(dynamic_plugin_data_t *nodeinfo,
-					enum select_nodedata_type dinfo,
-					enum node_states state,
-					void *data);
+                                        enum select_nodedata_type dinfo,
+                                        enum node_states state,
+                                        void *data);
 
 /*
  * Updated a node configuration. This happens when a node registers with
@@ -298,7 +338,7 @@ extern int select_g_select_nodeinfo_get(dynamic_plugin_data_t *nodeinfo,
  * IN index  - index into the node record list
  * RETURN SLURM_SUCCESS on success || SLURM_ERROR else wise
  */
-extern int select_g_update_node_config (int index);
+extern int select_g_update_node_config(int index);
 
 /*
  * Assign a 'node_rank' value to each of the node_ptr entries.
@@ -314,7 +354,7 @@ extern bool select_g_node_ranking(struct node_record *node_ptr, int node_cnt);
  * IN node_ptr - Pointer to the node that has been updated
  * RETURN SLURM_SUCCESS on success || SLURM_ERROR else wise
  */
-extern int select_g_update_node_state (struct node_record *node_ptr);
+extern int select_g_update_node_state(struct node_record *node_ptr);
 
 /******************************************************\
  * JOB SPECIFIC SELECT CREDENTIAL MANAGEMENT FUNCIONS *
@@ -323,46 +363,46 @@ extern int select_g_update_node_state (struct node_record *node_ptr);
 #define SELECT_MODE_BASE         0x00ff
 #define SELECT_MODE_FLAGS        0xff00
 
-#define SELECT_MODE_RUN_NOW	 0x0000
-#define SELECT_MODE_TEST_ONLY	 0x0001
-#define SELECT_MODE_WILL_RUN	 0x0002
-#define SELECT_MODE_RESV	 0x0004
+#define SELECT_MODE_RUN_NOW     0x0000
+#define SELECT_MODE_TEST_ONLY     0x0001
+#define SELECT_MODE_WILL_RUN     0x0002
+#define SELECT_MODE_RESV     0x0004
 
 #define SELECT_MODE_PREEMPT_FLAG 0x0100
 #define SELECT_MODE_CHECK_FULL   0x0200
 #define SELECT_MODE_IGN_ERR      0x0400
 
 #define SELECT_IS_MODE_RUN_NOW(_X) \
-	(((_X & SELECT_MODE_BASE) == SELECT_MODE_RUN_NOW) \
-	 && !SELECT_IS_PREEMPT_ON_FULL_TEST(_X))
+    (((_X & SELECT_MODE_BASE) == SELECT_MODE_RUN_NOW) \
+     && !SELECT_IS_PREEMPT_ON_FULL_TEST(_X))
 
 #define SELECT_IS_MODE_TEST_ONLY(_X) \
-	(_X & SELECT_MODE_TEST_ONLY)
+    (_X & SELECT_MODE_TEST_ONLY)
 
 #define SELECT_IS_MODE_WILL_RUN(_X) \
-	(_X & SELECT_MODE_WILL_RUN || SELECT_IS_MODE_RESV(_X))
+    (_X & SELECT_MODE_WILL_RUN || SELECT_IS_MODE_RESV(_X))
 
 #define SELECT_IS_MODE_RESV(_X) \
-	(_X & SELECT_MODE_RESV)
+    (_X & SELECT_MODE_RESV)
 
 #define SELECT_IGN_ERR(_X) \
-	(_X & SELECT_MODE_IGN_ERR)
+    (_X & SELECT_MODE_IGN_ERR)
 
 #define SELECT_IS_PREEMPT_SET(_X) \
-	(_X & SELECT_MODE_PREEMPT_FLAG)
+    (_X & SELECT_MODE_PREEMPT_FLAG)
 
 #define SELECT_IS_CHECK_FULL_SET(_X) \
-	(_X & SELECT_MODE_CHECK_FULL)
+    (_X & SELECT_MODE_CHECK_FULL)
 
 #define SELECT_IS_TEST(_X) \
-	(SELECT_IS_MODE_TEST_ONLY(_X) || SELECT_IS_MODE_WILL_RUN(_X))
+    (SELECT_IS_MODE_TEST_ONLY(_X) || SELECT_IS_MODE_WILL_RUN(_X))
 
 #define SELECT_IS_PREEMPT_ON_FULL_TEST(_X) \
-	(SELECT_IS_CHECK_FULL_SET(_X) && SELECT_IS_PREEMPT_SET(_X))
+    (SELECT_IS_CHECK_FULL_SET(_X) && SELECT_IS_PREEMPT_SET(_X))
 
 #define SELECT_IS_PREEMPTABLE_TEST(_X) \
-	((SELECT_IS_MODE_TEST_ONLY(_X) || SELECT_IS_MODE_WILL_RUN(_X))	\
-	 && SELECT_IS_PREEMPT_SET(_X))
+    ((SELECT_IS_MODE_TEST_ONLY(_X) || SELECT_IS_MODE_WILL_RUN(_X))    \
+     && SELECT_IS_PREEMPT_SET(_X))
 
 /* allocate storage for a select job credential
  * RET jobinfo - storage for a select job credential
@@ -376,7 +416,7 @@ extern dynamic_plugin_data_t *select_g_select_jobinfo_alloc(void);
  * NOTE: returned value must be freed using select_g_select_jobinfo_free
  */
 extern dynamic_plugin_data_t *select_g_select_jobinfo_copy(
-	dynamic_plugin_data_t *jobinfo);
+        dynamic_plugin_data_t *jobinfo);
 
 /* free storage previously allocated for a select job credential
  * IN jobinfo  - the select job credential to be freed
@@ -391,8 +431,8 @@ extern int select_g_select_jobinfo_free(dynamic_plugin_data_t *jobinfo);
  * RET         - slurm error code
  */
 extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo,
-					Buf buffer,
-					uint16_t protocol_version);
+                                        Buf buffer,
+                                        uint16_t protocol_version);
 
 /* unpack a select job credential from a buffer
  * OUT jobinfo - the select job credential read
@@ -402,8 +442,8 @@ extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo,
  * NOTE: returned value must be freed using select_g_select_jobinfo_free
  */
 extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
-					  Buf buffer,
-					  uint16_t protocol_version);
+                                          Buf buffer,
+                                          uint16_t protocol_version);
 
 /* fill in a previously allocated select job credential
  * IN/OUT jobinfo  - updated select job credential
@@ -411,8 +451,8 @@ extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
  * IN data - the data to enter into job credential
  */
 extern int select_g_select_jobinfo_set(dynamic_plugin_data_t *jobinfo,
-				       enum select_jobdata_type data_type,
-				       void *data);
+                                       enum select_jobdata_type data_type,
+                                       void *data);
 
 /* get data from a select job credential
  * IN jobinfo  - updated select job credential
@@ -421,8 +461,8 @@ extern int select_g_select_jobinfo_set(dynamic_plugin_data_t *jobinfo,
  *	data for data_type == SELECT_JOBDATA_PART_ID
  */
 extern int select_g_select_jobinfo_get(dynamic_plugin_data_t *jobinfo,
-				       enum select_jobdata_type data_type,
-				       void *data);
+                                       enum select_jobdata_type data_type,
+                                       void *data);
 
 /* write select job info to a string
  * IN jobinfo - a select job credential
@@ -432,7 +472,7 @@ extern int select_g_select_jobinfo_get(dynamic_plugin_data_t *jobinfo,
  * RET        - the string, same as buf
  */
 extern char *select_g_select_jobinfo_sprint(dynamic_plugin_data_t *jobinfo,
-					    char *buf, size_t size, int mode);
+                                            char *buf, size_t size, int mode);
 
 /* write select job info to a string
  * IN jobinfo - a select job credential
@@ -441,7 +481,7 @@ extern char *select_g_select_jobinfo_sprint(dynamic_plugin_data_t *jobinfo,
  * RET        - the string, same as buf
  */
 extern char *select_g_select_jobinfo_xstrdup(dynamic_plugin_data_t *jobinfo,
-					     int mode);
+                                             int mode);
 
 /*
  * Select the "best" nodes for given job from those available
@@ -464,11 +504,11 @@ extern char *select_g_select_jobinfo_xstrdup(dynamic_plugin_data_t *jobinfo,
  * RET zero on success, EINVAL otherwise
  */
 extern int select_g_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-			     uint32_t min_nodes, uint32_t max_nodes,
-			     uint32_t req_nodes, uint16_t mode,
-			     List preemptee_candidates,
-			     List *preemptee_job_list,
-			     bitstr_t *exc_core_bitmap);
+                             uint32_t min_nodes, uint32_t max_nodes,
+                             uint32_t req_nodes, uint16_t mode,
+                             List preemptee_candidates,
+                             List *preemptee_job_list,
+                             bitstr_t *exc_core_bitmap);
 
 /*
  * Note initiation of job is about to begin. Called immediately
@@ -532,7 +572,7 @@ extern int select_g_job_resume(struct job_record *job_ptr, bool indf_susp);
  * RET: 0 or an error code
  */
 extern int select_g_job_expand(struct job_record *from_job_ptr,
-			       struct job_record *to_job_ptr);
+                               struct job_record *to_job_ptr);
 
 /*
  * Modify internal data structures for a job that has changed size
@@ -540,7 +580,7 @@ extern int select_g_job_expand(struct job_record *from_job_ptr,
  * RET: 0 or an error code
  */
 extern int select_g_job_resized(struct job_record *job_ptr,
-				struct node_record *node_ptr);
+                                struct node_record *node_ptr);
 
 /*******************************************************\
  * STEP SPECIFIC SELECT CREDENTIAL MANAGEMENT FUNCIONS *
@@ -563,10 +603,11 @@ extern int select_g_job_resized(struct job_record *job_ptr,
  * select plugin need to select resources and take system topology into
  * consideration.
  */
-extern bitstr_t * select_g_step_pick_nodes(struct job_record *job_ptr,
-					   dynamic_plugin_data_t *step_jobinfo,
-					   uint32_t node_count,
-					   bitstr_t **avail_nodes);
+extern bitstr_t *select_g_step_pick_nodes(struct job_record *job_ptr,
+                                          dynamic_plugin_data_t *step_jobinfo,
+                                          uint32_t node_count,
+                                          bitstr_t **avail_nodes);
+
 /*
  * Post pick_nodes operations for the step.
  * IN/OUT step_ptr - step pointer to operate on.
@@ -599,10 +640,10 @@ extern int select_g_step_finish(struct step_record *step_ptr, bool killing_step)
  *	(flush bitstr then apply only used cores)
  * RET - nodes selected for use by the reservation
  */
-extern bitstr_t * select_g_resv_test(resv_desc_msg_t *resv_desc_ptr,
-				     uint32_t node_cnt,
-				     bitstr_t *avail_bitmap,
-				     bitstr_t **core_bitmap);
+extern bitstr_t *select_g_resv_test(resv_desc_msg_t *resv_desc_ptr,
+                                    uint32_t node_cnt,
+                                    bitstr_t *avail_bitmap,
+                                    bitstr_t **core_bitmap);
 
 /*****************************\
  * GET INFORMATION FUNCTIONS *
@@ -616,8 +657,8 @@ extern bitstr_t * select_g_resv_test(resv_desc_msg_t *resv_desc_ptr,
  * IN job_ptr   - pointer to the job that's related to this query (may be NULL)
  * IN/OUT data  - the data to get from node record
  */
-extern int select_g_get_info_from_plugin (enum select_plugindata_info dinfo,
-					  struct job_record *job_ptr,
-					  void *data);
+extern int select_g_get_info_from_plugin(enum select_plugindata_info dinfo,
+                                         struct job_record *job_ptr,
+                                         void *data);
 
 #endif /*__SELECT_PLUGIN_API_H__*/

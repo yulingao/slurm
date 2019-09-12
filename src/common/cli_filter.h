@@ -112,6 +112,6 @@ IN stepid	- 步骤标识符(如果没有设置NOVAL)
  * IN stepid	- step identifier (NOVAL if not set)
  */
 extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid,
-										  uint32_t stepid);
+                                          uint32_t stepid);
 
 #endif /* !_CLI_FILTER_H */

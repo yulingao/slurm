@@ -49,33 +49,29 @@
 #include "src/slurmctld/slurmctld.h"
 #include "src/common/slurm_priority.h"
 
-const char		plugin_name[]	= "Slurm Hold Scheduler plugin";
-const char		plugin_type[]	= "sched/hold";
-const uint32_t		plugin_version	= SLURM_VERSION_NUMBER;
+const char plugin_name[] = "Slurm Hold Scheduler plugin";
+const char plugin_type[] = "sched/hold";
+const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
-int init(void)
-{
-	sched_verbose("Hold scheduler plugin loaded");
-	return SLURM_SUCCESS;
+int init(void) {
+    sched_verbose("Hold scheduler plugin loaded");
+    return SLURM_SUCCESS;
 }
 
-void fini(void)
-{
-	/* Empty. */
+void fini(void) {
+    /* Empty. */
 }
 
-int slurm_sched_p_reconfig(void)
-{
-	return SLURM_SUCCESS;
+int slurm_sched_p_reconfig(void) {
+    return SLURM_SUCCESS;
 }
 
 uint32_t slurm_sched_p_initial_priority(uint32_t last_prio,
-					struct job_record *job_ptr)
-{
-	struct stat buf;
+                                        struct job_record *job_ptr) {
+    struct stat buf;
 
-	if (stat("/etc/slurm.hold", &buf) == 0)
-		return 0;	/* hold all new jobs */
+    if (stat("/etc/slurm.hold", &buf) == 0)
+        return 0;    /* hold all new jobs */
 
-	return priority_g_set(last_prio, job_ptr);
+    return priority_g_set(last_prio, job_ptr);
 }

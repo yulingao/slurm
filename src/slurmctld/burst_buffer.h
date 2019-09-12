@@ -111,7 +111,7 @@ extern uint64_t bb_g_get_system_size(char *name);
  * Returns a Slurm errno.
  */
 extern int bb_g_job_validate(struct job_descriptor *job_desc,
-			     uid_t submit_uid);
+                             uid_t submit_uid);
 
 /*
  * Secondary validation of a job submit request with respect to burst buffer
@@ -139,7 +139,7 @@ extern char *bb_g_build_pack_script(char *script, uint32_t pack_job_offset);
  * IN locked - if the assoc_mgr tres read locked is locked or not
  */
 extern void bb_g_job_set_tres_cnt(struct job_record *job_ptr,
-				  uint64_t *tres_cnt, bool locked);
+                                  uint64_t *tres_cnt, bool locked);
 
 /*
  * For a given job, return our best guess if when it might be able to start

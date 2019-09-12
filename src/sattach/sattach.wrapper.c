@@ -13,7 +13,6 @@
 
 extern int sattach(int argc, char **argv);
 
-int main(int argc, char **argv)
-{
-	return sattach(argc, argv);
+int main(int argc, char **argv) {
+    return sattach(argc, argv);
 }

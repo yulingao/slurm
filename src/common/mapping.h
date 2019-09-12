@@ -50,17 +50,19 @@
 #include "src/common/xassert.h"
 
 extern char *pack_process_mapping(uint32_t node_cnt,
-				  uint32_t task_cnt,
-				  uint16_t *tasks,
-				  uint32_t **tids);
+                                  uint32_t task_cnt,
+                                  uint16_t *tasks,
+                                  uint32_t **tids);
+
 extern uint32_t *unpack_process_mapping_flat(char *map,
-					     uint32_t node_cnt,
-					     uint32_t task_cnt,
-					     uint16_t *tasks);
+                                             uint32_t node_cnt,
+                                             uint32_t task_cnt,
+                                             uint16_t *tasks);
+
 extern int unpack_process_mapping(char *map,
-				  uint32_t node_cnt,
-				  uint32_t task_cnt,
-				  uint16_t *tasks,
-				  uint32_t **tids);
+                                  uint32_t node_cnt,
+                                  uint32_t task_cnt,
+                                  uint16_t *tasks,
+                                  uint32_t **tids);
 
 #endif // MAPPING_H

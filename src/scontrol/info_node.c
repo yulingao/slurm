@@ -41,37 +41,35 @@
 
 /* Load current node table information into *node_buffer_pptr */
 extern int
-scontrol_load_nodes (node_info_msg_t ** node_buffer_pptr, uint16_t show_flags)
-{
-	int error_code;
-	static int last_show_flags = 0xffff;
-	node_info_msg_t *node_info_ptr = NULL;
+scontrol_load_nodes(node_info_msg_t **node_buffer_pptr, uint16_t show_flags) {
+    int error_code;
+    static int last_show_flags = 0xffff;
+    node_info_msg_t *node_info_ptr = NULL;
 
-	if (old_node_info_ptr) {
-		if (last_show_flags != show_flags)
-			old_node_info_ptr->last_update = (time_t) 0;
-		error_code = slurm_load_node (old_node_info_ptr->last_update,
-					      &node_info_ptr, show_flags);
-		if (error_code == SLURM_SUCCESS)
-			slurm_free_node_info_msg (old_node_info_ptr);
-		else if (slurm_get_errno () == SLURM_NO_CHANGE_IN_DATA) {
-			node_info_ptr = old_node_info_ptr;
-			error_code = SLURM_SUCCESS;
-			if (quiet_flag == -1)
-				printf ("slurm_load_node no change in data\n");
-		}
-	}
-	else
-		error_code = slurm_load_node ((time_t) NULL, &node_info_ptr,
-					      show_flags);
+    if (old_node_info_ptr) {
+        if (last_show_flags != show_flags)
+            old_node_info_ptr->last_update = (time_t) 0;
+        error_code = slurm_load_node(old_node_info_ptr->last_update,
+                                     &node_info_ptr, show_flags);
+        if (error_code == SLURM_SUCCESS)
+            slurm_free_node_info_msg(old_node_info_ptr);
+        else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
+            node_info_ptr = old_node_info_ptr;
+            error_code = SLURM_SUCCESS;
+            if (quiet_flag == -1)
+                printf("slurm_load_node no change in data\n");
+        }
+    } else
+        error_code = slurm_load_node((time_t) NULL, &node_info_ptr,
+                                     show_flags);
 
-	if (error_code == SLURM_SUCCESS) {
-		old_node_info_ptr = node_info_ptr;
-		last_show_flags = show_flags;
-		*node_buffer_pptr = node_info_ptr;
-	}
+    if (error_code == SLURM_SUCCESS) {
+        old_node_info_ptr = node_info_ptr;
+        last_show_flags = show_flags;
+        *node_buffer_pptr = node_info_ptr;
+    }
 
-	return error_code;
+    return error_code;
 }
 
 /*
@@ -84,51 +82,50 @@ scontrol_load_nodes (node_info_msg_t ** node_buffer_pptr, uint16_t show_flags)
  *	last name match
  */
 extern void
-scontrol_print_node(char *node_name, node_info_msg_t *node_buffer_ptr)
-{
-	int error_code, i, j, print_cnt = 0;
-	static int last_inx = 0;
-	partition_info_msg_t *part_info_ptr = NULL;
+scontrol_print_node(char *node_name, node_info_msg_t *node_buffer_ptr) {
+    int error_code, i, j, print_cnt = 0;
+    static int last_inx = 0;
+    partition_info_msg_t *part_info_ptr = NULL;
 
-	error_code = scontrol_load_partitions(&part_info_ptr);
-	if (error_code) {
-		part_info_ptr = NULL;
-		exit_code = 1;
-		if (quiet_flag != 1)
-			slurm_perror("slurm_load_partitions error");
-	}
-	slurm_populate_node_partitions(node_buffer_ptr, part_info_ptr);
+    error_code = scontrol_load_partitions(&part_info_ptr);
+    if (error_code) {
+        part_info_ptr = NULL;
+        exit_code = 1;
+        if (quiet_flag != 1)
+            slurm_perror("slurm_load_partitions error");
+    }
+    slurm_populate_node_partitions(node_buffer_ptr, part_info_ptr);
 
-	for (j = 0; j < node_buffer_ptr->record_count; j++) {
-		if (node_name) {
-			i = (j + last_inx) % node_buffer_ptr->record_count;
-			if ((node_buffer_ptr->node_array[i].name == NULL) ||
-			    xstrcmp (node_name,
-				    node_buffer_ptr->node_array[i].name))
-				continue;
-		} else if (node_buffer_ptr->node_array[j].name == NULL)
-			continue;
-		else
-			i = j;
-		print_cnt++;
-		slurm_print_node_table (stdout,
-					& node_buffer_ptr->node_array[i],
-					one_liner);
+    for (j = 0; j < node_buffer_ptr->record_count; j++) {
+        if (node_name) {
+            i = (j + last_inx) % node_buffer_ptr->record_count;
+            if ((node_buffer_ptr->node_array[i].name == NULL) ||
+                xstrcmp(node_name,
+                        node_buffer_ptr->node_array[i].name))
+                continue;
+        } else if (node_buffer_ptr->node_array[j].name == NULL)
+            continue;
+        else
+            i = j;
+        print_cnt++;
+        slurm_print_node_table(stdout,
+                               &node_buffer_ptr->node_array[i],
+                               one_liner);
 
-		if (node_name) {
-			last_inx = i;
-			break;
-		}
-	}
+        if (node_name) {
+            last_inx = i;
+            break;
+        }
+    }
 
-	if (print_cnt == 0) {
-		if (node_name) {
-			exit_code = 1;
-			if (quiet_flag != 1)
-				printf ("Node %s not found\n", node_name);
-		} else if (quiet_flag != 1)
-				printf ("No nodes in the system\n");
-	}
+    if (print_cnt == 0) {
+        if (node_name) {
+            exit_code = 1;
+            if (quiet_flag != 1)
+                printf("Node %s not found\n", node_name);
+        } else if (quiet_flag != 1)
+            printf("No nodes in the system\n");
+    }
 }
 
 
@@ -139,118 +136,116 @@ scontrol_print_node(char *node_name, node_info_msg_t *node_buffer_ptr)
  *	(or regular expression)
  */
 extern void
-scontrol_print_node_list (char *node_list)
-{
-	node_info_msg_t *node_info_ptr = NULL;
-	hostlist_t host_list;
-	int error_code;
-	uint16_t show_flags = 0;
-	char *this_node_name;
+scontrol_print_node_list(char *node_list) {
+    node_info_msg_t *node_info_ptr = NULL;
+    hostlist_t host_list;
+    int error_code;
+    uint16_t show_flags = 0;
+    char *this_node_name;
 
-	if (all_flag)
-		show_flags |= SHOW_ALL;
-	if (detail_flag)
-		show_flags |= SHOW_DETAIL;
-	if (future_flag)
-		show_flags |= SHOW_FUTURE;
+    if (all_flag)
+        show_flags |= SHOW_ALL;
+    if (detail_flag)
+        show_flags |= SHOW_DETAIL;
+    if (future_flag)
+        show_flags |= SHOW_FUTURE;
 
-	error_code = scontrol_load_nodes(&node_info_ptr, show_flags);
-	if (error_code) {
-		exit_code = 1;
-		if (quiet_flag != 1)
-			slurm_perror ("slurm_load_node error");
-		return;
-	}
+    error_code = scontrol_load_nodes(&node_info_ptr, show_flags);
+    if (error_code) {
+        exit_code = 1;
+        if (quiet_flag != 1)
+            slurm_perror("slurm_load_node error");
+        return;
+    }
 
-	if (quiet_flag == -1) {
-		char time_str[32];
-		slurm_make_time_str ((time_t *)&node_info_ptr->last_update,
-			             time_str, sizeof(time_str));
-		printf ("last_update_time=%s, records=%d\n",
-			time_str, node_info_ptr->record_count);
-	}
+    if (quiet_flag == -1) {
+        char time_str[32];
+        slurm_make_time_str((time_t *) &node_info_ptr->last_update,
+                            time_str, sizeof(time_str));
+        printf("last_update_time=%s, records=%d\n",
+               time_str, node_info_ptr->record_count);
+    }
 
-	if (node_list == NULL) {
-		scontrol_print_node (NULL, node_info_ptr);
-	} else {
-		if ((host_list = hostlist_create (node_list))) {
-			while ((this_node_name = hostlist_shift (host_list))) {
-				scontrol_print_node(this_node_name,
-						    node_info_ptr);
-				free(this_node_name);
-			}
+    if (node_list == NULL) {
+        scontrol_print_node(NULL, node_info_ptr);
+    } else {
+        if ((host_list = hostlist_create(node_list))) {
+            while ((this_node_name = hostlist_shift(host_list))) {
+                scontrol_print_node(this_node_name,
+                                    node_info_ptr);
+                free(this_node_name);
+            }
 
-			hostlist_destroy(host_list);
-		} else {
-			exit_code = 1;
-			if (quiet_flag != 1) {
-				if (errno == EINVAL) {
-					fprintf(stderr,
-					        "unable to parse node list %s\n",
-					        node_list);
-				 } else if (errno == ERANGE) {
-					fprintf(stderr,
-					        "too many nodes in supplied range %s\n",
-					        node_list);
-				} else
-					perror("error parsing node list");
-			}
-		}
-	}
-	return;
+            hostlist_destroy(host_list);
+        } else {
+            exit_code = 1;
+            if (quiet_flag != 1) {
+                if (errno == EINVAL) {
+                    fprintf(stderr,
+                            "unable to parse node list %s\n",
+                            node_list);
+                } else if (errno == ERANGE) {
+                    fprintf(stderr,
+                            "too many nodes in supplied range %s\n",
+                            node_list);
+                } else
+                    perror("error parsing node list");
+            }
+        }
+    }
+    return;
 }
 
 /*
  * scontrol_print_topo - print the switch topology above the specified node
  * IN node_name - NULL to print all topology information
  */
-extern void	scontrol_print_topo (char *node_list)
-{
-	static topo_info_response_msg_t *topo_info_msg = NULL;
-	int i, match, match_cnt = 0;
-	hostset_t hs;
+extern void scontrol_print_topo(char *node_list) {
+    static topo_info_response_msg_t *topo_info_msg = NULL;
+    int i, match, match_cnt = 0;
+    hostset_t hs;
 
-	if ((topo_info_msg == NULL) &&
-	    slurm_load_topo(&topo_info_msg)) {
-		slurm_perror ("slurm_load_topo error");
-		return;
-	}
+    if ((topo_info_msg == NULL) &&
+        slurm_load_topo(&topo_info_msg)) {
+        slurm_perror("slurm_load_topo error");
+        return;
+    }
 
-	if ((node_list == NULL) || (node_list[0] == '\0')) {
-		slurm_print_topo_info_msg(stdout, topo_info_msg, one_liner);
-		return;
-	}
+    if ((node_list == NULL) || (node_list[0] == '\0')) {
+        slurm_print_topo_info_msg(stdout, topo_info_msg, one_liner);
+        return;
+    }
 
-	/* Search for matching switch name */
-	for (i=0; i<topo_info_msg->record_count; i++) {
-		if (xstrcmp(topo_info_msg->topo_array[i].name, node_list))
-			continue;
-		slurm_print_topo_record(stdout, &topo_info_msg->topo_array[i],
-					one_liner);
-		return;
-	}
+    /* Search for matching switch name */
+    for (i = 0; i < topo_info_msg->record_count; i++) {
+        if (xstrcmp(topo_info_msg->topo_array[i].name, node_list))
+            continue;
+        slurm_print_topo_record(stdout, &topo_info_msg->topo_array[i],
+                                one_liner);
+        return;
+    }
 
-	/* Search for matching node name */
-	for (i=0; i<topo_info_msg->record_count; i++) {
-		if ((topo_info_msg->topo_array[i].nodes == NULL) ||
-		    (topo_info_msg->topo_array[i].nodes[0] == '\0'))
-			continue;
-		hs = hostset_create(topo_info_msg->topo_array[i].nodes);
-		if (hs == NULL)
-			fatal("hostset_create: memory allocation failure");
-		match = hostset_within(hs, node_list);
-		hostset_destroy(hs);
-		if (!match)
-			continue;
-		match_cnt++;
-		slurm_print_topo_record(stdout, &topo_info_msg->topo_array[i],
-					one_liner);
-	}
+    /* Search for matching node name */
+    for (i = 0; i < topo_info_msg->record_count; i++) {
+        if ((topo_info_msg->topo_array[i].nodes == NULL) ||
+            (topo_info_msg->topo_array[i].nodes[0] == '\0'))
+            continue;
+        hs = hostset_create(topo_info_msg->topo_array[i].nodes);
+        if (hs == NULL)
+            fatal("hostset_create: memory allocation failure");
+        match = hostset_within(hs, node_list);
+        hostset_destroy(hs);
+        if (!match)
+            continue;
+        match_cnt++;
+        slurm_print_topo_record(stdout, &topo_info_msg->topo_array[i],
+                                one_liner);
+    }
 
-	if (match_cnt == 0) {
-		error("Topology information contains no switch or "
-		      "node named %s", node_list);
-	}
+    if (match_cnt == 0) {
+        error("Topology information contains no switch or "
+              "node named %s", node_list);
+    }
 }
 
 /*
@@ -258,58 +253,55 @@ extern void	scontrol_print_topo (char *node_list)
  * above the specified node(s)
  * IN node_list - NULL to print the overall powercapping details
  */
-extern void	scontrol_print_powercap (char *node_list)
-{
-	static powercap_info_msg_t *powercap_info_msg = NULL;
+extern void scontrol_print_powercap(char *node_list) {
+    static powercap_info_msg_t *powercap_info_msg = NULL;
 
-	if ((powercap_info_msg == NULL) &&
-	    slurm_load_powercap(&powercap_info_msg)) {
-		slurm_perror ("slurm_load_powercap error");
-		return;
-	}
+    if ((powercap_info_msg == NULL) &&
+        slurm_load_powercap(&powercap_info_msg)) {
+        slurm_perror("slurm_load_powercap error");
+        return;
+    }
 
-	/* TODO: the case of a particular node list is not yet treated here */
-	if ((node_list == NULL) || (node_list[0] == '\0')) {
-		slurm_print_powercap_info_msg(stdout, powercap_info_msg,
-					      one_liner);
-		return;
-	}
+    /* TODO: the case of a particular node list is not yet treated here */
+    if ((node_list == NULL) || (node_list[0] == '\0')) {
+        slurm_print_powercap_info_msg(stdout, powercap_info_msg,
+                                      one_liner);
+        return;
+    }
 }
 
 /*
  * Load current front_end table information into *node_buffer_pptr
  */
 extern int
-scontrol_load_front_end(front_end_info_msg_t ** front_end_buffer_pptr)
-{
-	int error_code;
-	front_end_info_msg_t *front_end_info_ptr = NULL;
+scontrol_load_front_end(front_end_info_msg_t **front_end_buffer_pptr) {
+    int error_code;
+    front_end_info_msg_t *front_end_info_ptr = NULL;
 
-	if (old_front_end_info_ptr) {
-		error_code = slurm_load_front_end (
-				old_front_end_info_ptr->last_update,
-				&front_end_info_ptr);
-		if (error_code == SLURM_SUCCESS)
-			slurm_free_front_end_info_msg (old_front_end_info_ptr);
-		else if (slurm_get_errno () == SLURM_NO_CHANGE_IN_DATA) {
-			front_end_info_ptr = old_front_end_info_ptr;
-			error_code = SLURM_SUCCESS;
-			if (quiet_flag == -1) {
-				printf("slurm_load_front_end no change in "
-				       "data\n");
-			}
-		}
-	}
-	else
-		error_code = slurm_load_front_end((time_t) NULL,
-						  &front_end_info_ptr);
+    if (old_front_end_info_ptr) {
+        error_code = slurm_load_front_end(
+                old_front_end_info_ptr->last_update,
+                &front_end_info_ptr);
+        if (error_code == SLURM_SUCCESS)
+            slurm_free_front_end_info_msg(old_front_end_info_ptr);
+        else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
+            front_end_info_ptr = old_front_end_info_ptr;
+            error_code = SLURM_SUCCESS;
+            if (quiet_flag == -1) {
+                printf("slurm_load_front_end no change in "
+                       "data\n");
+            }
+        }
+    } else
+        error_code = slurm_load_front_end((time_t) NULL,
+                                          &front_end_info_ptr);
 
-	if (error_code == SLURM_SUCCESS) {
-		old_front_end_info_ptr = front_end_info_ptr;
-		*front_end_buffer_pptr = front_end_info_ptr;
-	}
+    if (error_code == SLURM_SUCCESS) {
+        old_front_end_info_ptr = front_end_info_ptr;
+        *front_end_buffer_pptr = front_end_info_ptr;
+    }
 
-	return error_code;
+    return error_code;
 }
 
 /*
@@ -323,98 +315,96 @@ scontrol_load_front_end(front_end_info_msg_t ** front_end_buffer_pptr)
  */
 extern void
 scontrol_print_front_end(char *node_name,
-			 front_end_info_msg_t  *front_end_buffer_ptr)
-{
-	int i, j, print_cnt = 0;
-	static int last_inx = 0;
+                         front_end_info_msg_t *front_end_buffer_ptr) {
+    int i, j, print_cnt = 0;
+    static int last_inx = 0;
 
-	for (j = 0; j < front_end_buffer_ptr->record_count; j++) {
-		if (node_name) {
-			i = (j + last_inx) % front_end_buffer_ptr->record_count;
-			if (!front_end_buffer_ptr->front_end_array[i].name ||
-			    xstrcmp(node_name, front_end_buffer_ptr->
-				    front_end_array[i].name))
-				continue;
-		} else if (front_end_buffer_ptr->front_end_array[j].name == NULL)
-			continue;
-		else
-			i = j;
-		print_cnt++;
-		slurm_print_front_end_table(stdout,
-					    &front_end_buffer_ptr->
-					    front_end_array[i],
-					    one_liner);
+    for (j = 0; j < front_end_buffer_ptr->record_count; j++) {
+        if (node_name) {
+            i = (j + last_inx) % front_end_buffer_ptr->record_count;
+            if (!front_end_buffer_ptr->front_end_array[i].name ||
+                xstrcmp(node_name, front_end_buffer_ptr->
+                        front_end_array[i].name))
+                continue;
+        } else if (front_end_buffer_ptr->front_end_array[j].name == NULL)
+            continue;
+        else
+            i = j;
+        print_cnt++;
+        slurm_print_front_end_table(stdout,
+                                    &front_end_buffer_ptr->
+                                            front_end_array[i],
+                                    one_liner);
 
-		if (node_name) {
-			last_inx = i;
-			break;
-		}
-	}
+        if (node_name) {
+            last_inx = i;
+            break;
+        }
+    }
 
-	if (print_cnt == 0) {
-		if (node_name) {
-			exit_code = 1;
-			if (quiet_flag != 1)
-				printf ("Node %s not found\n", node_name);
-		} else if (quiet_flag != 1)
-				printf ("No nodes in the system\n");
-	}
+    if (print_cnt == 0) {
+        if (node_name) {
+            exit_code = 1;
+            if (quiet_flag != 1)
+                printf("Node %s not found\n", node_name);
+        } else if (quiet_flag != 1)
+            printf("No nodes in the system\n");
+    }
 }
 
 /*
  * scontrol_print_front_end_list - print information about all front_end nodes
  */
 extern void
-scontrol_print_front_end_list(char *node_list)
-{
-	front_end_info_msg_t *front_end_info_ptr = NULL;
-	int error_code;
-	hostlist_t host_list;
-	char *this_node_name;
+scontrol_print_front_end_list(char *node_list) {
+    front_end_info_msg_t *front_end_info_ptr = NULL;
+    int error_code;
+    hostlist_t host_list;
+    char *this_node_name;
 
-	error_code = scontrol_load_front_end(&front_end_info_ptr);
-	if (error_code) {
-		exit_code = 1;
-		if (quiet_flag != 1)
-			slurm_perror ("slurm_load_front_end error");
-		return;
-	}
+    error_code = scontrol_load_front_end(&front_end_info_ptr);
+    if (error_code) {
+        exit_code = 1;
+        if (quiet_flag != 1)
+            slurm_perror("slurm_load_front_end error");
+        return;
+    }
 
-	if (quiet_flag == -1) {
-		char time_str[32];
-		slurm_make_time_str((time_t *)&front_end_info_ptr->last_update,
-			            time_str, sizeof(time_str));
-		printf ("last_update_time=%s, records=%d\n",
-			time_str, front_end_info_ptr->record_count);
-	}
+    if (quiet_flag == -1) {
+        char time_str[32];
+        slurm_make_time_str((time_t *) &front_end_info_ptr->last_update,
+                            time_str, sizeof(time_str));
+        printf("last_update_time=%s, records=%d\n",
+               time_str, front_end_info_ptr->record_count);
+    }
 
-	if (node_list == NULL) {
-		scontrol_print_front_end(NULL, front_end_info_ptr);
-	} else {
-		if ((host_list = hostlist_create (node_list))) {
-			while ((this_node_name = hostlist_shift (host_list))) {
-				scontrol_print_front_end(this_node_name,
-							 front_end_info_ptr);
-				free(this_node_name);
-			}
+    if (node_list == NULL) {
+        scontrol_print_front_end(NULL, front_end_info_ptr);
+    } else {
+        if ((host_list = hostlist_create(node_list))) {
+            while ((this_node_name = hostlist_shift(host_list))) {
+                scontrol_print_front_end(this_node_name,
+                                         front_end_info_ptr);
+                free(this_node_name);
+            }
 
-			hostlist_destroy(host_list);
-		} else {
-			exit_code = 1;
-			if (quiet_flag != 1) {
-				if (errno == EINVAL) {
-					fprintf(stderr,
-					        "unable to parse node list %s\n",
-					        node_list);
-				 } else if (errno == ERANGE) {
-					fprintf(stderr,
-					        "too many nodes in supplied range %s\n",
-					        node_list);
-				} else
-					perror("error parsing node list");
-			}
-		}
-	}
+            hostlist_destroy(host_list);
+        } else {
+            exit_code = 1;
+            if (quiet_flag != 1) {
+                if (errno == EINVAL) {
+                    fprintf(stderr,
+                            "unable to parse node list %s\n",
+                            node_list);
+                } else if (errno == ERANGE) {
+                    fprintf(stderr,
+                            "too many nodes in supplied range %s\n",
+                            node_list);
+                } else
+                    perror("error parsing node list");
+            }
+        }
+    }
 
-	return;
+    return;
 }
