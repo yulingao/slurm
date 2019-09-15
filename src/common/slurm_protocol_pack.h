@@ -130,39 +130,27 @@ extern int unpack_msg(slurm_msg_t *msg, Buf buffer);
 /* 		Buf buffer ); */
 
 
-extern int slurm_pack_list(List send_list,
-                           void (*pack_function)(void *object,
-                                                 uint16_t rpc_version,
-                                                 Buf buffer),
-                           Buf buffer, uint16_t protocol_version);
+extern int
+slurm_pack_list(List send_list, void (*pack_function)(void *object, uint16_t rpc_version, Buf buffer), Buf buffer,
+                uint16_t protocol_version);
 
-extern int slurm_unpack_list(List *recv_list,
-                             int (*unpack_function)(void **object,
-                                                    uint16_t protocol_version,
-                                                    Buf buffer),
-                             void (*destroy_function)(void *object),
-                             Buf buffer, uint16_t protocol_version);
+extern int
+slurm_unpack_list(List *recv_list, int (*unpack_function)(void **object, uint16_t protocol_version, Buf buffer),
+                  void (*destroy_function)(void *object), Buf buffer, uint16_t protocol_version);
 
-extern void pack_job_step_create_response_msg(
-        job_step_create_response_msg_t *msg, Buf buffer,
-        uint16_t protocol_version);
+extern void
+pack_job_step_create_response_msg(job_step_create_response_msg_t *msg, Buf buffer, uint16_t protocol_version);
 
-extern int unpack_job_step_create_response_msg(
-        job_step_create_response_msg_t **msg, Buf buffer,
-        uint16_t protocol_version);
+extern int
+unpack_job_step_create_response_msg(job_step_create_response_msg_t **msg, Buf buffer, uint16_t protocol_version);
 
-extern void pack_job_step_create_request_msg(
-        job_step_create_request_msg_t *msg, Buf buffer,
-        uint16_t protocol_version);
+extern void pack_job_step_create_request_msg(job_step_create_request_msg_t *msg, Buf buffer, uint16_t protocol_version);
 
-extern int unpack_job_step_create_request_msg(
-        job_step_create_request_msg_t **msg, Buf buffer,
-        uint16_t protocol_version);
+extern int
+unpack_job_step_create_request_msg(job_step_create_request_msg_t **msg, Buf buffer, uint16_t protocol_version);
 
-extern void pack_multi_core_data(multi_core_data_t *multi_core, Buf buffer,
-                                 uint16_t protocol_version);
+extern void pack_multi_core_data(multi_core_data_t *multi_core, Buf buffer, uint16_t protocol_version);
 
-extern int unpack_multi_core_data(multi_core_data_t **multi_core, Buf buffer,
-                                  uint16_t protocol_version);
+extern int unpack_multi_core_data(multi_core_data_t **multi_core, Buf buffer, uint16_t protocol_version);
 
 #endif

@@ -67,12 +67,9 @@ extern char *slurm_xstr_mem_bind_type(mem_bind_type_t mem_bind_type);
  * default_cpu_bind IN - default task binding (based upon Slurm configuration)
  * RET SLURM_SUCCESS, SLURM_ERROR (-1) on failure, 1 for return for "help" arg
  */
-extern int slurm_verify_cpu_bind(const char *arg, char **cpu_bind,
-                                 cpu_bind_type_t *flags,
-                                 uint32_t default_cpu_bind);
+extern int slurm_verify_cpu_bind(const char *arg, char **cpu_bind, cpu_bind_type_t *flags, uint32_t default_cpu_bind);
 
-int slurm_verify_mem_bind(const char *arg, char **mem_bind,
-                          mem_bind_type_t *flags);
+int slurm_verify_mem_bind(const char *arg, char **mem_bind, mem_bind_type_t *flags);
 
 /*
  * Translate a CPU bind string to its equivalent numeric value

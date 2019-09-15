@@ -62,8 +62,7 @@ int get_local_peers(int **_peers) {
 
     if (val->type != PMIX_UINT32) {
         TEST_ERROR(("rank %d: local peer # attribute value type mismatch,"
-                    " want %d get %d(%d)",
-                rank, PMIX_UINT32, val->type));
+                    " want %d get %d(%d)", rank, PMIX_UINT32, val->type));
         exit(0);
     }
     npeers = val->data.uint32;
@@ -81,8 +80,7 @@ int get_local_peers(int **_peers) {
 
     if (val->type != PMIX_STRING) {
         TEST_ERROR(("rank %d: local peers attribute value type mismatch,"
-                    " want %d get %d(%d)",
-                rank, PMIX_UINT32, val->type));
+                    " want %d get %d(%d)", rank, PMIX_UINT32, val->type));
         exit(0);
     }
 
@@ -91,8 +89,8 @@ int get_local_peers(int **_peers) {
     str = val->data.string;
     do {
         if (count > npeers) {
-            TEST_ERROR(("rank %d: Bad peer ranks number: should be %d, actual %d (%s)",
-                    rank, npeers, count, val->data.string));
+            TEST_ERROR(
+                    ("rank %d: Bad peer ranks number: should be %d, actual %d (%s)", rank, npeers, count, val->data.string));
             exit(0);
         }
         token = strtok_r(str, ",", &sptr);
@@ -108,8 +106,8 @@ int get_local_peers(int **_peers) {
     } while (NULL != token);
 
     if (count != npeers) {
-        TEST_ERROR(("rank %d: Bad peer ranks number: should be %d, actual %d (%s)",
-                rank, npeers, count, val->data.string));
+        TEST_ERROR(
+                ("rank %d: Bad peer ranks number: should be %d, actual %d (%s)", rank, npeers, count, val->data.string));
         exit(0);
     }
 
@@ -183,9 +181,7 @@ int main(int argc, char **argv) {
     /* TODO: Guess number of processes from the Slurm environment! */
     if (val->type != PMIX_UINT32 || val->data.uint32 != nprocs) {
         TEST_ERROR(("rank %d: Universe size value or type mismatch,"
-                    " want %d(%d) get %d(%d)",
-                rank, nprocs, PMIX_UINT32,
-                val->data.integer, val->type));
+                    " want %d(%d) get %d(%d)", rank, nprocs, PMIX_UINT32, val->data.integer, val->type));
         exit(0);
     }
     TEST_OUTPUT(("rank %d: Universe size check: PASSED", rank));
@@ -287,9 +283,8 @@ int main(int argc, char **argv) {
                 }
                 if (val->type != PMIX_INT || val->data.integer != (12340 + j)) {
                     TEST_ERROR(("rank %d: Key %s value or type mismatch,"
-                                " want %d(%d) get %d(%d)",
-                            rank, key, (12340 + j), PMIX_INT,
-                            val->data.integer, val->type));
+                                " want %d(%d) get %d(%d)", rank, key, (12340 +
+                                                                       j), PMIX_INT, val->data.integer, val->type));
                     exit(0);
                 }
                 TEST_VERBOSE(("rank %d: GET OF %s SUCCEEDED", rank, key));
@@ -302,8 +297,8 @@ int main(int argc, char **argv) {
                 exit(0);
             }
             if (val->type != PMIX_STRING || xstrcmp(val->data.string, sval)) {
-                TEST_ERROR(("rank %d:  Key %s value or type mismatch, wait %s(%d) get %s(%d)",
-                        rank, key, sval, PMIX_STRING, val->data.string, val->type));
+                TEST_ERROR(
+                        ("rank %d:  Key %s value or type mismatch, wait %s(%d) get %s(%d)", rank, key, sval, PMIX_STRING, val->data.string, val->type));
                 exit(0);
             }
             TEST_VERBOSE(("rank %d: GET OF %s SUCCEEDED", rank, key));
@@ -316,9 +311,8 @@ int main(int argc, char **argv) {
             }
             if (val->type != PMIX_FLOAT || val->data.fval != (float) 12.15 + j) {
                 TEST_ERROR(("rank %d [ERROR]: Key %s value or type mismatch,"
-                            " wait %f(%d) get %f(%d)",
-                        rank, key, ((float) 10.15 + i), PMIX_FLOAT,
-                        val->data.fval, val->type));
+                            " wait %f(%d) get %f(%d)", rank, key, ((float) 10.15 +
+                                                                   i), PMIX_FLOAT, val->data.fval, val->type));
                 exit(0);
             }
             PMIX_VALUE_RELEASE(val);
@@ -327,13 +321,11 @@ int main(int argc, char **argv) {
 
         /* ask for a non-existent key */
         if (PMIX_SUCCESS == (rc = PMIx_Get(nspace, i, "foobar", &val))) {
-            TEST_ERROR(("rank %d: PMIx_Get returned success instead of failure",
-                    rank));
+            TEST_ERROR(("rank %d: PMIx_Get returned success instead of failure", rank));
             exit(0);
         }
         if (PMIX_ERR_NOT_FOUND != rc) {
-            TEST_ERROR(("rank %d [ERROR]: PMIx_Get returned %d instead of not_found",
-                    rank, rc));
+            TEST_ERROR(("rank %d [ERROR]: PMIx_Get returned %d instead of not_found", rank, rc));
         }
         if (NULL != val) {
             TEST_ERROR(("rank %d [ERROR]: PMIx_Get did not return NULL value", rank));

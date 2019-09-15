@@ -56,9 +56,7 @@ extern void allocate_nodes(struct job_record *job_ptr);
  *	identical to avail_bitmap
  * NOTE: Currently supports only simple AND of features
  */
-extern void build_active_feature_bitmap(struct job_record *job_ptr,
-                                        bitstr_t *avail_bitmap,
-                                        bitstr_t **active_bitmap);
+extern void build_active_feature_bitmap(struct job_record *job_ptr, bitstr_t *avail_bitmap, bitstr_t **active_bitmap);
 
 /* Return bitmap of nodes with all specified features currently active */
 extern bitstr_t *build_active_feature_bitmap2(char *reboot_features);
@@ -81,24 +79,21 @@ extern void build_node_details(struct job_record *job_ptr, bool new_alloc);
  *	already decremented);
  * IN preempted - true if job is being preempted
  */
-extern void deallocate_nodes(struct job_record *job_ptr, bool timeout,
-                             bool suspended, bool preempted);
+extern void deallocate_nodes(struct job_record *job_ptr, bool timeout, bool suspended, bool preempted);
 
 /* Remove nodes from consideration for allocation based upon "mcs" by
  * other users
  * job_ptr IN - Job to be scheduled
  * usable_node_mask IN/OUT - Nodes available for use by this job's mcs
  */
-extern void filter_by_node_mcs(struct job_record *job_ptr, int mcs_select,
-                               bitstr_t *usable_node_mask);
+extern void filter_by_node_mcs(struct job_record *job_ptr, int mcs_select, bitstr_t *usable_node_mask);
 
 /* Remove nodes from consideration for allocation based upon "ownership" by
  * other users
  * job_ptr IN - Job to be scheduled
  * usable_node_mask IN/OUT - Nodes available for use by this job's user
  */
-extern void filter_by_node_owner(struct job_record *job_ptr,
-                                 bitstr_t *usable_node_mask);
+extern void filter_by_node_owner(struct job_record *job_ptr, bitstr_t *usable_node_mask);
 
 /*
  * For every element in the feature_list, identify the nodes with that feature
@@ -140,9 +135,9 @@ extern void re_kill_job(struct job_record *job_ptr);
  *	   the request, (e.g. best-fit or other criterion)
  *	3) Call allocate_nodes() to perform the actual allocation
  */
-extern int select_nodes(struct job_record *job_ptr, bool test_only,
-                        bitstr_t **select_node_bitmap, char **err_msg,
-                        bool submission, uint32_t scheduler_type);
+extern int
+select_nodes(struct job_record *job_ptr, bool test_only, bitstr_t **select_node_bitmap, char **err_msg, bool submission,
+             uint32_t scheduler_type);
 
 /*
  * get_node_cnts - determine the number of nodes for the requested job.
@@ -155,11 +150,9 @@ extern int select_nodes(struct job_record *job_ptr, bool test_only,
  * OUT max_nodes - The max number of nodes for the job.
  * RET SLURM_SUCCESS on success, ESLURM code from slurm_errno.h otherwise.
  */
-extern int get_node_cnts(struct job_record *job_ptr,
-                         uint32_t qos_flags,
-                         struct part_record *part_ptr,
-                         uint32_t *min_nodes,
-                         uint32_t *req_nodes, uint32_t *max_nodes);
+extern int
+get_node_cnts(struct job_record *job_ptr, uint32_t qos_flags, struct part_record *part_ptr, uint32_t *min_nodes,
+              uint32_t *req_nodes, uint32_t *max_nodes);
 
 /* launch_prolog - launch job prolog script by slurmd on allocated nodes
  * IN job_ptr - pointer to the job record
@@ -176,7 +169,6 @@ extern void launch_prolog(struct job_record *job_ptr);
  * OUT has_xor - set if XOR/XAND found in feature expresion
  * RET true if valid, false otherwise
  */
-extern bool valid_feature_counts(struct job_record *job_ptr, bool use_active,
-                                 bitstr_t *node_bitmap, bool *has_xor);
+extern bool valid_feature_counts(struct job_record *job_ptr, bool use_active, bitstr_t *node_bitmap, bool *has_xor);
 
 #endif /* !_HAVE_NODE_SCHEDULER_H */

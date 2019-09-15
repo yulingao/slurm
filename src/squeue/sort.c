@@ -145,17 +145,14 @@ void sort_job_list(List job_list) {
 
     for (i = (strlen(params.sort) - 1); i >= 0; i--) {
         reverse_order = false;
-        if ((params.sort[i] == ',') ||
-            (params.sort[i] == '+') || params.sort[i] == '-')
+        if ((params.sort[i] == ',') || (params.sort[i] == '+') || params.sort[i] == '-')
             continue;
         if ((i > 0) && (params.sort[i - 1] == '-'))
             reverse_order = true;
 
         if ((CLUSTER_NAME_LEN <= (i + 1)) &&
-            !xstrncasecmp(params.sort + (i - CLUSTER_NAME_LEN + 1),
-                          "cluster", CLUSTER_NAME_LEN)) {
-            if ((CLUSTER_NAME_LEN <= i) &&
-                (params.sort[i - CLUSTER_NAME_LEN] == '-'))
+            !xstrncasecmp(params.sort + (i - CLUSTER_NAME_LEN + 1), "cluster", CLUSTER_NAME_LEN)) {
+            if ((CLUSTER_NAME_LEN <= i) && (params.sort[i - CLUSTER_NAME_LEN] == '-'))
                 reverse_order = true;
 
             list_sort(job_list, _sort_job_by_cluster_name);
@@ -224,8 +221,7 @@ void sort_job_list(List job_list) {
         else if (params.sort[i] == 'z')
             list_sort(job_list, _sort_job_by_num_sct);
         else {
-            error("Invalid sort specification: %c",
-                  params.sort[i]);
+            error("Invalid sort specification: %c", params.sort[i]);
             exit(1);
         }
     }
@@ -245,17 +241,14 @@ void sort_step_list(List step_list) {
         params.sort = xstrdup("P,i");    /* Partition, step id */
     for (i = (strlen(params.sort) - 1); i >= 0; i--) {
         reverse_order = false;
-        if ((params.sort[i] == ',') ||
-            (params.sort[i] == '+') || params.sort[i] == '-')
+        if ((params.sort[i] == ',') || (params.sort[i] == '+') || params.sort[i] == '-')
             continue;
         if ((i > 0) && (params.sort[i - 1] == '-'))
             reverse_order = true;
 
         if ((CLUSTER_NAME_LEN <= (i + 1)) &&
-            !xstrncasecmp(params.sort + (i - CLUSTER_NAME_LEN + 1),
-                          "cluster", CLUSTER_NAME_LEN)) {
-            if ((CLUSTER_NAME_LEN <= i) &&
-                (params.sort[i - CLUSTER_NAME_LEN] == '-'))
+            !xstrncasecmp(params.sort + (i - CLUSTER_NAME_LEN + 1), "cluster", CLUSTER_NAME_LEN)) {
+            if ((CLUSTER_NAME_LEN <= i) && (params.sort[i - CLUSTER_NAME_LEN] == '-'))
                 reverse_order = true;
 
             list_sort(step_list, _sort_step_by_cluster_name);
@@ -316,26 +309,22 @@ static inline int _diff_uint64(uint64_t value_1, uint64_t value_2) {
     return 0;
 }
 
-static void _get_job_info_from_void(job_info_t **j1, job_info_t **j2,
-                                    void *void1, void *void2) {
+static void _get_job_info_from_void(job_info_t **j1, job_info_t **j2, void *void1, void *void2) {
     *j1 = (*(squeue_job_rec_t **) void1)->job_ptr;
     *j2 = (*(squeue_job_rec_t **) void2)->job_ptr;
 }
 
-static void _get_part_prio_info_from_void(uint32_t *prio1, uint32_t *prio2,
-                                          void *void1, void *void2) {
+static void _get_part_prio_info_from_void(uint32_t *prio1, uint32_t *prio2, void *void1, void *void2) {
     *prio1 = (*(squeue_job_rec_t **) void1)->part_prio;
     *prio2 = (*(squeue_job_rec_t **) void2)->part_prio;
 }
 
-static void _get_part_name_info_from_void(char **name1, char **name2,
-                                          void *void1, void *void2) {
+static void _get_part_name_info_from_void(char **name1, char **name2, void *void1, void *void2) {
     *name1 = (*(squeue_job_rec_t **) void1)->part_name;
     *name2 = (*(squeue_job_rec_t **) void2)->part_name;
 }
 
-static void _get_step_info_from_void(job_step_info_t **s1, job_step_info_t **s2,
-                                     void *v1, void *v2) {
+static void _get_step_info_from_void(job_step_info_t **s1, job_step_info_t **s2, void *v1, void *v2) {
     *s1 = *(job_step_info_t **) v1;
     *s2 = *(job_step_info_t **) v2;
 }
@@ -506,8 +495,7 @@ static int _sort_job_by_node_list(void *void1, void *void2) {
                 break;
             continue;
         }
-        if ((isdigit((int) ptr1[inx])) &&
-            (isdigit((int) ptr2[inx]))) {
+        if ((isdigit((int) ptr1[inx])) && (isdigit((int) ptr2[inx]))) {
             int num1, num2;
             num1 = atoi(ptr1 + inx);
             num2 = atoi(ptr2 + inx);
@@ -658,8 +646,7 @@ static int _sort_job_by_state(void *void1, void *void2) {
 
     _get_job_info_from_void(&job1, &job2, void1, void2);
 
-    diff = xstrcmp(job_state_string(job1->job_state),
-                   job_state_string(job2->job_state));
+    diff = xstrcmp(job_state_string(job1->job_state), job_state_string(job2->job_state));
 
     if (reverse_order)
         diff = -diff;
@@ -673,8 +660,7 @@ static int _sort_job_by_state_compact(void *void1, void *void2) {
 
     _get_job_info_from_void(&job1, &job2, void1, void2);
 
-    diff = xstrcmp(job_state_string_compact(job1->job_state),
-                   job_state_string_compact(job2->job_state));
+    diff = xstrcmp(job_state_string_compact(job1->job_state), job_state_string_compact(job2->job_state));
 
     if (reverse_order)
         diff = -diff;
@@ -944,8 +930,7 @@ static int _sort_step_by_node_list(void *void1, void *void2) {
                 break;
             continue;
         }
-        if ((isdigit((int) ptr1[inx])) &&
-            (isdigit((int) ptr2[inx]))) {
+        if ((isdigit((int) ptr1[inx])) && (isdigit((int) ptr2[inx]))) {
             int num1, num2;
             num1 = atoi(ptr1 + inx);
             num2 = atoi(ptr2 + inx);

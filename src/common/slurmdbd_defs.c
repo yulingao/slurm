@@ -228,8 +228,7 @@ extern slurmdbd_msg_type_t str_2_slurmdbd_msg_type(char *msg_type) {
         return DBD_SEND_MULT_MSG;
     } else if (!xstrcasecmp(msg_type, "Got Multiple Message Returns")) {
         return DBD_GOT_MULT_MSG;
-    } else if (!xstrcasecmp(msg_type,
-                            "Persistent Connection Initialization")) {
+    } else if (!xstrcasecmp(msg_type, "Persistent Connection Initialization")) {
         return SLURM_PERSIST_INIT;
     } else {
         return NO_VAL;
@@ -951,15 +950,12 @@ extern void slurmdbd_free_msg(slurmdbd_msg_t *msg) {
             slurm_free_msg(msg->data);
             break;
         default:
-            error("%s: Unknown rec type %d(%s)",
-                  __func__, msg->msg_type,
-                  slurmdbd_msg_type_2_str(msg->msg_type, true));
+            error("%s: Unknown rec type %d(%s)", __func__, msg->msg_type, slurmdbd_msg_type_2_str(msg->msg_type, true));
             return;
     }
 }
 
-extern void slurmdbd_free_rec_msg(dbd_rec_msg_t *msg,
-                                  slurmdbd_msg_type_t type) {
+extern void slurmdbd_free_rec_msg(dbd_rec_msg_t *msg, slurmdbd_msg_type_t type) {
     void (*my_destroy)(void *object);
 
     if (msg) {
@@ -979,8 +975,7 @@ extern void slurmdbd_free_rec_msg(dbd_rec_msg_t *msg,
     }
 }
 
-extern void slurmdbd_free_cond_msg(dbd_cond_msg_t *msg,
-                                   slurmdbd_msg_type_t type) {
+extern void slurmdbd_free_cond_msg(dbd_cond_msg_t *msg, slurmdbd_msg_type_t type) {
     void (*my_destroy)(void *object);
 
     if (msg) {
@@ -1099,8 +1094,7 @@ extern void slurmdbd_free_list_msg(dbd_list_msg_t *msg) {
     }
 }
 
-extern void slurmdbd_free_modify_msg(dbd_modify_msg_t *msg,
-                                     slurmdbd_msg_type_t type) {
+extern void slurmdbd_free_modify_msg(dbd_modify_msg_t *msg, slurmdbd_msg_type_t type) {
     void (*destroy_cond)(void *object);
     void (*destroy_rec)(void *object);
 
@@ -1186,8 +1180,7 @@ extern void slurmdbd_free_step_start_msg(dbd_step_start_msg_t *msg) {
     }
 }
 
-extern void slurmdbd_free_usage_msg(dbd_usage_msg_t *msg,
-                                    slurmdbd_msg_type_t type) {
+extern void slurmdbd_free_usage_msg(dbd_usage_msg_t *msg, slurmdbd_msg_type_t type) {
     void (*destroy_rec)(void *object);
     if (msg) {
         switch (type) {

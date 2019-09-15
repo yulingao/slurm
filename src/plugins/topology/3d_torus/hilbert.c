@@ -33,10 +33,9 @@
 
 #include "src/plugins/topology/3d_torus/hilbert.h"
 
-extern void TransposetoAxes(
-        coord_t *X,            // I O  position   [n]
-        int b,            // I    # bits
-        int n)            // I    dimension
+extern void TransposetoAxes(coord_t *X,            // I O  position   [n]
+                            int b,            // I    # bits
+                            int n)            // I    dimension
 {
     coord_t M, P, Q, t;
     int i;
@@ -62,10 +61,9 @@ extern void TransposetoAxes(
     }
 }
 
-extern void AxestoTranspose(
-        coord_t *X,            // I O  position   [n]
-        int b,            // I    # bits
-        int n)            // I    dimension
+extern void AxestoTranspose(coord_t *X,            // I O  position   [n]
+                            int b,            // I    # bits
+                            int n)            // I    dimension
 {
     coord_t P, Q, t;
     int i;

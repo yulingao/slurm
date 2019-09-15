@@ -96,8 +96,7 @@ extern List find_preemptable_jobs(struct job_record *job_ptr) {
         return preemptee_job_list;
     }
     if (job_ptr->part_ptr->node_bitmap == NULL) {
-        error("find_preemptable_jobs: partition %s node_bitmap=NULL",
-              job_ptr->part_ptr->name);
+        error("find_preemptable_jobs: partition %s node_bitmap=NULL", job_ptr->part_ptr->name);
         return preemptee_job_list;
     }
 
@@ -106,17 +105,12 @@ extern List find_preemptable_jobs(struct job_record *job_ptr) {
     while ((job_p = (struct job_record *) list_next(job_iterator))) {
         if (!IS_JOB_RUNNING(job_p) && !IS_JOB_SUSPENDED(job_p))
             continue;
-        if ((job_p->part_ptr == NULL) ||
-            (job_p->part_ptr->priority_tier >=
-             job_ptr->part_ptr->priority_tier) ||
+        if ((job_p->part_ptr == NULL) || (job_p->part_ptr->priority_tier >= job_ptr->part_ptr->priority_tier) ||
             (job_p->part_ptr->preempt_mode == PREEMPT_MODE_OFF))
             continue;
-        if ((job_p->node_bitmap == NULL) ||
-            (bit_overlap(job_p->node_bitmap,
-                         job_ptr->part_ptr->node_bitmap) == 0))
+        if ((job_p->node_bitmap == NULL) || (bit_overlap(job_p->node_bitmap, job_ptr->part_ptr->node_bitmap) == 0))
             continue;
-        if (job_ptr->details &&
-            (job_ptr->details->expanding_jobid == job_p->job_id))
+        if (job_ptr->details && (job_ptr->details->expanding_jobid == job_p->job_id))
             continue;
         if (acct_policy_is_job_preempt_exempt(job_p))
             continue;
@@ -208,13 +202,10 @@ extern bool preemption_enabled(void) {
 }
 
 /* Return true if the preemptor can preempt the preemptee, otherwise false */
-extern bool job_preempt_check(job_queue_rec_t *preemptor,
-                              job_queue_rec_t *preemptee) {
+extern bool job_preempt_check(job_queue_rec_t *preemptor, job_queue_rec_t *preemptee) {
     if (preemptor->part_ptr && preemptee->part_ptr &&
-        (bit_overlap(preemptor->part_ptr->node_bitmap,
-                     preemptee->part_ptr->node_bitmap)) &&
-        (preemptor->part_ptr->priority_tier >
-         preemptee->part_ptr->priority_tier))
+        (bit_overlap(preemptor->part_ptr->node_bitmap, preemptee->part_ptr->node_bitmap)) &&
+        (preemptor->part_ptr->priority_tier > preemptee->part_ptr->priority_tier))
         return true;
 
     return false;

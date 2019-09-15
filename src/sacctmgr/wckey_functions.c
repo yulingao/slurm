@@ -40,9 +40,7 @@
 #include "src/sacctmgr/sacctmgr.h"
 #include "src/common/uid.h"
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_wckey_cond_t *wckey_cond,
-                     List format_list) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_wckey_cond_t *wckey_cond, List format_list) {
     int i;
     int set = 0;
     int end = 0;
@@ -64,75 +62,55 @@ static int _set_cond(int *start, int argc, char **argv,
             }
         }
 
-        if (!end && !xstrncasecmp(argv[i], "where",
-                                  MAX(command_len, 5))) {
+        if (!end && !xstrncasecmp(argv[i], "where", MAX(command_len, 5))) {
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "withdeleted",
-                                         MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "withdeleted", MAX(command_len, 5))) {
             wckey_cond->with_deleted = 1;
             set = 1;
-        } else if (!end
-                   || !xstrncasecmp(argv[i], "WCKeys",
-                                    MAX(command_len, 3))
-                   || !xstrncasecmp(argv[i], "Names",
-                                    MAX(command_len, 3))) {
+        } else if (!end || !xstrncasecmp(argv[i], "WCKeys", MAX(command_len, 3)) ||
+                   !xstrncasecmp(argv[i], "Names", MAX(command_len, 3))) {
             if (!wckey_cond->name_list)
-                wckey_cond->name_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(wckey_cond->name_list,
-                                      argv[i] + end))
+                wckey_cond->name_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(wckey_cond->name_list, argv[i] + end))
                 set = 1;
-        } else if (!xstrncasecmp(argv[i], "Ids",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Ids", MAX(command_len, 1))) {
             ListIterator itr = NULL;
             char *temp = NULL;
             uint32_t id = 0;
 
             if (!wckey_cond->id_list)
-                wckey_cond->id_list =
-                        list_create(slurm_destroy_char);
+                wckey_cond->id_list = list_create(slurm_destroy_char);
 
-            if (slurm_addto_char_list(wckey_cond->id_list,
-                                      argv[i] + end))
+            if (slurm_addto_char_list(wckey_cond->id_list, argv[i] + end))
                 set = 1;
 
             /* check to make sure user gave ints here */
             itr = list_iterator_create(wckey_cond->id_list);
             while ((temp = list_next(itr))) {
-                if (get_uint(temp, &id, "WCKeyID")
-                    != SLURM_SUCCESS) {
+                if (get_uint(temp, &id, "WCKeyID") != SLURM_SUCCESS) {
                     exit_code = 1;
                     list_delete_item(itr);
                 }
             }
             list_iterator_destroy(itr);
-        } else if (!xstrncasecmp(argv[i], "Clusters",
-                                 MAX(command_len, 3))) {
+        } else if (!xstrncasecmp(argv[i], "Clusters", MAX(command_len, 3))) {
             if (!wckey_cond->cluster_list)
-                wckey_cond->cluster_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(wckey_cond->cluster_list,
-                                      argv[i] + end))
+                wckey_cond->cluster_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(wckey_cond->cluster_list, argv[i] + end))
                 set = 1;
         } else if (!xstrncasecmp(argv[i], "End", MAX(command_len, 1))) {
             wckey_cond->usage_end = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 1))) {
             if (format_list)
                 slurm_addto_char_list(format_list, argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "Start",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Start", MAX(command_len, 1))) {
             wckey_cond->usage_start = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Users",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Users", MAX(command_len, 1))) {
             if (!wckey_cond->user_list)
-                wckey_cond->user_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list_with_case(wckey_cond->user_list,
-                                                argv[i] + end,
-                                                user_case_norm))
+                wckey_cond->user_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list_with_case(wckey_cond->user_list, argv[i] + end, user_case_norm))
                 set = 1;
         } else {
             exit_code = 1;
@@ -147,8 +125,7 @@ static int _set_cond(int *start, int argc, char **argv,
 
 extern int sacctmgr_list_wckey(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
-    slurmdb_wckey_cond_t *wckey_cond =
-            xmalloc(sizeof(slurmdb_wckey_cond_t));
+    slurmdb_wckey_cond_t *wckey_cond = xmalloc(sizeof(slurmdb_wckey_cond_t));
     List wckey_list = NULL;
     int i = 0;
     ListIterator itr = NULL;
@@ -163,16 +140,12 @@ extern int sacctmgr_list_wckey(int argc, char **argv) {
     List print_fields_list; /* types are of print_field_t */
 
     enum {
-        PRINT_CLUSTER,
-        PRINT_ID,
-        PRINT_NAME,
-        PRINT_USER
+        PRINT_CLUSTER, PRINT_ID, PRINT_NAME, PRINT_USER
     };
 
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         _set_cond(&i, argc, argv, wckey_cond, format_list);
     }
@@ -184,8 +157,7 @@ extern int sacctmgr_list_wckey(int argc, char **argv) {
     }
 
     if (!list_count(format_list)) {
-        slurm_addto_char_list(format_list,
-                              "Name,Cluster,User");
+        slurm_addto_char_list(format_list, "Name,Cluster,User");
     }
 
     print_fields_list = list_create(destroy_print_field);
@@ -204,14 +176,13 @@ extern int sacctmgr_list_wckey(int argc, char **argv) {
         command_len = strlen(object);
 
         field = xmalloc(sizeof(print_field_t));
-        if (!xstrncasecmp("WCKeys", object, MAX(command_len, 1))
-            || !xstrncasecmp("Names", object, MAX(command_len, 1))) {
+        if (!xstrncasecmp("WCKeys", object, MAX(command_len, 1)) ||
+            !xstrncasecmp("Names", object, MAX(command_len, 1))) {
             field->type = PRINT_NAME;
             field->name = xstrdup("WCKey");
             field->len = 10;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Clusters", object,
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp("Clusters", object, MAX(command_len, 2))) {
             field->type = PRINT_CLUSTER;
             field->name = xstrdup("Cluster");
             field->len = 10;
@@ -252,8 +223,7 @@ extern int sacctmgr_list_wckey(int argc, char **argv) {
 
     if (!wckey_list) {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         FREE_NULL_LIST(print_fields_list);
         return SLURM_ERROR;
     }
@@ -270,33 +240,19 @@ extern int sacctmgr_list_wckey(int argc, char **argv) {
             switch (field->type) {
                 /* All the association stuff */
                 case PRINT_CLUSTER:
-                    field->print_routine(
-                            field,
-                            wckey->cluster,
-                            (curr_inx == field_count));
+                    field->print_routine(field, wckey->cluster, (curr_inx == field_count));
                     break;
                 case PRINT_ID:
-                    field->print_routine(
-                            field,
-                            wckey->id,
-                            (curr_inx == field_count));
+                    field->print_routine(field, wckey->id, (curr_inx == field_count));
                     break;
                 case PRINT_NAME:
-                    field->print_routine(
-                            field,
-                            wckey->name,
-                            (curr_inx == field_count));
+                    field->print_routine(field, wckey->name, (curr_inx == field_count));
                     break;
                 case PRINT_USER:
-                    field->print_routine(
-                            field,
-                            wckey->user,
-                            (curr_inx == field_count));
+                    field->print_routine(field, wckey->user, (curr_inx == field_count));
                     break;
                 default:
-                    field->print_routine(
-                            field, NULL,
-                            (curr_inx == field_count));
+                    field->print_routine(field, NULL, (curr_inx == field_count));
                     break;
             }
             curr_inx++;

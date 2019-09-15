@@ -74,8 +74,7 @@ bool is_ping_done(void) {
     slurm_mutex_lock(&lock_mutex);
     if (ping_count) {
         is_done = false;
-        if (!ping_msg_sent &&
-            (difftime(time(NULL), ping_start) >= PING_TIMEOUT)) {
+        if (!ping_msg_sent && (difftime(time(NULL), ping_start) >= PING_TIMEOUT)) {
             error("Node ping apparently hung, "
                   "many nodes may be DOWN or configured "
                   "SlurmdTimeout should be increased");
@@ -169,8 +168,7 @@ void ping_nodes(void) {
      * Because of this, we extend the SlurmdTimeout by the
      * time needed to complete a ping of all nodes.
      */
-    if ((last_ping_timeout == 0) ||
-        (last_ping_time == (time_t) 0)) {
+    if ((last_ping_timeout == 0) || (last_ping_time == (time_t) 0)) {
         node_dead_time = (time_t) 0;
     } else {
         node_dead_time = last_ping_time - last_ping_timeout;
@@ -183,8 +181,7 @@ void ping_nodes(void) {
         max_reg_threads = MAX(slurm_get_tree_width(), 1);
     }
     offset += max_reg_threads;
-    if ((offset > node_record_count) &&
-        (offset >= (max_reg_threads * MAX_REG_FREQUENCY)))
+    if ((offset > node_record_count) && (offset >= (max_reg_threads * MAX_REG_FREQUENCY)))
         offset = 0;
 
 #ifdef HAVE_FRONT_END
@@ -259,30 +256,21 @@ void ping_nodes(void) {
         ping_agent_args->node_count++;
     }
 #else
-    for (i = 0, node_ptr = node_record_table_ptr;
-         i < node_record_count; i++, node_ptr++) {
-        if (IS_NODE_FUTURE(node_ptr) ||
-            IS_NODE_POWER_SAVE(node_ptr) ||
-            IS_NODE_POWER_UP(node_ptr))
+    for (i = 0, node_ptr = node_record_table_ptr; i < node_record_count; i++, node_ptr++) {
+        if (IS_NODE_FUTURE(node_ptr) || IS_NODE_POWER_SAVE(node_ptr) || IS_NODE_POWER_UP(node_ptr))
             continue;
-        if ((slurmctld_conf.slurmd_timeout == 0) &&
-            (!restart_flag) &&
-            (!IS_NODE_UNKNOWN(node_ptr)) &&
+        if ((slurmctld_conf.slurmd_timeout == 0) && (!restart_flag) && (!IS_NODE_UNKNOWN(node_ptr)) &&
             (!IS_NODE_NO_RESPOND(node_ptr)))
             continue;
 
-        if ((node_ptr->last_response != (time_t) 0) &&
-            (node_ptr->last_response <= node_dead_time) &&
+        if ((node_ptr->last_response != (time_t) 0) && (node_ptr->last_response <= node_dead_time) &&
             (!IS_NODE_DOWN(node_ptr))) {
             if (down_hostlist)
-                (void) hostlist_push_host(down_hostlist,
-                                          node_ptr->name);
+                (void) hostlist_push_host(down_hostlist, node_ptr->name);
             else {
-                down_hostlist =
-                        hostlist_create(node_ptr->name);
+                down_hostlist = hostlist_create(node_ptr->name);
                 if (!down_hostlist) {
-                    fatal("Invalid host name: %s",
-                          node_ptr->name);
+                    fatal("Invalid host name: %s", node_ptr->name);
                 }
             }
             set_node_down_ptr(node_ptr, "Not responding");
@@ -294,8 +282,7 @@ void ping_nodes(void) {
            keep the larger last_response so we don't
            accidentally mark them as "unexpectedly rebooted".
         */
-        if (restart_flag
-            && (node_ptr->last_response < slurmctld_conf.last_update))
+        if (restart_flag && (node_ptr->last_response < slurmctld_conf.last_update))
             node_ptr->last_response = slurmctld_conf.last_update;
 
         /* Request a node registration if its state is UNKNOWN or
@@ -306,20 +293,15 @@ void ping_nodes(void) {
          * can generate a flood of incoming RPCs. */
         if (IS_NODE_UNKNOWN(node_ptr) || (node_ptr->boot_time == 0) ||
             ((i >= offset) && (i < (offset + max_reg_threads)))) {
-            if (reg_agent_args->protocol_version >
-                node_ptr->protocol_version)
-                reg_agent_args->protocol_version =
-                        node_ptr->protocol_version;
-            hostlist_push_host(reg_agent_args->hostlist,
-                               node_ptr->name);
+            if (reg_agent_args->protocol_version > node_ptr->protocol_version)
+                reg_agent_args->protocol_version = node_ptr->protocol_version;
+            hostlist_push_host(reg_agent_args->hostlist, node_ptr->name);
             reg_agent_args->node_count++;
             continue;
         }
 
-        if ((!IS_NODE_NO_RESPOND(node_ptr)) &&
-            (node_ptr->last_response >= still_live_time) &&
-            (node_ptr->cpu_load_time >= old_cpu_load_time) &&
-            (node_ptr->free_mem_time >= old_free_mem_time))
+        if ((!IS_NODE_NO_RESPOND(node_ptr)) && (node_ptr->last_response >= still_live_time) &&
+            (node_ptr->cpu_load_time >= old_cpu_load_time) && (node_ptr->free_mem_time >= old_free_mem_time))
             continue;
 
         /* Do not keep pinging down nodes since this can induce
@@ -327,10 +309,8 @@ void ping_nodes(void) {
         if (IS_NODE_NO_RESPOND(node_ptr) && IS_NODE_DOWN(node_ptr))
             continue;
 
-        if (ping_agent_args->protocol_version >
-            node_ptr->protocol_version)
-            ping_agent_args->protocol_version =
-                    node_ptr->protocol_version;
+        if (ping_agent_args->protocol_version > node_ptr->protocol_version)
+            ping_agent_args->protocol_version = node_ptr->protocol_version;
         hostlist_push_host(ping_agent_args->hostlist, node_ptr->name);
         ping_agent_args->node_count++;
     }
@@ -342,8 +322,7 @@ void ping_nodes(void) {
         xfree(ping_agent_args);
     } else {
         hostlist_uniq(ping_agent_args->hostlist);
-        host_str = hostlist_ranged_string_xmalloc(
-                ping_agent_args->hostlist);
+        host_str = hostlist_ranged_string_xmalloc(ping_agent_args->hostlist);
         debug("Spawning ping agent for %s", host_str);
         xfree(host_str);
         ping_begin();
@@ -355,10 +334,8 @@ void ping_nodes(void) {
         xfree(reg_agent_args);
     } else {
         hostlist_uniq(reg_agent_args->hostlist);
-        host_str = hostlist_ranged_string_xmalloc(
-                reg_agent_args->hostlist);
-        debug("Spawning registration agent for %s %d hosts",
-              host_str, reg_agent_args->node_count);
+        host_str = hostlist_ranged_string_xmalloc(reg_agent_args->hostlist);
+        debug("Spawning registration agent for %s %d hosts", host_str, reg_agent_args->node_count);
         xfree(host_str);
         ping_begin();
         agent_queue_request(reg_agent_args);
@@ -415,28 +392,23 @@ extern void run_health_check(void) {
     }
 #else
     node_limit = 0;
-    run_cyclic = slurmctld_conf.health_check_node_state &
-                 HEALTH_CHECK_CYCLE;
-    node_states = slurmctld_conf.health_check_node_state &
-                  (~HEALTH_CHECK_CYCLE);
+    run_cyclic = slurmctld_conf.health_check_node_state & HEALTH_CHECK_CYCLE;
+    node_states = slurmctld_conf.health_check_node_state & (~HEALTH_CHECK_CYCLE);
     if (run_cyclic) {
         time_t now = time(NULL);
         if (cycle_start_time == (time_t) 0)
             cycle_start_time = now;
         else if (base_node_loc >= 0);    /* mid-cycle */
-        else if (difftime(now, cycle_start_time) <
-                 slurmctld_conf.health_check_interval) {
+        else if (difftime(now, cycle_start_time) < slurmctld_conf.health_check_interval) {
             return;    /* Wait to start next cycle */
         }
         cycle_start_time = now;
         /* Determine how many nodes we want to test on each call of
          * run_health_check() to spread out the work. */
-        node_limit = (node_record_count * 2) /
-                     slurmctld_conf.health_check_interval;
+        node_limit = (node_record_count * 2) / slurmctld_conf.health_check_interval;
         node_limit = MAX(node_limit, 10);
     }
-    if ((node_states != HEALTH_CHECK_NODE_ANY) &&
-        (node_states != HEALTH_CHECK_NODE_IDLE)) {
+    if ((node_states != HEALTH_CHECK_NODE_ANY) && (node_states != HEALTH_CHECK_NODE_IDLE)) {
         /* Update each node's alloc_cpus count */
         select_g_select_nodeinfo_set_all();
     }
@@ -459,8 +431,7 @@ extern void run_health_check(void) {
         } else {
             node_ptr = node_record_table_ptr + i;
         }
-        if (IS_NODE_NO_RESPOND(node_ptr) || IS_NODE_FUTURE(node_ptr) ||
-            IS_NODE_POWER_SAVE(node_ptr))
+        if (IS_NODE_NO_RESPOND(node_ptr) || IS_NODE_FUTURE(node_ptr) || IS_NODE_POWER_SAVE(node_ptr))
             continue;
         if (node_states != HEALTH_CHECK_NODE_ANY) {
             uint16_t cpus_total, cpus_used = 0;
@@ -470,11 +441,8 @@ extern void run_health_check(void) {
                 cpus_total = node_ptr->cpus;
             }
             if (!IS_NODE_IDLE(node_ptr)) {
-                select_g_select_nodeinfo_get(
-                        node_ptr->select_nodeinfo,
-                        SELECT_NODEDATA_SUBCNT,
-                        NODE_STATE_ALLOCATED,
-                        &cpus_used);
+                select_g_select_nodeinfo_get(node_ptr->select_nodeinfo, SELECT_NODEDATA_SUBCNT, NODE_STATE_ALLOCATED,
+                                             &cpus_used);
             }
             /* Here the node state is inferred from
              * the cpus allocated on it.
@@ -498,10 +466,8 @@ extern void run_health_check(void) {
                     continue;
             }
         }
-        if (check_agent_args->protocol_version >
-            node_ptr->protocol_version)
-            check_agent_args->protocol_version =
-                    node_ptr->protocol_version;
+        if (check_agent_args->protocol_version > node_ptr->protocol_version)
+            check_agent_args->protocol_version = node_ptr->protocol_version;
         hostlist_push_host(check_agent_args->hostlist, node_ptr->name);
         check_agent_args->node_count++;
     }
@@ -514,8 +480,7 @@ extern void run_health_check(void) {
         xfree(check_agent_args);
     } else {
         hostlist_uniq(check_agent_args->hostlist);
-        host_str = hostlist_ranged_string_xmalloc(
-                check_agent_args->hostlist);
+        host_str = hostlist_ranged_string_xmalloc(check_agent_args->hostlist);
         debug("Spawning health check agent for %s", host_str);
         xfree(host_str);
         ping_begin();
@@ -554,14 +519,11 @@ extern void update_nodes_acct_gather_data(void) {
         agent_args->node_count++;
     }
 #else
-    for (i = 0, node_ptr = node_record_table_ptr;
-         i < node_record_count; i++, node_ptr++) {
-        if (IS_NODE_NO_RESPOND(node_ptr) || IS_NODE_FUTURE(node_ptr) ||
-            IS_NODE_POWER_SAVE(node_ptr))
+    for (i = 0, node_ptr = node_record_table_ptr; i < node_record_count; i++, node_ptr++) {
+        if (IS_NODE_NO_RESPOND(node_ptr) || IS_NODE_FUTURE(node_ptr) || IS_NODE_POWER_SAVE(node_ptr))
             continue;
         if (agent_args->protocol_version > node_ptr->protocol_version)
-            agent_args->protocol_version =
-                    node_ptr->protocol_version;
+            agent_args->protocol_version = node_ptr->protocol_version;
         hostlist_push_host(agent_args->hostlist, node_ptr->name);
         agent_args->node_count++;
     }

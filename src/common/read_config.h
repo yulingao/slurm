@@ -330,8 +330,7 @@ extern char *job_defaults_str(List in_list);
 extern void job_defaults_pack(void *in, uint16_t protocol_version, Buf buffer);
 
 /* Unpack a job_defaults_t element. Used by slurm_pack_list() */
-extern int job_defaults_unpack(void **out, uint16_t protocol_version,
-                               Buf buffer);
+extern int job_defaults_unpack(void **out, uint16_t protocol_version, Buf buffer);
 
 /*
  * list_find_frontend - find an entry in the front_end list, see list.h for
@@ -430,8 +429,7 @@ extern int slurm_conf_downnodes_array(slurm_conf_downnodes_t **ptr_array[]);
 /*
  * slurm_reset_alias - Reset the address and hostname of a specific node name
  */
-extern void slurm_reset_alias(char *node_name, char *node_addr,
-                              char *node_hostname);
+extern void slurm_reset_alias(char *node_name, char *node_addr, char *node_hostname);
 
 /*
  * slurm_conf_get_hostname - Return the NodeHostname for given NodeName
@@ -512,10 +510,9 @@ extern int slurm_conf_get_addr(const char *node_name, slurm_addr_t *address);
  *
  * NOTE: Caller must NOT be holding slurm_conf_lock().
  */
-extern int slurm_conf_get_cpus_bsct(const char *node_name,
-                                    uint16_t *cpus, uint16_t *boards,
-                                    uint16_t *sockets, uint16_t *cores,
-                                    uint16_t *threads);
+extern int
+slurm_conf_get_cpus_bsct(const char *node_name, uint16_t *cpus, uint16_t *boards, uint16_t *sockets, uint16_t *cores,
+                         uint16_t *threads);
 
 /*
  * slurm_conf_get_res_spec_info - Return resource specialization info
@@ -524,9 +521,7 @@ extern int slurm_conf_get_cpus_bsct(const char *node_name,
  *
  * NOTE: Caller must NOT be holding slurm_conf_lock().
  */
-extern int slurm_conf_get_res_spec_info(const char *node_name,
-                                        char **cpu_spec_list,
-                                        uint16_t *core_spec_cnt,
+extern int slurm_conf_get_res_spec_info(const char *node_name, char **cpu_spec_list, uint16_t *core_spec_cnt,
                                         uint64_t *mem_spec_limit);
 
 /*
@@ -543,8 +538,7 @@ extern void init_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr);
  * IN purge_node_hash - purge system-wide node hash table if set,
  *			set to zero if clearing private copy of config data
  */
-extern void free_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr,
-                            bool purge_node_hash);
+extern void free_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr, bool purge_node_hash);
 
 /*
  * gethostname_short - equivalent to gethostname(), but return only the first
@@ -563,8 +557,7 @@ extern int gethostname_short(char *name, size_t len);
  *
  * Returns an xmalloc()ed string which the caller must free with xfree().
  */
-extern char *slurm_conf_expand_slurmd_path(const char *path,
-                                           const char *node_name);
+extern char *slurm_conf_expand_slurmd_path(const char *path, const char *node_name);
 
 /*
  * prolog_flags2str - convert a PrologFlags uint16_t to the equivalent string
@@ -604,32 +597,23 @@ extern uint16_t reconfig_str2flags(char *reconfig_flags);
 
 extern void destroy_config_plugin_params(void *object);
 
-extern void pack_config_plugin_params(void *in, uint16_t protocol_version,
-                                      Buf buff);
+extern void pack_config_plugin_params(void *in, uint16_t protocol_version, Buf buff);
 
-extern int unpack_config_plugin_params(void **object, uint16_t protocol_version,
-                                       Buf buff);
+extern int unpack_config_plugin_params(void **object, uint16_t protocol_version, Buf buff);
 
-extern void pack_config_plugin_params_list(void *in, uint16_t protocol_version,
-                                           Buf buff);
+extern void pack_config_plugin_params_list(void *in, uint16_t protocol_version, Buf buff);
 
-extern int unpack_config_plugin_params_list(void **object,
-                                            uint16_t protocol_version,
-                                            Buf buff);
+extern int unpack_config_plugin_params_list(void **object, uint16_t protocol_version, Buf buff);
 
 extern void destroy_config_key_pair(void *object);
 
-extern void pack_key_pair_list(void *key_pairs, uint16_t protocol_version,
-                               Buf buffer);
+extern void pack_key_pair_list(void *key_pairs, uint16_t protocol_version, Buf buffer);
 
-extern int unpack_key_pair_list(void **key_pairs, uint16_t protocol_version,
-                                Buf buffer);
+extern int unpack_key_pair_list(void **key_pairs, uint16_t protocol_version, Buf buffer);
 
-extern void pack_config_key_pair(void *in, uint16_t protocol_version,
-                                 Buf buffer);
+extern void pack_config_key_pair(void *in, uint16_t protocol_version, Buf buffer);
 
-extern int unpack_config_key_pair(void **object, uint16_t protocol_version,
-                                  Buf buffer);
+extern int unpack_config_key_pair(void **object, uint16_t protocol_version, Buf buffer);
 
 extern int sort_key_pairs(void *v1, void *v2);
 
@@ -659,7 +643,6 @@ extern char *xlate_features(char *job_features);
  * 	host_list. See build_node_details().
  * RET return SLURM_SUCCESS on success, SLURM_ERROR otherwise.
  */
-extern int add_remote_nodes_to_conf_tbls(char *node_list,
-                                         slurm_addr_t *node_addrs);
+extern int add_remote_nodes_to_conf_tbls(char *node_list, slurm_addr_t *node_addrs);
 
 #endif /* !_READ_CONFIG_H */

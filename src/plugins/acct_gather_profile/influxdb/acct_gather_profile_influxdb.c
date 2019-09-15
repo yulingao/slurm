@@ -182,8 +182,7 @@ static bool _run_in_daemon(void) {
 
 
 /* Callback to handle the HTTP response */
-static size_t _write_callback(void *contents, size_t size, size_t nmemb,
-                              void *userp) {
+static size_t _write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
     struct http_response *mem = (struct http_response *) userp;
 
@@ -224,8 +223,8 @@ static int _send_data(const char *data) {
         length = strlen(data);
         datastrlen += length;
         if (slurm_get_debug_flags() & DEBUG_FLAG_PROFILE)
-            info("%s %s: %zu bytes of data added to buffer. New buffer size: %d",
-                 plugin_type, __func__, length, datastrlen);
+            info("%s %s: %zu bytes of data added to buffer. New buffer size: %d", plugin_type, __func__, length,
+                 datastrlen);
         return rc;
     }
 
@@ -242,37 +241,33 @@ static int _send_data(const char *data) {
         goto cleanup_easy_init;
     }
 
-    xstrfmtcat(url, "%s/write?db=%s&rp=%s&precision=s", influxdb_conf.host,
-               influxdb_conf.database, influxdb_conf.rt_policy);
+    xstrfmtcat(url, "%s/write?db=%s&rp=%s&precision=s", influxdb_conf.host, influxdb_conf.database,
+               influxdb_conf.rt_policy);
 
     chunk.message = xmalloc(1);
     chunk.size = 0;
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, url);
     if (influxdb_conf.password)
-        curl_easy_setopt(curl_handle, CURLOPT_PASSWORD,
-                         influxdb_conf.password);
+        curl_easy_setopt(curl_handle, CURLOPT_PASSWORD, influxdb_conf.password);
     curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
     curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, datastr);
     curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, strlen(datastr));
     if (influxdb_conf.username)
-        curl_easy_setopt(curl_handle, CURLOPT_USERNAME,
-                         influxdb_conf.username);
+        curl_easy_setopt(curl_handle, CURLOPT_USERNAME, influxdb_conf.username);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, _write_callback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &chunk);
 
     if ((res = curl_easy_perform(curl_handle)) != CURLE_OK) {
         if ((error_cnt++ % 100) == 0)
-            error("%s %s: curl_easy_perform failed to send data (discarded). Reason: %s",
-                  plugin_type, __func__, curl_easy_strerror(res));
+            error("%s %s: curl_easy_perform failed to send data (discarded). Reason: %s", plugin_type, __func__,
+                  curl_easy_strerror(res));
         rc = SLURM_ERROR;
         goto cleanup;
     }
 
-    if ((res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE,
-                                 &response_code)) != CURLE_OK) {
-        error("%s %s: curl_easy_getinfo response code failed: %s",
-              plugin_type, __func__, curl_easy_strerror(res));
+    if ((res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &response_code)) != CURLE_OK) {
+        error("%s %s: curl_easy_getinfo response code failed: %s", plugin_type, __func__, curl_easy_strerror(res));
         rc = SLURM_ERROR;
         goto cleanup;
     }
@@ -289,14 +284,12 @@ static int _send_data(const char *data) {
             error_cnt = 0;
     } else {
         rc = SLURM_ERROR;
-        debug2("%s %s: data write failed, response code: %ld",
-               plugin_type, __func__, response_code);
+        debug2("%s %s: data write failed, response code: %ld", plugin_type, __func__, response_code);
         if (slurm_get_debug_flags() & DEBUG_FLAG_PROFILE) {
             /* Strip any trailing newlines. */
             while (chunk.message[strlen(chunk.message) - 1] == '\n')
                 chunk.message[strlen(chunk.message) - 1] = '\0';
-            info("%s %s: JSON response body: %s", plugin_type,
-                 __func__, chunk.message);
+            info("%s %s: JSON response body: %s", plugin_type, __func__, chunk.message);
         }
     }
 
@@ -310,8 +303,7 @@ static int _send_data(const char *data) {
 
     END_TIMER;
     if (slurm_get_debug_flags() & DEBUG_FLAG_PROFILE)
-        debug("%s %s: took %s to send data", plugin_type, __func__,
-              TIME_STR);
+        debug("%s %s: took %s to send data", plugin_type, __func__, TIME_STR);
 
     if (data) {
         datastr = xstrdup(data);
@@ -351,18 +343,16 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options,
-                                               int *full_options_cnt) {
+extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     debug3("%s %s called", plugin_type, __func__);
 
-    s_p_options_t options[] = {
-            {"ProfileInfluxDBHost",     S_P_STRING},
-            {"ProfileInfluxDBDatabase", S_P_STRING},
-            {"ProfileInfluxDBDefault",  S_P_STRING},
-            {"ProfileInfluxDBPass",     S_P_STRING},
-            {"ProfileInfluxDBRTPolicy", S_P_STRING},
-            {"ProfileInfluxDBUser",     S_P_STRING},
-            {NULL}};
+    s_p_options_t options[] = {{"ProfileInfluxDBHost",     S_P_STRING},
+                               {"ProfileInfluxDBDatabase", S_P_STRING},
+                               {"ProfileInfluxDBDefault",  S_P_STRING},
+                               {"ProfileInfluxDBPass",     S_P_STRING},
+                               {"ProfileInfluxDBRTPolicy", S_P_STRING},
+                               {"ProfileInfluxDBUser",     S_P_STRING},
+                               {NULL}};
 
     transfer_s_p_options(full_options, options, full_options_cnt);
     return;
@@ -377,21 +367,15 @@ extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl) {
     if (tbl) {
         s_p_get_string(&influxdb_conf.host, "ProfileInfluxDBHost", tbl);
         if (s_p_get_string(&tmp, "ProfileInfluxDBDefault", tbl)) {
-            influxdb_conf.def =
-                    acct_gather_profile_from_string(tmp);
+            influxdb_conf.def = acct_gather_profile_from_string(tmp);
             if (influxdb_conf.def == ACCT_GATHER_PROFILE_NOT_SET)
-                fatal("ProfileInfluxDBDefault can not be set to %s, please specify a valid option",
-                      tmp);
+                fatal("ProfileInfluxDBDefault can not be set to %s, please specify a valid option", tmp);
             xfree(tmp);
         }
-        s_p_get_string(&influxdb_conf.database,
-                       "ProfileInfluxDBDatabase", tbl);
-        s_p_get_string(&influxdb_conf.password,
-                       "ProfileInfluxDBPass", tbl);
-        s_p_get_string(&influxdb_conf.rt_policy,
-                       "ProfileInfluxDBRTPolicy", tbl);
-        s_p_get_string(&influxdb_conf.username,
-                       "ProfileInfluxDBUser", tbl);
+        s_p_get_string(&influxdb_conf.database, "ProfileInfluxDBDatabase", tbl);
+        s_p_get_string(&influxdb_conf.password, "ProfileInfluxDBPass", tbl);
+        s_p_get_string(&influxdb_conf.rt_policy, "ProfileInfluxDBRTPolicy", tbl);
+        s_p_get_string(&influxdb_conf.username, "ProfileInfluxDBUser", tbl);
     }
 
     if (!influxdb_conf.host)
@@ -413,8 +397,7 @@ extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl) {
     debug("%s loaded", plugin_name);
 }
 
-extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
-                                      void *data) {
+extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type, void *data) {
     uint32_t *uint32 = (uint32_t *) data;
     char **tmp_char = (char **) data;
 
@@ -431,8 +414,7 @@ extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
             *uint32 = g_profile_running;
             break;
         default:
-            debug2("%s %s: info_type %d invalid", plugin_type,
-                   __func__, info_type);
+            debug2("%s %s: info_type %d invalid", plugin_type, __func__, info_type);
     }
 }
 
@@ -446,8 +428,7 @@ extern int acct_gather_profile_p_node_step_start(stepd_step_rec_t *job) {
 
     g_job = job;
     profile_str = acct_gather_profile_to_string(g_job->profile);
-    debug2("%s %s: option --profile=%s", plugin_type, __func__,
-           profile_str);
+    debug2("%s %s: option --profile=%s", plugin_type, __func__, profile_str);
     g_profile_running = _determine_profile();
     return rc;
 }
@@ -469,8 +450,7 @@ extern int acct_gather_profile_p_node_step_end(void) {
 extern int acct_gather_profile_p_task_start(uint32_t taskid) {
     int rc = SLURM_SUCCESS;
 
-    debug3("%s %s called with %d prof", plugin_type, __func__,
-           g_profile_running);
+    debug3("%s %s called with %d prof", plugin_type, __func__, g_profile_running);
 
     xassert(_run_in_daemon());
     xassert(g_job);
@@ -496,10 +476,8 @@ extern int64_t acct_gather_profile_p_create_group(const char *name) {
     return 0;
 }
 
-extern int acct_gather_profile_p_create_dataset(const char *name,
-                                                int64_t parent,
-                                                acct_gather_profile_dataset_t
-                                                *dataset) {
+extern int
+acct_gather_profile_p_create_dataset(const char *name, int64_t parent, acct_gather_profile_dataset_t *dataset) {
     table_t *table;
     acct_gather_profile_dataset_t *dataset_loc = dataset;
 
@@ -521,19 +499,15 @@ extern int acct_gather_profile_p_create_dataset(const char *name,
     table->size = 0;
 
     while (dataset_loc && (dataset_loc->type != PROFILE_FIELD_NOT_SET)) {
-        table->names = xrealloc(table->names,
-                                (table->size + 1) * sizeof(char *));
-        table->types = xrealloc(table->types,
-                                (table->size + 1) * sizeof(char *));
+        table->names = xrealloc(table->names, (table->size + 1) * sizeof(char *));
+        table->types = xrealloc(table->types, (table->size + 1) * sizeof(char *));
         (table->names)[table->size] = xstrdup(dataset_loc->name);
         switch (dataset_loc->type) {
             case PROFILE_FIELD_UINT64:
-                table->types[table->size] =
-                        PROFILE_FIELD_UINT64;
+                table->types[table->size] = PROFILE_FIELD_UINT64;
                 break;
             case PROFILE_FIELD_DOUBLE:
-                table->types[table->size] =
-                        PROFILE_FIELD_DOUBLE;
+                table->types[table->size] = PROFILE_FIELD_DOUBLE;
                 break;
             case PROFILE_FIELD_NOT_SET:
                 break;
@@ -545,8 +519,7 @@ extern int acct_gather_profile_p_create_dataset(const char *name,
     return tables_cur_len - 1;
 }
 
-extern int acct_gather_profile_p_add_sample_data(int table_id, void *data,
-                                                 time_t sample_time) {
+extern int acct_gather_profile_p_add_sample_data(int table_id, void *data, time_t sample_time) {
     table_t *table = &tables[table_id];
     int i = 0;
     char *str = NULL;
@@ -558,20 +531,14 @@ extern int acct_gather_profile_p_add_sample_data(int table_id, void *data,
             case PROFILE_FIELD_UINT64:
                 xstrfmtcat(str, "%s,job=%d,step=%d,task=%s,"
                                 "host=%s value=%"PRIu64" "
-                                "%"PRIu64"\n", table->names[i],
-                           g_job->jobid, g_job->stepid,
-                           table->name, g_job->node_name,
-                           ((union data_t *) data)[i].u,
-                           sample_time);
+                                "%"PRIu64"\n", table->names[i], g_job->jobid, g_job->stepid, table->name,
+                           g_job->node_name, ((union data_t *) data)[i].u, sample_time);
                 break;
             case PROFILE_FIELD_DOUBLE:
                 xstrfmtcat(str, "%s,job=%d,step=%d,task=%s,"
                                 "host=%s value=%.2f %"PRIu64""
-                                "\n", table->names[i],
-                           g_job->jobid, g_job->stepid,
-                           table->name, g_job->node_name,
-                           ((union data_t *) data)[i].d,
-                           sample_time);
+                                "\n", table->names[i], g_job->jobid, g_job->stepid, table->name, g_job->node_name,
+                           ((union data_t *) data)[i].d, sample_time);
                 break;
             case PROFILE_FIELD_NOT_SET:
                 break;
@@ -603,8 +570,7 @@ extern void acct_gather_profile_p_conf_values(List *data) {
 
     key_pair = xmalloc(sizeof(config_key_pair_t));
     key_pair->name = xstrdup("ProfileInfluxDBDefault");
-    key_pair->value =
-            xstrdup(acct_gather_profile_to_string(influxdb_conf.def));
+    key_pair->value = xstrdup(acct_gather_profile_to_string(influxdb_conf.def));
     list_append(*data, key_pair);
 
     key_pair = xmalloc(sizeof(config_key_pair_t));
@@ -632,6 +598,5 @@ extern bool acct_gather_profile_p_is_active(uint32_t type) {
     if (g_profile_running <= ACCT_GATHER_PROFILE_NONE)
         return false;
 
-    return (type == ACCT_GATHER_PROFILE_NOT_SET) ||
-           (g_profile_running & type);
+    return (type == ACCT_GATHER_PROFILE_NOT_SET) || (g_profile_running & type);
 }

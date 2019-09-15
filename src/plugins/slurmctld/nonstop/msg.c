@@ -151,8 +151,7 @@ static char *_recv_msg(int new_fd) {
     }
 
     if (sscanf(header, "%lu", &size) != 1) {
-        info("slurmctld/nonstop: malformed message header (%s)",
-             header);
+        info("slurmctld/nonstop: malformed message header (%s)", header);
         return NULL;
     }
 
@@ -195,8 +194,7 @@ static char *_decrypt(char *msg, uid_t *uid) {
 
     err = munge_decode(msg, ctx, &buf_out, &buf_out_size, uid, &gid);
     if (err != EMUNGE_SUCCESS) {
-        info("slurmctld/nonstop: munge_decode error: %s",
-             munge_strerror(err));
+        info("slurmctld/nonstop: munge_decode error: %s", munge_strerror(err));
         xfree(buf_out);
     }
     return (char *) buf_out;
@@ -204,17 +202,13 @@ static char *_decrypt(char *msg, uid_t *uid) {
 
 static void _proc_msg(int new_fd, char *msg, slurm_addr_t cli_addr) {
     /* Locks: Read job and node data */
-    slurmctld_lock_t job_read_lock = {
-            NO_LOCK, READ_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t job_read_lock = {NO_LOCK, READ_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
     /* Locks: Write job */
-    slurmctld_lock_t job_write_lock = {
-            NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t job_write_lock = {NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
     /* Locks: Write job, write node, read partition */
-    slurmctld_lock_t job_write_lock2 = {
-            NO_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
+    slurmctld_lock_t job_write_lock2 = {NO_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
     /* Locks: Write node data */
-    slurmctld_lock_t node_write_lock = {
-            NO_LOCK, NO_LOCK, WRITE_LOCK, NO_LOCK, READ_LOCK};
+    slurmctld_lock_t node_write_lock = {NO_LOCK, NO_LOCK, WRITE_LOCK, NO_LOCK, READ_LOCK};
     char *cmd_ptr, *resp = NULL, *msg_decrypted = NULL;
     uid_t cmd_uid;
     uint32_t protocol_version = 0;
@@ -250,8 +244,7 @@ static void _proc_msg(int new_fd, char *msg, slurm_addr_t cli_addr) {
         goto send_resp;
     }
     if (xstrncmp(cmd_ptr, "CALLBACK:JOBID:", 15) == 0) {
-        resp = register_callback(cmd_ptr, cmd_uid, cli_addr,
-                                 protocol_version);
+        resp = register_callback(cmd_ptr, cmd_uid, cli_addr, protocol_version);
     } else if (xstrncmp(cmd_ptr, "DRAIN:NODES:", 12) == 0) {
         lock_slurmctld(node_write_lock);
         resp = drain_nodes_user(cmd_ptr, cmd_uid, protocol_version);
@@ -304,8 +297,7 @@ static void *_msg_thread(void *no_data) {
         sock_fd = slurm_init_msg_engine_port(nonstop_comm_port);
         if (sock_fd != SLURM_ERROR)
             break;
-        error("slurmctld/nonstop: can not open port: %hu %m",
-              nonstop_comm_port);
+        error("slurmctld/nonstop: can not open port: %hu %m", nonstop_comm_port);
     }
 
     /* Process incoming RPCs until told to shutdown */

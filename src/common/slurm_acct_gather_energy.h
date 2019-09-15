@@ -60,25 +60,20 @@ extern acct_gather_energy_t *acct_gather_energy_alloc(uint16_t cnt);
 
 extern void acct_gather_energy_destroy(acct_gather_energy_t *energy);
 
-extern void acct_gather_energy_pack(acct_gather_energy_t *energy, Buf buffer,
-                                    uint16_t protocol_version);
+extern void acct_gather_energy_pack(acct_gather_energy_t *energy, Buf buffer, uint16_t protocol_version);
 
-extern int acct_gather_energy_unpack(acct_gather_energy_t **energy, Buf buffer,
-                                     uint16_t protocol_version,
-                                     bool need_alloc);
+extern int
+acct_gather_energy_unpack(acct_gather_energy_t **energy, Buf buffer, uint16_t protocol_version, bool need_alloc);
 
 extern int acct_gather_energy_g_update_node_energy(void);
 
-extern int acct_gather_energy_g_get_data(enum acct_energy_type data_type,
-                                         void *data);
+extern int acct_gather_energy_g_get_data(enum acct_energy_type data_type, void *data);
 
-extern int acct_gather_energy_g_set_data(enum acct_energy_type data_type,
-                                         void *data);
+extern int acct_gather_energy_g_set_data(enum acct_energy_type data_type, void *data);
 
 extern int acct_gather_energy_startpoll(uint32_t frequency);
 
-extern int acct_gather_energy_g_conf_options(s_p_options_t **full_options,
-                                             int *full_options_cnt);
+extern int acct_gather_energy_g_conf_options(s_p_options_t **full_options, int *full_options_cnt);
 
 extern int acct_gather_energy_g_conf_set(s_p_hashtbl_t *tbl);
 

@@ -104,8 +104,7 @@ int xdaemon(void) {
  * If pidfd != NULL, the file will be kept open and the fd
  * returned.
  */
-pid_t
-read_pidfile(const char *pidfile, int *pidfd) {
+pid_t read_pidfile(const char *pidfile, int *pidfd) {
     int fd;
     FILE *fp = NULL;
     unsigned long pid;
@@ -133,8 +132,7 @@ read_pidfile(const char *pidfile, int *pidfd) {
     }
 
     if (lpid != (pid_t) pid)
-        fatal("pidfile locked by %lu but contains pid=%lu",
-              (unsigned long) lpid, (unsigned long) pid);
+        fatal("pidfile locked by %lu but contains pid=%lu", (unsigned long) lpid, (unsigned long) pid);
 
     if (pidfd != NULL)
         *pidfd = fd;
@@ -146,16 +144,14 @@ read_pidfile(const char *pidfile, int *pidfd) {
 }
 
 
-int
-create_pidfile(const char *pidfile, uid_t uid) {
+int create_pidfile(const char *pidfile, uid_t uid) {
     FILE *fp;
     int fd;
 
     xassert(pidfile != NULL);
     xassert(pidfile[0] == '/');
 
-    fd = open(pidfile, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC,
-              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    fd = open(pidfile, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd < 0) {
         error("Unable to open pidfile `%s': %m", pidfile);
         return -1;
@@ -193,8 +189,7 @@ create_pidfile(const char *pidfile, uid_t uid) {
     return -1;
 }
 
-void
-test_core_limit(void) {
+void test_core_limit(void) {
 #ifdef RLIMIT_CORE
     struct rlimit rlim[1];
     if (getrlimit(RLIMIT_CORE, rlim) < 0)
@@ -202,8 +197,7 @@ test_core_limit(void) {
     else if (rlim->rlim_cur != RLIM_INFINITY) {
         rlim->rlim_cur /= 1024;    /* bytes to KB */
         if (rlim->rlim_cur < 2048) {
-            verbose("Warning: Core limit is only %ld KB",
-                    (long int) rlim->rlim_cur);
+            verbose("Warning: Core limit is only %ld KB", (long int) rlim->rlim_cur);
         }
     }
 #endif

@@ -100,13 +100,11 @@ extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl) {
     return;
 }
 
-extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options,
-                                               int *full_options_cnt) {
+extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     return;
 }
 
-extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
-                                      void *data) {
+extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type, void *data) {
     uint32_t *uint32 = (uint32_t *) data;
 
     switch (info_type) {
@@ -145,13 +143,11 @@ extern int acct_gather_profile_p_create_group(const char *name) {
     return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_create_dataset(
-        const char *name, int parent, acct_gather_profile_dataset_t *dataset) {
+extern int acct_gather_profile_p_create_dataset(const char *name, int parent, acct_gather_profile_dataset_t *dataset) {
     return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_p_add_sample_data(int dataset_id, void *data,
-                                                 time_t sample_time) {
+extern int acct_gather_profile_p_add_sample_data(int dataset_id, void *data, time_t sample_time) {
     return SLURM_SUCCESS;
 }
 

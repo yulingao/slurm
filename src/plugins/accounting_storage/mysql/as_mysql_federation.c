@@ -38,18 +38,12 @@
 #include "as_mysql_federation.h"
 #include "as_mysql_cluster.h"
 
-char *fed_req_inx[] = {
-        "t1.name",
-        "t1.flags",
-};
+char *fed_req_inx[] = {"t1.name", "t1.flags",};
 enum {
-    FED_REQ_NAME,
-    FED_REQ_FLAGS,
-    FED_REQ_COUNT
+    FED_REQ_NAME, FED_REQ_FLAGS, FED_REQ_COUNT
 };
 
-static int _setup_federation_cond_limits(slurmdb_federation_cond_t *fed_cond,
-                                         char **extra) {
+static int _setup_federation_cond_limits(slurmdb_federation_cond_t *fed_cond, char **extra) {
     int set = 0;
     ListIterator itr = NULL;
     char *object = NULL;
@@ -62,8 +56,7 @@ static int _setup_federation_cond_limits(slurmdb_federation_cond_t *fed_cond,
     else
         xstrcat(*extra, " where t1.deleted=0");
 
-    if (fed_cond->cluster_list
-        && list_count(fed_cond->cluster_list)) {
+    if (fed_cond->cluster_list && list_count(fed_cond->cluster_list)) {
         set = 0;
         xstrcat(*extra, " && (");
         itr = list_iterator_create(fed_cond->cluster_list);
@@ -77,8 +70,7 @@ static int _setup_federation_cond_limits(slurmdb_federation_cond_t *fed_cond,
         xstrcat(*extra, ")");
     }
 
-    if (fed_cond->federation_list
-        && list_count(fed_cond->federation_list)) {
+    if (fed_cond->federation_list && list_count(fed_cond->federation_list)) {
         set = 0;
         xstrcat(*extra, " && (");
         itr = list_iterator_create(fed_cond->federation_list);
@@ -95,8 +87,7 @@ static int _setup_federation_cond_limits(slurmdb_federation_cond_t *fed_cond,
     return set;
 }
 
-static int _setup_federation_rec_limits(slurmdb_federation_rec_t *fed,
-                                        char **cols, char **vals, char **extra) {
+static int _setup_federation_rec_limits(slurmdb_federation_rec_t *fed, char **cols, char **vals, char **extra) {
     if (!fed)
         return SLURM_ERROR;
 
@@ -127,8 +118,7 @@ static int _setup_federation_rec_limits(slurmdb_federation_rec_t *fed,
  * IN: fed - fed to remove clusters from
  * IN: exceptions - list of clusters to not remove.
  */
-static int _remove_all_clusters_from_fed(mysql_conn_t *mysql_conn,
-                                         const char *fed, List exceptions) {
+static int _remove_all_clusters_from_fed(mysql_conn_t *mysql_conn, const char *fed, List exceptions) {
     int rc = SLURM_SUCCESS;
     char *query = NULL;
     char *exception_names = NULL;
@@ -139,16 +129,13 @@ static int _remove_all_clusters_from_fed(mysql_conn_t *mysql_conn,
 
         itr = list_iterator_create(exceptions);
         while ((tmp_name = list_next(itr)))
-            xstrfmtcat(exception_names, "%s'%s'",
-                       (exception_names) ? "," : "",
-                       tmp_name);
+            xstrfmtcat(exception_names, "%s'%s'", (exception_names) ? "," : "", tmp_name);
         list_iterator_destroy(itr);
     }
 
     xstrfmtcat(query, "UPDATE %s "
                       "SET federation='', fed_id=0, fed_state=%u "
-                      "WHERE federation='%s' and deleted=0",
-               cluster_table, CLUSTER_FED_STATE_NA, fed);
+                      "WHERE federation='%s' and deleted=0", cluster_table, CLUSTER_FED_STATE_NA, fed);
     if (exception_names)
         xstrfmtcat(query, " AND name NOT IN (%s)", exception_names);
 
@@ -181,8 +168,7 @@ static int _remove_clusters_from_fed(mysql_conn_t *mysql_conn, List clusters) {
 
     xstrfmtcat(query, "UPDATE %s "
                       "SET federation='', fed_id=0, fed_state=%u "
-                      "WHERE name IN (%s) and deleted=0",
-               cluster_table, CLUSTER_FED_STATE_NA, names);
+                      "WHERE name IN (%s) and deleted=0", cluster_table, CLUSTER_FED_STATE_NA, names);
 
     if (debug_flags & DEBUG_FLAG_FEDR)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
@@ -196,8 +182,7 @@ static int _remove_clusters_from_fed(mysql_conn_t *mysql_conn, List clusters) {
     return rc;
 }
 
-static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters,
-                                const char *fed) {
+static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters, const char *fed) {
     int rc = SLURM_SUCCESS;
     char *query = NULL;
     char *name = NULL;
@@ -212,8 +197,7 @@ static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters,
     itr = list_iterator_create(clusters);
     while ((name = list_next(itr))) {
         int id;
-        if ((rc = as_mysql_get_fed_cluster_id(mysql_conn, name, fed,
-                                              last_id, &id)))
+        if ((rc = as_mysql_get_fed_cluster_id(mysql_conn, name, fed, last_id, &id)))
             goto end_it;
         last_id = id;
         xstrfmtcat(indexes, "WHEN name='%s' THEN %d ", name, id);
@@ -231,8 +215,7 @@ static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters,
                       "fed_state = CASE WHEN federation='%s' THEN fed_state ELSE %u END, "
                       "fed_id = CASE %s END, "
                       "federation='%s' "
-                      "WHERE name IN (%s) and deleted=0",
-               cluster_table, fed, CLUSTER_FED_STATE_ACTIVE, indexes, fed,
+                      "WHERE name IN (%s) and deleted=0", cluster_table, fed, CLUSTER_FED_STATE_ACTIVE, indexes, fed,
                names);
 
     if (debug_flags & DEBUG_FLAG_FEDR)
@@ -240,8 +223,7 @@ static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters,
 
     rc = mysql_db_query(mysql_conn, query);
     if (rc)
-        error("Failed to add clusters %s to federation %s",
-              names, fed);
+        error("Failed to add clusters %s to federation %s", names, fed);
 
     end_it:
     xfree(query);
@@ -252,9 +234,7 @@ static int _add_clusters_to_fed(mysql_conn_t *mysql_conn, List clusters,
     return rc;
 }
 
-static int _assign_clusters_to_federation(mysql_conn_t *mysql_conn,
-                                          const char *federation,
-                                          List cluster_list) {
+static int _assign_clusters_to_federation(mysql_conn_t *mysql_conn, const char *federation, List cluster_list) {
     int rc = SLURM_SUCCESS;
     List add_list = NULL;
     List rem_list = NULL;
@@ -288,16 +268,11 @@ static int _assign_clusters_to_federation(mysql_conn_t *mysql_conn,
     }
     list_iterator_destroy(itr);
 
-    if (clear_clusters &&
-        (rc = _remove_all_clusters_from_fed(mysql_conn, federation,
-                                            add_list)))
+    if (clear_clusters && (rc = _remove_all_clusters_from_fed(mysql_conn, federation, add_list)))
         goto end_it;
-    if (!clear_clusters &&
-        list_count(rem_list) &&
-        (rc = _remove_clusters_from_fed(mysql_conn, rem_list)))
+    if (!clear_clusters && list_count(rem_list) && (rc = _remove_clusters_from_fed(mysql_conn, rem_list)))
         goto end_it;
-    if (list_count(add_list) &&
-        (rc = _add_clusters_to_fed(mysql_conn, add_list, federation)))
+    if (list_count(add_list) && (rc = _add_clusters_to_fed(mysql_conn, add_list, federation)))
         goto end_it;
 
     end_it:
@@ -307,13 +282,11 @@ static int _assign_clusters_to_federation(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
-                                    List federation_list) {
+extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid, List federation_list) {
     ListIterator itr = NULL;
     int rc = SLURM_SUCCESS;
     slurmdb_federation_rec_t *object = NULL;
-    char *cols = NULL, *vals = NULL, *extra = NULL, *query = NULL,
-            *tmp_extra = NULL;
+    char *cols = NULL, *vals = NULL, *extra = NULL, *query = NULL, *tmp_extra = NULL;
     time_t now = time(NULL);
     char *user_name = NULL;
     int affect_rows = 0;
@@ -329,8 +302,7 @@ extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
 
     itr = list_iterator_create(federation_list);
     while ((object = list_next(itr))) {
-        if (object->cluster_list &&
-            (list_count(federation_list) > 1)) {
+        if (object->cluster_list && (list_count(federation_list) > 1)) {
             xfree(user_name);
             error("Clusters can only be assigned to one "
                   "federation");
@@ -344,10 +316,8 @@ extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
 
         _setup_federation_rec_limits(object, &cols, &vals, &extra);
 
-        xstrfmtcat(query,
-                   "insert into %s (%s) values (%s) "
-                   "on duplicate key update deleted=0%s",
-                   federation_table, cols, vals, extra);
+        xstrfmtcat(query, "insert into %s (%s) values (%s) "
+                          "on duplicate key update deleted=0%s", federation_table, cols, vals, extra);
         if (debug_flags & DEBUG_FLAG_FEDR)
             DB_DEBUG(mysql_conn->conn, "query\n%s", query);
         rc = mysql_db_query(mysql_conn, query);
@@ -370,9 +340,7 @@ extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
             continue;
         }
 
-        if (object->cluster_list &&
-            _assign_clusters_to_federation(mysql_conn, object->name,
-                                           object->cluster_list)) {
+        if (object->cluster_list && _assign_clusters_to_federation(mysql_conn, object->name, object->cluster_list)) {
             xfree(cols);
             xfree(vals);
             xfree(extra);
@@ -384,18 +352,15 @@ extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
         /* we always have a ', ' as the first 2 chars */
         tmp_extra = slurm_add_slash_to_quotes(extra + 2);
 
-        xstrfmtcat(query,
-                   "insert into %s "
-                   "(timestamp, action, name, actor, info) "
-                   "values (%ld, %u, '%s', '%s', '%s');",
-                   txn_table, now, DBD_ADD_FEDERATIONS,
-                   object->name, user_name, tmp_extra);
+        xstrfmtcat(query, "insert into %s "
+                          "(timestamp, action, name, actor, info) "
+                          "values (%ld, %u, '%s', '%s', '%s');", txn_table, now, DBD_ADD_FEDERATIONS, object->name,
+                   user_name, tmp_extra);
         xfree(cols);
         xfree(vals);
         xfree(tmp_extra);
         xfree(extra);
-        debug4("%d(%s:%d) query\n%s",
-               mysql_conn->conn, THIS_FILE, __LINE__, query);
+        debug4("%d(%s:%d) query\n%s", mysql_conn->conn, THIS_FILE, __LINE__, query);
 
         rc = mysql_db_query(mysql_conn, query);
         xfree(query);
@@ -416,8 +381,7 @@ extern int as_mysql_add_federations(mysql_conn_t *mysql_conn, uint32_t uid,
     return rc;
 }
 
-extern List as_mysql_get_federations(mysql_conn_t *mysql_conn, uid_t uid,
-                                     slurmdb_federation_cond_t *federation_cond) {
+extern List as_mysql_get_federations(mysql_conn_t *mysql_conn, uid_t uid, slurmdb_federation_cond_t *federation_cond) {
     char *query = NULL;
     char *extra = NULL;
     char *tmp = NULL;
@@ -446,18 +410,15 @@ extern List as_mysql_get_federations(mysql_conn_t *mysql_conn, uid_t uid,
         xstrfmtcat(tmp, ", %s", fed_req_inx[i]);
     }
 
-    query = xstrdup_printf(
-            "select distinct %s from %s as t1 "
-            "left join %s as t2 on t1.name=t2.federation and t2.deleted=0"
-            "%s order by t1.name",
-            tmp, federation_table, cluster_table, extra);
+    query = xstrdup_printf("select distinct %s from %s as t1 "
+                           "left join %s as t2 on t1.name=t2.federation and t2.deleted=0"
+                           "%s order by t1.name", tmp, federation_table, cluster_table, extra);
     xfree(tmp);
     xfree(extra);
 
     if (debug_flags & DEBUG_FLAG_FEDR)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         return NULL;
     }
@@ -492,16 +453,13 @@ extern List as_mysql_get_federations(mysql_conn_t *mysql_conn, uid_t uid,
     return federation_list;
 }
 
-extern List as_mysql_modify_federations(
-        mysql_conn_t *mysql_conn, uint32_t uid,
-        slurmdb_federation_cond_t *fed_cond,
-        slurmdb_federation_rec_t *fed) {
+extern List as_mysql_modify_federations(mysql_conn_t *mysql_conn, uint32_t uid, slurmdb_federation_cond_t *fed_cond,
+                                        slurmdb_federation_rec_t *fed) {
     List ret_list = NULL;
     int rc = SLURM_SUCCESS;
     int req_inx = 0;
     char *object = NULL;
-    char *vals = NULL, *extra = NULL, *query = NULL,
-            *name_char = NULL, *fed_items = NULL;
+    char *vals = NULL, *extra = NULL, *query = NULL, *name_char = NULL, *fed_items = NULL;
     char *tmp_char1 = NULL, *tmp_char2 = NULL;
     time_t now = time(NULL);
     MYSQL_RES *result = NULL;
@@ -515,8 +473,7 @@ extern List as_mysql_modify_federations(
     if (check_connection(mysql_conn) != SLURM_SUCCESS)
         return NULL;
 
-    if (!is_user_min_admin_level(mysql_conn, uid,
-                                 SLURMDB_ADMIN_SUPER_USER)) {
+    if (!is_user_min_admin_level(mysql_conn, uid, SLURMDB_ADMIN_SUPER_USER)) {
         errno = ESLURM_ACCESS_DENIED;
         return NULL;
     }
@@ -528,8 +485,7 @@ extern List as_mysql_modify_federations(
     xfree(tmp_char1);
     xfree(tmp_char2);
 
-    if (!extra ||
-        (!vals && (!fed->cluster_list || !list_count(fed->cluster_list)))) {
+    if (!extra || (!vals && (!fed->cluster_list || !list_count(fed->cluster_list)))) {
         xfree(extra);
         xfree(vals);
         errno = SLURM_NO_CHANGE_IN_DATA;
@@ -537,9 +493,7 @@ extern List as_mysql_modify_federations(
         return NULL;
     }
 
-    if (fed->cluster_list &&
-        fed_cond->federation_list &&
-        (list_count(fed_cond->federation_list) > 1)) {
+    if (fed->cluster_list && fed_cond->federation_list && (list_count(fed_cond->federation_list) > 1)) {
         xfree(extra);
         xfree(vals);
         error("Clusters can only be assigned to one federation");
@@ -555,8 +509,7 @@ extern List as_mysql_modify_federations(
         xstrfmtcat(fed_items, ", %s", fed_req_inx[req_inx]);
     }
 
-    xstrfmtcat(query, "select %s from %s as t1 %s;",
-               fed_items, federation_table, extra);
+    xstrfmtcat(query, "select %s from %s as t1 %s;", fed_items, federation_table, extra);
     xfree(fed_items);
 
     if (debug_flags & DEBUG_FLAG_FEDR)
@@ -583,9 +536,7 @@ extern List as_mysql_modify_federations(
     }
     mysql_free_result(result);
 
-    if (fed->cluster_list &&
-        (_assign_clusters_to_federation(mysql_conn, object,
-                                        fed->cluster_list))) {
+    if (fed->cluster_list && (_assign_clusters_to_federation(mysql_conn, object, fed->cluster_list))) {
         xfree(vals);
         xfree(name_char);
         xfree(query);
@@ -595,8 +546,7 @@ extern List as_mysql_modify_federations(
     if (!list_count(ret_list)) {
         errno = SLURM_NO_CHANGE_IN_DATA;
         if (debug_flags & DEBUG_FLAG_FEDR)
-            DB_DEBUG(mysql_conn->conn,
-                     "didn't effect anything\n%s", query);
+            DB_DEBUG(mysql_conn->conn, "didn't effect anything\n%s", query);
         xfree(vals);
         xfree(name_char);
         xfree(query);
@@ -607,9 +557,7 @@ extern List as_mysql_modify_federations(
 
     if (vals) {
         char *user_name = uid_to_string((uid_t) uid);
-        rc = modify_common(mysql_conn, DBD_MODIFY_FEDERATIONS, now,
-                           user_name, federation_table,
-                           name_char, vals, NULL);
+        rc = modify_common(mysql_conn, DBD_MODIFY_FEDERATIONS, now, user_name, federation_table, name_char, vals, NULL);
         xfree(user_name);
     }
     xfree(name_char);
@@ -625,8 +573,7 @@ extern List as_mysql_modify_federations(
     return ret_list;
 }
 
-extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid,
-                                        slurmdb_federation_cond_t *fed_cond) {
+extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid, slurmdb_federation_cond_t *fed_cond) {
     List ret_list = NULL;
     int rc = SLURM_SUCCESS;
     char *extra = NULL, *query = NULL, *name_char = NULL;
@@ -643,8 +590,7 @@ extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid,
     if (check_connection(mysql_conn) != SLURM_SUCCESS)
         return NULL;
 
-    if (!is_user_min_admin_level(
-            mysql_conn, uid, SLURMDB_ADMIN_SUPER_USER)) {
+    if (!is_user_min_admin_level(mysql_conn, uid, SLURMDB_ADMIN_SUPER_USER)) {
         errno = ESLURM_ACCESS_DENIED;
         return NULL;
     }
@@ -658,8 +604,7 @@ extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid,
         return NULL;
     }
 
-    query = xstrdup_printf("select name from %s as t1 %s;",
-                           federation_table, extra);
+    query = xstrdup_printf("select name from %s as t1 %s;", federation_table, extra);
     xfree(extra);
     if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
@@ -672,8 +617,7 @@ extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid,
         mysql_free_result(result);
         errno = SLURM_NO_CHANGE_IN_DATA;
         if (debug_flags & DEBUG_FLAG_FEDR)
-            DB_DEBUG(mysql_conn->conn,
-                     "didn't effect anything\n%s", query);
+            DB_DEBUG(mysql_conn->conn, "didn't effect anything\n%s", query);
         xfree(query);
         return ret_list;
     }
@@ -684,16 +628,14 @@ extern List as_mysql_remove_federations(mysql_conn_t *mysql_conn, uint32_t uid,
         char *object = xstrdup(row[0]);
         list_append(ret_list, object);
 
-        if ((rc = _remove_all_clusters_from_fed(mysql_conn, object,
-                                                NULL)))
+        if ((rc = _remove_all_clusters_from_fed(mysql_conn, object, NULL)))
             break;
 
         xfree(name_char);
         xstrfmtcat(name_char, "name='%s'", object);
 
-        if ((rc = remove_common(mysql_conn, DBD_REMOVE_FEDERATIONS, now,
-                                user_name, federation_table, name_char,
-                                NULL, NULL, ret_list, NULL)))
+        if ((rc = remove_common(mysql_conn, DBD_REMOVE_FEDERATIONS, now, user_name, federation_table, name_char, NULL,
+                                NULL, ret_list, NULL)))
             break;
     }
     mysql_free_result(result);
@@ -716,10 +658,7 @@ extern int as_mysql_add_feds_to_update_list(mysql_conn_t *mysql_conn) {
     /* Even if there are no feds, need to send an empty list for the case
      * that all feds were removed. The controller needs to know that it was
      * removed from a federation. */
-    if (feds &&
-        ((rc = addto_update_list(mysql_conn->update_list,
-                                 SLURMDB_UPDATE_FEDS, feds))
-         != SLURM_SUCCESS)) {
+    if (feds && ((rc = addto_update_list(mysql_conn->update_list, SLURMDB_UPDATE_FEDS, feds)) != SLURM_SUCCESS)) {
         FREE_NULL_LIST(feds);
     }
     return rc;

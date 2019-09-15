@@ -396,8 +396,7 @@ typedef struct dbd_step_start_msg {
 
 extern slurmdbd_msg_type_t str_2_slurmdbd_msg_type(char *msg_type);
 
-extern char *slurmdbd_msg_type_2_str(slurmdbd_msg_type_t msg_type,
-                                     int get_enum);
+extern char *slurmdbd_msg_type_2_str(slurmdbd_msg_type_t msg_type, int get_enum);
 
 /*****************************************************************************\
  * Free various SlurmDBD message structures
@@ -412,8 +411,7 @@ extern void slurmdbd_free_msg(slurmdbd_msg_t *msg);
 
 extern void slurmdbd_free_rec_msg(dbd_rec_msg_t *msg, slurmdbd_msg_type_t type);
 
-extern void slurmdbd_free_cond_msg(dbd_cond_msg_t *msg,
-                                   slurmdbd_msg_type_t type);
+extern void slurmdbd_free_cond_msg(dbd_cond_msg_t *msg, slurmdbd_msg_type_t type);
 
 extern void slurmdbd_free_fini_msg(dbd_fini_msg_t *msg);
 
@@ -427,8 +425,7 @@ extern void slurmdbd_free_job_suspend_msg(dbd_job_suspend_msg_t *msg);
 
 extern void slurmdbd_free_list_msg(dbd_list_msg_t *msg);
 
-extern void slurmdbd_free_modify_msg(dbd_modify_msg_t *msg,
-                                     slurmdbd_msg_type_t type);
+extern void slurmdbd_free_modify_msg(dbd_modify_msg_t *msg, slurmdbd_msg_type_t type);
 
 extern void slurmdbd_free_node_state_msg(dbd_node_state_msg_t *msg);
 
@@ -440,7 +437,6 @@ extern void slurmdbd_free_step_complete_msg(dbd_step_comp_msg_t *msg);
 
 extern void slurmdbd_free_step_start_msg(dbd_step_start_msg_t *msg);
 
-extern void slurmdbd_free_usage_msg(dbd_usage_msg_t *msg,
-                                    slurmdbd_msg_type_t type);
+extern void slurmdbd_free_usage_msg(dbd_usage_msg_t *msg, slurmdbd_msg_type_t type);
 
 #endif    /* !_SLURMDBD_DEFS_H */

@@ -87,8 +87,7 @@
  */
 static void _make_tmpdir(stepd_step_rec_t *job);
 
-static int _run_script_and_set_env(const char *name, const char *path,
-                                   stepd_step_rec_t *job);
+static int _run_script_and_set_env(const char *name, const char *path, stepd_step_rec_t *job);
 
 static void _proc_stdout(char *buf, stepd_step_rec_t *job);
 
@@ -144,8 +143,7 @@ static void _proc_stdout(char *buf, stepd_step_rec_t *job) {
             }
             debug("export name:%s:val:%s:", name_ptr, val_ptr);
             if (setenvf(env, name_ptr, "%s", val_ptr)) {
-                error("Unable to set %s environment variable",
-                      buf_ptr);
+                error("Unable to set %s environment variable", buf_ptr);
             }
             equal_ptr[0] = '=';
             if (end_buf)
@@ -187,9 +185,7 @@ static void _proc_stdout(char *buf, stepd_step_rec_t *job) {
  *	if prolog
  * RET 0 on success, -1 on failure.
  */
-static int
-_run_script_and_set_env(const char *name, const char *path,
-                        stepd_step_rec_t *job) {
+static int _run_script_and_set_env(const char *name, const char *path, stepd_step_rec_t *job) {
     int status, rc;
     pid_t cpid;
     int pfd[2];
@@ -303,8 +299,7 @@ extern char *_build_path(char *fname, char **prog_env, char *cwd) {
     dir = strtok(path_env, ":");
     while (dir) {
         snprintf(file_name, len, "%s/%s", dir, fname);
-        if ((stat(file_name, &stat_buf) == 0)
-            && (!S_ISDIR(stat_buf.st_mode)))
+        if ((stat(file_name, &stat_buf) == 0) && (!S_ISDIR(stat_buf.st_mode)))
             break;
         dir = strtok(NULL, ":");
     }
@@ -315,8 +310,7 @@ extern char *_build_path(char *fname, char **prog_env, char *cwd) {
     return file_name;
 }
 
-static int
-_setup_mpi(stepd_step_rec_t *job, int ltaskid) {
+static int _setup_mpi(stepd_step_rec_t *job, int ltaskid) {
     mpi_plugin_task_info_t info[1];
 
     if (job->pack_jobid && (job->pack_jobid != NO_VAL)) {
@@ -326,8 +320,7 @@ _setup_mpi(stepd_step_rec_t *job, int ltaskid) {
         info->nodeid = job->node_offset + job->nodeid;
         info->ntasks = job->pack_ntasks;
         info->ltasks = job->node_tasks;
-        info->gtaskid = job->pack_task_offset +
-                        job->task[ltaskid]->gtid;
+        info->gtaskid = job->pack_task_offset + job->task[ltaskid]->gtid;
         info->ltaskid = job->task[ltaskid]->id;
         info->self = job->envtp->self;
         info->client = job->envtp->cli;
@@ -402,12 +395,10 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
     setenvf(&job->envtp->env, "SLURM_JOB_GID", "%d", job->gid);
     setenvf(&job->envtp->env, "SLURMD_NODENAME", "%s", conf->node_name);
     if (job->tres_bind) {
-        setenvf(&job->envtp->env, "SLURMD_TRES_BIND", "%s",
-                job->tres_bind);
+        setenvf(&job->envtp->env, "SLURMD_TRES_BIND", "%s", job->tres_bind);
     }
     if (job->tres_freq) {
-        setenvf(&job->envtp->env, "SLURMD_TRES_FREQ", "%s",
-                job->tres_freq);
+        setenvf(&job->envtp->env, "SLURMD_TRES_FREQ", "%s", job->tres_freq);
     }
     tmp_env = job->env;
     job->env = job->envtp->env;
@@ -427,10 +418,8 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
     }
 
     if (!job->batch && (job->stepid != SLURM_EXTERN_CONT)) {
-        if (switch_g_job_attach(job->switch_job, &job->env,
-                                job->nodeid, (uint32_t) local_proc_id,
-                                job->nnodes, job->ntasks,
-                                task->gtid) < 0) {
+        if (switch_g_job_attach(job->switch_job, &job->env, job->nodeid, (uint32_t) local_proc_id, job->nnodes,
+                                job->ntasks, task->gtid) < 0) {
             error("Unable to attach to interconnect: %m");
             log_fini();
             exit(1);
@@ -457,8 +446,7 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
          * generate invalid memory references.
          */
         job->envtp->env = env_array_copy((const char **) job->env);
-        gres_plugin_step_set_env(&job->envtp->env, job->step_gres_list,
-                                 job->accel_bind_type, job->tres_bind,
+        gres_plugin_step_set_env(&job->envtp->env, job->step_gres_list, job->accel_bind_type, job->tres_bind,
                                  job->tres_freq, local_proc_id);
         tmp_env = job->env;
         job->env = job->envtp->env;
@@ -475,13 +463,11 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
         slurm_mutex_lock(&conf->config_mutex);
         my_prolog = xstrdup(conf->task_prolog);
         slurm_mutex_unlock(&conf->config_mutex);
-        _run_script_and_set_env("slurm task_prolog",
-                                my_prolog, job);
+        _run_script_and_set_env("slurm task_prolog", my_prolog, job);
         xfree(my_prolog);
     }
     if (job->task_prolog) {
-        _run_script_and_set_env("user task_prolog",
-                                job->task_prolog, job);
+        _run_script_and_set_env("user task_prolog", job->task_prolog, job);
     }
 
     /*
@@ -527,8 +513,7 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
     /*
      * print error message and clean up if execve() returns:
      */
-    if ((errno == ENOENT) &&
-        ((fd = open(task->argv[0], O_RDONLY)) >= 0)) {
+    if ((errno == ENOENT) && ((fd = open(task->argv[0], O_RDONLY)) >= 0)) {
         char buf[256], *eol;
         int sz;
         sz = read(fd, buf, sizeof(buf));
@@ -547,8 +532,7 @@ extern void exec_task(stepd_step_rec_t *job, int local_proc_id) {
     exit(errno);
 }
 
-static void
-_make_tmpdir(stepd_step_rec_t *job) {
+static void _make_tmpdir(stepd_step_rec_t *job) {
     char *tmpdir;
 
     if (!(tmpdir = getenvp(job->env, "TMPDIR")))
@@ -559,8 +543,7 @@ _make_tmpdir(stepd_step_rec_t *job) {
 
         if (stat(tmpdir, &st)) { /* does the file exist ? */
             /* show why we were not able to create it */
-            error("Unable to create TMPDIR [%s]: %s",
-                  tmpdir, strerror(mkdir_errno));
+            error("Unable to create TMPDIR [%s]: %s", tmpdir, strerror(mkdir_errno));
         } else if (!S_ISDIR(st.st_mode)) {  /* is it a directory? */
             error("TMPDIR [%s] is not a directory", tmpdir);
         }

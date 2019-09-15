@@ -58,9 +58,7 @@ extern char *state_control_watts_to_str(uint32_t watts) {
     return str;
 }
 
-extern uint32_t state_control_parse_resv_watts(char *watts_str,
-                                               resv_desc_msg_t *resv_msg_ptr,
-                                               char **err_msg) {
+extern uint32_t state_control_parse_resv_watts(char *watts_str, resv_desc_msg_t *resv_msg_ptr, char **err_msg) {
     resv_msg_ptr->resv_watts = 0;
     char *end_ptr = NULL;
 
@@ -77,8 +75,7 @@ extern uint32_t state_control_parse_resv_watts(char *watts_str,
         resv_msg_ptr->resv_watts *= 1000000;
     } else if (end_ptr[0] != '\0') {
         if (err_msg)
-            xstrfmtcat(*err_msg, "Invalid Watts value: %s",
-                       watts_str);
+            xstrfmtcat(*err_msg, "Invalid Watts value: %s", watts_str);
         resv_msg_ptr->resv_watts = NO_VAL;
         return SLURM_ERROR;
     }
@@ -113,18 +110,16 @@ extern int state_control_configured_tres(char *type) {
 extern int state_control_corecnt_supported(void) {
     uint32_t select_type = slurmdb_setup_plugin_id_select();
 
-    if ((select_type != SELECT_PLUGIN_CONS_RES) &&
-        (select_type != SELECT_PLUGIN_CONS_TRES) &&
-        (select_type != SELECT_PLUGIN_CRAY_CONS_RES) &&
-        (select_type != SELECT_PLUGIN_CRAY_CONS_TRES))
+    if ((select_type != SELECT_PLUGIN_CONS_RES) && (select_type != SELECT_PLUGIN_CONS_TRES) &&
+        (select_type != SELECT_PLUGIN_CRAY_CONS_RES) && (select_type != SELECT_PLUGIN_CRAY_CONS_TRES))
         return SLURM_ERROR;
 
     return SLURM_SUCCESS;
 }
 
-extern int state_control_parse_resv_corecnt(resv_desc_msg_t *resv_msg_ptr,
-                                            char *val, int *free_tres_corecnt,
-                                            bool from_tres, char **err_msg) {
+extern int
+state_control_parse_resv_corecnt(resv_desc_msg_t *resv_msg_ptr, char *val, int *free_tres_corecnt, bool from_tres,
+                                 char **err_msg) {
     char *endptr = NULL, *core_cnt, *tok, *ptrptr = NULL;
     int node_inx = 0;
 
@@ -138,23 +133,15 @@ extern int state_control_parse_resv_corecnt(resv_desc_msg_t *resv_msg_ptr,
     core_cnt = xstrdup(val);
     tok = strtok_r(core_cnt, ",", &ptrptr);
     while (tok) {
-        xrealloc(resv_msg_ptr->core_cnt,
-                 sizeof(uint32_t) * (node_inx + 2));
+        xrealloc(resv_msg_ptr->core_cnt, sizeof(uint32_t) * (node_inx + 2));
         *free_tres_corecnt = 1;
-        resv_msg_ptr->core_cnt[node_inx] =
-                strtol(tok, &endptr, 10);
-        if ((endptr == NULL) ||
-            (endptr[0] != '\0') ||
-            (tok[0] == '\0')) {
+        resv_msg_ptr->core_cnt[node_inx] = strtol(tok, &endptr, 10);
+        if ((endptr == NULL) || (endptr[0] != '\0') || (tok[0] == '\0')) {
             if (err_msg) {
                 if (from_tres)
-                    xstrfmtcat(*err_msg,
-                               "Invalid TRES core count %s",
-                               val);
+                    xstrfmtcat(*err_msg, "Invalid TRES core count %s", val);
                 else
-                    xstrfmtcat(*err_msg,
-                               "Invalid core count %s",
-                               val);
+                    xstrfmtcat(*err_msg, "Invalid core count %s", val);
             }
             xfree(core_cnt);
             return SLURM_ERROR;
@@ -168,9 +155,8 @@ extern int state_control_parse_resv_corecnt(resv_desc_msg_t *resv_msg_ptr,
 
 }
 
-extern int parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val,
-                              int *free_tres_nodecnt, bool from_tres,
-                              char **err_msg) {
+extern int
+parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val, int *free_tres_nodecnt, bool from_tres, char **err_msg) {
     char *endptr = NULL, *node_cnt, *tok, *ptrptr = NULL;
     int node_inx = 0;
     long node_cnt_l;
@@ -186,8 +172,7 @@ extern int parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val,
     node_cnt = xstrdup(val);
     tok = strtok_r(node_cnt, ",", &ptrptr);
     while (tok) {
-        xrealloc(resv_msg_ptr->node_cnt,
-                 sizeof(uint32_t) * (node_inx + 2));
+        xrealloc(resv_msg_ptr->node_cnt, sizeof(uint32_t) * (node_inx + 2));
         *free_tres_nodecnt = 1;
         /*
          * Use temporary variable to check for negative or huge values
@@ -201,17 +186,11 @@ extern int parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val,
             resv_msg_ptr->node_cnt[node_inx] = node_cnt_l;
         }
 
-        if ((endptr != NULL) &&
-            ((endptr[0] == 'k') ||
-             (endptr[0] == 'K'))) {
+        if ((endptr != NULL) && ((endptr[0] == 'k') || (endptr[0] == 'K'))) {
             resv_msg_ptr->node_cnt[node_inx] *= 1024;
-        } else if ((endptr != NULL) &&
-                   ((endptr[0] == 'm') ||
-                    (endptr[0] == 'M'))) {
+        } else if ((endptr != NULL) && ((endptr[0] == 'm') || (endptr[0] == 'M'))) {
             resv_msg_ptr->node_cnt[node_inx] *= 1024 * 1024;
-        } else if ((endptr == NULL) ||
-                   (endptr[0] != '\0') ||
-                   (tok[0] == '\0')) {
+        } else if ((endptr == NULL) || (endptr[0] != '\0') || (tok[0] == '\0')) {
             ret_code = SLURM_ERROR;
             break;
         }
@@ -223,11 +202,9 @@ extern int parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val,
         if (err_msg) {
             xfree(*err_msg);
             if (from_tres) {
-                xstrfmtcat(*err_msg,
-                           "Invalid TRES node count %s", val);
+                xstrfmtcat(*err_msg, "Invalid TRES node count %s", val);
             } else {
-                xstrfmtcat(*err_msg,
-                           "Invalid node count %s", val);
+                xstrfmtcat(*err_msg, "Invalid node count %s", val);
             }
         } else {
             info("%s: Invalid node count (%s)", __func__, tok);
@@ -237,19 +214,11 @@ extern int parse_resv_nodecnt(resv_desc_msg_t *resv_msg_ptr, char *val,
     return ret_code;
 }
 
-extern int state_control_parse_resv_tres(char *val,
-                                         resv_desc_msg_t *resv_msg_ptr,
-                                         int *free_tres_license,
-                                         int *free_tres_bb,
-                                         int *free_tres_corecnt,
-                                         int *free_tres_nodecnt,
-                                         char **err_msg) {
+extern int
+state_control_parse_resv_tres(char *val, resv_desc_msg_t *resv_msg_ptr, int *free_tres_license, int *free_tres_bb,
+                              int *free_tres_corecnt, int *free_tres_nodecnt, char **err_msg) {
     int i, ret, len;
-    char *tres_bb = NULL, *tres_license = NULL,
-            *tres_corecnt = NULL, *tres_nodecnt = NULL,
-            *token, *type = NULL, *saveptr1 = NULL,
-            *value_str = NULL, *name = NULL, *compound = NULL,
-            *tmp = NULL;
+    char *tres_bb = NULL, *tres_license = NULL, *tres_corecnt = NULL, *tres_nodecnt = NULL, *token, *type = NULL, *saveptr1 = NULL, *value_str = NULL, *name = NULL, *compound = NULL, *tmp = NULL;
     bool discard, first;
 
     *free_tres_license = 0;
@@ -274,9 +243,7 @@ extern int state_control_parse_resv_tres(char *val,
             type = compound;
 
         if (state_control_configured_tres(compound) != SLURM_SUCCESS) {
-            xstrfmtcat(*err_msg,
-                       "couldn't identify configured TRES '%s'",
-                       compound);
+            xstrfmtcat(*err_msg, "couldn't identify configured TRES '%s'", compound);
             goto error;
         }
 
@@ -300,9 +267,7 @@ extern int state_control_parse_resv_tres(char *val,
                 for (i = 0; i < len; i++) {
                     if (!isdigit(value_str[i])) {
                         if (first) {
-                            xstrfmtcat(*err_msg,
-                                       "invalid TRES cpu value '%s'",
-                                       value_str);
+                            xstrfmtcat(*err_msg, "invalid TRES cpu value '%s'", value_str);
                             goto error;
                         } else
                             discard = true;
@@ -311,8 +276,7 @@ extern int state_control_parse_resv_tres(char *val,
                 }
                 first = false;
                 if (!discard) {
-                    if (tres_corecnt && tres_corecnt[0]
-                                        != '\0')
+                    if (tres_corecnt && tres_corecnt[0] != '\0')
                         xstrcatchar(tres_corecnt, ',');
                     xstrcat(tres_corecnt, value_str);
 
@@ -327,8 +291,7 @@ extern int state_control_parse_resv_tres(char *val,
             xstrcat(tres_nodecnt, value_str);
             token = strtok_r(NULL, ",", &saveptr1);
         } else {
-            xstrfmtcat(*err_msg, "TRES type '%s' not supported with reservations",
-                       compound);
+            xstrfmtcat(*err_msg, "TRES type '%s' not supported with reservations", compound);
             goto error;
         }
 
@@ -342,18 +305,14 @@ extern int state_control_parse_resv_tres(char *val,
                        "CoreCnt or CPUCnt is only supported when SelectType includes select/cons_res or SelectTypeParameters includes OTHER_CONS_RES on a Cray.");
             goto error;
         }
-        ret = state_control_parse_resv_corecnt(resv_msg_ptr,
-                                               tres_corecnt,
-                                               free_tres_corecnt, true,
-                                               err_msg);
+        ret = state_control_parse_resv_corecnt(resv_msg_ptr, tres_corecnt, free_tres_corecnt, true, err_msg);
         xfree(tres_corecnt);
         if (ret != SLURM_SUCCESS)
             goto error;
     }
 
     if (tres_nodecnt && tres_nodecnt[0] != '\0') {
-        ret = parse_resv_nodecnt(resv_msg_ptr, tres_nodecnt,
-                                 free_tres_nodecnt, true, err_msg);
+        ret = parse_resv_nodecnt(resv_msg_ptr, tres_nodecnt, free_tres_nodecnt, true, err_msg);
         xfree(tres_nodecnt);
         if (ret != SLURM_SUCCESS)
             goto error;

@@ -98,30 +98,27 @@ static struct {
     char *cmd;
 
     int (*handler)(int fd, int lrank, client_req_t *req);
-} pmi1_cmd_handlers[] = {
-        {GETMAXES_CMD,      _handle_get_maxes},
-        {GETUNIVSIZE_CMD,   _handle_get_universe_size},
-        {GETAPPNUM_CMD,     _handle_get_appnum},
-        {BARRIERIN_CMD,     _handle_barrier_in},
-        {FINALIZE_CMD,      _handle_finalize},
-        {ABORT_CMD,         _handle_abort},
-        {GETMYKVSNAME_CMD,  _handle_get_my_kvsname},
-        {CREATEKVS_CMD,     _handle_create_kvs},
-        {DESTROYKVS_CMD,    _handle_destroy_kvs},
-        {PUT_CMD,           _handle_put},
-        {GET_CMD,           _handle_get},
-        {GETBYIDX_CMD,      _handle_getbyidx},
-        {PUBLISHNAME_CMD,   _handle_publish_name},
-        {UNPUBLISHNAME_CMD, _handle_unpublish_name},
-        {LOOKUPNAME_CMD,    _handle_lookup_name},
-        {MCMD_CMD,          _handle_mcmd},
-        {NULL, NULL},
-};
+} pmi1_cmd_handlers[] = {{GETMAXES_CMD,      _handle_get_maxes},
+                         {GETUNIVSIZE_CMD,   _handle_get_universe_size},
+                         {GETAPPNUM_CMD,     _handle_get_appnum},
+                         {BARRIERIN_CMD,     _handle_barrier_in},
+                         {FINALIZE_CMD,      _handle_finalize},
+                         {ABORT_CMD,         _handle_abort},
+                         {GETMYKVSNAME_CMD,  _handle_get_my_kvsname},
+                         {CREATEKVS_CMD,     _handle_create_kvs},
+                         {DESTROYKVS_CMD,    _handle_destroy_kvs},
+                         {PUT_CMD,           _handle_put},
+                         {GET_CMD,           _handle_get},
+                         {GETBYIDX_CMD,      _handle_getbyidx},
+                         {PUBLISHNAME_CMD,   _handle_publish_name},
+                         {UNPUBLISHNAME_CMD, _handle_unpublish_name},
+                         {LOOKUPNAME_CMD,    _handle_lookup_name},
+                         {MCMD_CMD,          _handle_mcmd},
+                         {NULL, NULL},};
 
 static spawn_req_t *pmi1_spawn = NULL;
 
-static int
-_handle_get_maxes(int fd, int lrank, client_req_t *req) {
+static int _handle_get_maxes(int fd, int lrank, client_req_t *req) {
     int rc = 0;
     client_resp_t *resp;
 
@@ -139,8 +136,7 @@ _handle_get_maxes(int fd, int lrank, client_req_t *req) {
             KEYLENMAX_KEY
             "=%d "
             VALLENMAX_KEY
-            "=%d\n",
-                       rc, MAXKVSNAME, MAXKEYLEN, MAXVALLEN);
+            "=%d\n", rc, MAXKVSNAME, MAXKEYLEN, MAXVALLEN);
     (void) client_resp_send(resp, fd);
     client_resp_free(resp);
 
@@ -148,8 +144,7 @@ _handle_get_maxes(int fd, int lrank, client_req_t *req) {
     return SLURM_SUCCESS;
 }
 
-static int
-_handle_get_universe_size(int fd, int lrank, client_req_t *req) {
+static int _handle_get_universe_size(int fd, int lrank, client_req_t *req) {
     int rc = 0;
     client_resp_t *resp;
 
@@ -163,8 +158,7 @@ _handle_get_universe_size(int fd, int lrank, client_req_t *req) {
             RC_KEY
             "=%d "
             SIZE_KEY
-            "=%d\n",
-                       rc, job_info.ntasks);
+            "=%d\n", rc, job_info.ntasks);
     (void) client_resp_send(resp, fd);
     client_resp_free(resp);
 
@@ -172,8 +166,7 @@ _handle_get_universe_size(int fd, int lrank, client_req_t *req) {
     return SLURM_SUCCESS;
 }
 
-static int
-_handle_get_appnum(int fd, int lrank, client_req_t *req) {
+static int _handle_get_appnum(int fd, int lrank, client_req_t *req) {
     int rc = 0;
     client_resp_t *resp;
 
@@ -201,12 +194,10 @@ _handle_get_appnum(int fd, int lrank, client_req_t *req) {
     return SLURM_SUCCESS;
 }
 
-static int
-_handle_barrier_in(int fd, int lrank, client_req_t *req) {
+static int _handle_barrier_in(int fd, int lrank, client_req_t *req) {
     int rc = 0;
 
-    debug3("mpi/pmi2: in _handle_barrier_in, from task %d",
-           job_info.gtids[lrank]);
+    debug3("mpi/pmi2: in _handle_barrier_in, from task %d", job_info.gtids[lrank]);
     if (tasks_to_wait == 0 && children_to_wait == 0) {
         tasks_to_wait = job_info.ltasks;
         children_to_wait = tree_info.num_children;
@@ -217,14 +208,10 @@ _handle_barrier_in(int fd, int lrank, client_req_t *req) {
     if (tasks_to_wait == 0 && children_to_wait == 0) {
         rc = temp_kvs_send();
         if (rc != SLURM_SUCCESS) {
-            error("mpi/pmi2: failed to send temp kvs to %s",
-                  tree_info.parent_node ?: "srun");
-            send_kvs_fence_resp_to_clients(
-                    rc,
-                    "mpi/pmi2: failed to send temp kvs");
+            error("mpi/pmi2: failed to send temp kvs to %s", tree_info.parent_node ?: "srun");
+            send_kvs_fence_resp_to_clients(rc, "mpi/pmi2: failed to send temp kvs");
             /* cancel the step to avoid tasks hang */
-            slurm_kill_job_step(job_info.jobid, job_info.stepid,
-                                SIGKILL);
+            slurm_kill_job_step(job_info.jobid, job_info.stepid, SIGKILL);
         } else {
             waiting_kvs_resp = 1;
         }
@@ -234,8 +221,7 @@ _handle_barrier_in(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_finalize(int fd, int lrank, client_req_t *req) {
+static int _handle_finalize(int fd, int lrank, client_req_t *req) {
     client_resp_t *resp;
     int rc = 0;
 
@@ -257,8 +243,7 @@ _handle_finalize(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_abort(int fd, int lrank, client_req_t *req) {
+static int _handle_abort(int fd, int lrank, client_req_t *req) {
     debug3("mpi/pmi2: in _handle_abort");
     /* no response needed. just cancel the job */
     slurm_kill_job_step(job_info.jobid, job_info.stepid, SIGKILL);
@@ -266,8 +251,7 @@ _handle_abort(int fd, int lrank, client_req_t *req) {
     return SLURM_SUCCESS;
 }
 
-static int
-_handle_get_my_kvsname(int fd, int lrank, client_req_t *req) {
+static int _handle_get_my_kvsname(int fd, int lrank, client_req_t *req) {
     client_resp_t *resp;
     int rc = 0;
 
@@ -280,31 +264,27 @@ _handle_get_my_kvsname(int fd, int lrank, client_req_t *req) {
             RC_KEY
             "=%d "
             KVSNAME_KEY
-            "=%u.%u\n",
-                       rc, job_info.jobid, job_info.stepid);
+            "=%u.%u\n", rc, job_info.jobid, job_info.stepid);
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
     debug3("mpi/pmi2: out _handle_get_my_kvsname");
     return rc;
 }
 
-static int
-_handle_create_kvs(int fd, int lrank, client_req_t *req) {
+static int _handle_create_kvs(int fd, int lrank, client_req_t *req) {
     /* not used in MPICH2 */
     error("mpi/pmi2: PMI1 request of '" CREATEKVS_CMD "' not supported");
     return SLURM_ERROR;
 }
 
-static int
-_handle_destroy_kvs(int fd, int lrank, client_req_t *req) {
+static int _handle_destroy_kvs(int fd, int lrank, client_req_t *req) {
     /* not used in MPICH2 */
     error("mpi/pmi2: PMI1 request of '" DESTROYKVS_CMD "' not supported");
     return SLURM_ERROR;
 }
 
 
-static int
-_handle_put(int fd, int lrank, client_req_t *req) {
+static int _handle_put(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     client_resp_t *resp;
     char *kvsname = NULL, *key = NULL, *val = NULL;
@@ -340,8 +320,7 @@ _handle_put(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_get(int fd, int lrank, client_req_t *req) {
+static int _handle_get(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *kvsname = NULL, *key = NULL, *val = NULL;
@@ -382,16 +361,14 @@ _handle_get(int fd, int lrank, client_req_t *req) {
 }
 
 
-static int
-_handle_getbyidx(int fd, int lrank, client_req_t *req) {
+static int _handle_getbyidx(int fd, int lrank, client_req_t *req) {
     /* not used in MPICH2 */
     error("mpi/pmi2: PMI1 request of '" GETBYIDX_CMD "' not supported");
 
     return SLURM_ERROR;
 }
 
-static int
-_handle_publish_name(int fd, int lrank, client_req_t *req) {
+static int _handle_publish_name(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *service = NULL, *port = NULL;
@@ -412,8 +389,7 @@ _handle_publish_name(int fd, int lrank, client_req_t *req) {
             PUBLISHRESULT_CMD
             " "
             INFO_KEY
-            "=%s\n",
-                       rc == SLURM_SUCCESS ? "ok" : "fail");
+            "=%s\n", rc == SLURM_SUCCESS ? "ok" : "fail");
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
 
@@ -421,8 +397,7 @@ _handle_publish_name(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_unpublish_name(int fd, int lrank, client_req_t *req) {
+static int _handle_unpublish_name(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *service = NULL;
@@ -441,8 +416,7 @@ _handle_unpublish_name(int fd, int lrank, client_req_t *req) {
             UNPUBLISHRESULT_CMD
             " "
             INFO_KEY
-            "=%s\n",
-                       rc == SLURM_SUCCESS ? "ok" : "fail");
+            "=%s\n", rc == SLURM_SUCCESS ? "ok" : "fail");
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
 
@@ -454,8 +428,7 @@ _handle_unpublish_name(int fd, int lrank, client_req_t *req) {
  * this design is not scalable: each task that calls MPI_Lookup_name()
  * will generate a RPC to srun.
  */
-static int
-_handle_lookup_name(int fd, int lrank, client_req_t *req) {
+static int _handle_lookup_name(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *service = NULL, *port = NULL;
@@ -479,8 +452,7 @@ _handle_lookup_name(int fd, int lrank, client_req_t *req) {
         client_resp_append(resp, INFO_KEY
                 "=ok "
                 PORT_KEY
-                "=%s\n",
-                           port);
+                "=%s\n", port);
     }
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
@@ -492,8 +464,7 @@ _handle_lookup_name(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_mcmd(int fd, int lrank, client_req_t *req) {
+static int _handle_mcmd(int fd, int lrank, client_req_t *req) {
     spawn_subcmd_t *subcmd = NULL;
     spawn_resp_t *spawn_resp = NULL;
     client_resp_t *task_resp = NULL;
@@ -510,16 +481,11 @@ _handle_mcmd(int fd, int lrank, client_req_t *req) {
     client_req_get_int(req, SPAWNSSOFAR_KEY, &spawnssofar);
     if (spawnssofar == 1) {
         pmi1_spawn = spawn_req_new();
-        client_req_get_int(req, TOTSPAWNS_KEY,
-                           (int *) &pmi1_spawn->subcmd_cnt);
-        pmi1_spawn->subcmds = xmalloc(pmi1_spawn->subcmd_cnt *
-                                      sizeof(spawn_subcmd_t *));
-        client_req_get_int(req, PREPUTNUM_KEY,
-                           (int *) &pmi1_spawn->preput_cnt);
-        pmi1_spawn->pp_keys =
-                xmalloc(pmi1_spawn->preput_cnt * sizeof(char *));
-        pmi1_spawn->pp_vals =
-                xmalloc(pmi1_spawn->preput_cnt * sizeof(char *));
+        client_req_get_int(req, TOTSPAWNS_KEY, (int *) &pmi1_spawn->subcmd_cnt);
+        pmi1_spawn->subcmds = xmalloc(pmi1_spawn->subcmd_cnt * sizeof(spawn_subcmd_t *));
+        client_req_get_int(req, PREPUTNUM_KEY, (int *) &pmi1_spawn->preput_cnt);
+        pmi1_spawn->pp_keys = xmalloc(pmi1_spawn->preput_cnt * sizeof(char *));
+        pmi1_spawn->pp_vals = xmalloc(pmi1_spawn->preput_cnt * sizeof(char *));
         for (i = 0; i < pmi1_spawn->preput_cnt; i++) {
             snprintf(buf, 64, PREPUTKEY_KEY"%d", i);
             client_req_get_str(req, buf, &pmi1_spawn->pp_keys[i]);
@@ -543,8 +509,7 @@ _handle_mcmd(int fd, int lrank, client_req_t *req) {
                     RC_KEY
                     "=%d;"
                     ERRMSG_KEY
-                    "=spawn failed;",
-                               spawn_resp->rc);
+                    "=spawn failed;", spawn_resp->rc);
             client_resp_send(task_resp, fd);
             client_resp_free(task_resp);
 
@@ -574,8 +539,7 @@ _handle_mcmd(int fd, int lrank, client_req_t *req) {
 #define MAX_READLINE 1024
 
 /* buf will be xfree-ed */
-static int
-_handle_pmi1_cmd_buf(int fd, int lrank, int buf_len, char *buf) {
+static int _handle_pmi1_cmd_buf(int fd, int lrank, int buf_len, char *buf) {
     client_req_t *req = NULL;
     int i = 0, rc;
 
@@ -606,8 +570,7 @@ _handle_pmi1_cmd_buf(int fd, int lrank, int buf_len, char *buf) {
 }
 
 /* *pbuf not xfree-ed */
-static int
-_handle_pmi1_mcmd_buf(int fd, int lrank, int buf_size, int buf_len, char **pbuf) {
+static int _handle_pmi1_mcmd_buf(int fd, int lrank, int buf_size, int buf_len, char **pbuf) {
     int n, len, endcmd_len, not_end;
     char *cmd_buf = NULL, *tmp_buf = NULL, *tmp_ptr = NULL, *buf;
     int rc = SLURM_SUCCESS;
@@ -623,8 +586,7 @@ _handle_pmi1_mcmd_buf(int fd, int lrank, int buf_size, int buf_len, char **pbuf)
             xrealloc(buf, buf_size + 1);
             *pbuf = buf;
         }
-        while ((len = read(fd, &buf[n], buf_size - n)) < 0
-               && errno == EINTR);
+        while ((len = read(fd, &buf[n], buf_size - n)) < 0 && errno == EINTR);
         if (len < 0) {
             error("mpi/pmi2: failed to read PMI1 request");
             return SLURM_ERROR;
@@ -633,8 +595,7 @@ _handle_pmi1_mcmd_buf(int fd, int lrank, int buf_size, int buf_len, char **pbuf)
             usleep(100);
         } else {
             n += len;
-            not_end = xstrncmp(&buf[n - endcmd_len],
-                               ENDCMD_KEY"\n", endcmd_len);
+            not_end = xstrncmp(&buf[n - endcmd_len], ENDCMD_KEY"\n", endcmd_len);
         }
     }
     buf[n] = '\0';
@@ -661,8 +622,7 @@ _handle_pmi1_mcmd_buf(int fd, int lrank, int buf_size, int buf_len, char **pbuf)
     return rc;
 }
 
-extern int
-handle_pmi1_cmd(int fd, int lrank) {
+extern int handle_pmi1_cmd(int fd, int lrank) {
     char *buf = NULL;
     int n, len, size, rc = SLURM_SUCCESS;
 

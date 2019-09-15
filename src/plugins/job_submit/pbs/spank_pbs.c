@@ -61,29 +61,24 @@ int slurm_spank_task_init(spank_t sp, int ac, char **av) {
         spank_setenv(sp, "PBS_ENVIRONMENT", "PBS_INTERACTIVE", 1);
 #endif
 
-    if (spank_getenv(sp, "SLURM_ARRAY_JOB_ID", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_ARRAY_JOB_ID", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_ARRAY_ID", val, 1);
-    if (spank_getenv(sp, "SLURM_ARRAY_TASK_ID", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_ARRAY_TASK_ID", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_ARRAY_INDEX", val, 1);
 
     if (getcwd(val, sizeof(val)))
         spank_setenv(sp, "PBS_JOBDIR", val, 1);
 
-    if (spank_getenv(sp, "SLURM_JOB_ID", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_JOB_ID", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_JOBID", val, 1);
 
-    if (spank_getenv(sp, "SLURM_JOB_NAME", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_JOB_NAME", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_JOBNAME", val, 1);
 
     /* PBS_NODEFILE is not currently available, although such a file might
      * be build based upon the SLURM_JOB_NODELIST environment variable */
 
-    if (spank_getenv(sp, "SLURM_NODEID", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_NODEID", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_NODENUM", val, 1);
 
     if (spank_getenv(sp, "HOME", val, sizeof(val)) == ESPANK_SUCCESS)
@@ -113,15 +108,13 @@ int slurm_spank_task_init(spank_t sp, int ac, char **av) {
     if (spank_getenv(sp, "SYSTEM", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_O_SYSTEM", val, 1);
 
-    if (spank_getenv(sp, "SLURM_SUBMIT_DIR", val, sizeof(val)) ==
-        ESPANK_SUCCESS)
+    if (spank_getenv(sp, "SLURM_SUBMIT_DIR", val, sizeof(val)) == ESPANK_SUCCESS)
         spank_setenv(sp, "PBS_O_WORKDIR", val, 1);
 
     /* PBS_QUEUE is set in the job_submit/pbs plugin, but only for
      * batch jobs that specify the job's partition at job submit time. */
 
-    if (spank_getenv(sp, "SLURM_PROCID", val, sizeof(val)) ==
-        ESPANK_SUCCESS) {
+    if (spank_getenv(sp, "SLURM_PROCID", val, sizeof(val)) == ESPANK_SUCCESS) {
         int i = atoi(val) + 1;
         snprintf(val, sizeof(val), "%d", i);
         spank_setenv(sp, "PBS_TASKNUM", val, 1);

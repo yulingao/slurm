@@ -213,8 +213,7 @@ char *slurm_auth_get_host(slurm_auth_credential_t *cred) {
  * Marshall a credential for transmission over the network, according to
  * Slurm's marshalling protocol.
  */
-int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf,
-                    uint16_t protocol_version) {
+int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf, uint16_t protocol_version) {
     if (!cred || !buf) {
         slurm_seterrno(ESLURM_AUTH_BADARG);
         return SLURM_ERROR;
@@ -228,8 +227,7 @@ int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf,
         pack32((uint32_t) cred->uid, buf);
         pack32((uint32_t) cred->gid, buf);
     } else {
-        error("%s: Unknown protocol version %d",
-              __func__, protocol_version);
+        error("%s: Unknown protocol version %d", __func__, protocol_version);
         return SLURM_ERROR;
     }
 
@@ -283,8 +281,7 @@ slurm_auth_credential_t *slurm_auth_unpack(Buf buf, uint16_t protocol_version) {
         safe_unpack32(&tmpint, buf);
         cred->gid = tmpint;
     } else {
-        error("%s: unknown protocol version %u",
-              __func__, protocol_version);
+        error("%s: unknown protocol version %u", __func__, protocol_version);
         goto unpack_error;
     }
 

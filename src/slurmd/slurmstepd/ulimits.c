@@ -60,8 +60,7 @@
  * Prototypes:
  *
  */
-static int _get_env_val(char **env, const char *name, unsigned long *valp,
-                        bool *u_req_propagate);
+static int _get_env_val(char **env, const char *name, unsigned long *valp, bool *u_req_propagate);
 
 static int _set_limit(char **env, slurm_rlimits_info_t *rli);
 
@@ -105,8 +104,7 @@ int set_user_limits(stepd_step_rec_t *job) {
 
     if (getrlimit(RLIMIT_CPU, &r) == 0) {
         if (r.rlim_max != RLIM_INFINITY) {
-            error("Slurm process CPU time limit is %d seconds",
-                  (int) r.rlim_max);
+            error("Slurm process CPU time limit is %d seconds", (int) r.rlim_max);
         }
     }
 
@@ -125,15 +123,13 @@ int set_user_limits(stepd_step_rec_t *job) {
      * node and not per process, but hopefully this is better than
      * nothing).  */
 #ifdef RLIMIT_RSS
-    if ((task_mem_bytes) && (getrlimit(RLIMIT_RSS, &r) == 0) &&
-        (r.rlim_max > task_mem_bytes)) {
+    if ((task_mem_bytes) && (getrlimit(RLIMIT_RSS, &r) == 0) && (r.rlim_max > task_mem_bytes)) {
         r.rlim_max = r.rlim_cur = task_mem_bytes;
         if (setrlimit(RLIMIT_RSS, &r)) {
             /* Indicates that limit has already been exceeded */
             fatal("setrlimit(RLIMIT_RSS, %"
             PRIu64
-            " MB): %m",
-                    job->step_mem);
+            " MB): %m", job->step_mem);
         } else
             debug2("Set task rss(%"
         PRIu64
@@ -146,18 +142,15 @@ int set_user_limits(stepd_step_rec_t *job) {
 #endif
 
 #ifdef SLURM_RLIMIT_VSIZE
-    if ((task_mem_bytes) &&
-        ((vsize_factor = slurm_get_vsize_factor()) != 0) &&
-        (getrlimit(SLURM_RLIMIT_VSIZE, &r) == 0) &&
-        (r.rlim_max > task_mem_bytes)) {
+    if ((task_mem_bytes) && ((vsize_factor = slurm_get_vsize_factor()) != 0) &&
+        (getrlimit(SLURM_RLIMIT_VSIZE, &r) == 0) && (r.rlim_max > task_mem_bytes)) {
         r.rlim_max = task_mem_bytes * (vsize_factor / 100.0);
         r.rlim_cur = r.rlim_max;
         if (setrlimit(SLURM_RLIMIT_VSIZE, &r)) {
             /* Indicates that limit has already been exceeded */
             fatal("setrlimit(%s, %"
             PRIu64
-            " MB): %m",
-                    SLURM_RLIMIT_VNAME, job->step_mem);
+            " MB): %m", SLURM_RLIMIT_VNAME, job->step_mem);
         } else
             debug2("Set task vsize(%"
         PRIu64
@@ -184,8 +177,7 @@ static char *rlim_to_string(unsigned long rlim, char *buf, size_t n) {
 }
 
 /* Set umask using value of env var SLURM_UMASK */
-extern int
-set_umask(stepd_step_rec_t *job) {
+extern int set_umask(stepd_step_rec_t *job) {
     mode_t mask;
     char *val;
 
@@ -196,8 +188,7 @@ set_umask(stepd_step_rec_t *job) {
     }
 
     mask = strtol(val, (char **) NULL, 8);
-    if ((job->stepid == SLURM_EXTERN_CONT) ||
-        (job->stepid == SLURM_BATCH_SCRIPT))
+    if ((job->stepid == SLURM_EXTERN_CONT) || (job->stepid == SLURM_BATCH_SCRIPT))
         unsetenvp(job->env, "SLURM_UMASK");
     umask(mask);
     return SLURM_SUCCESS;
@@ -216,8 +207,7 @@ set_umask(stepd_step_rec_t *job) {
  * ANYTHING IS WRITTEN TO IT.  SO IF RUNNING +DEBUG2 AND THE USER IS
  * GETTING CORES WITH FILE SYSTEM LIMIT ERRORS THIS IS THE REASON.
  */
-static int
-_set_limit(char **env, slurm_rlimits_info_t *rli) {
+static int _set_limit(char **env, slurm_rlimits_info_t *rli) {
     unsigned long env_value;
     char max[24], cur[24], req[24];
     struct rlimit r;
@@ -256,16 +246,13 @@ _set_limit(char **env, slurm_rlimits_info_t *rli) {
      * Nothing to do if the rlimit won't change
      */
     if (r.rlim_cur == (rlim_t) env_value) {
-        debug2("_set_limit: %s setrlimit %s no change in value: %lu",
-               u_req_propagate ? "user" : "conf", rlimit_name,
+        debug2("_set_limit: %s setrlimit %s no change in value: %lu", u_req_propagate ? "user" : "conf", rlimit_name,
                (unsigned long) r.rlim_cur);
         goto cleanup;
     }
 
-    debug2("_set_limit: %-14s: max:%s cur:%s req:%s", rlimit_name,
-           rlim_to_string(r.rlim_max, max, sizeof(max)),
-           rlim_to_string(r.rlim_cur, cur, sizeof(cur)),
-           rlim_to_string(env_value, req, sizeof(req)));
+    debug2("_set_limit: %-14s: max:%s cur:%s req:%s", rlimit_name, rlim_to_string(r.rlim_max, max, sizeof(max)),
+           rlim_to_string(r.rlim_cur, cur, sizeof(cur)), rlim_to_string(env_value, req, sizeof(req)));
 
     r.rlim_cur = (rlim_t) env_value;
     if (r.rlim_max < r.rlim_cur)
@@ -276,21 +263,16 @@ _set_limit(char **env, slurm_rlimits_info_t *rli) {
          * Report an error only if the user requested propagate
          */
         if (u_req_propagate) {
-            error("Can't propagate %s of %s from submit host: %m",
-                  rlimit_name,
-                  r.rlim_cur == RLIM_INFINITY ? "'unlimited'" :
-                  rlim_to_string(r.rlim_cur, cur, sizeof(cur)));
+            error("Can't propagate %s of %s from submit host: %m", rlimit_name,
+                  r.rlim_cur == RLIM_INFINITY ? "'unlimited'" : rlim_to_string(r.rlim_cur, cur, sizeof(cur)));
         } else {
-            verbose("Can't propagate %s of %s from submit host: %m",
-                    rlimit_name,
-                    r.rlim_cur == RLIM_INFINITY ? "'unlimited'" :
-                    rlim_to_string(r.rlim_cur, cur, sizeof(cur)));
+            verbose("Can't propagate %s of %s from submit host: %m", rlimit_name,
+                    r.rlim_cur == RLIM_INFINITY ? "'unlimited'" : rlim_to_string(r.rlim_cur, cur, sizeof(cur)));
         }
         rc = SLURM_ERROR;
         goto cleanup;
     }
-    debug2("_set_limit: %s setrlimit %s succeeded",
-           u_req_propagate ? "user" : "conf", rlimit_name);
+    debug2("_set_limit: %s setrlimit %s succeeded", u_req_propagate ? "user" : "conf", rlimit_name);
 
     cleanup:
     xfree(rlimit_name);
@@ -301,8 +283,7 @@ _set_limit(char **env, slurm_rlimits_info_t *rli) {
  * Determine the value of the env var 'name' (if it exists) and whether
  * or not the user wants to use its value as the jobs soft rlimit.
  */
-static int _get_env_val(char **env, const char *name, unsigned long *valp,
-                        bool *u_req_propagate) {
+static int _get_env_val(char **env, const char *name, unsigned long *valp, bool *u_req_propagate) {
     char *val = NULL;
     char *p = NULL;
 

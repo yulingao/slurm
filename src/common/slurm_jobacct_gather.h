@@ -142,8 +142,7 @@ extern void jobacct_gather_suspend_poll(void);
 
 extern void jobacct_gather_resume_poll(void);
 
-extern int jobacct_gather_add_task(pid_t pid, jobacct_id_t *jobacct_id,
-                                   int poll);
+extern int jobacct_gather_add_task(pid_t pid, jobacct_id_t *jobacct_id, int poll);
 
 /* must free jobacctinfo_t if not NULL */
 extern jobacctinfo_t *jobacct_gather_stat_task(pid_t pid);
@@ -153,32 +152,24 @@ extern jobacctinfo_t *jobacct_gather_remove_task(pid_t pid);
 
 extern int jobacct_gather_set_proctrack_container_id(uint64_t id);
 
-extern int jobacct_gather_set_mem_limit(uint32_t job_id,
-                                        uint32_t step_id,
-                                        uint64_t mem_limit);
+extern int jobacct_gather_set_mem_limit(uint32_t job_id, uint32_t step_id, uint64_t mem_limit);
 
-extern void jobacct_gather_handle_mem_limit(uint64_t total_job_mem,
-                                            uint64_t total_job_vsize);
+extern void jobacct_gather_handle_mem_limit(uint64_t total_job_mem, uint64_t total_job_vsize);
 
 extern jobacctinfo_t *jobacctinfo_create(jobacct_id_t *jobacct_id);
 
 extern void jobacctinfo_destroy(void *object);
 
-extern int jobacctinfo_setinfo(jobacctinfo_t *jobacct,
-                               enum jobacct_data_type type, void *data,
-                               uint16_t protocol_version);
+extern int
+jobacctinfo_setinfo(jobacctinfo_t *jobacct, enum jobacct_data_type type, void *data, uint16_t protocol_version);
 
-extern int jobacctinfo_getinfo(jobacctinfo_t *jobacct,
-                               enum jobacct_data_type type, void *data,
-                               uint16_t protocol_version);
+extern int
+jobacctinfo_getinfo(jobacctinfo_t *jobacct, enum jobacct_data_type type, void *data, uint16_t protocol_version);
 
-extern void jobacctinfo_pack(jobacctinfo_t *jobacct,
-                             uint16_t rpc_version,
-                             uint16_t protocol_type, Buf buffer);
+extern void jobacctinfo_pack(jobacctinfo_t *jobacct, uint16_t rpc_version, uint16_t protocol_type, Buf buffer);
 
-extern int jobacctinfo_unpack(jobacctinfo_t **jobacct,
-                              uint16_t rpc_version,
-                              uint16_t protocol_type, Buf buffer, bool alloc);
+extern int
+jobacctinfo_unpack(jobacctinfo_t **jobacct, uint16_t rpc_version, uint16_t protocol_type, Buf buffer, bool alloc);
 
 extern void jobacctinfo_aggregate(jobacctinfo_t *dest, jobacctinfo_t *from);
 

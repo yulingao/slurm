@@ -63,11 +63,9 @@ int check_header_version(header_t *header) {
         check_version = working_cluster_rec->rpc_version;
 
     if (slurmdbd_conf) {
-        if ((header->version != SLURM_PROTOCOL_VERSION) &&
-            (header->version != SLURM_ONE_BACK_PROTOCOL_VERSION) &&
+        if ((header->version != SLURM_PROTOCOL_VERSION) && (header->version != SLURM_ONE_BACK_PROTOCOL_VERSION) &&
             (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
-            debug("unsupported RPC version %hu msg type %s(%u)",
-                  header->version, rpc_num2string(header->msg_type),
+            debug("unsupported RPC version %hu msg type %s(%u)", header->version, rpc_num2string(header->msg_type),
                   header->msg_type);
             slurm_seterrno_ret(SLURM_PROTOCOL_VERSION_ERROR);
         }
@@ -81,23 +79,17 @@ int check_header_version(header_t *header) {
                     /* Disable job step creation/launch
                      * between major releases. Other RPCs
                      * should all be supported. */
-                    debug("unsupported RPC type %hu",
-                          header->msg_type);
-                    slurm_seterrno_ret(
-                            SLURM_PROTOCOL_VERSION_ERROR);
+                    debug("unsupported RPC type %hu", header->msg_type);
+                    slurm_seterrno_ret(SLURM_PROTOCOL_VERSION_ERROR);
                     break;
                 }
             default:
                 if ((header->version != SLURM_PROTOCOL_VERSION) &&
-                    (header->version !=
-                     SLURM_ONE_BACK_PROTOCOL_VERSION) &&
+                    (header->version != SLURM_ONE_BACK_PROTOCOL_VERSION) &&
                     (header->version != SLURM_MIN_PROTOCOL_VERSION)) {
                     debug("Unsupported RPC version %hu "
-                          "msg type %s(%u)", header->version,
-                          rpc_num2string(header->msg_type),
-                          header->msg_type);
-                    slurm_seterrno_ret(
-                            SLURM_PROTOCOL_VERSION_ERROR);
+                          "msg type %s(%u)", header->version, rpc_num2string(header->msg_type), header->msg_type);
+                    slurm_seterrno_ret(SLURM_PROTOCOL_VERSION_ERROR);
                 }
                 break;
 
@@ -122,16 +114,12 @@ void init_header(header_t *header, slurm_msg_t *msg, uint16_t flags) {
     if (msg->protocol_version != NO_VAL16)
         header->version = msg->protocol_version;
     else if (working_cluster_rec)
-        msg->protocol_version = header->version =
-                working_cluster_rec->rpc_version;
-    else if ((msg->msg_type == ACCOUNTING_UPDATE_MSG) ||
-             (msg->msg_type == ACCOUNTING_FIRST_REG)) {
-        uint16_t rpc_version =
-                ((accounting_update_msg_t *) msg->data)->rpc_version;
+        msg->protocol_version = header->version = working_cluster_rec->rpc_version;
+    else if ((msg->msg_type == ACCOUNTING_UPDATE_MSG) || (msg->msg_type == ACCOUNTING_FIRST_REG)) {
+        uint16_t rpc_version = ((accounting_update_msg_t *) msg->data)->rpc_version;
         msg->protocol_version = header->version = rpc_version;
     } else
-        msg->protocol_version = header->version =
-                SLURM_PROTOCOL_VERSION;
+        msg->protocol_version = header->version = SLURM_PROTOCOL_VERSION;
 
     header->flags = flags;
     header->msg_type = msg->msg_type;
@@ -186,7 +174,6 @@ void slurm_print_launch_task_msg(launch_tasks_request_msg_t *msg, char *name) {
     debug3("msg -> flags      = %x", msg->flags);
 
     for (i = 0; i < msg->tasks_to_launch[node_id]; i++) {
-        debug3("global_task_id[%d]: %u ", i,
-               msg->global_task_ids[node_id][i]);
+        debug3("global_task_id[%d]: %u ", i, msg->global_task_ids[node_id][i]);
     }
 }

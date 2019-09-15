@@ -83,8 +83,7 @@ if (forward_msg(forward_struct, &header) == SLURM_ERROR) {
 }
 
 *********************************************************************/
-extern int forward_msg(forward_struct_t *forward_struct,
-                       header_t *header);
+extern int forward_msg(forward_struct_t *forward_struct, header_t *header);
 
 
 /*

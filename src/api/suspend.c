@@ -61,8 +61,7 @@ static int _suspend_op(uint16_t op, uint32_t job_id) {
     req_msg.msg_type = REQUEST_SUSPEND;
     req_msg.data = &sus_req;
 
-    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     slurm_seterrno(rc);
@@ -95,8 +94,7 @@ extern int slurm_resume(uint32_t job_id) {
  * RET 0 or a slurm error code
  * NOTE: Supply either job_id NO_VAL or job_id_str as NULL, not both
  */
-static int _suspend_op2(uint16_t op, char *job_id_str,
-                        job_array_resp_msg_t **resp) {
+static int _suspend_op2(uint16_t op, char *job_id_str, job_array_resp_msg_t **resp) {
     int rc = SLURM_SUCCESS;
     suspend_msg_t sus_req;
     slurm_msg_t req_msg, resp_msg;
@@ -110,8 +108,7 @@ static int _suspend_op2(uint16_t op, char *job_id_str,
     req_msg.msg_type = REQUEST_SUSPEND;
     req_msg.data = &sus_req;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     switch (resp_msg.msg_type) {
         case RESPONSE_JOB_ARRAY_ERRORS:
             *resp = (job_array_resp_msg_t *) resp_msg.data;
@@ -178,8 +175,7 @@ extern int slurm_requeue(uint32_t job_id, uint32_t flags) {
     req_msg.msg_type = REQUEST_JOB_REQUEUE;
     req_msg.data = &requeue_req;
 
-    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     slurm_seterrno(rc);
@@ -202,8 +198,7 @@ extern int slurm_requeue(uint32_t job_id, uint32_t flags) {
  *	      free using slurm_free_job_array_resp()
  * RET 0 or a slurm error code
  */
-extern int slurm_requeue2(char *job_id_str, uint32_t flags,
-                          job_array_resp_msg_t **resp) {
+extern int slurm_requeue2(char *job_id_str, uint32_t flags, job_array_resp_msg_t **resp) {
     int rc = SLURM_SUCCESS;
     requeue_msg_t requeue_req;
     slurm_msg_t req_msg, resp_msg;
@@ -217,8 +212,7 @@ extern int slurm_requeue2(char *job_id_str, uint32_t flags,
     req_msg.msg_type = REQUEST_JOB_REQUEUE;
     req_msg.data = &requeue_req;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     switch (resp_msg.msg_type) {
         case RESPONSE_JOB_ARRAY_ERRORS:
             *resp = (job_array_resp_msg_t *) resp_msg.data;

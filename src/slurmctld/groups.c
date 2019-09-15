@@ -109,8 +109,7 @@ extern uid_t *get_group_members(char *group_name) {
     grp_buffer = xmalloc(buflen);
     while (1) {
         slurm_seterrno(0);
-        res = getgrnam_r(group_name, &grp, grp_buffer, buflen,
-                         &grp_result);
+        res = getgrnam_r(group_name, &grp, grp_buffer, buflen, &grp_result);
 
         /* We need to check for !grp_result, since it appears some
          * versions of this function do not return an error on
@@ -122,8 +121,7 @@ extern uid_t *get_group_members(char *group_name) {
                 xrealloc(grp_buffer, buflen);
                 continue;
             }
-            error("%s: Could not find configured group %s",
-                  __func__, group_name);
+            error("%s: Could not find configured group %s", __func__, group_name);
             xfree(grp_buffer);
             return NULL;
         }
@@ -138,16 +136,14 @@ extern uid_t *get_group_members(char *group_name) {
      */
     for (i = 0; grp_result->gr_mem[i]; i++) {
 
-        if (uid_from_string(grp_result->gr_mem[i],
-                            &my_uid) < 0) {
+        if (uid_from_string(grp_result->gr_mem[i], &my_uid) < 0) {
             continue;
         }
         if (my_uid == 0)
             continue;
         if (j + 1 >= uid_cnt) {
             uid_cnt += 100;
-            xrealloc(group_uids,
-                     (sizeof(uid_t) * uid_cnt));
+            xrealloc(group_uids, (sizeof(uid_t) * uid_cnt));
         }
 
         group_uids[j++] = my_uid;
@@ -191,8 +187,7 @@ extern uid_t *get_group_members(char *group_name) {
             }
 
             for (i = 0; grp_result->gr_mem[i]; i++) {
-                if (uid_from_string(grp_result->gr_mem[i],
-                                    &my_uid) < 0) {
+                if (uid_from_string(grp_result->gr_mem[i], &my_uid) < 0) {
                     /* Group member without valid login */
                     continue;
                 }
@@ -200,8 +195,7 @@ extern uid_t *get_group_members(char *group_name) {
                     continue;
                 if (j + 1 >= uid_cnt) {
                     uid_cnt += 100;
-                    xrealloc(group_uids,
-                             (sizeof(uid_t) * uid_cnt));
+                    xrealloc(group_uids, (sizeof(uid_t) * uid_cnt));
                 }
                 group_uids[j++] = my_uid;
             }

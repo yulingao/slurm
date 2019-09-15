@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+import codecs
+import os
 import re
 import sys
-import os
-import codecs
 
 canonical_url = 'https://slurm.schedmd.com/'
 
@@ -29,6 +29,7 @@ title = ''
 dirname = ''
 newfilename = ''
 
+
 def include_virtual(matchobj):
     global dirname
     if dirname:
@@ -37,19 +38,22 @@ def include_virtual(matchobj):
         filename = matchobj.group(2)
 
     if os.access(filename, os.F_OK):
-        #print 'Including file', filename
+        # print 'Including file', filename
         lines = open(filename, 'r').read()
         return lines
     else:
         return matchobj.group(0)
 
+
 def canonical_rewrite(matchobj):
     global newfilename
     return '<link rel="canonical" href="' + canonical_url + newfilename + '" />'
 
+
 def page_title_rewrite(matchobj):
     global title
     return '<title>Slurm Workload Manager - ' + title + '</title>'
+
 
 def url_rewrite(matchobj):
     global dirname
@@ -64,14 +68,16 @@ def url_rewrite(matchobj):
             newname = location[:-6] + '.html'
         else:
             newname = location[:-6] + '.html' + matchobj.group(3)
-        #print 'Rewriting', location, 'to', newname
+        # print 'Rewriting', location, 'to', newname
         return matchobj.group(1) + newname + matchobj.group(4)
     else:
         return matchobj.group(0)
 
+
 def version_rewrite(matchobj):
     global version
     return version
+
 
 # Make sure all of the files on the command line have the .shtml extension.
 version = sys.argv[1]
@@ -81,7 +87,7 @@ for f in sys.argv[2:]:
     if f[-6:] == '.shtml':
         files.append(f)
     else:
-        #print 'Skipping file %s (extension is not .shtml)' % f
+        # print 'Skipping file %s (extension is not .shtml)' % f
         pass
 
 for filename in files:
@@ -105,7 +111,6 @@ for filename in files:
         line = canonical_regex.sub(canonical_rewrite, line)
         line = url_regex.sub(url_rewrite, line)
         html.write(line)
-
 
     html.close()
     shtml.close()

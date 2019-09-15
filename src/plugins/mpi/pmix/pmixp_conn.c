@@ -54,8 +54,7 @@ static void _msg_handler_destruct(void *obj);
 static List _conn_list, _empty_hndl_list;
 static pmixp_p2p_data_t _slurm_hdr, _direct_hdr;
 
-void pmixp_conn_init(pmixp_p2p_data_t slurm_hdr,
-                     pmixp_p2p_data_t direct_hdr) {
+void pmixp_conn_init(pmixp_p2p_data_t slurm_hdr, pmixp_p2p_data_t direct_hdr) {
     _conn_list = list_create(_msg_handler_destruct);
     _empty_hndl_list = list_create(_msg_handler_destruct);
     _slurm_hdr = slurm_hdr;
@@ -86,8 +85,7 @@ static void _msg_handler_destruct(void *obj) {
             break;
         default:
             /* this shouldn't happen! */
-        PMIXP_ERROR("Bad message handler connection type: %d",
-                    (int) conn->type);
+        PMIXP_ERROR("Bad message handler connection type: %d", (int) conn->type);
             abort();
     }
     xfree(conn);
@@ -106,8 +104,7 @@ void pmixp_conn_cleanup(void) {
     }
 }
 
-pmixp_conn_t *pmixp_conn_new_temp(pmixp_conn_proto_t proto, int fd,
-                                  pmixp_conn_new_msg_cb_t nmsg_cb) {
+pmixp_conn_t *pmixp_conn_new_temp(pmixp_conn_proto_t proto, int fd, pmixp_conn_new_msg_cb_t nmsg_cb) {
     xassert(proto == PMIXP_PROTO_SLURM || proto == PMIXP_PROTO_DIRECT);
 
     pmixp_conn_t *conn = list_pop(_empty_hndl_list);
@@ -142,9 +139,7 @@ pmixp_conn_t *pmixp_conn_new_temp(pmixp_conn_proto_t proto, int fd,
     return conn;
 }
 
-pmixp_conn_t *pmixp_conn_new_persist(pmixp_conn_proto_t proto,
-                                     pmixp_io_engine_t *eng,
-                                     pmixp_conn_new_msg_cb_t nmsg_cb,
+pmixp_conn_t *pmixp_conn_new_persist(pmixp_conn_proto_t proto, pmixp_io_engine_t *eng, pmixp_conn_new_msg_cb_t nmsg_cb,
                                      pmixp_conn_ret_cb_t ret_cb, void *ret_data) {
     xassert(proto == PMIXP_PROTO_SLURM || proto == PMIXP_PROTO_DIRECT);
     xassert(NULL != eng);

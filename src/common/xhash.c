@@ -151,9 +151,7 @@ uint32_t xhash_count(xhash_t *table) {
     return table->count;
 }
 
-void xhash_walk(xhash_t *table,
-                void (*callback)(void *item, void *arg),
-                void *arg) {
+void xhash_walk(xhash_t *table, void (*callback)(void *item, void *arg), void *arg) {
     xhash_item_t *current_item = NULL;
     xhash_item_t *tmp = NULL;
     if (!table || !callback)

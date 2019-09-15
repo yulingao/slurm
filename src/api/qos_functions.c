@@ -75,9 +75,7 @@ extern List slurmdb_qos_get(void *db_conn, slurmdb_qos_cond_t *qos_cond) {
  * RET: List containing (char *'s) else NULL on error
  * note List needs to be freed with slurm_list_destroy() when called
  */
-extern List slurmdb_qos_modify(void *db_conn,
-                               slurmdb_qos_cond_t *qos_cond,
-                               slurmdb_qos_rec_t *qos) {
+extern List slurmdb_qos_modify(void *db_conn, slurmdb_qos_cond_t *qos_cond, slurmdb_qos_rec_t *qos) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 

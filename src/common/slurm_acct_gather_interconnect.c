@@ -60,8 +60,7 @@
 typedef struct slurm_acct_gather_interconnect_ops {
     int (*node_update)(void);
 
-    void (*conf_options)(s_p_options_t **full_options,
-                         int *full_options_cnt);
+    void (*conf_options)(s_p_options_t **full_options, int *full_options_cnt);
 
     void (*conf_set)(s_p_hashtbl_t *tbl);
 
@@ -73,13 +72,9 @@ typedef struct slurm_acct_gather_interconnect_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_acct_gather_interconnect_ops_t.
  */
-static const char *syms[] = {
-        "acct_gather_interconnect_p_node_update",
-        "acct_gather_interconnect_p_conf_options",
-        "acct_gather_interconnect_p_conf_set",
-        "acct_gather_interconnect_p_conf_values",
-        "acct_gather_interconnect_p_get_data",
-};
+static const char *syms[] = {"acct_gather_interconnect_p_node_update", "acct_gather_interconnect_p_conf_options",
+                             "acct_gather_interconnect_p_conf_set", "acct_gather_interconnect_p_conf_values",
+                             "acct_gather_interconnect_p_get_data",};
 
 static slurm_acct_gather_interconnect_ops_t *ops = NULL;
 static plugin_context_t **g_context = NULL;
@@ -89,8 +84,7 @@ static bool init_run = false;
 static bool acct_shutdown = true;
 static int freq = 0;
 static pthread_t watch_node_thread_id = 0;
-static acct_gather_profile_timer_t *profile_timer =
-        &acct_gather_profile_timer[PROFILE_NETWORK];
+static acct_gather_profile_timer_t *profile_timer = &acct_gather_profile_timer[PROFILE_NETWORK];
 
 static void *_watch_node(void *arg) {
     int i;
@@ -112,8 +106,7 @@ static void *_watch_node(void *arg) {
         slurm_mutex_unlock(&g_context_lock);
 
         slurm_mutex_lock(&profile_timer->notify_mutex);
-        slurm_cond_wait(&profile_timer->notify,
-                        &profile_timer->notify_mutex);
+        slurm_cond_wait(&profile_timer->notify, &profile_timer->notify_mutex);
         slurm_mutex_unlock(&profile_timer->notify_mutex);
     }
 
@@ -138,19 +131,15 @@ extern int acct_gather_interconnect_init(void) {
     g_context_num = 0; /* mark it before anything else */
     plugin_entry = full_plugin_type;
     while ((type = strtok_r(plugin_entry, ",", &last))) {
-        xrealloc(ops, sizeof(slurm_acct_gather_interconnect_ops_t) *
-                      (g_context_num + 1));
-        xrealloc(g_context, (sizeof(plugin_context_t * ) *
-                             (g_context_num + 1)));
+        xrealloc(ops, sizeof(slurm_acct_gather_interconnect_ops_t) * (g_context_num + 1));
+        xrealloc(g_context, (sizeof(plugin_context_t * ) * (g_context_num + 1)));
         if (xstrncmp(type, "acct_gather_interconnect/", 25) == 0)
             type += 25; /* backward compatibility */
         type = xstrdup_printf("%s/%s", plugin_type, type);
-        g_context[g_context_num] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_num],
-                syms, sizeof(syms));
+        g_context[g_context_num] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_num], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_num]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             xfree(type);
             retval = SLURM_ERROR;
             break;
@@ -197,9 +186,7 @@ extern int acct_gather_interconnect_fini(void) {
 
         rc2 = plugin_context_destroy(g_context[i]);
         if (rc2 != SLURM_SUCCESS) {
-            debug("%s: %s: %s", __func__,
-                  g_context[i]->type,
-                  slurm_strerror(rc2));
+            debug("%s: %s: %s", __func__, g_context[i]->type, slurm_strerror(rc2));
             rc = SLURM_ERROR;
         }
     }
@@ -242,8 +229,7 @@ extern int acct_gather_interconnect_startpoll(uint32_t frequency) {
 }
 
 
-extern int acct_gather_interconnect_g_conf_options(
-        s_p_options_t **full_options, int *full_options_cnt) {
+extern int acct_gather_interconnect_g_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     int i;
 
     if (acct_gather_interconnect_init() < 0)

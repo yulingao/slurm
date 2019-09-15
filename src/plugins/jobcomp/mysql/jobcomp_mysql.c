@@ -76,40 +76,36 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 mysql_conn_t *jobcomp_mysql_conn = NULL;
 
 char *jobcomp_table = "jobcomp_table";
-storage_field_t jobcomp_table_fields[] = {
-        {"jobid",        "int not null"},
-        {"uid",          "int unsigned not null"},
-        {"user_name",    "tinytext not null"},
-        {"gid",          "int unsigned not null"},
-        {"group_name",   "tinytext not null"},
-        {"name",         "tinytext not null"},
-        {"state",        "int unsigned not null"},
-        {"partition",    "tinytext not null"},
-        {"timelimit",    "tinytext not null"},
-        {"starttime",    "int unsigned default 0 not null"},
-        {"endtime",      "int unsigned default 0 not null"},
-        {"nodelist",     "text"},
-        {"nodecnt",      "int unsigned not null"},
-        {"proc_cnt",     "int unsigned not null"},
-        {"connect_type", "tinytext"},
-        {"reboot",       "tinytext"},
-        {"rotate",       "tinytext"},
-        {"maxprocs",     "int unsigned default 0 not null"},
-        {"geometry",     "tinytext"},
-        {"start",        "tinytext"},
-        {"blockid",      "tinytext"},
-        {NULL,           NULL}
-};
+storage_field_t jobcomp_table_fields[] = {{"jobid",        "int not null"},
+                                          {"uid",          "int unsigned not null"},
+                                          {"user_name",    "tinytext not null"},
+                                          {"gid",          "int unsigned not null"},
+                                          {"group_name",   "tinytext not null"},
+                                          {"name",         "tinytext not null"},
+                                          {"state",        "int unsigned not null"},
+                                          {"partition",    "tinytext not null"},
+                                          {"timelimit",    "tinytext not null"},
+                                          {"starttime",    "int unsigned default 0 not null"},
+                                          {"endtime",      "int unsigned default 0 not null"},
+                                          {"nodelist",     "text"},
+                                          {"nodecnt",      "int unsigned not null"},
+                                          {"proc_cnt",     "int unsigned not null"},
+                                          {"connect_type", "tinytext"},
+                                          {"reboot",       "tinytext"},
+                                          {"rotate",       "tinytext"},
+                                          {"maxprocs",     "int unsigned default 0 not null"},
+                                          {"geometry",     "tinytext"},
+                                          {"start",        "tinytext"},
+                                          {"blockid",      "tinytext"},
+                                          {NULL,           NULL}};
 
 /* File descriptor used for logging */
 static pthread_mutex_t jobcomp_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
 static int _mysql_jobcomp_check_tables() {
-    if (mysql_db_create_table(jobcomp_mysql_conn, jobcomp_table,
-                              jobcomp_table_fields,
-                              ", primary key (jobid, starttime, endtime))")
-        == SLURM_ERROR)
+    if (mysql_db_create_table(jobcomp_mysql_conn, jobcomp_table, jobcomp_table_fields,
+                              ", primary key (jobid, starttime, endtime))") == SLURM_ERROR)
         return SLURM_ERROR;
 
     return SLURM_SUCCESS;
@@ -196,8 +192,7 @@ extern int slurm_jobcomp_set_location(char *location) {
         while (location[i]) {
             if (location[i] == '.' || location[i] == '/') {
                 debug("%s doesn't look like a database "
-                      "name using %s",
-                      location, DEFAULT_JOB_COMP_DB);
+                      "name using %s", location, DEFAULT_JOB_COMP_DB);
                 break;
             }
             i++;
@@ -232,9 +227,7 @@ extern int slurm_jobcomp_set_location(char *location) {
 extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     int rc = SLURM_SUCCESS;
     char *usr_str = NULL, *grp_str = NULL, lim_str[32], *jname = NULL;
-    char *connect_type = NULL, *reboot = NULL, *rotate = NULL,
-            *geometry = NULL, *start = NULL,
-            *blockid = NULL;
+    char *connect_type = NULL, *reboot = NULL, *rotate = NULL, *geometry = NULL, *start = NULL, *blockid = NULL;
     uint32_t job_state;
     char *query = NULL, *on_dup = NULL;
     uint32_t time_limit, start_time, end_time;
@@ -258,8 +251,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     if (time_limit == INFINITE)
         strcpy(lim_str, "UNLIMITED");
     else {
-        snprintf(lim_str, sizeof(lim_str), "%lu",
-                 (unsigned long) time_limit);
+        snprintf(lim_str, sizeof(lim_str), "%lu", (unsigned long) time_limit);
     }
 
     /* Job will typically be COMPLETING when this is called.
@@ -290,23 +282,15 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     else
         jname = xstrdup("allocation");
 
-    connect_type = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                                   SELECT_PRINT_CONNECTION);
-    reboot = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                             SELECT_PRINT_REBOOT);
-    rotate = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                             SELECT_PRINT_ROTATE);
-    geometry = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                               SELECT_PRINT_GEOMETRY);
-    start = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                            SELECT_PRINT_START);
-    blockid = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo,
-                                              SELECT_PRINT_RESV_ID);
-    query = xstrdup_printf(
-            "insert into %s (jobid, uid, user_name, gid, group_name, "
-            "name, state, proc_cnt, `partition`, timelimit, "
-            "starttime, endtime, nodecnt",
-            jobcomp_table);
+    connect_type = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_CONNECTION);
+    reboot = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_REBOOT);
+    rotate = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_ROTATE);
+    geometry = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_GEOMETRY);
+    start = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_START);
+    blockid = select_g_select_jobinfo_xstrdup(job_ptr->select_jobinfo, SELECT_PRINT_RESV_ID);
+    query = xstrdup_printf("insert into %s (jobid, uid, user_name, gid, group_name, "
+                           "name, state, proc_cnt, `partition`, timelimit, "
+                           "starttime, endtime, nodecnt", jobcomp_table);
 
     if (job_ptr->nodes)
         xstrcat(query, ", nodelist");
@@ -325,18 +309,14 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     if (blockid)
         xstrcat(query, ", blockid");
     xstrfmtcat(query, ") values (%u, %u, '%s', %u, '%s', '%s', %u, %u, "
-                      "'%s', '%s', %u, %u, %u",
-               job_ptr->job_id, job_ptr->user_id, usr_str,
-               job_ptr->group_id, grp_str, jname,
-               job_state, job_ptr->total_cpus, job_ptr->partition, lim_str,
-               start_time, end_time, job_ptr->node_cnt);
+                      "'%s', '%s', %u, %u, %u", job_ptr->job_id, job_ptr->user_id, usr_str, job_ptr->group_id, grp_str,
+               jname, job_state, job_ptr->total_cpus, job_ptr->partition, lim_str, start_time, end_time,
+               job_ptr->node_cnt);
 
     xstrfmtcat(on_dup, "uid=%u, user_name='%s', gid=%u, group_name='%s', "
                        "name='%s', state=%u, proc_cnt=%u, `partition`='%s', "
-                       "timelimit='%s', nodecnt=%u",
-               job_ptr->user_id, usr_str, job_ptr->group_id, grp_str, jname,
-               job_state, job_ptr->total_cpus, job_ptr->partition, lim_str,
-               job_ptr->node_cnt);
+                       "timelimit='%s', nodecnt=%u", job_ptr->user_id, usr_str, job_ptr->group_id, grp_str, jname,
+               job_state, job_ptr->total_cpus, job_ptr->partition, lim_str, job_ptr->node_cnt);
 
     if (job_ptr->nodes) {
         xstrfmtcat(query, ", '%s'", job_ptr->nodes);
@@ -360,8 +340,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     }
     if (job_ptr->details && (job_ptr->details->max_cpus != NO_VAL)) {
         xstrfmtcat(query, ", '%u'", job_ptr->details->max_cpus);
-        xstrfmtcat(on_dup, ", maxprocs='%u'",
-                   job_ptr->details->max_cpus);
+        xstrfmtcat(on_dup, ", maxprocs='%u'", job_ptr->details->max_cpus);
     }
 
     if (geometry) {
@@ -381,8 +360,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     }
     xstrfmtcat(query, ") ON DUPLICATE KEY UPDATE %s;", on_dup);
 
-    debug3("(%s:%d) query\n%s",
-           THIS_FILE, __LINE__, query);
+    debug3("(%s:%d) query\n%s", THIS_FILE, __LINE__, query);
     rc = mysql_db_query(jobcomp_mysql_conn, query);
     xfree(usr_str);
     xfree(grp_str);

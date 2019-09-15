@@ -66,8 +66,7 @@ int pmixp_nspaces_init(void) {
     task_map = pmixp_info_task_map();
     hl = pmixp_info_step_hostlist();
     /* Initialize local namespace */
-    rc = pmixp_nspaces_add(mynspace, nnodes, nodeid, ntasks, task_cnts,
-                           task_map, hostlist_copy(hl));
+    rc = pmixp_nspaces_add(mynspace, nnodes, nodeid, ntasks, task_cnts, task_map, hostlist_copy(hl));
     _pmixp_nspaces.local = pmixp_nspaces_find(mynspace);
     return rc;
 }
@@ -77,9 +76,9 @@ int pmixp_nspaces_finalize(void) {
     return 0;
 }
 
-int pmixp_nspaces_add(char *name, uint32_t nnodes, int node_id,
-                      uint32_t ntasks, uint32_t *task_cnts,
-                      char *task_map_packed, hostlist_t hl) {
+int
+pmixp_nspaces_add(char *name, uint32_t nnodes, int node_id, uint32_t ntasks, uint32_t *task_cnts, char *task_map_packed,
+                  hostlist_t hl) {
     pmixp_namespace_t *nsptr = xmalloc(sizeof(pmixp_namespace_t));
     int i;
 
@@ -99,8 +98,7 @@ int pmixp_nspaces_add(char *name, uint32_t nnodes, int node_id,
         nsptr->task_cnts[i] = task_cnts[i];
     }
     nsptr->task_map_packed = xstrdup(task_map_packed);
-    nsptr->task_map = unpack_process_mapping_flat(task_map_packed, nnodes,
-                                                  ntasks, NULL);
+    nsptr->task_map = unpack_process_mapping_flat(task_map_packed, nnodes, ntasks, NULL);
     if (nsptr->task_map == NULL) {
         xfree(nsptr->task_cnts);
         xfree(nsptr->task_map_packed);
@@ -133,8 +131,7 @@ pmixp_namespace_t *pmixp_nspaces_find(const char *name) {
     return nsptr;
 }
 
-hostlist_t pmixp_nspace_rankhosts(pmixp_namespace_t *nsptr, const uint32_t *ranks,
-                                  size_t nranks) {
+hostlist_t pmixp_nspace_rankhosts(pmixp_namespace_t *nsptr, const uint32_t *ranks, size_t nranks) {
     hostlist_t hl = hostlist_create("");
     int i;
     for (i = 0; i < nranks; i++) {

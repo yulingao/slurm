@@ -146,8 +146,7 @@ int unpackdouble_array(double **valp, uint32_t *size_val, Buf buffer);
 
 void packlongdouble_array(long double *valp, uint32_t size_val, Buf buffer);
 
-int unpacklongdouble_array(long double **valp, uint32_t *size_val,
-                           Buf buffer);
+int unpacklongdouble_array(long double **valp, uint32_t *size_val, Buf buffer);
 
 void packmem(char *valp, uint32_t size_val, Buf buffer);
 

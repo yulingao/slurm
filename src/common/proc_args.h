@@ -54,8 +54,7 @@ void print_slurm_version(void);
 void print_gres_help(void);
 
 /* set distribution type strings from distribution type const */
-void set_distribution(task_dist_states_t distribution,
-                      char **dist, char **lllp_dist);
+void set_distribution(task_dist_states_t distribution, char **dist, char **lllp_dist);
 
 /* verify the requested distribution type */
 task_dist_states_t verify_dist_type(const char *arg, uint32_t *plane_size);
@@ -85,8 +84,7 @@ extern char *mbytes2_to_str(uint64_t mbytes);
 bool verify_node_count(const char *arg, int *min_nodes, int *max_nodes);
 
 /* verify a node list is valid based on the dist and task count given */
-bool verify_node_list(char **node_list_pptr, enum task_dist_states dist,
-                      int task_count);
+bool verify_node_list(char **node_list_pptr, enum task_dist_states dist, int task_count);
 
 /*
  * get either 1 or 2 integers for a resource count in the form of either
@@ -99,17 +97,14 @@ bool verify_node_list(char **node_list_pptr, enum task_dist_states dist,
  * IN isFatal - if set, exit on error
  * RET true if valid
  */
-bool get_resource_arg_range(const char *arg, const char *what, int *min,
-                            int *max, bool isFatal);
+bool get_resource_arg_range(const char *arg, const char *what, int *min, int *max, bool isFatal);
 
 /* verify resource counts from a complex form of: X, X:X, X:X:X or X:X:X:X */
-bool verify_socket_core_thread_count(const char *arg, int *min_sockets,
-                                     int *min_cores, int *min_threads,
+bool verify_socket_core_thread_count(const char *arg, int *min_sockets, int *min_cores, int *min_threads,
                                      cpu_bind_type_t *cpu_bind_type);
 
 /* verify a hint and convert it into the implied settings */
-bool verify_hint(const char *arg, int *min_sockets, int *min_cores,
-                 int *min_threads, int *ntasks_per_core,
+bool verify_hint(const char *arg, int *min_sockets, int *min_cores, int *min_threads, int *ntasks_per_core,
                  cpu_bind_type_t *cpu_bind_type);
 
 /* parse the mail type */
@@ -128,8 +123,7 @@ char *print_mail_type(const uint16_t type);
  * IN test_exec - if false, do not confirm access mode of cmd if full path
  * RET full path of cmd or NULL if not found
  */
-char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode,
-                  bool test_exec);
+char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode, bool test_exec);
 
 /* helper function for printing options */
 char *print_commandline(const int script_argc, char **script_argv);
@@ -137,12 +131,10 @@ char *print_commandline(const int script_argc, char **script_argv);
 /* Translate a signal option string "--signal=<int>[@<time>]" into
  * it's warn_signal and warn_time components.
  * RET 0 on success, -1 on failure */
-int get_signal_opts(char *optarg, uint16_t *warn_signal, uint16_t *warn_time,
-                    uint16_t *warn_flags);
+int get_signal_opts(char *optarg, uint16_t *warn_signal, uint16_t *warn_time, uint16_t *warn_flags);
 
 /* Return an xmalloc()'d string representing the original cmdline args */
-extern char *signal_opts_to_cmdline(uint16_t warn_signal, uint16_t warn_time,
-                                    uint16_t warn_flags);
+extern char *signal_opts_to_cmdline(uint16_t warn_signal, uint16_t warn_time, uint16_t warn_flags);
 
 /* Convert a signal name to it's numeric equivalent.
  * Return 0 on failure */

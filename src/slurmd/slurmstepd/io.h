@@ -84,8 +84,7 @@ void free_io_buf(struct io_buf *buf);
  * yet started, we initialize the msg_queue as an empty list and
  * directly add the eio_obj_t to the eio handle with eio_new_initial_handle.
  */
-int io_initial_client_connect(srun_info_t *srun, stepd_step_rec_t *job,
-                              int stdout_tasks, int stderr_tasks);
+int io_initial_client_connect(srun_info_t *srun, stepd_step_rec_t *job, int stdout_tasks, int stderr_tasks);
 
 /*
  * Initiate a TCP connection back to a waiting client (e.g. srun).
@@ -100,10 +99,8 @@ int io_client_connect(srun_info_t *srun, stepd_step_rec_t *job);
  * Open a local file and create and eio object for files written
  * from the slurmstepd, probably with labelled output.
  */
-int
-io_create_local_client(const char *filename, int file_flags,
-                       stepd_step_rec_t *job, bool labelio,
-                       int stdout_tasks, int stderr_tasks);
+int io_create_local_client(const char *filename, int file_flags, stepd_step_rec_t *job, bool labelio, int stdout_tasks,
+                           int stderr_tasks);
 
 /*
  * Initialize each task's standard I/O file descriptors.  The file descriptors
@@ -138,10 +135,8 @@ void io_close_local_fds(stepd_step_rec_t *job);
  *  if stdout and stderr point to the same file(s).
  *  See comments above for slurmd_filename_pattern_t.
  */
-void io_find_filename_pattern(stepd_step_rec_t *job,
-                              slurmd_filename_pattern_t *outpattern,
-                              slurmd_filename_pattern_t *errpattern,
-                              bool *same_out_err_files);
+void io_find_filename_pattern(stepd_step_rec_t *job, slurmd_filename_pattern_t *outpattern,
+                              slurmd_filename_pattern_t *errpattern, bool *same_out_err_files);
 
 /*
  *  Get the flags to be used with the open call to create output files.
@@ -152,7 +147,6 @@ int io_get_file_flags(stepd_step_rec_t *job);
  *  Initialize "user managed" IO, where each task has a single TCP
  *  socket end point shared on stdin, stdout, and stderr.
  */
-int user_managed_io_client_connect(int ntasks, srun_info_t *srun,
-                                   stepd_step_task_info_t **tasks);
+int user_managed_io_client_connect(int ntasks, srun_info_t *srun, stepd_step_task_info_t **tasks);
 
 #endif /* !_IO_H */

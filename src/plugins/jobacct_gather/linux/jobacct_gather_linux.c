@@ -114,38 +114,30 @@ static void _aggregate_prec(jag_prec_t *prec, jag_prec_t *ancestor) {
     for (i = 0; i < prec->tres_count; i++) {
         if (prec->tres_data[i].num_reads != INFINITE64) {
             if (ancestor->tres_data[i].num_reads == INFINITE64)
-                ancestor->tres_data[i].num_reads =
-                        prec->tres_data[i].num_reads;
+                ancestor->tres_data[i].num_reads = prec->tres_data[i].num_reads;
             else
-                ancestor->tres_data[i].num_reads +=
-                        prec->tres_data[i].num_reads;
+                ancestor->tres_data[i].num_reads += prec->tres_data[i].num_reads;
         }
 
         if (prec->tres_data[i].num_writes != INFINITE64) {
             if (ancestor->tres_data[i].num_writes == INFINITE64)
-                ancestor->tres_data[i].num_writes =
-                        prec->tres_data[i].num_writes;
+                ancestor->tres_data[i].num_writes = prec->tres_data[i].num_writes;
             else
-                ancestor->tres_data[i].num_writes +=
-                        prec->tres_data[i].num_writes;
+                ancestor->tres_data[i].num_writes += prec->tres_data[i].num_writes;
         }
 
         if (prec->tres_data[i].size_read != INFINITE64) {
             if (ancestor->tres_data[i].size_read == INFINITE64)
-                ancestor->tres_data[i].size_read =
-                        prec->tres_data[i].size_read;
+                ancestor->tres_data[i].size_read = prec->tres_data[i].size_read;
             else
-                ancestor->tres_data[i].size_read +=
-                        prec->tres_data[i].size_read;
+                ancestor->tres_data[i].size_read += prec->tres_data[i].size_read;
         }
 
         if (prec->tres_data[i].size_write != INFINITE64) {
             if (ancestor->tres_data[i].size_write == INFINITE64)
-                ancestor->tres_data[i].size_write =
-                        prec->tres_data[i].size_write;
+                ancestor->tres_data[i].size_write = prec->tres_data[i].size_write;
             else
-                ancestor->tres_data[i].size_write +=
-                        prec->tres_data[i].size_write;
+                ancestor->tres_data[i].size_write += prec->tres_data[i].size_write;
         }
     }
     prec->visited = true;
@@ -196,9 +188,7 @@ static void _get_offspring_data(List prec_list, jag_prec_t *ancestor, pid_t pid)
     list_append(tmp_list, prec);
 
     while ((prec_tmp = list_dequeue(tmp_list))) {
-        while ((prec = list_find_first(prec_list,
-                                       _list_find_prec_by_ppid,
-                                       &(prec_tmp->pid)))) {
+        while ((prec = list_find_first(prec_list, _list_find_prec_by_ppid, &(prec_tmp->pid)))) {
             _aggregate_prec(prec, ancestor);
             list_append(tmp_list, prec);
         }
@@ -260,8 +250,7 @@ extern int fini(void) {
  *    is a Linux-style stat entry. We disregard the data if they look
  *    wrong.
  */
-extern void jobacct_gather_p_poll_data(
-        List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
+extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
     static jag_callbacks_t callbacks;
     static bool first = 1;
 
@@ -273,8 +262,7 @@ extern void jobacct_gather_p_poll_data(
         callbacks.get_offspring_data = _get_offspring_data;
     }
 
-    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
-                         profile);
+    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks, profile);
     return;
 }
 

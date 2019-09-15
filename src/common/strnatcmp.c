@@ -40,26 +40,22 @@
 
 /* These are defined as macros to make it easier to adapt this code to
  * different characters types or comparison functions. */
-static inline int
-nat_isdigit(nat_char a) {
+static inline int nat_isdigit(nat_char a) {
     return isdigit((unsigned char) a);
 }
 
 
-static inline int
-nat_isspace(nat_char a) {
+static inline int nat_isspace(nat_char a) {
     return isspace((unsigned char) a);
 }
 
 
-static inline nat_char
-nat_toupper(nat_char a) {
+static inline nat_char nat_toupper(nat_char a) {
     return toupper((unsigned char) a);
 }
 
 
-static int
-compare_right(nat_char const *a, nat_char const *b) {
+static int compare_right(nat_char const *a, nat_char const *b) {
     int bias = 0;
 
     /* The longest run of digits wins.  That aside, the greatest
@@ -87,8 +83,7 @@ compare_right(nat_char const *a, nat_char const *b) {
 }
 
 
-static int
-compare_left(nat_char const *a, nat_char const *b) {
+static int compare_left(nat_char const *a, nat_char const *b) {
     /* Compare two left-aligned numbers: the first to have a
        different value wins. */
     for (;; a++, b++) {

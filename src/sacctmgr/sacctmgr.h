@@ -222,20 +222,14 @@ extern List g_tres_list;
 extern bool user_case_norm;
 extern bool tree_display;
 
-extern bool sacctmgr_check_default_qos(uint32_t qos_id,
-                                       slurmdb_assoc_cond_t *assoc_cond);
+extern bool sacctmgr_check_default_qos(uint32_t qos_id, slurmdb_assoc_cond_t *assoc_cond);
 
-extern int sacctmgr_set_assoc_cond(slurmdb_assoc_cond_t *assoc_cond,
-                                   char *type, char *value,
-                                   int command_len, int option);
+extern int
+sacctmgr_set_assoc_cond(slurmdb_assoc_cond_t *assoc_cond, char *type, char *value, int command_len, int option);
 
-extern int sacctmgr_set_assoc_rec(slurmdb_assoc_rec_t *assoc_rec,
-                                  char *type, char *value,
-                                  int command_len, int option);
+extern int sacctmgr_set_assoc_rec(slurmdb_assoc_rec_t *assoc_rec, char *type, char *value, int command_len, int option);
 
-extern void sacctmgr_print_assoc_rec(slurmdb_assoc_rec_t *assoc,
-                                     print_field_t *field, List tree_list,
-                                     bool last);
+extern void sacctmgr_print_assoc_rec(slurmdb_assoc_rec_t *assoc, print_field_t *field, List tree_list, bool last);
 
 extern int sacctmgr_add_assoc(int argc, char **argv);
 
@@ -338,22 +332,17 @@ extern int get_uint64(char *in_value, uint64_t *out_value, char *type);
 
 extern int get_double(char *in_value, double *out_value, char *type);
 
-extern int addto_qos_char_list(List char_list, List qos_list, char *names,
-                               int option);
+extern int addto_qos_char_list(List char_list, List qos_list, char *names, int option);
 
 extern int addto_action_char_list(List char_list, char *names);
 
-extern void sacctmgr_print_coord_list(
-        print_field_t *field, List value, int last);
+extern void sacctmgr_print_coord_list(print_field_t *field, List value, int last);
 
-extern void sacctmgr_print_qos_list(print_field_t *field, List qos_list,
-                                    List value, int last);
+extern void sacctmgr_print_qos_list(print_field_t *field, List qos_list, List value, int last);
 
-extern void sacctmgr_print_qos_bitstr(print_field_t *field, List qos_list,
-                                      bitstr_t *value, int last);
+extern void sacctmgr_print_qos_bitstr(print_field_t *field, List qos_list, bitstr_t *value, int last);
 
-extern void sacctmgr_print_tres(print_field_t *field, char *tres_simple_str,
-                                int last);
+extern void sacctmgr_print_tres(print_field_t *field, char *tres_simple_str, int last);
 
 extern void sacctmgr_print_assoc_limits(slurmdb_assoc_rec_t *assoc);
 
@@ -374,8 +363,7 @@ extern List sacctmgr_process_format_list(List format_list);
 extern int sacctmgr_validate_cluster_list(List cluster_list);
 
 /* you need to free the objects returned from these functions */
-extern slurmdb_assoc_rec_t *sacctmgr_find_account_base_assoc(
-        char *account, char *cluster);
+extern slurmdb_assoc_rec_t *sacctmgr_find_account_base_assoc(char *account, char *cluster);
 
 extern slurmdb_assoc_rec_t *sacctmgr_find_root_assoc(char *cluster);
 
@@ -389,41 +377,30 @@ extern slurmdb_cluster_rec_t *sacctmgr_find_cluster(char *name);
  * they are pointing to an object in the list given
  */
 
-extern slurmdb_assoc_rec_t *sacctmgr_find_assoc_from_list(
-        List assoc_list, char *user, char *account,
-        char *cluster, char *partition);
+extern slurmdb_assoc_rec_t *
+sacctmgr_find_assoc_from_list(List assoc_list, char *user, char *account, char *cluster, char *partition);
 
-extern slurmdb_assoc_rec_t *sacctmgr_find_account_base_assoc_from_list(
-        List assoc_list, char *account, char *cluster);
+extern slurmdb_assoc_rec_t *sacctmgr_find_account_base_assoc_from_list(List assoc_list, char *account, char *cluster);
 
-extern slurmdb_res_rec_t *sacctmgr_find_res_from_list(
-        List res_list, uint32_t id, char *name, char *server);
+extern slurmdb_res_rec_t *sacctmgr_find_res_from_list(List res_list, uint32_t id, char *name, char *server);
 
-extern slurmdb_qos_rec_t *sacctmgr_find_qos_from_list(
-        List qos_list, char *name);
+extern slurmdb_qos_rec_t *sacctmgr_find_qos_from_list(List qos_list, char *name);
 
-extern slurmdb_user_rec_t *sacctmgr_find_user_from_list(
-        List user_list, char *name);
+extern slurmdb_user_rec_t *sacctmgr_find_user_from_list(List user_list, char *name);
 
-extern slurmdb_account_rec_t *sacctmgr_find_account_from_list(
-        List acct_list, char *name);
+extern slurmdb_account_rec_t *sacctmgr_find_account_from_list(List acct_list, char *name);
 
-extern slurmdb_cluster_rec_t *sacctmgr_find_cluster_from_list(
-        List cluster_list, char *name);
+extern slurmdb_cluster_rec_t *sacctmgr_find_cluster_from_list(List cluster_list, char *name);
 
-extern slurmdb_wckey_rec_t *sacctmgr_find_wckey_from_list(
-        List wckey_list, char *user, char *name, char *cluster);
+extern slurmdb_wckey_rec_t *sacctmgr_find_wckey_from_list(List wckey_list, char *user, char *name, char *cluster);
 
 extern void sacctmgr_initialize_g_tres_list(void);
 
 /* file_functions.c */
-extern int print_file_add_limits_to_line(char **line,
-                                         slurmdb_assoc_rec_t *assoc);
+extern int print_file_add_limits_to_line(char **line, slurmdb_assoc_rec_t *assoc);
 
-extern int print_file_slurmdb_hierarchical_rec_list(FILE *fd,
-                                                    List slurmdb_hierarchical_rec_list,
-                                                    List user_list,
-                                                    List acct_list);
+extern int
+print_file_slurmdb_hierarchical_rec_list(FILE *fd, List slurmdb_hierarchical_rec_list, List user_list, List acct_list);
 
 extern void load_sacctmgr_cfg_file(int argc, char **argv);
 
@@ -436,7 +413,6 @@ extern int sacctmgr_list_runaway_jobs(int argc, char **argv);
 /* federation_functions.c */
 extern int verify_federations_exist(List name_list);
 
-extern int verify_fed_clusters(List cluster_list, const char *fed_name,
-                               bool *existing_fed);
+extern int verify_fed_clusters(List cluster_list, const char *fed_name, bool *existing_fed);
 
 #endif

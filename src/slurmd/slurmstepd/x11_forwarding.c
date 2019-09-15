@@ -137,8 +137,7 @@ static int _x11_socket_read(eio_obj_t *obj, List objs) {
     }
 
     if ((rc = slurm_get_return_code(resp.msg_type, resp.data))) {
-        error("Error setting up X11 forwarding from remote: %s",
-              slurm_strerror(rc));
+        error("Error setting up X11 forwarding from remote: %s", slurm_strerror(rc));
         slurm_free_msg_members(&resp);
         goto shutdown;
     }
@@ -175,8 +174,7 @@ static char *_get_home(uid_t uid) {
     struct passwd pwd, *pwd_ptr = NULL;
     char pwd_buf[PW_BUF_SIZE];
 
-    if (slurm_getpwuid_r(uid, &pwd, pwd_buf, PW_BUF_SIZE, &pwd_ptr)
-        || (pwd_ptr == NULL)) {
+    if (slurm_getpwuid_r(uid, &pwd, pwd_buf, PW_BUF_SIZE, &pwd_ptr) || (pwd_ptr == NULL)) {
         error("%s: getpwuid_r(%u):%m", __func__, uid);
         return NULL;
     }
@@ -195,8 +193,7 @@ static void _shutdown_x11(int signal) {
     if (xauthority) {
         if (local_xauthority) {
             if (unlink(xauthority))
-                error("%s: problem unlinking xauthority file %s: %m",
-                      __func__, xauthority);
+                error("%s: problem unlinking xauthority file %s: %m", __func__, xauthority);
         } else
             x11_delete_xauth(xauthority, hostname, x11_display);
 
@@ -217,8 +214,7 @@ static void _shutdown_x11(int signal) {
  * OUT: tmp_xauthority - XAUTHORITY file in use
  * OUT: SLURM_SUCCESS or SLURM_ERROR
  */
-extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
-                             char **tmp_xauthority) {
+extern int setup_x11_forward(stepd_step_rec_t *job, int *display, char **tmp_xauthority) {
     int listen_socket = -1;
     uint16_t port;
     /*
@@ -233,10 +229,7 @@ extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
      * forwarded connections.
      */
     eio_obj_t *obj;
-    static struct io_operations x11_socket_ops = {
-            .readable = _x11_socket_readable,
-            .handle_read = _x11_socket_read,
-    };
+    static struct io_operations x11_socket_ops = {.readable = _x11_socket_readable, .handle_read = _x11_socket_read,};
 
     *tmp_xauthority = NULL;
     job_id = job->jobid;
@@ -280,14 +273,12 @@ extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
         /* use a node-local XAUTHORITY file instead of ~/.Xauthority */
         int fd;
         local_xauthority = true;
-        xauthority = xstrdup_printf("%s/.Xauthority-XXXXXX",
-                                    conf->tmpfs);
+        xauthority = xstrdup_printf("%s/.Xauthority-XXXXXX", conf->tmpfs);
 
         /* protect against weak file permissions in old glibc */
         umask(0077);
         if ((fd = mkstemp(xauthority)) == -1) {
-            error("%s: failed to create temporary XAUTHORITY file: %m",
-                  __func__);
+            error("%s: failed to create temporary XAUTHORITY file: %m", __func__);
             goto shutdown;
         }
         close(fd);
@@ -307,14 +298,12 @@ extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
     }
 
     x11_display = port - X11_TCP_PORT_OFFSET;
-    if (x11_set_xauth(xauthority, job->x11_magic_cookie,
-                      hostname, x11_display)) {
+    if (x11_set_xauth(xauthority, job->x11_magic_cookie, hostname, x11_display)) {
         error("%s: failed to run xauth", __func__);
         goto shutdown;
     }
 
-    info("X11 forwarding established on DISPLAY=%s:%d.0",
-         hostname, x11_display);
+    info("X11 forwarding established on DISPLAY=%s:%d.0", hostname, x11_display);
 
     eio_handle = eio_handle_create(0);
     obj = eio_obj_create(listen_socket, &x11_socket_ops, NULL);

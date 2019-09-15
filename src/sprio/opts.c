@@ -68,8 +68,7 @@ static char *_get_prefix(char *token);
 
 static void _help(void);
 
-static void _parse_token(char *token, char *field, int *field_size,
-                         bool *right_justify, char **suffix);
+static void _parse_token(char *token, char *field, int *field_size, bool *right_justify, char **suffix);
 
 static void _print_options(void);
 
@@ -78,8 +77,7 @@ static void _usage(void);
 static void _opt_env(void) {
     char *env_val;
 
-    if (slurmctld_conf.fed_params &&
-        strstr(slurmctld_conf.fed_params, "fed_display"))
+    if (slurmctld_conf.fed_params && strstr(slurmctld_conf.fed_params, "fed_display"))
         params.federation = true;
 
     if ((env_val = getenv("SLURM_CLUSTERS"))) {
@@ -100,41 +98,37 @@ static void _opt_env(void) {
 /*
  * parse_command_line
  */
-extern void
-parse_command_line(int argc, char **argv) {
+extern void parse_command_line(int argc, char **argv) {
     int opt_char;
     int option_index;
     bool override_format_env = false;
 
-    static struct option long_options[] = {
-            {"noheader",   no_argument,       0, 'h'},
-            {"jobs",       optional_argument, 0, 'j'},
-            {"long",       no_argument,       0, 'l'},
-            {"cluster",    required_argument, 0, 'M'},
-            {"clusters",   required_argument, 0, 'M'},
-            {"norm",       no_argument,       0, 'n'},
-            {"format",     required_argument, 0, 'o'},
-            {"sort",       required_argument, 0, 'S'},
-            {"partition",  required_argument, 0, 'p'},
-            {"user",       required_argument, 0, 'u'},
-            {"users",      required_argument, 0, 'u'},
-            {"verbose",    no_argument,       0, 'v'},
-            {"version",    no_argument,       0, 'V'},
-            {"weights",    no_argument,       0, 'w'},
-            {"federation", no_argument,       0, OPT_LONG_FEDR},
-            {"help",       no_argument,       0, OPT_LONG_HELP},
-            {"local",      no_argument,       0, OPT_LONG_LOCAL},
-            {"sib",        no_argument,       0, OPT_LONG_SIBLING},
-            {"sibling",    no_argument,       0, OPT_LONG_SIBLING},
-            {"usage",      no_argument,       0, OPT_LONG_USAGE},
-            {NULL, 0,                         0, 0}
-    };
+    static struct option long_options[] = {{"noheader",   no_argument,       0, 'h'},
+                                           {"jobs",       optional_argument, 0, 'j'},
+                                           {"long",       no_argument,       0, 'l'},
+                                           {"cluster",    required_argument, 0, 'M'},
+                                           {"clusters",   required_argument, 0, 'M'},
+                                           {"norm",       no_argument,       0, 'n'},
+                                           {"format",     required_argument, 0, 'o'},
+                                           {"sort",       required_argument, 0, 'S'},
+                                           {"partition",  required_argument, 0, 'p'},
+                                           {"user",       required_argument, 0, 'u'},
+                                           {"users",      required_argument, 0, 'u'},
+                                           {"verbose",    no_argument,       0, 'v'},
+                                           {"version",    no_argument,       0, 'V'},
+                                           {"weights",    no_argument,       0, 'w'},
+                                           {"federation", no_argument,       0, OPT_LONG_FEDR},
+                                           {"help",       no_argument,       0, OPT_LONG_HELP},
+                                           {"local",      no_argument,       0, OPT_LONG_LOCAL},
+                                           {"sib",        no_argument,       0, OPT_LONG_SIBLING},
+                                           {"sibling",    no_argument,       0, OPT_LONG_SIBLING},
+                                           {"usage",      no_argument,       0, OPT_LONG_USAGE},
+                                           {NULL, 0,                         0, 0}};
 
     /* get defaults from environment */
     _opt_env();
 
-    while ((opt_char = getopt_long(argc, argv, "hj::lM:no:S:p:u:vVw",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "hj::lM:no:S:p:u:vVw", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) '?':
                 fprintf(stderr, "Try \"sprio --help\" "
@@ -156,8 +150,7 @@ parse_command_line(int argc, char **argv) {
                 break;
             case (int) 'M':
                 FREE_NULL_LIST(params.clusters);
-                if (!(params.clusters =
-                              slurmdb_get_info_cluster(optarg))) {
+                if (!(params.clusters = slurmdb_get_info_cluster(optarg))) {
                     print_db_notok(optarg, 0);
                     exit(1);
                 }
@@ -274,116 +267,53 @@ extern int parse_format(char *format) {
     if (token && (format[0] != '%'))    /* toss header */
         token = strtok_r(NULL, "%", &tmp_char);
     while (token) {
-        _parse_token(token, field, &field_size, &right_justify,
-                     &suffix);
+        _parse_token(token, field, &field_size, &right_justify, &suffix);
         if (field[0] == 'a')
-            job_format_add_age_priority_normalized(params.format_list,
-                                                   field_size,
-                                                   right_justify,
-                                                   suffix);
+            job_format_add_age_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'A')
-            job_format_add_age_priority_weighted(params.format_list,
-                                                 field_size,
-                                                 right_justify,
-                                                 suffix);
+            job_format_add_age_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'b')
-            job_format_add_assoc_priority_normalized(
-                    params.format_list,
-                    field_size,
-                    right_justify, suffix);
+            job_format_add_assoc_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'B')
-            job_format_add_assoc_priority_weighted(
-                    params.format_list,
-                    field_size,
-                    right_justify, suffix);
+            job_format_add_assoc_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'c')
-            job_format_add_cluster_name(params.format_list,
-                                        field_size, right_justify,
-                                        suffix);
+            job_format_add_cluster_name(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'f')
-            job_format_add_fs_priority_normalized(params.format_list,
-                                                  field_size,
-                                                  right_justify,
-                                                  suffix);
+            job_format_add_fs_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'F')
-            job_format_add_fs_priority_weighted(params.format_list,
-                                                field_size,
-                                                right_justify,
-                                                suffix);
+            job_format_add_fs_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'i')
-            job_format_add_job_id(params.format_list,
-                                  field_size,
-                                  right_justify,
-                                  suffix);
+            job_format_add_job_id(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'j')
-            job_format_add_js_priority_normalized(params.format_list,
-                                                  field_size,
-                                                  right_justify,
-                                                  suffix);
+            job_format_add_js_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'J')
-            job_format_add_js_priority_weighted(params.format_list,
-                                                field_size,
-                                                right_justify,
-                                                suffix);
+            job_format_add_js_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'N')
-            job_format_add_job_nice(params.format_list,
-                                    field_size,
-                                    right_justify,
-                                    suffix);
+            job_format_add_job_nice(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'p')
-            job_format_add_part_priority_normalized(params.format_list,
-                                                    field_size,
-                                                    right_justify,
-                                                    suffix);
+            job_format_add_part_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'P')
-            job_format_add_part_priority_weighted(params.format_list,
-                                                  field_size,
-                                                  right_justify,
-                                                  suffix);
+            job_format_add_part_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'r')
-            job_format_add_partition(params.format_list,
-                                     field_size, right_justify,
-                                     suffix);
+            job_format_add_partition(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'S')
-            job_format_add_site_priority(params.format_list,
-                                         field_size,
-                                         right_justify, suffix);
+            job_format_add_site_priority(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'q')
-            job_format_add_qos_priority_normalized(params.format_list,
-                                                   field_size,
-                                                   right_justify,
-                                                   suffix);
+            job_format_add_qos_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'Q')
-            job_format_add_qos_priority_weighted(params.format_list,
-                                                 field_size,
-                                                 right_justify,
-                                                 suffix);
+            job_format_add_qos_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'u')
-            job_format_add_user_name(params.format_list,
-                                     field_size,
-                                     right_justify,
-                                     suffix);
+            job_format_add_user_name(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'y')
-            job_format_add_job_priority_normalized(params.format_list,
-                                                   field_size,
-                                                   right_justify,
-                                                   suffix);
+            job_format_add_job_priority_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'Y')
-            job_format_add_job_priority_weighted(params.format_list,
-                                                 field_size,
-                                                 right_justify,
-                                                 suffix);
+            job_format_add_job_priority_weighted(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 't')
-            job_format_add_tres_normalized(params.format_list,
-                                           field_size, right_justify,
-                                           suffix);
+            job_format_add_tres_normalized(params.format_list, field_size, right_justify, suffix);
         else if (field[0] == 'T')
-            job_format_add_tres_weighted(params.format_list,
-                                         field_size, right_justify,
-                                         suffix);
+            job_format_add_tres_weighted(params.format_list, field_size, right_justify, suffix);
         else
-            error("Invalid job format specification: %c",
-                  field[0]);
+            error("Invalid job format specification: %c", field[0]);
 
         token = strtok_r(NULL, "%", &tmp_char);
     }
@@ -396,8 +326,7 @@ extern int parse_format(char *format) {
  * IN/OUT token - input specification, everything before "%" is removed
  * RET - everything before "%" in the token
  */
-static char *
-_get_prefix(char *token) {
+static char *_get_prefix(char *token) {
     char *pos, *prefix;
 
     if (token == NULL)
@@ -423,9 +352,7 @@ _get_prefix(char *token) {
  * OUT right_justify - true of field to be right justified
  * OUT suffix - string containing everthing after the field specification
  */
-static void
-_parse_token(char *token, char *field, int *field_size, bool *right_justify,
-             char **suffix) {
+static void _parse_token(char *token, char *field, int *field_size, bool *right_justify, char **suffix) {
     int i = 0;
 
     assert(token != NULL);
@@ -446,8 +373,7 @@ _parse_token(char *token, char *field, int *field_size, bool *right_justify,
 }
 
 /* print the parameters specified */
-static void
-_print_options(void) {
+static void _print_options(void) {
     ListIterator iterator;
     int i;
     uint32_t *job_id;
@@ -488,8 +414,7 @@ _print_options(void) {
  * IN str - comma separated list of job_ids
  * RET List of job_ids (uint32_t)
  */
-static List
-_build_job_list(char *str) {
+static List _build_job_list(char *str) {
     List my_list;
     char *job = NULL, *tmp_char = NULL, *my_job_list = NULL;
     int i;
@@ -521,8 +446,7 @@ _build_job_list(char *str) {
  * IN str - comma separated list of user names
  * RET List of UIDs (uint32_t)
  */
-static List
-_build_user_list(char *str) {
+static List _build_user_list(char *str) {
     List my_list;
     char *user = NULL;
     char *tmp_char = NULL, *my_user_list = NULL;

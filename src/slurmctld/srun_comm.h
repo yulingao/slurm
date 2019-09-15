@@ -92,8 +92,7 @@ extern void srun_step_complete(struct step_record *step_ptr);
  * IN step_ptr  - pointer to the slurmctld job step record
  * IN node_list - name of nodes we did not find the step on
  */
-extern void srun_step_missing(struct step_record *step_ptr,
-                              char *node_list);
+extern void srun_step_missing(struct step_record *step_ptr, char *node_list);
 
 /*
  * srun_step_signal - notify srun that a job step should be signaled

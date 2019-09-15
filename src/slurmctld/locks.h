@@ -95,9 +95,7 @@
 
 /* levels of locking required for each data structure */
 typedef enum {
-    NO_LOCK,
-    READ_LOCK,
-    WRITE_LOCK
+    NO_LOCK, READ_LOCK, WRITE_LOCK
 } lock_level_t;
 
 /* slurmctld specific data structures to lock via APIs */
@@ -110,12 +108,7 @@ typedef struct {
 } slurmctld_lock_t;
 
 typedef enum {
-    CONF_LOCK,
-    JOB_LOCK,
-    NODE_LOCK,
-    PART_LOCK,
-    FED_LOCK,
-    ENTITY_COUNT
+    CONF_LOCK, JOB_LOCK, NODE_LOCK, PART_LOCK, FED_LOCK, ENTITY_COUNT
 } lock_datatype_t;
 
 #ifndef NDEBUG

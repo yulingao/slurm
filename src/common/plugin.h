@@ -108,10 +108,7 @@ const char *plugin_strerror(plugin_err_t err);
  *
  * Returns a Slurm errno.
  */
-int plugin_peek(const char *fq_path,
-                char *plugin_type,
-                const size_t type_len,
-                uint32_t *plugin_version);
+int plugin_peek(const char *fq_path, char *plugin_type, const size_t type_len, uint32_t *plugin_version);
 
 
 /*
@@ -145,8 +142,7 @@ plugin_err_t plugin_load_from_file(plugin_handle_t *pph, const char *fq_path);
  * The plugin's initialization code will be executed prior
  * to this function's return.
  */
-plugin_handle_t plugin_load_and_link(const char *type_name, int n_syms,
-                                     const char *names[], void *ptrs[]);
+plugin_handle_t plugin_load_and_link(const char *type_name, int n_syms, const char *names[], void *ptrs[]);
 
 /*
  * Unload a plugin from memory.
@@ -182,10 +178,7 @@ uint32_t plugin_get_version(plugin_handle_t plug);
  * Returns the number of symbols successfully resolved.  Pointers whose
  * associated symbol name was not found will be set to NULL.
  */
-int plugin_get_syms(plugin_handle_t plug,
-                    int n_syms,
-                    const char *names[],
-                    void *ptrs[]);
+int plugin_get_syms(plugin_handle_t plug, int n_syms, const char *names[], void *ptrs[]);
 
 
 /*
@@ -203,9 +196,9 @@ int plugin_get_syms(plugin_handle_t plug,
  *
  * Free memory with plugin_context_destroy
  */
-extern plugin_context_t *plugin_context_create(
-        const char *plugin_type, const char *uler_type,
-        void *ptrs[], const char *names[], size_t names_size);
+extern plugin_context_t *
+plugin_context_create(const char *plugin_type, const char *uler_type, void *ptrs[], const char *names[],
+                      size_t names_size);
 
 /*
  * Destroy a context created from plugin_context_create.

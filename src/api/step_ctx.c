@@ -66,9 +66,7 @@
 #include "src/common/xstring.h"
 #include "src/api/step_ctx.h"
 
-int step_signals[] = {
-        SIGINT, SIGQUIT, SIGCONT, SIGTERM, SIGHUP,
-        SIGALRM, SIGUSR1, SIGUSR2, SIGPIPE, 0};
+int step_signals[] = {SIGINT, SIGQUIT, SIGCONT, SIGTERM, SIGHUP, SIGALRM, SIGUSR1, SIGUSR2, SIGPIPE, 0};
 static int destroy_step = 0;
 
 static void _signal_while_allocating(int signo) {
@@ -79,8 +77,7 @@ static void _signal_while_allocating(int signo) {
     destroy_step = signo;
 }
 
-static void
-_job_fake_cred(struct slurm_step_ctx_struct *ctx) {
+static void _job_fake_cred(struct slurm_step_ctx_struct *ctx) {
     slurm_cred_arg_t arg;
     uint32_t node_cnt = ctx->step_resp->step_layout->node_cnt;
 
@@ -113,10 +110,8 @@ _job_fake_cred(struct slurm_step_ctx_struct *ctx) {
     ctx->step_resp->cred = slurm_cred_faker(&arg);
 }
 
-static job_step_create_request_msg_t *_create_step_request(
-        const slurm_step_ctx_params_t *step_params) {
-    job_step_create_request_msg_t *step_req =
-            xmalloc(sizeof(job_step_create_request_msg_t));
+static job_step_create_request_msg_t *_create_step_request(const slurm_step_ctx_params_t *step_params) {
+    job_step_create_request_msg_t *step_req = xmalloc(sizeof(job_step_create_request_msg_t));
     step_req->ckpt_dir = xstrdup(step_params->ckpt_dir);
     step_req->ckpt_interval = step_params->ckpt_interval;
     step_req->cpu_count = step_params->cpu_count;
@@ -162,8 +157,7 @@ static job_step_create_request_msg_t *_create_step_request(
  * RET the step context or NULL on failure with slurm errno set
  * NOTE: Free allocated memory using slurm_step_ctx_destroy.
  */
-extern slurm_step_ctx_t *
-slurm_step_ctx_create(const slurm_step_ctx_params_t *step_params) {
+extern slurm_step_ctx_t *slurm_step_ctx_create(const slurm_step_ctx_params_t *step_params) {
     struct slurm_step_ctx_struct *ctx = NULL;
     job_step_create_request_msg_t *step_req = NULL;
     job_step_create_response_msg_t *step_resp = NULL;
@@ -188,8 +182,7 @@ slurm_step_ctx_create(const slurm_step_ctx_params_t *step_params) {
     step_req->port = port;
     step_req->host = xshort_hostname();
 
-    if ((slurm_job_step_create(step_req, &step_resp) < 0) ||
-        (step_resp == NULL)) {
+    if ((slurm_job_step_create(step_req, &step_resp) < 0) || (step_resp == NULL)) {
         errnum = errno;
         slurm_free_job_step_create_request_msg(step_req);
         close(sock);
@@ -217,13 +210,8 @@ slurm_step_ctx_create(const slurm_step_ctx_params_t *step_params) {
  * (i.e. the errno set by slurm_step_ctx_create_timeout() is recoverable).
  */
 extern bool slurm_step_retry_errno(int rc) {
-    if ((rc == EAGAIN) ||
-        (rc == ESLURM_DISABLED) ||
-        (rc == ESLURM_INTERCONNECT_BUSY) ||
-        (rc == ESLURM_NODES_BUSY) ||
-        (rc == ESLURM_PORTS_BUSY) ||
-        (rc == ESLURM_POWER_NOT_AVAIL) ||
-        (rc == ESLURM_POWER_RESERVED) ||
+    if ((rc == EAGAIN) || (rc == ESLURM_DISABLED) || (rc == ESLURM_INTERCONNECT_BUSY) || (rc == ESLURM_NODES_BUSY) ||
+        (rc == ESLURM_PORTS_BUSY) || (rc == ESLURM_POWER_NOT_AVAIL) || (rc == ESLURM_POWER_RESERVED) ||
         (rc == SLURM_PROTOCOL_SOCKET_IMPL_TIMEOUT))
         return true;
     return false;
@@ -236,9 +224,7 @@ extern bool slurm_step_retry_errno(int rc) {
  * RET the step context or NULL on failure with slurm errno set
  * NOTE: Free allocated memory using slurm_step_ctx_destroy.
  */
-extern slurm_step_ctx_t *
-slurm_step_ctx_create_timeout(const slurm_step_ctx_params_t *step_params,
-                              int timeout) {
+extern slurm_step_ctx_t *slurm_step_ctx_create_timeout(const slurm_step_ctx_params_t *step_params, int timeout) {
     struct slurm_step_ctx_struct *ctx = NULL;
     job_step_create_request_msg_t *step_req = NULL;
     job_step_create_response_msg_t *step_resp = NULL;
@@ -294,8 +280,7 @@ slurm_step_ctx_create_timeout(const slurm_step_ctx_params_t *step_params,
         }
         xsignal_block(step_signals);
         if (destroy_step) {
-            info("Cancelled pending job step with signal %d",
-                 destroy_step);
+            info("Cancelled pending job step with signal %d", destroy_step);
             errnum = ESLURM_ALREADY_DONE;
         }
         slurm_free_job_step_create_request_msg(step_req);
@@ -328,9 +313,7 @@ slurm_step_ctx_create_timeout(const slurm_step_ctx_params_t *step_params,
  * RET the step context or NULL on failure with slurm errno set
  * NOTE: Free allocated memory using slurm_step_ctx_destroy.
  */
-extern slurm_step_ctx_t *
-slurm_step_ctx_create_no_alloc(const slurm_step_ctx_params_t *step_params,
-                               uint32_t step_id) {
+extern slurm_step_ctx_t *slurm_step_ctx_create_no_alloc(const slurm_step_ctx_params_t *step_params, uint32_t step_id) {
     struct slurm_step_ctx_struct *ctx = NULL;
     job_step_create_request_msg_t *step_req = NULL;
     job_step_create_response_msg_t *step_resp = NULL;
@@ -355,22 +338,14 @@ slurm_step_ctx_create_no_alloc(const slurm_step_ctx_params_t *step_params,
     step_req->host = xshort_hostname();
 
     /* Then make up a reponse with only certain things filled in */
-    step_resp = (job_step_create_response_msg_t *)
-            xmalloc(sizeof(job_step_create_response_msg_t));
+    step_resp = (job_step_create_response_msg_t *) xmalloc(sizeof(job_step_create_response_msg_t));
 
-    step_resp->step_layout = fake_slurm_step_layout_create(
-            step_req->node_list,
-            NULL, NULL,
-            step_req->min_nodes,
-            step_req->num_tasks);
+    step_resp->step_layout = fake_slurm_step_layout_create(step_req->node_list, NULL, NULL, step_req->min_nodes,
+                                                           step_req->num_tasks);
 
-    if (switch_g_alloc_jobinfo(&step_resp->switch_job,
-                               step_req->job_id,
-                               step_resp->job_step_id) < 0)
+    if (switch_g_alloc_jobinfo(&step_resp->switch_job, step_req->job_id, step_resp->job_step_id) < 0)
         fatal("switch_g_alloc_jobinfo: %m");
-    if (switch_g_build_jobinfo(step_resp->switch_job,
-                               step_resp->step_layout,
-                               step_req->network) < 0)
+    if (switch_g_build_jobinfo(step_resp->switch_job, step_resp->step_layout, step_req->network) < 0)
         fatal("switch_g_build_jobinfo: %m");
 
 
@@ -400,8 +375,7 @@ slurm_step_ctx_create_no_alloc(const slurm_step_ctx_params_t *step_params,
  * IN ctx - job step context generated by slurm_step_ctx_create
  * RET SLURM_SUCCESS or SLURM_ERROR (with slurm_errno set)
  */
-extern int
-slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
+extern int slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
     va_list ap;
     int rc = SLURM_SUCCESS;
     uint32_t node_inx;
@@ -444,8 +418,7 @@ slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
                 break;
             }
             uint32_array_pptr = (uint32_t **) va_arg(ap, void *);
-            *uint32_array_pptr =
-                    ctx->step_resp->step_layout->tids[node_inx];
+            *uint32_array_pptr = ctx->step_resp->step_layout->tids[node_inx];
             break;
         case SLURM_STEP_CTX_TIDS:
             uint32_array_ppptr = (uint32_t ***) va_arg(ap, void *);
@@ -453,8 +426,7 @@ slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
             break;
 
         case SLURM_STEP_CTX_RESP:
-            step_resp_pptr = (job_step_create_response_msg_t * *)
-                    va_arg(ap, void *);
+            step_resp_pptr = (job_step_create_response_msg_t * *)va_arg(ap, void *);
             *step_resp_pptr = ctx->step_resp;
             break;
         case SLURM_STEP_CTX_CRED:
@@ -477,21 +449,18 @@ slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
                 break;
             }
             char_array_pptr = (char **) va_arg(ap, void *);
-            *char_array_pptr = nodelist_nth_host(
-                    ctx->step_resp->step_layout->node_list, node_inx);
+            *char_array_pptr = nodelist_nth_host(ctx->step_resp->step_layout->node_list, node_inx);
             break;
         case SLURM_STEP_CTX_NODE_LIST:
             char_array_pptr = (char **) va_arg(ap, void *);
-            *char_array_pptr =
-                    xstrdup(ctx->step_resp->step_layout->node_list);
+            *char_array_pptr = xstrdup(ctx->step_resp->step_layout->node_list);
             break;
         case SLURM_STEP_CTX_USER_MANAGED_SOCKETS:
             int_ptr = va_arg(ap, int *);
             int_array_pptr = va_arg(ap, int **);
 
-            if (ctx->launch_state == NULL
-                || ctx->launch_state->user_managed_io == false
-                || ctx->launch_state->io.user == NULL) {
+            if (ctx->launch_state == NULL || ctx->launch_state->user_managed_io == false ||
+                ctx->launch_state->io.user == NULL) {
                 *int_ptr = 0;
                 *int_array_pptr = (int *) NULL;
                 rc = SLURM_ERROR;
@@ -520,8 +489,7 @@ slurm_step_ctx_get(slurm_step_ctx_t *ctx, int ctx_key, ...) {
  * OUT data - the requested data type
  * RET SLURM_SUCCESS or SLURM_ERROR (with slurm_errno set)
  */
-extern int
-slurm_jobinfo_ctx_get(dynamic_plugin_data_t *jobinfo, int data_type, void *data) {
+extern int slurm_jobinfo_ctx_get(dynamic_plugin_data_t *jobinfo, int data_type, void *data) {
     if (jobinfo == NULL) {
         slurm_seterrno(EINVAL);
         return SLURM_ERROR;
@@ -536,8 +504,7 @@ slurm_jobinfo_ctx_get(dynamic_plugin_data_t *jobinfo, int data_type, void *data)
  * IN ctx - job step context generated by slurm_step_ctx_create
  * RET SLURM_SUCCESS or SLURM_ERROR (with slurm_errno set)
  */
-extern int
-slurm_step_ctx_destroy(slurm_step_ctx_t *ctx) {
+extern int slurm_step_ctx_destroy(slurm_step_ctx_t *ctx) {
     if ((ctx == NULL) || (ctx->magic != STEP_CTX_MAGIC)) {
         slurm_seterrno(EINVAL);
         return SLURM_ERROR;
@@ -564,10 +531,8 @@ slurm_step_ctx_destroy(slurm_step_ctx_t *ctx) {
  * IN/OUT curr_task_num - task_id of newest task, initialze to zero
  * RET SLURM_SUCCESS or SLURM_ERROR (with slurm_errno set)
  */
-extern int
-slurm_step_ctx_daemon_per_node_hack(
-        slurm_step_ctx_t *ctx, char *node_list, uint32_t node_cnt,
-        uint32_t *curr_task_num) {
+extern int slurm_step_ctx_daemon_per_node_hack(slurm_step_ctx_t *ctx, char *node_list, uint32_t node_cnt,
+                                               uint32_t *curr_task_num) {
     slurm_step_layout_t *layout;
     int i, orig_task_num = *curr_task_num;
     int sock = -1;
@@ -581,8 +546,7 @@ slurm_step_ctx_daemon_per_node_hack(
         /* hack the context step layout */
         sock = ctx->launch_state->slurmctld_socket_fd;
         slurm_step_layout_destroy(ctx->step_resp->step_layout);
-        ctx->step_resp->step_layout =
-                xmalloc(sizeof(slurm_step_layout_t));
+        ctx->step_resp->step_layout = xmalloc(sizeof(slurm_step_layout_t));
         layout = ctx->step_resp->step_layout;
 
         layout->tasks = xmalloc(sizeof(uint16_t) * node_cnt);
@@ -593,8 +557,7 @@ slurm_step_ctx_daemon_per_node_hack(
         xrealloc(layout->tids, sizeof(uint32_t *) * node_cnt);
     }
 
-    ctx->step_req->num_tasks = layout->task_cnt = layout->node_cnt
-            = node_cnt;
+    ctx->step_req->num_tasks = layout->task_cnt = layout->node_cnt = node_cnt;
 
     xfree(layout->node_list);
     layout->node_list = xstrdup(node_list);

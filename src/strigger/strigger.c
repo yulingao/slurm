@@ -236,160 +236,118 @@ static int _get_trigger(void) {
     for (i = 0; i < trig_msg->record_count; i++) {
         /* perform filtering */
         if (params.burst_buffer) {
-            if (trig_msg->trigger_array[i].trig_type
-                != TRIGGER_TYPE_BURST_BUFFER)
+            if (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_BURST_BUFFER)
                 continue;
         }
         if (params.job_fini) {
-            if (trig_msg->trigger_array[i].trig_type
-                != TRIGGER_TYPE_FINI)
+            if (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_FINI)
                 continue;
         }
         if (params.job_id) {
             long jid;
-            if (trig_msg->trigger_array[i].res_type
-                != TRIGGER_RES_TYPE_JOB)
+            if (trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_JOB)
                 continue;
             jid = atol(trig_msg->trigger_array[i].res_id);
             if (jid != params.job_id)
                 continue;
         }
         if (params.node_down) {
-            if (((trig_msg->trigger_array[i].res_type
-                  != TRIGGER_RES_TYPE_NODE) &&
-                 (trig_msg->trigger_array[i].res_type
-                  != TRIGGER_RES_TYPE_FRONT_END)) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_DOWN))
+            if (((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE) &&
+                 (trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_FRONT_END)) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_DOWN))
                 continue;
         }
         if (params.node_drained) {
-            if ((trig_msg->trigger_array[i].res_type
-                 != TRIGGER_RES_TYPE_NODE) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_DRAINED))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_DRAINED))
                 continue;
         }
         if (params.node_fail) {
-            if ((trig_msg->trigger_array[i].res_type
-                 != TRIGGER_RES_TYPE_NODE) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_FAIL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_FAIL))
                 continue;
         }
         if (params.node_id) {
-            if (trig_msg->trigger_array[i].res_type
-                != TRIGGER_RES_TYPE_NODE)
+            if (trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE)
                 continue;
         }
         if (params.node_idle) {
-            if ((trig_msg->trigger_array[i].res_type
-                 != TRIGGER_RES_TYPE_NODE) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_IDLE))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_IDLE))
                 continue;
         }
         if (params.node_up) {
-            if (((trig_msg->trigger_array[i].res_type
-                  != TRIGGER_RES_TYPE_NODE) &&
-                 (trig_msg->trigger_array[i].res_type
-                  != TRIGGER_RES_TYPE_FRONT_END)) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_UP))
+            if (((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_NODE) &&
+                 (trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_FRONT_END)) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_UP))
                 continue;
         }
         if (params.time_limit) {
-            if ((trig_msg->trigger_array[i].res_type
-                 != TRIGGER_RES_TYPE_JOB) ||
-                (trig_msg->trigger_array[i].trig_type
-                 != TRIGGER_TYPE_TIME))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_JOB) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_TIME))
                 continue;
         }
         if (params.trigger_id) {
-            if (params.trigger_id !=
-                trig_msg->trigger_array[i].trig_id)
+            if (params.trigger_id != trig_msg->trigger_array[i].trig_id)
                 continue;
         }
         if (params.user_id != NO_VAL) {
-            if (params.user_id !=
-                trig_msg->trigger_array[i].user_id)
+            if (params.user_id != trig_msg->trigger_array[i].user_id)
                 continue;
         }
         if (params.pri_ctld_fail) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_CTLD_FAIL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_CTLD_FAIL))
                 continue;
         }
         if (params.pri_ctld_res_op) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_CTLD_RES_OP))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_CTLD_RES_OP))
                 continue;
         }
         if (params.pri_ctld_res_ctrl) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_CTLD_RES_CTRL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_CTLD_RES_CTRL))
                 continue;
         }
         if (params.pri_ctld_acct_buffer_full) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_CTLD_ACCT_FULL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_CTLD_ACCT_FULL))
                 continue;
         }
         if (params.bu_ctld_fail) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_BU_CTLD_FAIL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_BU_CTLD_FAIL))
                 continue;
         }
         if (params.bu_ctld_res_op) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_BU_CTLD_RES_OP))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_BU_CTLD_RES_OP))
                 continue;
         }
         if (params.bu_ctld_as_ctrl) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMCTLD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_BU_CTLD_AS_CTRL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMCTLD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_BU_CTLD_AS_CTRL))
                 continue;
         }
         if (params.pri_dbd_fail) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMDBD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_DBD_FAIL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMDBD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_DBD_FAIL))
                 continue;
         }
         if (params.pri_dbd_res_op) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_SLURMDBD) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_DBD_RES_OP))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_SLURMDBD) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_DBD_RES_OP))
                 continue;
         }
         if (params.pri_db_fail) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_DATABASE) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_DB_FAIL))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_DATABASE) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_DB_FAIL))
                 continue;
         }
         if (params.pri_db_res_op) {
-            if ((trig_msg->trigger_array[i].res_type !=
-                 TRIGGER_RES_TYPE_DATABASE) ||
-                (trig_msg->trigger_array[i].trig_type !=
-                 TRIGGER_TYPE_PRI_DB_RES_OP))
+            if ((trig_msg->trigger_array[i].res_type != TRIGGER_RES_TYPE_DATABASE) ||
+                (trig_msg->trigger_array[i].trig_type != TRIGGER_TYPE_PRI_DB_RES_OP))
                 continue;
         }
 
@@ -405,14 +363,10 @@ static int _get_trigger(void) {
         }
         line_no++;
 
-        printf("%7u %-9s %7s %-35s %6d %-8s %-5s %s\n",
-               trig_msg->trigger_array[i].trig_id,
-               trigger_res_type(trig_msg->trigger_array[i].res_type),
-               trig_msg->trigger_array[i].res_id,
-               trigger_type(trig_msg->trigger_array[i].trig_type),
-               _trig_offset(trig_msg->trigger_array[i].offset),
-               _trig_user(trig_msg->trigger_array[i].user_id),
-               _trig_flags(trig_msg->trigger_array[i].flags),
+        printf("%7u %-9s %7s %-35s %6d %-8s %-5s %s\n", trig_msg->trigger_array[i].trig_id,
+               trigger_res_type(trig_msg->trigger_array[i].res_type), trig_msg->trigger_array[i].res_id,
+               trigger_type(trig_msg->trigger_array[i].trig_type), _trig_offset(trig_msg->trigger_array[i].offset),
+               _trig_user(trig_msg->trigger_array[i].user_id), _trig_flags(trig_msg->trigger_array[i].flags),
                trig_msg->trigger_array[i].program);
     }
 

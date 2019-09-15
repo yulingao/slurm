@@ -55,8 +55,7 @@
 /* Retry getpwuid_r while return code is EINTR so we always get the
  * info.  Return return code of getpwuid_r.
  */
-extern int slurm_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
-                            size_t bufsiz, struct passwd **result);
+extern int slurm_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t bufsiz, struct passwd **result);
 
 /*
  * Return validated uid_t for string in ``name'' which contains

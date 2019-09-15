@@ -41,74 +41,66 @@
 /*
  * All spank plugins must define this macro for the Slurm plugin loader.
  */
-SPANK_PLUGIN(direct-io, 1)
+SPANK_PLUGIN(direct
+-io, 1)
 
-#define CACHE_IO	0x1
-#define DIRECT_IO	0x2
+#define CACHE_IO    0x1
+#define DIRECT_IO    0x2
 
 static int io_style = 0;
 
-static int _opt_process (int val, const char *optarg, int remote);
+static int _opt_process(int val, const char *optarg, int remote);
 
 /*
  *  Provide a --cache-io/--direct-io option for srun:
  */
-struct spank_option spank_option_array[] =
-{
-	{ "cache-io",     NULL, "Cache I/O", 
-		0, CACHE_IO, (spank_opt_cb_f) _opt_process },
-	{ "direct-io",    NULL, "Write I/O directly to disk, without caching", 
-		0, DIRECT_IO,  (spank_opt_cb_f) _opt_process },
-	SPANK_OPTIONS_TABLE_END
-};
+struct spank_option spank_option_array[] = {{"cache-io", NULL, "Cache I/O", 0, CACHE_IO, (spank_opt_cb_f) _opt_process},
+                                            {"direct-io", NULL, "Write I/O directly to disk, without caching", 0,
+                                             DIRECT_IO, (spank_opt_cb_f) _opt_process}, SPANK_OPTIONS_TABLE_END};
 
-int slurm_spank_init(spank_t sp, int ac, char **av)
-{
-	int i, j, rc = ESPANK_SUCCESS;
+int slurm_spank_init(spank_t sp, int ac, char **av) {
+    int i, j, rc = ESPANK_SUCCESS;
 
-	for (i=0; spank_option_array[i].name; i++) {
-		j = spank_option_register(sp, &spank_option_array[i]);
-		if (j != ESPANK_SUCCESS) {
-			slurm_error("Could not register Spank option %s",
-				    spank_option_array[i].name);
-			rc = j;
-		}
-	}
+    for (i = 0; spank_option_array[i].name; i++) {
+        j = spank_option_register(sp, &spank_option_array[i]);
+        if (j != ESPANK_SUCCESS) {
+            slurm_error("Could not register Spank option %s", spank_option_array[i].name);
+            rc = j;
+        }
+    }
 
-	return rc;
+    return rc;
 }
 
 /*
  *  Called from both srun and slurmd.
  */
-int slurm_spank_init_post_opt (spank_t sp, int ac, char **av)
-{
-	int rc = ESPANK_SUCCESS;
+int slurm_spank_init_post_opt(spank_t sp, int ac, char **av) {
+    int rc = ESPANK_SUCCESS;
 
-	if (spank_remote (sp))
-		return (0);
+    if (spank_remote(sp))
+        return (0);
 
-	if (io_style == CACHE_IO) {
-		slurm_debug("cache_io option");
-		rc = spank_set_job_env("O_DIRECT", "0", 1);
-	} else if (io_style == DIRECT_IO) {
-		slurm_debug("direct_io option");
-		rc = spank_set_job_env("O_DIRECT", "1", 1);
-	} else if (getenv("SLURM_CACHE_IO")) {
-		slurm_debug("cache_io env var");
-		rc = spank_set_job_env("O_DIRECT", "0", 1);
-	} else if (getenv("SLURM_DIRECT_IO")) {
-		slurm_debug("direct_io env var");
-		rc = spank_set_job_env("O_DIRECT", "1", 1);
-	}
-	if (rc != ESPANK_SUCCESS)
-		slurm_error("spank_setjob_env: %s", spank_strerror(rc));
+    if (io_style == CACHE_IO) {
+        slurm_debug("cache_io option");
+        rc = spank_set_job_env("O_DIRECT", "0", 1);
+    } else if (io_style == DIRECT_IO) {
+        slurm_debug("direct_io option");
+        rc = spank_set_job_env("O_DIRECT", "1", 1);
+    } else if (getenv("SLURM_CACHE_IO")) {
+        slurm_debug("cache_io env var");
+        rc = spank_set_job_env("O_DIRECT", "0", 1);
+    } else if (getenv("SLURM_DIRECT_IO")) {
+        slurm_debug("direct_io env var");
+        rc = spank_set_job_env("O_DIRECT", "1", 1);
+    }
+    if (rc != ESPANK_SUCCESS)
+        slurm_error("spank_setjob_env: %s", spank_strerror(rc));
 
-	return (0);
+    return (0);
 }
 
-static int _opt_process (int val, const char *optarg, int remote)
-{
-	io_style = val;
-	return (0);
+static int _opt_process(int val, const char *optarg, int remote) {
+    io_style = val;
+    return (0);
 }

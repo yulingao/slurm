@@ -62,8 +62,7 @@ List task_memory_cg_list = NULL;
 
 static uint32_t max_task_id;
 
-extern int
-jobacct_gather_cgroup_memory_init(void) {
+extern int jobacct_gather_cgroup_memory_init(void) {
     /* initialize user/job/jobstep cgroup relative paths */
     user_cgroup_path[0] = '\0';
     job_cgroup_path[0] = '\0';
@@ -71,8 +70,7 @@ jobacct_gather_cgroup_memory_init(void) {
     task_cgroup_path[0] = '\0';
 
     /* initialize memory cgroup namespace */
-    if (xcgroup_ns_create(&memory_ns, "", "memory")
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_ns_create(&memory_ns, "", "memory") != XCGROUP_SUCCESS) {
         error("jobacct_gather/cgroup: unable to create memory "
               "namespace");
         return SLURM_ERROR;
@@ -84,16 +82,13 @@ jobacct_gather_cgroup_memory_init(void) {
     return SLURM_SUCCESS;
 }
 
-extern int
-jobacct_gather_cgroup_memory_fini(void) {
+extern int jobacct_gather_cgroup_memory_fini(void) {
     xcgroup_t memory_cg;
     bool lock_ok;
     int cc;
 
-    if (user_cgroup_path[0] == '\0'
-        || job_cgroup_path[0] == '\0'
-        || jobstep_cgroup_path[0] == '\0'
-        || task_cgroup_path[0] == '\0')
+    if (user_cgroup_path[0] == '\0' || job_cgroup_path[0] == '\0' || jobstep_cgroup_path[0] == '\0' ||
+        task_cgroup_path[0] == '\0')
         return SLURM_SUCCESS;
     /*
      * Move the slurmstepd back to the root memory cg and force empty
@@ -133,8 +128,7 @@ jobacct_gather_cgroup_memory_fini(void) {
         /* rmdir all tasks this running slurmstepd
          * was responsible for.
          */
-        xstrfmtcat(buf, "%s%s/task_%d",
-                   memory_ns.mnt_point, jobstep_cgroup_path, cc);
+        xstrfmtcat(buf, "%s%s/task_%d", memory_ns.mnt_point, jobstep_cgroup_path, cc);
         cgroup.path = buf;
 
         if (xcgroup_delete(&cgroup) != XCGROUP_SUCCESS) {
@@ -147,18 +141,15 @@ jobacct_gather_cgroup_memory_fini(void) {
     /* Clean the rest of the hierarchy.
      */
     if (xcgroup_delete(&step_memory_cg) != XCGROUP_SUCCESS) {
-        debug2("%s: failed to delete %s %m", __func__,
-               step_memory_cg.path);
+        debug2("%s: failed to delete %s %m", __func__, step_memory_cg.path);
     }
 
     if (xcgroup_delete(&job_memory_cg) != XCGROUP_SUCCESS) {
-        debug2("%s: failed to delete %s %m", __func__,
-               job_memory_cg.path);
+        debug2("%s: failed to delete %s %m", __func__, job_memory_cg.path);
     }
 
     if (xcgroup_delete(&user_memory_cg) != XCGROUP_SUCCESS) {
-        debug2("%s: failed to delete %s %m", __func__,
-               user_memory_cg.path);
+        debug2("%s: failed to delete %s %m", __func__, user_memory_cg.path);
     }
 
     if (lock_ok == true)
@@ -180,8 +171,7 @@ jobacct_gather_cgroup_memory_fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern int
-jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
+extern int jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
     xcgroup_t memory_cg;
     stepd_step_rec_t *job;
     uid_t uid;
@@ -210,8 +200,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
 
     xassert(task_cpuacct_cg_list);
 
-    debug("%s: jobid %u stepid %u taskid %u max_task_id %u",
-          __func__, jobid, stepid, taskid, max_task_id);
+    debug("%s: jobid %u stepid %u taskid %u max_task_id %u", __func__, jobid, stepid, taskid, max_task_id);
 
     /* create slurm root cg in this cg namespace */
     slurm_cgpath = jobacct_cgroup_create_slurm_cg(&memory_ns);
@@ -221,8 +210,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
 
     /* build user cgroup relative path if not set (should not be) */
     if (*user_cgroup_path == '\0') {
-        if (snprintf(user_cgroup_path, PATH_MAX,
-                     "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
+        if (snprintf(user_cgroup_path, PATH_MAX, "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
             error("unable to build uid %u cgroup relative "
                   "path : %m", uid);
             xfree(slurm_cgpath);
@@ -233,8 +221,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
 
     /* build job cgroup relative path if not set (may not be) */
     if (*job_cgroup_path == '\0') {
-        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u",
-                     user_cgroup_path, jobid) >= PATH_MAX) {
+        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u", user_cgroup_path, jobid) >= PATH_MAX) {
             error("jobacct_gather/cgroup: unable to build job %u "
                   "memory cg relative path : %m", jobid);
             return SLURM_ERROR;
@@ -245,27 +232,21 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
     if (*jobstep_cgroup_path == '\0') {
         int len;
         if (stepid == SLURM_BATCH_SCRIPT) {
-            len = snprintf(jobstep_cgroup_path, PATH_MAX,
-                           "%s/step_batch", job_cgroup_path);
+            len = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_batch", job_cgroup_path);
         } else if (stepid == SLURM_EXTERN_CONT) {
-            len = snprintf(jobstep_cgroup_path, PATH_MAX,
-                           "%s/step_extern", job_cgroup_path);
+            len = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_extern", job_cgroup_path);
         } else {
-            len = snprintf(jobstep_cgroup_path, PATH_MAX,
-                           "%s/step_%u",
-                           job_cgroup_path, stepid);
+            len = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_%u", job_cgroup_path, stepid);
         }
         if (len >= PATH_MAX) {
             error("jobacct_gather/cgroup: unable to build job step "
-                  "%u.%u memory cg relative path : %m",
-                  jobid, stepid);
+                  "%u.%u memory cg relative path : %m", jobid, stepid);
             return SLURM_ERROR;
         }
     }
 
     /* build task cgroup relative path */
-    if (snprintf(task_cgroup_path, PATH_MAX, "%s/task_%u",
-                 jobstep_cgroup_path, taskid) >= PATH_MAX) {
+    if (snprintf(task_cgroup_path, PATH_MAX, "%s/task_%u", jobstep_cgroup_path, taskid) >= PATH_MAX) {
         error("jobacct_gather/cgroup: unable to build task %u "
               "memory cg relative path: %m", taskid);
         return SLURM_ERROR;
@@ -284,8 +265,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
      * to avoid this scenario.
      */
 
-    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0)
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0) != XCGROUP_SUCCESS) {
         error("jobacct_gather/cgroup: unable to create root memory "
               "xcgroup");
         return SLURM_ERROR;
@@ -302,9 +282,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
      * container in order to track the memory consumption up to the
      * user.
      */
-    if (xcgroup_create(&memory_ns, &user_memory_cg,
-                       user_cgroup_path,
-                       uid, gid) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &user_memory_cg, user_cgroup_path, uid, gid) != XCGROUP_SUCCESS) {
         error("jobacct_gather/cgroup: unable to create user %u memory "
               "cgroup", uid);
         fstatus = SLURM_ERROR;
@@ -322,9 +300,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
     /*
      * Create job cgroup in the memory ns (it could already exist)
      */
-    if (xcgroup_create(&memory_ns, &job_memory_cg,
-                       job_cgroup_path,
-                       uid, gid) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &job_memory_cg, job_cgroup_path, uid, gid) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&user_memory_cg);
         error("jobacct_gather/cgroup: unable to create job %u memory "
               "cgroup", jobid);
@@ -344,9 +320,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
     /*
      * Create step cgroup in the memory ns (it could already exist)
      */
-    if (xcgroup_create(&memory_ns, &step_memory_cg,
-                       jobstep_cgroup_path,
-                       uid, gid) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &step_memory_cg, jobstep_cgroup_path, uid, gid) != XCGROUP_SUCCESS) {
         /* do not delete user/job cgroup as they can exist for other
          * steps, but release cgroup structures */
         xcgroup_destroy(&user_memory_cg);
@@ -367,9 +341,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
         goto error;
     }
 
-    if (!(task_cg_info = list_find_first(task_memory_cg_list,
-                                         find_task_cg_info,
-                                         &taskid))) {
+    if (!(task_cg_info = list_find_first(task_memory_cg_list, find_task_cg_info, &taskid))) {
         task_cg_info = xmalloc(sizeof(*task_cg_info));
         task_cg_info->taskid = taskid;
         need_to_add = true;
@@ -377,9 +349,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
     /*
      * Create task cgroup in the memory ns
      */
-    if (xcgroup_create(&memory_ns, &task_cg_info->task_cg,
-                       task_cgroup_path,
-                       uid, gid) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &task_cg_info->task_cg, task_cgroup_path, uid, gid) != XCGROUP_SUCCESS) {
         /*
          * do not delete user/job cgroup as they can exist for
          * other steps, but release cgroup structures
@@ -390,8 +360,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
         /* Don't use free_task_cg_info as the task_cg isn't there */
         xfree(task_cg_info);
 
-        error("jobacct_gather/cgroup: unable to create jobstep %u.%u task %u memory cgroup",
-              jobid, stepid, taskid);
+        error("jobacct_gather/cgroup: unable to create jobstep %u.%u task %u memory cgroup", jobid, stepid, taskid);
         fstatus = SLURM_ERROR;
         goto error;
     }
@@ -401,8 +370,8 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
         xcgroup_destroy(&job_memory_cg);
         xcgroup_destroy(&step_memory_cg);
         free_task_cg_info(task_cg_info);
-        error("jobacct_gather/cgroup: unable to instantiate jobstep %u.%u task %u memory cgroup",
-              jobid, stepid, taskid);
+        error("jobacct_gather/cgroup: unable to instantiate jobstep %u.%u task %u memory cgroup", jobid, stepid,
+              taskid);
         fstatus = SLURM_ERROR;
         goto error;
     }
@@ -412,8 +381,7 @@ jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id) {
      */
     rc = xcgroup_add_pids(&task_cg_info->task_cg, &pid, 1);
     if (rc != XCGROUP_SUCCESS) {
-        error("jobacct_gather/cgroup: unable to add slurmstepd to memory cg '%s'",
-              task_cg_info->task_cg.path);
+        error("jobacct_gather/cgroup: unable to add slurmstepd to memory cg '%s'", task_cg_info->task_cg.path);
         fstatus = SLURM_ERROR;
     } else
         fstatus = SLURM_SUCCESS;

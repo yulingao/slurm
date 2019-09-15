@@ -82,8 +82,7 @@ int main(int argc, char **argv) {
             slurm_perror("slurm_reset_statistics");
     } else {
         req.command_id = STAT_COMMAND_GET;
-        rc = slurm_get_statistics(&buf,
-                                  (stats_info_request_msg_t *) &req);
+        rc = slurm_get_statistics(&buf, (stats_info_request_msg_t *) &req);
         if (rc == SLURM_SUCCESS) {
             _sort_rpc();
             rc = _print_stats();
@@ -109,10 +108,8 @@ static int _print_stats(void) {
     }
 
     printf("*******************************************************\n");
-    printf("sdiag output at %s (%ld)\n",
-           slurm_ctime2(&buf->req_time), buf->req_time);
-    printf("Data since      %s (%ld)\n",
-           slurm_ctime2(&buf->req_time_start), buf->req_time_start);
+    printf("sdiag output at %s (%ld)\n", slurm_ctime2(&buf->req_time), buf->req_time);
+    printf("Data since      %s (%ld)\n", slurm_ctime2(&buf->req_time_start), buf->req_time_start);
     printf("*******************************************************\n");
 
     printf("Server thread count:  %d\n", buf->server_thread_count);
@@ -126,8 +123,7 @@ static int _print_stats(void) {
     printf("Jobs canceled:  %d\n", buf->jobs_canceled);
     printf("Jobs failed:    %d\n\n", buf->jobs_failed);
 
-    printf("Job states ts:  %s (%ld)\n",
-           slurm_ctime2(&buf->job_states_ts), buf->job_states_ts);
+    printf("Job states ts:  %s (%ld)\n", slurm_ctime2(&buf->job_states_ts), buf->job_states_ts);
     printf("Jobs pending:   %d\n", buf->jobs_pending);
     printf("Jobs running:   %d\n", buf->jobs_running);
 
@@ -136,15 +132,12 @@ static int _print_stats(void) {
     printf("\tMax cycle:    %u\n", buf->schedule_cycle_max);
     printf("\tTotal cycles: %u\n", buf->schedule_cycle_counter);
     if (buf->schedule_cycle_counter > 0) {
-        printf("\tMean cycle:   %u\n",
-               buf->schedule_cycle_sum / buf->schedule_cycle_counter);
-        printf("\tMean depth cycle:  %u\n",
-               buf->schedule_cycle_depth / buf->schedule_cycle_counter);
+        printf("\tMean cycle:   %u\n", buf->schedule_cycle_sum / buf->schedule_cycle_counter);
+        printf("\tMean depth cycle:  %u\n", buf->schedule_cycle_depth / buf->schedule_cycle_counter);
     }
     if ((buf->req_time - buf->req_time_start) > 60) {
         printf("\tCycles per minute: %u\n",
-               (uint32_t) (buf->schedule_cycle_counter /
-                           ((buf->req_time - buf->req_time_start) / 60)));
+               (uint32_t) (buf->schedule_cycle_counter / ((buf->req_time - buf->req_time_start) / 60)));
     }
     printf("\tLast queue length: %u\n", buf->schedule_queue_len);
 
@@ -154,53 +147,41 @@ static int _print_stats(void) {
     } else
         printf("\nBackfilling stats\n");
 
-    printf("\tTotal backfilled jobs (since last slurm start): %u\n",
-           buf->bf_backfilled_jobs);
-    printf("\tTotal backfilled jobs (since last stats cycle start): %u\n",
-           buf->bf_last_backfilled_jobs);
-    printf("\tTotal backfilled heterogeneous job components: %u\n",
-           buf->bf_backfilled_pack_jobs);
+    printf("\tTotal backfilled jobs (since last slurm start): %u\n", buf->bf_backfilled_jobs);
+    printf("\tTotal backfilled jobs (since last stats cycle start): %u\n", buf->bf_last_backfilled_jobs);
+    printf("\tTotal backfilled heterogeneous job components: %u\n", buf->bf_backfilled_pack_jobs);
     printf("\tTotal cycles: %u\n", buf->bf_cycle_counter);
-    printf("\tLast cycle when: %s (%ld)\n",
-           slurm_ctime2(&buf->bf_when_last_cycle), buf->bf_when_last_cycle);
+    printf("\tLast cycle when: %s (%ld)\n", slurm_ctime2(&buf->bf_when_last_cycle), buf->bf_when_last_cycle);
     printf("\tLast cycle: %u\n", buf->bf_cycle_last);
     printf("\tMax cycle:  %u\n", buf->bf_cycle_max);
     if (buf->bf_cycle_counter > 0) {
         printf("\tMean cycle: %"
                PRIu64
-               "\n",
-               buf->bf_cycle_sum / buf->bf_cycle_counter);
+               "\n", buf->bf_cycle_sum / buf->bf_cycle_counter);
     }
     printf("\tLast depth cycle: %u\n", buf->bf_last_depth);
     printf("\tLast depth cycle (try sched): %u\n", buf->bf_last_depth_try);
     if (buf->bf_cycle_counter > 0) {
-        printf("\tDepth Mean: %u\n",
-               buf->bf_depth_sum / buf->bf_cycle_counter);
-        printf("\tDepth Mean (try depth): %u\n",
-               buf->bf_depth_try_sum / buf->bf_cycle_counter);
+        printf("\tDepth Mean: %u\n", buf->bf_depth_sum / buf->bf_cycle_counter);
+        printf("\tDepth Mean (try depth): %u\n", buf->bf_depth_try_sum / buf->bf_cycle_counter);
     }
     printf("\tLast queue length: %u\n", buf->bf_queue_len);
     if (buf->bf_cycle_counter > 0) {
-        printf("\tQueue length mean: %u\n",
-               buf->bf_queue_len_sum / buf->bf_cycle_counter);
+        printf("\tQueue length mean: %u\n", buf->bf_queue_len_sum / buf->bf_cycle_counter);
     }
     printf("\tLast table size: %u\n", buf->bf_table_size);
     if (buf->bf_cycle_counter > 0) {
-        printf("\tMean table size: %u\n",
-               buf->bf_table_size_sum / buf->bf_cycle_counter);
+        printf("\tMean table size: %u\n", buf->bf_table_size_sum / buf->bf_cycle_counter);
     }
 
-    printf("\nLatency for 1000 calls to gettimeofday(): %d microseconds\n",
-           buf->gettimeofday_latency);
+    printf("\nLatency for 1000 calls to gettimeofday(): %d microseconds\n", buf->gettimeofday_latency);
 
     printf("\nRemote Procedure Call statistics by message type\n");
     for (i = 0; i < buf->rpc_type_size; i++) {
         printf("\t%-40s(%5u) count:%-6u "
                "ave_time:%-6u total_time:%"
                PRIu64
-               "\n",
-               rpc_num2string(buf->rpc_type_id[i]),
-               buf->rpc_type_id[i], buf->rpc_type_cnt[i],
+               "\n", rpc_num2string(buf->rpc_type_id[i]), buf->rpc_type_id[i], buf->rpc_type_cnt[i],
                rpc_type_ave_time[i], buf->rpc_type_time[i]);
     }
 
@@ -209,9 +190,7 @@ static int _print_stats(void) {
         printf("\t%-16s(%8u) count:%-6u "
                "ave_time:%-6u total_time:%"
                PRIu64
-               "\n",
-               uid_to_string_cached((uid_t) buf->rpc_user_id[i]),
-               buf->rpc_user_id[i], buf->rpc_user_cnt[i],
+               "\n", uid_to_string_cached((uid_t) buf->rpc_user_id[i]), buf->rpc_user_id[i], buf->rpc_user_cnt[i],
                rpc_user_ave_time[i], buf->rpc_user_time[i]);
     }
 
@@ -219,9 +198,7 @@ static int _print_stats(void) {
     if (buf->rpc_queue_type_count == 0)
         printf("\tNo pending RPCs\n");
     for (i = 0; i < buf->rpc_queue_type_count; i++) {
-        printf("\t%-40s(%5u) count:%-6u\n",
-               rpc_num2string(buf->rpc_queue_type_id[i]),
-               buf->rpc_queue_type_id[i],
+        printf("\t%-40s(%5u) count:%-6u\n", rpc_num2string(buf->rpc_queue_type_id[i]), buf->rpc_queue_type_id[i],
                buf->rpc_queue_count[i]);
     }
 
@@ -230,10 +207,7 @@ static int _print_stats(void) {
     }
 
     for (i = 0; i < buf->rpc_dump_count; i++) {
-        printf("\t%2u: %-36s %s\n",
-               i + 1,
-               rpc_num2string(buf->rpc_dump_types[i]),
-               buf->rpc_dump_hostlist[i]);
+        printf("\t%2u: %-36s %s\n", i + 1, rpc_num2string(buf->rpc_dump_types[i]), buf->rpc_dump_hostlist[i]);
     }
 
     return 0;
@@ -264,8 +238,7 @@ static void _sort_rpc(void) {
                 buf->rpc_type_time[j] = type_time;
             }
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->rpc_user_size; i++) {
@@ -283,8 +256,7 @@ static void _sort_rpc(void) {
                 buf->rpc_user_time[j] = user_time;
             }
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
     } else if (sort_by_time) {
@@ -303,8 +275,7 @@ static void _sort_rpc(void) {
                 buf->rpc_type_time[j] = type_time;
             }
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->rpc_user_size; i++) {
@@ -322,15 +293,13 @@ static void _sort_rpc(void) {
                 buf->rpc_user_time[j] = user_time;
             }
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
     } else if (sort_by_time2) {
         for (i = 0; i < buf->rpc_type_size; i++) {
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->rpc_type_size; i++) {
@@ -353,8 +322,7 @@ static void _sort_rpc(void) {
         }
         for (i = 0; i < buf->rpc_user_size; i++) {
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
         for (i = 0; i < buf->rpc_user_size; i++) {
@@ -391,8 +359,7 @@ static void _sort_rpc(void) {
                 buf->rpc_type_time[j] = type_time;
             }
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->rpc_user_size; i++) {
@@ -410,8 +377,7 @@ static void _sort_rpc(void) {
                 buf->rpc_user_time[j] = user_time;
             }
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
     }

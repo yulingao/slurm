@@ -41,11 +41,7 @@
 #include "pmixp_common.h"
 
 typedef enum {
-    PMIXP_MSG_NONE,
-    PMIXP_MSG_FAN_IN,
-    PMIXP_MSG_FAN_OUT,
-    PMIXP_MSG_DMDX,
-    PMIXP_MSG_INIT_DIRECT,
+    PMIXP_MSG_NONE, PMIXP_MSG_FAN_IN, PMIXP_MSG_FAN_OUT, PMIXP_MSG_DMDX, PMIXP_MSG_INIT_DIRECT,
 #ifndef NDEBUG
     PMIXP_MSG_PINGPONG,
 #endif
@@ -54,9 +50,7 @@ typedef enum {
 
 typedef enum {
     /* use non as to check non-init case */
-            PMIXP_EP_NONE = 0,
-    PMIXP_EP_HLIST,
-    PMIXP_EP_NOIDEID
+            PMIXP_EP_NONE = 0, PMIXP_EP_HLIST, PMIXP_EP_NOIDEID
 } pmixp_ep_type_t;
 
 typedef struct {
@@ -67,8 +61,7 @@ typedef struct {
     } ep;
 } pmixp_ep_t;
 
-typedef void (*pmixp_server_sent_cb_t)(int rc, pmixp_p2p_ctx_t ctx,
-                                       void *cb_data);
+typedef void (*pmixp_server_sent_cb_t)(int rc, pmixp_p2p_ctx_t ctx, void *cb_data);
 
 /* convenience callback to just release sent buffer
  * expects an object of type `Buf` to be passed as `cb_data`
@@ -89,10 +82,9 @@ void pmixp_server_direct_conn(int fd);
 
 int pmixp_server_direct_conn_early(void);
 
-int pmixp_server_send_nb(pmixp_ep_t *ep, pmixp_srv_cmd_t type,
-                         uint32_t seq, Buf buf,
-                         pmixp_server_sent_cb_t complete_cb,
-                         void *cb_data);
+int
+pmixp_server_send_nb(pmixp_ep_t *ep, pmixp_srv_cmd_t type, uint32_t seq, Buf buf, pmixp_server_sent_cb_t complete_cb,
+                     void *cb_data);
 
 Buf pmixp_server_buf_new(void);
 

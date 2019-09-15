@@ -59,15 +59,13 @@ extern int jobacct_gather_cgroup_cpuacct_init(void);
 
 extern int jobacct_gather_cgroup_cpuacct_fini(void);
 
-extern int jobacct_gather_cgroup_cpuacct_attach_task(
-        pid_t pid, jobacct_id_t *jobacct_id);
+extern int jobacct_gather_cgroup_cpuacct_attach_task(pid_t pid, jobacct_id_t *jobacct_id);
 
 extern int jobacct_gather_cgroup_memory_init(void);
 
 extern int jobacct_gather_cgroup_memory_fini(void);
 
-extern int jobacct_gather_cgroup_memory_attach_task(
-        pid_t pid, jobacct_id_t *jobacct_id);
+extern int jobacct_gather_cgroup_memory_attach_task(pid_t pid, jobacct_id_t *jobacct_id);
 
 /* FIXME: Enable when kernel support ready. */
 /* extern xcgroup_t task_blkio_cg; */

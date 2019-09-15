@@ -80,14 +80,12 @@ int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
     return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job,
-                               char ***env) {
+int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
     debug("Using mpi/none");
     return SLURM_SUCCESS;
 }
 
-mpi_plugin_client_state_t *
-p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
+mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
     debug("Using mpi/none");
     /* only return NULL on error */
     return (void *) 0xdeadbeef;

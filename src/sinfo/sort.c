@@ -50,8 +50,7 @@
 static bool reverse_order;
 static bool part_order;        /* order same as in part table */
 
-static void _get_sinfo_from_void(sinfo_data_t **s1, sinfo_data_t **s2,
-                                 void *v1, void *v2);
+static void _get_sinfo_from_void(sinfo_data_t **s1, sinfo_data_t **s2, void *v1, void *v2);
 
 static int _sort_by_avail(void *void1, void *void2);
 
@@ -134,8 +133,7 @@ void sort_sinfo_list(List sinfo_list) {
         reverse_order = false;
         part_order = false;
 
-        if ((params.sort[i] == ',') || (params.sort[i] == '#') ||
-            (params.sort[i] == '+') || (params.sort[i] == '-'))
+        if ((params.sort[i] == ',') || (params.sort[i] == '#') || (params.sort[i] == '+') || (params.sort[i] == '-'))
             continue;
         if ((i > 0) && (params.sort[i - 1] == '-'))
             reverse_order = true;
@@ -236,8 +234,7 @@ static inline int _diff_uint64(uint64_t value_1, uint64_t value_2) {
     return 0;
 }
 
-static void
-_get_sinfo_from_void(sinfo_data_t **s1, sinfo_data_t **s2, void *v1, void *v2) {
+static void _get_sinfo_from_void(sinfo_data_t **s1, sinfo_data_t **s2, void *v1, void *v2) {
     *s1 = *(sinfo_data_t **) v1;
     *s2 = *(sinfo_data_t **) v2;
 }
@@ -492,8 +489,7 @@ static int _sort_by_node_addr(void *void1, void *void2) {
                 break;
             continue;
         }
-        if ((isdigit((int) ptr1[inx])) &&
-            (isdigit((int) ptr2[inx]))) {
+        if ((isdigit((int) ptr1[inx])) && (isdigit((int) ptr2[inx]))) {
             int num1, num2;
             num1 = atoi(ptr1 + inx);
             num2 = atoi(ptr2 + inx);
@@ -551,8 +547,7 @@ static int _sort_by_hostnames(void *void1, void *void2) {
                 break;
             continue;
         }
-        if ((isdigit((int) ptr1[inx])) &&
-            (isdigit((int) ptr2[inx]))) {
+        if ((isdigit((int) ptr1[inx])) && (isdigit((int) ptr2[inx]))) {
             int num1, num2;
             num1 = atoi(ptr1 + inx);
             num2 = atoi(ptr2 + inx);
@@ -668,8 +663,7 @@ static int _sort_by_node_list(void *void1, void *void2) {
                 break;
             continue;
         }
-        if ((isdigit((int) ptr1[inx])) &&
-            (isdigit((int) ptr2[inx]))) {
+        if ((isdigit((int) ptr1[inx])) && (isdigit((int) ptr2[inx]))) {
             int num1, num2;
             num1 = atoi(ptr1 + inx);
             num2 = atoi(ptr2 + inx);

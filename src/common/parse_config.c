@@ -108,13 +108,12 @@ strong_alias(transfer_s_p_options, slurm_transfer_s_p_options
 
 #define CONF_HASH_LEN 173
 
-static char *keyvalue_pattern =
-        "^[[:space:]]*"
-        "([[:alnum:]_.]+)" /* key */
-        "[[:space:]]*([-*+/]?)=[[:space:]]*"
-        "((\"([^\"]*)\")|([^[:space:]]+))" /* value: quoted with whitespace,
+static char *keyvalue_pattern = "^[[:space:]]*"
+                                "([[:alnum:]_.]+)" /* key */
+                                "[[:space:]]*([-*+/]?)=[[:space:]]*"
+                                "((\"([^\"]*)\")|([^[:space:]]+))" /* value: quoted with whitespace,
 					    * or unquoted and no whitespace */
-        "([[:space:]]|$)";
+                                "([[:space:]]|$)";
 
 struct s_p_values {
     char *key;
@@ -124,9 +123,8 @@ struct s_p_values {
     void *data;
     regex_t *keyvalue_re;
 
-    int (*handler)(void **data, slurm_parser_enum_t type,
-                   const char *key, const char *value,
-                   const char *line, char **leftover);
+    int (*handler)(void **data, slurm_parser_enum_t type, const char *key, const char *value, const char *line,
+                   char **leftover);
 
     void (*destroy)(void *data);
 
@@ -151,8 +149,7 @@ static int _conf_hashtbl_index(const char *key) {
     return hashval % CONF_HASH_LEN;
 }
 
-static void _conf_hashtbl_insert(s_p_hashtbl_t *hashtbl,
-                                 s_p_values_t *value) {
+static void _conf_hashtbl_insert(s_p_hashtbl_t *hashtbl, s_p_values_t *value) {
     int idx;
 
     xassert(value);
@@ -164,8 +161,7 @@ static void _conf_hashtbl_insert(s_p_hashtbl_t *hashtbl,
 /*
  * NOTE - "key" is case insensitive.
  */
-static s_p_values_t *_conf_hashtbl_lookup(
-        const s_p_hashtbl_t *hashtbl, const char *key) {
+static s_p_values_t *_conf_hashtbl_lookup(const s_p_hashtbl_t *hashtbl, const char *key) {
     int idx;
     s_p_values_t *p;
 
@@ -203,10 +199,8 @@ s_p_hashtbl_t *s_p_hashtbl_create(const s_p_options_t options[]) {
             /* line_options mandatory for S_P_*LINE */
             xassert(op->line_options);
             expdata = xmalloc(sizeof(_expline_values_t));
-            expdata->template =
-                    s_p_hashtbl_create(op->line_options);
-            expdata->index = xcalloc(CONF_HASH_LEN,
-                                     sizeof(s_p_values_t * ));
+            expdata->template = s_p_hashtbl_create(op->line_options);
+            expdata->index = xcalloc(CONF_HASH_LEN, sizeof(s_p_values_t * ));
             expdata->values = NULL;
             value->data = expdata;
         }
@@ -235,8 +229,7 @@ s_p_hashtbl_t *s_p_hashtbl_create(const s_p_options_t options[]) {
 
 /* Swap the data in two data structures without changing the linked list
  * pointers */
-static void _conf_hashtbl_swap_data(s_p_values_t *data_1,
-                                    s_p_values_t *data_2) {
+static void _conf_hashtbl_swap_data(s_p_values_t *data_1, s_p_values_t *data_2) {
     s_p_values_t *next_1, *next_2;
     s_p_values_t tmp_values;
 
@@ -322,8 +315,7 @@ void s_p_hashtbl_destroy(s_p_hashtbl_t *hashtbl) {
  *                 of the unsearched portion of the string
  * Return 0 when a key-value pair is found, and -1 otherwise.
  */
-static int _keyvalue_regex(s_p_hashtbl_t *hashtbl, const char *line,
-                           char **key, char **value, char **remaining,
+static int _keyvalue_regex(s_p_hashtbl_t *hashtbl, const char *line, char **key, char **value, char **remaining,
                            slurm_parser_operator_t *operator) {
     size_t nmatch = 8;
     regmatch_t pmatch[8];
@@ -337,15 +329,12 @@ static int _keyvalue_regex(s_p_hashtbl_t *hashtbl, const char *line,
 
     xassert(hashtbl[0]->keyvalue_re);
 
-    if (regexec(hashtbl[0]->keyvalue_re, line, nmatch, pmatch, 0)
-        == REG_NOMATCH) {
+    if (regexec(hashtbl[0]->keyvalue_re, line, nmatch, pmatch, 0) == REG_NOMATCH) {
         return -1;
     }
 
-    *key = (char *) (xstrndup(line + pmatch[1].rm_so,
-                              pmatch[1].rm_eo - pmatch[1].rm_so));
-    if (pmatch[2].rm_so != -1 &&
-        (pmatch[2].rm_so != pmatch[2].rm_eo)) {
+    *key = (char *) (xstrndup(line + pmatch[1].rm_so, pmatch[1].rm_eo - pmatch[1].rm_so));
+    if (pmatch[2].rm_so != -1 && (pmatch[2].rm_so != pmatch[2].rm_eo)) {
         op = *(line + pmatch[2].rm_so);
         if (op == '+') {
             *operator = S_P_OPERATOR_ADD;
@@ -358,11 +347,9 @@ static int _keyvalue_regex(s_p_hashtbl_t *hashtbl, const char *line,
         }
     }
     if (pmatch[5].rm_so != -1) {
-        *value = (char *) (xstrndup(line + pmatch[5].rm_so,
-                                    pmatch[5].rm_eo - pmatch[5].rm_so));
+        *value = (char *) (xstrndup(line + pmatch[5].rm_so, pmatch[5].rm_eo - pmatch[5].rm_so));
     } else if (pmatch[6].rm_so != -1) {
-        *value = (char *) (xstrndup(line + pmatch[6].rm_so,
-                                    pmatch[6].rm_eo - pmatch[6].rm_so));
+        *value = (char *) (xstrndup(line + pmatch[6].rm_so, pmatch[6].rm_eo - pmatch[6].rm_so));
     } else {
         *value = xstrdup("");
     }
@@ -481,8 +468,7 @@ static void _compute_hash_val(uint32_t *hash_val, char *line) {
  * the next line by a trailing "\".  Strips out comments,
  * replaces escaped "\#" with "#", and replaces "\\" with "\".
  */
-static int _get_next_line(char *buf, int buf_size,
-                          uint32_t *hash_val, FILE *file) {
+static int _get_next_line(char *buf, int buf_size, uint32_t *hash_val, FILE *file) {
     char *ptr = buf;
     int leftover = buf_size;
     int read_size, new_size;
@@ -512,17 +498,11 @@ static int _get_next_line(char *buf, int buf_size,
  *
  * if change_* is true, corresponding field will be updated with the next
  * corresponding parameter. */
-s_p_hashtbl_t *_hashtbl_copy_keys(const s_p_hashtbl_t *from_hashtbl,
-                                  bool change_type,
-                                  slurm_parser_enum_t new_type,
+s_p_hashtbl_t *_hashtbl_copy_keys(const s_p_hashtbl_t *from_hashtbl, bool change_type, slurm_parser_enum_t new_type,
                                   bool change_handler,
-                                  int (*handler)(void **data,
-                                                 slurm_parser_enum_t type, const char
-                                                 *key, const char *value, const char
-                                                 *line, char **leftover),
-                                  bool change_destroyer,
-                                  void (*destroy)(void *data)
-) {
+                                  int (*handler)(void **data, slurm_parser_enum_t type, const char *key,
+                                                 const char *value, const char *line, char **leftover),
+                                  bool change_destroyer, void (*destroy)(void *data)) {
     s_p_hashtbl_t *to_hashtbl = NULL;
     s_p_values_t *val_ptr, *val_copy;
     int len, i;
@@ -533,8 +513,7 @@ s_p_hashtbl_t *_hashtbl_copy_keys(const s_p_hashtbl_t *from_hashtbl,
     to_hashtbl = xmalloc(len);
 
     for (i = 0; i < CONF_HASH_LEN; ++i) {
-        for (val_ptr = from_hashtbl[i]; val_ptr;
-             val_ptr = val_ptr->next) {
+        for (val_ptr = from_hashtbl[i]; val_ptr; val_ptr = val_ptr->next) {
             val_copy = xmalloc(sizeof(s_p_values_t));
             val_copy->key = xstrdup(val_ptr->key);
             val_copy->operator = val_ptr->operator;
@@ -558,13 +537,11 @@ s_p_hashtbl_t *_hashtbl_copy_keys(const s_p_hashtbl_t *from_hashtbl,
 }
 
 
-static int _handle_common(s_p_values_t *v,
-                          const char *value, const char *line, char **leftover,
+static int _handle_common(s_p_values_t *v, const char *value, const char *line, char **leftover,
                           void *(*convert)(const char *key, const char *value)) {
     if (v->data_count != 0) {
         if (run_in_daemon("slurmctld,slurmd,slurmdbd"))
-            error("%s 1 specified more than once, latest value used",
-                  v->key);
+            error("%s 1 specified more than once, latest value used", v->key);
         xfree(v->data);
         v->data_count = 0;
     }
@@ -572,8 +549,7 @@ static int _handle_common(s_p_values_t *v,
     if (v->handler != NULL) {
         /* call the handler function */
         int rc;
-        rc = v->handler(&v->data, v->type, v->key, value,
-                        line, leftover);
+        rc = v->handler(&v->data, v->type, v->key, value, line, leftover);
         if (rc != 1)
             return rc == 0 ? 0 : -1;
     } else {
@@ -647,20 +623,17 @@ static void *_handle_ldouble(const char *key, const char *value) {
     return data;
 }
 
-static int _handle_pointer(s_p_values_t *v, const char *value,
-                           const char *line, char **leftover) {
+static int _handle_pointer(s_p_values_t *v, const char *value, const char *line, char **leftover) {
     if (v->handler != NULL) {
         /* call the handler function */
         int rc;
-        rc = v->handler(&v->data, v->type, v->key, value,
-                        line, leftover);
+        rc = v->handler(&v->data, v->type, v->key, value, line, leftover);
         if (rc != 1)
             return rc == 0 ? 0 : -1;
     } else {
         if (v->data_count != 0) {
             if (run_in_daemon("slurmctld,slurmd,slurmdbd"))
-                error("%s 2 specified more than once, latest value used",
-                      v->key);
+                error("%s 2 specified more than once, latest value used", v->key);
             xfree(v->data);
             v->data_count = 0;
         }
@@ -671,16 +644,14 @@ static int _handle_pointer(s_p_values_t *v, const char *value,
     return 1;
 }
 
-static int _handle_array(s_p_values_t *v, const char *value,
-                         const char *line, char **leftover) {
+static int _handle_array(s_p_values_t *v, const char *value, const char *line, char **leftover) {
     void *new_ptr;
     void **data;
 
     if (v->handler != NULL) {
         /* call the handler function */
         int rc;
-        rc = v->handler(&new_ptr, v->type, v->key, value,
-                        line, leftover);
+        rc = v->handler(&new_ptr, v->type, v->key, value, line, leftover);
         if (rc != 1)
             return rc == 0 ? 0 : -1;
     } else {
@@ -703,16 +674,13 @@ static void _empty_destroy(void *data) {}
  * if a table is found, merge the new one within.
  * otherwise, add the new table and create an index for further lookup.
  */
-static void _handle_expline_sc(s_p_hashtbl_t *index_tbl,
-                               const char *master_value,
-                               s_p_hashtbl_t *tbl,
-                               s_p_hashtbl_t ***tables,
-                               int *tables_count) {
+static void
+_handle_expline_sc(s_p_hashtbl_t *index_tbl, const char *master_value, s_p_hashtbl_t *tbl, s_p_hashtbl_t ***tables,
+                   int *tables_count) {
     s_p_values_t *matchp_index, *index_value;
     matchp_index = _conf_hashtbl_lookup(index_tbl, master_value);
     if (matchp_index) {
-        s_p_hashtbl_merge_override(
-                (s_p_hashtbl_t *) matchp_index->data, tbl);
+        s_p_hashtbl_merge_override((s_p_hashtbl_t *) matchp_index->data, tbl);
         s_p_hashtbl_destroy(tbl);
     } else {
         index_value = xmalloc(sizeof(s_p_values_t));
@@ -721,8 +689,7 @@ static void _handle_expline_sc(s_p_hashtbl_t *index_tbl,
         index_value->data = tbl;
         _conf_hashtbl_insert(index_tbl, index_value);
         (*tables_count) += 1;
-        (*tables) = (s_p_hashtbl_t **) xrealloc(*tables,
-                                                *tables_count * sizeof(s_p_hashtbl_t * ));
+        (*tables) = (s_p_hashtbl_t **) xrealloc(*tables, *tables_count * sizeof(s_p_hashtbl_t * ));
         (*tables)[*tables_count - 1] = tbl;
     }
 }
@@ -761,12 +728,8 @@ static int _handle_expline_cmp_ldouble(const void *v1, const void *v2) {
  * If a corresponding table is found, update it with the content of the
  * new one, otherwise, add the new table.
  */
-static void _handle_expline_ac(s_p_hashtbl_t *tbl,
-                               const char *master_key,
-                               const void *master_value,
-                               int (*cmp)(const void *v1, const void *v2),
-                               s_p_hashtbl_t ***tables,
-                               int *tables_count) {
+static void _handle_expline_ac(s_p_hashtbl_t *tbl, const char *master_key, const void *master_value,
+                               int (*cmp)(const void *v1, const void *v2), s_p_hashtbl_t ***tables, int *tables_count) {
     s_p_values_t *matchp;
     s_p_hashtbl_t *table;
     int i;
@@ -785,8 +748,7 @@ static void _handle_expline_ac(s_p_hashtbl_t *tbl,
 
     /* not found, just add it */
     *tables_count += 1;
-    *tables = (s_p_hashtbl_t **) xrealloc(*tables,
-                                          *tables_count * sizeof(s_p_hashtbl_t * ));
+    *tables = (s_p_hashtbl_t **) xrealloc(*tables, *tables_count * sizeof(s_p_hashtbl_t * ));
     *tables[*tables_count - 1] = tbl;
 }
 
@@ -795,11 +757,9 @@ static void _handle_expline_ac(s_p_hashtbl_t *tbl,
  * with the already added s_p_hashtbl_t elements of the previously processed
  * siblings
  */
-static void _handle_expline_merge(_expline_values_t *v_data,
-                                  int *tables_count, /* not accessible in v_data
+static void _handle_expline_merge(_expline_values_t *v_data, int *tables_count, /* not accessible in v_data
 							since in v */
-                                  const char *master_key,
-                                  s_p_hashtbl_t *current_tbl) {
+                                  const char *master_key, s_p_hashtbl_t *current_tbl) {
     s_p_values_t *matchp = _conf_hashtbl_lookup(current_tbl, master_key);
 
     /* record should have been skipped if key not in sub-hash-table */
@@ -807,56 +767,45 @@ static void _handle_expline_merge(_expline_values_t *v_data,
 
     switch (matchp->type) {
         case S_P_STRING:
-            _handle_expline_sc(v_data->index, matchp->data, current_tbl,
-                               &v_data->values, tables_count);
+            _handle_expline_sc(v_data->index, matchp->data, current_tbl, &v_data->values, tables_count);
             break;
         case S_P_LONG:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_long, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_long, &v_data->values,
                                tables_count);
             break;
         case S_P_UINT16:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_uint16, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_uint16, &v_data->values,
                                tables_count);
             break;
         case S_P_UINT32:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_uint32, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_uint32, &v_data->values,
                                tables_count);
             break;
         case S_P_UINT64:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_uint64, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_uint64, &v_data->values,
                                tables_count);
             break;
         case S_P_FLOAT:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_float, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_float, &v_data->values,
                                tables_count);
             break;
         case S_P_DOUBLE:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_double, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_double, &v_data->values,
                                tables_count);
             break;
         case S_P_LONG_DOUBLE:
-            _handle_expline_ac(current_tbl, master_key, matchp->data,
-                               _handle_expline_cmp_ldouble, &v_data->values,
+            _handle_expline_ac(current_tbl, master_key, matchp->data, _handle_expline_cmp_ldouble, &v_data->values,
                                tables_count);
             break;
     }
 }
 
-static int _handle_line(s_p_values_t *v, const char *value,
-                        const char *line, char **leftover) {
+static int _handle_line(s_p_values_t *v, const char *value, const char *line, char **leftover) {
     _expline_values_t *v_data = (_expline_values_t *) v->data;
     s_p_hashtbl_t *newtable;
 
-    newtable = _hashtbl_copy_keys(v_data->template, false, S_P_IGNORE,
-                                  false, NULL, false, NULL);
-    if (s_p_parse_line_complete(newtable, v->key, value, line,
-                                leftover) == SLURM_ERROR) {
+    newtable = _hashtbl_copy_keys(v_data->template, false, S_P_IGNORE, false, NULL, false, NULL);
+    if (s_p_parse_line_complete(newtable, v->key, value, line, leftover) == SLURM_ERROR) {
         s_p_hashtbl_destroy(newtable);
         return -1;
     }
@@ -867,22 +816,18 @@ static int _handle_line(s_p_values_t *v, const char *value,
 }
 
 
-static int _handle_expline(s_p_values_t *v, const char *value,
-                           const char *line, char **leftover) {
+static int _handle_expline(s_p_values_t *v, const char *value, const char *line, char **leftover) {
     _expline_values_t *v_data = (_expline_values_t *) v->data;
     s_p_hashtbl_t **new_tables;
     int new_tables_count, i;
 
-    if (s_p_parse_line_expanded(v_data->template,
-                                &new_tables, &new_tables_count,
-                                v->key, value,
-                                line, leftover) == SLURM_ERROR) {
+    if (s_p_parse_line_expanded(v_data->template, &new_tables, &new_tables_count, v->key, value, line, leftover) ==
+        SLURM_ERROR) {
         return -1;
     }
 
     for (i = 0; i < new_tables_count; ++i) {
-        _handle_expline_merge(v_data, &v->data_count,
-                              v->key, new_tables[i]);
+        _handle_expline_merge(v_data, &v->data_count, v->key, new_tables[i]);
     }
     xfree(new_tables);
     return 1;
@@ -897,9 +842,7 @@ static int _handle_expline(s_p_values_t *v, const char *value,
  *                  it will move the leftover pointer to point to the character
  *                  after it has finished parsing in the line.
  */
-static void _handle_keyvalue_match(s_p_values_t *v,
-                                   const char *value, const char *line,
-                                   char **leftover) {
+static void _handle_keyvalue_match(s_p_values_t *v, const char *value, const char *line, char **leftover) {
     switch (v->type) {
         case S_P_IGNORE:
             /* do nothing */
@@ -980,8 +923,7 @@ int s_p_parse_line(s_p_hashtbl_t *hashtbl, const char *line, char **leftover) {
     while (_keyvalue_regex(hashtbl, ptr, &key, &value, &new_leftover, &op) == 0) {
         if ((p = _conf_hashtbl_lookup(hashtbl, key))) {
             p->operator = op;
-            _handle_keyvalue_match(p, value,
-                                   new_leftover, &new_leftover);
+            _handle_keyvalue_match(p, value, new_leftover, &new_leftover);
             *leftover = ptr = new_leftover;
         } else {
             error("Parsing error at unrecognized key: %s", key);
@@ -1001,8 +943,7 @@ int s_p_parse_line(s_p_hashtbl_t *hashtbl, const char *line, char **leftover) {
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
  * IN ingore_new - if set do not treat unrecongized input as a fatal error
  */
-static int _parse_next_key(s_p_hashtbl_t *hashtbl,
-                           const char *line, char **leftover, bool ignore_new) {
+static int _parse_next_key(s_p_hashtbl_t *hashtbl, const char *line, char **leftover, bool ignore_new) {
     char *key, *value;
     s_p_values_t *p;
     char *new_leftover;
@@ -1011,16 +952,13 @@ static int _parse_next_key(s_p_hashtbl_t *hashtbl,
     if (_keyvalue_regex(hashtbl, line, &key, &value, &new_leftover, &op) == 0) {
         if ((p = _conf_hashtbl_lookup(hashtbl, key))) {
             p->operator = op;
-            _handle_keyvalue_match(p, value,
-                                   new_leftover, &new_leftover);
+            _handle_keyvalue_match(p, value, new_leftover, &new_leftover);
             *leftover = new_leftover;
         } else if (ignore_new) {
-            debug("%s: Parsing error at unrecognized key: %s",
-                  __func__, key);
+            debug("%s: Parsing error at unrecognized key: %s", __func__, key);
             *leftover = (char *) line;
         } else {
-            error("%s: Parsing error at unrecognized key: %s",
-                  __func__, key);
+            error("%s: Parsing error at unrecognized key: %s", __func__, key);
             xfree(key);
             xfree(value);
             *leftover = (char *) line;
@@ -1094,9 +1032,9 @@ static char *_parse_for_format(s_p_hashtbl_t *f_hashtbl, char *path) {
  * directive but the included file contained errors.  Returns 0 if
  * no include directive is found.
  */
-static int _parse_include_directive(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
-                                    const char *line, char **leftover,
-                                    bool ignore_new, char *slurm_conf_path) {
+static int
+_parse_include_directive(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, const char *line, char **leftover, bool ignore_new,
+                         char *slurm_conf_path) {
     char *ptr;
     char *fn_start, *fn_stop;
     char *file_name, *path_name;
@@ -1134,8 +1072,7 @@ static int _parse_include_directive(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
     }
 }
 
-int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
-                   bool ignore_new) {
+int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename, bool ignore_new) {
     FILE *f;
     char *leftover = NULL;
     int i, rc = SLURM_SUCCESS;
@@ -1153,8 +1090,7 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
     for (i = 0;; i++) {
         if (i == 1) {    /* Long once, on first retry */
             error("s_p_parse_file: unable to status file %s: %m, "
-                  "retrying in 1sec up to 60sec",
-                  filename);
+                  "retrying in 1sec up to 60sec", filename);
         }
         if (i >= 60)    /* Give up after 60 seconds */
             return SLURM_ERROR;
@@ -1169,30 +1105,25 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
     }
     f = fopen(filename, "r");
     if (f == NULL) {
-        error("s_p_parse_file: unable to read \"%s\": %m",
-              filename);
+        error("s_p_parse_file: unable to read \"%s\": %m", filename);
         return SLURM_ERROR;
     }
 
     /* Buffer needs one extra byte for trailing '\0' */
     line = xmalloc(stat_buf.st_size + 1);
     line_number = 1;
-    while ((merged_lines = _get_next_line(
-            line, stat_buf.st_size + 1, hash_val, f)) > 0) {
+    while ((merged_lines = _get_next_line(line, stat_buf.st_size + 1, hash_val, f)) > 0) {
         /* skip empty lines */
         if (line[0] == '\0') {
             line_number += merged_lines;
             continue;
         }
 
-        inc_rc = _parse_include_directive(hashtbl, hash_val,
-                                          line, &leftover, ignore_new,
-                                          filename);
+        inc_rc = _parse_include_directive(hashtbl, hash_val, line, &leftover, ignore_new, filename);
         if (inc_rc == 0) {
             _parse_next_key(hashtbl, line, &leftover, ignore_new);
         } else if (inc_rc < 0) {
-            error("\"Include\" failed in file %s line %d",
-                  filename, line_number);
+            error("\"Include\" failed in file %s line %d", filename, line_number);
             rc = SLURM_ERROR;
             line_number += merged_lines;
             continue;
@@ -1203,11 +1134,9 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
             char *ptr = xstrdup(leftover);
             _strip_cr_nl(ptr);
             if (ignore_new) {
-                debug("Parse error in file %s line %d: \"%s\"",
-                      filename, line_number, ptr);
+                debug("Parse error in file %s line %d: \"%s\"", filename, line_number, ptr);
             } else {
-                error("Parse error in file %s line %d: \"%s\"",
-                      filename, line_number, ptr);
+                error("Parse error in file %s line %d: \"%s\"", filename, line_number, ptr);
                 rc = SLURM_ERROR;
             }
             xfree(ptr);
@@ -1220,8 +1149,7 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
     return rc;
 }
 
-int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
-                     Buf buffer, bool ignore_new) {
+int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, Buf buffer, bool ignore_new) {
     char *leftover = NULL;
     int rc = SLURM_SUCCESS;
     int line_number;
@@ -1263,8 +1191,7 @@ int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
                 continue;
         }
         unpack_error:
-        debug3("s_p_parse_buffer: ending after line %u",
-               line_number);
+        debug3("s_p_parse_buffer: ending after line %u", line_number);
         break;
     }
 
@@ -1300,12 +1227,10 @@ void s_p_hashtbl_merge(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl) {
                 val_ptr = val_ptr->next;
                 continue;
             }
-            match_ptr = _conf_hashtbl_lookup(to_hashtbl,
-                                             val_ptr->key);
+            match_ptr = _conf_hashtbl_lookup(to_hashtbl, val_ptr->key);
             if (match_ptr) {    /* Found matching key */
                 if (match_ptr->data_count == 0) {
-                    _conf_hashtbl_swap_data(val_ptr,
-                                            match_ptr);
+                    _conf_hashtbl_swap_data(val_ptr, match_ptr);
                 }
                 val_pptr = &val_ptr->next;
                 val_ptr = val_ptr->next;
@@ -1319,8 +1244,7 @@ void s_p_hashtbl_merge(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl) {
     }
 }
 
-void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl,
-                                s_p_hashtbl_t *from_hashtbl) {
+void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl) {
     int i;
     s_p_values_t **val_pptr, *val_ptr, *match_ptr;
 
@@ -1338,8 +1262,7 @@ void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl,
                 val_ptr = val_ptr->next;
                 continue;
             }
-            match_ptr = _conf_hashtbl_lookup(to_hashtbl,
-                                             val_ptr->key);
+            match_ptr = _conf_hashtbl_lookup(to_hashtbl, val_ptr->key);
             if (match_ptr) {    /* Found matching key */
                 _conf_hashtbl_swap_data(val_ptr, match_ptr);
                 val_pptr = &val_ptr->next;
@@ -1354,8 +1277,7 @@ void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl,
     }
 }
 
-void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl,
-                            s_p_hashtbl_t *from_hashtbl) {
+void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl) {
     int i;
     _expline_values_t *f_expline;
     _expline_values_t *t_expline;
@@ -1370,16 +1292,10 @@ void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl,
         while (p) {
             match_ptr = _conf_hashtbl_lookup(to_hashtbl, p->key);
             if (match_ptr) {    /* Found matching key */
-                if (match_ptr->type == p->type &&
-                    (p->type == S_P_LINE ||
-                     p->type == S_P_EXPLINE)) {
-                    t_expline = (_expline_values_t *)
-                            match_ptr->data;
-                    f_expline = (_expline_values_t *)
-                            p->data;
-                    s_p_hashtbl_merge_keys(
-                            t_expline->template,
-                            f_expline->template);
+                if (match_ptr->type == p->type && (p->type == S_P_LINE || p->type == S_P_EXPLINE)) {
+                    t_expline = (_expline_values_t *) match_ptr->data;
+                    f_expline = (_expline_values_t *) p->data;
+                    s_p_hashtbl_merge_keys(t_expline->template, f_expline->template);
                     /* Keys merged, free container memory */
                     s_p_hashtbl_destroy(f_expline->template);
                     s_p_hashtbl_destroy(f_expline->index);
@@ -1399,9 +1315,8 @@ void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl,
 
 }
 
-int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
-                            const char *key, const char *value,
-                            const char *line, char **leftover) {
+int
+s_p_parse_line_complete(s_p_hashtbl_t *hashtbl, const char *key, const char *value, const char *line, char **leftover) {
     if (!s_p_parse_pair(hashtbl, key, value)) {
         error("Error parsing '%s = %s', most left part of the"
               " line: %s.", key, value, line);
@@ -1420,10 +1335,8 @@ int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
  * custom handlers used by _parse_expline_adapt_table for config elements
  * expansions.
  */
-static int _parse_line_expanded_handler(
-        void **dest, slurm_parser_enum_t type,
-        const char *key, const char *value,
-        const char *line, char **leftover) {
+static int _parse_line_expanded_handler(void **dest, slurm_parser_enum_t type, const char *key, const char *value,
+                                        const char *line, char **leftover) {
     *dest = hostlist_create(value);
     /* FIXME: this function should always return either an empty list, or
      * the string as its first element if it was not expandable, or the
@@ -1466,10 +1379,8 @@ static s_p_hashtbl_t *_parse_expline_adapt_table(const s_p_hashtbl_t *hashtbl) {
                 val_copy->type = S_P_STRING;
             } else {
                 val_copy->type = S_P_POINTER;
-                val_copy->handler =
-                        _parse_line_expanded_handler;
-                val_copy->destroy =
-                        _parse_line_expanded_destroyer;
+                val_copy->handler = _parse_line_expanded_handler;
+                val_copy->destroy = _parse_line_expanded_destroyer;
             }
             _conf_hashtbl_insert(to_hashtbl, val_copy);
         }
@@ -1493,12 +1404,10 @@ static void _hashtbl_plain_to_string(s_p_hashtbl_t *hashtbl) {
         for (p = hashtbl[i]; p; p = p->next) {
             if (p->type == S_P_PLAIN_STRING) {
                 p->type = S_P_STRING;
-            } else if (p->type == S_P_LINE
-                       || p->type == S_P_EXPLINE) {
+            } else if (p->type == S_P_LINE || p->type == S_P_EXPLINE) {
                 v_data = (_expline_values_t *) p->data;
                 for (j = 0; j < p->data_count; ++j) {
-                    _hashtbl_plain_to_string(
-                            v_data->values[j]);
+                    _hashtbl_plain_to_string(v_data->values[j]);
                 }
             }
         }
@@ -1515,9 +1424,7 @@ static void _hashtbl_plain_to_string(s_p_hashtbl_t *hashtbl) {
  * The config elements are mapped to their original S_P_* type when associated
  * with the tables using s_p_parse_pair().
  */
-static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
-                                   int tables_count,
-                                   s_p_values_t *item) {
+static int _parse_expline_doexpand(s_p_hashtbl_t **tables, int tables_count, s_p_values_t *item) {
     hostlist_t item_hl, sub_item_hl;
     int item_count, i;
     int j, items_per_record, items_idx = 0;
@@ -1534,11 +1441,8 @@ static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
      * copy the string as it using s_p_parse_pair() */
     if (item->type == S_P_STRING) {
         for (i = 0; i < tables_count; ++i) {
-            if (!s_p_parse_pair(tables[i],
-                                item->key,
-                                item->data)) {
-                error("parsing %s=%s.",
-                      item->key, (char *) item->data);
+            if (!s_p_parse_pair(tables[i], item->key, item->data)) {
+                error("parsing %s=%s.", item->key, (char *) item->data);
                 return 0;
             }
         }
@@ -1562,15 +1466,13 @@ static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
     item_count = hostlist_count(item_hl);
     if ((item_count < tables_count) || (item_count == 1)) {
         items_per_record = 1;
-    } else if ((item_count >= tables_count) &&
-               ((item_count % tables_count) == 0)) {
+    } else if ((item_count >= tables_count) && ((item_count % tables_count) == 0)) {
         items_per_record = (int) (item_count / tables_count);
     } else {
         item_str = hostlist_ranged_string_xmalloc(item_hl);
         error("parsing %s=%s : count is not coherent with the"
               " amount of records or there must be no more than"
-              " one (%d vs %d)", item->key, item_str,
-              item_count, tables_count);
+              " one (%d vs %d)", item->key, item_str, item_count, tables_count);
         xfree(item_str);
         return 0;
     }
@@ -1589,14 +1491,11 @@ static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
                 sub_item_hl = hostlist_create(item_str);
                 for (j = 1; j < items_per_record; j++) {
                     free(item_str);
-                    item_str = hostlist_nth(item_hl,
-                                            items_idx++);
-                    hostlist_push_host(sub_item_hl,
-                                       item_str);
+                    item_str = hostlist_nth(item_hl, items_idx++);
+                    hostlist_push_host(sub_item_hl, item_str);
                 }
                 free(item_str);
-                item_str = hostlist_ranged_string_malloc(
-                        sub_item_hl);
+                item_str = hostlist_ranged_string_malloc(sub_item_hl);
                 hostlist_destroy(sub_item_hl);
             } else {
                 /* one item per table,
@@ -1617,10 +1516,8 @@ static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
          * So, parse the targeted pair injecting that information to
          * push it into the destination table.
          */
-        if (!s_p_parse_pair_with_op(tables[i], item->key, item_str,
-                                    item->operator)) {
-            error("parsing %s=%s after expansion.", item->key,
-                  item_str);
+        if (!s_p_parse_pair_with_op(tables[i], item->key, item_str, item->operator)) {
+            error("parsing %s=%s after expansion.", item->key, item_str);
             free(item_str);
             return 0;
         }
@@ -1631,10 +1528,8 @@ static int _parse_expline_doexpand(s_p_hashtbl_t **tables,
     return 1;
 }
 
-int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
-                            s_p_hashtbl_t ***data, int *data_count,
-                            const char *key, const char *value,
-                            const char *line, char **leftover) {
+int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl, s_p_hashtbl_t ***data, int *data_count, const char *key,
+                            const char *value, const char *line, char **leftover) {
     int i, status;
     s_p_hashtbl_t *strhashtbl = NULL;
     s_p_hashtbl_t **tables = NULL;
@@ -1677,10 +1572,7 @@ int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
     for (i = 0; i < tables_count; i++) {
         free(value_str);
         value_str = hostlist_shift(value_hl);
-        tables[i] = _hashtbl_copy_keys(hashtbl,
-                                       false, S_P_IGNORE,
-                                       false, NULL,
-                                       false, NULL);
+        tables[i] = _hashtbl_copy_keys(hashtbl, false, S_P_IGNORE, false, NULL, false, NULL);
         _hashtbl_plain_to_string(tables[i]);
         if (!s_p_parse_pair(tables[i], key, value_str)) {
             error("Error parsing '%s = %s', most left part of the"
@@ -1694,9 +1586,7 @@ int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
      * the parsed attribute values with s_p_parse_pair */
     for (i = 0; i < CONF_HASH_LEN; ++i) {
         for (attr = strhashtbl[i]; attr; attr = attr->next) {
-            if (!_parse_expline_doexpand(tables,
-                                         tables_count,
-                                         attr)) {
+            if (!_parse_expline_doexpand(tables, tables_count, attr)) {
                 goto cleanup;
             }
         }
@@ -1728,14 +1618,12 @@ int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
  * Set the operator of the targeted s_p_values_t to the provided value.
  */
-int s_p_parse_pair_with_op(s_p_hashtbl_t *hashtbl, const char *key,
-                           const char *value, slurm_parser_operator_t opt) {
+int s_p_parse_pair_with_op(s_p_hashtbl_t *hashtbl, const char *key, const char *value, slurm_parser_operator_t opt) {
     s_p_values_t *p;
     char *leftover, *v;
 
     if ((p = _conf_hashtbl_lookup(hashtbl, key)) == NULL) {
-        error("%s: Parsing error at unrecognized key: %s",
-              __func__, key);
+        error("%s: Parsing error at unrecognized key: %s", __func__, key);
         slurm_seterrno(EINVAL);
         return 0;
     }
@@ -1783,8 +1671,7 @@ int s_p_parse_pair(s_p_hashtbl_t *hashtbl, const char *key, const char *value) {
  *
  * Information concerning theses function can be found in the header file.
  */
-static s_p_values_t *_get_check(slurm_parser_enum_t type,
-                                const char *key, const s_p_hashtbl_t *hashtbl) {
+static s_p_values_t *_get_check(slurm_parser_enum_t type, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p;
     if (!hashtbl)
         return NULL;
@@ -1825,8 +1712,7 @@ int s_p_get_long(long *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     return 0;
 }
 
-int s_p_get_uint16(uint16_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl) {
+int s_p_get_uint16(uint16_t *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_UINT16, key, hashtbl);
 
     if (p) {
@@ -1837,8 +1723,7 @@ int s_p_get_uint16(uint16_t *num, const char *key,
     return 0;
 }
 
-int s_p_get_uint32(uint32_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl) {
+int s_p_get_uint32(uint32_t *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_UINT32, key, hashtbl);
 
     if (p) {
@@ -1849,8 +1734,7 @@ int s_p_get_uint32(uint32_t *num, const char *key,
     return 0;
 }
 
-int s_p_get_uint64(uint64_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl) {
+int s_p_get_uint64(uint64_t *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_UINT64, key, hashtbl);
 
     if (p) {
@@ -1861,8 +1745,7 @@ int s_p_get_uint64(uint64_t *num, const char *key,
     return 0;
 }
 
-int s_p_get_operator(slurm_parser_operator_t *opt, const char *key,
-                     const s_p_hashtbl_t *hashtbl) {
+int s_p_get_operator(slurm_parser_operator_t *opt, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p;
     if (!hashtbl)
         return 0;
@@ -1887,8 +1770,7 @@ int s_p_get_pointer(void **ptr, const char *key, const s_p_hashtbl_t *hashtbl) {
 }
 
 
-int s_p_get_array(void **ptr_array[], int *count,
-                  const char *key, const s_p_hashtbl_t *hashtbl) {
+int s_p_get_array(void **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_ARRAY, key, hashtbl);
 
     if (p) {
@@ -1900,8 +1782,7 @@ int s_p_get_array(void **ptr_array[], int *count,
     return 0;
 }
 
-int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count,
-                 const char *key, const s_p_hashtbl_t *hashtbl) {
+int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_LINE, key, hashtbl);
 
     if (p) {
@@ -1913,8 +1794,7 @@ int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count,
     return 0;
 }
 
-int s_p_get_expline(s_p_hashtbl_t **ptr_array[], int *count,
-                    const char *key, const s_p_hashtbl_t *hashtbl) {
+int s_p_get_expline(s_p_hashtbl_t **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_EXPLINE, key, hashtbl);
 
     if (p) {
@@ -1937,8 +1817,7 @@ int s_p_get_boolean(bool *flag, const char *key, const s_p_hashtbl_t *hashtbl) {
     return 0;
 }
 
-int s_p_get_float(float *num, const char *key,
-                  const s_p_hashtbl_t *hashtbl) {
+int s_p_get_float(float *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_FLOAT, key, hashtbl);
 
     if (p) {
@@ -1949,8 +1828,7 @@ int s_p_get_float(float *num, const char *key,
     return 0;
 }
 
-int s_p_get_double(double *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl) {
+int s_p_get_double(double *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_DOUBLE, key, hashtbl);
 
     if (p) {
@@ -1961,8 +1839,7 @@ int s_p_get_double(double *num, const char *key,
     return 0;
 }
 
-int s_p_get_long_double(long double *num, const char *key,
-                        const s_p_hashtbl_t *hashtbl) {
+int s_p_get_long_double(long double *num, const char *key, const s_p_hashtbl_t *hashtbl) {
     s_p_values_t *p = _get_check(S_P_LONG_DOUBLE, key, hashtbl);
 
     if (p) {
@@ -1979,8 +1856,7 @@ int s_p_get_long_double(long double *num, const char *key,
  *
  * Primarily for debugging purposes.
  */
-void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
-                     const s_p_options_t options[]) {
+void s_p_dump_values(const s_p_hashtbl_t *hashtbl, const s_p_options_t options[]) {
     const s_p_options_t *op = NULL;
     long num;
     uint16_t num16;
@@ -2039,24 +1915,21 @@ void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
                     verbose("%s", op->key);
                 break;
             case S_P_LINE:
-                if (s_p_get_line((s_p_hashtbl_t * **) & ptr_array,
-                                 &count, op->key, hashtbl)) {
+                if (s_p_get_line((s_p_hashtbl_t * **) & ptr_array, &count, op->key, hashtbl)) {
                     verbose("%s, count = %d", op->key, count);
                 } else {
                     verbose("%s", op->key);
                 }
                 break;
             case S_P_EXPLINE:
-                if (s_p_get_expline((s_p_hashtbl_t * **) & ptr_array,
-                                    &count, op->key, hashtbl)) {
+                if (s_p_get_expline((s_p_hashtbl_t * **) & ptr_array, &count, op->key, hashtbl)) {
                     verbose("%s, count = %d", op->key, count);
                 } else {
                     verbose("%s", op->key);
                 }
                 break;
             case S_P_ARRAY:
-                if (s_p_get_array(&ptr_array, &count,
-                                  op->key, hashtbl)) {
+                if (s_p_get_array(&ptr_array, &count, op->key, hashtbl)) {
                     verbose("%s, count = %d", op->key, count);
                 } else {
                     verbose("%s", op->key);
@@ -2064,8 +1937,7 @@ void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
                 break;
             case S_P_BOOLEAN:
                 if (s_p_get_boolean(&flag, op->key, hashtbl)) {
-                    verbose("%s = %s", op->key,
-                            flag ? "TRUE" : "FALSE");
+                    verbose("%s = %s", op->key, flag ? "TRUE" : "FALSE");
                 } else {
                     verbose("%s", op->key);
                 }
@@ -2101,9 +1973,7 @@ void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
  * Primarily for sending a table across the network so you don't have to read a
  * file in.
  */
-extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl,
-                            const s_p_options_t options[],
-                            const uint32_t cnt) {
+extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl, const s_p_options_t options[], const uint32_t cnt) {
     Buf buffer = init_buf(0);
     s_p_values_t *p;
     int i;
@@ -2154,8 +2024,7 @@ extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl,
             case S_P_IGNORE:
                 break;
             default:
-                fatal("%s: unsupported pack type %d",
-                      __func__, options[i].type);
+                fatal("%s: unsupported pack type %d", __func__, options[i].type);
                 break;
         }
     }
@@ -2248,8 +2117,7 @@ extern s_p_hashtbl_t *s_p_unpack_hashtbl(Buf buffer) {
             case S_P_IGNORE:
                 break;
             default:
-                fatal("%s: unsupported pack type %d",
-                      __func__, value->type);
+                fatal("%s: unsupported pack type %d", __func__, value->type);
                 break;
         }
     }
@@ -2261,9 +2129,7 @@ extern s_p_hashtbl_t *s_p_unpack_hashtbl(Buf buffer) {
     return NULL;
 }
 
-extern void transfer_s_p_options(s_p_options_t **full_options,
-                                 s_p_options_t *options,
-                                 int *full_options_cnt) {
+extern void transfer_s_p_options(s_p_options_t **full_options, s_p_options_t *options, int *full_options_cnt) {
     s_p_options_t *op = NULL;
     s_p_options_t *full_options_ptr;
     int cnt = *full_options_cnt;

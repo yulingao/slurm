@@ -49,7 +49,8 @@
 
 #define SPANK_OPTION_ENV_PREFIX "_SLURM_SPANK_OPTION_"
 
-struct spank_launcher_job_info {
+struct spank_launcher_job_info
+{
     uid_t uid;
     gid_t gid;
     uint32_t jobid;
@@ -61,6 +62,9 @@ struct spank_launcher_job_info {
 
 int spank_init(stepd_step_rec_t *job);
 
+/*
+初始化slurm节点和job的插件程序
+*/
 int spank_slurmd_init(void);
 
 int spank_job_prolog(uint32_t jobid, uid_t uid);
@@ -226,7 +230,6 @@ extern bool spank_option_isset(char *optname);
  * IN/OUT state	- internal state, should point to NULL for the first call
  * RETURNS	- true if plugin/name/value set; false if no more options
  */
-extern bool spank_option_get_next_set(char **plugin, char **name,
-                                      char **value, void **state);
+extern bool spank_option_get_next_set(char **plugin, char **name, char **value, void **state);
 
 #endif /* !_PLUGSTACK_H */

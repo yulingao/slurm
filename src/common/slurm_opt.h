@@ -55,9 +55,7 @@
 #define SRUN_MAX_THREADS 60
 
 typedef enum {
-    BELL_NEVER,
-    BELL_AFTER_DELAY,
-    BELL_ALWAYS
+    BELL_NEVER, BELL_AFTER_DELAY, BELL_ALWAYS
 } bell_flag_t;
 
 /*
@@ -401,8 +399,7 @@ typedef struct slurm_options {
     char *ofname; /* output file name		*/
 } slurm_opt_t;
 
-extern struct option *slurm_option_table_create(slurm_opt_t *opt,
-                                                char **opt_string);
+extern struct option *slurm_option_table_create(slurm_opt_t *opt, char **opt_string);
 
 extern void slurm_option_table_destroy(struct option *optz);
 
@@ -414,8 +411,7 @@ extern void slurm_option_table_destroy(struct option *optz);
  * within a single thread in salloc/sbatch/srun, and that this restriction
  * should not be problematic. If it is, please refactor.
  */
-extern int slurm_process_option(slurm_opt_t *opt, int optval, const char *arg,
-                                bool set_by_env, bool early_pass);
+extern int slurm_process_option(slurm_opt_t *opt, int optval, const char *arg, bool set_by_env, bool early_pass);
 
 /*
  * Print all options that have been set through slurm_process_option()
@@ -451,8 +447,7 @@ extern bool slurm_option_isset(slurm_opt_t *opt, const char *name);
 /*
  * Replace option value by common option name.
  */
-extern int slurm_option_set(slurm_opt_t *opt, const char *name,
-                            const char *value, bool early);
+extern int slurm_option_set(slurm_opt_t *opt, const char *name, const char *value, bool early);
 
 /*
  * Reset option by common option name.
@@ -470,7 +465,6 @@ extern bool slurm_option_reset(slurm_opt_t *opt, const char *name);
  * IN/OUT state	- internal state, should be set to 0 for the first call
  * RETURNS      - true if name/value set; false if no more options
  */
-extern bool slurm_option_get_next_set(slurm_opt_t *opt, char **name,
-                                      char **value, size_t *state);
+extern bool slurm_option_get_next_set(slurm_opt_t *opt, char **name, char **value, size_t *state);
 
 #endif /* _SLURM_OPT_H_ */

@@ -101,11 +101,7 @@ const char *plugin_strerror(plugin_err_t e) {
     return ("Unknown error");
 }
 
-int
-plugin_peek(const char *fq_path,
-            char *plugin_type,
-            const size_t type_len,
-            uint32_t *plugin_version) {
+int plugin_peek(const char *fq_path, char *plugin_type, const size_t type_len, uint32_t *plugin_version) {
     plugin_handle_t plug;
     char *type;
     uint32_t *version;
@@ -136,8 +132,7 @@ plugin_peek(const char *fq_path,
         plugin_minor = SLURM_VERSION_MINOR(*version);
         plugin_micro = SLURM_VERSION_MICRO(*version);
         dlclose(plug);
-        info("%s: Incompatible Slurm plugin version (%d.%02d.%d)",
-             fq_path, plugin_major, plugin_minor, plugin_micro);
+        info("%s: Incompatible Slurm plugin version (%d.%02d.%d)", fq_path, plugin_major, plugin_minor, plugin_micro);
         return SLURM_ERROR;
     }
 
@@ -145,8 +140,7 @@ plugin_peek(const char *fq_path,
     return SLURM_SUCCESS;
 }
 
-plugin_err_t
-plugin_load_from_file(plugin_handle_t *p, const char *fq_path) {
+plugin_err_t plugin_load_from_file(plugin_handle_t *p, const char *fq_path) {
     plugin_handle_t plug;
     int (*init)(void);
     uint32_t *version;
@@ -176,15 +170,12 @@ plugin_load_from_file(plugin_handle_t *p, const char *fq_path) {
      */
     plug = dlopen(fq_path, RTLD_LAZY);
     if (plug == NULL) {
-        error("plugin_load_from_file: dlopen(%s): %s",
-              fq_path,
-              _dlerror());
+        error("plugin_load_from_file: dlopen(%s): %s", fq_path, _dlerror());
         return EPLUGIN_DLOPEN_FAILED;
     }
 
     /* Now see if our required symbols are defined. */
-    if ((dlsym(plug, PLUGIN_NAME) == NULL) ||
-        ((type = dlsym(plug, PLUGIN_TYPE)) == NULL)) {
+    if ((dlsym(plug, PLUGIN_NAME) == NULL) || ((type = dlsym(plug, PLUGIN_TYPE)) == NULL)) {
         dlclose(plug);
         return EPLUGIN_MISSING_NAME;
     }
@@ -199,8 +190,7 @@ plugin_load_from_file(plugin_handle_t *p, const char *fq_path) {
         plugin_minor = SLURM_VERSION_MINOR(*version);
         plugin_micro = SLURM_VERSION_MICRO(*version);
         dlclose(plug);
-        info("%s: Incompatible Slurm plugin version (%d.%02d.%d)",
-             fq_path, plugin_major, plugin_minor, plugin_micro);
+        info("%s: Incompatible Slurm plugin version (%d.%02d.%d)", fq_path, plugin_major, plugin_minor, plugin_micro);
         return EPLUGIN_BAD_VERSION;
     }
 
@@ -219,9 +209,7 @@ plugin_load_from_file(plugin_handle_t *p, const char *fq_path) {
     return EPLUGIN_SUCCESS;
 }
 
-plugin_handle_t
-plugin_load_and_link(const char *type_name, int n_syms,
-                     const char *names[], void *ptrs[]) {
+plugin_handle_t plugin_load_and_link(const char *type_name, int n_syms, const char *names[], void *ptrs[]) {
     plugin_handle_t plug = PLUGIN_INVALID_HANDLE;
     struct stat st;
     char *head = NULL, *dir_array = NULL, *so_name = NULL;
@@ -255,15 +243,12 @@ plugin_load_and_link(const char *type_name, int n_syms,
         file_name = xstrdup_printf("%s/%s", head, so_name);
         debug3("Trying to load plugin %s", file_name);
         if ((stat(file_name, &st) < 0) || (!S_ISREG(st.st_mode))) {
-            debug4("%s: Does not exist or not a regular file.",
-                   file_name);
+            debug4("%s: Does not exist or not a regular file.", file_name);
             xfree(file_name);
             err = EPLUGIN_NOTFOUND;
         } else {
-            if ((err = plugin_load_from_file(&plug, file_name))
-                == EPLUGIN_SUCCESS) {
-                if (plugin_get_syms(plug, n_syms,
-                                    names, ptrs) >= n_syms) {
+            if ((err = plugin_load_from_file(&plug, file_name)) == EPLUGIN_SUCCESS) {
+                if (plugin_get_syms(plug, n_syms, names, ptrs) >= n_syms) {
                     debug3("Success.");
                     xfree(file_name);
                     break;
@@ -295,8 +280,7 @@ plugin_load_and_link(const char *type_name, int n_syms,
  * crash if the library handle is not valid.
  */
 
-void
-plugin_unload(plugin_handle_t plug) {
+void plugin_unload(plugin_handle_t plug) {
     void (*fini)(void);
 
     if (plug != PLUGIN_INVALID_HANDLE) {
@@ -319,32 +303,28 @@ plugin_unload(plugin_handle_t plug) {
 }
 
 
-void *
-plugin_get_sym(plugin_handle_t plug, const char *name) {
+void *plugin_get_sym(plugin_handle_t plug, const char *name) {
     if (plug != PLUGIN_INVALID_HANDLE)
         return dlsym(plug, name);
     else
         return NULL;
 }
 
-const char *
-plugin_get_name(plugin_handle_t plug) {
+const char *plugin_get_name(plugin_handle_t plug) {
     if (plug != PLUGIN_INVALID_HANDLE)
         return (const char *) dlsym(plug, PLUGIN_NAME);
     else
         return NULL;
 }
 
-const char *
-plugin_get_type(plugin_handle_t plug) {
+const char *plugin_get_type(plugin_handle_t plug) {
     if (plug != PLUGIN_INVALID_HANDLE)
         return (const char *) dlsym(plug, PLUGIN_TYPE);
     else
         return NULL;
 }
 
-uint32_t
-plugin_get_version(plugin_handle_t plug) {
+uint32_t plugin_get_version(plugin_handle_t plug) {
     uint32_t *ptr;
 
     if (plug == PLUGIN_INVALID_HANDLE)
@@ -353,11 +333,7 @@ plugin_get_version(plugin_handle_t plug) {
     return ptr ? *ptr : 0;
 }
 
-int
-plugin_get_syms(plugin_handle_t plug,
-                int n_syms,
-                const char *names[],
-                void *ptrs[]) {
+int plugin_get_syms(plugin_handle_t plug, int n_syms, const char *names[], void *ptrs[]) {
     int i, count;
 
     count = 0;
@@ -366,8 +342,7 @@ plugin_get_syms(plugin_handle_t plug,
         if (ptrs[i])
             ++count;
         else
-            debug3("Couldn't find sym '%s' in the plugin",
-                   names[i]);
+            debug3("Couldn't find sym '%s' in the plugin", names[i]);
     }
 
     return count;
@@ -376,9 +351,9 @@ plugin_get_syms(plugin_handle_t plug,
 /*
  * Create a priority context
  */
-extern plugin_context_t *plugin_context_create(
-        const char *plugin_type, const char *uler_type,
-        void *ptrs[], const char *names[], size_t names_size) {
+extern plugin_context_t *
+plugin_context_create(const char *plugin_type, const char *uler_type, void *ptrs[], const char *names[],
+                      size_t names_size) {
     plugin_context_t *c;
     int n_names;
 
@@ -389,12 +364,10 @@ extern plugin_context_t *plugin_context_create(
         debug3("plugin_context_create: no plugin type");
         return NULL;
     } else if (!names) {
-        error("plugin_context_create: no symbols given for plugin %s",
-              plugin_type);
+        error("plugin_context_create: no symbols given for plugin %s", plugin_type);
         return NULL;
     } else if (!ptrs) {
-        error("plugin_context_create: no ptrs given for plugin %s",
-              plugin_type);
+        error("plugin_context_create: no ptrs given for plugin %s", plugin_type);
         return NULL;
     }
 
@@ -410,14 +383,12 @@ extern plugin_context_t *plugin_context_create(
         return c;
 
     if (errno != EPLUGIN_NOTFOUND) {
-        error("Couldn't load specified plugin name for %s: %s",
-              c->type, plugin_strerror(errno));
+        error("Couldn't load specified plugin name for %s: %s", c->type, plugin_strerror(errno));
         goto fail;
     }
 
     error("Couldn't find the specified plugin name for %s "
-          "looking at all files",
-          c->type);
+          "looking at all files", c->type);
 
     /* Get plugin list. */
     if (!c->plugin_list) {
@@ -514,14 +485,11 @@ extern List plugin_get_plugins_of_type(char *plugin_type) {
             /* add one for the / */
             len++;
             xassert(len < sizeof(full_name));
-            snprintf(full_name, len, "%s%s",
-                     type_slash, e->d_name + strlen(type_slash));
+            snprintf(full_name, len, "%s%s", type_slash, e->d_name + strlen(type_slash));
 
             if (!plugin_names)
                 plugin_names = list_create(slurm_destroy_char);
-            if (!list_find_first(plugin_names,
-                                 slurm_find_char_in_list,
-                                 full_name))
+            if (!list_find_first(plugin_names, slurm_find_char_in_list, full_name))
                 list_append(plugin_names, xstrdup(full_name));
         }
         closedir(dirp);

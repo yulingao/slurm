@@ -78,8 +78,7 @@ typedef struct xcgroup {
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_ns_create(xcgroup_ns_t *cgns, char *mnt_args,
-                      char *subsys);
+int xcgroup_ns_create(xcgroup_ns_t *cgns, char *mnt_args, char *subsys);
 
 /*
  * destroy a cgroup namespace
@@ -142,8 +141,7 @@ int xcgroup_ns_load(xcgroup_ns_t *cgns, char *subsys);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_create(xcgroup_ns_t *cgns, xcgroup_t *cg,
-                   char *uri, uid_t uid, gid_t gid);
+int xcgroup_create(xcgroup_ns_t *cgns, xcgroup_t *cg, char *uri, uid_t uid, gid_t gid);
 
 /*
  * destroy a cgroup internal structure
@@ -244,8 +242,7 @@ int xcgroup_set_param(xcgroup_t *cg, char *parameter, char *content);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_get_param(xcgroup_t *cg, char *param, char **content,
-                      size_t *csize);
+int xcgroup_get_param(xcgroup_t *cg, char *param, char **content, size_t *csize);
 
 /*
  * set a cgroup parameter in the form of a uint32_t

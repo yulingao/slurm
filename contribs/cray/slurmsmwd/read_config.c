@@ -40,7 +40,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "src/common/slurm_xlator.h"	/* Must be first */
+#include "src/common/slurm_xlator.h"    /* Must be first */
 #include "src/common/parse_config.h"
 #include "read_config.h"
 
@@ -49,54 +49,49 @@ uint16_t slurmsmwd_cabinets_per_row = 0;
 uint16_t slurmsmwd_debug_level = LOG_LEVEL_INFO;
 char *slurmsmwd_log_file = NULL;
 
-static s_p_options_t slurmsmwd_options[] = {
-	{"CabinetsPerRow", S_P_UINT16},
-	{"DebugLevel", S_P_STRING},
-	{"LogFile", S_P_STRING},
-	{NULL}
-};
+static s_p_options_t slurmsmwd_options[] = {{"CabinetsPerRow", S_P_UINT16},
+                                            {"DebugLevel",     S_P_STRING},
+                                            {"LogFile",        S_P_STRING},
+                                            {NULL}};
 
-static void _validate_config(void)
-{
-	if (slurmsmwd_cabinets_per_row == 0)
-		fatal("slurmsmwd.conf: CabinetsPerRow must not be zero");
+static void _validate_config(void) {
+    if (slurmsmwd_cabinets_per_row == 0)
+        fatal("slurmsmwd.conf: CabinetsPerRow must not be zero");
 }
 
-extern void slurmsmwd_print_config(void)
-{
-	debug2("slurmsmwd configuration");
-	debug2("CabinetsPerRow = %u", slurmsmwd_cabinets_per_row);
-	debug2("DebugLevel     = %u", slurmsmwd_debug_level);
-	debug2("LogFile        = %s", slurmsmwd_log_file);
+extern void slurmsmwd_print_config(void) {
+    debug2("slurmsmwd configuration");
+    debug2("CabinetsPerRow = %u", slurmsmwd_cabinets_per_row);
+    debug2("DebugLevel     = %u", slurmsmwd_debug_level);
+    debug2("LogFile        = %s", slurmsmwd_log_file);
 }
 
 /* Load configuration file contents into global variables.
  * Call slurmsmwd_free_config to free memory. */
-extern void slurmsmwd_read_config(void)
-{
-	char *config_file = NULL;
-	char *temp_str = NULL;
-	s_p_hashtbl_t *tbl = NULL;
-	struct stat config_stat;
+extern void slurmsmwd_read_config(void) {
+    char *config_file = NULL;
+    char *temp_str = NULL;
+    s_p_hashtbl_t *tbl = NULL;
+    struct stat config_stat;
 
-	config_file = get_extra_conf_path("slurmsmwd.conf");
-	if (stat(config_file, &config_stat) < 0)
-		fatal("Can't stat slurmsmwd.conf %s: %m", config_file);
-	tbl = s_p_hashtbl_create(slurmsmwd_options);
-	if (s_p_parse_file(tbl, NULL, config_file, false) == SLURM_ERROR)
-		fatal("Can't parse slurmsmwd.conf %s: %m", config_file);
+    config_file = get_extra_conf_path("slurmsmwd.conf");
+    if (stat(config_file, &config_stat) < 0)
+        fatal("Can't stat slurmsmwd.conf %s: %m", config_file);
+    tbl = s_p_hashtbl_create(slurmsmwd_options);
+    if (s_p_parse_file(tbl, NULL, config_file, false) == SLURM_ERROR)
+        fatal("Can't parse slurmsmwd.conf %s: %m", config_file);
 
-	s_p_get_uint16(&slurmsmwd_cabinets_per_row, "CabinetsPerRow", tbl);
-	s_p_get_string(&slurmsmwd_log_file, "LogFile", tbl);
-	if (s_p_get_string(&temp_str, "DebugLevel", tbl)) {
-		slurmsmwd_debug_level = log_string2num(temp_str);
-		if (slurmsmwd_debug_level == NO_VAL16)
-			fatal("Invalid DebugLevel %s", temp_str);
-		xfree(temp_str);
-	}
+    s_p_get_uint16(&slurmsmwd_cabinets_per_row, "CabinetsPerRow", tbl);
+    s_p_get_string(&slurmsmwd_log_file, "LogFile", tbl);
+    if (s_p_get_string(&temp_str, "DebugLevel", tbl)) {
+        slurmsmwd_debug_level = log_string2num(temp_str);
+        if (slurmsmwd_debug_level == NO_VAL16)
+            fatal("Invalid DebugLevel %s", temp_str);
+        xfree(temp_str);
+    }
 
-	_validate_config();
+    _validate_config();
 
-	s_p_hashtbl_destroy(tbl);
-	xfree(config_file);
+    s_p_hashtbl_destroy(tbl);
+    xfree(config_file);
 }

@@ -92,8 +92,7 @@ static inline int geometric_series(int width, int depth) {
      * the root - we need to return analog in the w=1 tree which is
      * (depth+1).
      */
-    return (width == 1) ?
-           (depth + 1) : (1 - (int_pow(width, (depth + 1)))) / (1 - width);
+    return (width == 1) ? (depth + 1) : (1 - (int_pow(width, (depth + 1)))) / (1 - width);
 }
 
 static inline int dep(int total, int width) {
@@ -107,8 +106,8 @@ static inline int dep(int total, int width) {
     return i - 1;
 }
 
-static int search_tree(int id, int node, int max_children, int width,
-                       int *parent_id, int *next_max_children, int *depth) {
+static int
+search_tree(int id, int node, int max_children, int width, int *parent_id, int *next_max_children, int *depth) {
     int current, next, next_children;
     int i;
 
@@ -130,9 +129,7 @@ static int search_tree(int id, int node, int max_children, int width,
             return 1;
         }
         if (id > current && id < next) {
-            return search_tree(id, current, next_children, width,
-                               parent_id, next_max_children,
-                               depth);
+            return search_tree(id, current, next_children, width, parent_id, next_max_children, depth);
         }
         current = next;
     }
@@ -141,10 +138,7 @@ static int search_tree(int id, int node, int max_children, int width,
     return 0;
 }
 
-void
-reverse_tree_info(int rank, int num_nodes, int width,
-                  int *parent, int *num_children,
-                  int *depth, int *max_depth) {
+void reverse_tree_info(int rank, int num_nodes, int width, int *parent, int *num_children, int *depth, int *max_depth) {
     int max_children;
     int p, c;
 
@@ -177,8 +171,7 @@ reverse_tree_info(int rank, int num_nodes, int width,
     return;
 }
 
-int reverse_tree_direct_children(int rank, int num_nodes, int width,
-                                 int depth, int *children) {
+int reverse_tree_direct_children(int rank, int num_nodes, int width, int depth, int *children) {
     int current, child_distance;
     int max_depth, sub_depth, max_rank_children;
     int i;

@@ -188,9 +188,7 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
         PRIu64
         " total_time:%-12"
         PRIu64
-        "\n",
-                rollup_type, buf->rollup_count[i], roll_ave,
-                buf->rollup_max_time[i], buf->rollup_time[i]);
+        "\n", rollup_type, buf->rollup_count[i], roll_ave, buf->rollup_max_time[i], buf->rollup_time[i]);
     }
 
     if (argc) {
@@ -206,8 +204,7 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
     if (sort_by_ave_time) {
         for (i = 0; i < buf->type_cnt; i++) {
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->type_cnt; i++) {
@@ -230,8 +227,7 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
         }
         for (i = 0; i < buf->user_cnt; i++) {
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
         for (i = 0; i < buf->user_cnt; i++) {
@@ -255,8 +251,7 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
     } else if (sort_by_total_time) {
         for (i = 0; i < buf->type_cnt; i++) {
             for (j = i + 1; j < buf->type_cnt; j++) {
-                if (buf->rpc_type_time[i] >=
-                    buf->rpc_type_time[j])
+                if (buf->rpc_type_time[i] >= buf->rpc_type_time[j])
                     continue;
                 type_id = buf->rpc_type_id[i];
                 type_cnt = buf->rpc_type_cnt[i];
@@ -269,14 +264,12 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
                 buf->rpc_type_time[j] = type_time;
             }
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->user_cnt; i++) {
             for (j = i + 1; j < buf->user_cnt; j++) {
-                if (buf->rpc_user_time[i] >=
-                    buf->rpc_user_time[j])
+                if (buf->rpc_user_time[i] >= buf->rpc_user_time[j])
                     continue;
                 user_id = buf->rpc_user_id[i];
                 user_cnt = buf->rpc_user_cnt[i];
@@ -289,15 +282,13 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
                 buf->rpc_user_time[j] = user_time;
             }
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
     } else {    /* sort by RPC count */
         for (i = 0; i < buf->type_cnt; i++) {
             for (j = i + 1; j < buf->type_cnt; j++) {
-                if (buf->rpc_type_cnt[i] >=
-                    buf->rpc_type_cnt[j])
+                if (buf->rpc_type_cnt[i] >= buf->rpc_type_cnt[j])
                     continue;
                 type_id = buf->rpc_type_id[i];
                 type_cnt = buf->rpc_type_cnt[i];
@@ -310,14 +301,12 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
                 buf->rpc_type_time[j] = type_time;
             }
             if (buf->rpc_type_cnt[i]) {
-                rpc_type_ave_time[i] = buf->rpc_type_time[i] /
-                                       buf->rpc_type_cnt[i];
+                rpc_type_ave_time[i] = buf->rpc_type_time[i] / buf->rpc_type_cnt[i];
             }
         }
         for (i = 0; i < buf->user_cnt; i++) {
             for (j = i + 1; j < buf->user_cnt; j++) {
-                if (buf->rpc_user_cnt[i] >=
-                    buf->rpc_user_cnt[j])
+                if (buf->rpc_user_cnt[i] >= buf->rpc_user_cnt[j])
                     continue;
                 user_id = buf->rpc_user_id[i];
                 user_cnt = buf->rpc_user_cnt[i];
@@ -330,8 +319,7 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
                 buf->rpc_user_time[j] = user_time;
             }
             if (buf->rpc_user_cnt[i]) {
-                rpc_user_ave_time[i] = buf->rpc_user_time[i] /
-                                       buf->rpc_user_cnt[i];
+                rpc_user_ave_time[i] = buf->rpc_user_time[i] / buf->rpc_user_cnt[i];
             }
         }
     }
@@ -343,10 +331,8 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
         printf("\t%-25s(%5u) count:%-6u "
                "ave_time:%-6u total_time:%"
         PRIu64
-        "\n",
-                slurmdbd_msg_type_2_str(buf->rpc_type_id[i], 1),
-                buf->rpc_type_id[i], buf->rpc_type_cnt[i],
-                rpc_type_ave_time[i], buf->rpc_type_time[i]);
+        "\n", slurmdbd_msg_type_2_str(buf->rpc_type_id[i],
+                                      1), buf->rpc_type_id[i], buf->rpc_type_cnt[i], rpc_type_ave_time[i], buf->rpc_type_time[i]);
     }
 
     printf("\nRemote Procedure Call statistics by user\n");
@@ -356,10 +342,8 @@ extern int sacctmgr_list_stats(int argc, char **argv) {
         printf("\t%-20s(%10u) count:%-6u "
                "ave_time:%-6u total_time:%"
         PRIu64
-        "\n",
-                uid_to_string_cached((uid_t) buf->rpc_user_id[i]),
-                buf->rpc_user_id[i], buf->rpc_user_cnt[i],
-                rpc_user_ave_time[i], buf->rpc_user_time[i]);
+        "\n", uid_to_string_cached(
+                (uid_t) buf->rpc_user_id[i]), buf->rpc_user_id[i], buf->rpc_user_cnt[i], rpc_user_ave_time[i], buf->rpc_user_time[i]);
     }
 
     xfree(rpc_type_ave_time);

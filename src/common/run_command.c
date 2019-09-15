@@ -101,9 +101,8 @@ static int _tot_wait(struct timeval *start_time) {
  * tid IN - thread we are called from
  * status OUT - Job exit code
  * Return stdout+stderr of spawned program, value must be xfreed. */
-extern char *run_command(char *script_type, char *script_path,
-                         char **script_argv, int max_wait,
-                         pthread_t tid, int *status) {
+extern char *
+run_command(char *script_type, char *script_path, char **script_argv, int max_wait, pthread_t tid, int *status) {
     int i, new_wait, resp_size = 0, resp_offset = 0;
     pid_t cpid;
     char *resp = NULL;
@@ -116,15 +115,13 @@ extern char *run_command(char *script_type, char *script_path,
         return resp;
     }
     if (script_path[0] != '/') {
-        error("%s: %s is not fully qualified pathname (%s)",
-              __func__, script_type, script_path);
+        error("%s: %s is not fully qualified pathname (%s)", __func__, script_type, script_path);
         *status = 127;
         resp = xstrdup("Run command failed - configuration error");
         return resp;
     }
     if (access(script_path, R_OK | X_OK) < 0) {
-        error("%s: %s can not be executed (%s) %m",
-              __func__, script_type, script_path);
+        error("%s: %s can not be executed (%s) %m", __func__, script_type, script_path);
         *status = 127;
         resp = xstrdup("Run command failed - configuration error");
         return resp;
@@ -148,8 +145,7 @@ extern char *run_command(char *script_type, char *script_path,
             dup2(pfd[1], STDERR_FILENO);
             dup2(pfd[1], STDOUT_FILENO);
             for (i = 0; i < cc; i++) {
-                if ((i != STDERR_FILENO) &&
-                    (i != STDOUT_FILENO))
+                if ((i != STDERR_FILENO) && (i != STDOUT_FILENO))
                     close(i);
             }
         } else {
@@ -184,8 +180,7 @@ extern char *run_command(char *script_type, char *script_path,
             track_script_reset_cpid(tid, cpid);
         while (1) {
             if (shutdown) {
-                error("%s: killing %s operation on shutdown",
-                      __func__, script_type);
+                error("%s: killing %s operation on shutdown", __func__, script_type);
                 break;
             }
             fds.fd = pfd[0];
@@ -196,8 +191,7 @@ extern char *run_command(char *script_type, char *script_path,
             } else {
                 new_wait = max_wait - _tot_wait(&tstart);
                 if (new_wait <= 0) {
-                    error("%s: %s poll timeout @ %d msec",
-                          __func__, script_type, max_wait);
+                    error("%s: %s poll timeout @ %d msec", __func__, script_type, max_wait);
                     break;
                 }
                 new_wait = MIN(new_wait, MAX_POLL_WAIT);
@@ -211,15 +205,13 @@ extern char *run_command(char *script_type, char *script_path,
             }
             if ((fds.revents & POLLIN) == 0)
                 break;
-            i = read(pfd[0], resp + resp_offset,
-                     resp_size - resp_offset);
+            i = read(pfd[0], resp + resp_offset, resp_size - resp_offset);
             if (i == 0) {
                 break;
             } else if (i < 0) {
                 if (errno == EAGAIN)
                     continue;
-                error("%s: read(%s): %m", __func__,
-                      script_path);
+                error("%s: read(%s): %m", __func__, script_path);
                 break;
             } else {
                 resp_offset += i;

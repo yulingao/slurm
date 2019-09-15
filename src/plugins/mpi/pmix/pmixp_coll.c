@@ -109,8 +109,7 @@ inline int pmixp_coll_check(pmixp_coll_t *coll, uint32_t seq) {
     return PMIXP_COLL_REQ_FAILURE;
 }
 
-int pmixp_hostset_from_ranges(const pmixp_proc_t *procs, size_t nprocs,
-                              hostlist_t *hl_out) {
+int pmixp_hostset_from_ranges(const pmixp_proc_t *procs, size_t nprocs, hostlist_t *hl_out) {
     int i;
     hostlist_t hl = hostlist_create("");
     pmixp_namespace_t *nsptr = NULL;
@@ -140,23 +139,19 @@ int pmixp_hostset_from_ranges(const pmixp_proc_t *procs, size_t nprocs,
     return SLURM_ERROR;
 }
 
-int pmixp_coll_contrib_local(pmixp_coll_t *coll, pmixp_coll_type_t type,
-                             char *data, size_t ndata,
-                             void *cbfunc, void *cbdata) {
+int pmixp_coll_contrib_local(pmixp_coll_t *coll, pmixp_coll_type_t type, char *data, size_t ndata, void *cbfunc,
+                             void *cbdata) {
     int ret = SLURM_SUCCESS;
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: %s seq=%d, size=%lu", coll, pmixp_coll_type2str(type),
-                coll->seq, ndata);
+    PMIXP_DEBUG("%p: %s seq=%d, size=%lu", coll, pmixp_coll_type2str(type), coll->seq, ndata);
 #endif
     switch (type) {
         case PMIXP_COLL_TYPE_FENCE_TREE:
-            ret = pmixp_coll_tree_local(coll, data, ndata,
-                                        cbfunc, cbdata);
+            ret = pmixp_coll_tree_local(coll, data, ndata, cbfunc, cbdata);
             break;
         case PMIXP_COLL_TYPE_FENCE_RING:
-            ret = pmixp_coll_ring_local(coll, data, ndata,
-                                        cbfunc, cbdata);
+            ret = pmixp_coll_ring_local(coll, data, ndata, cbfunc, cbdata);
             break;
         default:
             ret = SLURM_ERROR;
@@ -166,8 +161,7 @@ int pmixp_coll_contrib_local(pmixp_coll_t *coll, pmixp_coll_type_t type,
     return ret;
 }
 
-int pmixp_coll_init(pmixp_coll_t *coll, pmixp_coll_type_t type,
-                    const pmixp_proc_t *procs, size_t nprocs) {
+int pmixp_coll_init(pmixp_coll_t *coll, pmixp_coll_type_t type, const pmixp_proc_t *procs, size_t nprocs) {
     int rc = SLURM_SUCCESS;
     hostlist_t hl;
 
@@ -233,8 +227,7 @@ void pmixp_coll_free(pmixp_coll_t *coll) {
         case PMIXP_COLL_TYPE_FENCE_RING: {
             int i, ctx_in_use = 0;
             for (i = 0; i < PMIXP_COLL_RING_CTX_NUM; i++) {
-                pmixp_coll_ring_ctx_t *coll_ctx =
-                        &coll->state.ring.ctx_array[i];
+                pmixp_coll_ring_ctx_t *coll_ctx = &coll->state.ring.ctx_array[i];
                 if (coll_ctx->in_use)
                     ctx_in_use++;
             }
@@ -284,8 +277,7 @@ void pmixp_coll_log(pmixp_coll_t *coll) {
 
 void pmixp_coll_localcb_nodata(pmixp_coll_t *coll, int status) {
     if (coll->cbfunc) {
-        pmixp_lib_modex_invoke(coll->cbfunc, status, NULL,
-                               0, coll->cbdata, NULL, NULL);
+        pmixp_lib_modex_invoke(coll->cbfunc, status, NULL, 0, coll->cbdata, NULL, NULL);
         /* Clear callback info as we are not allowed
          * to use it second ime */
         coll->cbfunc = NULL;

@@ -54,8 +54,7 @@ static int _slurm_update(void *data, slurm_msg_type_t msg_type);
  * IN front_end_msg - description of front_end node updates
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_front_end(update_front_end_msg_t *front_end_msg) {
+int slurm_update_front_end(update_front_end_msg_t *front_end_msg) {
     return _slurm_update((void *) front_end_msg, REQUEST_UPDATE_FRONT_END);
 }
 
@@ -65,8 +64,7 @@ slurm_update_front_end(update_front_end_msg_t *front_end_msg) {
  * IN job_msg - description of job updates
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_job(job_desc_msg_t *job_msg) {
+int slurm_update_job(job_desc_msg_t *job_msg) {
     if (job_msg->job_id_str) {
         error("Use slurm_update_job2() rather than slurm_update_job() "
               "with job_msg->job_id_str to get multiple error codes "
@@ -83,8 +81,7 @@ slurm_update_job(job_desc_msg_t *job_msg) {
  *	      free using slurm_free_job_array_resp()
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int
-slurm_update_job2(job_desc_msg_t *job_msg, job_array_resp_msg_t **resp) {
+extern int slurm_update_job2(job_desc_msg_t *job_msg, job_array_resp_msg_t **resp) {
     int rc = SLURM_SUCCESS;
     slurm_msg_t req_msg, resp_msg;
     slurmdb_cluster_rec_t *save_working_cluster_rec = working_cluster_rec;
@@ -96,18 +93,15 @@ slurm_update_job2(job_desc_msg_t *job_msg, job_array_resp_msg_t **resp) {
     tryagain:
     slurm_msg_t_init(&resp_msg);
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     switch (resp_msg.msg_type) {
         case RESPONSE_SLURM_REROUTE_MSG: {
             reroute_msg_t *rr_msg = (reroute_msg_t *) resp_msg.data;
 
             /* Don't expect mutliple hops but in the case it does
              * happen, free the previous rr cluster_rec. */
-            if (working_cluster_rec &&
-                working_cluster_rec != save_working_cluster_rec)
-                slurmdb_destroy_cluster_rec(
-                        working_cluster_rec);
+            if (working_cluster_rec && working_cluster_rec != save_working_cluster_rec)
+                slurmdb_destroy_cluster_rec(working_cluster_rec);
 
             working_cluster_rec = rr_msg->working_cluster_rec;
             slurmdb_setup_cluster_rec(working_cluster_rec);
@@ -140,8 +134,7 @@ slurm_update_job2(job_desc_msg_t *job_msg, job_array_resp_msg_t **resp) {
  * IN node_msg - description of node updates
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_node(update_node_msg_t *node_msg) {
+int slurm_update_node(update_node_msg_t *node_msg) {
     return _slurm_update((void *) node_msg, REQUEST_UPDATE_NODE);
 }
 
@@ -151,8 +144,7 @@ slurm_update_node(update_node_msg_t *node_msg) {
  * IN layout_msg - command line (same format as conf)
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_layout(update_layout_msg_t *layout_msg) {
+int slurm_update_layout(update_layout_msg_t *layout_msg) {
     return _slurm_update((void *) layout_msg, REQUEST_UPDATE_LAYOUT);
 }
 
@@ -161,8 +153,7 @@ slurm_update_layout(update_layout_msg_t *layout_msg) {
  * IN part_msg - description of partition configuration
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_create_partition(update_part_msg_t *part_msg) {
+int slurm_create_partition(update_part_msg_t *part_msg) {
     return _slurm_update((void *) part_msg, REQUEST_CREATE_PARTITION);
 }
 
@@ -172,8 +163,7 @@ slurm_create_partition(update_part_msg_t *part_msg) {
  * IN part_msg - description of partition updates
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_partition(update_part_msg_t *part_msg) {
+int slurm_update_partition(update_part_msg_t *part_msg) {
     return _slurm_update((void *) part_msg, REQUEST_UPDATE_PARTITION);
 }
 
@@ -183,8 +173,7 @@ slurm_update_partition(update_part_msg_t *part_msg) {
  * IN part_msg - description of partition to delete
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_delete_partition(delete_part_msg_t *part_msg) {
+int slurm_delete_partition(delete_part_msg_t *part_msg) {
     return _slurm_update((void *) part_msg, REQUEST_DELETE_PARTITION);
 }
 
@@ -193,8 +182,7 @@ slurm_delete_partition(delete_part_msg_t *part_msg) {
  * IN powercap_msg - description of powercapping updates
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_update_powercap(update_powercap_msg_t *powercap_msg) {
+int slurm_update_powercap(update_powercap_msg_t *powercap_msg) {
     return _slurm_update((void *) powercap_msg, REQUEST_UPDATE_POWERCAP);
 }
 
@@ -204,8 +192,7 @@ slurm_update_powercap(update_powercap_msg_t *powercap_msg) {
  * RET name of reservation on success (caller must free the memory),
  *	otherwise return NULL and set errno to indicate the error
  */
-char *
-slurm_create_reservation(resv_desc_msg_t *resv_msg) {
+char *slurm_create_reservation(resv_desc_msg_t *resv_msg) {
     int rc;
     char *resv_name = NULL;
     slurm_msg_t req_msg;
@@ -218,8 +205,7 @@ slurm_create_reservation(resv_desc_msg_t *resv_msg) {
     req_msg.msg_type = REQUEST_CREATE_RESERVATION;
     req_msg.data = resv_msg;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     if (rc)
         slurm_seterrno(rc);
     switch (resp_msg.msg_type) {
@@ -255,16 +241,14 @@ extern int slurm_update_reservation(resv_desc_msg_t *resv_msg) {
  * IN resv_msg - description of reservation to delete
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int
-slurm_delete_reservation(reservation_name_msg_t *resv_msg) {
+int slurm_delete_reservation(reservation_name_msg_t *resv_msg) {
     return _slurm_update((void *) resv_msg, REQUEST_DELETE_RESERVATION);
 }
 
 /* Update the time limit of a job step,
  * step_id == NO_VAL updates all job steps of the specified job_id
  * RET 0 or -1 on error */
-int
-slurm_update_step(step_update_request_msg_t *step_msg) {
+int slurm_update_step(step_update_request_msg_t *step_msg) {
     return _slurm_update((void *) step_msg, REQUEST_UPDATE_JOB_STEP);
 }
 
@@ -273,8 +257,7 @@ slurm_update_step(step_update_request_msg_t *step_msg) {
  *	partition, account, and QOS.
  * IN job_id_str - a job id
  * RET 0 or -1 on error */
-extern int
-slurm_top_job(char *job_id_str) {
+extern int slurm_top_job(char *job_id_str) {
     int rc = SLURM_SUCCESS;
     top_job_msg_t top_job_req;
     slurm_msg_t req_msg;
@@ -285,8 +268,7 @@ slurm_top_job(char *job_id_str) {
     req_msg.msg_type = REQUEST_TOP_JOB;
     req_msg.data = &top_job_req;
 
-    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     slurm_seterrno(rc);
@@ -294,8 +276,7 @@ slurm_top_job(char *job_id_str) {
 }
 
 /* _slurm_update - issue RPC for all update requests */
-static int
-_slurm_update(void *data, slurm_msg_type_t msg_type) {
+static int _slurm_update(void *data, slurm_msg_type_t msg_type) {
     int rc;
     slurm_msg_t req_msg;
 
@@ -303,8 +284,7 @@ _slurm_update(void *data, slurm_msg_type_t msg_type) {
     req_msg.msg_type = msg_type;
     req_msg.data = data;
 
-    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req_msg, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     if (rc != SLURM_SUCCESS)

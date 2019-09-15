@@ -88,14 +88,12 @@ static void _rebuild_port_array(struct step_record *step_ptr) {
     hl = hostlist_create(tmp_char);
     xfree(tmp_char);
     if (!hl) {
-        error("%pS has invalid reserved ports: %s",
-              step_ptr, step_ptr->resv_ports);
+        error("%pS has invalid reserved ports: %s", step_ptr, step_ptr->resv_ports);
         xfree(step_ptr->resv_ports);
         return;
     }
 
-    step_ptr->resv_port_array = xmalloc(sizeof(int) *
-                                        step_ptr->resv_port_cnt);
+    step_ptr->resv_port_array = xmalloc(sizeof(int) * step_ptr->resv_port_cnt);
     step_ptr->resv_port_cnt = 0;
     while ((tmp_char = hostlist_shift(hl))) {
         i = atoi(tmp_char);
@@ -105,8 +103,7 @@ static void _rebuild_port_array(struct step_record *step_ptr) {
     }
     hostlist_destroy(hl);
     if (step_ptr->resv_port_cnt == 0) {
-        error("Problem recovering resv_port_array for %pS: %s",
-              step_ptr, step_ptr->resv_ports);
+        error("Problem recovering resv_port_array for %pS: %s", step_ptr, step_ptr->resv_ports);
         xfree(step_ptr->resv_ports);
     }
 }
@@ -116,17 +113,14 @@ static void _rebuild_port_array(struct step_record *step_ptr) {
 static void _make_step_resv(struct step_record *step_ptr) {
     int i, j;
 
-    if ((step_ptr->resv_port_cnt == 0) ||
-        (step_ptr->resv_ports == NULL) ||
-        (step_ptr->resv_ports[0] == '\0'))
+    if ((step_ptr->resv_port_cnt == 0) || (step_ptr->resv_ports == NULL) || (step_ptr->resv_ports[0] == '\0'))
         return;
 
     if (step_ptr->resv_port_array == NULL)
         _rebuild_port_array(step_ptr);
 
     for (i = 0; i < step_ptr->resv_port_cnt; i++) {
-        if ((step_ptr->resv_port_array[i] < port_resv_min) ||
-            (step_ptr->resv_port_array[i] > port_resv_max))
+        if ((step_ptr->resv_port_array[i] < port_resv_min) || (step_ptr->resv_port_array[i] > port_resv_max))
             continue;
         j = step_ptr->resv_port_array[i] - port_resv_min;
         bit_or(port_resv_table[j], step_ptr->step_node_bitmap);
@@ -143,8 +137,7 @@ static void _make_all_resv(void) {
     job_iterator = list_iterator_create(job_list);
     while ((job_ptr = (struct job_record *) list_next(job_iterator))) {
         step_iterator = list_iterator_create(job_ptr->step_list);
-        while ((step_ptr = (struct step_record *)
-                list_next(step_iterator))) {
+        while ((step_ptr = (struct step_record *) list_next(step_iterator))) {
             if (step_ptr->state < JOB_RUNNING)
                 continue;
             _make_step_resv(step_ptr);
@@ -195,8 +188,7 @@ extern int reserve_port_config(char *mpi_params) {
     port_resv_min = p_min;
     port_resv_max = p_max;
     port_resv_cnt = p_max - p_min + 1;
-    debug("Ports available for reservation %u-%u",
-          port_resv_min, port_resv_max);
+    debug("Ports available for reservation %u-%u", port_resv_min, port_resv_max);
 
     xfree(port_resv_table);
     port_resv_table = xmalloc(sizeof(bitstr_t * ) * port_resv_cnt);
@@ -225,8 +217,7 @@ extern int resv_port_alloc(struct step_record *step_ptr) {
         dims = slurmdb_setup_cluster_name_dims();
 
     if (step_ptr->resv_port_cnt > port_resv_cnt) {
-        info("%pS needs %u reserved ports, but only %d exist",
-             step_ptr, step_ptr->resv_port_cnt, port_resv_cnt);
+        info("%pS needs %u reserved ports, but only %d exist", step_ptr, step_ptr->resv_port_cnt, port_resv_cnt);
         return ESLURM_PORTS_INVALID;
     }
 
@@ -236,16 +227,14 @@ extern int resv_port_alloc(struct step_record *step_ptr) {
     for (i = 0; i < port_resv_cnt; i++) {
         if (++last_port_alloc >= port_resv_cnt)
             last_port_alloc = 0;
-        if (bit_overlap(step_ptr->step_node_bitmap,
-                        port_resv_table[last_port_alloc]))
+        if (bit_overlap(step_ptr->step_node_bitmap, port_resv_table[last_port_alloc]))
             continue;
         port_array[port_inx++] = last_port_alloc;
         if (port_inx >= step_ptr->resv_port_cnt)
             break;
     }
     if (port_inx < step_ptr->resv_port_cnt) {
-        info("insufficient ports for %pS to reserve (%d of %u)",
-             step_ptr, port_inx, step_ptr->resv_port_cnt);
+        info("insufficient ports for %pS to reserve (%d of %u)", step_ptr, port_inx, step_ptr->resv_port_cnt);
         xfree(port_array);
         return ESLURM_PORTS_BUSY;
     }
@@ -253,8 +242,7 @@ extern int resv_port_alloc(struct step_record *step_ptr) {
     /* Reserve selected ports */
     hl = hostlist_create(NULL);
     for (i = 0; i < port_inx; i++) {
-        bit_or(port_resv_table[port_array[i]],
-               step_ptr->step_node_bitmap);
+        bit_or(port_resv_table[port_array[i]], step_ptr->step_node_bitmap);
         port_array[i] += port_resv_min;
         snprintf(port_str, sizeof(port_str), "%d", port_array[i]);
         hostlist_push_host(hl, port_str);
@@ -265,8 +253,7 @@ extern int resv_port_alloc(struct step_record *step_ptr) {
     hostlist_destroy(hl);
     step_ptr->resv_port_array = port_array;
 
-    debug("reserved ports %s for %pS",
-          step_ptr->resv_ports, step_ptr);
+    debug("reserved ports %s for %pS", step_ptr->resv_ports, step_ptr);
 
     return SLURM_SUCCESS;
 }
@@ -280,8 +267,7 @@ extern void resv_port_free(struct step_record *step_ptr) {
         return;
 
     for (i = 0; i < step_ptr->resv_port_cnt; i++) {
-        if ((step_ptr->resv_port_array[i] < port_resv_min) ||
-            (step_ptr->resv_port_array[i] > port_resv_max))
+        if ((step_ptr->resv_port_array[i] < port_resv_min) || (step_ptr->resv_port_array[i] > port_resv_max))
             continue;
         j = step_ptr->resv_port_array[i] - port_resv_min;
         bit_and_not(port_resv_table[j], step_ptr->step_node_bitmap);
@@ -289,6 +275,5 @@ extern void resv_port_free(struct step_record *step_ptr) {
     }
     xfree(step_ptr->resv_port_array);
 
-    debug("freed ports %s for %pS",
-          step_ptr->resv_ports, step_ptr);
+    debug("freed ports %s for %pS", step_ptr->resv_ports, step_ptr);
 }

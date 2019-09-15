@@ -138,20 +138,17 @@ static pthread_mutex_t ofed_lock = PTHREAD_MUTEX_INITIALIZER;
 static int dataset_id = -1; /* id of the dataset for profile data */
 static int tres_pos = -1;
 
-static uint8_t *_slurm_pma_query_via(void *rcvbuf, ib_portid_t *dest, int port,
-                                     unsigned timeout, unsigned id,
+static uint8_t *_slurm_pma_query_via(void *rcvbuf, ib_portid_t *dest, int port, unsigned timeout, unsigned id,
                                      const struct ibmad_port *srcport) {
 #ifdef HAVE_OFED_PMA_QUERY_VIA
     return pma_query_via(rcvbuf, dest, port, timeout, id, srcport);
 #else
     switch (id) {
         case CLASS_PORT_INFO:
-            return perf_classportinfo_query_via(
-                    pc, &portid, port, ibd_timeout, srcport);
+            return perf_classportinfo_query_via(pc, &portid, port, ibd_timeout, srcport);
             break;
         case IB_GSI_PORT_COUNTERS_EXT:
-            return port_performance_ext_query_via(
-                    pc, &portid, port, ibd_timeout, srcport);
+            return port_performance_ext_query_via(pc, &portid, port, ibd_timeout, srcport);
             break;
         default:
             error("_slurm_pma_query_via: unhandled id");
@@ -179,13 +176,10 @@ static int _read_ofed_values(void) {
     ofed_sens.update_time = time(NULL);
 
     if (first) {
-        int mgmt_classes[4] = {IB_SMI_CLASS, IB_SMI_DIRECT_CLASS,
-                               IB_SA_CLASS, IB_PERFORMANCE_CLASS};
-        srcport = mad_rpc_open_port(NULL, ofed_conf.port,
-                                    mgmt_classes, 4);
+        int mgmt_classes[4] = {IB_SMI_CLASS, IB_SMI_DIRECT_CLASS, IB_SA_CLASS, IB_PERFORMANCE_CLASS};
+        srcport = mad_rpc_open_port(NULL, ofed_conf.port, mgmt_classes, 4);
         if (!srcport) {
-            debug("%s: Failed to open port '%d'",
-                  __func__, ofed_conf.port);
+            debug("%s: Failed to open port '%d'", __func__, ofed_conf.port);
             debug("OFED: failed");
             return SLURM_ERROR;
         }
@@ -194,25 +188,19 @@ static int _read_ofed_values(void) {
             error("can't resolve self port %d", port);
 
         memset(pc, 0, sizeof(pc));
-        if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout,
-                                  CLASS_PORT_INFO, srcport))
+        if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout, CLASS_PORT_INFO, srcport))
             error("classportinfo query: %m");
 
         memcpy(&cap_mask, pc + 2, sizeof(cap_mask));
-        if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout,
-                                  IB_GSI_PORT_COUNTERS_EXT, srcport)) {
+        if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout, IB_GSI_PORT_COUNTERS_EXT, srcport)) {
             error("ofed: %m");
             return SLURM_ERROR;
         }
 
-        mad_decode_field(pc, IB_PC_EXT_XMT_BYTES_F,
-                         &last_update_xmtdata);
-        mad_decode_field(pc, IB_PC_EXT_RCV_BYTES_F,
-                         &last_update_rcvdata);
-        mad_decode_field(pc, IB_PC_EXT_XMT_PKTS_F,
-                         &last_update_xmtpkts);
-        mad_decode_field(pc, IB_PC_EXT_RCV_PKTS_F,
-                         &last_update_rcvpkts);
+        mad_decode_field(pc, IB_PC_EXT_XMT_BYTES_F, &last_update_xmtdata);
+        mad_decode_field(pc, IB_PC_EXT_RCV_BYTES_F, &last_update_rcvdata);
+        mad_decode_field(pc, IB_PC_EXT_XMT_PKTS_F, &last_update_xmtpkts);
+        mad_decode_field(pc, IB_PC_EXT_RCV_PKTS_F, &last_update_rcvpkts);
 
         if (debug_flags & DEBUG_FLAG_INTERCONNECT)
             info("%s ofed init", plugin_name);
@@ -223,8 +211,7 @@ static int _read_ofed_values(void) {
 
     memset(pc, 0, sizeof(pc));
     memcpy(&cap_mask, pc + 2, sizeof(cap_mask));
-    if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout,
-                              IB_GSI_PORT_COUNTERS_EXT, srcport)) {
+    if (!_slurm_pma_query_via(pc, &portid, port, ibd_timeout, IB_GSI_PORT_COUNTERS_EXT, srcport)) {
         error("ofed: %m");
         return SLURM_ERROR;
     }
@@ -260,20 +247,14 @@ static int _update_node_interconnect(void) {
     int rc;
 
     enum {
-        FIELD_PACKIN,
-        FIELD_PACKOUT,
-        FIELD_MBIN,
-        FIELD_MBOUT,
-        FIELD_CNT
+        FIELD_PACKIN, FIELD_PACKOUT, FIELD_MBIN, FIELD_MBOUT, FIELD_CNT
     };
 
-    acct_gather_profile_dataset_t dataset[] = {
-            {"PacketsIn",  PROFILE_FIELD_UINT64},
-            {"PacketsOut", PROFILE_FIELD_UINT64},
-            {"InMB",       PROFILE_FIELD_DOUBLE},
-            {"OutMB",      PROFILE_FIELD_DOUBLE},
-            {NULL,         PROFILE_FIELD_NOT_SET}
-    };
+    acct_gather_profile_dataset_t dataset[] = {{"PacketsIn",  PROFILE_FIELD_UINT64},
+                                               {"PacketsOut", PROFILE_FIELD_UINT64},
+                                               {"InMB",       PROFILE_FIELD_DOUBLE},
+                                               {"OutMB",      PROFILE_FIELD_DOUBLE},
+                                               {NULL,         PROFILE_FIELD_NOT_SET}};
 
     union {
         double d;
@@ -281,8 +262,7 @@ static int _update_node_interconnect(void) {
     } data[FIELD_CNT];
 
     if (dataset_id < 0) {
-        dataset_id = acct_gather_profile_g_create_dataset("Network",
-                                                          NO_PARENT, dataset);
+        dataset_id = acct_gather_profile_g_create_dataset("Network", NO_PARENT, dataset);
         if (debug_flags & DEBUG_FLAG_INTERCONNECT)
             debug("IB: dataset created (id = %d)", dataset_id);
         if (dataset_id == SLURM_ERROR) {
@@ -308,19 +288,15 @@ static int _update_node_interconnect(void) {
         " bytes, "
         "received %"
         PRIu64
-        " bytes",
-                (int) (ofed_sens.update_time - ofed_sens.last_update_time),
-                ofed_sens.xmtdata, ofed_sens.rcvdata);
+        " bytes", (int) (ofed_sens.update_time - ofed_sens.last_update_time), ofed_sens.xmtdata, ofed_sens.rcvdata);
     }
     slurm_mutex_unlock(&ofed_lock);
 
     if (debug_flags & DEBUG_FLAG_PROFILE) {
         char str[256];
-        info("PROFILE-Network: %s", acct_gather_profile_dataset_str(
-                dataset, data, str, sizeof(str)));
+        info("PROFILE-Network: %s", acct_gather_profile_dataset_str(dataset, data, str, sizeof(str)));
     }
-    return acct_gather_profile_g_add_sample_data(dataset_id, (void *) data,
-                                                 ofed_sens.update_time);
+    return acct_gather_profile_g_add_sample_data(dataset_id, (void *) data, ofed_sens.update_time);
 }
 
 static bool _run_in_daemon(void) {
@@ -381,8 +357,7 @@ extern int acct_gather_interconnect_p_node_update(void) {
 
     if (!set) {
         set = true;
-        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING,
-                                  &profile);
+        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING, &profile);
 
         if (!(profile & ACCT_GATHER_PROFILE_NETWORK))
             run = false;
@@ -397,10 +372,8 @@ extern int acct_gather_interconnect_p_node_update(void) {
 
 extern void acct_gather_interconnect_p_conf_set(s_p_hashtbl_t *tbl) {
     if (tbl) {
-        if (!s_p_get_uint32(&ofed_conf.port,
-                            "InterconnectOFEDPort", tbl) &&
-            !s_p_get_uint32(&ofed_conf.port,
-                            "InfinibandOFEDPort", tbl))
+        if (!s_p_get_uint32(&ofed_conf.port, "InterconnectOFEDPort", tbl) &&
+            !s_p_get_uint32(&ofed_conf.port, "InfinibandOFEDPort", tbl))
             ofed_conf.port = INTERCONNECT_DEFAULT_PORT;
     }
 
@@ -411,12 +384,10 @@ extern void acct_gather_interconnect_p_conf_set(s_p_hashtbl_t *tbl) {
     ofed_sens.update_time = time(NULL);
 }
 
-extern void acct_gather_interconnect_p_conf_options(
-        s_p_options_t **full_options, int *full_options_cnt) {
-    s_p_options_t options[] = {
-            {"InterconnectOFEDPort", S_P_UINT32},
-            {"InfinibandOFEDPort",   S_P_UINT32},
-            {NULL}};
+extern void acct_gather_interconnect_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
+    s_p_options_t options[] = {{"InterconnectOFEDPort", S_P_UINT32},
+                               {"InfinibandOFEDPort",   S_P_UINT32},
+                               {NULL}};
 
     transfer_s_p_options(full_options, options, full_options_cnt);
 

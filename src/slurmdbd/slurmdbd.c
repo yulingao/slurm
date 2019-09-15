@@ -82,9 +82,7 @@ pthread_t signal_handler_thread;    /* thread ID for signal hander */
 
 /* Local variables */
 static int dbd_sigarray[] = {    /* blocked signals for this process */
-        SIGINT, SIGTERM, SIGCHLD, SIGUSR1,
-        SIGUSR2, SIGTSTP, SIGXCPU, SIGQUIT,
-        SIGPIPE, SIGALRM, SIGABRT, SIGHUP, 0};
+        SIGINT, SIGTERM, SIGCHLD, SIGUSR1, SIGUSR2, SIGTSTP, SIGXCPU, SIGQUIT, SIGPIPE, SIGALRM, SIGABRT, SIGHUP, 0};
 static int debug_level = 0;        /* incremented for -v on command line */
 static int foreground = 0;        /* run process as a daemon */
 static log_options_t log_opts =    /* Log to stderr & syslog */
@@ -176,12 +174,10 @@ int main(int argc, char **argv) {
      * for the first time after an upgrade.
      */
     if (slurm_auth_init(NULL) != SLURM_SUCCESS) {
-        fatal("Unable to initialize %s authentication plugin",
-              slurmdbd_conf->auth_type);
+        fatal("Unable to initialize %s authentication plugin", slurmdbd_conf->auth_type);
     }
     if (slurm_acct_storage_init(NULL) != SLURM_SUCCESS) {
-        fatal("Unable to initialize %s accounting storage plugin",
-              slurmdbd_conf->storage_type);
+        fatal("Unable to initialize %s accounting storage plugin", slurmdbd_conf->storage_type);
     }
 
     _become_slurm_user();
@@ -211,8 +207,7 @@ int main(int argc, char **argv) {
      * If we are tracking wckey we need to cache wckeys,
      * if we aren't only cache the users, qos, and tres.
      */
-    assoc_init_arg.cache_level = ASSOC_MGR_CACHE_USER |
-                                 ASSOC_MGR_CACHE_QOS | ASSOC_MGR_CACHE_TRES;
+    assoc_init_arg.cache_level = ASSOC_MGR_CACHE_USER | ASSOC_MGR_CACHE_QOS | ASSOC_MGR_CACHE_TRES;
     if (slurmdbd_conf->track_wckey)
         assoc_init_arg.cache_level |= ASSOC_MGR_CACHE_WCKEY;
 
@@ -225,9 +220,7 @@ int main(int argc, char **argv) {
 
     if (reset_lft_rgt) {
         int rc;
-        if ((rc = acct_storage_g_reset_lft_rgt(
-                db_conn, slurmdbd_conf->slurm_user_id,
-                lft_rgt_list)) != SLURM_SUCCESS)
+        if ((rc = acct_storage_g_reset_lft_rgt(db_conn, slurmdbd_conf->slurm_user_id, lft_rgt_list)) != SLURM_SUCCESS)
             fatal("Error when trying to reset lft and rgt's");
 
         if (acct_storage_g_commit(db_conn, 1))
@@ -241,10 +234,9 @@ int main(int argc, char **argv) {
         fatal("getnodename_short: %m");
 
     while (1) {
-        if (slurmdbd_conf->dbd_backup &&
-            (!xstrcmp(node_name_short, slurmdbd_conf->dbd_backup) ||
-             !xstrcmp(node_name_long, slurmdbd_conf->dbd_backup) ||
-             !xstrcmp(slurmdbd_conf->dbd_backup, "localhost"))) {
+        if (slurmdbd_conf->dbd_backup && (!xstrcmp(node_name_short, slurmdbd_conf->dbd_backup) ||
+                                          !xstrcmp(node_name_long, slurmdbd_conf->dbd_backup) ||
+                                          !xstrcmp(slurmdbd_conf->dbd_backup, "localhost"))) {
             info("slurmdbd running in background mode");
             have_control = false;
             backup = true;
@@ -253,17 +245,14 @@ int main(int argc, char **argv) {
             run_dbd_backup();
             if (!shutdown_time)
                 assoc_mgr_refresh_lists(db_conn, 0);
-        } else if (slurmdbd_conf->dbd_host &&
-                   (!xstrcmp(slurmdbd_conf->dbd_host, node_name_short) ||
-                    !xstrcmp(slurmdbd_conf->dbd_host, node_name_long) ||
-                    !xstrcmp(slurmdbd_conf->dbd_host, "localhost"))) {
+        } else if (slurmdbd_conf->dbd_host && (!xstrcmp(slurmdbd_conf->dbd_host, node_name_short) ||
+                                               !xstrcmp(slurmdbd_conf->dbd_host, node_name_long) ||
+                                               !xstrcmp(slurmdbd_conf->dbd_host, "localhost"))) {
             backup = false;
             have_control = true;
         } else {
             fatal("This host not configured to run SlurmDBD "
-                  "((%s or %s) != %s | (backup) %s)",
-                  node_name_short, node_name_long,
-                  slurmdbd_conf->dbd_host,
+                  "((%s or %s) != %s | (backup) %s)", node_name_short, node_name_long, slurmdbd_conf->dbd_host,
                   slurmdbd_conf->dbd_backup);
         }
 
@@ -274,15 +263,13 @@ int main(int argc, char **argv) {
 
         if (!shutdown_time) {
             /* Create attached thread to do usage rollup */
-            slurm_thread_create(&rollup_handler_thread,
-                                _rollup_handler, db_conn);
+            slurm_thread_create(&rollup_handler_thread, _rollup_handler, db_conn);
         }
 
         /* Daemon is fully operational here */
         if (!shutdown_time || primary_resumed) {
             shutdown_time = 0;
-            info("slurmdbd version %s started",
-                 SLURM_VERSION_STRING);
+            info("slurmdbd version %s started", SLURM_VERSION_STRING);
             if (backup)
                 run_dbd_backup();
         }
@@ -320,10 +307,8 @@ int main(int argc, char **argv) {
     acct_storage_g_commit(db_conn, 1);
     acct_storage_g_close_connection(&db_conn);
 
-    if (slurmdbd_conf->pid_file &&
-        (unlink(slurmdbd_conf->pid_file) < 0)) {
-        verbose("Unable to remove pidfile '%s': %m",
-                slurmdbd_conf->pid_file);
+    if (slurmdbd_conf->pid_file && (unlink(slurmdbd_conf->pid_file) < 0)) {
+        verbose("Unable to remove pidfile '%s': %m", slurmdbd_conf->pid_file);
     }
 
     FREE_NULL_LIST(registered_clusters);
@@ -365,28 +350,19 @@ extern void shutdown_threads(void) {
  * Free storage using _free_dbd_stats() */
 static void _init_dbd_stats(void) {
     slurm_mutex_lock(&rpc_mutex);
-    rpc_stats.rollup_count =
-            xmalloc(sizeof(uint16_t) * ROLLUP_COUNT);
-    rpc_stats.rollup_time =
-            xmalloc(sizeof(uint64_t) * ROLLUP_COUNT);
-    rpc_stats.rollup_max_time =
-            xmalloc(sizeof(uint64_t) * ROLLUP_COUNT);
+    rpc_stats.rollup_count = xmalloc(sizeof(uint16_t) * ROLLUP_COUNT);
+    rpc_stats.rollup_time = xmalloc(sizeof(uint64_t) * ROLLUP_COUNT);
+    rpc_stats.rollup_max_time = xmalloc(sizeof(uint64_t) * ROLLUP_COUNT);
 
     rpc_stats.type_cnt = 200;  /* Capture info for first 200 RPC types */
-    rpc_stats.rpc_type_id =
-            xmalloc(sizeof(uint16_t) * rpc_stats.type_cnt);
-    rpc_stats.rpc_type_cnt =
-            xmalloc(sizeof(uint32_t) * rpc_stats.type_cnt);
-    rpc_stats.rpc_type_time =
-            xmalloc(sizeof(uint64_t) * rpc_stats.type_cnt);
+    rpc_stats.rpc_type_id = xmalloc(sizeof(uint16_t) * rpc_stats.type_cnt);
+    rpc_stats.rpc_type_cnt = xmalloc(sizeof(uint32_t) * rpc_stats.type_cnt);
+    rpc_stats.rpc_type_time = xmalloc(sizeof(uint64_t) * rpc_stats.type_cnt);
 
     rpc_stats.user_cnt = 200;  /* Capture info for first 200 RPC users */
-    rpc_stats.rpc_user_id =
-            xmalloc(sizeof(uint32_t) * rpc_stats.user_cnt);
-    rpc_stats.rpc_user_cnt =
-            xmalloc(sizeof(uint32_t) * rpc_stats.user_cnt);
-    rpc_stats.rpc_user_time =
-            xmalloc(sizeof(uint64_t) * rpc_stats.user_cnt);
+    rpc_stats.rpc_user_id = xmalloc(sizeof(uint32_t) * rpc_stats.user_cnt);
+    rpc_stats.rpc_user_cnt = xmalloc(sizeof(uint32_t) * rpc_stats.user_cnt);
+    rpc_stats.rpc_user_time = xmalloc(sizeof(uint64_t) * rpc_stats.user_cnt);
     slurm_mutex_unlock(&rpc_mutex);
 }
 
@@ -508,9 +484,7 @@ static void _usage(char *prog_name) {
 static void _update_logging(bool startup) {
     /* Preserve execute line arguments (if any) */
     if (debug_level) {
-        slurmdbd_conf->debug_level = MIN(
-                (LOG_LEVEL_INFO + debug_level),
-                (LOG_LEVEL_END - 1));
+        slurmdbd_conf->debug_level = MIN((LOG_LEVEL_INFO + debug_level), (LOG_LEVEL_END - 1));
     }
 
     log_opts.logfile_level = slurmdbd_conf->debug_level;
@@ -524,8 +498,7 @@ static void _update_logging(bool startup) {
         log_opts.syslog_level = slurmdbd_conf->syslog_debug;
     } else if (foreground) {
         log_opts.syslog_level = LOG_LEVEL_QUIET;
-    } else if ((slurmdbd_conf->debug_level > LOG_LEVEL_QUIET)
-               && !slurmdbd_conf->log_file) {
+    } else if ((slurmdbd_conf->debug_level > LOG_LEVEL_QUIET) && !slurmdbd_conf->log_file) {
         log_opts.syslog_level = slurmdbd_conf->debug_level;
     } else
         log_opts.syslog_level = LOG_LEVEL_FATAL;
@@ -536,12 +509,9 @@ static void _update_logging(bool startup) {
         int rc;
         gid_t slurm_user_gid;
         slurm_user_gid = gid_from_uid(slurmdbd_conf->slurm_user_id);
-        rc = chown(slurmdbd_conf->log_file,
-                   slurmdbd_conf->slurm_user_id, slurm_user_gid);
+        rc = chown(slurmdbd_conf->log_file, slurmdbd_conf->slurm_user_id, slurm_user_gid);
         if (rc) {
-            error("chown(%s, %d, %d): %m",
-                  slurmdbd_conf->log_file,
-                  (int) slurmdbd_conf->slurm_user_id,
+            error("chown(%s, %d, %d): %m", slurmdbd_conf->log_file, (int) slurmdbd_conf->slurm_user_id,
                   (int) slurm_user_gid);
         }
     }
@@ -613,8 +583,7 @@ static void _daemonize(void) {
 static void _set_work_dir(void) {
     bool success = false;
 
-    if (slurmdbd_conf->log_file &&
-        (slurmdbd_conf->log_file[0] == '/')) {
+    if (slurmdbd_conf->log_file && (slurmdbd_conf->log_file[0] == '/')) {
         char *slash_ptr, *work_dir;
         work_dir = xstrdup(slurmdbd_conf->log_file);
         slash_ptr = strrchr(work_dir, '/');
@@ -630,8 +599,7 @@ static void _set_work_dir(void) {
     }
 
     if (!success) {
-        if ((access("/var/tmp", W_OK) != 0) ||
-            (chdir("/var/tmp") < 0)) {
+        if ((access("/var/tmp", W_OK) != 0) || (chdir("/var/tmp") < 0)) {
             error("chdir(/var/tmp): %m");
         } else
             info("chdir to /var/tmp");
@@ -639,8 +607,7 @@ static void _set_work_dir(void) {
 }
 
 static void _request_registrations(void *db_conn) {
-    List cluster_list = acct_storage_g_get_clusters(
-            db_conn, getuid(), NULL);
+    List cluster_list = acct_storage_g_get_clusters(db_conn, getuid(), NULL);
     ListIterator itr;
     slurmdb_cluster_rec_t *cluster_rec = NULL;
 
@@ -648,8 +615,7 @@ static void _request_registrations(void *db_conn) {
         return;
     itr = list_iterator_create(cluster_list);
     while ((cluster_rec = list_next(itr))) {
-        if (!cluster_rec->control_port
-            || (cluster_rec->rpc_version < 9))
+        if (!cluster_rec->control_port || (cluster_rec->rpc_version < 9))
             continue;
         if (_send_slurmctld_register_req(cluster_rec) != SLURM_SUCCESS)
             /* mark this cluster as unresponsive */
@@ -692,8 +658,7 @@ static void *_rollup_handler(void *db_conn) {
     (void) pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
     if (!slurm_localtime_r(&start_time, &tm)) {
-        fatal("Couldn't get localtime for rollup handler %ld",
-              (long) start_time);
+        fatal("Couldn't get localtime for rollup handler %ld", (long) start_time);
         return NULL;
     }
 
@@ -715,11 +680,8 @@ static void *_rollup_handler(void *db_conn) {
             if (rollup_stats.rollup_time[i] == 0)
                 continue;
             rpc_stats.rollup_count[i]++;
-            rpc_stats.rollup_time[i] +=
-                    rollup_stats.rollup_time[i];
-            rpc_stats.rollup_max_time[i] =
-                    MAX(rpc_stats.rollup_max_time[i],
-                        rollup_stats.rollup_time[i]);
+            rpc_stats.rollup_time[i] += rollup_stats.rollup_time[i];
+            rpc_stats.rollup_max_time[i] = MAX(rpc_stats.rollup_max_time[i], rollup_stats.rollup_time[i]);
         }
         slurm_mutex_unlock(&rpc_mutex);
 
@@ -727,8 +689,7 @@ static void *_rollup_handler(void *db_conn) {
         start_time = time(NULL);
 
         if (!slurm_localtime_r(&start_time, &tm)) {
-            fatal("Couldn't get localtime for rollup handler %ld",
-                  (long) start_time);
+            fatal("Couldn't get localtime for rollup handler %ld", (long) start_time);
             return NULL;
         }
 
@@ -776,10 +737,8 @@ static void *_commit_handler(void *db_conn) {
             running_commit = 1;
             itr = list_iterator_create(registered_clusters);
             while ((slurmdbd_conn = list_next(itr))) {
-                debug4("running commit for %s",
-                       slurmdbd_conn->conn->cluster_name);
-                acct_storage_g_commit(
-                        slurmdbd_conn->db_conn, 1);
+                debug4("running commit for %s", slurmdbd_conn->conn->cluster_name);
+                acct_storage_g_commit(slurmdbd_conn->db_conn, 1);
             }
             list_iterator_destroy(itr);
             running_commit = 0;
@@ -789,8 +748,7 @@ static void *_commit_handler(void *db_conn) {
         /* This really doesn't need to be synconized so just
          * sleep for a bit and do it again.
          */
-        sleep(slurmdbd_conf->commit_delay ?
-              slurmdbd_conf->commit_delay : 5);
+        sleep(slurmdbd_conf->commit_delay ? slurmdbd_conf->commit_delay : 5);
     }
 
     return NULL;
@@ -808,8 +766,7 @@ static int _send_slurmctld_register_req(slurmdb_cluster_rec_t *cluster_rec) {
     int fd;
     int rc = SLURM_SUCCESS;
 
-    slurm_set_addr_char(&ctld_address, cluster_rec->control_port,
-                        cluster_rec->control_host);
+    slurm_set_addr_char(&ctld_address, cluster_rec->control_port, cluster_rec->control_host);
     fd = slurm_open_msg_conn(&ctld_address);
     if (fd < 0) {
         rc = SLURM_ERROR;
@@ -899,20 +856,17 @@ static void _become_slurm_user(void) {
     /* Determine SlurmUser gid */
     slurm_user_gid = gid_from_uid(slurmdbd_conf->slurm_user_id);
     if (slurm_user_gid == (gid_t) -1) {
-        fatal("Failed to determine gid of SlurmUser(%u)",
-              slurmdbd_conf->slurm_user_id);
+        fatal("Failed to determine gid of SlurmUser(%u)", slurmdbd_conf->slurm_user_id);
     }
 
     /* Initialize supplementary groups ID list for SlurmUser */
     if (getuid() == 0) {
         /* root does not need supplementary groups */
-        if ((slurmdbd_conf->slurm_user_id == 0) &&
-            (setgroups(0, NULL) != 0)) {
+        if ((slurmdbd_conf->slurm_user_id == 0) && (setgroups(0, NULL) != 0)) {
             fatal("Failed to drop supplementary groups, "
                   "setgroups: %m");
         } else if ((slurmdbd_conf->slurm_user_id != getuid()) &&
-                   initgroups(slurmdbd_conf->slurm_user_name,
-                              slurm_user_gid)) {
+                   initgroups(slurmdbd_conf->slurm_user_name, slurm_user_gid)) {
             fatal("Failed to set supplementary groups, "
                   "initgroups: %m");
         }
@@ -921,16 +875,13 @@ static void _become_slurm_user(void) {
     }
 
     /* Set GID to GID of SlurmUser */
-    if ((slurm_user_gid != getegid()) &&
-        (setgid(slurm_user_gid))) {
+    if ((slurm_user_gid != getegid()) && (setgid(slurm_user_gid))) {
         fatal("Failed to set GID to %d", slurm_user_gid);
     }
 
     /* Set UID to UID of SlurmUser */
-    if ((slurmdbd_conf->slurm_user_id != getuid()) &&
-        (setuid(slurmdbd_conf->slurm_user_id))) {
-        fatal("Can not set uid to SlurmUser(%u): %m",
-              slurmdbd_conf->slurm_user_id);
+    if ((slurmdbd_conf->slurm_user_id != getuid()) && (setuid(slurmdbd_conf->slurm_user_id))) {
+        fatal("Can not set uid to SlurmUser(%u): %m", slurmdbd_conf->slurm_user_id);
     }
 }
 

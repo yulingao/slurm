@@ -33,8 +33,7 @@ void sview_thread_init(gpointer vtable) {
 #endif
 }
 
-GThread *sview_thread_new(GThreadFunc func, gpointer data,
-                          gboolean joinable, GError **error) {
+GThread *sview_thread_new(GThreadFunc func, gpointer data, gboolean joinable, GError **error) {
 #ifndef GLIB_NEW_THREADS
     return g_thread_create(func, data, joinable, error);
 #else

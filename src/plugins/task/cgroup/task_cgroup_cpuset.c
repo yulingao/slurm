@@ -150,10 +150,7 @@ static int _xcgroup_cpuset_init(xcgroup_t *cg);
 static int _xcgroup_cpuset_init(xcgroup_t *cg) {
     int fstatus, i;
 
-    char *cpuset_metafiles[] = {
-            "cpus",
-            "mems"
-    };
+    char *cpuset_metafiles[] = {"cpus", "mems"};
     char cpuset_meta[PATH_MAX];
     char *cpuset_conf;
     size_t csize;
@@ -184,11 +181,8 @@ static int _xcgroup_cpuset_init(xcgroup_t *cg) {
     /* inherits ancestor params */
     for (i = 0; i < 2; i++) {
         again:
-        snprintf(cpuset_meta, sizeof(cpuset_meta), "%s%s",
-                 cpuset_prefix, cpuset_metafiles[i]);
-        if (xcgroup_get_param(&acg, cpuset_meta,
-                              &cpuset_conf, &csize)
-            != XCGROUP_SUCCESS) {
+        snprintf(cpuset_meta, sizeof(cpuset_meta), "%s%s", cpuset_prefix, cpuset_metafiles[i]);
+        if (xcgroup_get_param(&acg, cpuset_meta, &cpuset_conf, &csize) != XCGROUP_SUCCESS) {
             if (!cpuset_prefix_set) {
                 cpuset_prefix_set = 1;
                 cpuset_prefix = "cpuset.";
@@ -202,11 +196,9 @@ static int _xcgroup_cpuset_init(xcgroup_t *cg) {
         }
         if (csize > 0)
             cpuset_conf[csize - 1] = '\0';
-        if (xcgroup_set_param(cg, cpuset_meta, cpuset_conf)
-            != XCGROUP_SUCCESS) {
+        if (xcgroup_set_param(cg, cpuset_meta, cpuset_conf) != XCGROUP_SUCCESS) {
             debug("task/cgroup: unable to write %s configuration "
-                  "(%s) for cpuset cg '%s'", cpuset_meta,
-                  cpuset_conf, cg->path);
+                  "(%s) for cpuset cg '%s'", cpuset_meta, cpuset_conf, cg->path);
             xcgroup_destroy(&acg);
             xfree(cpuset_conf);
             return fstatus;
@@ -988,8 +980,7 @@ extern int task_cgroup_cpuset_init(void) {
     jobstep_cgroup_path[0] = '\0';
 
     /* initialize cpuset cgroup namespace */
-    if (xcgroup_ns_create(&cpuset_ns, "", "cpuset")
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_ns_create(&cpuset_ns, "", "cpuset") != XCGROUP_SUCCESS) {
         error("task/cgroup: unable to create cpuset namespace");
         return SLURM_ERROR;
     }
@@ -1099,8 +1090,7 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
 
     /* build user cgroup relative path if not set (should not be) */
     if (*user_cgroup_path == '\0') {
-        if (snprintf(user_cgroup_path, PATH_MAX,
-                     "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
+        if (snprintf(user_cgroup_path, PATH_MAX, "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
             error("task/cgroup: unable to build uid %u cgroup "
                   "relative path : %m", uid);
             xfree(slurm_cgpath);
@@ -1115,8 +1105,7 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
     else
         jobid = job->jobid;
     if (*job_cgroup_path == '\0') {
-        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u",
-                     user_cgroup_path, jobid) >= PATH_MAX) {
+        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u", user_cgroup_path, jobid) >= PATH_MAX) {
             error("task/cgroup: unable to build job %u cpuset "
                   "cg relative path : %m", jobid);
             return SLURM_ERROR;
@@ -1127,19 +1116,15 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
     if (*jobstep_cgroup_path == '\0') {
         int cc;
         if (stepid == SLURM_BATCH_SCRIPT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_batch", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_batch", job_cgroup_path);
         } else if (stepid == SLURM_EXTERN_CONT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_extern", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_extern", job_cgroup_path);
         } else {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_%u", job_cgroup_path, stepid);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_%u", job_cgroup_path, stepid);
         }
         if (cc >= PATH_MAX) {
             error("task/cgroup: unable to build job step %u.%u "
-                  "cpuset cg relative path: %m",
-                  jobid, stepid);
+                  "cpuset cg relative path: %m", jobid, stepid);
             return SLURM_ERROR;
         }
     }
@@ -1169,30 +1154,23 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
     /*
      * build job and job steps allocated cores lists
      */
-    debug("task/cgroup: job abstract cores are '%s'",
-          job->job_alloc_cores);
-    debug("task/cgroup: step abstract cores are '%s'",
-          job->step_alloc_cores);
-    if (xcpuinfo_abs_to_mac(job->job_alloc_cores,
-                            &job_alloc_cores) != SLURM_SUCCESS) {
+    debug("task/cgroup: job abstract cores are '%s'", job->job_alloc_cores);
+    debug("task/cgroup: step abstract cores are '%s'", job->step_alloc_cores);
+    if (xcpuinfo_abs_to_mac(job->job_alloc_cores, &job_alloc_cores) != SLURM_SUCCESS) {
         error("task/cgroup: unable to build job physical cores");
         goto error;
     }
-    if (xcpuinfo_abs_to_mac(job->step_alloc_cores,
-                            &step_alloc_cores) != SLURM_SUCCESS) {
+    if (xcpuinfo_abs_to_mac(job->step_alloc_cores, &step_alloc_cores) != SLURM_SUCCESS) {
         error("task/cgroup: unable to build step physical cores");
         goto error;
     }
-    debug("task/cgroup: job physical cores are '%s'",
-          job_alloc_cores);
-    debug("task/cgroup: step physical cores are '%s'",
-          step_alloc_cores);
+    debug("task/cgroup: job physical cores are '%s'", job_alloc_cores);
+    debug("task/cgroup: step physical cores are '%s'", step_alloc_cores);
 
     /*
      * create user cgroup in the cpuset ns (it could already exist)
      */
-    if (xcgroup_create(&cpuset_ns, &user_cpuset_cg, user_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&cpuset_ns, &user_cpuset_cg, user_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         goto error;
     }
     if (xcgroup_instantiate(&user_cpuset_cg) != XCGROUP_SUCCESS) {
@@ -1225,9 +1203,7 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
     /*
      * create job cgroup in the cpuset ns (it could already exist)
      */
-    if (xcgroup_create(&cpuset_ns, &job_cpuset_cg,
-                       job_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&cpuset_ns, &job_cpuset_cg, job_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&user_cpuset_cg);
         goto error;
     }
@@ -1247,9 +1223,7 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
      * use job's user uid/gid to enable tasks cgroups creation by
      * the user inside the step cgroup owned by root
      */
-    if (xcgroup_create(&cpuset_ns, &step_cpuset_cg,
-                       jobstep_cgroup_path,
-                       uid, gid) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&cpuset_ns, &step_cpuset_cg, jobstep_cgroup_path, uid, gid) != XCGROUP_SUCCESS) {
         /* do not delete user/job cgroup as */
         /* they can exist for other steps */
         xcgroup_destroy(&user_cpuset_cg);
@@ -1286,8 +1260,7 @@ extern int task_cgroup_cpuset_create(stepd_step_rec_t *job) {
     pid_t pid = getpid();
     rc = xcgroup_add_pids(&step_cpuset_cg, &pid, 1);
     if (rc != XCGROUP_SUCCESS) {
-        error("task/cgroup: unable to add slurmstepd to cpuset cg '%s'",
-              step_cpuset_cg.path);
+        error("task/cgroup: unable to add slurmstepd to cpuset cg '%s'", step_cpuset_cg.path);
         fstatus = SLURM_ERROR;
     } else
         fstatus = SLURM_SUCCESS;

@@ -60,20 +60,17 @@ extern bool sort_by_time2;
 extern void parse_command_line(int argc, char **argv) {
     int opt_char;
     int option_index;
-    static struct option long_options[] = {
-            {"all",           no_argument, 0, 'a'},
-            {"help",          no_argument, 0, 'h'},
-            {"reset",         no_argument, 0, 'r'},
-            {"sort-by-id",    no_argument, 0, 'i'},
-            {"sort-by-time",  no_argument, 0, 't'},
-            {"sort-by-time2", no_argument, 0, 'T'},
-            {"usage",         no_argument, 0, OPT_LONG_USAGE},
-            {"version",       no_argument, 0, 'V'},
-            {NULL, 0,                      0, 0}
-    };
+    static struct option long_options[] = {{"all",           no_argument, 0, 'a'},
+                                           {"help",          no_argument, 0, 'h'},
+                                           {"reset",         no_argument, 0, 'r'},
+                                           {"sort-by-id",    no_argument, 0, 'i'},
+                                           {"sort-by-time",  no_argument, 0, 't'},
+                                           {"sort-by-time2", no_argument, 0, 'T'},
+                                           {"usage",         no_argument, 0, OPT_LONG_USAGE},
+                                           {"version",       no_argument, 0, 'V'},
+                                           {NULL, 0,                      0, 0}};
 
-    while ((opt_char = getopt_long(argc, argv, "ahirtTV", long_options,
-                                   &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "ahirtTV", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) 'a':
                 sdiag_param = STAT_COMMAND_GET;

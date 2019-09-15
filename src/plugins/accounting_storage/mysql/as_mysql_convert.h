@@ -51,7 +51,6 @@ extern int as_mysql_convert_tables_post_create(mysql_conn_t *mysql_conn);
  * Functions for converting tables that aren't cluster centric as the other
  * functions in this deal with.
  */
-extern int as_mysql_convert_non_cluster_tables_post_create(
-        mysql_conn_t *mysql_conn);
+extern int as_mysql_convert_non_cluster_tables_post_create(mysql_conn_t *mysql_conn);
 
 #endif

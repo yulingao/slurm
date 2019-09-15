@@ -47,37 +47,39 @@
  *  SWITCH topology data structures
  *  defined here but is really tree plugin related
 \*****************************************************************************/
-struct switch_record {
-    uint64_t consumed_energy;    /* consumed energy, in joules */
-    int level;            /* level in hierarchy, leaf=0 */
-    uint32_t link_speed;        /* link speed, arbitrary units */
-    char *name;            /* switch name */
-    bitstr_t *node_bitmap;        /* bitmap of all nodes descended from
+struct switch_record
+{
+    uint64_t consumed_energy; /* consumed energy, in joules */
+    int level;                /* level in hierarchy, leaf=0 */
+    uint32_t link_speed;      /* link speed, arbitrary units */
+    char *name;               /* switch name */
+    bitstr_t *node_bitmap;    /* bitmap of all nodes descended from
 					 * this switch */
-    char *nodes;            /* name if direct descendant nodes */
-    uint16_t num_switches;         /* number of descendant switches */
-    uint16_t parent;        /* index of parent switch */
-    char *switches;            /* name of direct descendant switches */
-    uint16_t *switch_index;        /* indexes of child switches */
+    char *nodes;              /* name if direct descendant nodes */
+    uint16_t num_switches;    /* number of descendant switches */
+    uint16_t parent;          /* index of parent switch */
+    char *switches;           /* name of direct descendant switches */
+    uint16_t *switch_index;   /* indexes of child switches */
     uint32_t temp;            /* temperature, in celsius */
 };
 
-extern struct switch_record *switch_record_table;  /* ptr to switch records */
-extern int switch_record_cnt;        /* size of switch_record_table */
-extern int switch_levels;               /* number of switch levels     */
+extern struct switch_record *switch_record_table; /* ptr to switch records */
+extern int switch_record_cnt;                     /* size of switch_record_table */
+extern int switch_levels;                         /* number of switch levels     */
 
 /*****************************************************************************\
  *  Hypercube SWITCH topology data structures
  *  defined here but is really hypercube plugin related
 \*****************************************************************************/
-struct hypercube_switch {
-    int switch_index; /* index of this switch in switch_record_table */
-    char *switch_name; /* the name of this switch */
+struct hypercube_switch
+{
+    int switch_index;      /* index of this switch in switch_record_table */
+    char *switch_name;     /* the name of this switch */
     bitstr_t *node_bitmap; /* bitmap of nodes connected to this switch */
-    int node_cnt; /* number of nodes connected to this switch */
-    int avail_cnt; /* number of available nodes connected to this switch */
-    int32_t *distance; /*distance to the start (first) switch for each curve */
-    int *node_index; /* index of the connected nodes in the node_record_table */
+    int node_cnt;          /* number of nodes connected to this switch */
+    int avail_cnt;         /* number of available nodes connected to this switch */
+    int32_t *distance;     /*distance to the start (first) switch for each curve */
+    int *node_index;       /* index of the connected nodes in the node_record_table */
 };
 
 extern int hypercube_dimensions; /* number of dimensions in hypercube 
@@ -118,6 +120,8 @@ extern int slurm_topo_fini(void);
  */
 
 /*
+系统启动或重新配置后，构建和重新配置拓扑信息
+
  * slurm_topo_build_config - build or rebuild system topology information
  *	after a system startup or reconfiguration.
  */
@@ -134,7 +138,6 @@ extern bool slurm_topo_generate_node_ranking(void);
  * slurm_topo_get_node_addr - build node address and the associated pattern
  *      based on the topology information
  */
-extern int slurm_topo_get_node_addr(char *node_name, char **addr,
-                                    char **pattern);
+extern int slurm_topo_get_node_addr(char *node_name, char **addr, char **pattern);
 
 #endif /*__SLURM_CONTROLLER_TOPO_PLUGIN_API_H__*/

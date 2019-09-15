@@ -109,8 +109,7 @@ uint32_t powercap_get_node_bitmap_maxwatts(bitstr_t *select_bitmap);
  * IN reboot - node reboot required
  * RET - The power cap this job is restricted to
  */
-uint32_t powercap_get_job_cap(struct job_record *job_ptr, time_t when,
-                              bool reboot);
+uint32_t powercap_get_job_cap(struct job_record *job_ptr, time_t when, bool reboot);
 
 /**
  * power_layout_ready
@@ -139,8 +138,7 @@ int which_power_layout(void);
  * RET int* - an array of allowed frequency positions 
  *            and in 0 the number of total allowed frequencies
  */
-int *powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap,
-                                    uint32_t cpu_freq_min, uint32_t cpu_freq_max);
+int *powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap, uint32_t cpu_freq_min, uint32_t cpu_freq_max);
 
 /**
  * powercap_get_node_bitmap_maxwatts_dvfs
@@ -154,9 +152,9 @@ int *powercap_get_job_nodes_numfreq(bitstr_t *select_bitmap,
  * IN uint32_t num_cpus par job par node 
  * RET uint32_t - the max consumption in watts
  */
-uint32_t powercap_get_node_bitmap_maxwatts_dvfs(bitstr_t *idle_bitmap,
-                                                bitstr_t *select_bitmap, uint32_t *max_watts_dvfs,
-                                                int *allowed_freqs, uint32_t num_cpus);
+uint32_t
+powercap_get_node_bitmap_maxwatts_dvfs(bitstr_t *idle_bitmap, bitstr_t *select_bitmap, uint32_t *max_watts_dvfs,
+                                       int *allowed_freqs, uint32_t num_cpus);
 
 /**
  * powercap_get_job_optimal_cpufreq

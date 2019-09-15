@@ -253,8 +253,7 @@ void bit_free(bitstr_t *b) {
  *   b (IN)		bitstring to check
  *   RETURN		number of bits allocated
  */
-bitoff_t
-bit_size(bitstr_t *b) {
+bitoff_t bit_size(bitstr_t *b) {
     _assert_bitstr_valid(b);
     return _bitstr_bits(b);
 }
@@ -357,8 +356,7 @@ void bit_clear_all(bitstr_t *b) {
  *   nbits (IN)		number of bits to search
  *   RETURN      	resulting bit position (-1 if none found)
  */
-bitoff_t
-bit_ffc(bitstr_t *b) {
+bitoff_t bit_ffc(bitstr_t *b) {
     bitoff_t bit = 0, value = -1;
 
     _assert_bitstr_valid(b);
@@ -386,8 +384,7 @@ bit_ffc(bitstr_t *b) {
  *   n (IN)             number of bits needed
  *   RETURN             position of first bit in range (-1 if none found)
  */
-bitoff_t
-bit_nffc(bitstr_t *b, int32_t n) {
+bitoff_t bit_nffc(bitstr_t *b, int32_t n) {
     bitoff_t value = -1;
     bitoff_t bit;
     int32_t cnt = 0;
@@ -416,8 +413,7 @@ bit_nffc(bitstr_t *b, int32_t n) {
  *   seed (IN)          position at which to begin search
  *   RETURN             position of first bit in range (-1 if none found)
  */
-bitoff_t
-bit_noc(bitstr_t *b, int32_t n, int32_t seed) {
+bitoff_t bit_noc(bitstr_t *b, int32_t n, int32_t seed) {
     bitoff_t value = -1;
     bitoff_t bit;
     int32_t cnt = 0;
@@ -463,8 +459,7 @@ bit_noc(bitstr_t *b, int32_t n, int32_t seed) {
  *   n (IN)             number of bits needed
  *   RETURN             position of first bit in range (-1 if none found)
  */
-bitoff_t
-bit_nffs(bitstr_t *b, int32_t n) {
+bitoff_t bit_nffs(bitstr_t *b, int32_t n) {
     bitoff_t value = -1;
     bitoff_t bit;
     int32_t cnt = 0;
@@ -496,8 +491,7 @@ bit_nffs(bitstr_t *b, int32_t n) {
  *   b (IN)		bitstring to search
  *   RETURN 		resulting bit position (-1 if none found)
  */
-bitoff_t
-bit_ffs(bitstr_t *b) {
+bitoff_t bit_ffs(bitstr_t *b) {
     bitoff_t bit = 0, value = -1;
 
     _assert_bitstr_valid(b);
@@ -534,8 +528,7 @@ bit_ffs(bitstr_t *b) {
  *   b (IN)		bitstring to search
  *   RETURN 		resulting bit position (-1 if none found)
  */
-bitoff_t
-bit_fls(bitstr_t *b) {
+bitoff_t bit_fls(bitstr_t *b) {
     bitoff_t bit, value = -1;
     int32_t word;
 
@@ -607,8 +600,7 @@ int bit_super_set(bitstr_t *b1, bitstr_t *b2) {
     assert(_bitstr_bits(b1) == _bitstr_bits(b2));
 
     for (bit = 0; bit < _bitstr_bits(b1); bit += sizeof(bitstr_t) * 8) {
-        if (b1[_bit_word(bit)] != (b1[_bit_word(bit)] &
-                                   b2[_bit_word(bit)]))
+        if (b1[_bit_word(bit)] != (b1[_bit_word(bit)] & b2[_bit_word(bit)]))
             return 0;
     }
 
@@ -618,8 +610,7 @@ int bit_super_set(bitstr_t *b1, bitstr_t *b2) {
 /*
  * return 1 if b1 and b2 are identical, 0 otherwise
  */
-extern int
-bit_equal(bitstr_t *b1, bitstr_t *b2) {
+extern int bit_equal(bitstr_t *b1, bitstr_t *b2) {
     bitoff_t bit;
 
     _assert_bitstr_valid(b1);
@@ -716,8 +707,7 @@ void bit_or_not(bitstr_t *b1, bitstr_t *b2) {
 /*
  * return a copy of the supplied bitmap
  */
-bitstr_t *
-bit_copy(bitstr_t *b) {
+bitstr_t *bit_copy(bitstr_t *b) {
     bitstr_t *new;
     int32_t newsize_bits;
     size_t len = 0; /* Number of bytes to memcpy() */
@@ -752,8 +742,7 @@ void bit_copybits(bitstr_t *dest, bitstr_t *src) {
  * Returns the hamming weight (i.e. the number of bits set) in a word.
  * NOTE: This routine borrowed from Linux 4.9 <tools/lib/hweight.c>.
  */
-static uint64_t
-hweight(uint64_t w) {
+static uint64_t hweight(uint64_t w) {
     w -= (w >> 1) & 0x5555555555555555ul;
     w = (w & 0x3333333333333333ul) + ((w >> 2) & 0x3333333333333333ul);
     w = (w + (w >> 4)) & 0x0f0f0f0f0f0f0f0ful;
@@ -767,8 +756,7 @@ hweight(uint64_t w) {
  *   b (IN)		bitstring to check
  *   RETURN		count of set bits
  */
-int32_t
-bit_set_count(bitstr_t *b) {
+int32_t bit_set_count(bitstr_t *b) {
     int32_t count = 0;
     bitoff_t bit, bit_cnt;
     int32_t word_size = sizeof(bitstr_t) * 8;
@@ -793,8 +781,7 @@ bit_set_count(bitstr_t *b) {
  *   end (IN)	last bit to check+1
  *   RETURN		count of set bits
  */
-int32_t
-bit_set_count_range(bitstr_t *b, int32_t start, int32_t end) {
+int32_t bit_set_count_range(bitstr_t *b, int32_t start, int32_t end) {
     int32_t count = 0, eow;
     bitoff_t bit;
     const int32_t word_size = sizeof(bitstr_t) * 8;
@@ -822,8 +809,7 @@ bit_set_count_range(bitstr_t *b, int32_t start, int32_t end) {
 /*
  * return number of bits set in b1 that are also set in b2, 0 if no overlap
  */
-extern int32_t
-bit_overlap(bitstr_t *b1, bitstr_t *b2) {
+extern int32_t bit_overlap(bitstr_t *b1, bitstr_t *b2) {
     int32_t count = 0;
     bitoff_t bit, bit_cnt;
     int32_t word_size = sizeof(bitstr_t) * 8;
@@ -851,8 +837,7 @@ bit_overlap(bitstr_t *b1, bitstr_t *b2) {
  *   b (IN)		bitstring to check
  *   RETURN		count of clear bits
  */
-int32_t
-bit_clear_count(bitstr_t *b) {
+int32_t bit_clear_count(bitstr_t *b) {
     _assert_bitstr_valid(b);
     return (_bitstr_bits(b) - bit_set_count(b));
 }
@@ -864,8 +849,7 @@ bit_clear_count(bitstr_t *b) {
  *   end (IN)	last bit to check+1
  *   RETURN		count of set bits
  */
-int32_t
-bit_clear_count_range(bitstr_t *b, int32_t start, int32_t end) {
+int32_t bit_clear_count_range(bitstr_t *b, int32_t start, int32_t end) {
     _assert_bitstr_valid(b);
     int diff = end - start;
 
@@ -879,8 +863,7 @@ bit_clear_count_range(bitstr_t *b, int32_t start, int32_t end) {
  *   b (IN)             bitstring to search
  *   RETURN             the largest number of contiguous bits set in b
  */
-int32_t
-bit_nset_max_count(bitstr_t *b) {
+int32_t bit_nset_max_count(bitstr_t *b) {
     bitoff_t bit;
     int32_t cnt = 0;
     int32_t maxcnt = 0;
@@ -914,8 +897,7 @@ bit_nset_max_count(bitstr_t *b) {
  *				note: nbits must be >= bit_size(b1)
  *   RETURN		new rotated bitmap
  */
-bitstr_t *
-bit_rotate_copy(bitstr_t *b1, int32_t n, bitoff_t nbits) {
+bitstr_t *bit_rotate_copy(bitstr_t *b1, int32_t n, bitoff_t nbits) {
     bitoff_t bit, dst;
     bitstr_t *new;
     bitoff_t bitsize;
@@ -976,8 +958,7 @@ void bit_rotate(bitstr_t *b1, int32_t n) {
 /*
  * build a bitmap containing the first nbits of b which are set
  */
-bitstr_t *
-bit_pick_cnt(bitstr_t *b, bitoff_t nbits) {
+bitstr_t *bit_pick_cnt(bitstr_t *b, bitoff_t nbits) {
     bitoff_t bit = 0, new_bits, count = 0;
     bitstr_t *new;
     int32_t word_size = sizeof(bitstr_t) * 8;
@@ -1000,8 +981,7 @@ bit_pick_cnt(bitstr_t *b, bitoff_t nbits) {
         }
 
         new_bits = hweight(b[word]);
-        if (((count + new_bits) <= nbits) &&
-            ((bit + word_size - 1) < _bitstr_bits(b))) {
+        if (((count + new_bits) <= nbits) && ((bit + word_size - 1) < _bitstr_bits(b))) {
             new[word] = b[word];
             count += new_bits;
             bit += word_size;
@@ -1049,18 +1029,15 @@ char *bit_fmt(char *str, int32_t len, bitstr_t *b) {
             }
             size = strlen(str);
             if (bit == start) { /* add single bit position */
-                ret = snprintf(str + size, len - size,
-                               "%"
-                                       BITSTR_FMT
-                                       ",", start);
+                ret = snprintf(str + size, len - size, "%"
+                        BITSTR_FMT
+                        ",", start);
             } else { /* add bit position range */
-                ret = snprintf(str + size, len - size,
-                               "%"
-                                       BITSTR_FMT
-                                       "-%"
-                                       BITSTR_FMT
-                                       ",",
-                               start, bit);
+                ret = snprintf(str + size, len - size, "%"
+                        BITSTR_FMT
+                        "-%"
+                        BITSTR_FMT
+                        ",", start, bit);
             }
             assert(ret != -1);
         }
@@ -1098,14 +1075,12 @@ char *bit_fmt_full(bitstr_t *b) {
             if (bit == start) /* add single bit position */
                 xstrfmtcat(str, "%s%"
             BITSTR_FMT
-            "",
-                    comma, start);
+            "", comma, start);
             else /* add bit position range */
             xstrfmtcat(str, "%s%"
             BITSTR_FMT
             "-%"
-            BITSTR_FMT,
-                    comma, start, bit);
+            BITSTR_FMT, comma, start, bit);
             comma = ",";
         }
         bit++;
@@ -1144,15 +1119,12 @@ char *bit_fmt_range(bitstr_t *b, int offset, int len) {
             if (bit == start) { /* add single bit position */
                 xstrfmtcat(str, "%s%"
                 BITSTR_FMT
-                "",
-                        comma, (start - offset));
+                "", comma, (start - offset));
             } else { /* add bit position range */
                 xstrfmtcat(str, "%s%"
                 BITSTR_FMT
                 "-%"
-                BITSTR_FMT,
-                        comma, (start - offset),
-                        (bit - offset));
+                BITSTR_FMT, comma, (start - offset), (bit - offset));
             }
             comma = ",";
         }
@@ -1206,14 +1178,12 @@ int32_t *bitfmt2int(char *bit_str_ptr) {
         bit_inx = sum = 0;
         start_val = -1;
         for (i = 0; i < size; i++) {
-            if (bit_str_ptr[i] >= '0' &&
-                bit_str_ptr[i] <= '9') {
+            if (bit_str_ptr[i] >= '0' && bit_str_ptr[i] <= '9') {
                 sum = (sum * 10) + (bit_str_ptr[i] - '0');
             } else if (bit_str_ptr[i] == '-') {
                 start_val = sum;
                 sum = 0;
-            } else if (bit_str_ptr[i] == ',' ||
-                       bit_str_ptr[i] == '\0') {
+            } else if (bit_str_ptr[i] == ',' || bit_str_ptr[i] == '\0') {
                 if (i == 0)
                     break;
                 if (start_val == -1)
@@ -1258,8 +1228,7 @@ int32_t *bitfmt2int(char *bit_str_ptr) {
  * output: char *
  * NOTE: the caller must xfree the returned memory
  */
-char *
-inx2bitfmt(int32_t *inx) {
+char *inx2bitfmt(int32_t *inx) {
     int32_t j = 0;
     char *bit_char_ptr = NULL;
 
@@ -1288,8 +1257,7 @@ int inx2bitstr(bitstr_t *b, int32_t *inx) {
     if (bit_cnt > 0)
         bit_nclear(b, 0, bit_cnt - 1);
     for (p = inx; *p != -1; p += 2) {
-        if ((*p < 0) || (*p >= bit_cnt) ||
-            (*(p + 1) < 0) || (*(p + 1) >= bit_cnt)) {
+        if ((*p < 0) || (*p >= bit_cnt) || (*(p + 1) < 0) || (*(p + 1) >= bit_cnt)) {
             rc = -1;
             break;
         }
@@ -1504,8 +1472,7 @@ void bit_unfmt_binmask(bitstr_t *bitmap, const char *str) {
  *   RETURN             number bit is set in bitstring (-1 on error)
  */
 
-bitoff_t
-bit_get_bit_num(bitstr_t *b, int32_t pos) {
+bitoff_t bit_get_bit_num(bitstr_t *b, int32_t pos) {
     bitoff_t bit;
     int32_t cnt = 0;
     bitoff_t bit_cnt;
@@ -1534,8 +1501,7 @@ bit_get_bit_num(bitstr_t *b, int32_t pos) {
  *   RETURN             number bit is set in bitstring (-1 on error)
  */
 
-int32_t
-bit_get_pos_num(bitstr_t *b, bitoff_t pos) {
+int32_t bit_get_pos_num(bitstr_t *b, bitoff_t pos) {
     bitoff_t bit;
     int32_t cnt = -1;
     bitoff_t bit_cnt;

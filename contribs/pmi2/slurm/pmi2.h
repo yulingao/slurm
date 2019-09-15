@@ -23,72 +23,72 @@
 extern "C" {
 #endif
 
-static const char FULLINIT_CMD[]          = "fullinit";
-static const char FULLINITRESP_CMD[]      = "fullinit-response";
-static const char FINALIZE_CMD[]          = "finalize";
-static const char FINALIZERESP_CMD[]      = "finalize-response";
-static const char ABORT_CMD[]             = "abort";
-static const char JOBGETID_CMD[]          = "job-getid";
-static const char JOBGETIDRESP_CMD[]      = "job-getid-response";
-static const char JOBCONNECT_CMD[]        = "job-connect";
-static const char JOBCONNECTRESP_CMD[]    = "job-connect-response";
-static const char JOBDISCONNECT_CMD[]     = "job-disconnect";
+static const char FULLINIT_CMD[] = "fullinit";
+static const char FULLINITRESP_CMD[] = "fullinit-response";
+static const char FINALIZE_CMD[] = "finalize";
+static const char FINALIZERESP_CMD[] = "finalize-response";
+static const char ABORT_CMD[] = "abort";
+static const char JOBGETID_CMD[] = "job-getid";
+static const char JOBGETIDRESP_CMD[] = "job-getid-response";
+static const char JOBCONNECT_CMD[] = "job-connect";
+static const char JOBCONNECTRESP_CMD[] = "job-connect-response";
+static const char JOBDISCONNECT_CMD[] = "job-disconnect";
 static const char JOBDISCONNECTRESP_CMD[] = "job-disconnect-response";
-static const char KVSPUT_CMD[]            = "kvs-put";
-static const char KVSPUTRESP_CMD[]        = "kvs-put-response";
-static const char KVSFENCE_CMD[]          = "kvs-fence";
-static const char KVSFENCERESP_CMD[]      = "kvs-fence-response";
-static const char KVSGET_CMD[]            = "kvs-get";
-static const char KVSGETRESP_CMD[]        = "kvs-get-response";
-static const char GETNODEATTR_CMD[]       = "info-getnodeattr";
-static const char GETNODEATTRRESP_CMD[]   = "info-getnodeattr-response";
-static const char PUTNODEATTR_CMD[]       = "info-putnodeattr";
-static const char PUTNODEATTRRESP_CMD[]   = "info-putnodeattr-response";
-static const char GETJOBATTR_CMD[]        = "info-getjobattr";
-static const char GETJOBATTRRESP_CMD[]    = "info-getjobattr-response";
-static const char NAMEPUBLISH_CMD[]       = "name-publish";
-static const char NAMEPUBLISHRESP_CMD[]   = "name-publish-response";
-static const char NAMEUNPUBLISH_CMD[]     = "name-unpublish";
+static const char KVSPUT_CMD[] = "kvs-put";
+static const char KVSPUTRESP_CMD[] = "kvs-put-response";
+static const char KVSFENCE_CMD[] = "kvs-fence";
+static const char KVSFENCERESP_CMD[] = "kvs-fence-response";
+static const char KVSGET_CMD[] = "kvs-get";
+static const char KVSGETRESP_CMD[] = "kvs-get-response";
+static const char GETNODEATTR_CMD[] = "info-getnodeattr";
+static const char GETNODEATTRRESP_CMD[] = "info-getnodeattr-response";
+static const char PUTNODEATTR_CMD[] = "info-putnodeattr";
+static const char PUTNODEATTRRESP_CMD[] = "info-putnodeattr-response";
+static const char GETJOBATTR_CMD[] = "info-getjobattr";
+static const char GETJOBATTRRESP_CMD[] = "info-getjobattr-response";
+static const char NAMEPUBLISH_CMD[] = "name-publish";
+static const char NAMEPUBLISHRESP_CMD[] = "name-publish-response";
+static const char NAMEUNPUBLISH_CMD[] = "name-unpublish";
 static const char NAMEUNPUBLISHRESP_CMD[] = "name-unpublish-response";
-static const char NAMELOOKUP_CMD[]        = "name-lookup";
-static const char NAMELOOKUPRESP_CMD[]    = "name-lookup-response";
-static const char RING_CMD[]              = "ring";
-static const char RINGRESP_CMD[]          = "ring-response";
+static const char NAMELOOKUP_CMD[] = "name-lookup";
+static const char NAMELOOKUPRESP_CMD[] = "name-lookup-response";
+static const char RING_CMD[] = "ring";
+static const char RINGRESP_CMD[] = "ring-response";
 
-static const char PMIJOBID_KEY[]          = "pmijobid";
-static const char PMIRANK_KEY[]           = "pmirank";
-static const char SRCID_KEY[]             = "srcid";
-static const char THREADED_KEY[]          = "threaded";
-static const char RC_KEY[]                = "rc";
-static const char ERRMSG_KEY[]            = "errmsg";
-static const char PMIVERSION_KEY[]        = "pmi-version";
-static const char PMISUBVER_KEY[]         = "pmi-subversion";
-static const char RANK_KEY[]              = "rank";
-static const char SIZE_KEY[]              = "size";
-static const char APPNUM_KEY[]            = "appnum";
-static const char SPAWNERJOBID_KEY[]      = "spawner-jobid";
-static const char DEBUGGED_KEY[]          = "debugged";
-static const char PMIVERBOSE_KEY[]        = "pmiverbose";
-static const char ISWORLD_KEY[]           = "isworld";
-static const char MSG_KEY[]               = "msg";
-static const char JOBID_KEY[]             = "jobid";
-static const char KVSCOPY_KEY[]           = "kvscopy";
-static const char KEY_KEY[]               = "key";
-static const char VALUE_KEY[]             = "value";
-static const char FOUND_KEY[]             = "found";
-static const char WAIT_KEY[]              = "wait";
-static const char NAME_KEY[]              = "name";
-static const char PORT_KEY[]              = "port";
-static const char THRID_KEY[]             = "thrid";
-static const char INFOKEYCOUNT_KEY[]      = "infokeycount";
-static const char INFOKEY_KEY[]           = "infokey%d";
-static const char INFOVAL_KEY[]           = "infoval%d";
-static const char RING_COUNT_KEY[]        = "ring-count";
-static const char RING_LEFT_KEY[]         = "ring-left";
-static const char RING_RIGHT_KEY[]        = "ring-right";
+static const char PMIJOBID_KEY[] = "pmijobid";
+static const char PMIRANK_KEY[] = "pmirank";
+static const char SRCID_KEY[] = "srcid";
+static const char THREADED_KEY[] = "threaded";
+static const char RC_KEY[] = "rc";
+static const char ERRMSG_KEY[] = "errmsg";
+static const char PMIVERSION_KEY[] = "pmi-version";
+static const char PMISUBVER_KEY[] = "pmi-subversion";
+static const char RANK_KEY[] = "rank";
+static const char SIZE_KEY[] = "size";
+static const char APPNUM_KEY[] = "appnum";
+static const char SPAWNERJOBID_KEY[] = "spawner-jobid";
+static const char DEBUGGED_KEY[] = "debugged";
+static const char PMIVERBOSE_KEY[] = "pmiverbose";
+static const char ISWORLD_KEY[] = "isworld";
+static const char MSG_KEY[] = "msg";
+static const char JOBID_KEY[] = "jobid";
+static const char KVSCOPY_KEY[] = "kvscopy";
+static const char KEY_KEY[] = "key";
+static const char VALUE_KEY[] = "value";
+static const char FOUND_KEY[] = "found";
+static const char WAIT_KEY[] = "wait";
+static const char NAME_KEY[] = "name";
+static const char PORT_KEY[] = "port";
+static const char THRID_KEY[] = "thrid";
+static const char INFOKEYCOUNT_KEY[] = "infokeycount";
+static const char INFOKEY_KEY[] = "infokey%d";
+static const char INFOVAL_KEY[] = "infoval%d";
+static const char RING_COUNT_KEY[] = "ring-count";
+static const char RING_LEFT_KEY[] = "ring-left";
+static const char RING_RIGHT_KEY[] = "ring-right";
 
-static const char TRUE_VAL[]              = "TRUE";
-static const char FALSE_VAL[]             = "FALSE";
+static const char TRUE_VAL[] = "TRUE";
+static const char FALSE_VAL[] = "FALSE";
 
 /* Local types */
 
@@ -97,19 +97,19 @@ static const char FALSE_VAL[]             = "FALSE";
 typedef struct PMI2_Keyvalpair {
     const char *key;
     const char *value;
-    int         valueLen;  /* Length of a value (values may contain nulls, so
+    int valueLen;  /* Length of a value (values may contain nulls, so
                               we need this) */
-    int         isCopy;    /* The value is a copy (and will need to be freed)
+    int isCopy;    /* The value is a copy (and will need to be freed)
                               if this is true, otherwise,
                               it is a null-terminated string in the original
                               buffer */
 } PMI2_Keyvalpair;
 
 typedef struct PMI2_Command {
-    int               nPairs;   /* Number of key=value pairs */
-    char             *command;  /* Overall command buffer */
+    int nPairs;   /* Number of key=value pairs */
+    char *command;  /* Overall command buffer */
     PMI2_Keyvalpair **pairs;    /* Array of pointers to pairs */
-    int               complete;
+    int complete;
 } PMI2_Command;
 
 
@@ -190,10 +190,12 @@ typedef struct PMI_keyval_t
   
 @*/
 typedef struct PMI2_Connect_comm {
-    int (*read)( void *buf, int maxlen, void *ctx );
-    int (*write)( const void *buf, int len, void *ctx );
+    int (*read)(void *buf, int maxlen, void *ctx);
+
+    int (*write)(const void *buf, int len, void *ctx);
+
     void *ctx;
-    int  isMaster;
+    int isMaster;
 } PMI2_Connect_comm_t;
 
 
@@ -230,12 +232,12 @@ typedef struct PMI2_Connect_comm {
   Info-DS
   S*/
 typedef struct MPID_Info {
-    int                 handle;
-    int                 pobj_mutex;
-    int                 ref_count;
-    struct MPID_Info    *next;
-    char                *key;
-    char                *value;
+    int handle;
+    int pobj_mutex;
+    int ref_count;
+    struct MPID_Info *next;
+    char *key;
+    char *value;
 } MPID_Info;
 
 #define PMI2U_Info MPID_Info
@@ -332,15 +334,9 @@ int PMI2_Abort(int flag, const char msg[]);
   mpiexec in the MPI-2 standard.  Environment variables may be passed to the
   spawned processes through PMI implementation specific 'info_keyval' parameters.
 @*/
-int PMI2_Job_Spawn(int count, const char * cmds[],
-                   int argcs[], const char ** argvs[],
-                   const int maxprocs[],
-                   const int info_keyval_sizes[],
-                   const struct MPID_Info *info_keyval_vectors[],
-                   int preput_keyval_size,
-                   const struct MPID_Info *preput_keyval_vector[],
-                   char jobId[], int jobIdSize,
-                   int errors[]);
+int PMI2_Job_Spawn(int count, const char *cmds[], int argcs[], const char **argvs[], const int maxprocs[],
+                   const int info_keyval_sizes[], const struct MPID_Info *info_keyval_vectors[], int preput_keyval_size,
+                   const struct MPID_Info *preput_keyval_vector[], char jobId[], int jobIdSize, int errors[]);
 
 
 /*@
@@ -368,7 +364,7 @@ int PMI2_Job_GetId(char jobid[], int jobid_size);
   Returns 'PMI2_SUCCESS' on success and an PMI error code on failure.
 
 @*/
-int PMI2_Job_GetRank(int* rank);
+int PMI2_Job_GetRank(int *rank);
 
 /*@
   PMI2_Info_GetSize - get the number of processes on the node
@@ -379,7 +375,7 @@ int PMI2_Job_GetRank(int* rank);
   Return values:
   Returns 'PMI2_SUCCESS' on success and an PMI error code on failure.
 @*/
-int PMI2_Info_GetSize(int* size);
+int PMI2_Info_GetSize(int *size);
 
 /*@
   PMI2_Job_Connect - connect to the parallel job with ID jobid
@@ -450,6 +446,7 @@ int PMI2_Job_Disconnect(const char jobid[]);
 
 @*/
 #define HAVE_PMIX_RING 1 /* so one can conditionally compile with this function */
+
 int PMIX_Ring(const char value[], int *rank, int *ranks, char left[], char right[], int maxvalue);
 
 /*@
@@ -470,6 +467,7 @@ int PMIX_Ring(const char value[], int *rank, int *ranks, char left[], char right
 
 @*/
 int PMI2_KVS_Put(const char key[], const char value[]);
+
 /*@
   PMI2_KVS_Fence - commit all PMI2_KVS_Put calls made before this fence
 
@@ -513,7 +511,7 @@ int PMI2_KVS_Fence(void);
   Returns 'MPI_SUCCESS' on success and an MPI error code on failure.
 
 @*/
-int PMI2_KVS_Get(const char *jobid, int src_pmi_id, const char key[], char value [], int maxvalue, int *vallen);
+int PMI2_KVS_Get(const char *jobid, int src_pmi_id, const char key[], char value[], int maxvalue, int *vallen);
 
 /*@
   PMI2_Info_GetNodeAttr - returns the value of the attribute associated
@@ -719,8 +717,8 @@ int PMI2_Nameserv_publish(const char service_name[], const struct MPID_Info *inf
   Returns 'MPI_SUCCESS' on success and an MPI error code on failure.
 
 @*/
-int PMI2_Nameserv_lookup(const char service_name[], const struct MPID_Info *info_ptr,
-                        char port[], int portLen);
+int PMI2_Nameserv_lookup(const char service_name[], const struct MPID_Info *info_ptr, char port[], int portLen);
+
 /*@
   PMI2_Nameserv_unpublish - unpublish a name
 
@@ -732,9 +730,7 @@ int PMI2_Nameserv_lookup(const char service_name[], const struct MPID_Info *info
   Returns 'MPI_SUCCESS' on success and an MPI error code on failure.
 
 @*/
-int PMI2_Nameserv_unpublish(const char service_name[], 
-                           const struct MPID_Info *info_ptr);
-
+int PMI2_Nameserv_unpublish(const char service_name[], const struct MPID_Info *info_ptr);
 
 
 #if defined(__cplusplus)

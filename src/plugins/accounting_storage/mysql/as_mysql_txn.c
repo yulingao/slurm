@@ -39,8 +39,7 @@
 
 #include "as_mysql_txn.h"
 
-extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
-                             slurmdb_txn_cond_t *txn_cond) {
+extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid, slurmdb_txn_cond_t *txn_cond) {
     char *query = NULL;
     char *assoc_extra = NULL;
     char *name_extra = NULL;
@@ -57,15 +56,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
     bool locked = 0;
 
     /* if this changes you will need to edit the corresponding enum */
-    char *txn_req_inx[] = {
-            "id",
-            "timestamp",
-            "action",
-            "name",
-            "actor",
-            "info",
-            "cluster"
-    };
+    char *txn_req_inx[] = {"id", "timestamp", "action", "name", "actor", "info", "cluster"};
     enum {
         TXN_REQ_ID,
         TXN_REQ_TS,
@@ -106,8 +97,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
 
             xstrfmtcat(name_extra, "(name like '%%\\'%s\\'%%'"
                                    " || name='%s')"
-                                   " || (info like '%%acct=\\'%s\\'%%')",
-                       object, object, object);
+                                   " || (info like '%%acct=\\'%s\\'%%')", object, object, object);
             set = 1;
         }
         list_iterator_destroy(itr);
@@ -129,8 +119,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
             }
             xstrfmtcat(name_extra, "(cluster='%s' || "
                                    "name like '%%\\'%s\\'%%' || name='%s')"
-                                   " || (info like '%%cluster=\\'%s\\'%%')",
-                       object, object, object, object);
+                                   " || (info like '%%cluster=\\'%s\\'%%')", object, object, object, object);
             set = 1;
         }
         list_iterator_destroy(itr);
@@ -160,8 +149,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
 
             xstrfmtcat(name_extra, "(name like '%%\\'%s\\'%%'"
                                    " || name='%s')"
-                                   " || (info like '%%user=\\'%s\\'%%')",
-                       object, object, object);
+                                   " || (info like '%%user=\\'%s\\'%%')", object, object, object);
 
             set = 1;
         }
@@ -178,12 +166,10 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
 
         itr = list_iterator_create(use_cluster_list);
         while ((object = list_next(itr))) {
-            xstrfmtcat(query, "select id_assoc from \"%s_%s\"%s",
-                       object, assoc_table, assoc_extra);
+            xstrfmtcat(query, "select id_assoc from \"%s_%s\"%s", object, assoc_table, assoc_extra);
             if (debug_flags & DEBUG_FLAG_DB_QUERY)
                 DB_DEBUG(mysql_conn->conn, "query\n%s", query);
-            if (!(result = mysql_db_query_ret(
-                    mysql_conn, query, 0))) {
+            if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
                 xfree(query);
                 break;
             }
@@ -191,13 +177,9 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
 
             if (mysql_num_rows(result)) {
                 if (extra)
-                    xstrfmtcat(extra,
-                               " || (cluster='%s' && (",
-                               object);
+                    xstrfmtcat(extra, " || (cluster='%s' && (", object);
                 else
-                    xstrfmtcat(extra,
-                               " where (cluster='%s' && (",
-                               object);
+                    xstrfmtcat(extra, " where (cluster='%s' && (", object);
 
                 set = 0;
 
@@ -205,12 +187,10 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
                     if (set)
                         xstrcat(extra, " || ");
 
-                    xstrfmtcat(extra,
-                               "(name like "
-                               "'%%id_assoc=%s %%' "
-                               "|| name like "
-                               "'%%id_assoc=%s)')",
-                               row[0], row[0]);
+                    xstrfmtcat(extra, "(name like "
+                                      "'%%id_assoc=%s %%' "
+                                      "|| name like "
+                                      "'%%id_assoc=%s)')", row[0], row[0]);
                     set = 1;
                 }
                 xstrcat(extra, "))");
@@ -276,8 +256,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
             char *ptr = NULL;
             long num = strtol(object, &ptr, 10);
             if ((num == 0) && ptr && ptr[0]) {
-                error("Invalid value for txn id (%s)",
-                      object);
+                error("Invalid value for txn id (%s)", object);
                 xfree(extra);
                 list_iterator_destroy(itr);
                 goto end_it;
@@ -331,8 +310,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
             xstrcat(extra, " && (");
         else
             xstrcat(extra, " where (");
-        xstrfmtcat(extra, "timestamp < %ld && timestamp >= %ld)",
-                   txn_cond->time_end, txn_cond->time_start);
+        xstrfmtcat(extra, "timestamp < %ld && timestamp >= %ld)", txn_cond->time_end, txn_cond->time_start);
     } else if (txn_cond->time_start) {
         if (extra)
             xstrcat(extra, " && (");
@@ -352,8 +330,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
      * when grouping the names
      */
     if (txn_cond->with_assoc_info)
-        mysql_db_query(mysql_conn,
-                       "set session group_concat_max_len=65536;");
+        mysql_db_query(mysql_conn, "set session group_concat_max_len=65536;");
 
     empty:
     if (!locked && (use_cluster_list == as_mysql_cluster_list)) {
@@ -379,8 +356,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
 
     if (debug_flags & DEBUG_FLAG_DB_QUERY)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         goto end_it;
     }
@@ -401,26 +377,19 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
         txn->where_query = xstrdup(row[TXN_REQ_NAME]);
         txn->clusters = xstrdup(row[TXN_REQ_CLUSTER]);
 
-        if (txn_cond && txn_cond->with_assoc_info
-            && (txn->action == DBD_ADD_ASSOCS
-                || txn->action == DBD_MODIFY_ASSOCS
-                || txn->action == DBD_REMOVE_ASSOCS)) {
+        if (txn_cond && txn_cond->with_assoc_info &&
+            (txn->action == DBD_ADD_ASSOCS || txn->action == DBD_MODIFY_ASSOCS || txn->action == DBD_REMOVE_ASSOCS)) {
             MYSQL_RES *result2 = NULL;
             MYSQL_ROW row2;
             if (txn->clusters) {
-                query = xstrdup_printf(
-                        "select "
-                        "group_concat(distinct user "
-                        "order by user), "
-                        "group_concat(distinct acct "
-                        "order by acct) "
-                        "from \"%s_%s\" where %s",
-                        txn->clusters, assoc_table,
-                        row[TXN_REQ_NAME]);
-                debug4("%d(%s:%d) query\n%s", mysql_conn->conn,
-                       THIS_FILE, __LINE__, query);
-                if (!(result2 = mysql_db_query_ret(
-                        mysql_conn, query, 0))) {
+                query = xstrdup_printf("select "
+                                       "group_concat(distinct user "
+                                       "order by user), "
+                                       "group_concat(distinct acct "
+                                       "order by acct) "
+                                       "from \"%s_%s\" where %s", txn->clusters, assoc_table, row[TXN_REQ_NAME]);
+                debug4("%d(%s:%d) query\n%s", mysql_conn->conn, THIS_FILE, __LINE__, query);
+                if (!(result2 = mysql_db_query_ret(mysql_conn, query, 0))) {
                     xfree(query);
                     continue;
                 }
@@ -435,8 +404,7 @@ extern List as_mysql_get_txn(mysql_conn_t *mysql_conn, uid_t uid,
                 mysql_free_result(result2);
             } else {
                 error("We can't handle associations "
-                      "from action %s yet.",
-                      slurmdbd_msg_type_2_str(txn->action, 1));
+                      "from action %s yet.", slurmdbd_msg_type_2_str(txn->action, 1));
             }
         }
     }

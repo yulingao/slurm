@@ -55,8 +55,7 @@ extern void get_reservation(void) {
     bitstr_t *nodes_req = NULL;
 
     if (resv_info_ptr) {
-        error_code = slurm_load_reservations(resv_info_ptr->last_update,
-                                             &new_resv_ptr);
+        error_code = slurm_load_reservations(resv_info_ptr->last_update, &new_resv_ptr);
         if (error_code == SLURM_SUCCESS)
             slurm_free_reservation_info_msg(resv_info_ptr);
         else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
@@ -64,20 +63,15 @@ extern void get_reservation(void) {
             new_resv_ptr = resv_info_ptr;
         }
     } else
-        error_code = slurm_load_reservations((time_t) NULL,
-                                             &new_resv_ptr);
+        error_code = slurm_load_reservations((time_t) NULL, &new_resv_ptr);
 
     if (error_code) {
         if (quiet_flag != 1) {
             if (!params.commandline) {
-                mvwprintw(text_win,
-                          main_ycord, 1,
-                          "slurm_load_reservations: %s",
-                          slurm_strerror(slurm_get_errno()));
+                mvwprintw(text_win, main_ycord, 1, "slurm_load_reservations: %s", slurm_strerror(slurm_get_errno()));
                 main_ycord++;
             } else {
-                printf("slurm_load_reservations: %s\n",
-                       slurm_strerror(slurm_get_errno()));
+                printf("slurm_load_reservations: %s\n", slurm_strerror(slurm_get_errno()));
             }
         }
     }
@@ -119,26 +113,19 @@ extern void get_reservation(void) {
             int j = 0;
             resv.node_cnt = 0;
             while (resv.node_inx[j] >= 0) {
-                resv.node_cnt +=
-                        (resv.node_inx[j + 1] + 1) -
-                        resv.node_inx[j];
-                set_grid_inx(resv.node_inx[j],
-                             resv.node_inx[j + 1],
-                             count);
+                resv.node_cnt += (resv.node_inx[j + 1] + 1) - resv.node_inx[j];
+                set_grid_inx(resv.node_inx[j], resv.node_inx[j + 1], count);
                 j += 2;
             }
         }
 
         if (resv.node_inx[0] != -1) {
             if (!params.commandline) {
-                if ((count >= text_line_cnt) &&
-                    (printed_resv < (getmaxy(text_win) - 4))) {
+                if ((count >= text_line_cnt) && (printed_resv < (getmaxy(text_win) - 4))) {
                     resv.flags = (int) letters[count % 62];
-                    wattron(text_win,
-                            COLOR_PAIR(colors[count % 6]));
+                    wattron(text_win, COLOR_PAIR(colors[count % 6]));
                     _print_text_resv(&resv);
-                    wattroff(text_win,
-                             COLOR_PAIR(colors[count % 6]));
+                    wattroff(text_win, COLOR_PAIR(colors[count % 6]));
                     printed_resv++;
                 }
             } else {
@@ -164,27 +151,19 @@ extern void get_reservation(void) {
 
 static void _print_header_resv(void) {
     if (!params.commandline) {
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "ID ");
+        mvwprintw(text_win, main_ycord, main_xcord, "ID ");
         main_xcord += 3;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%12.12s  ", "NAME");
+        mvwprintw(text_win, main_ycord, main_xcord, "%12.12s  ", "NAME");
         main_xcord += 14;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%19.19s  ", "START_TIME");
+        mvwprintw(text_win, main_ycord, main_xcord, "%19.19s  ", "START_TIME");
         main_xcord += 21;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%19.19s  ", "END_TIME");
+        mvwprintw(text_win, main_ycord, main_xcord, "%19.19s  ", "END_TIME");
         main_xcord += 21;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%5.5s  ", "NODES");
+        mvwprintw(text_win, main_ycord, main_xcord, "%5.5s  ", "NODES");
         main_xcord += 7;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%30.30s  ",
-                  "ACCESS_CONTROL(Accounts,Users)");
+        mvwprintw(text_win, main_ycord, main_xcord, "%30.30s  ", "ACCESS_CONTROL(Accounts,Users)");
         main_xcord += 32;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%s", "NODELIST");
+        mvwprintw(text_win, main_ycord, main_xcord, "%s", "NODELIST");
         main_xcord = 1;
         main_ycord++;
     } else {
@@ -200,15 +179,11 @@ static void _print_header_resv(void) {
 static void _print_text_resv(reserve_info_t *resv_ptr) {
     char start_str[32], end_str[32], acl[32];
 
-    slurm_make_time_str(&resv_ptr->start_time, start_str,
-                        sizeof(start_str));
-    slurm_make_time_str(&resv_ptr->end_time, end_str,
-                        sizeof(end_str));
+    slurm_make_time_str(&resv_ptr->start_time, start_str, sizeof(start_str));
+    slurm_make_time_str(&resv_ptr->end_time, end_str, sizeof(end_str));
 
-    if (resv_ptr->accounts && resv_ptr->accounts[0] &&
-        resv_ptr->users && resv_ptr->users[0])
-        snprintf(acl, sizeof(acl), "A:%s,U:%s", resv_ptr->accounts,
-                 resv_ptr->users);
+    if (resv_ptr->accounts && resv_ptr->accounts[0] && resv_ptr->users && resv_ptr->users[0])
+        snprintf(acl, sizeof(acl), "A:%s,U:%s", resv_ptr->accounts, resv_ptr->users);
     else if (resv_ptr->accounts && resv_ptr->accounts[0])
         snprintf(acl, sizeof(acl), "A:%s", resv_ptr->accounts);
     else if (resv_ptr->users && resv_ptr->users[0])
@@ -218,32 +193,25 @@ static void _print_text_resv(reserve_info_t *resv_ptr) {
 
 
     if (!params.commandline) {
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%c", resv_ptr->flags);
+        mvwprintw(text_win, main_ycord, main_xcord, "%c", resv_ptr->flags);
         main_xcord += 3;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%12.12s  ", resv_ptr->name);
+        mvwprintw(text_win, main_ycord, main_xcord, "%12.12s  ", resv_ptr->name);
         main_xcord += 14;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%19.19s  ", start_str);
+        mvwprintw(text_win, main_ycord, main_xcord, "%19.19s  ", start_str);
         main_xcord += 21;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%19.19s  ", end_str);
+        mvwprintw(text_win, main_ycord, main_xcord, "%19.19s  ", end_str);
         main_xcord += 21;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%5.d  ", resv_ptr->node_cnt);
+        mvwprintw(text_win, main_ycord, main_xcord, "%5.d  ", resv_ptr->node_cnt);
         main_xcord += 7;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%30.30s  ", acl);
+        mvwprintw(text_win, main_ycord, main_xcord, "%30.30s  ", acl);
         main_xcord += 33;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%s", resv_ptr->node_list);
+        mvwprintw(text_win, main_ycord, main_xcord, "%s", resv_ptr->node_list);
 
         main_xcord = 1;
         main_ycord++;

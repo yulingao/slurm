@@ -124,8 +124,7 @@ static int _send_to_backup_collector(slurm_msg_t *msg, int rc) {
     slurm_addr_t *next_dest = NULL;
 
     if (msg_collection.debug_flags & DEBUG_FLAG_ROUTE) {
-        info("%s: primary %s, getting backup", __func__,
-             rc ? "can't be reached" : "is null");
+        info("%s: primary %s, getting backup", __func__, rc ? "can't be reached" : "is null");
     }
 
     if ((next_dest = route_g_next_collector_backup())) {
@@ -140,8 +139,7 @@ static int _send_to_backup_collector(slurm_msg_t *msg, int rc) {
 
     if (!next_dest || (rc != SLURM_SUCCESS)) {
         if (msg_collection.debug_flags & DEBUG_FLAG_ROUTE)
-            info("%s: backup %s, sending msg to controller",
-                 __func__, rc ? "can't be reached" : "is null");
+            info("%s: backup %s, sending msg to controller", __func__, rc ? "can't be reached" : "is null");
         rc = slurm_send_only_controller_msg(msg, working_cluster_rec);
     }
 
@@ -200,24 +198,19 @@ static void *_msg_aggregation_sender(void *arg) {
         /* Wait for a new msg to be collected */
         slurm_cond_wait(&msg_collection.cond, &msg_collection.mutex);
 
-        if (!msg_collection.running &&
-            !list_count(msg_collection.msg_list))
+        if (!msg_collection.running && !list_count(msg_collection.msg_list))
             break;
 
         /* A msg has been collected; start new window */
         gettimeofday(&now, NULL);
-        timeout.tv_sec = now.tv_sec +
-                         (msg_collection.window / MSEC_IN_SEC);
-        timeout.tv_nsec = (now.tv_usec * NSEC_IN_USEC) +
-                          (NSEC_IN_MSEC * (msg_collection.window % MSEC_IN_SEC));
+        timeout.tv_sec = now.tv_sec + (msg_collection.window / MSEC_IN_SEC);
+        timeout.tv_nsec = (now.tv_usec * NSEC_IN_USEC) + (NSEC_IN_MSEC * (msg_collection.window % MSEC_IN_SEC));
         timeout.tv_sec += timeout.tv_nsec / NSEC_IN_SEC;
         timeout.tv_nsec %= NSEC_IN_SEC;
 
-        slurm_cond_timedwait(&msg_collection.cond,
-                             &msg_collection.mutex, &timeout);
+        slurm_cond_timedwait(&msg_collection.cond, &msg_collection.mutex, &timeout);
 
-        if (!msg_collection.running &&
-            !list_count(msg_collection.msg_list))
+        if (!msg_collection.running && !list_count(msg_collection.msg_list))
             break;
 
         msg_collection.max_msgs = true;
@@ -227,12 +220,10 @@ static void *_msg_aggregation_sender(void *arg) {
         memset(&msg, 0, sizeof(slurm_msg_t));
         memset(&cmp, 0, sizeof(composite_msg_t));
 
-        memcpy(&cmp.sender, &msg_collection.node_addr,
-               sizeof(slurm_addr_t));
+        memcpy(&cmp.sender, &msg_collection.node_addr, sizeof(slurm_addr_t));
         cmp.msg_list = msg_collection.msg_list;
 
-        msg_collection.msg_list =
-                list_create(slurm_free_comp_msg_list);
+        msg_collection.msg_list = list_create(slurm_free_comp_msg_list);
         msg_collection.max_msgs = false;
 
         slurm_msg_t_init(&msg);
@@ -254,8 +245,7 @@ static void *_msg_aggregation_sender(void *arg) {
     return NULL;
 }
 
-extern void msg_aggr_sender_init(char *host, uint16_t port, uint64_t window,
-                                 uint64_t max_msg_cnt) {
+extern void msg_aggr_sender_init(char *host, uint16_t port, uint64_t window, uint64_t max_msg_cnt) {
     if (msg_collection.running || (max_msg_cnt <= 1))
         return;
 
@@ -277,8 +267,7 @@ extern void msg_aggr_sender_init(char *host, uint16_t port, uint64_t window,
     msg_collection.debug_flags = slurm_get_debug_flags();
     slurm_mutex_unlock(&msg_collection.aggr_mutex);
 
-    slurm_thread_create(&msg_collection.thread_id,
-                        &_msg_aggregation_sender, NULL);
+    slurm_thread_create(&msg_collection.thread_id, &_msg_aggregation_sender, NULL);
 
     /* wait for thread to start */
     slurm_cond_wait(&msg_collection.cond, &msg_collection.mutex);
@@ -321,8 +310,7 @@ extern void msg_aggr_sender_fini(void) {
     slurm_mutex_destroy(&msg_collection.mutex);
 }
 
-extern void msg_aggr_add_msg(slurm_msg_t *msg, bool wait,
-                             void (*resp_callback)(slurm_msg_t *msg)) {
+extern void msg_aggr_add_msg(slurm_msg_t *msg, bool wait, void (*resp_callback)(slurm_msg_t *msg)) {
     int count;
     static uint16_t msg_index = 1;
     static uint32_t wait_count = 0;
@@ -374,9 +362,7 @@ extern void msg_aggr_add_msg(slurm_msg_t *msg, bool wait,
 
         wait_count++;
 
-        if (pthread_cond_timedwait(&msg_aggr->wait_cond,
-                                   &msg_collection.aggr_mutex,
-                                   &timeout) == ETIMEDOUT)
+        if (pthread_cond_timedwait(&msg_aggr->wait_cond, &msg_collection.aggr_mutex, &timeout) == ETIMEDOUT)
             _handle_msg_aggr_ret(msg_aggr->msg_index, 1);
         wait_count--;
         slurm_mutex_unlock(&msg_collection.aggr_mutex);
@@ -427,19 +413,15 @@ extern void msg_aggr_resp(slurm_msg_t *msg) {
                  * msg */
                 if (msg_collection.debug_flags & DEBUG_FLAG_ROUTE)
                     info("msg_aggr_resp: response found for "
-                         "index %u signaling sending thread",
-                         next_msg->msg_index);
+                         "index %u signaling sending thread", next_msg->msg_index);
                 slurm_mutex_lock(&msg_collection.aggr_mutex);
-                if (!(msg_aggr = _handle_msg_aggr_ret(
-                        next_msg->msg_index, 1))) {
+                if (!(msg_aggr = _handle_msg_aggr_ret(next_msg->msg_index, 1))) {
                     debug2("msg_aggr_resp: error: unable to "
-                           "locate aggr message struct for job %u",
-                           next_msg->msg_index);
+                           "locate aggr message struct for job %u", next_msg->msg_index);
                     slurm_mutex_unlock(&msg_collection.aggr_mutex);
                     continue;
                 }
-                if (msg_aggr->resp_callback &&
-                    (next_msg->msg_type != RESPONSE_SLURM_RC))
+                if (msg_aggr->resp_callback && (next_msg->msg_type != RESPONSE_SLURM_RC))
                     (*(msg_aggr->resp_callback))(next_msg);
                 slurm_cond_signal(&msg_aggr->wait_cond);
                 slurm_mutex_unlock(&msg_collection.aggr_mutex);
@@ -447,13 +429,11 @@ extern void msg_aggr_resp(slurm_msg_t *msg) {
             case RESPONSE_MESSAGE_COMPOSITE:
                 comp_msg = (composite_msg_t *) next_msg->data;
                 /* set up the address here for the next node */
-                memcpy(&next_msg->address, &comp_msg->sender,
-                       sizeof(slurm_addr_t));
+                memcpy(&next_msg->address, &comp_msg->sender, sizeof(slurm_addr_t));
 
                 if (msg_collection.debug_flags & DEBUG_FLAG_ROUTE) {
                     char addrbuf[100];
-                    slurm_print_slurm_addr(&next_msg->address,
-                                           addrbuf, 32);
+                    slurm_print_slurm_addr(&next_msg->address, addrbuf, 32);
                     info("msg_aggr_resp: composite response msg "
                          "found for %s", addrbuf);
                 }

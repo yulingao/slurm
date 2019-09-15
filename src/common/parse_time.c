@@ -83,25 +83,22 @@ typedef struct unit_names {
     int name_len;
     int multiplier;
 } unit_names_t;
-static unit_names_t un[] = {
-        {"minutes", 7, 60},
-        {"minute",  6, 60},
-        {"hours",   5, (60 * 60)},
-        {"hour",    4, (60 * 60)},
-        {"days",    4, (24 * 60 * 60)},
-        {"day",     3, (24 * 60 * 60)},
-        {"weeks",   5, (7 * 24 * 60 * 60)},
-        {"week",    4, (7 * 24 * 60 * 60)},
-        {NULL,      0, 0}
-};
+static unit_names_t un[] = {{"minutes", 7, 60},
+                            {"minute",  6, 60},
+                            {"hours",   5, (60 * 60)},
+                            {"hour",    4, (60 * 60)},
+                            {"days",    4, (24 * 60 * 60)},
+                            {"day",     3, (24 * 60 * 60)},
+                            {"weeks",   5, (7 * 24 * 60 * 60)},
+                            {"week",    4, (7 * 24 * 60 * 60)},
+                            {NULL,      0, 0}};
 
 /* _is_valid_timespec()
  *
  * Validate that time format follows
  * is supported.
  */
-static bool
-_is_valid_timespec(const char *s) {
+static bool _is_valid_timespec(const char *s) {
     int digit;
     int dash;
     int colon;
@@ -131,23 +128,18 @@ _is_valid_timespec(const char *s) {
     if (!digit)
         return false;
 
-    if (dash > 1
-        || colon > 2)
+    if (dash > 1 || colon > 2)
         return false;
 
     if (dash) {
-        if (colon == 1
-            && digit < 3)
+        if (colon == 1 && digit < 3)
             return false;
-        if (colon == 2
-            && digit < 4)
+        if (colon == 2 && digit < 4)
             return false;
     } else {
-        if (colon == 1
-            && digit < 2)
+        if (colon == 1 && digit < 2)
             return false;
-        if (colon == 2
-            && digit < 3)
+        if (colon == 2 && digit < 3)
             return false;
     }
 
@@ -165,14 +157,11 @@ static int _get_delta(const char *time_str, int *pos, long *delta) {
     long cnt = 0;
     int digit = 0;
 
-    for (offset = (*pos) + 1;
-         ((time_str[offset] != '\0') && (time_str[offset] != '\n'));
-         offset++) {
+    for (offset = (*pos) + 1; ((time_str[offset] != '\0') && (time_str[offset] != '\n')); offset++) {
         if (isspace((int) time_str[offset]))
             continue;
         for (i = 0; un[i].name; i++) {
-            if (!xstrncasecmp((time_str + offset),
-                              un[i].name, un[i].name_len)) {
+            if (!xstrncasecmp((time_str + offset), un[i].name, un[i].name_len)) {
                 offset += un[i].name_len;
                 cnt *= un[i].multiplier;
                 break;
@@ -206,8 +195,7 @@ static int _get_delta(const char *time_str, int *pos, long *delta) {
  * hour, minute, second (out): numberic values
  * RET: -1 on error, 0 otherwise
  */
-static int _get_time(const char *time_str, int *pos, int *hour, int *minute,
-                     int *second) {
+static int _get_time(const char *time_str, int *pos, int *hour, int *minute, int *second) {
     int hr, min, sec;
     int offset = *pos;
 
@@ -296,8 +284,7 @@ static int _get_time(const char *time_str, int *pos, int *hour, int *minute,
  * month, mday, year (out): numberic values
  * RET: -1 on error, 0 otherwise
  */
-static int _get_date(const char *time_str, int *pos, int *month, int *mday,
-                     int *year) {
+static int _get_date(const char *time_str, int *pos, int *month, int *mday, int *year) {
     int mon, day, yr;
     int offset = *pos;
     int len;
@@ -307,8 +294,7 @@ static int _get_date(const char *time_str, int *pos, int *month, int *mday,
 
     len = strlen(time_str);
 
-    if ((len >= (offset + 7)) && (time_str[offset + 4] == '-')
-        && (time_str[offset + 7] == '-')) {
+    if ((len >= (offset + 7)) && (time_str[offset + 4] == '-') && (time_str[offset + 7] == '-')) {
         /* get year */
         if ((time_str[offset] < '0') || (time_str[offset] > '9'))
             goto prob;
@@ -430,8 +416,7 @@ extern time_t parse_time(const char *time_str, int past) {
     if (xstrncasecmp(time_str, "uts", 3) == 0) {
         char *last = NULL;
         long uts = strtol(time_str + 3, &last, 10);
-        if ((uts < 1000000) || (uts == LONG_MAX) ||
-            (last == NULL) || (last[0] != '\0'))
+        if ((uts < 1000000) || (uts == LONG_MAX) || (last == NULL) || (last[0] != '\0'))
             goto prob;
         return (time_t) uts;
     }
@@ -439,10 +424,8 @@ extern time_t parse_time(const char *time_str, int past) {
     time_now = time(NULL);
     time_now_tm = slurm_localtime(&time_now);
 
-    for (pos = 0; ((time_str[pos] != '\0') && (time_str[pos] != '\n'));
-         pos++) {
-        if (isblank((int) time_str[pos]) ||
-            (time_str[pos] == '-') || (time_str[pos] == 'T'))
+    for (pos = 0; ((time_str[pos] != '\0') && (time_str[pos] != '\n')); pos++) {
+        if (isblank((int) time_str[pos]) || (time_str[pos] == '-') || (time_str[pos] == 'T'))
             continue;
         if (xstrncasecmp(time_str + pos, "today", 5) == 0) {
             month = time_now_tm->tm_mon;
@@ -502,8 +485,7 @@ extern time_t parse_time(const char *time_str, int past) {
                 }
                 if (isblank((int) time_str[i]))
                     continue;
-                if ((time_str[i] == '\0')
-                    || (time_str[i] == '\n')) {
+                if ((time_str[i] == '\0') || (time_str[i] == '\n')) {
                     pos += (i - 1);
                     break;
                 }
@@ -545,9 +527,8 @@ extern time_t parse_time(const char *time_str, int past) {
         minute = 0;
     } else if ((hour != -1) && (month == -1)) {
         /* time, no date implies soonest day */
-        if (past || (hour > time_now_tm->tm_hour)
-            || ((hour == time_now_tm->tm_hour)
-                && (minute > time_now_tm->tm_min))) {
+        if (past || (hour > time_now_tm->tm_hour) ||
+            ((hour == time_now_tm->tm_hour) && (minute > time_now_tm->tm_min))) {
             /* today */
             month = time_now_tm->tm_mon;
             mday = time_now_tm->tm_mday;
@@ -569,16 +550,11 @@ extern time_t parse_time(const char *time_str, int past) {
                 /* this year */
                 year = time_now_tm->tm_year;
             }
-        } else if ((month > time_now_tm->tm_mon)
-                   || ((month == time_now_tm->tm_mon)
-                       && (mday > time_now_tm->tm_mday))
-                   || ((month == time_now_tm->tm_mon)
-                       && (mday == time_now_tm->tm_mday)
-                       && (hour > time_now_tm->tm_hour))
-                   || ((month == time_now_tm->tm_mon)
-                       && (mday == time_now_tm->tm_mday)
-                       && (hour == time_now_tm->tm_hour)
-                       && (minute > time_now_tm->tm_min))) {
+        } else if ((month > time_now_tm->tm_mon) || ((month == time_now_tm->tm_mon) && (mday > time_now_tm->tm_mday)) ||
+                   ((month == time_now_tm->tm_mon) && (mday == time_now_tm->tm_mday) &&
+                    (hour > time_now_tm->tm_hour)) ||
+                   ((month == time_now_tm->tm_mon) && (mday == time_now_tm->tm_mday) &&
+                    (hour == time_now_tm->tm_hour) && (minute > time_now_tm->tm_min))) {
             /* this year */
             year = time_now_tm->tm_year;
         } else {
@@ -656,8 +632,7 @@ static char *_relative_date_fmt(const struct tm *when) {
  * IN size - length of string buffer, we recommend a size of 32 bytes to
  *	easily support different site-specific formats
  */
-extern void
-slurm_make_time_str(time_t *time, char *string, int size) {
+extern void slurm_make_time_str(time_t *time, char *string, int size) {
     struct tm time_tm;
 
     slurm_localtime_r(time, &time_tm);
@@ -684,8 +659,7 @@ slurm_make_time_str(time_t *time, char *string, int size) {
             if ((!fmt) || (!*fmt) || (!xstrcmp(fmt, "standard"))) { ;
             } else if (xstrcmp(fmt, "relative") == 0) {
                 use_relative_format = true;
-            } else if ((strchr(fmt, '%') == NULL) ||
-                       (strlen(fmt) >= sizeof(fmt_buf))) {
+            } else if ((strchr(fmt, '%') == NULL) || (strlen(fmt) >= sizeof(fmt_buf))) {
                 error("invalid SLURM_TIME_FORMAT = '%s'", fmt);
             } else {
                 strlcpy(fmt_buf, fmt, sizeof(fmt_buf));
@@ -718,9 +692,7 @@ extern int time_str2secs(const char *string) {
     if ((string == NULL) || (string[0] == '\0'))
         return NO_VAL;    /* invalid input */
 
-    if ((!xstrcasecmp(string, "-1"))
-        || (!xstrcasecmp(string, "INFINITE"))
-        || (!xstrcasecmp(string, "UNLIMITED"))) {
+    if ((!xstrcasecmp(string, "-1")) || (!xstrcasecmp(string, "INFINITE")) || (!xstrcasecmp(string, "UNLIMITED"))) {
         return INFINITE;
     }
 
@@ -770,17 +742,12 @@ extern void secs2time_str(time_t time, char *string, int size) {
         hours = (time / 3600) % 24;
         days = time / 86400;
 
-        if ((days < 0) || (hours < 0) || (minutes < 0) ||
-            (seconds < 0)) {
+        if ((days < 0) || (hours < 0) || (minutes < 0) || (seconds < 0)) {
             snprintf(string, size, "INVALID");
         } else if (days) {
-            snprintf(string, size,
-                     "%ld-%2.2ld:%2.2ld:%2.2ld",
-                     days, hours, minutes, seconds);
+            snprintf(string, size, "%ld-%2.2ld:%2.2ld:%2.2ld", days, hours, minutes, seconds);
         } else {
-            snprintf(string, size,
-                     "%2.2ld:%2.2ld:%2.2ld",
-                     hours, minutes, seconds);
+            snprintf(string, size, "%2.2ld:%2.2ld:%2.2ld", hours, minutes, seconds);
         }
     }
 }
@@ -795,17 +762,12 @@ extern void mins2time_str(uint32_t time, char *string, int size) {
         hours = time / 60 % 24;
         days = time / 1440;
 
-        if ((days < 0) || (hours < 0) || (minutes < 0) ||
-            (seconds < 0)) {
+        if ((days < 0) || (hours < 0) || (minutes < 0) || (seconds < 0)) {
             snprintf(string, size, "INVALID");
         } else if (days) {
-            snprintf(string, size,
-                     "%ld-%2.2ld:%2.2ld:%2.2ld",
-                     days, hours, minutes, seconds);
+            snprintf(string, size, "%ld-%2.2ld:%2.2ld:%2.2ld", days, hours, minutes, seconds);
         } else {
-            snprintf(string, size,
-                     "%2.2ld:%2.2ld:%2.2ld",
-                     hours, minutes, seconds);
+            snprintf(string, size, "%2.2ld:%2.2ld:%2.2ld", hours, minutes, seconds);
         }
     }
 }

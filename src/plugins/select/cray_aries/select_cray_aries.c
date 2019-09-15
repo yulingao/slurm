@@ -717,8 +717,7 @@ static void _free_blade(blade_info_t *blade_info) {
     FREE_NULL_BITMAP(blade_info->node_bitmap);
 }
 
-static void _pack_blade(blade_info_t *blade_info, Buf buffer,
-                        uint16_t protocol_version) {
+static void _pack_blade(blade_info_t *blade_info, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         pack64(blade_info->id, buffer);
         pack32(blade_info->job_cnt, buffer);
@@ -727,8 +726,7 @@ static void _pack_blade(blade_info_t *blade_info, Buf buffer,
 
 }
 
-static int _unpack_blade(blade_info_t *blade_info, Buf buffer,
-                         uint16_t protocol_version) {
+static int _unpack_blade(blade_info_t *blade_info, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         safe_unpack64(&blade_info->id, buffer);
         safe_unpack32(&blade_info->job_cnt, buffer);
@@ -760,12 +758,9 @@ static void _set_job_running(struct job_record *job_ptr) {
             blade_array[nodeinfo->blade_id].job_cnt++;
 
             if (jobinfo->npc == NPC_SYS) {
-                bit_nset(blade_nodes_running_npc, 0,
-                         node_record_count - 1);
+                bit_nset(blade_nodes_running_npc, 0, node_record_count - 1);
             } else if (jobinfo->npc)
-                bit_or(blade_nodes_running_npc,
-                       blade_array[nodeinfo->blade_id].
-                               node_bitmap);
+                bit_or(blade_nodes_running_npc, blade_array[nodeinfo->blade_id].node_bitmap);
         }
     }
 
@@ -787,19 +782,16 @@ static void _set_job_running_restore(select_jobinfo_t *jobinfo) {
         blade_array[i].job_cnt++;
 
         if (jobinfo->npc == NPC_SYS) {
-            bit_nset(blade_nodes_running_npc, 0,
-                     node_record_count - 1);
+            bit_nset(blade_nodes_running_npc, 0, node_record_count - 1);
         } else if (jobinfo->npc)
-            bit_or(blade_nodes_running_npc,
-                   blade_array[i].node_bitmap);
+            bit_or(blade_nodes_running_npc, blade_array[i].node_bitmap);
     }
 
     if (jobinfo->npc)
         last_npc_update = time(NULL);
 }
 
-static void _select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer,
-                                 uint16_t protocol_version) {
+static void _select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         if (!jobinfo) {
             pack_bit_str_hex(NULL, buffer);
@@ -815,8 +807,7 @@ static void _select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer,
     }
 }
 
-static int _select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr,
-                                  Buf buffer, uint16_t protocol_version) {
+static int _select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr, Buf buffer, uint16_t protocol_version) {
     select_jobinfo_t *jobinfo = xmalloc(sizeof(struct select_jobinfo));
 
     *jobinfo_pptr = jobinfo;
@@ -954,8 +945,7 @@ extern int select_p_state_save(char *dir_name) {
 
     log_fd = creat(new_file, 0600);
     if (log_fd < 0) {
-        error("Can't save state, error creating file %s, %m",
-              new_file);
+        error("Can't save state, error creating file %s, %m", new_file);
         error_code = errno;
     } else {
         int pos = 0, nwrite = get_buf_offset(buffer), amount;
@@ -980,12 +970,10 @@ extern int select_p_state_save(char *dir_name) {
     } else {            /* file shuffle */
         (void) unlink(old_file);
         if (link(reg_file, old_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   reg_file, old_file);
+            debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
         (void) unlink(reg_file);
         if (link(new_file, reg_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   new_file, reg_file);
+            debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
         (void) unlink(new_file);
     }
     xfree(old_file);
@@ -1052,8 +1040,7 @@ extern int select_p_state_restore(char *dir_name) {
 
     if (record_count != blade_cnt)
         error("For some reason we have a different blade_cnt than we "
-              "did before, this may cause issue.  Got %u expecting %u.",
-              record_count, blade_cnt);
+              "did before, this may cause issue.  Got %u expecting %u.", record_count, blade_cnt);
 
     for (i = 0; i < record_count; i++) {
         blade_info_t blade_info;
@@ -1066,32 +1053,23 @@ extern int select_p_state_restore(char *dir_name) {
             error("Blade %"PRIu64"(%d %d %d) doesn't have "
                   "any nodes from the state file!  "
                   "Unexpected results could "
-                  "happen if jobs are running!",
-                  blade_info.id,
-                  GET_BLADE_X(blade_info.id),
-                  GET_BLADE_Y(blade_info.id),
+                  "happen if jobs are running!", blade_info.id, GET_BLADE_X(blade_info.id), GET_BLADE_Y(blade_info.id),
                   GET_BLADE_Z(blade_info.id));
         } else if (blade_info.id == blade_array[i].id) {
             //blade_array[i].job_cnt = blade_info.job_cnt;
-            if (!bit_equal(blade_array[i].node_bitmap,
-                           blade_info.node_bitmap))
+            if (!bit_equal(blade_array[i].node_bitmap, blade_info.node_bitmap))
                 error("Blade %"PRIu64"(%d %d %d) "
                       "has changed it's nodes!  "
                       "Unexpected results could "
-                      "happen if jobs are running!",
-                      blade_info.id,
-                      GET_BLADE_X(blade_info.id),
-                      GET_BLADE_Y(blade_info.id),
-                      GET_BLADE_Z(blade_info.id));
+                      "happen if jobs are running!", blade_info.id, GET_BLADE_X(blade_info.id),
+                      GET_BLADE_Y(blade_info.id), GET_BLADE_Z(blade_info.id));
         } else {
             int j;
             for (j = 0; j < blade_cnt; j++) {
                 if (blade_info.id == blade_array[j].id) {
                     /* blade_array[j].job_cnt = */
                     /*	blade_info.job_cnt; */
-                    if (!bit_equal(blade_array[j].
-                                           node_bitmap,
-                                   blade_info.node_bitmap))
+                    if (!bit_equal(blade_array[j].node_bitmap, blade_info.node_bitmap))
                         error("Blade %"PRIu64"(%d "
                               "%d %d) "
                               "has changed it's "
@@ -1099,26 +1077,16 @@ extern int select_p_state_restore(char *dir_name) {
                               "Unexpected results "
                               "could "
                               "happen if jobs are "
-                              "running!",
-                              blade_info.id,
-                              GET_BLADE_X(
-                                      blade_info.id),
-                              GET_BLADE_Y(
-                                      blade_info.id),
-                              GET_BLADE_Z(
-                                      blade_info.id));
+                              "running!", blade_info.id, GET_BLADE_X(blade_info.id), GET_BLADE_Y(blade_info.id),
+                              GET_BLADE_Z(blade_info.id));
                     break;
                 }
             }
             error("Blade %"PRIu64"(%d %d %d) "
                   "is no longer at location %d, but at %d!  "
                   "Unexpected results could "
-                  "happen if jobs are running!",
-                  blade_info.id,
-                  GET_BLADE_X(blade_info.id),
-                  GET_BLADE_Y(blade_info.id),
-                  GET_BLADE_Z(blade_info.id),
-                  i, j);
+                  "happen if jobs are running!", blade_info.id, GET_BLADE_X(blade_info.id), GET_BLADE_Y(blade_info.id),
+                  GET_BLADE_Z(blade_info.id), i, j);
         }
         _free_blade(&blade_info);
     }
@@ -1166,18 +1134,12 @@ extern int select_p_job_init(List job_list) {
              * the size so loops based off blade_cnt will
              * work correctly.
              */
-            if (jobinfo->blade_map
-                && (bit_size(jobinfo->blade_map) < blade_cnt))
-                jobinfo->blade_map = bit_realloc(
-                        jobinfo->blade_map, blade_cnt);
-            if (jobinfo->used_blades
-                && (bit_size(jobinfo->used_blades) < blade_cnt))
-                jobinfo->used_blades = bit_realloc(
-                        jobinfo->used_blades, blade_cnt);
+            if (jobinfo->blade_map && (bit_size(jobinfo->blade_map) < blade_cnt))
+                jobinfo->blade_map = bit_realloc(jobinfo->blade_map, blade_cnt);
+            if (jobinfo->used_blades && (bit_size(jobinfo->used_blades) < blade_cnt))
+                jobinfo->used_blades = bit_realloc(jobinfo->used_blades, blade_cnt);
 
-            if ((IS_CLEANING_STARTED(jobinfo) &&
-                 !IS_CLEANING_COMPLETE(jobinfo)) ||
-                IS_JOB_RUNNING(job_ptr))
+            if ((IS_CLEANING_STARTED(jobinfo) && !IS_CLEANING_COMPLETE(jobinfo)) || IS_JOB_RUNNING(job_ptr))
                 _set_job_running_restore(jobinfo);
 
 #if defined(HAVE_NATIVE_CRAY) && !defined(HAVE_CRAY_NETWORK)
@@ -1265,18 +1227,14 @@ extern int select_p_node_init(struct node_record *node_ptr, int node_cnt) {
     for (i = 0; i < node_cnt; i++) {
         node_rec = &node_ptr[i];
         if (!node_rec->select_nodeinfo)
-            node_rec->select_nodeinfo =
-                    select_g_select_nodeinfo_alloc();
+            node_rec->select_nodeinfo = select_g_select_nodeinfo_alloc();
         nodeinfo = node_rec->select_nodeinfo->data;
         if (nodeinfo->nid == NO_VAL) {
             char *nid_char;
 
-            if (!(nid_char = strpbrk(node_rec->name,
-                                     "0123456789"))) {
+            if (!(nid_char = strpbrk(node_rec->name, "0123456789"))) {
                 error("(%s: %d: %s) Error: Node was not "
-                      "recognizable: %s",
-                      THIS_FILE, __LINE__, __func__,
-                      node_rec->name);
+                      "recognizable: %s", THIS_FILE, __LINE__, __func__, node_rec->name);
                 slurm_mutex_unlock(&blade_mutex);
                 return SLURM_ERROR;
             }
@@ -1334,12 +1292,9 @@ extern int select_p_node_init(struct node_record *node_ptr, int node_cnt) {
         bit_set(blade_array[j].node_bitmap, i);
         blade_array[j].id = blade_id;
 
-        debug2("got %s(%u) blade %u %"PRIu64" %"PRIu64" %d %d %d",
-               node_rec->name, nodeinfo->nid, nodeinfo->blade_id,
-               blade_id, blade_array[nodeinfo->blade_id].id,
-               GET_BLADE_X(blade_array[nodeinfo->blade_id].id),
-               GET_BLADE_Y(blade_array[nodeinfo->blade_id].id),
-               GET_BLADE_Z(blade_array[nodeinfo->blade_id].id));
+        debug2("got %s(%u) blade %u %"PRIu64" %"PRIu64" %d %d %d", node_rec->name, nodeinfo->nid, nodeinfo->blade_id,
+               blade_id, blade_array[nodeinfo->blade_id].id, GET_BLADE_X(blade_array[nodeinfo->blade_id].id),
+               GET_BLADE_Y(blade_array[nodeinfo->blade_id].id), GET_BLADE_Z(blade_array[nodeinfo->blade_id].id));
     }
     /* give back the memory */
     xrealloc(blade_array, sizeof(blade_info_t) * blade_cnt);
@@ -1393,11 +1348,8 @@ extern int select_p_block_init(List part_list) {
  * NOTE: bitmap must be a superset of the job's required at the time that
  *	select_p_job_test is called
  */
-extern int select_p_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-                             uint32_t min_nodes, uint32_t max_nodes,
-                             uint32_t req_nodes, uint16_t mode,
-                             List preemptee_candidates,
-                             List *preemptee_job_list,
+extern int select_p_job_test(struct job_record *job_ptr, bitstr_t *bitmap, uint32_t min_nodes, uint32_t max_nodes,
+                             uint32_t req_nodes, uint16_t mode, List preemptee_candidates, List *preemptee_job_list,
                              bitstr_t *exc_core_bitmap) {
 #ifdef HAVE_NATIVE_CRAY
     /* Restart if the thread ever has an unrecoverable error and exits. */
@@ -1419,8 +1371,7 @@ extern int select_p_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
                  * NPC_SYS.
                  */
                 if (bit_ffs(blade_nodes_running_npc) != -1)
-                    bit_nclear(bitmap, 0,
-                               bit_size(bitmap) - 1);
+                    bit_nclear(bitmap, 0, bit_size(bitmap) - 1);
             } else {
                 bit_and_not(bitmap, blade_nodes_running_npc);
             }
@@ -1435,8 +1386,7 @@ extern int select_p_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
     /* xfree(tmp3); */
     slurm_mutex_unlock(&blade_mutex);
 
-    return other_job_test(job_ptr, bitmap, min_nodes, max_nodes,
-                          req_nodes, mode, preemptee_candidates,
+    return other_job_test(job_ptr, bitmap, min_nodes, max_nodes, req_nodes, mode, preemptee_candidates,
                           preemptee_job_list, exc_core_bitmap);
 }
 
@@ -1456,8 +1406,7 @@ extern int select_p_job_begin(struct job_record *job_ptr) {
     if (!jobinfo->blade_map) {
         jobinfo->blade_map = bit_alloc(blade_cnt);
     } else {    /* Clear vestigial bitmap in case job requeued */
-        bit_nclear(jobinfo->blade_map, 0,
-                   bit_size(jobinfo->blade_map) - 1);
+        bit_nclear(jobinfo->blade_map, 0, bit_size(jobinfo->blade_map) - 1);
     }
     _set_job_running(job_ptr);
 
@@ -1515,13 +1464,11 @@ extern int select_p_job_ready(struct job_record *job_ptr) {
     return other_job_ready(job_ptr);
 }
 
-extern int select_p_job_resized(struct job_record *job_ptr,
-                                struct node_record *node_ptr) {
+extern int select_p_job_resized(struct job_record *job_ptr, struct node_record *node_ptr) {
     return other_job_resized(job_ptr, node_ptr);
 }
 
-extern int select_p_job_expand(struct job_record *from_job_ptr,
-                               struct job_record *to_job_ptr) {
+extern int select_p_job_expand(struct job_record *from_job_ptr, struct job_record *to_job_ptr) {
     return other_job_expand(from_job_ptr, to_job_ptr);
 }
 
@@ -1597,10 +1544,9 @@ extern int select_p_job_resume(struct job_record *job_ptr, bool indf_susp) {
     return other_job_resume(job_ptr, indf_susp);
 }
 
-extern bitstr_t *select_p_step_pick_nodes(struct job_record *job_ptr,
-                                          select_jobinfo_t *step_jobinfo,
-                                          uint32_t node_count,
-                                          bitstr_t **avail_nodes) {
+extern bitstr_t *
+select_p_step_pick_nodes(struct job_record *job_ptr, select_jobinfo_t *step_jobinfo, uint32_t node_count,
+                         bitstr_t **avail_nodes) {
     select_jobinfo_t *jobinfo;
     DEF_TIMERS;
 
@@ -1665,12 +1611,9 @@ extern int select_p_step_start(struct step_record *step_ptr) {
             if (!bit_test(step_ptr->step_node_bitmap, i))
                 continue;
 
-            nodeinfo = node_record_table_ptr[i].
-                    select_nodeinfo->data;
-            if (!bit_test(step_jobinfo->blade_map,
-                          nodeinfo->blade_id))
-                bit_set(step_jobinfo->blade_map,
-                        nodeinfo->blade_id);
+            nodeinfo = node_record_table_ptr[i].select_nodeinfo->data;
+            if (!bit_test(step_jobinfo->blade_map, nodeinfo->blade_id))
+                bit_set(step_jobinfo->blade_map, nodeinfo->blade_id);
         }
         bit_or(jobinfo->used_blades, step_jobinfo->blade_map);
     }
@@ -1722,8 +1665,7 @@ extern int select_p_select_nodeinfo_free(select_nodeinfo_t *nodeinfo) {
     return SLURM_SUCCESS;
 }
 
-extern int select_p_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo,
-                                         Buf buffer, uint16_t protocol_version) {
+extern int select_p_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo, Buf buffer, uint16_t protocol_version) {
     int rc = SLURM_ERROR;
 
     if (!nodeinfo) {
@@ -1734,24 +1676,20 @@ extern int select_p_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo,
         error("%s: nodeinfo is NULL", __func__);
         rc = other_select_nodeinfo_pack(NULL, buffer, protocol_version);
     } else {
-        rc = other_select_nodeinfo_pack(nodeinfo->other_nodeinfo,
-                                        buffer, protocol_version);
+        rc = other_select_nodeinfo_pack(nodeinfo->other_nodeinfo, buffer, protocol_version);
     }
 
     return rc;
 }
 
-extern int select_p_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo_pptr,
-                                           Buf buffer,
-                                           uint16_t protocol_version) {
+extern int select_p_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo_pptr, Buf buffer, uint16_t protocol_version) {
     int rc = SLURM_ERROR;
     select_nodeinfo_t *nodeinfo = xmalloc(sizeof(struct select_nodeinfo));
 
     *nodeinfo_pptr = nodeinfo;
 
     nodeinfo->magic = NODEINFO_MAGIC;
-    rc = other_select_nodeinfo_unpack(&nodeinfo->other_nodeinfo,
-                                      buffer, protocol_version);
+    rc = other_select_nodeinfo_unpack(&nodeinfo->other_nodeinfo, buffer, protocol_version);
 
     if (rc != SLURM_SUCCESS)
         goto unpack_error;
@@ -1776,8 +1714,7 @@ extern int select_p_select_nodeinfo_set_all(void) {
        the last time we set things up. */
     if (last_set_all && (last_npc_update - 1 < last_set_all)) {
         debug3("Node select info for set all hasn't "
-               "changed since %ld",
-               last_set_all);
+               "changed since %ld", last_set_all);
         return SLURM_NO_CHANGE_IN_DATA;
     }
     last_set_all = last_npc_update;
@@ -1804,10 +1741,9 @@ extern int select_p_select_nodeinfo_set(struct job_record *job_ptr) {
     return other_select_nodeinfo_set(job_ptr);
 }
 
-extern int select_p_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
-                                        enum select_nodedata_type dinfo,
-                                        enum node_states state,
-                                        void *data) {
+extern int
+select_p_select_nodeinfo_get(select_nodeinfo_t *nodeinfo, enum select_nodedata_type dinfo, enum node_states state,
+                             void *data) {
     int rc = SLURM_SUCCESS;
     select_nodeinfo_t **select_nodeinfo = (select_nodeinfo_t **) data;
 
@@ -1826,8 +1762,7 @@ extern int select_p_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
             *select_nodeinfo = nodeinfo->other_nodeinfo;
             break;
         default:
-            rc = other_select_nodeinfo_get(nodeinfo->other_nodeinfo,
-                                           dinfo, state, data);
+            rc = other_select_nodeinfo_get(nodeinfo->other_nodeinfo, dinfo, state, data);
             break;
     }
     return rc;
@@ -1846,9 +1781,7 @@ extern select_jobinfo_t *select_p_select_jobinfo_alloc(void) {
     return jobinfo;
 }
 
-extern int select_p_select_jobinfo_set(select_jobinfo_t *jobinfo,
-                                       enum select_jobdata_type data_type,
-                                       void *data) {
+extern int select_p_select_jobinfo_set(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     int rc = SLURM_SUCCESS;
     uint16_t *uint16 = (uint16_t *) data;
     char *in_char = (char *) data;
@@ -1870,8 +1803,7 @@ extern int select_p_select_jobinfo_set(select_jobinfo_t *jobinfo,
             jobinfo->released = *uint16;
             break;
         case SELECT_JOBDATA_NETWORK:
-            if (!in_char || !strlen(in_char)
-                || !xstrcmp(in_char, "none"))
+            if (!in_char || !strlen(in_char) || !xstrcmp(in_char, "none"))
                 jobinfo->npc = NPC_NONE;
             else if (!xstrcmp(in_char, "system"))
                 jobinfo->npc = NPC_SYS;
@@ -1886,9 +1818,7 @@ extern int select_p_select_jobinfo_set(select_jobinfo_t *jobinfo,
     return rc;
 }
 
-extern int select_p_select_jobinfo_get(select_jobinfo_t *jobinfo,
-                                       enum select_jobdata_type data_type,
-                                       void *data) {
+extern int select_p_select_jobinfo_get(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     int rc = SLURM_SUCCESS;
     uint16_t *uint16 = (uint16_t *) data;
     char **in_char = (char **) data;
@@ -1908,8 +1838,7 @@ extern int select_p_select_jobinfo_get(select_jobinfo_t *jobinfo,
             *select_jobinfo = jobinfo->other_jobinfo;
             break;
         case SELECT_JOBDATA_CLEANING:
-            if (IS_CLEANING_STARTED(jobinfo) &&
-                !IS_CLEANING_COMPLETE(jobinfo))
+            if (IS_CLEANING_STARTED(jobinfo) && !IS_CLEANING_COMPLETE(jobinfo))
                 *uint16 = 1;
             else
                 *uint16 = 0;
@@ -1971,21 +1900,18 @@ extern int select_p_select_jobinfo_free(select_jobinfo_t *jobinfo) {
     return rc;
 }
 
-extern int select_p_select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer,
-                                        uint16_t protocol_version) {
+extern int select_p_select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer, uint16_t protocol_version) {
     int rc = SLURM_ERROR;
 
     _select_jobinfo_pack(jobinfo, buffer, protocol_version);
     if (jobinfo)
-        rc = other_select_jobinfo_pack(jobinfo->other_jobinfo, buffer,
-                                       protocol_version);
+        rc = other_select_jobinfo_pack(jobinfo->other_jobinfo, buffer, protocol_version);
     else
         rc = other_select_jobinfo_pack(NULL, buffer, protocol_version);
     return rc;
 }
 
-extern int select_p_select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr,
-                                          Buf buffer, uint16_t protocol_version) {
+extern int select_p_select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr, Buf buffer, uint16_t protocol_version) {
     int rc;
     select_jobinfo_t *jobinfo = NULL;
 
@@ -1996,8 +1922,7 @@ extern int select_p_select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr,
 
     jobinfo = *jobinfo_pptr;
 
-    rc = other_select_jobinfo_unpack(&jobinfo->other_jobinfo,
-                                     buffer, protocol_version);
+    rc = other_select_jobinfo_unpack(&jobinfo->other_jobinfo, buffer, protocol_version);
 
     if (rc != SLURM_SUCCESS)
         goto unpack_error;
@@ -2011,8 +1936,7 @@ extern int select_p_select_jobinfo_unpack(select_jobinfo_t **jobinfo_pptr,
     return SLURM_ERROR;
 }
 
-extern char *select_p_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
-                                            char *buf, size_t size, int mode) {
+extern char *select_p_select_jobinfo_sprint(select_jobinfo_t *jobinfo, char *buf, size_t size, int mode) {
     /*
      * Skip call to other_select_jobinfo_sprint, all of the other select
      * plugins we can layer on top of do this same thing anyways:
@@ -2024,12 +1948,10 @@ extern char *select_p_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
         return NULL;
 }
 
-extern char *select_p_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo,
-                                             int mode) {
+extern char *select_p_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo, int mode) {
     char *buf = NULL;
 
-    if ((mode != SELECT_PRINT_DATA)
-        && jobinfo && (jobinfo->magic != JOBINFO_MAGIC)) {
+    if ((mode != SELECT_PRINT_DATA) && jobinfo && (jobinfo->magic != JOBINFO_MAGIC)) {
         error("select/cray jobinfo_xstrdup: jobinfo magic bad");
         return NULL;
     }
@@ -2048,17 +1970,14 @@ extern char *select_p_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo,
     switch (mode) {
         /* See comment in select_p_select_jobinfo_sprint() regarding format. */
         default:
-            xstrcat(buf, other_select_jobinfo_xstrdup(
-                    jobinfo->other_jobinfo, mode));
+            xstrcat(buf, other_select_jobinfo_xstrdup(jobinfo->other_jobinfo, mode));
             break;
     }
 
     return buf;
 }
 
-extern int select_p_get_info_from_plugin(enum select_plugindata_info dinfo,
-                                         struct job_record *job_ptr,
-                                         void *data) {
+extern int select_p_get_info_from_plugin(enum select_plugindata_info dinfo, struct job_record *job_ptr, void *data) {
     return other_get_info_from_plugin(dinfo, job_ptr, data);
 }
 
@@ -2075,10 +1994,7 @@ extern int select_p_reconfigure(void) {
     return other_reconfigure();
 }
 
-extern bitstr_t *select_p_resv_test(resv_desc_msg_t *resv_desc_ptr,
-                                    uint32_t node_cnt,
-                                    bitstr_t *avail_bitmap,
-                                    bitstr_t **core_bitmap) {
-    return other_resv_test(resv_desc_ptr, node_cnt,
-                           avail_bitmap, core_bitmap);
+extern bitstr_t *
+select_p_resv_test(resv_desc_msg_t *resv_desc_ptr, uint32_t node_cnt, bitstr_t *avail_bitmap, bitstr_t **core_bitmap) {
+    return other_resv_test(resv_desc_ptr, node_cnt, avail_bitmap, core_bitmap);
 }

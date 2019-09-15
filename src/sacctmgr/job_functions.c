@@ -39,8 +39,7 @@
 
 #include "src/sacctmgr/sacctmgr.h"
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_job_modify_cond_t *job_cond) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_job_modify_cond_t *job_cond) {
     char *next_str;
     int i;
     int set = 0;
@@ -68,28 +67,21 @@ static int _set_cond(int *start, int argc, char **argv,
         if (!xstrncasecmp(argv[i], "Set", MAX(command_len, 3))) {
             i--;
             break;
-        } else if (!end && !xstrncasecmp(argv[i], "where",
-                                         MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "where", MAX(command_len, 5))) {
             continue;
-        } else if (!xstrncasecmp(argv[i], "Cluster",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Cluster", MAX(command_len, 1))) {
             job_cond->cluster = xstrdup(argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "JobID",
-                                 MAX(command_len, 1))) {
-            job_cond->job_id = (uint32_t) strtol(argv[i] + end,
-                                                 &next_str, 10);
-            if ((job_cond->job_id == 0) ||
-                ((next_str[0] != '\0') && (next_str[0] != ' '))) {
-                fprintf(stderr, "Invalid job id %s specified\n",
-                        argv[i] + end);
+        } else if (!xstrncasecmp(argv[i], "JobID", MAX(command_len, 1))) {
+            job_cond->job_id = (uint32_t) strtol(argv[i] + end, &next_str, 10);
+            if ((job_cond->job_id == 0) || ((next_str[0] != '\0') && (next_str[0] != ' '))) {
+                fprintf(stderr, "Invalid job id %s specified\n", argv[i] + end);
                 exit_code = 1;
             } else
                 set = 1;
         } else {
             exit_code = 1;
             fprintf(stderr, " Unknown condition: %s\n"
-                            " Use keyword 'set' to modify value\n",
-                    argv[i]);
+                            " Use keyword 'set' to modify value\n", argv[i]);
         }
     }
 
@@ -101,8 +93,7 @@ static int _set_cond(int *start, int argc, char **argv,
     return set;
 }
 
-static int _set_rec(int *start, int argc, char **argv,
-                    slurmdb_job_rec_t *job) {
+static int _set_rec(int *start, int argc, char **argv, slurmdb_job_rec_t *job) {
     int i;
     int set = 0;
     int end = 0;
@@ -122,36 +113,27 @@ static int _set_rec(int *start, int argc, char **argv,
         if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))) {
             i--;
             break;
-        } else if (!end && !xstrncasecmp(argv[i], "set",
-                                         MAX(command_len, 3))) {
+        } else if (!end && !xstrncasecmp(argv[i], "set", MAX(command_len, 3))) {
             continue;
         } else if (!end) {
             exit_code = 1;
-            fprintf(stderr,
-                    " Bad format on %s: End your option with "
-                    "an '=' sign\n", argv[i]);
-        } else if ((!xstrncasecmp(argv[i], "DerivedExitCode",
-                                  MAX(command_len, 12))) ||
-                   (!xstrncasecmp(argv[i], "DerivedEC",
-                                  MAX(command_len, 9)))) {
-            if (get_uint(argv[i] + end, &job->derived_ec,
-                         "DerivedExitCode") == SLURM_SUCCESS) {
+            fprintf(stderr, " Bad format on %s: End your option with "
+                            "an '=' sign\n", argv[i]);
+        } else if ((!xstrncasecmp(argv[i], "DerivedExitCode", MAX(command_len, 12))) ||
+                   (!xstrncasecmp(argv[i], "DerivedEC", MAX(command_len, 9)))) {
+            if (get_uint(argv[i] + end, &job->derived_ec, "DerivedExitCode") == SLURM_SUCCESS) {
                 set = 1;
             }
-        } else if ((!xstrncasecmp(argv[i], "Comment",
-                                  MAX(command_len, 7))) ||
-                   (!xstrncasecmp(argv[i], "DerivedExitString",
-                                  MAX(command_len, 12))) ||
-                   (!xstrncasecmp(argv[i], "DerivedES",
-                                  MAX(command_len, 9)))) {
+        } else if ((!xstrncasecmp(argv[i], "Comment", MAX(command_len, 7))) ||
+                   (!xstrncasecmp(argv[i], "DerivedExitString", MAX(command_len, 12))) ||
+                   (!xstrncasecmp(argv[i], "DerivedES", MAX(command_len, 9)))) {
             if (job->derived_es)
                 xfree(job->derived_es);
             job->derived_es = strip_quotes(argv[i] + end, NULL, 1);
             set = 1;
         } else {
             printf(" Unknown option: %s\n"
-                   " Use keyword 'where' to modify condition\n",
-                   argv[i]);
+                   " Use keyword 'where' to modify condition\n", argv[i]);
         }
     }
 
@@ -162,8 +144,7 @@ static int _set_rec(int *start, int argc, char **argv,
 
 extern int sacctmgr_modify_job(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
-    slurmdb_job_modify_cond_t *job_cond = xmalloc(sizeof(
-                                                          slurmdb_job_modify_cond_t));
+    slurmdb_job_modify_cond_t *job_cond = xmalloc(sizeof(slurmdb_job_modify_cond_t));
     slurmdb_job_rec_t *job = slurmdb_create_job_rec();
     int i = 0;
     int cond_set = 0, rec_set = 0, set = 0;
@@ -220,8 +201,7 @@ extern int sacctmgr_modify_job(int argc, char **argv) {
         rc = SLURM_ERROR;
     } else {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         rc = SLURM_ERROR;
     }
 

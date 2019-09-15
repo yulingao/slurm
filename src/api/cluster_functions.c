@@ -62,8 +62,7 @@ extern int slurmdb_clusters_add(void *db_conn, List cluster_list) {
  * returns List of slurmdb_cluster_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_clusters_get(void *db_conn,
-                                 slurmdb_cluster_cond_t *cluster_cond) {
+extern List slurmdb_clusters_get(void *db_conn, slurmdb_cluster_cond_t *cluster_cond) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
@@ -76,14 +75,12 @@ extern List slurmdb_clusters_get(void *db_conn,
  * IN:  slurmdb_cluster_rec_t *cluster
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_clusters_modify(void *db_conn,
-                                    slurmdb_cluster_cond_t *cluster_cond,
-                                    slurmdb_cluster_rec_t *cluster) {
+extern List
+slurmdb_clusters_modify(void *db_conn, slurmdb_cluster_cond_t *cluster_cond, slurmdb_cluster_rec_t *cluster) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
-    return acct_storage_g_modify_clusters(db_conn, db_api_uid,
-                                          cluster_cond, cluster);
+    return acct_storage_g_modify_clusters(db_conn, db_api_uid, cluster_cond, cluster);
 }
 
 /*
@@ -91,11 +88,9 @@ extern List slurmdb_clusters_modify(void *db_conn,
  * IN:  slurmdb_cluster_cond_t *cluster_cond
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_clusters_remove(void *db_conn,
-                                    slurmdb_cluster_cond_t *cluster_cond) {
+extern List slurmdb_clusters_remove(void *db_conn, slurmdb_cluster_cond_t *cluster_cond) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
-    return acct_storage_g_remove_clusters(
-            db_conn, db_api_uid, cluster_cond);
+    return acct_storage_g_remove_clusters(db_conn, db_api_uid, cluster_cond);
 }

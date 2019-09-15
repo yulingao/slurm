@@ -54,10 +54,7 @@
 #include "src/common/slurm_opt.h"
 
 enum wrappers {
-    WRPR_START,
-    WRPR_BSUB,
-    WRPR_PBS,
-    WRPR_CNT
+    WRPR_START, WRPR_BSUB, WRPR_PBS, WRPR_CNT
 };
 
 typedef struct sbatch_env_opts {
@@ -131,33 +128,27 @@ process options:
  * pack_inx IN - pack job component ID, zero origin
  * more_packs OUT - more packs job specifications in script to process
  */
-extern void process_options_second_pass(int argc, char **argv, int *argc_off,
-                                        int pack_inx, bool *more_packs,
-                                        const char *file,
-                                        const void *script_body,
-                                        int script_size);
+extern void
+process_options_second_pass(int argc, char **argv, int *argc_off, int pack_inx, bool *more_packs, const char *file,
+                            const void *script_body, int script_size);
 
 /* external functions available for SPANK plugins to modify the environment
  * exported to the Slurm Prolog and Epilog programs */
 extern char *spank_get_job_env(const char *name);
 
-extern int spank_set_job_env(const char *name, const char *value,
-                             int overwrite);
+extern int spank_set_job_env(const char *name, const char *value, int overwrite);
 
 extern int spank_unset_job_env(const char *name);
 
 extern void init_envs(sbatch_env_t *local_env);
 
-extern void set_envs(char ***array_ptr, sbatch_env_t *local_env,
-                     int pack_offset);
+extern void set_envs(char ***array_ptr, sbatch_env_t *local_env, int pack_offset);
 
-extern char *get_argument(const char *file, int lineno, const char *line,
-                          int *skipped);
+extern char *get_argument(const char *file, int lineno, const char *line, int *skipped);
 
 extern char *next_line(const void *buf, int size, void **state);
 
 /* Translate #BSUB and #PBS directives in job script */
-extern bool xlate_batch_script(const char *file, const void *body,
-                               int size, int magic);
+extern bool xlate_batch_script(const char *file, const void *body, int size, int magic);
 
 #endif /* _HAVE_OPT_H */

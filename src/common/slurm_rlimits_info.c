@@ -86,8 +86,7 @@ static slurm_rlimits_info_t rlimits_info[] = {
 #ifdef RLIMIT_AS
         {RLIMIT_AS, "AS", PROPAGATE_RLIMITS_NOT_SET},
 #endif
-        {0, NULL, PROPAGATE_RLIMITS_NOT_SET}
-};
+        {0, NULL, PROPAGATE_RLIMITS_NOT_SET}};
 
 
 static bool rlimits_were_parsed = false;
@@ -95,8 +94,7 @@ static bool rlimits_were_parsed = false;
 /*
  * Return a pointer to the private rlimits info array.
  */
-slurm_rlimits_info_t *
-get_slurm_rlimits_info(void) {
+slurm_rlimits_info_t *get_slurm_rlimits_info(void) {
     xassert(rlimits_were_parsed == true);
 
     return rlimits_info;
@@ -113,8 +111,7 @@ get_slurm_rlimits_info(void) {
  * Return 0 on success, or -1 if the 'rlimits_str' input parameter contains
  * a name that is not in rlimits_info[].
  */
-int
-parse_rlimits(char *rlimits_str, int propagate_flag) {
+int parse_rlimits(char *rlimits_str, int propagate_flag) {
     slurm_rlimits_info_t *rli;    /* ptr iterator for rlimits_info[] */
     char *tp;    /* token ptr */
     bool found;
@@ -190,8 +187,7 @@ extern void print_rlimits(void) {
 
     for (rli = rlimits_info; rli->name; rli++) {
         if (getrlimit(rli->resource, &rlp) == 0) {
-            printf("SLURM_RLIMIT_%s=%lu\n", rli->name,
-                   (unsigned long) rlp.rlim_cur);
+            printf("SLURM_RLIMIT_%s=%lu\n", rli->name, (unsigned long) rlp.rlim_cur);
         }
     }
 }

@@ -101,8 +101,7 @@ extern int init(void) {
     /* enable subsystems based on conf */
     if (cg_conf->constrain_cores)
         use_cpuset = true;
-    if (cg_conf->constrain_ram_space ||
-        cg_conf->constrain_swap_space)
+    if (cg_conf->constrain_ram_space || cg_conf->constrain_swap_space)
         use_memory = true;
     if (cg_conf->constrain_devices)
         use_devices = true;
@@ -114,8 +113,7 @@ extern int init(void) {
         if (task_cgroup_cpuset_init() != SLURM_SUCCESS) {
             return SLURM_ERROR;
         }
-        debug("%s: now constraining jobs allocated cores",
-              plugin_type);
+        debug("%s: now constraining jobs allocated cores", plugin_type);
     }
 
     if (use_memory) {
@@ -123,16 +121,14 @@ extern int init(void) {
         if (task_cgroup_memory_init() != SLURM_SUCCESS) {
             return SLURM_ERROR;
         }
-        debug("%s: now constraining jobs allocated memory",
-              plugin_type);
+        debug("%s: now constraining jobs allocated memory", plugin_type);
     }
 
     if (use_devices) {
         if (task_cgroup_devices_init() != SLURM_SUCCESS) {
             return SLURM_ERROR;
         }
-        debug("%s: now constraining jobs allocated devices",
-              plugin_type);
+        debug("%s: now constraining jobs allocated devices", plugin_type);
     }
 
     debug("%s: loaded", plugin_type);
@@ -168,16 +164,14 @@ extern int task_p_slurmd_batch_request(batch_job_launch_msg_t *req) {
 /*
  * task_p_slurmd_launch_request()
  */
-extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req,
-                                        uint32_t node_id) {
+extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req, uint32_t node_id) {
     return SLURM_SUCCESS;
 }
 
 /*
  * task_p_slurmd_reserve_resources()
  */
-extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req,
-                                           uint32_t node_id) {
+extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req, uint32_t node_id) {
     return SLURM_SUCCESS;
 }
 
@@ -329,20 +323,17 @@ extern char *task_cgroup_create_slurm_cg(xcgroup_ns_t *ns) {
 #endif
 
     /* create slurm cgroup in the ns (it could already exist) */
-    if (xcgroup_create(ns, &slurm_cg, pre,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(ns, &slurm_cg, pre, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xfree(pre);
         return pre;
     }
     if (xcgroup_instantiate(&slurm_cg) != XCGROUP_SUCCESS) {
-        error("unable to build slurm cgroup for ns %s: %m",
-              ns->subsystems);
+        error("unable to build slurm cgroup for ns %s: %m", ns->subsystems);
         xcgroup_destroy(&slurm_cg);
         xfree(pre);
         return pre;
     } else {
-        debug3("slurm cgroup %s successfully created for ns %s: %m",
-               pre, ns->subsystems);
+        debug3("slurm cgroup %s successfully created for ns %s: %m", pre, ns->subsystems);
         xcgroup_destroy(&slurm_cg);
     }
 

@@ -108,10 +108,7 @@ uint32_t xtree_get_count(xtree_t *tree) {
     return tree->count;
 }
 
-xtree_node_t *xtree_add_child(xtree_t *tree,
-                              xtree_node_t *parent,
-                              void *data,
-                              uint8_t flags) {
+xtree_node_t *xtree_add_child(xtree_t *tree, xtree_node_t *parent, void *data, uint8_t flags) {
     xtree_node_t *newnode = NULL;
 
     if (!tree || (!parent && tree->root) || (parent && !tree->root)) {
@@ -166,10 +163,7 @@ xtree_node_t *xtree_add_child(xtree_t *tree,
     return newnode;
 }
 
-xtree_node_t *xtree_add_sibling(xtree_t *tree,
-                                xtree_node_t *node,
-                                void *data,
-                                uint8_t flags) {
+xtree_node_t *xtree_add_sibling(xtree_t *tree, xtree_node_t *node, void *data, uint8_t flags) {
     xtree_node_t *newnode = NULL;
 
     xassert(flags & (XTREE_APPEND | XTREE_PREPEND));
@@ -232,10 +226,7 @@ uint32_t xtree_depth_const(const xtree_t *tree) {
     return xtree_depth_const_node(tree, tree->root);
 }
 
-static uint8_t xtree_depth_helper(xtree_node_t *node,
-                                  uint8_t which,
-                                  uint32_t level,
-                                  void *arg) {
+static uint8_t xtree_depth_helper(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     uint32_t *max_level = (uint32_t *) arg;
 
     if (level >= *max_level) {
@@ -250,12 +241,7 @@ uint32_t xtree_depth_const_node(const xtree_t *tree, const xtree_node_t *node) {
 
     if (!tree->root)
         return 0;
-    xtree_walk((xtree_t *) tree,
-               NULL,
-               0,
-               UINT32_MAX,
-               xtree_depth_helper,
-               &max_level);
+    xtree_walk((xtree_t *) tree, NULL, 0, UINT32_MAX, xtree_depth_helper, &max_level);
     return max_level + 1;
 }
 
@@ -284,12 +270,9 @@ uint32_t xtree_node_depth(const xtree_node_t *node) {
  * child, go to next sibling, then if no sibling, go up until a sibling is
  * found.
  */
-xtree_node_t *xtree_walk(xtree_t *tree,
-                         xtree_node_t *node,
-                         uint32_t min_level,
-                         uint32_t max_level,
-                         xtree_walk_function_t action,
-                         void *arg) {
+xtree_node_t *
+xtree_walk(xtree_t *tree, xtree_node_t *node, uint32_t min_level, uint32_t max_level, xtree_walk_function_t action,
+           void *arg) {
     xtree_node_t *current_node = NULL;
     uint32_t level = 0;
 
@@ -301,19 +284,13 @@ xtree_node_t *xtree_walk(xtree_t *tree,
     current_node = node;
     while (current_node) {
 
-        if (level >= min_level && !action(current_node,
-                                          XTREE_GROWING,
-                                          level,
-                                          arg)) {
+        if (level >= min_level && !action(current_node, XTREE_GROWING, level, arg)) {
             return current_node;
         }
 
         /* go down and continue counting */
         if (current_node->start) {
-            if (level >= min_level && !action(current_node,
-                                              XTREE_PREORDER,
-                                              level,
-                                              arg)) {
+            if (level >= min_level && !action(current_node, XTREE_PREORDER, level, arg)) {
                 return current_node;
             }
             if (level < max_level) {
@@ -321,8 +298,7 @@ xtree_node_t *xtree_walk(xtree_t *tree,
                 ++level;
                 continue;
             }
-        } else if (level >= min_level &&
-                   !action(current_node, XTREE_LEAF, level, arg)) {
+        } else if (level >= min_level && !action(current_node, XTREE_LEAF, level, arg)) {
             return current_node;
         }
 
@@ -333,29 +309,18 @@ xtree_node_t *xtree_walk(xtree_t *tree,
             if (!current_node) {
                 return NULL;
             } else if (current_node == node) {
-                if (level >= min_level &&
-                    !action(current_node,
-                            XTREE_ENDORDER,
-                            level,
-                            arg)) {
+                if (level >= min_level && !action(current_node, XTREE_ENDORDER, level, arg)) {
                     return current_node;
                 }
                 return NULL;
-            } else if (level >= min_level && !action(current_node,
-                                                     XTREE_ENDORDER,
-                                                     level,
-                                                     arg)) {
+            } else if (level >= min_level && !action(current_node, XTREE_ENDORDER, level, arg)) {
                 return current_node;
             }
         }
 
         /* go to next sibling */
         if (current_node->next) {
-            if ((level >= min_level) &&
-                !action(current_node->parent,
-                        XTREE_INORDER,
-                        level - 1,
-                        arg)) {
+            if ((level >= min_level) && !action(current_node->parent, XTREE_INORDER, level - 1, arg)) {
                 return current_node;
             }
             current_node = current_node->next;
@@ -369,17 +334,12 @@ struct xtree_find_st {
     const void *arg;
 };
 
-static uint8_t xtree_find_helper(xtree_node_t *node,
-                                 uint8_t which,
-                                 uint32_t level,
-                                 void *arg) {
+static uint8_t xtree_find_helper(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     struct xtree_find_st *st = (struct xtree_find_st *) arg;
     return st->compare(node->data, st->arg);
 }
 
-xtree_node_t *xtree_find(xtree_t *tree,
-                         xtree_find_compare_t compare,
-                         const void *arg) {
+xtree_node_t *xtree_find(xtree_t *tree, xtree_find_compare_t compare, const void *arg) {
 
     struct xtree_find_st st;
     if (!tree || !compare)
@@ -425,9 +385,7 @@ xtree_node_t *xtree_delete(xtree_t *tree, xtree_node_t *node) {
 
 #define XTREE_GET_PARENTS_FIRST_SIZE 64
 
-xtree_node_t **xtree_get_parents(xtree_t *tree,
-                                 xtree_node_t *node,
-                                 uint32_t *size) {
+xtree_node_t **xtree_get_parents(xtree_t *tree, xtree_node_t *node, uint32_t *size) {
     xtree_node_t *current_node = NULL;
     xtree_node_t **parents_list = NULL;
     uint32_t parents_size = 0;
@@ -442,8 +400,7 @@ xtree_node_t **xtree_get_parents(xtree_t *tree,
     while (current_node) {
         if (parents_count >= parents_size) {
             parents_size = parents_count * 2;
-            parents_list = (xtree_node_t **) xrealloc(parents_list,
-                                                      sizeof(xtree_node_t * ) * parents_size);
+            parents_list = (xtree_node_t **) xrealloc(parents_list, sizeof(xtree_node_t * ) * parents_size);
         }
         parents_list[parents_count] = current_node;
         ++parents_count;
@@ -451,8 +408,7 @@ xtree_node_t **xtree_get_parents(xtree_t *tree,
     }
 
     if (parents_count != 0) {
-        parents_list = (xtree_node_t **) xrealloc(parents_list,
-                                                  sizeof(xtree_node_t * ) * (parents_count + 1));
+        parents_list = (xtree_node_t **) xrealloc(parents_list, sizeof(xtree_node_t * ) * (parents_count + 1));
         /* safety measure, can be used as strlen if users assumes it */
         parents_list[parents_count] = NULL;
     } else {
@@ -463,16 +419,13 @@ xtree_node_t **xtree_get_parents(xtree_t *tree,
     return parents_list;
 }
 
-xtree_node_t *xtree_common(xtree_t *tree,
-                           const xtree_node_t *const *nodes,
-                           uint32_t size) {
+xtree_node_t *xtree_common(xtree_t *tree, const xtree_node_t *const *nodes, uint32_t size) {
     xtree_node_t *common_ancestor = NULL;
     xtree_node_t *current_node = NULL;
     uint32_t i;
     uint8_t found_common_ancestor;
 
-    if (!tree || !tree->root || !nodes || !nodes[0] || !size ||
-        !nodes[0]->parent)
+    if (!tree || !tree->root || !nodes || !nodes[0] || !size || !nodes[0]->parent)
         return NULL;
 
     common_ancestor = nodes[0]->parent;
@@ -481,8 +434,7 @@ xtree_node_t *xtree_common(xtree_t *tree,
         while (common_ancestor && !found_common_ancestor) {
             if (!nodes[i]) return common_ancestor;
             current_node = nodes[i]->parent;
-            while (current_node &&
-                   current_node != common_ancestor) {
+            while (current_node && current_node != common_ancestor) {
                 current_node = current_node->parent;
             }
             if (current_node != common_ancestor) {
@@ -503,16 +455,12 @@ struct xtree_get_leaves_st {
     uint32_t size;
 };
 
-static uint8_t xtree_get_leaves_helper(xtree_node_t *node,
-                                       uint8_t which,
-                                       uint32_t level,
-                                       void *arg) {
+static uint8_t xtree_get_leaves_helper(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     struct xtree_get_leaves_st *st = (struct xtree_get_leaves_st *) arg;
     if (which == XTREE_LEAF) {
         if (st->list_count >= st->size) {
             st->size = st->list_count * 2;
-            st->list = (xtree_node_t **) xrealloc(st->list,
-                                                  sizeof(xtree_node_t * ) * st->size);
+            st->list = (xtree_node_t **) xrealloc(st->list, sizeof(xtree_node_t * ) * st->size);
         }
         st->list[st->list_count] = node;
         ++st->list_count;
@@ -520,9 +468,7 @@ static uint8_t xtree_get_leaves_helper(xtree_node_t *node,
     return 1;
 }
 
-xtree_node_t **xtree_get_leaves(xtree_t *tree,
-                                xtree_node_t *node,
-                                uint32_t *size) {
+xtree_node_t **xtree_get_leaves(xtree_t *tree, xtree_node_t *node, uint32_t *size) {
     struct xtree_get_leaves_st st;
     if (!tree || !size || !node) {
         /* testing node nulliness to return NULL since xtree_walk will
@@ -541,8 +487,7 @@ xtree_node_t **xtree_get_leaves(xtree_t *tree,
     st.list = xmalloc(sizeof(xtree_node_t * ) * st.size);
     xtree_walk(tree, node, 0, UINT32_MAX, xtree_get_leaves_helper, &st);
     if (st.list_count != 0) {
-        st.list = (xtree_node_t **) xrealloc(st.list,
-                                             sizeof(xtree_node_t * ) * (st.list_count + 1));
+        st.list = (xtree_node_t **) xrealloc(st.list, sizeof(xtree_node_t * ) * (st.list_count + 1));
         /* safety measure, can be used as strlen if users assumes it */
         st.list[st.list_count] = NULL;
     } else {

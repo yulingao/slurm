@@ -69,6 +69,8 @@
 #define AUTH_DEFAULT_INDEX 0
 
 /*
+初始化验证插件
+
  * Prepare the global context.
  * auth_type IN: authentication mechanism (e.g. "auth/munge") or
  *	NULL to select based upon slurm_get_auth_type() results

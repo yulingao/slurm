@@ -83,8 +83,7 @@ static xpid_t *_alloc_pid(pid_t pid, int is_usercmd, char *cmd, xpid_t *next) {
     return new;
 }
 
-static xppid_t *_alloc_ppid(pid_t ppid, pid_t pid, int is_usercmd, char *cmd,
-                            xppid_t *next) {
+static xppid_t *_alloc_ppid(pid_t ppid, pid_t pid, int is_usercmd, char *cmd, xppid_t *next) {
     xppid_t *new;
 
     new = xmalloc(sizeof(*new));
@@ -94,8 +93,7 @@ static xppid_t *_alloc_ppid(pid_t ppid, pid_t pid, int is_usercmd, char *cmd,
     return new;
 }
 
-static void _push_to_hashtbl(pid_t ppid, pid_t pid,
-                             int is_usercmd, char *cmd, xppid_t **hashtbl) {
+static void _push_to_hashtbl(pid_t ppid, pid_t pid, int is_usercmd, char *cmd, xppid_t **hashtbl) {
     int idx;
     xppid_t *ppids, *newppid;
     xpid_t *newpid;
@@ -171,8 +169,7 @@ static xppid_t **_build_hashtbl(void) {
             continue;
         ret_l = strtol(num, &endptr, 10);
         if ((ret_l == LONG_MIN) || (ret_l == LONG_MAX)) {
-            error("couldn't do a strtol on str %s(%ld): %m",
-                  num, ret_l);
+            error("couldn't do a strtol on str %s(%ld): %m", num, ret_l);
             continue;
         }
         if (endptr == NULL || *endptr != 0)
@@ -187,8 +184,7 @@ static xppid_t **_build_hashtbl(void) {
             continue;
         }
         close(fd);
-        if (sscanf(rbuf, "%ld %s %c %ld", &pid, cmd, &state, &ppid)
-            != 4) {
+        if (sscanf(rbuf, "%ld %s %c %ld", &pid, cmd, &state, &ppid) != 4) {
             continue;
         }
         if (state == 'Z') {
@@ -198,8 +194,7 @@ static xppid_t **_build_hashtbl(void) {
         }
 
         /* Record cmd for debugging purpose */
-        _push_to_hashtbl((pid_t) ppid, (pid_t) pid,
-                         xstrcmp(myname, cmd), cmd, hashtbl);
+        _push_to_hashtbl((pid_t) ppid, (pid_t) pid, xstrcmp(myname, cmd), cmd, hashtbl);
     }
     xfree(rbuf);
     closedir(dir);
@@ -243,10 +238,7 @@ static xpid_t *_get_list(int top, xpid_t *list, xppid_t **hashtbl) {
         if (ppid->ppid == top) {
             children = ppid->list;
             while (children) {
-                list = _alloc_pid(children->pid,
-                                  children->is_usercmd,
-                                  children->cmd,
-                                  list);
+                list = _alloc_pid(children->pid, children->is_usercmd, children->cmd, list);
                 children = children->next;
             }
             children = ppid->list;
@@ -269,11 +261,9 @@ static int _kill_proclist(xpid_t *list, int sig) {
         if (list->pid > 1) {
             if (!list->is_usercmd) {
                 debug2("%ld %s is not a user command.  "
-                       "Skipped sending signal %d",
-                       (long) list->pid, list->cmd, sig);
+                       "Skipped sending signal %d", (long) list->pid, list->cmd, sig);
             } else {
-                verbose("Sending signal %d to pid %d %s",
-                        sig, list->pid, list->cmd);
+                verbose("Sending signal %d to pid %d %s", sig, list->pid, list->cmd);
                 if (kill(list->pid, sig))
                     rc = errno; /* save the last error */
             }

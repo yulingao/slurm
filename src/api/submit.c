@@ -60,8 +60,7 @@ extern pid_t getsid(pid_t pid); /* missing from <unistd.h> */
  * OUT resp - response to request
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_submit_batch_job(job_desc_msg_t *req,
-                                  submit_response_msg_t **resp) {
+extern int slurm_submit_batch_job(job_desc_msg_t *req, submit_response_msg_t **resp) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -78,8 +77,7 @@ extern int slurm_submit_batch_job(job_desc_msg_t *req,
     req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB;
     req_msg.data = req;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     if (rc == SLURM_ERROR)
         return SLURM_ERROR;
 
@@ -115,8 +113,7 @@ extern int slurm_submit_batch_job(job_desc_msg_t *req,
  * OUT resp - response to request
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_submit_batch_pack_job(List job_req_list,
-                                       submit_response_msg_t **resp) {
+extern int slurm_submit_batch_pack_job(List job_req_list, submit_response_msg_t **resp) {
     int rc;
     job_desc_msg_t *req;
     slurm_msg_t req_msg;
@@ -139,8 +136,7 @@ extern int slurm_submit_batch_pack_job(List job_req_list,
     req_msg.msg_type = REQUEST_SUBMIT_BATCH_JOB_PACK;
     req_msg.data = job_req_list;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                        working_cluster_rec);
+    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
     if (rc == SLURM_ERROR)
         return SLURM_ERROR;
     switch (resp_msg.msg_type) {

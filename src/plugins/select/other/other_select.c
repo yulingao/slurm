@@ -60,49 +60,23 @@ uint16_t other_select_type_param = 0;
 /*
  * Must be synchronized with slurm_select_ops_t in node_select.h.
  */
-const char *node_select_syms[] = {
-        "plugin_id",
-        "select_p_state_save",
-        "select_p_state_restore",
-        "select_p_job_init",
-        "select_p_node_ranking",
-        "select_p_node_init",
-        "select_p_block_init",
-        "select_p_job_test",
-        "select_p_job_begin",
-        "select_p_job_ready",
-        "select_p_job_expand",
-        "select_p_job_resized",
-        "select_p_job_signal",
-        "select_p_job_mem_confirm",
-        "select_p_job_fini",
-        "select_p_job_suspend",
-        "select_p_job_resume",
-        "select_p_step_pick_nodes",
-        "select_p_step_start",
-        "select_p_step_finish",
-        "select_p_select_nodeinfo_pack",
-        "select_p_select_nodeinfo_unpack",
-        "select_p_select_nodeinfo_alloc",
-        "select_p_select_nodeinfo_free",
-        "select_p_select_nodeinfo_set_all",
-        "select_p_select_nodeinfo_set",
-        "select_p_select_nodeinfo_get",
-        "select_p_select_jobinfo_alloc",
-        "select_p_select_jobinfo_free",
-        "select_p_select_jobinfo_set",
-        "select_p_select_jobinfo_get",
-        "select_p_select_jobinfo_copy",
-        "select_p_select_jobinfo_pack",
-        "select_p_select_jobinfo_unpack",
-        "select_p_select_jobinfo_sprint",
-        "select_p_select_jobinfo_xstrdup",
-        "select_p_get_info_from_plugin",
-        "select_p_update_node_config",
-        "select_p_update_node_state",
-        "select_p_reconfigure",
-        "select_p_resv_test",
-};
+const char *node_select_syms[] = {"plugin_id", "select_p_state_save", "select_p_state_restore", "select_p_job_init",
+                                  "select_p_node_ranking", "select_p_node_init", "select_p_block_init",
+                                  "select_p_job_test", "select_p_job_begin", "select_p_job_ready",
+                                  "select_p_job_expand", "select_p_job_resized", "select_p_job_signal",
+                                  "select_p_job_mem_confirm", "select_p_job_fini", "select_p_job_suspend",
+                                  "select_p_job_resume", "select_p_step_pick_nodes", "select_p_step_start",
+                                  "select_p_step_finish", "select_p_select_nodeinfo_pack",
+                                  "select_p_select_nodeinfo_unpack", "select_p_select_nodeinfo_alloc",
+                                  "select_p_select_nodeinfo_free", "select_p_select_nodeinfo_set_all",
+                                  "select_p_select_nodeinfo_set", "select_p_select_nodeinfo_get",
+                                  "select_p_select_jobinfo_alloc", "select_p_select_jobinfo_free",
+                                  "select_p_select_jobinfo_set", "select_p_select_jobinfo_get",
+                                  "select_p_select_jobinfo_copy", "select_p_select_jobinfo_pack",
+                                  "select_p_select_jobinfo_unpack", "select_p_select_jobinfo_sprint",
+                                  "select_p_select_jobinfo_xstrdup", "select_p_get_info_from_plugin",
+                                  "select_p_update_node_config", "select_p_update_node_state", "select_p_reconfigure",
+                                  "select_p_resv_test",};
 
 static slurm_select_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -144,9 +118,7 @@ extern int other_select_init(void) {
               "node_select_syms should match what is in "
               "src/common/node_select.c");
 
-    if (!(g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops,
-            node_select_syms, n_syms))) {
+    if (!(g_context = plugin_context_create(plugin_type, type, (void **) &ops, node_select_syms, n_syms))) {
         error("cannot create %s context for %s", plugin_type, type);
         retval = SLURM_ERROR;
         goto done;
@@ -251,20 +223,14 @@ extern int other_block_init(List block_list) {
  * IN exc_core_bitmap - bitmap of cores being reserved.
  * RET zero on success, EINVAL otherwise
  */
-extern int other_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-                          uint32_t min_nodes, uint32_t max_nodes,
-                          uint32_t req_nodes, uint16_t mode,
-                          List preemptee_candidates, List *preemptee_job_list,
-                          bitstr_t *exc_core_bitmap) {
+extern int
+other_job_test(struct job_record *job_ptr, bitstr_t *bitmap, uint32_t min_nodes, uint32_t max_nodes, uint32_t req_nodes,
+               uint16_t mode, List preemptee_candidates, List *preemptee_job_list, bitstr_t *exc_core_bitmap) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
-    return (*(ops.job_test))
-            (job_ptr, bitmap,
-             min_nodes, max_nodes,
-             req_nodes, mode,
-             preemptee_candidates, preemptee_job_list,
-             exc_core_bitmap);
+    return (*(ops.job_test))(job_ptr, bitmap, min_nodes, max_nodes, req_nodes, mode, preemptee_candidates,
+                             preemptee_job_list, exc_core_bitmap);
 }
 
 /*
@@ -298,8 +264,7 @@ extern int other_job_ready(struct job_record *job_ptr) {
  *	"to_job_ptr". Also see other_job_resized().
  * RET: 0 or an error code
  */
-extern int other_job_expand(struct job_record *from_job_ptr,
-                            struct job_record *to_job_ptr) {
+extern int other_job_expand(struct job_record *from_job_ptr, struct job_record *to_job_ptr) {
     if (other_select_init() < 0)
         return -1;
 
@@ -311,8 +276,7 @@ extern int other_job_expand(struct job_record *from_job_ptr,
  *	Only support jobs shrinking. Also see other_job_expand();
  * RET: 0 or an error code
  */
-extern int other_job_resized(struct job_record *job_ptr,
-                             struct node_record *node_ptr) {
+extern int other_job_resized(struct job_record *job_ptr, struct node_record *node_ptr) {
     if (other_select_init() < 0)
         return -1;
 
@@ -395,23 +359,19 @@ extern int other_job_resume(struct job_record *job_ptr, bool indf_susp) {
  *                  (not always set).
  * RET map of slurm nodes to be used for step, NULL on failure
  */
-extern bitstr_t *other_step_pick_nodes(struct job_record *job_ptr,
-                                       select_jobinfo_t *jobinfo,
-                                       uint32_t node_count,
+extern bitstr_t *other_step_pick_nodes(struct job_record *job_ptr, select_jobinfo_t *jobinfo, uint32_t node_count,
                                        bitstr_t **avail_nodes) {
     if (other_select_init() < 0)
         return NULL;
 
-    return (*(ops.step_pick_nodes))(job_ptr, jobinfo, node_count,
-                                    avail_nodes);
+    return (*(ops.step_pick_nodes))(job_ptr, jobinfo, node_count, avail_nodes);
 }
 
 extern int other_step_start(struct step_record *step_ptr) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
-    return (*(ops.step_start))
-            (step_ptr);
+    return (*(ops.step_start))(step_ptr);
 }
 
 /*
@@ -424,22 +384,17 @@ extern int other_step_finish(struct step_record *step_ptr, bool killing_step) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
-    return (*(ops.step_finish))
-            (step_ptr, killing_step);
+    return (*(ops.step_finish))(step_ptr, killing_step);
 }
 
-extern int other_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo,
-                                      Buf buffer,
-                                      uint16_t protocol_version) {
+extern int other_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo, Buf buffer, uint16_t protocol_version) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
     return (*(ops.nodeinfo_pack))(nodeinfo, buffer, protocol_version);
 }
 
-extern int other_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo,
-                                        Buf buffer,
-                                        uint16_t protocol_version) {
+extern int other_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo, Buf buffer, uint16_t protocol_version) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -474,10 +429,9 @@ extern int other_select_nodeinfo_set(struct job_record *job_ptr) {
     return (*(ops.nodeinfo_set))(job_ptr);
 }
 
-extern int other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
-                                     enum select_nodedata_type dinfo,
-                                     enum node_states state,
-                                     void *data) {
+extern int
+other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo, enum select_nodedata_type dinfo, enum node_states state,
+                          void *data) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -500,9 +454,7 @@ extern int other_select_jobinfo_free(select_jobinfo_t *jobinfo) {
     return (*(ops.jobinfo_free))(jobinfo);
 }
 
-extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
-                                    enum select_jobdata_type data_type,
-                                    void *data) {
+extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -514,9 +466,7 @@ extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
  * IN data_type - type of data to enter into job credential
  * IN/OUT data - the data to enter into job credential
  */
-extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo,
-                                    enum select_jobdata_type data_type,
-                                    void *data) {
+extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -528,8 +478,7 @@ extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo,
  * RET        - the copy or NULL on failure
  * NOTE: returned value must be freed using other_free_jobinfo
  */
-extern select_jobinfo_t *other_select_jobinfo_copy(
-        select_jobinfo_t *jobinfo) {
+extern select_jobinfo_t *other_select_jobinfo_copy(select_jobinfo_t *jobinfo) {
     if (other_select_init() < 0)
         return NULL;
 
@@ -541,9 +490,7 @@ extern select_jobinfo_t *other_select_jobinfo_copy(
  * OUT buffer  - buffer with select credential appended
  * RET         - slurm error code
  */
-extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
-                                     Buf buffer,
-                                     uint16_t protocol_version) {
+extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer, uint16_t protocol_version) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -556,9 +503,7 @@ extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
  * RET         - slurm error code
  * NOTE: returned value must be freed using other_free_jobinfo
  */
-extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
-                                       Buf buffer,
-                                       uint16_t protocol_version) {
+extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo, Buf buffer, uint16_t protocol_version) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -572,8 +517,7 @@ extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - the string, same as buf
  */
-extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
-                                         char *buf, size_t size, int mode) {
+extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo, char *buf, size_t size, int mode) {
     if (other_select_init() < 0)
         return NULL;
 
@@ -585,8 +529,7 @@ extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - char * containing string of request
  */
-extern char *other_select_jobinfo_xstrdup(
-        select_jobinfo_t *jobinfo, int mode) {
+extern char *other_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo, int mode) {
     if (other_select_init() < 0)
         return NULL;
 
@@ -599,9 +542,7 @@ extern char *other_select_jobinfo_xstrdup(
  *                (see enum select_plugindata_info)
  * IN/OUT data  - the data to get from node record
  */
-extern int other_get_info_from_plugin(enum select_plugindata_info dinfo,
-                                      struct job_record *job_ptr,
-                                      void *data) {
+extern int other_get_info_from_plugin(enum select_plugindata_info dinfo, struct job_record *job_ptr, void *data) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
@@ -618,8 +559,7 @@ extern int other_update_node_config(int index) {
     if (other_select_init() < 0)
         return SLURM_ERROR;
 
-    return (*(ops.
-            update_node_config))(index);
+    return (*(ops.update_node_config))(index);
 }
 
 /*
@@ -646,13 +586,10 @@ extern int other_reconfigure(void) {
     return (*(ops.reconfigure))();
 }
 
-extern bitstr_t *other_resv_test(resv_desc_msg_t *resv_desc_ptr,
-                                 uint32_t node_cnt,
-                                 bitstr_t *avail_bitmap,
-                                 bitstr_t **core_bitmap) {
+extern bitstr_t *
+other_resv_test(resv_desc_msg_t *resv_desc_ptr, uint32_t node_cnt, bitstr_t *avail_bitmap, bitstr_t **core_bitmap) {
     if (other_select_init() < 0)
         return NULL;
 
-    return (*(ops.resv_test))(resv_desc_ptr, node_cnt,
-                              avail_bitmap, core_bitmap);
+    return (*(ops.resv_test))(resv_desc_ptr, node_cnt, avail_bitmap, core_bitmap);
 }

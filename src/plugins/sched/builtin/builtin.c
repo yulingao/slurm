@@ -118,8 +118,7 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "interval=")))
         builtin_interval = atoi(tmp_ptr + 9);
     if (builtin_interval < 1) {
-        error("Invalid SchedulerParameters interval: %d",
-              builtin_interval);
+        error("Invalid SchedulerParameters interval: %d", builtin_interval);
         builtin_interval = BACKFILL_INTERVAL;
     }
 
@@ -128,8 +127,7 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_test=")))
         max_sched_job_cnt = atoi(tmp_ptr + 16);
     if (max_sched_job_cnt < 1) {
-        error("Invalid SchedulerParameters bf_max_job_test: %d",
-              max_sched_job_cnt);
+        error("Invalid SchedulerParameters bf_max_job_test: %d", max_sched_job_cnt);
         max_sched_job_cnt = 50;
     }
     xfree(sched_params);
@@ -161,22 +159,19 @@ static void _compute_start_times(void) {
             continue;    /* Only test one partition */
 
         if (job_cnt++ > max_sched_job_cnt) {
-            debug2("scheduling loop exiting after %d jobs",
-                   max_sched_job_cnt);
+            debug2("scheduling loop exiting after %d jobs", max_sched_job_cnt);
             break;
         }
 
         /* Determine minimum and maximum node counts */
         /* On BlueGene systems don't adjust the min/max node limits
            here.  We are working on midplane values. */
-        min_nodes = MAX(job_ptr->details->min_nodes,
-                        part_ptr->min_nodes);
+        min_nodes = MAX(job_ptr->details->min_nodes, part_ptr->min_nodes);
 
         if (job_ptr->details->max_nodes == 0)
             max_nodes = part_ptr->max_nodes;
         else
-            max_nodes = MIN(job_ptr->details->max_nodes,
-                            part_ptr->max_nodes);
+            max_nodes = MIN(job_ptr->details->max_nodes, part_ptr->max_nodes);
 
         max_nodes = MIN(max_nodes, 500000);     /* prevent overflows */
 
@@ -190,32 +185,26 @@ static void _compute_start_times(void) {
             continue;
         }
 
-        j = job_test_resv(job_ptr, &now, true, &avail_bitmap,
-                          &exc_core_bitmap, &resv_overlap, false);
+        j = job_test_resv(job_ptr, &now, true, &avail_bitmap, &exc_core_bitmap, &resv_overlap, false);
         if (j != SLURM_SUCCESS) {
             FREE_NULL_BITMAP(avail_bitmap);
             FREE_NULL_BITMAP(exc_core_bitmap);
             continue;
         }
 
-        rc = select_g_job_test(job_ptr, avail_bitmap,
-                               min_nodes, max_nodes, req_nodes,
-                               SELECT_MODE_WILL_RUN,
-                               preemptee_candidates, NULL,
-                               exc_core_bitmap);
+        rc = select_g_job_test(job_ptr, avail_bitmap, min_nodes, max_nodes, req_nodes, SELECT_MODE_WILL_RUN,
+                               preemptee_candidates, NULL, exc_core_bitmap);
         if (rc == SLURM_SUCCESS) {
             last_job_update = now;
             if (job_ptr->time_limit == INFINITE)
                 time_limit = 365 * 24 * 60 * 60;
             else if (job_ptr->time_limit != NO_VAL)
                 time_limit = job_ptr->time_limit * 60;
-            else if (job_ptr->part_ptr &&
-                     (job_ptr->part_ptr->max_time != INFINITE))
+            else if (job_ptr->part_ptr && (job_ptr->part_ptr->max_time != INFINITE))
                 time_limit = job_ptr->part_ptr->max_time * 60;
             else
                 time_limit = 365 * 24 * 60 * 60;
-            if (bit_overlap(alloc_bitmap, avail_bitmap) &&
-                (job_ptr->start_time <= last_job_alloc)) {
+            if (bit_overlap(alloc_bitmap, avail_bitmap) && (job_ptr->start_time <= last_job_alloc)) {
                 job_ptr->start_time = last_job_alloc;
             }
             bit_or(alloc_bitmap, avail_bitmap);
@@ -225,8 +214,7 @@ static void _compute_start_times(void) {
         FREE_NULL_BITMAP(exc_core_bitmap);
 
         if ((time(NULL) - sched_start) >= sched_timeout) {
-            debug2("scheduling loop exiting after %d jobs",
-                   max_sched_job_cnt);
+            debug2("scheduling loop exiting after %d jobs", max_sched_job_cnt);
             break;
         }
     }
@@ -245,8 +233,7 @@ extern void *builtin_agent(void *args) {
     double wait_time;
     static time_t last_sched_time = 0;
     /* Read config, nodes and partitions; Write jobs */
-    slurmctld_lock_t all_locks = {
-            READ_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK, READ_LOCK};
+    slurmctld_lock_t all_locks = {READ_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK, READ_LOCK};
 
     _load_config();
     last_sched_time = time(NULL);

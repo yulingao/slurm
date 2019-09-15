@@ -145,14 +145,10 @@ extern void *slurmctld_state_save(void *no_data) {
         /* wait for work to perform */
         slurm_mutex_lock(&state_save_lock);
         while (1) {
-            save_count = save_jobs + save_nodes + save_parts +
-                         save_front_end + save_resv +
-                         save_triggers;
+            save_count = save_jobs + save_nodes + save_parts + save_front_end + save_resv + save_triggers;
             now = time(NULL);
             save_delay = difftime(now, last_save);
-            if (save_count &&
-                (!run_save_thread ||
-                 (save_delay >= SAVE_MAX_WAIT))) {
+            if (save_count && (!run_save_thread || (save_delay >= SAVE_MAX_WAIT))) {
                 last_save = now;
                 break;        /* do the work */
             } else if (!run_save_thread) {
@@ -162,11 +158,9 @@ extern void *slurmctld_state_save(void *no_data) {
             } else if (save_count) { /* wait for a timeout */
                 struct timespec ts = {0, 0};
                 ts.tv_sec = now + 1;
-                slurm_cond_timedwait(&state_save_cond,
-                                     &state_save_lock, &ts);
+                slurm_cond_timedwait(&state_save_cond, &state_save_lock, &ts);
             } else {        /* wait for more work */
-                slurm_cond_wait(&state_save_cond,
-                                &state_save_lock);
+                slurm_cond_wait(&state_save_cond, &state_save_lock);
             }
         }
 

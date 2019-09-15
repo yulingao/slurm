@@ -74,8 +74,7 @@ typedef struct kill_thread {
 
 static struct io_buf *_alloc_io_buf(void);
 
-static void _init_stdio_eio_objs(slurm_step_io_fds_t fds,
-                                 client_io_t *cio);
+static void _init_stdio_eio_objs(slurm_step_io_fds_t fds, client_io_t *cio);
 
 static void _handle_io_init_msg(int fd, client_io_t *cio);
 
@@ -94,10 +93,7 @@ static bool _listening_socket_readable(eio_obj_t *obj);
 
 static int _listening_socket_read(eio_obj_t *obj, List objs);
 
-struct io_operations listening_socket_ops = {
-        .readable = &_listening_socket_readable,
-        .handle_read = &_listening_socket_read
-};
+struct io_operations listening_socket_ops = {.readable = &_listening_socket_readable, .handle_read = &_listening_socket_read};
 
 /**********************************************************************
  * IO server socket declarations
@@ -110,12 +106,7 @@ static bool _server_writable(eio_obj_t *obj);
 
 static int _server_write(eio_obj_t *obj, List objs);
 
-struct io_operations server_ops = {
-        .readable = &_server_readable,
-        .handle_read = &_server_read,
-        .writable = &_server_writable,
-        .handle_write = &_server_write
-};
+struct io_operations server_ops = {.readable = &_server_readable, .handle_read = &_server_read, .writable = &_server_writable, .handle_write = &_server_write};
 
 struct server_io_info {
     client_io_t *cio;
@@ -144,10 +135,7 @@ static bool _file_writable(eio_obj_t *obj);
 
 static int _file_write(eio_obj_t *obj, List objs);
 
-struct io_operations file_write_ops = {
-        .writable = &_file_writable,
-        .handle_write = &_file_write,
-};
+struct io_operations file_write_ops = {.writable = &_file_writable, .handle_write = &_file_write,};
 
 struct file_write_info {
     client_io_t *cio;
@@ -170,10 +158,7 @@ static bool _file_readable(eio_obj_t *obj);
 
 static int _file_read(eio_obj_t *obj, List objs);
 
-struct io_operations file_read_ops = {
-        .readable = &_file_readable,
-        .handle_read = &_file_read,
-};
+struct io_operations file_read_ops = {.readable = &_file_readable, .handle_read = &_file_read,};
 
 struct file_read_info {
     client_io_t *cio;
@@ -189,8 +174,7 @@ struct file_read_info {
 /**********************************************************************
  * Listening socket functions
  **********************************************************************/
-static bool
-_listening_socket_readable(eio_obj_t *obj) {
+static bool _listening_socket_readable(eio_obj_t *obj) {
     debug3("Called _listening_socket_readable");
     if (obj->shutdown == true) {
         if (obj->fd != -1) {
@@ -204,8 +188,7 @@ _listening_socket_readable(eio_obj_t *obj) {
     return true;
 }
 
-static int
-_listening_socket_read(eio_obj_t *obj, List objs) {
+static int _listening_socket_read(eio_obj_t *obj, List objs) {
     client_io_t *cio = (client_io_t *) obj->arg;
 
     debug3("Called _listening_socket_read");
@@ -214,8 +197,7 @@ _listening_socket_read(eio_obj_t *obj, List objs) {
     return (0);
 }
 
-static void
-_set_listensocks_nonblocking(client_io_t *cio) {
+static void _set_listensocks_nonblocking(client_io_t *cio) {
     int i;
     for (i = 0; i < cio->num_listen; i++)
         fd_set_nonblocking(cio->listensock[i]);
@@ -224,9 +206,7 @@ _set_listensocks_nonblocking(client_io_t *cio) {
 /**********************************************************************
  * IO server socket functions
  **********************************************************************/
-static eio_obj_t *
-_create_server_eio_obj(int fd, client_io_t *cio, int nodeid,
-                       int stdout_objs, int stderr_objs) {
+static eio_obj_t *_create_server_eio_obj(int fd, client_io_t *cio, int nodeid, int stdout_objs, int stderr_objs) {
     struct server_io_info *info = NULL;
     eio_obj_t *eio = NULL;
 
@@ -249,8 +229,7 @@ _create_server_eio_obj(int fd, client_io_t *cio, int nodeid,
     return eio;
 }
 
-static bool
-_server_readable(eio_obj_t *obj) {
+static bool _server_readable(eio_obj_t *obj) {
     struct server_io_info *s = (struct server_io_info *) obj->arg;
 
     debug4("Called _server_readable");
@@ -265,8 +244,7 @@ _server_readable(eio_obj_t *obj) {
         return false;
     }
 
-    if (s->remote_stdout_objs > 0 || s->remote_stderr_objs > 0 ||
-        s->testing_connection) {
+    if (s->remote_stdout_objs > 0 || s->remote_stderr_objs > 0 || s->testing_connection) {
         debug4("remote_stdout_objs = %d", s->remote_stdout_objs);
         debug4("remote_stderr_objs = %d", s->remote_stderr_objs);
         return true;
@@ -288,8 +266,7 @@ _server_readable(eio_obj_t *obj) {
     return false;
 }
 
-static int
-_server_read(eio_obj_t *obj, List objs) {
+static int _server_read(eio_obj_t *obj, List objs) {
     struct server_io_info *s = (struct server_io_info *) obj->arg;
     void *buf;
     int n;
@@ -307,17 +284,13 @@ _server_read(eio_obj_t *obj, List objs) {
         if (n <= 0) { /* got eof or error on socket read */
             if (n < 0) {    /* Error */
                 if (obj->shutdown) {
-                    verbose("%s: Dropped pending I/O for terminated task",
-                            __func__);
+                    verbose("%s: Dropped pending I/O for terminated task", __func__);
                 } else {
                     if (getenv("SLURM_PTY_PORT") == NULL) {
-                        error("%s: fd %d error reading header: %m",
-                              __func__, obj->fd);
+                        error("%s: fd %d error reading header: %m", __func__, obj->fd);
                     }
                     if (s->cio->sls) {
-                        step_launch_notify_io_failure(
-                                s->cio->sls,
-                                s->node_id);
+                        step_launch_notify_io_failure(s->cio->sls, s->node_id);
                     }
                 }
             }
@@ -332,8 +305,7 @@ _server_read(eio_obj_t *obj, List objs) {
         }
         if (s->header.type == SLURM_IO_CONNECTION_TEST) {
             if (s->cio->sls)
-                step_launch_clear_questionable_state(
-                        s->cio->sls, s->node_id);
+                step_launch_clear_questionable_state(s->cio->sls, s->node_id);
             list_enqueue(s->cio->free_outgoing, s->in_msg);
             s->in_msg = NULL;
             s->testing_connection = false;
@@ -353,8 +325,7 @@ _server_read(eio_obj_t *obj, List objs) {
             /* If all remote eios are gone, shutdown
              * the i/o channel with stepd.
              */
-            if (s->remote_stdout_objs == 0
-                && s->remote_stderr_objs == 0) {
+            if (s->remote_stdout_objs == 0 && s->remote_stderr_objs == 0) {
                 obj->shutdown = true;
             }
             list_enqueue(s->cio->free_outgoing, s->in_msg);
@@ -385,18 +356,15 @@ _server_read(eio_obj_t *obj, List objs) {
                  * the file is closed at slurmstepd shutdown.
                  * The reason for this error is unknown. -Moe */
                 debug("Stdout/err from task %u may be "
-                      "incomplete due to a network error",
-                      s->header.gtaskid);
+                      "incomplete due to a network error", s->header.gtaskid);
             } else {
                 debug3("_server_read error: %m");
             }
         }
         if (n <= 0) { /* got eof or unhandled error */
-            error("%s: fd %d got error or unexpected eof reading message body",
-                  __func__, obj->fd);
+            error("%s: fd %d got error or unexpected eof reading message body", __func__, obj->fd);
             if (s->cio->sls)
-                step_launch_notify_io_failure(
-                        s->cio->sls, s->node_id);
+                step_launch_notify_io_failure(s->cio->sls, s->node_id);
             if (obj->fd > STDERR_FILENO)
                 close(obj->fd);
             obj->fd = -1;
@@ -439,8 +407,7 @@ _server_read(eio_obj_t *obj, List objs) {
     return SLURM_SUCCESS;
 }
 
-static bool
-_server_writable(eio_obj_t *obj) {
+static bool _server_writable(eio_obj_t *obj) {
     struct server_io_info *s = (struct server_io_info *) obj->arg;
 
     debug4("Called _server_writable");
@@ -453,10 +420,8 @@ _server_writable(eio_obj_t *obj) {
         debug4("  false, shutdown");
         return false;
     }
-    if (s->out_msg != NULL
-        || !list_is_empty(s->msg_queue)) {
-        debug4("  true, s->msg_queue length = %d",
-               list_count(s->msg_queue));
+    if (s->out_msg != NULL || !list_is_empty(s->msg_queue)) {
+        debug4("  true, s->msg_queue length = %d", list_count(s->msg_queue));
         return true;
     }
 
@@ -464,8 +429,7 @@ _server_writable(eio_obj_t *obj) {
     return false;
 }
 
-static int
-_server_write(eio_obj_t *obj, List objs) {
+static int _server_write(eio_obj_t *obj, List objs) {
     struct server_io_info *s = (struct server_io_info *) obj->arg;
     void *buf;
     int n;
@@ -482,8 +446,7 @@ _server_write(eio_obj_t *obj, List objs) {
             debug3("_server_write: nothing in the queue");
             return SLURM_SUCCESS;
         }
-        debug3("  dequeue successful, s->out_msg->length = %d",
-               s->out_msg->length);
+        debug3("  dequeue successful, s->out_msg->length = %d", s->out_msg->length);
         s->out_remaining = s->out_msg->length;
     }
 
@@ -503,8 +466,7 @@ _server_write(eio_obj_t *obj, List objs) {
         } else {
             error("_server_write write failed: %m");
             if (s->cio->sls)
-                step_launch_notify_io_failure(s->cio->sls,
-                                              s->node_id);
+                step_launch_notify_io_failure(s->cio->sls, s->node_id);
             s->out_eof = true;
             /* FIXME - perhaps we should free the message here? */
             return SLURM_ERROR;
@@ -534,14 +496,11 @@ _server_write(eio_obj_t *obj, List objs) {
 /**********************************************************************
  * File write functions
  **********************************************************************/
-static eio_obj_t *
-create_file_write_eio_obj(int fd, uint32_t taskid, uint32_t nodeid,
-                          client_io_t *cio) {
+static eio_obj_t *create_file_write_eio_obj(int fd, uint32_t taskid, uint32_t nodeid, client_io_t *cio) {
     struct file_write_info *info = NULL;
     eio_obj_t *eio = NULL;
 
-    info = (struct file_write_info *)
-            xmalloc(sizeof(struct file_write_info));
+    info = (struct file_write_info *) xmalloc(sizeof(struct file_write_info));
     info->cio = cio;
     info->msg_queue = list_create(NULL); /* FIXME! Add destructor */
     info->out_msg = NULL;
@@ -560,8 +519,7 @@ static bool _file_writable(eio_obj_t *obj) {
     struct file_write_info *info = (struct file_write_info *) obj->arg;
 
     debug2("Called _file_writable");
-    if (info->out_msg != NULL
-        || !list_is_empty(info->msg_queue))
+    if (info->out_msg != NULL || !list_is_empty(info->msg_queue))
         return true;
 
     debug3("  false");
@@ -591,18 +549,12 @@ static int _file_write(eio_obj_t *obj, List objs) {
     /*
      * Write message to file.
      */
-    if ((info->taskid != (uint32_t) -1) &&
-        (info->out_msg->header.gtaskid != info->taskid)) {
+    if ((info->taskid != (uint32_t) -1) && (info->out_msg->header.gtaskid != info->taskid)) {
         /* we are ignoring messages not from info->taskid */
     } else if (!info->eof) {
-        ptr = info->out_msg->data + (info->out_msg->length
-                                     - info->out_remaining);
-        if ((n = write_labelled_message(obj->fd, ptr,
-                                        info->out_remaining,
-                                        info->out_msg->header.gtaskid,
-                                        info->cio->pack_offset,
-                                        info->cio->task_offset,
-                                        info->cio->label,
+        ptr = info->out_msg->data + (info->out_msg->length - info->out_remaining);
+        if ((n = write_labelled_message(obj->fd, ptr, info->out_remaining, info->out_msg->header.gtaskid,
+                                        info->cio->pack_offset, info->cio->task_offset, info->cio->label,
                                         info->cio->taskid_width)) < 0) {
             list_enqueue(info->cio->free_outgoing, info->out_msg);
             info->eof = true;
@@ -629,14 +581,11 @@ static int _file_write(eio_obj_t *obj, List objs) {
 /**********************************************************************
  * File read functions
  **********************************************************************/
-static eio_obj_t *
-create_file_read_eio_obj(int fd, uint32_t taskid, uint32_t nodeid,
-                         client_io_t *cio) {
+static eio_obj_t *create_file_read_eio_obj(int fd, uint32_t taskid, uint32_t nodeid, client_io_t *cio) {
     struct file_read_info *info = NULL;
     eio_obj_t *eio = NULL;
 
-    info = (struct file_read_info *)
-            xmalloc(sizeof(struct file_read_info));
+    info = (struct file_read_info *) xmalloc(sizeof(struct file_read_info));
     info->cio = cio;
     if (taskid == (uint32_t) -1) {
         info->header.type = SLURM_IO_ALLSTDIN;
@@ -714,8 +663,7 @@ static int _file_read(eio_obj_t *obj, List objs) {
         if (errno == EINTR)
             goto again;
         if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-            debug("_file_read returned %s",
-                  errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK");
+            debug("_file_read returned %s", errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK");
             slurm_mutex_lock(&info->cio->ioservers_lock);
             list_enqueue(info->cio->free_incoming, msg);
             slurm_mutex_unlock(&info->cio->ioservers_lock);
@@ -790,8 +738,7 @@ static int _file_read(eio_obj_t *obj, List objs) {
  * General fuctions
  **********************************************************************/
 
-static void *
-_io_thr_internal(void *cio_arg) {
+static void *_io_thr_internal(void *cio_arg) {
     client_io_t *cio = (client_io_t *) cio_arg;
     sigset_t set;
 
@@ -816,8 +763,7 @@ _io_thr_internal(void *cio_arg) {
     return NULL;
 }
 
-static eio_obj_t *
-_create_listensock_eio(int fd, client_io_t *cio) {
+static eio_obj_t *_create_listensock_eio(int fd, client_io_t *cio) {
     eio_obj_t *eio = NULL;
 
     eio = eio_obj_create(fd, &listening_socket_ops, (void *) cio);
@@ -825,8 +771,7 @@ _create_listensock_eio(int fd, client_io_t *cio) {
     return eio;
 }
 
-static int
-_read_io_init_msg(int fd, client_io_t *cio, char *host) {
+static int _read_io_init_msg(int fd, client_io_t *cio, char *host) {
     struct slurm_io_init_msg msg;
 
     if (io_init_msg_read_from_fd(fd, &msg) != SLURM_SUCCESS) {
@@ -840,8 +785,7 @@ _read_io_init_msg(int fd, client_io_t *cio, char *host) {
         error("Invalid nodeid %d from %s", msg.nodeid, host);
         goto fail;
     }
-    debug2("Validated IO connection from %s, node rank %u, sd=%d",
-           host, msg.nodeid, fd);
+    debug2("Validated IO connection from %s, node rank %u, sd=%d", host, msg.nodeid, fd);
 
     net_set_low_water(fd, 1);
     debug3("msg.stdout_objs = %d", msg.stdout_objs);
@@ -853,9 +797,7 @@ _read_io_init_msg(int fd, client_io_t *cio, char *host) {
         error("IO: Hey, you told me node %d was down!", msg.nodeid);
     }
 
-    cio->ioserver[msg.nodeid] = _create_server_eio_obj(fd, cio, msg.nodeid,
-                                                       msg.stdout_objs,
-                                                       msg.stderr_objs);
+    cio->ioserver[msg.nodeid] = _create_server_eio_obj(fd, cio, msg.nodeid, msg.stdout_objs, msg.stderr_objs);
     slurm_mutex_lock(&cio->ioservers_lock);
     bit_set(cio->ioservers_ready_bits, msg.nodeid);
     cio->ioservers_ready = bit_set_count(cio->ioservers_ready_bits);
@@ -879,8 +821,7 @@ _read_io_init_msg(int fd, client_io_t *cio, char *host) {
 }
 
 
-static bool
-_is_fd_ready(int fd) {
+static bool _is_fd_ready(int fd) {
     struct pollfd pfd[1];
     int rc;
 
@@ -893,8 +834,7 @@ _is_fd_ready(int fd) {
 }
 
 
-static void
-_handle_io_init_msg(int fd, client_io_t *cio) {
+static void _handle_io_init_msg(int fd, client_io_t *cio) {
     int j;
     debug2("Activity on IO listening socket %d", fd);
 
@@ -916,8 +856,7 @@ _handle_io_init_msg(int fd, client_io_t *cio) {
                 continue;
             if (errno == EAGAIN)    /* No more connections */
                 return;
-            if ((errno == ECONNABORTED) ||
-                (errno == EWOULDBLOCK)) {
+            if ((errno == ECONNABORTED) || (errno == EWOULDBLOCK)) {
                 return;
             }
             error("Unable to accept new connection: %m\n");
@@ -948,8 +887,7 @@ _handle_io_init_msg(int fd, client_io_t *cio) {
     }
 }
 
-static int
-_wid(int n) {
+static int _wid(int n) {
     int width = 1;
     n--;    /* For zero origin */
     while (n /= 10)
@@ -957,8 +895,7 @@ _wid(int n) {
     return width;
 }
 
-static struct io_buf *
-_alloc_io_buf(void) {
+static struct io_buf *_alloc_io_buf(void) {
     struct io_buf *buf;
 
     buf = (struct io_buf *) xmalloc(sizeof(struct io_buf));
@@ -977,15 +914,13 @@ _alloc_io_buf(void) {
     return buf;
 }
 
-static void
-_init_stdio_eio_objs(slurm_step_io_fds_t fds, client_io_t *cio) {
+static void _init_stdio_eio_objs(slurm_step_io_fds_t fds, client_io_t *cio) {
     /*
      * build stdin eio_obj_t
      */
     if (fds.input.fd > -1) {
         fd_set_close_on_exec(fds.input.fd);
-        cio->stdin_obj = create_file_read_eio_obj(
-                fds.input.fd, fds.input.taskid, fds.input.nodeid, cio);
+        cio->stdin_obj = create_file_read_eio_obj(fds.input.fd, fds.input.taskid, fds.input.nodeid, cio);
         eio_new_initial_obj(cio->eio, cio->stdin_obj);
     }
 
@@ -993,8 +928,7 @@ _init_stdio_eio_objs(slurm_step_io_fds_t fds, client_io_t *cio) {
      * build stdout eio_obj_t
      */
     if (fds.out.fd > -1) {
-        cio->stdout_obj = create_file_write_eio_obj(
-                fds.out.fd, fds.out.taskid, fds.out.nodeid, cio);
+        cio->stdout_obj = create_file_write_eio_obj(fds.out.fd, fds.out.taskid, fds.out.nodeid, cio);
         eio_new_initial_obj(cio->eio, cio->stdout_obj);
     }
 
@@ -1002,24 +936,19 @@ _init_stdio_eio_objs(slurm_step_io_fds_t fds, client_io_t *cio) {
      * build a seperate stderr eio_obj_t only if stderr is not sharing
      * the stdout file descriptor and task filtering option.
      */
-    if (fds.err.fd == fds.out.fd
-        && fds.err.taskid == fds.out.taskid
-        && fds.err.nodeid == fds.out.nodeid) {
+    if (fds.err.fd == fds.out.fd && fds.err.taskid == fds.out.taskid && fds.err.nodeid == fds.out.nodeid) {
         debug3("stdout and stderr sharing a file");
         cio->stderr_obj = cio->stdout_obj;
     } else {
         if (fds.err.fd > -1) {
-            cio->stderr_obj = create_file_write_eio_obj(
-                    fds.err.fd, fds.err.taskid,
-                    fds.err.nodeid, cio);
+            cio->stderr_obj = create_file_write_eio_obj(fds.err.fd, fds.err.taskid, fds.err.nodeid, cio);
             eio_new_initial_obj(cio->eio, cio->stderr_obj);
         }
     }
 }
 
 /* Callers of this function should already have locked cio->ioservers_lock */
-static bool
-_incoming_buf_free(client_io_t *cio) {
+static bool _incoming_buf_free(client_io_t *cio) {
     struct io_buf *buf;
 
     if (list_count(cio->free_incoming) > 0) {
@@ -1035,8 +964,7 @@ _incoming_buf_free(client_io_t *cio) {
     return false;
 }
 
-static bool
-_outgoing_buf_free(client_io_t *cio) {
+static bool _outgoing_buf_free(client_io_t *cio) {
     struct io_buf *buf;
 
     if (list_count(cio->free_outgoing) > 0) {
@@ -1053,17 +981,15 @@ _outgoing_buf_free(client_io_t *cio) {
     return false;
 }
 
-static inline int
-_estimate_nports(int nclients, int cli_per_port) {
+static inline int _estimate_nports(int nclients, int cli_per_port) {
     div_t d;
     d = div(nclients, cli_per_port);
     return d.rem > 0 ? d.quot + 1 : d.quot;
 }
 
-client_io_t *client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks,
-                                      int num_nodes, slurm_cred_t *cred,
-                                      bool label, uint32_t pack_offset,
-                                      uint32_t task_offset) {
+client_io_t *
+client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks, int num_nodes, slurm_cred_t *cred, bool label,
+                         uint32_t pack_offset, uint32_t task_offset) {
     client_io_t *cio;
     int i;
     uint32_t siglen;
@@ -1118,17 +1044,13 @@ client_io_t *client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks,
         int cc;
 
         if (ports)
-            cc = net_stream_listen_ports(&cio->listensock[i],
-                                         &cio->listenport[i],
-                                         ports, false);
+            cc = net_stream_listen_ports(&cio->listensock[i], &cio->listenport[i], ports, false);
         else
-            cc = net_stream_listen(&cio->listensock[i],
-                                   &cio->listenport[i]);
+            cc = net_stream_listen(&cio->listensock[i], &cio->listenport[i]);
         if (cc < 0) {
             fatal("unable to initialize stdio listen socket: %m");
         }
-        debug("initialized stdio listening socket, port %d",
-              cio->listenport[i]);
+        debug("initialized stdio listening socket, port %d", cio->listenport[i]);
         /*net_set_low_water(cio->listensock[i], 140);*/
         obj = _create_listensock_eio(cio->listensock[i], cio);
         eio_new_initial_obj(cio->eio, obj);
@@ -1149,8 +1071,7 @@ client_io_t *client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks,
     return cio;
 }
 
-int
-client_io_handler_start(client_io_t *cio) {
+int client_io_handler_start(client_io_t *cio) {
     xsignal(SIGTTIN, SIG_IGN);
 
     slurm_thread_create(&cio->ioid, _io_thr_internal, cio);
@@ -1179,8 +1100,7 @@ static void _delay_kill_thread(pthread_t thread_id, int secs) {
     slurm_thread_create_detached(NULL, _kill_thr, kt);
 }
 
-int
-client_io_handler_finish(client_io_t *cio) {
+int client_io_handler_finish(client_io_t *cio) {
     if (cio == NULL)
         return SLURM_SUCCESS;
 
@@ -1197,8 +1117,7 @@ client_io_handler_finish(client_io_t *cio) {
     return SLURM_SUCCESS;
 }
 
-void
-client_io_handler_destroy(client_io_t *cio) {
+void client_io_handler_destroy(client_io_t *cio) {
     if (cio == NULL)
         return;
 
@@ -1215,9 +1134,7 @@ client_io_handler_destroy(client_io_t *cio) {
     xfree(cio);
 }
 
-void
-client_io_handler_downnodes(client_io_t *cio,
-                            const int *node_ids, int num_node_ids) {
+void client_io_handler_downnodes(client_io_t *cio, const int *node_ids, int num_node_ids) {
     int i;
     int node_id;
     struct server_io_info *info;
@@ -1231,8 +1148,7 @@ client_io_handler_downnodes(client_io_t *cio,
         node_id = node_ids[i];
         if (node_id >= cio->num_nodes || node_id < 0)
             continue;
-        if (bit_test(cio->ioservers_ready_bits, node_id)
-            && cio->ioserver[node_id] != NULL) {
+        if (bit_test(cio->ioservers_ready_bits, node_id) && cio->ioserver[node_id] != NULL) {
             tmp = cio->ioserver[node_id]->arg;
             info = (struct server_io_info *) tmp;
             info->remote_stdout_objs = 0;
@@ -1241,8 +1157,7 @@ client_io_handler_downnodes(client_io_t *cio,
             cio->ioserver[node_id]->shutdown = true;
         } else {
             bit_set(cio->ioservers_ready_bits, node_id);
-            cio->ioservers_ready =
-                    bit_set_count(cio->ioservers_ready_bits);
+            cio->ioservers_ready = bit_set_count(cio->ioservers_ready_bits);
         }
     }
     slurm_mutex_unlock(&cio->ioservers_lock);
@@ -1251,8 +1166,7 @@ client_io_handler_downnodes(client_io_t *cio,
 }
 
 
-void
-client_io_handler_abort(client_io_t *cio) {
+void client_io_handler_abort(client_io_t *cio) {
     struct server_io_info *io_info;
     int i;
 
@@ -1262,8 +1176,7 @@ client_io_handler_abort(client_io_t *cio) {
     for (i = 0; i < cio->num_nodes; i++) {
         if (!bit_test(cio->ioservers_ready_bits, i)) {
             bit_set(cio->ioservers_ready_bits, i);
-            cio->ioservers_ready =
-                    bit_set_count(cio->ioservers_ready_bits);
+            cio->ioservers_ready = bit_set_count(cio->ioservers_ready_bits);
         } else if (cio->ioserver[i] != NULL) {
             io_info = (struct server_io_info *) cio->ioserver[i]->arg;
             /* Trick the server eio_obj_t into closing its
@@ -1278,8 +1191,7 @@ client_io_handler_abort(client_io_t *cio) {
 }
 
 
-int client_io_handler_send_test_message(client_io_t *cio, int node_id,
-                                        bool *sent_message) {
+int client_io_handler_send_test_message(client_io_t *cio, int node_id, bool *sent_message) {
     struct io_buf *msg;
     io_hdr_t header;
     Buf packbuf;

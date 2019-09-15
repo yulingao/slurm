@@ -277,8 +277,7 @@ static inline int pmixp_info_job_hostid(char *hostname) {
 static inline char *pmixp_info_nspace_usock(const char *nspace) {
     char *spool;
     debug("mpi/pmix: setup sockets");
-    spool = xstrdup_printf("%s/stepd.%s",
-                           _pmixp_job_info.spool_dir, nspace);
+    spool = xstrdup_printf("%s/stepd.%s", _pmixp_job_info.spool_dir, nspace);
     return spool;
 }
 

@@ -81,9 +81,8 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
     /* Handle special  cases
      */
 
-    if ((format == NULL)
-        || (xstrncasecmp(format, "all", (size_t) 3) == 0)
-        || (xstrncmp(format, "-", (size_t) 1) == 0)) {
+    if ((format == NULL) || (xstrncasecmp(format, "all", (size_t) 3) == 0) ||
+        (xstrncmp(format, "-", (size_t) 1) == 0)) {
         /* "all" explicitly sets IO_ALL and is the default */
         return fname;
     }
@@ -149,11 +148,9 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
                 case 'a':  /* '%a' => array task id   */
                     tmp_env = getenv("SLURM_ARRAY_TASK_ID");
                     if (tmp_env)
-                        array_task_id = strtoul(tmp_env, &end,
-                                                10);
+                        array_task_id = strtoul(tmp_env, &end, 10);
                     xmemcat(name, q, p - 1);
-                    xstrfmtcat(name, "%0*u", wid,
-                               array_task_id);
+                    xstrfmtcat(name, "%0*u", wid, array_task_id);
                     xfree(tmp_perc);
                     tmp_perc = NULL;
                     q = ++p;
@@ -161,11 +158,9 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
                 case 'A':  /* '%A' => array master job id */
                     tmp_env = getenv("SLURM_ARRAY_JOB_ID");
                     if (tmp_env)
-                        array_job_id = strtoul(tmp_env, &end,
-                                               10);
+                        array_job_id = strtoul(tmp_env, &end, 10);
                     xmemcat(name, q, p - 1);
-                    xstrfmtcat(name, "%0*u", wid,
-                               array_job_id);
+                    xstrfmtcat(name, "%0*u", wid, array_job_id);
                     xfree(tmp_perc);
                     tmp_perc = NULL;
                     q = ++p;
@@ -173,21 +168,17 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
                 case 'J':  /* '%J' => "jobid.stepid" */
                 case 'j':  /* '%j' => jobid          */
                     xmemcat(name, q, p - 1);
-                    xstrfmtcat(name, "%0*d", wid,
-                               job->jobid);
+                    xstrfmtcat(name, "%0*d", wid, job->jobid);
 
-                    if ((*p == 'J') && (job->stepid !=
-                                        NO_VAL))
-                        xstrfmtcat(name, ".%d",
-                                   job->stepid);
+                    if ((*p == 'J') && (job->stepid != NO_VAL))
+                        xstrfmtcat(name, ".%d", job->stepid);
                     xfree(tmp_perc);
                     tmp_perc = NULL;
                     q = ++p;
                     break;
                 case 's':  /* '%s' => stepid         */
                     xmemcat(name, q, p - 1);
-                    xstrfmtcat(name, "%0*d", wid,
-                               job->stepid);
+                    xstrfmtcat(name, "%0*d", wid, job->stepid);
                     xfree(tmp_perc);
                     tmp_perc = NULL;
                     q = ++p;
@@ -203,8 +194,7 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
                     if (wid) { /* Put the width back and
 					    * the removed %, so the
 					    * slurmstepd can remove it */
-                        xstrcat(name,
-                                xstrdup_printf("%%%u", wid));
+                        xstrcat(name, xstrdup_printf("%%%u", wid));
 
                     } else {
                         xmemcat(name, q, p);
@@ -245,8 +235,7 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
 					    * the removed %, so the
 					    * step can remove it
 					    */
-                        xstrcat(name,
-                                xstrdup_printf("%u", wid));
+                        xstrcat(name, xstrdup_printf("%u", wid));
                         q = p;
                     }
                     xfree(tmp_perc);
@@ -271,15 +260,13 @@ extern fname_t *fname_create(srun_job_t *job, char *format, int task_count) {
     return fname;
 }
 
-void
-fname_destroy(fname_t *f) {
+void fname_destroy(fname_t *f) {
     if (f->name)
         xfree(f->name);
     xfree(f);
 }
 
-char *
-fname_remote_string(fname_t *f) {
+char *fname_remote_string(fname_t *f) {
     if ((f->type == IO_PER_TASK) || (f->type == IO_ONE))
         return (xstrdup(f->name));
 
@@ -292,8 +279,7 @@ fname_remote_string(fname_t *f) {
  * The new path will tell the caller not to
  * translate escaped characters.
  */
-static char *
-_remove_path_slashes(char *p) {
+static char *_remove_path_slashes(char *p) {
     char *buf;
     bool t;
     int i;

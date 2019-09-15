@@ -142,8 +142,7 @@ static bool _conn_readable(slurm_persist_conn_t *persist_conn) {
         }
         if (rc == 0)
             return false;
-        if ((ufds.revents & POLLHUP) &&
-            ((ufds.revents & POLLIN) == 0)) {
+        if ((ufds.revents & POLLHUP) && ((ufds.revents & POLLIN) == 0)) {
             debug2("persistent connection closed");
             return false;
         }
@@ -156,8 +155,7 @@ static bool _conn_readable(slurm_persist_conn_t *persist_conn) {
             return false;
         }
         if ((ufds.revents & POLLIN) == 0) {
-            error("persistent connection %d events %d",
-                  persist_conn->fd, ufds.revents);
+            error("persistent connection %d events %d", persist_conn->fd, ufds.revents);
             return false;
         }
         /* revents == POLLIN */
@@ -177,16 +175,14 @@ static void _destroy_persist_service(persist_service_conn_t *persist_service) {
 static void _sig_handler(int signal) {
 }
 
-static void _persist_free_msg_members(slurm_persist_conn_t *persist_conn,
-                                      persist_msg_t *persist_msg) {
+static void _persist_free_msg_members(slurm_persist_conn_t *persist_conn, persist_msg_t *persist_msg) {
     if (persist_conn->flags & PERSIST_FLAG_DBD)
         slurmdbd_free_msg((slurmdbd_msg_t *) persist_msg);
     else
         slurm_free_msg_data(persist_msg->msg_type, persist_msg->data);
 }
 
-static int _process_service_connection(
-        slurm_persist_conn_t *persist_conn, void *arg) {
+static int _process_service_connection(slurm_persist_conn_t *persist_conn, void *arg) {
     uint32_t nw_size = 0, msg_size = 0, uid = NO_VAL;
     char *msg_char = NULL;
     ssize_t msg_read = 0, offset = 0;
@@ -197,8 +193,7 @@ static int _process_service_connection(
     xassert(persist_conn->callback_proc);
     xassert(persist_conn->shutdown);
 
-    debug2("Opened connection %d from %s", persist_conn->fd,
-           persist_conn->rem_host);
+    debug2("Opened connection %d from %s", persist_conn->fd, persist_conn->rem_host);
 
     if (persist_conn->flags & PERSIST_FLAG_ALREADY_INITED)
         first = false;
@@ -211,16 +206,13 @@ static int _process_service_connection(
             break;
         if (msg_read != sizeof(nw_size)) {
             error("Could not read msg_size from "
-                  "connection %d(%s) uid(%d)",
-                  persist_conn->fd, persist_conn->rem_host, uid);
+                  "connection %d(%s) uid(%d)", persist_conn->fd, persist_conn->rem_host, uid);
             break;
         }
         msg_size = ntohl(nw_size);
         if ((msg_size < 2) || (msg_size > MAX_MSG_SIZE)) {
             error("Invalid msg_size (%u) from "
-                  "connection %d(%s) uid(%d)",
-                  msg_size, persist_conn->fd,
-                  persist_conn->rem_host, uid);
+                  "connection %d(%s) uid(%d)", msg_size, persist_conn->fd, persist_conn->rem_host, uid);
             break;
         }
 
@@ -229,8 +221,7 @@ static int _process_service_connection(
         while (msg_size > offset) {
             if (!_conn_readable(persist_conn))
                 break;        /* problem with this socket */
-            msg_read = read(persist_conn->fd, (msg_char + offset),
-                            (msg_size - offset));
+            msg_read = read(persist_conn->fd, (msg_char + offset), (msg_size - offset));
             if (msg_read <= 0) {
                 error("read(%d): %m", persist_conn->fd);
                 break;
@@ -240,48 +231,35 @@ static int _process_service_connection(
         if (msg_size == offset) {
             persist_msg_t msg;
 
-            rc = slurm_persist_conn_process_msg(
-                    persist_conn, &msg,
-                    msg_char, msg_size,
-                    &buffer, first);
+            rc = slurm_persist_conn_process_msg(persist_conn, &msg, msg_char, msg_size, &buffer, first);
 
             if (rc == SLURM_SUCCESS) {
-                rc = (persist_conn->callback_proc)(
-                        arg, &msg, &buffer, &uid);
+                rc = (persist_conn->callback_proc)(arg, &msg, &buffer, &uid);
                 _persist_free_msg_members(persist_conn, &msg);
-                if (rc != SLURM_SUCCESS &&
-                    rc != ACCOUNTING_FIRST_REG &&
-                    rc != ACCOUNTING_TRES_CHANGE_DB &&
+                if (rc != SLURM_SUCCESS && rc != ACCOUNTING_FIRST_REG && rc != ACCOUNTING_TRES_CHANGE_DB &&
                     rc != ACCOUNTING_NODES_CHANGE_DB) {
                     error("Processing last message from "
-                          "connection %d(%s) uid(%d)",
-                          persist_conn->fd,
-                          persist_conn->rem_host, uid);
-                    if (rc == ESLURM_ACCESS_DENIED ||
-                        rc == SLURM_PROTOCOL_VERSION_ERROR)
+                          "connection %d(%s) uid(%d)", persist_conn->fd, persist_conn->rem_host, uid);
+                    if (rc == ESLURM_ACCESS_DENIED || rc == SLURM_PROTOCOL_VERSION_ERROR)
                         fini = true;
                 }
             }
             first = false;
         } else {
-            buffer = slurm_persist_make_rc_msg(
-                    persist_conn, SLURM_ERROR, "Bad offset", 0);
+            buffer = slurm_persist_make_rc_msg(persist_conn, SLURM_ERROR, "Bad offset", 0);
             fini = true;
         }
 
         xfree(msg_char);
         if (buffer) {
-            if (slurm_persist_send_msg(persist_conn, buffer)
-                != SLURM_SUCCESS) {
+            if (slurm_persist_send_msg(persist_conn, buffer) != SLURM_SUCCESS) {
                 /* This is only an issue on persistent
                  * connections, and really isn't that big of a
                  * deal as the slurmctld will just send the
                  * message again. */
                 if (persist_conn->rem_port)
                     debug("Problem sending response to "
-                          "connection %d(%s) uid(%d)",
-                          persist_conn->fd,
-                          persist_conn->rem_host, uid);
+                          "connection %d(%s) uid(%d)", persist_conn->fd, persist_conn->rem_host, uid);
                 fini = true;
             }
             free_buf(buffer);
@@ -315,8 +293,7 @@ static void *_service_connection(void *arg) {
     if (service_conn->conn->callback_fini)
         (service_conn->conn->callback_fini)(service_conn->arg);
     else
-        debug("Persist connection from cluster %s has disconnected",
-              service_conn->conn->cluster_name);
+        debug("Persist connection from cluster %s has disconnected", service_conn->conn->cluster_name);
 
     /* service_conn is freed inside here */
     slurm_persist_conn_free_thread_loc(service_conn->thread_loc);
@@ -367,8 +344,7 @@ extern void slurm_persist_conn_recv_server_fini(void) {
         if (!persist_service_conn[i])
             continue;
         if (persist_service_conn[i]->thread_id)
-            pthread_kill(persist_service_conn[i]->thread_id,
-                         SIGUSR1);
+            pthread_kill(persist_service_conn[i]->thread_id, SIGUSR1);
     }
     /* It is faster to signal then wait since the threads would end serially
      * instead of parallel if you did it all in one loop.
@@ -377,8 +353,7 @@ extern void slurm_persist_conn_recv_server_fini(void) {
         if (!persist_service_conn[i])
             continue;
         if (persist_service_conn[i]->thread_id) {
-            pthread_t thread_id =
-                    persist_service_conn[i]->thread_id;
+            pthread_t thread_id = persist_service_conn[i]->thread_id;
 
             /* Let go of lock in case the persistent connection
              * thread is cleaning itself up.
@@ -395,8 +370,7 @@ extern void slurm_persist_conn_recv_server_fini(void) {
     slurm_mutex_unlock(&thread_count_lock);
 }
 
-extern void slurm_persist_conn_recv_thread_init(slurm_persist_conn_t *persist_conn,
-                                                int thread_loc, void *arg) {
+extern void slurm_persist_conn_recv_thread_init(slurm_persist_conn_t *persist_conn, int thread_loc, void *arg) {
     persist_service_conn_t *service_conn;
 
     if (thread_loc < 0)
@@ -419,8 +393,7 @@ extern void slurm_persist_conn_recv_thread_init(slurm_persist_conn_t *persist_co
 				   */
 
     //_service_connection(service_conn);
-    slurm_thread_create(&persist_service_conn[thread_loc]->thread_id,
-                        _service_connection, service_conn);
+    slurm_thread_create(&persist_service_conn[thread_loc]->thread_id, _service_connection, service_conn);
 }
 
 /* Increment thread_count and don't return until its value is no larger
@@ -460,8 +433,7 @@ extern int slurm_persist_conn_wait_for_thread_loc(void) {
                 time_t now = time(NULL);
                 if (difftime(now, last_print_time) > 2) {
                     verbose("thread_count over "
-                            "limit (%d), waiting",
-                            thread_count);
+                            "limit (%d), waiting", thread_count);
                     last_print_time = now;
                 }
                 print_it = false;
@@ -492,8 +464,7 @@ extern void slurm_persist_conn_free_thread_loc(int thread_loc) {
     slurm_mutex_unlock(&thread_count_lock);
 }
 
-extern int slurm_persist_conn_open_without_init(
-        slurm_persist_conn_t *persist_conn) {
+extern int slurm_persist_conn_open_without_init(slurm_persist_conn_t *persist_conn) {
     slurm_addr_t addr;
 
     xassert(persist_conn);
@@ -519,14 +490,11 @@ extern int slurm_persist_conn_open_without_init(
     if (persist_conn->timeout < 0)
         persist_conn->timeout = slurm_get_msg_timeout() * 1000;
 
-    slurm_set_addr_char(&addr, persist_conn->rem_port,
-                        persist_conn->rem_host);
+    slurm_set_addr_char(&addr, persist_conn->rem_port, persist_conn->rem_host);
     if ((persist_conn->fd = slurm_open_msg_conn(&addr)) < 0) {
         if (_comm_fail_log(persist_conn)) {
-            char *s = xstrdup_printf("%s: failed to open persistent connection to %s:%d: %m",
-                                     __func__,
-                                     persist_conn->rem_host,
-                                     persist_conn->rem_port);
+            char *s = xstrdup_printf("%s: failed to open persistent connection to %s:%d: %m", __func__,
+                                     persist_conn->rem_host, persist_conn->rem_port);
             if (persist_conn->flags & PERSIST_FLAG_SUPPRESS_ERR)
                 debug2("%s", s);
             else
@@ -576,8 +544,8 @@ extern int slurm_persist_conn_open(slurm_persist_conn_t *persist_conn) {
     req_msg.data = &req;
 
     if (slurm_send_node_msg(persist_conn->fd, &req_msg) < 0) {
-        error("%s: failed to send persistent connection init message to %s:%d",
-              __func__, persist_conn->rem_host, persist_conn->rem_port);
+        error("%s: failed to send persistent connection init message to %s:%d", __func__, persist_conn->rem_host,
+              persist_conn->rem_port);
         _close_fd(&persist_conn->fd);
     } else {
         Buf buffer = slurm_persist_recv_msg(persist_conn);
@@ -586,15 +554,13 @@ extern int slurm_persist_conn_open(slurm_persist_conn_t *persist_conn) {
 
         if (!buffer) {
             if (_comm_fail_log(persist_conn)) {
-                error("%s: No response to persist_init",
-                      __func__);
+                error("%s: No response to persist_init", __func__);
             }
             _close_fd(&persist_conn->fd);
             goto end_it;
         }
         memset(&msg, 0, sizeof(persist_msg_t));
-        memcpy(&persist_conn_tmp, persist_conn,
-               sizeof(slurm_persist_conn_t));
+        memcpy(&persist_conn_tmp, persist_conn, sizeof(slurm_persist_conn_t));
         /* The first unpack is done the same way for dbd or normal
          * communication . */
         persist_conn_tmp.flags &= (~PERSIST_FLAG_DBD);
@@ -611,13 +577,10 @@ extern int slurm_persist_conn_open(slurm_persist_conn_t *persist_conn) {
         if (rc != SLURM_SUCCESS) {
             if (resp) {
                 error("%s: Something happened with the receiving/processing of the persistent connection init message to %s:%d: %s",
-                      __func__, persist_conn->rem_host,
-                      persist_conn->rem_port, resp->comment);
+                      __func__, persist_conn->rem_host, persist_conn->rem_port, resp->comment);
             } else {
-                error("%s: Failed to unpack persistent connection init resp message from %s:%d",
-                      __func__,
-                      persist_conn->rem_host,
-                      persist_conn->rem_port);
+                error("%s: Failed to unpack persistent connection init resp message from %s:%d", __func__,
+                      persist_conn->rem_host, persist_conn->rem_port);
             }
             _close_fd(&persist_conn->fd);
         }
@@ -637,8 +600,7 @@ extern void slurm_persist_conn_close(slurm_persist_conn_t *persist_conn) {
     _close_fd(&persist_conn->fd);
 }
 
-extern int slurm_persist_conn_reopen(slurm_persist_conn_t *persist_conn,
-                                     bool with_init) {
+extern int slurm_persist_conn_reopen(slurm_persist_conn_t *persist_conn, bool with_init) {
     slurm_persist_conn_close(persist_conn);
 
     if (with_init)
@@ -648,8 +610,7 @@ extern int slurm_persist_conn_reopen(slurm_persist_conn_t *persist_conn,
 }
 
 /* Close the persistent connection */
-extern void slurm_persist_conn_members_destroy(
-        slurm_persist_conn_t *persist_conn) {
+extern void slurm_persist_conn_members_destroy(slurm_persist_conn_t *persist_conn) {
     if (!persist_conn)
         return;
 
@@ -672,10 +633,9 @@ extern void slurm_persist_conn_destroy(slurm_persist_conn_t *persist_conn) {
     xfree(persist_conn);
 }
 
-extern int slurm_persist_conn_process_msg(slurm_persist_conn_t *persist_conn,
-                                          persist_msg_t *persist_msg,
-                                          char *msg_char, uint32_t msg_size,
-                                          Buf *out_buffer, bool first) {
+extern int
+slurm_persist_conn_process_msg(slurm_persist_conn_t *persist_conn, persist_msg_t *persist_msg, char *msg_char,
+                               uint32_t msg_size, Buf *out_buffer, bool first) {
     int rc;
     Buf recv_buffer = NULL;
     char *comment = NULL;
@@ -690,29 +650,20 @@ extern int slurm_persist_conn_process_msg(slurm_persist_conn_t *persist_conn,
 				     * (done later in this
 				     * function). */
     if (rc != SLURM_SUCCESS) {
-        comment = xstrdup_printf("Failed to unpack %s message",
-                                 slurmdbd_msg_type_2_str(
-                                         persist_msg->msg_type, true));
+        comment = xstrdup_printf("Failed to unpack %s message", slurmdbd_msg_type_2_str(persist_msg->msg_type, true));
         error("CONN:%u %s", persist_conn->fd, comment);
-        *out_buffer = slurm_persist_make_rc_msg(
-                persist_conn, rc, comment, persist_msg->msg_type);
+        *out_buffer = slurm_persist_make_rc_msg(persist_conn, rc, comment, persist_msg->msg_type);
         xfree(comment);
-    } else if (first &&
-               (persist_msg->msg_type != REQUEST_PERSIST_INIT)) {
+    } else if (first && (persist_msg->msg_type != REQUEST_PERSIST_INIT)) {
         comment = "Initial RPC not REQUEST_PERSIST_INIT";
-        error("CONN:%u %s type (%d)",
-              persist_conn->fd, comment, persist_msg->msg_type);
+        error("CONN:%u %s type (%d)", persist_conn->fd, comment, persist_msg->msg_type);
         rc = EINVAL;
-        *out_buffer = slurm_persist_make_rc_msg(
-                persist_conn, rc, comment,
-                REQUEST_PERSIST_INIT);
-    } else if (!first &&
-               (persist_msg->msg_type == REQUEST_PERSIST_INIT)) {
+        *out_buffer = slurm_persist_make_rc_msg(persist_conn, rc, comment, REQUEST_PERSIST_INIT);
+    } else if (!first && (persist_msg->msg_type == REQUEST_PERSIST_INIT)) {
         comment = "REQUEST_PERSIST_INIT sent after connection established";
         error("CONN:%u %s", persist_conn->fd, comment);
         rc = EINVAL;
-        *out_buffer = slurm_persist_make_rc_msg(
-                persist_conn, rc, comment, REQUEST_PERSIST_INIT);
+        *out_buffer = slurm_persist_make_rc_msg(persist_conn, rc, comment, REQUEST_PERSIST_INIT);
     }
 
     return rc;
@@ -756,35 +707,29 @@ extern int slurm_persist_conn_writeable(slurm_persist_conn_t *persist_conn) {
          * socket is gone, but getting 0 back from a
          * nonblocking read means just that.
          */
-        if (ufds.revents & POLLHUP ||
-            (recv(persist_conn->fd, &temp, 1, 0) == 0)) {
-            debug2("%s: persistent connection %d is closed for writes",
-                   __func__, persist_conn->fd);
+        if (ufds.revents & POLLHUP || (recv(persist_conn->fd, &temp, 1, 0) == 0)) {
+            debug2("%s: persistent connection %d is closed for writes", __func__, persist_conn->fd);
             if (persist_conn->trigger_callbacks.dbd_fail)
                 (persist_conn->trigger_callbacks.dbd_fail)();
             return -1;
         }
         if (ufds.revents & POLLNVAL) {
-            error("%s: persistent connection %d is invalid",
-                  __func__, persist_conn->fd);
+            error("%s: persistent connection %d is invalid", __func__, persist_conn->fd);
             return 0;
         }
         if (ufds.revents & POLLERR) {
             if (_comm_fail_log(persist_conn)) {
                 if (fd_get_socket_error(persist_conn->fd, &errno))
-                    error("%s: unable to get error for persistent connection %d: %m",
-                          __func__, persist_conn->fd);
+                    error("%s: unable to get error for persistent connection %d: %m", __func__, persist_conn->fd);
                 else
-                    error("%s: persistent connection %d experienced an error: %m",
-                          __func__, persist_conn->fd);
+                    error("%s: persistent connection %d experienced an error: %m", __func__, persist_conn->fd);
             }
             if (persist_conn->trigger_callbacks.dbd_fail)
                 (persist_conn->trigger_callbacks.dbd_fail)();
             return 0;
         }
         if ((ufds.revents & POLLOUT) == 0) {
-            error("%s: persistent connection %d events %d",
-                  __func__, persist_conn->fd, ufds.revents);
+            error("%s: persistent connection %d events %d", __func__, persist_conn->fd, ufds.revents);
             return 0;
         }
         /* revents == POLLOUT */
@@ -794,8 +739,7 @@ extern int slurm_persist_conn_writeable(slurm_persist_conn_t *persist_conn) {
     return 0;
 }
 
-extern int slurm_persist_send_msg(
-        slurm_persist_conn_t *persist_conn, Buf buffer) {
+extern int slurm_persist_send_msg(slurm_persist_conn_t *persist_conn, Buf buffer) {
     uint32_t msg_size, nw_size;
     char *msg;
     ssize_t msg_wrote;
@@ -882,8 +826,7 @@ extern Buf slurm_persist_recv_msg(slurm_persist_conn_t *persist_conn) {
     while (msg_size > offset) {
         if (!_conn_readable(persist_conn))
             break;        /* problem with this socket */
-        msg_read = read(persist_conn->fd, (msg + offset),
-                        (msg_size - offset));
+        msg_read = read(persist_conn->fd, (msg + offset), (msg_size - offset));
         if (msg_read <= 0) {
             error("Persistent Conn: read: %m");
             break;
@@ -892,8 +835,7 @@ extern Buf slurm_persist_recv_msg(slurm_persist_conn_t *persist_conn) {
     }
     if (msg_size != offset) {
         if (!(*persist_conn->shutdown)) {
-            error("Persistent Conn: only read %zd of %d bytes",
-                  offset, msg_size);
+            error("Persistent Conn: only read %zd of %d bytes", offset, msg_size);
         }    /* else in shutdown mode */
         xfree(msg);
         goto endit;
@@ -907,22 +849,19 @@ extern Buf slurm_persist_recv_msg(slurm_persist_conn_t *persist_conn) {
      * on the other end we can't rely on it after this point since we didn't
      * listen long enough for this response.
      */
-    if (!(*persist_conn->shutdown) &&
-        persist_conn->flags & PERSIST_FLAG_RECONNECT)
+    if (!(*persist_conn->shutdown) && persist_conn->flags & PERSIST_FLAG_RECONNECT)
         slurm_persist_conn_reopen(persist_conn, true);
 
     return NULL;
 }
 
-extern Buf slurm_persist_msg_pack(slurm_persist_conn_t *persist_conn,
-                                  persist_msg_t *req_msg) {
+extern Buf slurm_persist_msg_pack(slurm_persist_conn_t *persist_conn, persist_msg_t *req_msg) {
     Buf buffer;
 
     xassert(persist_conn);
 
     if (persist_conn->flags & PERSIST_FLAG_DBD)
-        buffer = pack_slurmdbd_msg((slurmdbd_msg_t *) req_msg,
-                                   persist_conn->version);
+        buffer = pack_slurmdbd_msg((slurmdbd_msg_t *) req_msg, persist_conn->version);
     else {
         slurm_msg_t msg;
 
@@ -946,17 +885,14 @@ extern Buf slurm_persist_msg_pack(slurm_persist_conn_t *persist_conn,
 }
 
 
-extern int slurm_persist_msg_unpack(slurm_persist_conn_t *persist_conn,
-                                    persist_msg_t *resp_msg, Buf buffer) {
+extern int slurm_persist_msg_unpack(slurm_persist_conn_t *persist_conn, persist_msg_t *resp_msg, Buf buffer) {
     int rc;
 
     xassert(persist_conn);
     xassert(resp_msg);
 
     if (persist_conn->flags & PERSIST_FLAG_DBD) {
-        rc = unpack_slurmdbd_msg((slurmdbd_msg_t *) resp_msg,
-                                 persist_conn->version,
-                                 buffer);
+        rc = unpack_slurmdbd_msg((slurmdbd_msg_t *) resp_msg, persist_conn->version, buffer);
     } else {
         slurm_msg_t msg;
 
@@ -990,8 +926,7 @@ extern int slurm_persist_msg_unpack(slurm_persist_conn_t *persist_conn,
     return SLURM_ERROR;
 }
 
-extern void slurm_persist_pack_init_req_msg(
-        persist_init_req_msg_t *msg, Buf buffer) {
+extern void slurm_persist_pack_init_req_msg(persist_init_req_msg_t *msg, Buf buffer) {
     /* always send version field first for backwards compatibility */
     pack16(msg->version, buffer);
 
@@ -1000,17 +935,14 @@ extern void slurm_persist_pack_init_req_msg(
         pack16(msg->persist_type, buffer);
         pack16(msg->port, buffer);
     } else {
-        error("%s: invalid protocol version %u",
-              __func__, msg->version);
+        error("%s: invalid protocol version %u", __func__, msg->version);
     }
 }
 
-extern int slurm_persist_unpack_init_req_msg(
-        persist_init_req_msg_t **msg, Buf buffer) {
+extern int slurm_persist_unpack_init_req_msg(persist_init_req_msg_t **msg, Buf buffer) {
     uint32_t tmp32;
 
-    persist_init_req_msg_t *msg_ptr =
-            xmalloc(sizeof(persist_init_req_msg_t));
+    persist_init_req_msg_t *msg_ptr = xmalloc(sizeof(persist_init_req_msg_t));
 
     *msg = msg_ptr;
 
@@ -1021,8 +953,7 @@ extern int slurm_persist_unpack_init_req_msg(
         safe_unpack16(&msg_ptr->persist_type, buffer);
         safe_unpack16(&msg_ptr->port, buffer);
     } else {
-        error("%s: invalid protocol_version %u",
-              __func__, msg_ptr->version);
+        error("%s: invalid protocol_version %u", __func__, msg_ptr->version);
         goto unpack_error;
     }
 
@@ -1041,21 +972,18 @@ extern void slurm_persist_free_init_req_msg(persist_init_req_msg_t *msg) {
     }
 }
 
-extern void slurm_persist_pack_rc_msg(
-        persist_rc_msg_t *msg, Buf buffer, uint16_t protocol_version) {
+extern void slurm_persist_pack_rc_msg(persist_rc_msg_t *msg, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         packstr(msg->comment, buffer);
         pack16(msg->flags, buffer);
         pack32(msg->rc, buffer);
         pack16(msg->ret_info, buffer);
     } else {
-        error("%s: invalid protocol version %u",
-              __func__, protocol_version);
+        error("%s: invalid protocol version %u", __func__, protocol_version);
     }
 }
 
-extern int slurm_persist_unpack_rc_msg(
-        persist_rc_msg_t **msg, Buf buffer, uint16_t protocol_version) {
+extern int slurm_persist_unpack_rc_msg(persist_rc_msg_t **msg, Buf buffer, uint16_t protocol_version) {
     uint32_t uint32_tmp;
 
     persist_rc_msg_t *msg_ptr = xmalloc(sizeof(persist_rc_msg_t));
@@ -1068,8 +996,7 @@ extern int slurm_persist_unpack_rc_msg(
         safe_unpack32(&msg_ptr->rc, buffer);
         safe_unpack16(&msg_ptr->ret_info, buffer);
     } else {
-        error("%s: invalid protocol_version %u",
-              __func__, protocol_version);
+        error("%s: invalid protocol_version %u", __func__, protocol_version);
         goto unpack_error;
     }
 
@@ -1088,9 +1015,8 @@ extern void slurm_persist_free_rc_msg(persist_rc_msg_t *msg) {
     }
 }
 
-extern Buf slurm_persist_make_rc_msg(slurm_persist_conn_t *persist_conn,
-                                     uint32_t rc, char *comment,
-                                     uint16_t ret_info) {
+extern Buf
+slurm_persist_make_rc_msg(slurm_persist_conn_t *persist_conn, uint32_t rc, char *comment, uint16_t ret_info) {
     persist_rc_msg_t msg;
     persist_msg_t resp;
 
@@ -1107,10 +1033,9 @@ extern Buf slurm_persist_make_rc_msg(slurm_persist_conn_t *persist_conn,
     return slurm_persist_msg_pack(persist_conn, &resp);
 }
 
-extern Buf slurm_persist_make_rc_msg_flags(slurm_persist_conn_t *persist_conn,
-                                           uint32_t rc, char *comment,
-                                           uint16_t flags,
-                                           uint16_t ret_info) {
+extern Buf
+slurm_persist_make_rc_msg_flags(slurm_persist_conn_t *persist_conn, uint32_t rc, char *comment, uint16_t flags,
+                                uint16_t ret_info) {
     persist_rc_msg_t msg;
     persist_msg_t resp;
 

@@ -89,14 +89,13 @@ extern char **environ;
 /**********************************************************************
  * General declarations for step launch code
  **********************************************************************/
-static int _launch_tasks(slurm_step_ctx_t *ctx,
-                         launch_tasks_request_msg_t *launch_msg,
-                         uint32_t timeout, char *nodelist, int start_nodeid);
+static int
+_launch_tasks(slurm_step_ctx_t *ctx, launch_tasks_request_msg_t *launch_msg, uint32_t timeout, char *nodelist,
+              int start_nodeid);
 
 static char *_lookup_cwd(void);
 
-static void _print_launch_msg(launch_tasks_request_msg_t *msg,
-                              char *hostname, int nodeid);
+static void _print_launch_msg(launch_tasks_request_msg_t *msg, char *hostname, int nodeid);
 
 /**********************************************************************
  * Message handler declarations
@@ -116,11 +115,7 @@ static int _cr_notify_step_launch(slurm_step_ctx_t *ctx);
 
 static void *_check_io_timeout(void *_sls);
 
-static struct io_operations message_socket_ops = {
-        .readable = &eio_message_socket_readable,
-        .handle_read = &eio_message_socket_accept,
-        .handle_msg = &_handle_msg
-};
+static struct io_operations message_socket_ops = {.readable = &eio_message_socket_readable, .handle_read = &eio_message_socket_accept, .handle_msg = &_handle_msg};
 
 
 /**********************************************************************
@@ -169,25 +164,21 @@ extern int slurm_mpi_plugin_init(char *plugin_name) {
  * For a pack job step, rebuild the MPI data structure to show what is running
  * in a single MPI_COMM_WORLD
  */
-static void _rebuild_mpi_layout(slurm_step_ctx_t *ctx,
-                                const slurm_step_launch_params_t *params) {
+static void _rebuild_mpi_layout(slurm_step_ctx_t *ctx, const slurm_step_launch_params_t *params) {
     slurm_step_layout_t *new_step_layout, *orig_step_layout;
 
     ctx->launch_state->mpi_info->pack_jobid = params->pack_jobid;
-    ctx->launch_state->mpi_info->pack_task_offset =
-            params->pack_task_offset;
+    ctx->launch_state->mpi_info->pack_task_offset = params->pack_task_offset;
     new_step_layout = xmalloc(sizeof(slurm_step_layout_t));
     orig_step_layout = ctx->launch_state->mpi_info->step_layout;
     ctx->launch_state->mpi_info->step_layout = new_step_layout;
     if (orig_step_layout->front_end) {
-        new_step_layout->front_end =
-                xstrdup(orig_step_layout->front_end);
+        new_step_layout->front_end = xstrdup(orig_step_layout->front_end);
     }
     new_step_layout->node_cnt = params->pack_nnodes;
     new_step_layout->node_list = xstrdup(params->pack_node_list);
     new_step_layout->plane_size = orig_step_layout->plane_size;
-    new_step_layout->start_protocol_ver =
-            orig_step_layout->start_protocol_ver;
+    new_step_layout->start_protocol_ver = orig_step_layout->start_protocol_ver;
     new_step_layout->tasks = params->pack_task_cnts;
     new_step_layout->task_cnt = params->pack_ntasks;
     new_step_layout->task_dist = orig_step_layout->task_dist;
@@ -201,8 +192,7 @@ static void _rebuild_mpi_layout(slurm_step_ctx_t *ctx,
  * IN callbacks - Identify functions to be called when various events occur
  * RET SLURM_SUCCESS or SLURM_ERROR (with errno set)
  */
-extern int slurm_step_launch(slurm_step_ctx_t *ctx,
-                             const slurm_step_launch_params_t *params,
+extern int slurm_step_launch(slurm_step_ctx_t *ctx, const slurm_step_launch_params_t *params,
                              const slurm_step_launch_callbacks_t *callbacks) {
     launch_tasks_request_msg_t launch;
     char **env = NULL;
@@ -222,12 +212,10 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
     /* Initialize the callback pointers */
     if (callbacks != NULL) {
         /* copy the user specified callback pointers */
-        memcpy(&(ctx->launch_state->callback), callbacks,
-               sizeof(slurm_step_launch_callbacks_t));
+        memcpy(&(ctx->launch_state->callback), callbacks, sizeof(slurm_step_launch_callbacks_t));
     } else {
         /* set all callbacks to NULL */
-        memset(&(ctx->launch_state->callback), 0,
-               sizeof(slurm_step_launch_callbacks_t));
+        memset(&(ctx->launch_state->callback), 0, sizeof(slurm_step_launch_callbacks_t));
     }
 
     if (mpi_hook_client_init(params->mpi_plugin_name) == SLURM_ERROR) {
@@ -239,16 +227,13 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
         _rebuild_mpi_layout(ctx, params);
 
     mpi_env = xmalloc(sizeof(char *));  /* Needed for setenvf used by MPI */
-    if ((ctx->launch_state->mpi_state =
-                 mpi_hook_client_prelaunch(ctx->launch_state->mpi_info, &mpi_env))
-        == NULL) {
+    if ((ctx->launch_state->mpi_state = mpi_hook_client_prelaunch(ctx->launch_state->mpi_info, &mpi_env)) == NULL) {
         slurm_seterrno(SLURM_MPI_PLUGIN_PRELAUNCH_SETUP_FAILED);
         return SLURM_ERROR;
     }
 
     /* Create message receiving sockets and handler thread */
-    rc = _msg_thr_create(ctx->launch_state,
-                         ctx->step_resp->step_layout->node_cnt);
+    rc = _msg_thr_create(ctx->launch_state, ctx->step_resp->step_layout->node_cnt);
     if (rc != SLURM_SUCCESS)
         return rc;
 
@@ -284,8 +269,7 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
     }
     if (params->pack_ntasks != NO_VAL)
         preserve_env = true;
-    env_array_for_step(&env, ctx->step_resp, &launch,
-                       ctx->launch_state->resp_port[0], preserve_env);
+    env_array_for_step(&env, ctx->step_resp, &launch, ctx->launch_state->resp_port[0], preserve_env);
     env_array_merge(&env, (const char **) mpi_env);
     env_array_free(mpi_env);
 
@@ -333,8 +317,7 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
     launch.acctg_freq = params->acctg_freq;
     launch.open_mode = params->open_mode;
     launch.options = job_options_create();
-    launch.complete_nodelist =
-            xstrdup(ctx->step_resp->step_layout->node_list);
+    launch.complete_nodelist = xstrdup(ctx->step_resp->step_layout->node_list);
     spank_set_remote_options(launch.options);
     if (params->parallel_debug)
         launch.flags |= LAUNCH_PARALLEL_DEBUG;
@@ -356,14 +339,9 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
             launch.flags |= LAUNCH_BUFFERED_IO;
         if (params->labelio)
             launch.flags |= LAUNCH_LABEL_IO;
-        ctx->launch_state->io.normal =
-                client_io_handler_create(params->local_fds,
-                                         ctx->step_req->num_tasks,
-                                         launch.nnodes,
-                                         ctx->step_resp->cred,
-                                         params->labelio,
-                                         params->pack_offset,
-                                         params->pack_task_offset);
+        ctx->launch_state->io.normal = client_io_handler_create(params->local_fds, ctx->step_req->num_tasks,
+                                                                launch.nnodes, ctx->step_resp->cred, params->labelio,
+                                                                params->pack_offset, params->pack_task_offset);
         if (ctx->launch_state->io.normal == NULL) {
             rc = SLURM_ERROR;
             goto fail1;
@@ -374,15 +352,13 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
          */
         ctx->launch_state->io.normal->sls = ctx->launch_state;
 
-        if (client_io_handler_start(ctx->launch_state->io.normal)
-            != SLURM_SUCCESS) {
+        if (client_io_handler_start(ctx->launch_state->io.normal) != SLURM_SUCCESS) {
             rc = SLURM_ERROR;
             goto fail1;
         }
         launch.num_io_port = ctx->launch_state->io.normal->num_listen;
         launch.io_port = xmalloc(sizeof(uint16_t) * launch.num_io_port);
-        memcpy(launch.io_port, ctx->launch_state->io.normal->listenport,
-               (sizeof(uint16_t) * launch.num_io_port));
+        memcpy(launch.io_port, ctx->launch_state->io.normal->listenport, (sizeof(uint16_t) * launch.num_io_port));
         /*
          * If the io timeout is > 0, create a flag to ping the stepds
          * if io_timeout seconds pass without stdio traffic to/from
@@ -391,19 +367,15 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
         ctx->launch_state->io_timeout = slurm_get_msg_timeout();
     } else { /* user_managed_io is true */
         /* initialize user_managed_io_t */
-        ctx->launch_state->io.user =
-                (user_managed_io_t *) xmalloc(sizeof(user_managed_io_t));
+        ctx->launch_state->io.user = (user_managed_io_t *) xmalloc(sizeof(user_managed_io_t));
         ctx->launch_state->io.user->connected = 0;
-        ctx->launch_state->io.user->sockets =
-                (int *) xmalloc(sizeof(int) * ctx->step_req->num_tasks);
+        ctx->launch_state->io.user->sockets = (int *) xmalloc(sizeof(int) * ctx->step_req->num_tasks);
     }
 
     launch.num_resp_port = ctx->launch_state->num_resp_port;
     launch.resp_port = xmalloc(sizeof(uint16_t) * launch.num_resp_port);
-    memcpy(launch.resp_port, ctx->launch_state->resp_port,
-           (sizeof(uint16_t) * launch.num_resp_port));
-    rc = _launch_tasks(ctx, &launch, params->msg_timeout,
-                       launch.complete_nodelist, 0);
+    memcpy(launch.resp_port, ctx->launch_state->resp_port, (sizeof(uint16_t) * launch.num_resp_port));
+    rc = _launch_tasks(ctx, &launch, params->msg_timeout, launch.complete_nodelist, 0);
 
     /* clean up */
     xfree(launch.resp_port);
@@ -430,10 +402,9 @@ extern int slurm_step_launch(slurm_step_ctx_t *ctx,
  *                   node in node_list.
  * RET SLURM_SUCCESS or SLURM_ERROR (with errno set)
  */
-extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
-                                 slurm_step_ctx_t *first_ctx,
-                                 const slurm_step_launch_params_t *params,
-                                 char *node_list, int start_nodeid) {
+extern int
+slurm_step_launch_add(slurm_step_ctx_t *ctx, slurm_step_ctx_t *first_ctx, const slurm_step_launch_params_t *params,
+                      char *node_list, int start_nodeid) {
     launch_tasks_request_msg_t launch;
     char **env = NULL;
     char **mpi_env = NULL;
@@ -484,8 +455,7 @@ extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
         resp_port = first_ctx->launch_state->resp_port[0];
     if (params->pack_ntasks != NO_VAL)
         preserve_env = true;
-    env_array_for_step(&env, ctx->step_resp, &launch, resp_port,
-                       preserve_env);
+    env_array_for_step(&env, ctx->step_resp, &launch, resp_port, preserve_env);
     env_array_merge(&env, (const char **) mpi_env);
     env_array_free(mpi_env);
 
@@ -526,8 +496,7 @@ extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
     launch.acctg_freq = params->acctg_freq;
     launch.open_mode = params->open_mode;
     launch.options = job_options_create();
-    launch.complete_nodelist =
-            xstrdup(ctx->step_resp->step_layout->node_list);
+    launch.complete_nodelist = xstrdup(ctx->step_resp->step_layout->node_list);
 
     spank_set_remote_options(launch.options);
     if (params->parallel_debug)
@@ -550,14 +519,9 @@ extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
             launch.flags |= LAUNCH_BUFFERED_IO;
         if (params->labelio)
             launch.flags |= LAUNCH_LABEL_IO;
-        ctx->launch_state->io.normal =
-                client_io_handler_create(params->local_fds,
-                                         ctx->step_req->num_tasks,
-                                         launch.nnodes,
-                                         ctx->step_resp->cred,
-                                         params->labelio,
-                                         params->pack_offset,
-                                         params->pack_task_offset);
+        ctx->launch_state->io.normal = client_io_handler_create(params->local_fds, ctx->step_req->num_tasks,
+                                                                launch.nnodes, ctx->step_resp->cred, params->labelio,
+                                                                params->pack_offset, params->pack_task_offset);
         if (ctx->launch_state->io.normal == NULL) {
             rc = SLURM_ERROR;
             goto fail1;
@@ -568,15 +532,13 @@ extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
          */
         ctx->launch_state->io.normal->sls = ctx->launch_state;
 
-        if (client_io_handler_start(ctx->launch_state->io.normal)
-            != SLURM_SUCCESS) {
+        if (client_io_handler_start(ctx->launch_state->io.normal) != SLURM_SUCCESS) {
             rc = SLURM_ERROR;
             goto fail1;
         }
         launch.num_io_port = ctx->launch_state->io.normal->num_listen;
         launch.io_port = xmalloc(sizeof(uint16_t) * launch.num_io_port);
-        memcpy(launch.io_port, ctx->launch_state->io.normal->listenport,
-               (sizeof(uint16_t) * launch.num_io_port));
+        memcpy(launch.io_port, ctx->launch_state->io.normal->listenport, (sizeof(uint16_t) * launch.num_io_port));
         /*
          * If the io timeout is > 0, create a flag to ping the stepds
          * if io_timeout seconds pass without stdio traffic to/from
@@ -584,21 +546,16 @@ extern int slurm_step_launch_add(slurm_step_ctx_t *ctx,
          */
         ctx->launch_state->io_timeout = slurm_get_msg_timeout();
     } else { /* user_managed_io is true */
-        xrealloc(ctx->launch_state->io.user->sockets,
-                 sizeof(int) * ctx->step_req->num_tasks);
+        xrealloc(ctx->launch_state->io.user->sockets, sizeof(int) * ctx->step_req->num_tasks);
     }
 
-    if (first_ctx->launch_state->num_resp_port &&
-        first_ctx->launch_state->resp_port) {
+    if (first_ctx->launch_state->num_resp_port && first_ctx->launch_state->resp_port) {
         launch.num_resp_port = first_ctx->launch_state->num_resp_port;
-        launch.resp_port = xmalloc(sizeof(uint16_t) *
-                                   launch.num_resp_port);
-        memcpy(launch.resp_port, first_ctx->launch_state->resp_port,
-               (sizeof(uint16_t) * launch.num_resp_port));
+        launch.resp_port = xmalloc(sizeof(uint16_t) * launch.num_resp_port);
+        memcpy(launch.resp_port, first_ctx->launch_state->resp_port, (sizeof(uint16_t) * launch.num_resp_port));
     }
 
-    rc = _launch_tasks(ctx, &launch, params->msg_timeout,
-                       node_list, start_nodeid);
+    rc = _launch_tasks(ctx, &launch, params->msg_timeout, node_list, start_nodeid);
 
     fail1:
     /* clean up */
@@ -618,8 +575,7 @@ static void _step_abort(slurm_step_ctx_t *ctx) {
     struct step_launch_state *sls = ctx->launch_state;
 
     if (!sls->abort_action_taken) {
-        slurm_kill_job_step(ctx->job_id, ctx->step_resp->job_step_id,
-                            SIGKILL);
+        slurm_kill_job_step(ctx->job_id, ctx->step_resp->job_step_id, SIGKILL);
         sls->abort_action_taken = true;
     }
 }
@@ -643,12 +599,9 @@ int slurm_step_launch_wait_start(slurm_step_ctx_t *ctx) {
             slurm_mutex_unlock(&sls->lock);
             return SLURM_ERROR;
         }
-        if (pthread_cond_timedwait(&sls->cond, &sls->lock, &ts) ==
-            ETIMEDOUT) {
+        if (pthread_cond_timedwait(&sls->cond, &sls->lock, &ts) == ETIMEDOUT) {
             error("timeout waiting for task launch, "
-                  "started %d of %d tasks",
-                  bit_set_count(sls->tasks_started),
-                  sls->tasks_requested);
+                  "started %d of %d tasks", bit_set_count(sls->tasks_started), sls->tasks_requested);
             sls->abort = true;
             _step_abort(ctx);
             slurm_cond_broadcast(&sls->cond);
@@ -664,8 +617,7 @@ int slurm_step_launch_wait_start(slurm_step_ctx_t *ctx) {
                 slurm_mutex_unlock(&sls->lock);
                 return SLURM_ERROR;
             }
-            if (pthread_cond_timedwait(&sls->cond, &sls->lock,
-                                       &ts) == ETIMEDOUT) {
+            if (pthread_cond_timedwait(&sls->cond, &sls->lock, &ts) == ETIMEDOUT) {
                 error("timeout waiting for I/O connect");
                 sls->abort = true;
                 _step_abort(ctx);
@@ -703,10 +655,7 @@ void slurm_step_launch_wait_finish(slurm_step_ctx_t *ctx) {
             slurm_cond_wait(&sls->cond, &sls->lock);
         } else {
             if (!sls->abort_action_taken) {
-                slurm_kill_job_step(ctx->job_id,
-                                    ctx->step_resp->
-                                            job_step_id,
-                                    SIGKILL);
+                slurm_kill_job_step(ctx->job_id, ctx->step_resp->job_step_id, SIGKILL);
                 sls->abort_action_taken = true;
             }
             if (!time_set) {
@@ -716,17 +665,14 @@ void slurm_step_launch_wait_finish(slurm_step_ctx_t *ctx) {
                  * times the condition variable is signaled.
                  */
                 kill_wait = slurm_get_kill_wait();
-                ts.tv_sec = time(NULL) + STEP_ABORT_TIME
-                            + kill_wait;
+                ts.tv_sec = time(NULL) + STEP_ABORT_TIME + kill_wait;
                 time_set = true;
                 /* FIXME - should this be a callback? */
                 info("Job step aborted: Waiting up to "
-                     "%d seconds for job step to finish.",
-                     kill_wait + STEP_ABORT_TIME);
+                     "%d seconds for job step to finish.", kill_wait + STEP_ABORT_TIME);
             }
 
-            errnum = pthread_cond_timedwait(&sls->cond,
-                                            &sls->lock, &ts);
+            errnum = pthread_cond_timedwait(&sls->cond, &sls->lock, &ts);
             if (errnum == ETIMEDOUT) {
                 error("Timed out waiting for job step to "
                       "complete");
@@ -737,20 +683,16 @@ void slurm_step_launch_wait_finish(slurm_step_ctx_t *ctx) {
                  *   be made smart enough to really ensure
                  *   that a killed step never starts.
                  */
-                slurm_kill_job_step(ctx->job_id,
-                                    ctx->step_resp->job_step_id,
-                                    SIGKILL);
+                slurm_kill_job_step(ctx->job_id, ctx->step_resp->job_step_id, SIGKILL);
                 if (!sls->user_managed_io) {
-                    client_io_handler_abort(sls->
-                            io.normal);
+                    client_io_handler_abort(sls->io.normal);
                 }
                 break;
             } else if (errnum != 0) {
                 error("Error waiting on condition in"
                       " slurm_step_launch_wait_finish: %m");
                 if (!sls->user_managed_io) {
-                    client_io_handler_abort(sls->
-                            io.normal);
+                    client_io_handler_abort(sls->io.normal);
                 }
                 break;
             }
@@ -760,8 +702,7 @@ void slurm_step_launch_wait_finish(slurm_step_ctx_t *ctx) {
         info("Job step aborted");    /* no need to wait */
 
     if (!force_terminated_job && task_exit_signal)
-        info("Force Terminated job step %u.%u",
-             ctx->job_id, ctx->step_resp->job_step_id);
+        info("Force Terminated job step %u.%u", ctx->job_id, ctx->step_resp->job_step_id);
 
     /*
      * task_exit_signal != 0 when srun receives a message that a task
@@ -860,14 +801,11 @@ extern void slurm_step_launch_fwd_signal(slurm_step_ctx_t *ctx, int signo) {
     slurm_mutex_lock(&sls->lock);
 
     hl = hostlist_create(NULL);
-    for (node_id = 0;
-         node_id < ctx->step_resp->step_layout->node_cnt;
-         node_id++) {
+    for (node_id = 0; node_id < ctx->step_resp->step_layout->node_cnt; node_id++) {
         bool active = false;
         num_tasks = sls->layout->tasks[node_id];
         for (j = 0; j < num_tasks; j++) {
-            if (!bit_test(sls->tasks_exited,
-                          sls->layout->tids[node_id][j])) {
+            if (!bit_test(sls->tasks_exited, sls->layout->tids[node_id][j])) {
                 /* this one has active tasks */
                 active = true;
                 break;
@@ -878,12 +816,10 @@ extern void slurm_step_launch_fwd_signal(slurm_step_ctx_t *ctx, int signo) {
             continue;
 
         if (ctx->step_resp->step_layout->front_end) {
-            hostlist_push_host(hl,
-                               ctx->step_resp->step_layout->front_end);
+            hostlist_push_host(hl, ctx->step_resp->step_layout->front_end);
             break;
         } else {
-            name = nodelist_nth_host(sls->layout->node_list,
-                                     node_id);
+            name = nodelist_nth_host(sls->layout->node_list, node_id);
             hostlist_push_host(hl, name);
             free(name);
         }
@@ -892,8 +828,7 @@ extern void slurm_step_launch_fwd_signal(slurm_step_ctx_t *ctx, int signo) {
     slurm_mutex_unlock(&sls->lock);
 
     if (!hostlist_count(hl)) {
-        verbose("no active tasks in step %u.%u to send signal %d",
-                ctx->job_id, ctx->step_resp->job_step_id, signo);
+        verbose("no active tasks in step %u.%u to send signal %d", ctx->job_id, ctx->step_resp->job_step_id, signo);
         hostlist_destroy(hl);
         return;
     }
@@ -908,8 +843,7 @@ extern void slurm_step_launch_fwd_signal(slurm_step_ctx_t *ctx, int signo) {
     if (ctx->step_resp->use_protocol_ver)
         req.protocol_version = ctx->step_resp->use_protocol_ver;
 
-    debug2("sending signal %d to step %u.%u on hosts %s",
-           signo, ctx->job_id, ctx->step_resp->job_step_id, name);
+    debug2("sending signal %d to step %u.%u on hosts %s", signo, ctx->job_id, ctx->step_resp->job_step_id, name);
 
     if (!(ret_list = slurm_send_recv_msgs(name, &req, 0, false))) {
         error("fwd_signal: slurm_send_recv_msgs really failed badly");
@@ -919,19 +853,15 @@ extern void slurm_step_launch_fwd_signal(slurm_step_ctx_t *ctx, int signo) {
 
     itr = list_iterator_create(ret_list);
     while ((ret_data_info = list_next(itr))) {
-        rc = slurm_get_return_code(ret_data_info->type,
-                                   ret_data_info->data);
+        rc = slurm_get_return_code(ret_data_info->type, ret_data_info->data);
         /*
          * Report error unless it is "Invalid job id" which
          * probably just means the tasks exited in the meanwhile.
          */
-        if ((rc != 0) && (rc != ESLURM_INVALID_JOB_ID) &&
-            (rc != ESLURMD_JOB_NOTRUNNING) && (rc != ESRCH) &&
-            (rc != EAGAIN) &&
-            (rc != ESLURM_TRANSITION_STATE_NO_UPDATE)) {
-            error("Failure sending signal %d to step %u.%u on node %s: %s",
-                  signo, ctx->job_id, ctx->step_resp->job_step_id,
-                  ret_data_info->node_name, slurm_strerror(rc));
+        if ((rc != 0) && (rc != ESLURM_INVALID_JOB_ID) && (rc != ESLURMD_JOB_NOTRUNNING) && (rc != ESRCH) &&
+            (rc != EAGAIN) && (rc != ESLURM_TRANSITION_STATE_NO_UPDATE)) {
+            error("Failure sending signal %d to step %u.%u on node %s: %s", signo, ctx->job_id,
+                  ctx->step_resp->job_step_id, ret_data_info->node_name, slurm_strerror(rc));
         }
         if ((rc == EAGAIN) || (rc == ESLURM_TRANSITION_STATE_NO_UPDATE))
             retry = true;
@@ -1059,8 +989,7 @@ static int _connect_srun_cr(char *addr) {
     strlcpy(sa.sun_path, addr, sizeof(sa.sun_path));
     sa_len = strlen(sa.sun_path) + sizeof(sa.sun_family);
 
-    while (((rc = connect(fd, (struct sockaddr *) &sa, sa_len)) < 0) &&
-           (errno == EINTR));
+    while (((rc = connect(fd, (struct sockaddr *) &sa, sa_len)) < 0) && (errno == EINTR));
 
     if (rc < 0) {
         debug2("failed connecting cr socket: %m");
@@ -1090,8 +1019,7 @@ static int _cr_notify_step_launch(slurm_step_ctx_t *ctx) {
         rc = -1;
         goto out;
     }
-    if (write(fd, &ctx->step_resp->job_step_id, sizeof(uint32_t)) !=
-        sizeof(uint32_t)) {
+    if (write(fd, &ctx->step_resp->job_step_id, sizeof(uint32_t)) != sizeof(uint32_t)) {
         error("failed writing job_step_id to srun_cr: %m");
         rc = -1;
         goto out;
@@ -1102,8 +1030,7 @@ static int _cr_notify_step_launch(slurm_step_ctx_t *ctx) {
         rc = -1;
         goto out;
     }
-    if (write(fd, ctx->step_resp->step_layout->node_list, len + 1) !=
-        (len + 1)) {
+    if (write(fd, ctx->step_resp->step_layout->node_list, len + 1) != (len + 1)) {
         error("failed writing nodelist to srun_cr: %m");
         rc = -1;
     }
@@ -1123,8 +1050,7 @@ static void *_msg_thr_internal(void *arg) {
     return NULL;
 }
 
-static inline int
-_estimate_nports(int nclients, int cli_per_port) {
+static inline int _estimate_nports(int nclients, int cli_per_port) {
     div_t d;
     d = div(nclients, cli_per_port);
     return d.rem > 0 ? d.quot + 1 : d.quot;
@@ -1172,8 +1098,7 @@ static int _msg_thr_create(struct step_launch_state *sls, int num_nodes) {
     /* finally, add the listening port that we told the slurmctld about
      * eariler in the step context creation phase */
     if (sls->slurmctld_socket_fd > -1) {
-        obj = eio_obj_create(sls->slurmctld_socket_fd,
-                             &message_socket_ops, (void *) sls);
+        obj = eio_obj_create(sls->slurmctld_socket_fd, &message_socket_ops, (void *) sls);
         eio_new_initial_obj(sls->msg_handle, obj);
     }
 
@@ -1181,25 +1106,20 @@ static int _msg_thr_create(struct step_launch_state *sls, int num_nodes) {
     return rc;
 }
 
-static void
-_launch_handler(struct step_launch_state *sls, slurm_msg_t *resp) {
+static void _launch_handler(struct step_launch_state *sls, slurm_msg_t *resp) {
     launch_tasks_response_msg_t *msg = resp->data;
     int i;
 
     slurm_mutex_lock(&sls->lock);
-    if ((msg->count_of_pids > 0) &&
-        bit_test(sls->tasks_started, msg->task_ids[0])) {
-        debug("%s: duplicate launch response received from node %s",
-              __func__, msg->node_name);
+    if ((msg->count_of_pids > 0) && bit_test(sls->tasks_started, msg->task_ids[0])) {
+        debug("%s: duplicate launch response received from node %s", __func__, msg->node_name);
         slurm_mutex_unlock(&sls->lock);
         return;
     }
 
     if (msg->return_code) {
         for (i = 0; i < msg->count_of_pids; i++) {
-            error("task %u launch failed: %s",
-                  msg->task_ids[i],
-                  slurm_strerror(msg->return_code));
+            error("task %u launch failed: %s", msg->task_ids[i], slurm_strerror(msg->return_code));
             bit_set(sls->tasks_started, msg->task_ids[i]);
             bit_set(sls->tasks_exited, msg->task_ids[i]);
         }
@@ -1215,16 +1135,13 @@ _launch_handler(struct step_launch_state *sls, slurm_msg_t *resp) {
 
 }
 
-static void
-_exit_handler(struct step_launch_state *sls, slurm_msg_t *exit_msg) {
+static void _exit_handler(struct step_launch_state *sls, slurm_msg_t *exit_msg) {
     task_exit_msg_t *msg = (task_exit_msg_t *) exit_msg->data;
     void (*task_finish)(task_exit_msg_t *);
     int i;
 
-    if ((msg->job_id != sls->mpi_info->jobid) ||
-        (msg->step_id != sls->mpi_info->stepid)) {
-        debug("Received MESSAGE_TASK_EXIT from wrong job: %u.%u",
-              msg->job_id, msg->step_id);
+    if ((msg->job_id != sls->mpi_info->jobid) || (msg->step_id != sls->mpi_info->stepid)) {
+        debug("Received MESSAGE_TASK_EXIT from wrong job: %u.%u", msg->job_id, msg->step_id);
         return;
     }
 
@@ -1252,17 +1169,13 @@ _exit_handler(struct step_launch_state *sls, slurm_msg_t *exit_msg) {
     slurm_mutex_unlock(&sls->lock);
 }
 
-static void
-_job_complete_handler(struct step_launch_state *sls, slurm_msg_t *complete_msg) {
-    srun_job_complete_msg_t *step_msg =
-            (srun_job_complete_msg_t *) complete_msg->data;
+static void _job_complete_handler(struct step_launch_state *sls, slurm_msg_t *complete_msg) {
+    srun_job_complete_msg_t *step_msg = (srun_job_complete_msg_t *) complete_msg->data;
 
     if (step_msg->step_id == NO_VAL) {
-        verbose("Complete job %u received",
-                step_msg->job_id);
+        verbose("Complete job %u received", step_msg->job_id);
     } else {
-        verbose("Complete job step %u.%u received",
-                step_msg->job_id, step_msg->step_id);
+        verbose("Complete job step %u.%u received", step_msg->job_id, step_msg->step_id);
     }
 
     if (sls->callback.step_complete)
@@ -1275,10 +1188,8 @@ _job_complete_handler(struct step_launch_state *sls, slurm_msg_t *complete_msg) 
     slurm_mutex_unlock(&sls->lock);
 }
 
-static void
-_timeout_handler(struct step_launch_state *sls, slurm_msg_t *timeout_msg) {
-    srun_timeout_msg_t *step_msg =
-            (srun_timeout_msg_t *) timeout_msg->data;
+static void _timeout_handler(struct step_launch_state *sls, slurm_msg_t *timeout_msg) {
+    srun_timeout_msg_t *step_msg = (srun_timeout_msg_t *) timeout_msg->data;
 
     if (sls->callback.step_timeout)
         (sls->callback.step_timeout)(step_msg);
@@ -1294,8 +1205,7 @@ _timeout_handler(struct step_launch_state *sls, slurm_msg_t *timeout_msg) {
  * client_io_handler_downnodes to notify the IO handler to expect no
  * further IO from that node.
  */
-static void
-_node_fail_handler(struct step_launch_state *sls, slurm_msg_t *fail_msg) {
+static void _node_fail_handler(struct step_launch_state *sls, slurm_msg_t *fail_msg) {
     srun_node_fail_msg_t *nf = fail_msg->data;
     hostset_t fail_nodes, all_nodes;
     hostlist_iterator_t fail_itr;
@@ -1335,18 +1245,14 @@ _node_fail_handler(struct step_launch_state *sls, slurm_msg_t *fail_msg) {
          */
         num_tasks = sls->layout->tasks[node_id];
         for (j = 0; j < num_tasks; j++) {
-            debug2("marking task %d done on failed node %d",
-                   sls->layout->tids[node_id][j], node_id);
-            bit_set(sls->tasks_started,
-                    sls->layout->tids[node_id][j]);
-            bit_set(sls->tasks_exited,
-                    sls->layout->tids[node_id][j]);
+            debug2("marking task %d done on failed node %d", sls->layout->tids[node_id][j], node_id);
+            bit_set(sls->tasks_started, sls->layout->tids[node_id][j]);
+            bit_set(sls->tasks_exited, sls->layout->tids[node_id][j]);
         }
     }
 
     if (!sls->user_managed_io) {
-        client_io_handler_downnodes(sls->io.normal, node_ids,
-                                    num_node_ids);
+        client_io_handler_downnodes(sls->io.normal, node_ids, num_node_ids);
     }
     slurm_cond_broadcast(&sls->cond);
     slurm_mutex_unlock(&sls->lock);
@@ -1364,8 +1270,7 @@ _node_fail_handler(struct step_launch_state *sls, slurm_msg_t *fail_msg) {
  * This message could be the result of the slurmd daemon cold-starting
  * or a race condition when tasks are starting or terminating.
  */
-static void
-_step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
+static void _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
     srun_step_missing_msg_t *step_missing = missing_msg->data;
     hostset_t fail_nodes, all_nodes;
     hostlist_iterator_t fail_itr;
@@ -1378,9 +1283,7 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
     int num_tasks;
     bool active;
 
-    debug("Step %u.%u missing from node(s) %s",
-          step_missing->job_id, step_missing->step_id,
-          step_missing->nodelist);
+    debug("Step %u.%u missing from node(s) %s", step_missing->job_id, step_missing->step_id, step_missing->nodelist);
 
     /* Ignore this message in the unusual "user_managed_io" case.  No way
        to confirm a bad connection, since a test message goes straight to
@@ -1394,8 +1297,7 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
 
     if (!sls->io_timeout_thread_created) {
         sls->io_timeout_thread_created = true;
-        slurm_thread_create(&sls->io_timeout_thread,
-                            _check_io_timeout, sls);
+        slurm_thread_create(&sls->io_timeout_thread, _check_io_timeout, sls);
     }
 
     fail_nodes = hostset_create(step_missing->nodelist);
@@ -1422,10 +1324,8 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
         num_tasks = sls->layout->tasks[node_id];
         active = false;
         for (j = 0; j < num_tasks; j++) {
-            if (bit_test(sls->tasks_started,
-                         sls->layout->tids[node_id][j]) &&
-                !bit_test(sls->tasks_exited,
-                          sls->layout->tids[node_id][j])) {
+            if (bit_test(sls->tasks_started, sls->layout->tids[node_id][j]) &&
+                !bit_test(sls->tasks_exited, sls->layout->tids[node_id][j])) {
                 active = true;
                 break;
             }
@@ -1436,8 +1336,7 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
         /* If this is true, an I/O error has already occurred on the
          * stepd for the current node, and the job should abort */
         if (bit_test(sls->node_io_error, node_id)) {
-            error("Aborting, step missing and io error on node %d",
-                  node_id);
+            error("Aborting, step missing and io error on node %d", node_id);
             sls->abort = true;
             slurm_cond_broadcast(&sls->cond);
             break;
@@ -1447,24 +1346,21 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
          * A test is already is progress. Ignore message for this node.
          */
         if (sls->io_deadline[node_id] != NO_VAL) {
-            debug("Test in progress for node %d, ignoring message",
-                  node_id);
+            debug("Test in progress for node %d, ignoring message", node_id);
             continue;
         }
 
         sls->io_deadline[node_id] = time(NULL) + sls->io_timeout;
 
         debug("Testing connection to node %d", node_id);
-        if (client_io_handler_send_test_message(cio, node_id,
-                                                &test_message_sent)) {
+        if (client_io_handler_send_test_message(cio, node_id, &test_message_sent)) {
             /*
              * If unable to test a connection, assume the step
              * is having problems and abort.  If unable to test,
              * the system is probably having serious problems, so
              * aborting the step seems reasonable.
              */
-            error("Aborting, can not test connection to node %d.",
-                  node_id);
+            error("Aborting, can not test connection to node %d.", node_id);
             sls->abort = true;
             slurm_cond_broadcast(&sls->cond);
             break;
@@ -1492,11 +1388,9 @@ _step_missing_handler(struct step_launch_state *sls, slurm_msg_t *missing_msg) {
 /* This RPC typically used to send a signal an external program that
  * is usually wrapped by srun.
  */
-static void
-_step_step_signal(struct step_launch_state *sls, slurm_msg_t *signal_msg) {
+static void _step_step_signal(struct step_launch_state *sls, slurm_msg_t *signal_msg) {
     job_step_kill_msg_t *step_signal = signal_msg->data;
-    debug2("Signal %u requested for step %u.%u", step_signal->signal,
-           step_signal->job_id, step_signal->job_step_id);
+    debug2("Signal %u requested for step %u.%u", step_signal->signal, step_signal->job_id, step_signal->job_step_id);
     if (sls->callback.step_signal)
         (sls->callback.step_signal)(step_signal->signal);
 
@@ -1514,11 +1408,8 @@ _step_step_signal(struct step_launch_state *sls, slurm_msg_t *signal_msg) {
  * set the slurm_msg_t's conn_fd to -1 to avoid having the caller close the
  * TCP stream.
  */
-static void
-_task_user_managed_io_handler(struct step_launch_state *sls,
-                              slurm_msg_t *user_io_msg) {
-    task_user_managed_io_msg_t *msg =
-            (task_user_managed_io_msg_t *) user_io_msg->data;
+static void _task_user_managed_io_handler(struct step_launch_state *sls, slurm_msg_t *user_io_msg) {
+    task_user_managed_io_msg_t *msg = (task_user_managed_io_msg_t *) user_io_msg->data;
 
     slurm_mutex_lock(&sls->lock);
 
@@ -1526,8 +1417,7 @@ _task_user_managed_io_handler(struct step_launch_state *sls,
     /* sanity check */
     if (msg->task_id >= sls->tasks_requested) {
         error("_task_user_managed_io_handler:"
-              " bad task ID %u (of %d tasks)",
-              msg->task_id, sls->tasks_requested);
+              " bad task ID %u (of %d tasks)", msg->task_id, sls->tasks_requested);
     }
 
     sls->io.user->connected++;
@@ -1544,8 +1434,7 @@ _task_user_managed_io_handler(struct step_launch_state *sls,
 /*
  * Identify the incoming message and call the appropriate handler function.
  */
-static void
-_handle_msg(void *arg, slurm_msg_t *msg) {
+static void _handle_msg(void *arg, slurm_msg_t *msg) {
     struct step_launch_state *sls = (struct step_launch_state *) arg;
     uid_t req_uid;
     uid_t uid = getuid();
@@ -1555,8 +1444,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
     req_uid = g_slurm_auth_get_uid(msg->auth_cred);
 
     if ((req_uid != slurm_uid) && (req_uid != 0) && (req_uid != uid)) {
-        error("Security violation, slurm message from uid %u",
-              (unsigned int) req_uid);
+        error("Security violation, slurm message from uid %u", (unsigned int) req_uid);
         return;
     }
 
@@ -1617,8 +1505,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
             _task_user_managed_io_handler(sls, msg);
             break;
         default:
-            error("%s: received spurious message type: %u",
-                  __func__, msg->msg_type);
+            error("%s: received spurious message type: %u", __func__, msg->msg_type);
             break;
     }
     return;
@@ -1664,16 +1551,15 @@ static int _fail_step_tasks(slurm_step_ctx_t *ctx, char *node, int ret_code) {
     if (ctx->step_resp->use_protocol_ver)
         req.protocol_version = ctx->step_resp->use_protocol_ver;
 
-    if (slurm_send_recv_controller_rc_msg(&req, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     return SLURM_SUCCESS;
 }
 
-static int _launch_tasks(slurm_step_ctx_t *ctx,
-                         launch_tasks_request_msg_t *launch_msg,
-                         uint32_t timeout, char *nodelist, int start_nodeid) {
+static int
+_launch_tasks(slurm_step_ctx_t *ctx, launch_tasks_request_msg_t *launch_msg, uint32_t timeout, char *nodelist,
+              int start_nodeid) {
 #ifdef HAVE_FRONT_END
     slurm_cred_arg_t cred_args;
 #endif
@@ -1701,8 +1587,7 @@ static int _launch_tasks(slurm_step_ctx_t *ctx,
      * running Prolog
      */
     if (timeout <= 0) {
-        timeout = (slurm_get_msg_timeout() +
-                   slurm_get_batch_start_timeout()) * 1000;
+        timeout = (slurm_get_msg_timeout() + slurm_get_batch_start_timeout()) * 1000;
     }
 
     slurm_msg_t_init(&msg);
@@ -1719,8 +1604,7 @@ static int _launch_tasks(slurm_step_ctx_t *ctx,
                     false);
     slurm_cred_free_args(&cred_args);
 #else
-    ret_list = slurm_send_recv_msgs(nodelist,
-                                    &msg, timeout, false);
+    ret_list = slurm_send_recv_msgs(nodelist, &msg, timeout, false);
 #endif
     if (ret_list == NULL) {
         error("slurm_send_recv_msgs failed miserably: %m");
@@ -1728,10 +1612,8 @@ static int _launch_tasks(slurm_step_ctx_t *ctx,
     }
     ret_itr = list_iterator_create(ret_list);
     while ((ret_data = list_next(ret_itr))) {
-        rc = slurm_get_return_code(ret_data->type,
-                                   ret_data->data);
-        debug("launch returned msg_rc=%d err=%d type=%d",
-              rc, ret_data->err, ret_data->type);
+        rc = slurm_get_return_code(ret_data->type, ret_data->data);
+        debug("launch returned msg_rc=%d err=%d type=%d", rc, ret_data->err, ret_data->type);
         if (rc != SLURM_SUCCESS) {
             if (ret_data->err)
                 tot_rc = ret_data->err;
@@ -1743,9 +1625,7 @@ static int _launch_tasks(slurm_step_ctx_t *ctx,
             errno = tot_rc;
             tot_rc = SLURM_ERROR;
             error("Task launch for %u.%u failed on "
-                  "node %s: %m",
-                  ctx->job_id, ctx->step_resp->job_step_id,
-                  ret_data->node_name);
+                  "node %s: %m", ctx->job_id, ctx->step_resp->job_step_id, ret_data->node_name);
         } else {
 #if 0 /* only for debugging, might want to make this a callback */
             errno = ret_data->err;
@@ -1773,8 +1653,7 @@ static char *_lookup_cwd(void) {
     }
 }
 
-static void _print_launch_msg(launch_tasks_request_msg_t *msg,
-                              char *hostname, int nodeid) {
+static void _print_launch_msg(launch_tasks_request_msg_t *msg, char *hostname, int nodeid) {
     int i;
     char *tmp_str = NULL, *task_list = NULL;
     hostlist_t hl = hostlist_create(NULL);
@@ -1787,13 +1666,11 @@ static void _print_launch_msg(launch_tasks_request_msg_t *msg,
     task_list = hostlist_ranged_string_xmalloc(hl);
     hostlist_destroy(hl);
 
-    info("launching %u.%u on host %s, %u tasks: %s",
-         msg->job_id, msg->job_step_id, hostname,
+    info("launching %u.%u on host %s, %u tasks: %s", msg->job_id, msg->job_step_id, hostname,
          msg->tasks_to_launch[nodeid], task_list);
     xfree(task_list);
 
-    debug3("uid:%ld gid:%ld cwd:%s %d", (long) msg->uid,
-           (long) msg->gid, msg->cwd, nodeid);
+    debug3("uid:%ld gid:%ld cwd:%s %d", (long) msg->uid, (long) msg->gid, msg->cwd, nodeid);
 }
 
 void record_ppid(void) {
@@ -1802,8 +1679,7 @@ void record_ppid(void) {
 
 /* This is used to initiate an OpenMPI checkpoint program,
  * but is written to be general purpose */
-static void
-_exec_prog(slurm_msg_t *msg) {
+static void _exec_prog(slurm_msg_t *msg) {
     pid_t child;
     int pfd[2], status, exit_code = 0, i;
     ssize_t len;
@@ -1812,18 +1688,13 @@ _exec_prog(slurm_msg_t *msg) {
     bool checkpoint = false;
     srun_exec_msg_t *exec_msg = msg->data;
 
-    if ((exec_msg->argc < 1) || (exec_msg->argv == NULL) ||
-        (exec_msg->argv[0] == NULL)) {
+    if ((exec_msg->argc < 1) || (exec_msg->argv == NULL) || (exec_msg->argv[0] == NULL)) {
         error("%s: called with no command to execute", __func__);
         return;
     } else if (exec_msg->argc > 2) {
-        verbose("Exec '%s %s' for %u.%u",
-                exec_msg->argv[0], exec_msg->argv[1],
-                exec_msg->job_id, exec_msg->step_id);
+        verbose("Exec '%s %s' for %u.%u", exec_msg->argv[0], exec_msg->argv[1], exec_msg->job_id, exec_msg->step_id);
     } else {
-        verbose("Exec '%s' for %u.%u",
-                exec_msg->argv[0],
-                exec_msg->job_id, exec_msg->step_id);
+        verbose("Exec '%s' for %u.%u", exec_msg->argv[0], exec_msg->job_id, exec_msg->step_id);
     }
 
     if (xstrcmp(exec_msg->argv[0], "ompi-checkpoint") == 0) {
@@ -1888,16 +1759,13 @@ _exec_prog(slurm_msg_t *msg) {
     if (checkpoint) {
         now = time(NULL);
         if (exit_code) {
-            info("Checkpoint completion code %d at %s",
-                 exit_code, slurm_ctime2(&now));
+            info("Checkpoint completion code %d at %s", exit_code, slurm_ctime2(&now));
         } else {
-            info("Checkpoint completed successfully at %s",
-                 slurm_ctime2(&now));
+            info("Checkpoint completed successfully at %s", slurm_ctime2(&now));
         }
         if (buf[0])
             info("Checkpoint location: %s", buf);
-        slurm_checkpoint_complete(exec_msg->job_id, exec_msg->step_id,
-                                  time(NULL), (uint32_t) exit_code, buf);
+        slurm_checkpoint_complete(exec_msg->job_id, exec_msg->step_id, time(NULL), (uint32_t) exit_code, buf);
     }
 }
 
@@ -1906,8 +1774,7 @@ _exec_prog(slurm_msg_t *msg) {
  * Notify the step_launch_state that an I/O connection went bad.
  * If the node is suspected to be down, abort the job.
  */
-int
-step_launch_notify_io_failure(step_launch_state_t *sls, int node_id) {
+int step_launch_notify_io_failure(step_launch_state_t *sls, int node_id) {
     slurm_mutex_lock(&sls->lock);
 
     bit_set(sls->node_io_error, node_id);
@@ -1918,8 +1785,7 @@ step_launch_notify_io_failure(step_launch_state_t *sls, int node_id) {
      * the _step_missing_handler was called on this node.
      */
     if (sls->io_deadline[node_id] != (time_t) NO_VAL) {
-        error("Aborting, io error and missing step on node %d",
-              node_id);
+        error("Aborting, io error and missing step on node %d", node_id);
         sls->abort = true;
         slurm_cond_broadcast(&sls->cond);
     } else {
@@ -1932,8 +1798,7 @@ step_launch_notify_io_failure(step_launch_state_t *sls, int node_id) {
          * Keep supporting 'srun -N x --pty bash'
          */
         if (getenv("SLURM_PTY_PORT") == NULL) {
-            error("%s: aborting, io error with slurmstepd on node %d",
-                  __func__, node_id);
+            error("%s: aborting, io error with slurmstepd on node %d", __func__, node_id);
             sls->abort = true;
             slurm_cond_broadcast(&sls->cond);
         }
@@ -1953,16 +1818,14 @@ step_launch_notify_io_failure(step_launch_state_t *sls, int node_id) {
  * job step setup, clear this flag if/when the node makes its initial
  * connection.
  */
-int
-step_launch_clear_questionable_state(step_launch_state_t *sls, int node_id) {
+int step_launch_clear_questionable_state(step_launch_state_t *sls, int node_id) {
     slurm_mutex_lock(&sls->lock);
     sls->io_deadline[node_id] = (time_t) NO_VAL;
     slurm_mutex_unlock(&sls->lock);
     return SLURM_SUCCESS;
 }
 
-static void *
-_check_io_timeout(void *_sls) {
+static void *_check_io_timeout(void *_sls) {
     int ii;
     time_t now, next_deadline;
     struct timespec ts = {0, 0};
@@ -1987,8 +1850,7 @@ _check_io_timeout(void *_sls) {
                 error("Cannot communicate with node %d.  "
                       "Aborting job.", ii);
                 break;
-            } else if (next_deadline == (time_t) NO_VAL ||
-                       sls->io_deadline[ii] < next_deadline) {
+            } else if (next_deadline == (time_t) NO_VAL || sls->io_deadline[ii] < next_deadline) {
                 next_deadline = sls->io_deadline[ii];
             }
         }
@@ -2000,8 +1862,7 @@ _check_io_timeout(void *_sls) {
                   "sleeping indefinitely");
             slurm_cond_wait(&sls->cond, &sls->lock);
         } else {
-            debug("io timeout thread: sleeping %lds until deadline",
-                  (long) (next_deadline - time(NULL)));
+            debug("io timeout thread: sleeping %lds until deadline", (long) (next_deadline - time(NULL)));
             ts.tv_sec = next_deadline;
             slurm_cond_timedwait(&sls->cond, &sls->lock, &ts);
         }

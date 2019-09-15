@@ -180,14 +180,12 @@ static uint32_t _read_file(const char *file, char **data) {
     fd = open(file, O_RDONLY);
     if (fd < 0) {
         if (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)
-            info("%s: Could not open state file %s", plugin_type,
-                 file);
+            info("%s: Could not open state file %s", plugin_type, file);
         return data_size;
     }
     if (fstat(fd, &f_stat)) {
         if (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)
-            info("%s: Could not stat state file %s", plugin_type,
-                 file);
+            info("%s: Could not stat state file %s", plugin_type, file);
         close(fd);
         return data_size;
     }
@@ -201,8 +199,7 @@ static uint32_t _read_file(const char *file, char **data) {
             if (errno == EINTR)
                 continue;
             else {
-                error("%s: Read error on %s: %m", plugin_type,
-                      file);
+                error("%s: Read error on %s: %m", plugin_type, file);
                 break;
             }
         } else if (data_read == 0)    /* EOF */
@@ -213,8 +210,7 @@ static uint32_t _read_file(const char *file, char **data) {
     }
     close(fd);
     if (data_size != fsize) {
-        error("%s: Could not read entire jobcomp state file %s (%d of %d)",
-              plugin_type, file, data_size, fsize);
+        error("%s: Could not read entire jobcomp state file %s (%d of %d)", plugin_type, file, data_size, fsize);
     }
     return data_size;
 }
@@ -229,8 +225,7 @@ static int _load_pending_jobs(void) {
 
     state_file = slurm_get_state_save_location();
     if (state_file == NULL) {
-        error("%s: Could not retrieve StateSaveLocation from conf",
-              plugin_type);
+        error("%s: Could not retrieve StateSaveLocation from conf", plugin_type);
         return SLURM_ERROR;
     }
 
@@ -258,8 +253,7 @@ static int _load_pending_jobs(void) {
     }
     if (job_cnt > 0) {
         if (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)
-            info("%s: Loaded %u jobs from state file", plugin_type,
-                 job_cnt);
+            info("%s: Loaded %u jobs from state file", plugin_type, job_cnt);
     }
     free_buf(buffer);
     xfree(state_file);
@@ -274,8 +268,7 @@ static int _load_pending_jobs(void) {
 }
 
 /* Callback to handle the HTTP response */
-static size_t _write_callback(void *contents, size_t size, size_t nmemb,
-                              void *userp) {
+static size_t _write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
     struct http_response *mem = (struct http_response *) userp;
 
@@ -341,8 +334,7 @@ static int _index_job(const char *jobcomp) {
 
     token = strtok(chunk.message, " ");
     if (token == NULL) {
-        error("%s: Could not receive the HTTP response status code from %s",
-              plugin_type, log_url);
+        error("%s: Could not receive the HTTP response status code from %s", plugin_type, log_url);
         rc = SLURM_ERROR;
         goto cleanup;
     }
@@ -360,10 +352,8 @@ static int _index_job(const char *jobcomp) {
      */
     if ((xstrcmp(token, "200") != 0) && (xstrcmp(token, "201") != 0)) {
         if (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH) {
-            info("%s: HTTP status code %s received from %s",
-                 plugin_type, token, log_url);
-            info("%s: HTTP response:\n%s", plugin_type,
-                 chunk.message);
+            info("%s: HTTP status code %s received from %s", plugin_type, token, log_url);
+            info("%s: HTTP response:\n%s", plugin_type, chunk.message);
         }
         rc = SLURM_ERROR;
     } else {
@@ -371,8 +361,7 @@ static int _index_job(const char *jobcomp) {
         (void) strtok(token, ":");
         token = strtok(NULL, ":");
         if (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)
-            info("%s: Job with jobid %s indexed into elasticsearch",
-                 plugin_type, token);
+            info("%s: Job with jobid %s indexed into elasticsearch", plugin_type, token);
     }
 
     cleanup:
@@ -467,8 +456,7 @@ static int _save_state(void) {
 
     state_file = slurm_get_state_save_location();
     if (state_file == NULL || state_file[0] == '\0') {
-        error("%s: Could not retrieve StateSaveLocation from conf",
-              plugin_type);
+        error("%s: Could not retrieve StateSaveLocation from conf", plugin_type);
         return SLURM_ERROR;
     }
 
@@ -484,8 +472,7 @@ static int _save_state(void) {
     slurm_mutex_lock(&save_lock);
     fd = open(new_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        error("%s: Can't save jobcomp state, open file %s error %m",
-              plugin_type, new_file);
+        error("%s: Can't save jobcomp state, open file %s error %m", plugin_type, new_file);
         rc = SLURM_ERROR;
     } else {
         int pos = 0, nwrite, amount, rc2;
@@ -497,8 +484,7 @@ static int _save_state(void) {
         while (nwrite > 0) {
             amount = write(fd, &data[pos], nwrite);
             if ((amount < 0) && (errno != EINTR)) {
-                error("%s: Error writing file %s, %m",
-                      plugin_type, new_file);
+                error("%s: Error writing file %s, %m", plugin_type, new_file);
                 rc = SLURM_ERROR;
                 break;
             }
@@ -514,14 +500,12 @@ static int _save_state(void) {
     else {
         (void) unlink(old_file);
         if (link(state_file, old_file)) {
-            error("%s: Unable to create link for %s -> %s: %m",
-                  plugin_type, state_file, old_file);
+            error("%s: Unable to create link for %s -> %s: %m", plugin_type, state_file, old_file);
             rc = SLURM_ERROR;
         }
         (void) unlink(state_file);
         if (link(new_file, state_file)) {
-            error("%s: Unable to create link for %s -> %s: %m",
-                  plugin_type, new_file, state_file);
+            error("%s: Unable to create link for %s -> %s: %m", plugin_type, new_file, state_file);
             rc = SLURM_ERROR;
         }
         (void) unlink(new_file);
@@ -550,11 +534,8 @@ static void _make_time_str(time_t *time, char *string, int size) {
         /* Format YYYY-MM-DDTHH:MM:SS, ISO8601 standard format,
          * NOTE: This is expected to break Maui, Moab and LSF
          * schedulers management of Slurm. */
-        snprintf(string, size,
-                 "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u",
-                 (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
-                 time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min,
-                 time_tm.tm_sec);
+        snprintf(string, size, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u", (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
+                 time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec);
 #else
         /* Format MM/DD-HH:MM:SS */
         snprintf(string, size,
@@ -579,8 +560,8 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     struct job_node *jnode;
 
     if (list_count(jobslist) > MAX_JOBS) {
-        error("%s: Limit of %d enqueued jobs in memory waiting to be indexed reached. Job %lu discarded",
-              plugin_type, MAX_JOBS, (unsigned long) job_ptr->job_id);
+        error("%s: Limit of %d enqueued jobs in memory waiting to be indexed reached. Job %lu discarded", plugin_type,
+              MAX_JOBS, (unsigned long) job_ptr->job_id);
         return SLURM_ERROR;
     }
 
@@ -596,11 +577,9 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         time_t now = time(NULL);
         state_string = job_state_string(job_ptr->job_state);
         if (job_ptr->resize_time) {
-            _make_time_str(&job_ptr->resize_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->resize_time, start_str, sizeof(start_str));
         } else {
-            _make_time_str(&job_ptr->start_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->start_time, start_str, sizeof(start_str));
         }
         _make_time_str(&now, end_str, sizeof(end_str));
     } else {
@@ -610,15 +589,13 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         job_state = job_ptr->job_state & JOB_STATE_BASE;
         state_string = job_state_string(job_state);
         if (job_ptr->resize_time) {
-            _make_time_str(&job_ptr->resize_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->resize_time, start_str, sizeof(start_str));
         } else if (job_ptr->start_time > job_ptr->end_time) {
             /* Job cancelled while pending and
              * expected start time is in the future. */
             snprintf(start_str, sizeof(start_str), "Unknown");
         } else {
-            _make_time_str(&job_ptr->start_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->start_time, start_str, sizeof(start_str));
         }
         _make_time_str(&job_ptr->end_time, end_str, sizeof(end_str));
     }
@@ -641,80 +618,54 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         tmp_int = WEXITSTATUS(job_ptr->exit_code);
     xstrfmtcat(exit_code_str, "%d:%d", tmp_int, tmp_int2);
 
-    json_str = xstrdup_printf(JOBCOMP_DATA_FORMAT,
-                              job_ptr->job_id, usr_str,
-                              job_ptr->user_id, grp_str,
-                              job_ptr->group_id, start_str,
-                              end_str, elapsed_time,
-                              job_ptr->partition, job_ptr->alloc_node,
-                              job_ptr->nodes, job_ptr->total_cpus,
-                              job_ptr->total_nodes,
-                              derived_ec_str,
-                              exit_code_str, state_string,
-                              ((float) elapsed_time *
-                               (float) job_ptr->total_cpus) /
-                              (float) 3600);
+    json_str = xstrdup_printf(JOBCOMP_DATA_FORMAT, job_ptr->job_id, usr_str, job_ptr->user_id, grp_str,
+                              job_ptr->group_id, start_str, end_str, elapsed_time, job_ptr->partition,
+                              job_ptr->alloc_node, job_ptr->nodes, job_ptr->total_cpus, job_ptr->total_nodes,
+                              derived_ec_str, exit_code_str, state_string,
+                              ((float) elapsed_time * (float) job_ptr->total_cpus) / (float) 3600);
 
     if (job_ptr->array_task_id != NO_VAL) {
-        xstrfmtcat(json_str, ",\"array_job_id\":%lu",
-                   (unsigned long) job_ptr->array_job_id);
-        xstrfmtcat(json_str, ",\"array_task_id\":%lu",
-                   (unsigned long) job_ptr->array_task_id);
+        xstrfmtcat(json_str, ",\"array_job_id\":%lu", (unsigned long) job_ptr->array_job_id);
+        xstrfmtcat(json_str, ",\"array_task_id\":%lu", (unsigned long) job_ptr->array_task_id);
     }
 
     if (job_ptr->pack_job_id != NO_VAL) {
-        xstrfmtcat(json_str, ",\"pack_job_id\":%lu",
-                   (unsigned long) job_ptr->pack_job_id);
-        xstrfmtcat(json_str, ",\"pack_job_offset\":%lu",
-                   (unsigned long) job_ptr->pack_job_offset);
+        xstrfmtcat(json_str, ",\"pack_job_id\":%lu", (unsigned long) job_ptr->pack_job_id);
+        xstrfmtcat(json_str, ",\"pack_job_offset\":%lu", (unsigned long) job_ptr->pack_job_offset);
     }
 
     if (job_ptr->details && job_ptr->details->submit_time) {
-        _make_time_str(&job_ptr->details->submit_time,
-                       time_str, sizeof(time_str));
+        _make_time_str(&job_ptr->details->submit_time, time_str, sizeof(time_str));
         xstrfmtcat(json_str, ",\"@submit\":\"%s\"", time_str);
     }
 
     if (job_ptr->details && job_ptr->details->begin_time) {
-        _make_time_str(&job_ptr->details->begin_time,
-                       time_str, sizeof(time_str));
+        _make_time_str(&job_ptr->details->begin_time, time_str, sizeof(time_str));
         xstrfmtcat(json_str, ",\"@eligible\":\"%s\"", time_str);
         if (job_ptr->start_time) {
-            int64_t queue_wait = (int64_t) difftime(
-                    job_ptr->start_time,
-                    job_ptr->details->begin_time);
-            xstrfmtcat(json_str, ",\"queue_wait\":%"PRIi64,
-                       queue_wait);
+            int64_t queue_wait = (int64_t) difftime(job_ptr->start_time, job_ptr->details->begin_time);
+            xstrfmtcat(json_str, ",\"queue_wait\":%"PRIi64, queue_wait);
         }
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->work_dir && job_ptr->details->work_dir[0])) {
-        xstrfmtcat(json_str, ",\"work_dir\":\"%s\"",
-                   job_ptr->details->work_dir);
+    if (job_ptr->details && (job_ptr->details->work_dir && job_ptr->details->work_dir[0])) {
+        xstrfmtcat(json_str, ",\"work_dir\":\"%s\"", job_ptr->details->work_dir);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->std_err && job_ptr->details->std_err[0])) {
-        xstrfmtcat(json_str, ",\"std_err\":\"%s\"",
-                   job_ptr->details->std_err);
+    if (job_ptr->details && (job_ptr->details->std_err && job_ptr->details->std_err[0])) {
+        xstrfmtcat(json_str, ",\"std_err\":\"%s\"", job_ptr->details->std_err);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->std_in && job_ptr->details->std_in[0])) {
-        xstrfmtcat(json_str, ",\"std_in\":\"%s\"",
-                   job_ptr->details->std_in);
+    if (job_ptr->details && (job_ptr->details->std_in && job_ptr->details->std_in[0])) {
+        xstrfmtcat(json_str, ",\"std_in\":\"%s\"", job_ptr->details->std_in);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->std_out && job_ptr->details->std_out[0])) {
-        xstrfmtcat(json_str, ",\"std_out\":\"%s\"",
-                   job_ptr->details->std_out);
+    if (job_ptr->details && (job_ptr->details->std_out && job_ptr->details->std_out[0])) {
+        xstrfmtcat(json_str, ",\"std_out\":\"%s\"", job_ptr->details->std_out);
     }
 
     if (job_ptr->assoc_ptr != NULL) {
-        xstrfmtcat(json_str, ",\"cluster\":\"%s\"",
-                   job_ptr->assoc_ptr->cluster);
+        xstrfmtcat(json_str, ",\"cluster\":\"%s\"", job_ptr->assoc_ptr->cluster);
     }
 
     if (job_ptr->qos_ptr != NULL) {
@@ -722,48 +673,35 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     }
 
     if (job_ptr->details && (job_ptr->details->num_tasks != NO_VAL)) {
-        xstrfmtcat(json_str, ",\"ntasks\":%u",
-                   job_ptr->details->num_tasks);
+        xstrfmtcat(json_str, ",\"ntasks\":%u", job_ptr->details->num_tasks);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->ntasks_per_node != NO_VAL16)) {
+    if (job_ptr->details && (job_ptr->details->ntasks_per_node != NO_VAL16)) {
         ntasks_per_node = job_ptr->details->ntasks_per_node;
-        xstrfmtcat(json_str, ",\"ntasks_per_node\":%hu",
-                   ntasks_per_node);
+        xstrfmtcat(json_str, ",\"ntasks_per_node\":%hu", ntasks_per_node);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->cpus_per_task != NO_VAL16)) {
-        xstrfmtcat(json_str, ",\"cpus_per_task\":%hu",
-                   job_ptr->details->cpus_per_task);
+    if (job_ptr->details && (job_ptr->details->cpus_per_task != NO_VAL16)) {
+        xstrfmtcat(json_str, ",\"cpus_per_task\":%hu", job_ptr->details->cpus_per_task);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->orig_dependency
-            && job_ptr->details->orig_dependency[0])) {
-        xstrfmtcat(json_str, ",\"orig_dependency\":\"%s\"",
-                   job_ptr->details->orig_dependency);
+    if (job_ptr->details && (job_ptr->details->orig_dependency && job_ptr->details->orig_dependency[0])) {
+        xstrfmtcat(json_str, ",\"orig_dependency\":\"%s\"", job_ptr->details->orig_dependency);
     }
 
-    if (job_ptr->details
-        && (job_ptr->details->exc_nodes
-            && job_ptr->details->exc_nodes[0])) {
-        xstrfmtcat(json_str, ",\"excluded_nodes\":\"%s\"",
-                   job_ptr->details->exc_nodes);
+    if (job_ptr->details && (job_ptr->details->exc_nodes && job_ptr->details->exc_nodes[0])) {
+        xstrfmtcat(json_str, ",\"excluded_nodes\":\"%s\"", job_ptr->details->exc_nodes);
     }
 
     if (time_limit != INFINITE) {
-        xstrfmtcat(json_str, ",\"time_limit\":%lu",
-                   (unsigned long) time_limit * 60);
+        xstrfmtcat(json_str, ",\"time_limit\":%lu", (unsigned long) time_limit * 60);
     }
 
     if (job_ptr->name && job_ptr->name[0])
         xstrfmtcat(json_str, ",\"job_name\":\"%s\"", job_ptr->name);
 
     if (job_ptr->resv_name && job_ptr->resv_name[0]) {
-        xstrfmtcat(json_str, ",\"reservation_name\":\"%s\"",
-                   job_ptr->resv_name);
+        xstrfmtcat(json_str, ",\"reservation_name\":\"%s\"", job_ptr->resv_name);
     }
 
     if (job_ptr->wckey && job_ptr->wckey[0])
@@ -774,8 +712,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     }
 
     if (job_ptr->gres_alloc && job_ptr->gres_alloc[0]) {
-        xstrfmtcat(json_str, ",\"gres_alloc\":\"%s\"",
-                   job_ptr->gres_alloc);
+        xstrfmtcat(json_str, ",\"gres_alloc\":\"%s\"", job_ptr->gres_alloc);
     }
 
     if (job_ptr->account && job_ptr->account[0]) {
@@ -791,8 +728,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     free_buf(script);
 
     if (job_ptr->assoc_ptr) {
-        assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
-                                  NO_LOCK, NO_LOCK, NO_LOCK};
+        assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
         slurmdb_assoc_rec_t *assoc_ptr = job_ptr->assoc_ptr;
         char *parent_accounts = NULL;
         char **acc_aux = NULL;
@@ -807,9 +743,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
          * realloc. */
         while (assoc_ptr) {
             if (assoc_ptr->acct) {
-                acc_aux = xrealloc(acc_aux,
-                                   sizeof(char *) *
-                                   (nparents + 1));
+                acc_aux = xrealloc(acc_aux, sizeof(char *) * (nparents + 1));
                 acc_aux[nparents++] = assoc_ptr->acct;
             }
             assoc_ptr = assoc_ptr->usage->parent_assoc_ptr;
@@ -819,8 +753,7 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
             xstrfmtcat(parent_accounts, "/%s", acc_aux[i]);
         xfree(acc_aux);
 
-        xstrfmtcat(json_str, ",\"parent_accounts\":\"%s\"",
-                   parent_accounts);
+        xstrfmtcat(json_str, ",\"parent_accounts\":\"%s\"", parent_accounts);
 
         xfree(parent_accounts);
 
@@ -854,14 +787,10 @@ extern void *_process_jobs(void *x) {
         int success_cnt = 0, fail_cnt = 0, wait_retry_cnt = 0;
         sleep(1);
         iter = list_iterator_create(jobslist);
-        while ((jnode = (struct job_node *) list_next(iter)) &&
-               !thread_shutdown) {
+        while ((jnode = (struct job_node *) list_next(iter)) && !thread_shutdown) {
             now = time(NULL);
-            if ((jnode->last_index_retry == 0) ||
-                (difftime(now, jnode->last_index_retry) >=
-                 INDEX_RETRY_INTERVAL)) {
-                if ((_index_job(jnode->serialized_job) ==
-                     SLURM_SUCCESS)) {
+            if ((jnode->last_index_retry == 0) || (difftime(now, jnode->last_index_retry) >= INDEX_RETRY_INTERVAL)) {
+                if ((_index_job(jnode->serialized_job) == SLURM_SUCCESS)) {
                     list_delete_item(iter);
                     success_cnt++;
                 } else {
@@ -872,11 +801,8 @@ extern void *_process_jobs(void *x) {
                 wait_retry_cnt++;
         }
         list_iterator_destroy(iter);
-        if ((success_cnt || fail_cnt) &&
-            (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)) {
-            info("%s: index success:%d fail:%d wait_retry:%d",
-                 plugin_type, success_cnt, fail_cnt,
-                 wait_retry_cnt);
+        if ((success_cnt || fail_cnt) && (slurm_get_debug_flags() & DEBUG_FLAG_ESEARCH)) {
+            info("%s: index success:%d fail:%d wait_retry:%d", plugin_type, success_cnt, fail_cnt, wait_retry_cnt);
         }
     }
     return NULL;
@@ -939,8 +865,7 @@ extern int slurm_jobcomp_set_location(char *location) {
         curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
         res = curl_easy_perform(curl_handle);
         if (res != CURLE_OK) {
-            error("%s: Could not connect to: %s", plugin_type,
-                  log_url);
+            error("%s: Could not connect to: %s", plugin_type, log_url);
             rc = SLURM_ERROR;
         }
         curl_easy_cleanup(curl_handle);

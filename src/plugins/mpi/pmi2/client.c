@@ -55,20 +55,15 @@
 static int pmi_version = 0;
 static int pmi_subversion = 0;
 
-extern int
-is_pmi11(void) {
-    return (pmi_version == PMI11_VERSION &&
-            pmi_subversion == PMI11_SUBVERSION);
+extern int is_pmi11(void) {
+    return (pmi_version == PMI11_VERSION && pmi_subversion == PMI11_SUBVERSION);
 }
 
-extern int
-is_pmi20(void) {
-    return (pmi_version == PMI20_VERSION &&
-            pmi_subversion == PMI20_SUBVERSION);
+extern int is_pmi20(void) {
+    return (pmi_version == PMI20_VERSION && pmi_subversion == PMI20_SUBVERSION);
 }
 
-extern int
-get_pmi_version(int *version, int *subversion) {
+extern int get_pmi_version(int *version, int *subversion) {
     if (pmi_version) {
         *version = pmi_version;
         *subversion = pmi_subversion;
@@ -77,33 +72,27 @@ get_pmi_version(int *version, int *subversion) {
         return SLURM_ERROR;
 }
 
-extern int
-set_pmi_version(int version, int subversion) {
+extern int set_pmi_version(int version, int subversion) {
     if ((version == PMI11_VERSION && subversion == PMI11_SUBVERSION) ||
         (version == PMI20_VERSION && subversion == PMI20_SUBVERSION)) {
 
-        if (pmi_version && (pmi_version != version ||
-                            pmi_subversion != subversion)) {
+        if (pmi_version && (pmi_version != version || pmi_subversion != subversion)) {
             error("mpi/pmi2: inconsistent client PMI version: "
-                  "%d.%d(req) <> %d.%d(orig)", version, subversion,
-                  pmi_version, pmi_subversion);
+                  "%d.%d(req) <> %d.%d(orig)", version, subversion, pmi_version, pmi_subversion);
             return SLURM_ERROR;
         } else if (!pmi_version) {
-            verbose("mpi/pmi2: got client PMI1 init, version=%d.%d",
-                    version, subversion);
+            verbose("mpi/pmi2: got client PMI1 init, version=%d.%d", version, subversion);
             pmi_version = version;
             pmi_subversion = subversion;
         }
     } else {
-        error("mpi/pmi2: unsupported PMI version: %d.%d", version,
-              subversion);
+        error("mpi/pmi2: unsupported PMI version: %d.%d", version, subversion);
         return SLURM_ERROR;
     }
     return SLURM_SUCCESS;
 }
 
-static int
-_parse_cmd(client_req_t *req) {
+static int _parse_cmd(client_req_t *req) {
     int i = 0, len = 0;
 
     len = strlen(MCMD_KEY"=");
@@ -126,17 +115,13 @@ _parse_cmd(client_req_t *req) {
     if (is_pmi11()) {
         req->sep = ' ';
         req->term = '\n';
-        while (req->buf[i] != req->sep &&
-               req->buf[i] != req->term &&
-               i < req->buf_len) {
+        while (req->buf[i] != req->sep && req->buf[i] != req->term && i < req->buf_len) {
             i++;
         }
     } else if (is_pmi20()) {
         req->sep = ';';
         req->term = ';';
-        while (req->buf[i] != req->sep &&
-               req->buf[i] != req->term &&
-               i < req->buf_len) {
+        while (req->buf[i] != req->sep && req->buf[i] != req->term && i < req->buf_len) {
             i++;
         }
     }
@@ -154,8 +139,7 @@ _parse_cmd(client_req_t *req) {
 }
 
 
-extern client_req_t *
-client_req_init(uint32_t len, char *buf) {
+extern client_req_t *client_req_init(uint32_t len, char *buf) {
     client_req_t *req = NULL;
 
     /* buf always '\0' terminated */
@@ -171,8 +155,7 @@ client_req_init(uint32_t len, char *buf) {
     return req;
 }
 
-extern void
-client_req_free(client_req_t *req) {
+extern void client_req_free(client_req_t *req) {
     if (req) {
         xfree(req->buf);
         xfree(req->pairs);
@@ -185,8 +168,7 @@ client_req_free(client_req_t *req) {
  * No escape of ';' supported for now, hence no ';' in value.
  * TODO: concat command processing
  */
-extern int
-client_req_parse_body(client_req_t *req) {
+extern int client_req_parse_body(client_req_t *req) {
     int i = 0, rc = SLURM_SUCCESS;
     char *key, *val;
 
@@ -210,9 +192,7 @@ client_req_parse_body(client_req_t *req) {
 
         /* search for val */
         val = &req->buf[i];
-        while (req->buf[i] != req->sep &&
-               req->buf[i] != req->term &&
-               i < req->buf_len) {
+        while (req->buf[i] != req->sep && req->buf[i] != req->term && i < req->buf_len) {
             i++;
         }
         if (i >= req->buf_len) {
@@ -244,8 +224,7 @@ client_req_parse_body(client_req_t *req) {
     return rc;
 }
 
-extern spawn_req_t *
-client_req_parse_spawn_req(client_req_t *req) {
+extern spawn_req_t *client_req_parse_spawn_req(client_req_t *req) {
     spawn_req_t *spawn_req = NULL;
     spawn_subcmd_t *subcmd = NULL;
     int i = 0, j = 0, pi = 0;
@@ -267,8 +246,7 @@ client_req_parse_spawn_req(client_req_t *req) {
         goto req_err;
     }
     spawn_req->subcmd_cnt = atoi(MP_VAL(req, pi));
-    spawn_req->subcmds = xmalloc(spawn_req->subcmd_cnt *
-                                 sizeof(spawn_subcmd_t *));
+    spawn_req->subcmds = xmalloc(spawn_req->subcmd_cnt * sizeof(spawn_subcmd_t *));
     pi++;
     /* preputcount */
     if (xstrcmp(MP_KEY(req, pi), PREPUTCOUNT_KEY)) {
@@ -277,8 +255,7 @@ client_req_parse_spawn_req(client_req_t *req) {
     }
     spawn_req->preput_cnt = atoi(MP_VAL(req, pi));
     pi++;
-    if (req->pairs_cnt - pi <
-        ((2 * spawn_req->preput_cnt) + (3 * spawn_req->subcmd_cnt))) {
+    if (req->pairs_cnt - pi < ((2 * spawn_req->preput_cnt) + (3 * spawn_req->subcmd_cnt))) {
         /* <PPKEY, PPVAL>, <SUBCMD, MAXPROCS, ARGC> */
         error("mpi/pmi2: wrong number of key-val pairs in spawn cmd");
         goto req_err;
@@ -336,8 +313,7 @@ client_req_parse_spawn_req(client_req_t *req) {
         }
         subcmd->argc = atoi(MP_VAL(req, pi));
         pi++;
-        if (req->pairs_cnt - pi <
-            (subcmd->argc + (3 * (spawn_req->subcmd_cnt - i - 1)))) {
+        if (req->pairs_cnt - pi < (subcmd->argc + (3 * (spawn_req->subcmd_cnt - i - 1)))) {
             /* <ARGV>, <SUBCMD, MAXPROCS, ARGC> */
             error("mpi/pmi2: wrong number of key-val pairs"
                   " in spawn cmd");
@@ -349,8 +325,7 @@ client_req_parse_spawn_req(client_req_t *req) {
         }
         /* argv */
         for (j = 0; j < subcmd->argc; j++) {
-            if (xstrncmp(MP_KEY(req, pi), ARGV_KEY,
-                         strlen(ARGV_KEY)) ||
+            if (xstrncmp(MP_KEY(req, pi), ARGV_KEY, strlen(ARGV_KEY)) ||
                 atoi((MP_KEY(req, pi) + strlen(ARGV_KEY))) != j) {
                 error("mpi/pmi2: '" ARGV_KEY
                       "%d' expected in spawn cmd", j);
@@ -374,27 +349,21 @@ client_req_parse_spawn_req(client_req_t *req) {
         }
         subcmd->info_cnt = atoi(MP_VAL(req, pi));
         pi++;
-        if (req->pairs_cnt - pi <
-            ((2 * subcmd->info_cnt) +
-             (3 * (spawn_req->subcmd_cnt - i - 1)))) {
+        if (req->pairs_cnt - pi < ((2 * subcmd->info_cnt) + (3 * (spawn_req->subcmd_cnt - i - 1)))) {
             /* <INFOKEY, INFOVAL>, <SUBCMD, MAXPROCS, ARGC> */
             error("mpi/pmi2: wrong number of key-val pairs"
                   " in spawn cmd");
             goto req_err;
         }
         if (subcmd->info_cnt > 0) {
-            subcmd->info_keys = xmalloc(subcmd->info_cnt *
-                                        sizeof(char *));
-            subcmd->info_vals = xmalloc(subcmd->info_cnt *
-                                        sizeof(char *));
+            subcmd->info_keys = xmalloc(subcmd->info_cnt * sizeof(char *));
+            subcmd->info_vals = xmalloc(subcmd->info_cnt * sizeof(char *));
         }
         /* infokey,infoval */
         for (j = 0; j < subcmd->info_cnt; j++) {
             /* infokey */
-            if (xstrncmp(MP_KEY(req, pi), INFOKEY_KEY,
-                         strlen(INFOKEY_KEY)) ||
-                atoi((MP_KEY(req, pi) +
-                      strlen(INFOKEY_KEY))) != j) {
+            if (xstrncmp(MP_KEY(req, pi), INFOKEY_KEY, strlen(INFOKEY_KEY)) ||
+                atoi((MP_KEY(req, pi) + strlen(INFOKEY_KEY))) != j) {
                 error("mpi/pmi2: '" INFOKEY_KEY
                       "%d' expected in spawn cmd", j);
                 goto req_err;
@@ -402,10 +371,8 @@ client_req_parse_spawn_req(client_req_t *req) {
             subcmd->info_keys[j] = xstrdup(MP_VAL(req, pi));
             pi++;
             /* infoval */
-            if (xstrncmp(MP_KEY(req, pi), INFOVAL_KEY,
-                         strlen(INFOVAL_KEY)) ||
-                atoi((MP_KEY(req, pi) +
-                      strlen(INFOVAL_KEY))) != j) {
+            if (xstrncmp(MP_KEY(req, pi), INFOVAL_KEY, strlen(INFOVAL_KEY)) ||
+                atoi((MP_KEY(req, pi) + strlen(INFOVAL_KEY))) != j) {
                 error("mpi/pmi2: '" INFOVAL_KEY
                       "%d' expected in spawn cmd", j);
                 goto req_err;
@@ -423,8 +390,7 @@ client_req_parse_spawn_req(client_req_t *req) {
     return NULL;
 }
 
-extern spawn_subcmd_t *
-client_req_parse_spawn_subcmd(client_req_t *req) {
+extern spawn_subcmd_t *client_req_parse_spawn_subcmd(client_req_t *req) {
     spawn_subcmd_t *subcmd = NULL;
     char buf[PMI2_MAX_KEYLEN];
     int i = 0;
@@ -454,8 +420,7 @@ client_req_parse_spawn_subcmd(client_req_t *req) {
 /************************************************************************/
 
 /* returned value not dup-ed */
-static char *
-_client_req_get_val(client_req_t *req, const char *key) {
+static char *_client_req_get_val(client_req_t *req, const char *key) {
     int i;
 
     for (i = 0; i < req->pairs_cnt; i++) {
@@ -466,8 +431,7 @@ _client_req_get_val(client_req_t *req, const char *key) {
 }
 
 /* return true if found */
-extern bool
-client_req_get_str(client_req_t *req, const char *key, char **pval) {
+extern bool client_req_get_str(client_req_t *req, const char *key, char **pval) {
     char *val;
 
     val = _client_req_get_val(req, key);
@@ -478,8 +442,7 @@ client_req_get_str(client_req_t *req, const char *key, char **pval) {
     return true;
 }
 
-extern bool
-client_req_get_int(client_req_t *req, const char *key, int *pval) {
+extern bool client_req_get_int(client_req_t *req, const char *key, int *pval) {
     char *val;
 
     val = _client_req_get_val(req, key);
@@ -490,8 +453,7 @@ client_req_get_int(client_req_t *req, const char *key, int *pval) {
     return true;
 }
 
-extern bool
-client_req_get_bool(client_req_t *req, const char *key, bool *pval) {
+extern bool client_req_get_bool(client_req_t *req, const char *key, bool *pval) {
     char *val;
 
     val = _client_req_get_val(req, key);
@@ -507,16 +469,14 @@ client_req_get_bool(client_req_t *req, const char *key, bool *pval) {
 
 /* ************************************************************ */
 
-extern client_resp_t *
-client_resp_new(void) {
+extern client_resp_t *client_resp_new(void) {
     client_resp_t *resp;
 
     resp = xmalloc(sizeof(client_resp_t));
     return resp;
 }
 
-extern int
-client_resp_send(client_resp_t *resp, int fd) {
+extern int client_resp_send(client_resp_t *resp, int fd) {
     char len_buf[7];
     int len;
 
@@ -537,8 +497,7 @@ client_resp_send(client_resp_t *resp, int fd) {
     return SLURM_ERROR;
 }
 
-extern void
-client_resp_free(client_resp_t *resp) {
+extern void client_resp_free(client_resp_t *resp) {
     if (resp) {
         xfree(resp->buf);
         xfree(resp);
@@ -546,8 +505,7 @@ client_resp_free(client_resp_t *resp) {
 }
 
 /* caller must free the result */
-static char *
-_str_replace(char *str, char src, char dst) {
+static char *_str_replace(char *str, char src, char dst) {
     char *res, *ptr;
 
     res = xstrdup(str);
@@ -561,8 +519,7 @@ _str_replace(char *str, char src, char dst) {
 }
 
 /* send fence_resp/barrier_out to tasks */
-extern int
-send_kvs_fence_resp_to_clients(int rc, char *errmsg) {
+extern int send_kvs_fence_resp_to_clients(int rc, char *errmsg) {
     int i = 0;
     client_resp_t *resp;
     char *msg;
@@ -579,8 +536,7 @@ send_kvs_fence_resp_to_clients(int rc, char *errmsg) {
                     RC_KEY
                     "=%d "
                     MSG_KEY
-                    "=%s\n",
-                               rc, msg);
+                    "=%s\n", rc, msg);
             xfree(msg);
         } else {
             client_resp_append(resp, CMD_KEY
@@ -601,8 +557,7 @@ send_kvs_fence_resp_to_clients(int rc, char *errmsg) {
                     RC_KEY
                     "=%d;"
                     ERRMSG_KEY
-                    "=%s;",
-                               rc, msg);
+                    "=%s;", rc, msg);
             xfree(msg);
         } else {
             client_resp_append(resp, CMD_KEY

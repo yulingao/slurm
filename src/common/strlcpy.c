@@ -38,8 +38,7 @@ strong_alias(strlcpy, slurm_strlcpy
  * will be copied.  Always NUL terminates (unless siz == 0).
  * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-size_t
-strlcpy(char *dst, const char *src, size_t siz) {
+size_t strlcpy(char *dst, const char *src, size_t siz) {
     char *d = dst;
     const char *s = src;
     size_t n = siz;

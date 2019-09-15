@@ -39,9 +39,7 @@
 
 #include "src/sacctmgr/sacctmgr.h"
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_assoc_cond_t *assoc_cond,
-                     List format_list) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_assoc_cond_t *assoc_cond, List format_list) {
     int i, end = 0;
     int set = 0;
     int command_len = 0;
@@ -57,61 +55,39 @@ static int _set_cond(int *start, int argc, char **argv,
             }
         }
 
-        if (!end && !xstrncasecmp(argv[i], "Tree",
-                                  MAX(command_len, 4))) {
+        if (!end && !xstrncasecmp(argv[i], "Tree", MAX(command_len, 4))) {
             tree_display = 1;
-        } else if (!end && !xstrncasecmp(argv[i], "where",
-                                         MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "where", MAX(command_len, 5))) {
             continue;
-        } else if (!end || !xstrncasecmp(argv[i], "Ids",
-                                         MAX(command_len, 1))
-                   || !xstrncasecmp(argv[i], "Problems",
-                                    MAX(command_len, 2))) {
+        } else if (!end || !xstrncasecmp(argv[i], "Ids", MAX(command_len, 1)) ||
+                   !xstrncasecmp(argv[i], "Problems", MAX(command_len, 2))) {
             if (!assoc_cond->id_list)
-                assoc_cond->id_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(assoc_cond->id_list,
-                                  argv[i] + end);
+                assoc_cond->id_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(assoc_cond->id_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Accounts",
-                                 MAX(command_len, 2))
-                   || !xstrncasecmp(argv[i], "Acct",
-                                    MAX(command_len, 4))) {
+        } else if (!xstrncasecmp(argv[i], "Accounts", MAX(command_len, 2)) ||
+                   !xstrncasecmp(argv[i], "Acct", MAX(command_len, 4))) {
             if (!assoc_cond->acct_list)
-                assoc_cond->acct_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(assoc_cond->acct_list,
-                                  argv[i] + end);
+                assoc_cond->acct_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(assoc_cond->acct_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Clusters",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Clusters", MAX(command_len, 1))) {
             if (!assoc_cond->cluster_list)
-                assoc_cond->cluster_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(assoc_cond->cluster_list,
-                                  argv[i] + end);
+                assoc_cond->cluster_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(assoc_cond->cluster_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 1))) {
             if (format_list)
-                slurm_addto_char_list(format_list,
-                                      argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "Partitions",
-                                 MAX(command_len, 4))) {
+                slurm_addto_char_list(format_list, argv[i] + end);
+        } else if (!xstrncasecmp(argv[i], "Partitions", MAX(command_len, 4))) {
             if (!assoc_cond->partition_list)
-                assoc_cond->partition_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(assoc_cond->partition_list,
-                                  argv[i] + end);
+                assoc_cond->partition_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(assoc_cond->partition_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Users",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Users", MAX(command_len, 1))) {
             if (!assoc_cond->user_list)
-                assoc_cond->user_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list_with_case(assoc_cond->user_list,
-                                            argv[i] + end,
-                                            user_case_norm);
+                assoc_cond->user_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list_with_case(assoc_cond->user_list, argv[i] + end, user_case_norm);
             set = 1;
         } else {
             exit_code = 1;
@@ -126,8 +102,7 @@ static int _set_cond(int *start, int argc, char **argv,
 
 extern int sacctmgr_list_problem(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
-    slurmdb_assoc_cond_t *assoc_cond =
-            xmalloc(sizeof(slurmdb_assoc_cond_t));
+    slurmdb_assoc_cond_t *assoc_cond = xmalloc(sizeof(slurmdb_assoc_cond_t));
     List assoc_list = NULL;
     slurmdb_assoc_rec_t *assoc = NULL;
     int i = 0;
@@ -144,8 +119,7 @@ extern int sacctmgr_list_problem(int argc, char **argv) {
 
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         _set_cond(&i, argc, argv, assoc_cond, format_list);
     }
@@ -171,8 +145,7 @@ extern int sacctmgr_list_problem(int argc, char **argv) {
 
     if (!assoc_list) {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         FREE_NULL_LIST(print_fields_list);
         return SLURM_ERROR;
     }
@@ -188,16 +161,10 @@ extern int sacctmgr_list_problem(int argc, char **argv) {
         while ((field = list_next(itr2))) {
             switch (field->type) {
                 case PRINT_ACCT:
-                    field->print_routine(
-                            field,
-                            assoc->acct,
-                            (curr_inx == field_count));
+                    field->print_routine(field, assoc->acct, (curr_inx == field_count));
                     break;
                 case PRINT_CLUSTER:
-                    field->print_routine(
-                            field,
-                            assoc->cluster,
-                            (curr_inx == field_count));
+                    field->print_routine(field, assoc->cluster, (curr_inx == field_count));
                     break;
                 case PRINT_PROBLEM:
                     /* make some sort of string here to
@@ -205,20 +172,13 @@ extern int sacctmgr_list_problem(int argc, char **argv) {
                        Maybe make an array or something
                        and just print out a standard error.
                     */
-                    field->print_routine(
-                            field,
-                            slurmdb_problem_str_get(assoc->id),
-                            (curr_inx == field_count));
+                    field->print_routine(field, slurmdb_problem_str_get(assoc->id), (curr_inx == field_count));
                     break;
                 case PRINT_USER:
-                    field->print_routine(field,
-                                         assoc->user,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, assoc->user, (curr_inx == field_count));
                     break;
                 default:
-                    field->print_routine(
-                            field, NULL,
-                            (curr_inx == field_count));
+                    field->print_routine(field, NULL, (curr_inx == field_count));
                     break;
             }
             curr_inx++;

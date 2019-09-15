@@ -40,73 +40,70 @@
 /*
  * All spank plugins must define this macro for the Slurm plugin loader.
  */
-SPANK_PLUGIN(test_suite, 1);
+SPANK_PLUGIN(test_suite,
+1);
 
 static char *opt_out_file = NULL;
 
-int run_test(spank_t sp, const char *caller)
-{
-	uint32_t job_id, array_job_id, array_task_id, step_id;
-	FILE *fp = NULL;
-	int rc, i;
-	job_info_msg_t *job_info = NULL;
-	errno = 0;
+int run_test(spank_t sp, const char *caller) {
+    uint32_t job_id, array_job_id, array_task_id, step_id;
+    FILE *fp = NULL;
+    int rc, i;
+    job_info_msg_t *job_info = NULL;
+    errno = 0;
 
-	if (!opt_out_file)
-		return -1;
-	for (i = 0; (i < 10) && !fp; i++)
-		fp = fopen(opt_out_file, "a");
-	if (!fp)
-		return -1;
+    if (!opt_out_file)
+        return -1;
+    for (i = 0; (i < 10) && !fp; i++)
+        fp = fopen(opt_out_file, "a");
+    if (!fp)
+        return -1;
 
-	// only want to test against a running job
-	if (spank_context() != S_CTX_REMOTE) {
-		fprintf(fp, "skipping %s\n", caller);
-		return 0;
-	}
+    // only want to test against a running job
+    if (spank_context() != S_CTX_REMOTE) {
+        fprintf(fp, "skipping %s\n", caller);
+        return 0;
+    }
 
-	if ((rc = spank_get_item(sp, S_JOB_STEPID, &step_id)))
-		return rc;
-	if ((rc = spank_get_item(sp, S_JOB_ID, &job_id)))
-		return rc;
-	if ((rc = spank_get_item(sp, S_JOB_ARRAY_ID, &array_job_id)))
-		array_job_id = 0;
-	if ((rc = spank_get_item(sp, S_JOB_ARRAY_TASK_ID, &array_task_id)))
-		array_task_id = 0;
+    if ((rc = spank_get_item(sp, S_JOB_STEPID, &step_id)))
+        return rc;
+    if ((rc = spank_get_item(sp, S_JOB_ID, &job_id)))
+        return rc;
+    if ((rc = spank_get_item(sp, S_JOB_ARRAY_ID, &array_job_id)))
+        array_job_id = 0;
+    if ((rc = spank_get_item(sp, S_JOB_ARRAY_TASK_ID, &array_task_id)))
+        array_task_id = 0;
 
-	fprintf(fp, "%s spank_get_item: step_id=%u job_id=%u array_job_id=%u array_task_id=%u\n",
-			caller, step_id, job_id, array_job_id, array_task_id);
+    fprintf(fp, "%s spank_get_item: step_id=%u job_id=%u array_job_id=%u array_task_id=%u\n", caller, step_id, job_id,
+            array_job_id, array_task_id);
 
-	// Ask slurm about this job
-	rc = slurm_load_job(&job_info, job_id, SHOW_DETAIL);
-	if (rc)
-		return rc;
+    // Ask slurm about this job
+    rc = slurm_load_job(&job_info, job_id, SHOW_DETAIL);
+    if (rc)
+        return rc;
 
-	for (i = 0; i < job_info->record_count; ++i) {
-		slurm_job_info_t *job = job_info->job_array + i;
+    for (i = 0; i < job_info->record_count; ++i) {
+        slurm_job_info_t *job = job_info->job_array + i;
 
-		fprintf(fp, "%s load_job: step_id=%u job_id=%u array_job_id=%u array_task_id=%u\n",
-			caller, step_id, job->job_id, job->array_job_id,
-			job->array_task_id);
-	}
+        fprintf(fp, "%s load_job: step_id=%u job_id=%u array_job_id=%u array_task_id=%u\n", caller, step_id,
+                job->job_id, job->array_job_id, job->array_task_id);
+    }
 
-	fclose(fp);
+    fclose(fp);
 
-	return (0);
+    return (0);
 }
 
 /*  Called from both srun and slurmd */
-int slurm_spank_init(spank_t sp, int ac, char **av)
-{
-	if (spank_remote(sp) && (ac == 1))
-		opt_out_file = strdup(av[0]);
+int slurm_spank_init(spank_t sp, int ac, char **av) {
+    if (spank_remote(sp) && (ac == 1))
+        opt_out_file = strdup(av[0]);
 
-	return (0);
+    return (0);
 }
 
 /* Called from slurmd only */
-int slurm_spank_task_init(spank_t sp, int ac, char **av)
-{
-	return run_test(sp, __func__);
+int slurm_spank_task_init(spank_t sp, int ac, char **av) {
+    return run_test(sp, __func__);
 }
 

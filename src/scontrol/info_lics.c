@@ -42,8 +42,7 @@
 
 static void _print_license_info(const char *, license_info_msg_t *);
 
-static slurm_license_info_t **_license_sort(license_info_msg_t
-                                            *license_list);
+static slurm_license_info_t **_license_sort(license_info_msg_t *license_list);
 
 static int _lic_cmp(const void *lic1, const void *lic2);
 
@@ -58,21 +57,17 @@ static int _lic_cmp(const void *lic1, const void *lic2) {
  * Sort the list of licenses by their name
  *
  */
-static slurm_license_info_t **_license_sort(license_info_msg_t
-                                            *license_list) {
-    slurm_license_info_t **lic_list_ptr = xmalloc(
-            sizeof(slurm_license_info_t * ) * license_list->num_lic);
+static slurm_license_info_t **_license_sort(license_info_msg_t *license_list) {
+    slurm_license_info_t **lic_list_ptr = xmalloc(sizeof(slurm_license_info_t * ) * license_list->num_lic);
     slurm_license_info_t *lic_ptr;
     int list_cnt;
 
     // Set tmp array of pointers to each license
-    for (list_cnt = 0, lic_ptr = license_list->lic_array;
-         list_cnt < license_list->num_lic; list_cnt++, lic_ptr++) {
+    for (list_cnt = 0, lic_ptr = license_list->lic_array; list_cnt < license_list->num_lic; list_cnt++, lic_ptr++) {
         lic_list_ptr[list_cnt] = lic_ptr;
     }
 
-    qsort(lic_list_ptr, license_list->num_lic,
-          sizeof(slurm_license_info_t * ), _lic_cmp);
+    qsort(lic_list_ptr, license_list->num_lic, sizeof(slurm_license_info_t * ), _lic_cmp);
 
     return lic_list_ptr;
 }
@@ -83,8 +78,7 @@ static slurm_license_info_t **_license_sort(license_info_msg_t
  * from the controller
  *
  */
-void
-scontrol_print_licenses(const char *name) {
+void scontrol_print_licenses(const char *name) {
     int cc;
     license_info_msg_t *msg;
     uint16_t show_flags;
@@ -133,13 +127,9 @@ static void _print_license_info(const char *name, license_info_msg_t *msg) {
     for (cc = 0; cc < msg->num_lic; cc++) {
         if (name && xstrcmp((sorted_lic[cc])->name, name))
             continue;
-        printf("LicenseName=%s%sTotal=%d Used=%u Free=%u Remote=%s\n",
-               (sorted_lic[cc])->name,
-               one_liner ? " " : "\n    ",
-               (sorted_lic[cc])->total,
-               (sorted_lic[cc])->in_use,
-               (sorted_lic[cc])->available,
-               (sorted_lic[cc])->remote ? "yes" : "no");
+        printf("LicenseName=%s%sTotal=%d Used=%u Free=%u Remote=%s\n", (sorted_lic[cc])->name,
+               one_liner ? " " : "\n    ", (sorted_lic[cc])->total, (sorted_lic[cc])->in_use,
+               (sorted_lic[cc])->available, (sorted_lic[cc])->remote ? "yes" : "no");
         if (name)
             break;
     }

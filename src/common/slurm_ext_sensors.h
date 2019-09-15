@@ -59,11 +59,9 @@ extern ext_sensors_data_t *ext_sensors_alloc(void);
 
 extern void ext_sensors_destroy(ext_sensors_data_t *ext_sensors);
 
-extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer,
-                                  uint16_t protocol_version);
+extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer, uint16_t protocol_version);
 
-extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer,
-                                   uint16_t protocol_version);
+extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer, uint16_t protocol_version);
 
 extern int ext_sensors_g_update_component_data(void);
 

@@ -106,11 +106,9 @@ int main(int argc, char **argv) {
     if (params.cluster_dims == 3)
         min_screen_width = 92;
 
-    while (slurm_load_node((time_t)NULL,
-                           &new_node_ptr, SHOW_ALL)) {
+    while (slurm_load_node((time_t)NULL, &new_node_ptr, SHOW_ALL)) {
         error_code = slurm_get_errno();
-        printf("slurm_load_node: %s\n",
-               slurm_strerror(error_code));
+        printf("slurm_load_node: %s\n", slurm_strerror(error_code));
         if (params.iterate == 0)
             exit(1);
         sleep(10);    /* keep trying to reconnect */
@@ -143,11 +141,7 @@ int main(int argc, char **argv) {
             endwin();
             error("Screen is too small make sure the screen "
                   "is at least %dx%d\n"
-                  "Right now it is %dx%d\n",
-                  check_width,
-                  height,
-                  COLS,
-                  LINES);
+                  "Right now it is %dx%d\n", check_width, height, COLS, LINES);
             _smap_exit(1);    /* Calls exit(), no return */
         }
 
@@ -216,36 +210,22 @@ int main(int argc, char **argv) {
 
             node_info_ptr = new_node_ptr;
             if (node_info_ptr) {
-                error_code = slurm_load_node(
-                        node_info_ptr->last_update,
-                        &new_node_ptr, SHOW_ALL);
+                error_code = slurm_load_node(node_info_ptr->last_update, &new_node_ptr, SHOW_ALL);
                 if (error_code == SLURM_SUCCESS)
-                    slurm_free_node_info_msg(
-                            node_info_ptr);
-                else if (slurm_get_errno()
-                         == SLURM_NO_CHANGE_IN_DATA) {
+                    slurm_free_node_info_msg(node_info_ptr);
+                else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
                     error_code = SLURM_SUCCESS;
                     new_node_ptr = node_info_ptr;
                 }
             } else {
-                error_code = slurm_load_node(
-                        (time_t)NULL,
-                        &new_node_ptr, SHOW_ALL);
+                error_code = slurm_load_node((time_t)NULL, &new_node_ptr, SHOW_ALL);
             }
             if (error_code && (quiet_flag != 1)) {
                 if (!params.commandline) {
-                    mvwprintw(
-                            text_win,
-                            main_ycord,
-                            1,
-                            "slurm_load_node: %s",
-                            slurm_strerror(
-                                    slurm_get_errno()));
+                    mvwprintw(text_win, main_ycord, 1, "slurm_load_node: %s", slurm_strerror(slurm_get_errno()));
                     main_ycord++;
                 } else {
-                    printf("slurm_load_node: %s",
-                           slurm_strerror(
-                                   slurm_get_errno()));
+                    printf("slurm_load_node: %s", slurm_strerror(slurm_get_errno()));
                 }
             }
         }

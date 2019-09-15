@@ -75,16 +75,13 @@ typedef struct load_part_resp_struct {
  * IN part_info_ptr - partitions information message pointer
  * IN one_liner - print as a single line if true
  */
-void slurm_print_partition_info_msg(FILE *out,
-                                    partition_info_msg_t *part_info_ptr, int one_liner) {
+void slurm_print_partition_info_msg(FILE *out, partition_info_msg_t *part_info_ptr, int one_liner) {
     int i;
     partition_info_t *part_ptr = part_info_ptr->partition_array;
     char time_str[32];
 
-    slurm_make_time_str((time_t * ) & part_info_ptr->last_update, time_str,
-                        sizeof(time_str));
-    fprintf(out, "Partition data as of %s, record count %d\n",
-            time_str, part_info_ptr->record_count);
+    slurm_make_time_str((time_t * ) & part_info_ptr->last_update, time_str, sizeof(time_str));
+    fprintf(out, "Partition data as of %s, record count %d\n", time_str, part_info_ptr->record_count);
 
     for (i = 0; i < part_info_ptr->record_count; i++) {
         slurm_print_partition_info(out, &part_ptr[i], one_liner);
@@ -99,8 +96,7 @@ void slurm_print_partition_info_msg(FILE *out,
  * IN part_ptr - an individual partition information record pointer
  * IN one_liner - print as a single line if true
  */
-void slurm_print_partition_info(FILE *out, partition_info_t *part_ptr,
-                                int one_liner) {
+void slurm_print_partition_info(FILE *out, partition_info_t *part_ptr, int one_liner) {
     char *print_this = slurm_sprint_partition_info(part_ptr, one_liner);
     fprintf(out, "%s", print_this);
     xfree(print_this);
@@ -115,8 +111,7 @@ void slurm_print_partition_info(FILE *out, partition_info_t *part_ptr,
  * RET out - char * containing formatted output (must be freed after call)
  *           NULL is returned on failure.
  */
-char *slurm_sprint_partition_info(partition_info_t *part_ptr,
-                                  int one_liner) {
+char *slurm_sprint_partition_info(partition_info_t *part_ptr, int one_liner) {
     char *out = NULL;
     char *allow_deny, *value;
     uint16_t force, preempt_mode, val;
@@ -129,8 +124,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
 
     /****** Line 2 ******/
 
-    if ((part_ptr->allow_groups == NULL) ||
-        (part_ptr->allow_groups[0] == '\0'))
+    if ((part_ptr->allow_groups == NULL) || (part_ptr->allow_groups[0] == '\0'))
         xstrcat(out, "AllowGroups=ALL");
     else {
         xstrfmtcat(out, "AllowGroups=%s", part_ptr->allow_groups);
@@ -138,8 +132,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
 
     if (part_ptr->allow_accounts || !part_ptr->deny_accounts) {
         allow_deny = "Allow";
-        if ((part_ptr->allow_accounts == NULL) ||
-            (part_ptr->allow_accounts[0] == '\0'))
+        if ((part_ptr->allow_accounts == NULL) || (part_ptr->allow_accounts[0] == '\0'))
             value = "ALL";
         else
             value = part_ptr->allow_accounts;
@@ -151,8 +144,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
 
     if (part_ptr->allow_qos || !part_ptr->deny_qos) {
         allow_deny = "Allow";
-        if ((part_ptr->allow_qos == NULL) ||
-            (part_ptr->allow_qos[0] == '\0'))
+        if ((part_ptr->allow_qos == NULL) || (part_ptr->allow_qos[0] == '\0'))
             value = "ALL";
         else
             value = part_ptr->allow_qos;
@@ -199,8 +191,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
         xstrcat(out, "DefaultTime=NONE");
     else {
         char time_line[32];
-        secs2time_str(part_ptr->default_time * 60, time_line,
-                      sizeof(time_line));
+        secs2time_str(part_ptr->default_time * 60, time_line, sizeof(time_line));
         xstrfmtcat(out, "DefaultTime=%s", time_line);
     }
 
@@ -234,8 +225,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
         xstrcat(out, " MaxTime=UNLIMITED");
     else {
         char time_line[32];
-        secs2time_str(part_ptr->max_time * 60, time_line,
-                      sizeof(time_line));
+        secs2time_str(part_ptr->max_time * 60, time_line, sizeof(time_line));
         xstrfmtcat(out, " MaxTime=%s", time_line);
     }
 
@@ -249,8 +239,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
     if (part_ptr->max_cpus_per_node == INFINITE)
         xstrcat(out, " MaxCPUsPerNode=UNLIMITED");
     else {
-        xstrfmtcat(out, " MaxCPUsPerNode=%u",
-                   part_ptr->max_cpus_per_node);
+        xstrfmtcat(out, " MaxCPUsPerNode=%u", part_ptr->max_cpus_per_node);
     }
 
     xstrcat(out, line_end);
@@ -318,8 +307,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
 
     xstrfmtcat(out, " TotalNodes=%u", part_ptr->total_nodes);
 
-    xstrfmtcat(out, " SelectTypeParameters=%s",
-               select_type_param_string(part_ptr->cr_type));
+    xstrfmtcat(out, " SelectTypeParameters=%s", select_type_param_string(part_ptr->cr_type));
 
     xstrcat(out, line_end);
 
@@ -336,16 +324,14 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
         } else {
             xstrfmtcat(out, "DefMemPerCPU=%"
             PRIu64
-            "",
-                    part_ptr->def_mem_per_cpu & (~MEM_PER_CPU));
+            "", part_ptr->def_mem_per_cpu & (~MEM_PER_CPU));
         }
     } else if (part_ptr->def_mem_per_cpu == 0) {
         xstrcat(out, "DefMemPerNode=UNLIMITED");
     } else {
         xstrfmtcat(out, "DefMemPerNode=%"
         PRIu64
-        "",
-                part_ptr->def_mem_per_cpu);
+        "", part_ptr->def_mem_per_cpu);
     }
 
     if (part_ptr->max_mem_per_cpu & MEM_PER_CPU) {
@@ -354,24 +340,21 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
         } else {
             xstrfmtcat(out, " MaxMemPerCPU=%"
             PRIu64
-            "",
-                    part_ptr->max_mem_per_cpu & (~MEM_PER_CPU));
+            "", part_ptr->max_mem_per_cpu & (~MEM_PER_CPU));
         }
     } else if (part_ptr->max_mem_per_cpu == 0) {
         xstrcat(out, " MaxMemPerNode=UNLIMITED");
     } else {
         xstrfmtcat(out, " MaxMemPerNode=%"
         PRIu64
-        "",
-                part_ptr->max_mem_per_cpu);
+        "", part_ptr->max_mem_per_cpu);
     }
 
     /****** Line 10 ******/
     if (part_ptr->billing_weights_str) {
         xstrcat(out, line_end);
 
-        xstrfmtcat(out, "TRESBillingWeights=%s",
-                   part_ptr->billing_weights_str);
+        xstrfmtcat(out, "TRESBillingWeights=%s", part_ptr->billing_weights_str);
     }
 
     if (one_liner)
@@ -382,9 +365,7 @@ char *slurm_sprint_partition_info(partition_info_t *part_ptr,
     return out;
 }
 
-static int _load_cluster_parts(slurm_msg_t *req_msg,
-                               partition_info_msg_t **resp,
-                               slurmdb_cluster_rec_t *cluster) {
+static int _load_cluster_parts(slurm_msg_t *req_msg, partition_info_msg_t **resp, slurmdb_cluster_rec_t *cluster) {
     slurm_msg_t resp_msg;
     int rc;
 
@@ -431,16 +412,13 @@ static void *_load_part_thread(void *args) {
     partition_info_msg_t *new_msg = NULL;
     int i, rc;
 
-    if ((rc = _load_cluster_parts(load_args->req_msg, &new_msg, cluster)) ||
-        !new_msg) {
-        verbose("Error reading partition information from cluster %s: %s",
-                cluster->name, slurm_strerror(rc));
+    if ((rc = _load_cluster_parts(load_args->req_msg, &new_msg, cluster)) || !new_msg) {
+        verbose("Error reading partition information from cluster %s: %s", cluster->name, slurm_strerror(rc));
     } else {
         load_part_resp_struct_t *part_resp;
         for (i = 0; i < new_msg->record_count; i++) {
             if (!new_msg->partition_array[i].cluster_name) {
-                new_msg->partition_array[i].cluster_name =
-                        xstrdup(cluster->name);
+                new_msg->partition_array[i].cluster_name = xstrdup(cluster->name);
             }
         }
         part_resp = xmalloc(sizeof(load_part_resp_struct_t));
@@ -453,10 +431,8 @@ static void *_load_part_thread(void *args) {
     return (void *) NULL;
 }
 
-static int _load_fed_parts(slurm_msg_t *req_msg,
-                           partition_info_msg_t **part_info_msg_pptr,
-                           uint16_t show_flags, char *cluster_name,
-                           slurmdb_federation_rec_t *fed) {
+static int _load_fed_parts(slurm_msg_t *req_msg, partition_info_msg_t **part_info_msg_pptr, uint16_t show_flags,
+                           char *cluster_name, slurmdb_federation_rec_t *fed) {
     int cluster_inx = 0, i;
     load_part_resp_struct_t *part_resp;
     partition_info_msg_t *orig_msg = NULL, *new_msg = NULL;
@@ -472,12 +448,10 @@ static int _load_fed_parts(slurm_msg_t *req_msg,
 
     /* Spawn one pthread per cluster to collect partition information */
     resp_msg_list = list_create(NULL);
-    load_thread = xmalloc(sizeof(pthread_t) *
-                          list_count(fed->cluster_list));
+    load_thread = xmalloc(sizeof(pthread_t) * list_count(fed->cluster_list));
     iter = list_iterator_create(fed->cluster_list);
     while ((cluster = (slurmdb_cluster_rec_t *) list_next(iter))) {
-        if ((cluster->control_host == NULL) ||
-            (cluster->control_host[0] == '\0'))
+        if ((cluster->control_host == NULL) || (cluster->control_host[0] == '\0'))
             continue;    /* Cluster down */
 
         load_args = xmalloc(sizeof(load_part_req_struct_t));
@@ -486,8 +460,7 @@ static int _load_fed_parts(slurm_msg_t *req_msg,
         load_args->req_msg = req_msg;
         load_args->resp_msg_list = resp_msg_list;
         load_args->show_flags = show_flags;
-        slurm_thread_create(&load_thread[pthread_count],
-                            _load_part_thread, load_args);
+        slurm_thread_create(&load_thread[pthread_count], _load_part_thread, load_args);
         pthread_count++;
 
     }
@@ -510,20 +483,12 @@ static int _load_fed_parts(slurm_msg_t *req_msg,
             *part_info_msg_pptr = orig_msg;
         } else {
             /* Merge the node records */
-            orig_msg->last_update = MIN(orig_msg->last_update,
-                                        new_msg->last_update);
-            new_rec_cnt = orig_msg->record_count +
-                          new_msg->record_count;
+            orig_msg->last_update = MIN(orig_msg->last_update, new_msg->last_update);
+            new_rec_cnt = orig_msg->record_count + new_msg->record_count;
             if (new_msg->record_count) {
-                orig_msg->partition_array =
-                        xrealloc(orig_msg->partition_array,
-                                 sizeof(partition_info_t) *
-                                 new_rec_cnt);
-                (void) memcpy(orig_msg->partition_array +
-                              orig_msg->record_count,
-                              new_msg->partition_array,
-                              sizeof(partition_info_t) *
-                              new_msg->record_count);
+                orig_msg->partition_array = xrealloc(orig_msg->partition_array, sizeof(partition_info_t) * new_rec_cnt);
+                (void) memcpy(orig_msg->partition_array + orig_msg->record_count, new_msg->partition_array,
+                              sizeof(partition_info_t) * new_msg->record_count);
                 orig_msg->record_count = new_rec_cnt;
             }
             xfree(new_msg->partition_array);
@@ -550,9 +515,7 @@ static int _load_fed_parts(slurm_msg_t *req_msg,
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_partition_info_msg
  */
-extern int slurm_load_partitions(time_t update_time,
-                                 partition_info_msg_t **resp,
-                                 uint16_t show_flags) {
+extern int slurm_load_partitions(time_t update_time, partition_info_msg_t **resp, uint16_t show_flags) {
     slurm_msg_t req_msg;
     part_info_request_msg_t req;
     char *cluster_name = NULL;
@@ -565,8 +528,7 @@ extern int slurm_load_partitions(time_t update_time,
     else
         cluster_name = slurm_get_cluster_name();
     if ((show_flags & SHOW_FEDERATION) && !(show_flags & SHOW_LOCAL) &&
-        (slurm_load_federation(&ptr) == SLURM_SUCCESS) &&
-        cluster_in_federation(ptr, cluster_name)) {
+        (slurm_load_federation(&ptr) == SLURM_SUCCESS) && cluster_in_federation(ptr, cluster_name)) {
         /* In federation. Need full info from all clusters */
         update_time = (time_t) 0;
         show_flags &= (~SHOW_LOCAL);
@@ -585,8 +547,7 @@ extern int slurm_load_partitions(time_t update_time,
 
     if ((show_flags & SHOW_FEDERATION) && ptr) { /* "ptr" check for CLANG */
         fed = (slurmdb_federation_rec_t *) ptr;
-        rc = _load_fed_parts(&req_msg, resp, show_flags, cluster_name,
-                             fed);
+        rc = _load_fed_parts(&req_msg, resp, show_flags, cluster_name, fed);
     } else {
         rc = _load_cluster_parts(&req_msg, resp, working_cluster_rec);
     }
@@ -602,9 +563,7 @@ extern int slurm_load_partitions(time_t update_time,
  * slurm_load_partitions2 - equivalent to slurm_load_partitions() with addition
  *	of cluster record for communications in a federation
  */
-extern int slurm_load_partitions2(time_t update_time,
-                                  partition_info_msg_t **resp,
-                                  uint16_t show_flags,
+extern int slurm_load_partitions2(time_t update_time, partition_info_msg_t **resp, uint16_t show_flags,
                                   slurmdb_cluster_rec_t *cluster) {
     slurm_msg_t req_msg;
     part_info_request_msg_t req;

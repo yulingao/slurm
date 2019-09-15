@@ -66,8 +66,7 @@ extern int slurm_load_powercap(powercap_info_msg_t **resp) {
     req_msg.msg_type = REQUEST_POWERCAP_INFO;
     req_msg.data = NULL;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -96,8 +95,7 @@ extern int slurm_load_powercap(powercap_info_msg_t **resp) {
  * IN powercap_info_msg_ptr - powercapping information message pointer
  * IN one_liner - print as a single line if not zero
  */
-extern void slurm_print_powercap_info_msg(FILE *out, powercap_info_msg_t *ptr,
-                                          int one_liner) {
+extern void slurm_print_powercap_info_msg(FILE *out, powercap_info_msg_t *ptr, int one_liner) {
     char *out_buf = NULL;
 
     if (ptr->power_cap == 0) {
@@ -108,17 +106,14 @@ extern void slurm_print_powercap_info_msg(FILE *out, powercap_info_msg_t *ptr,
         xfree(out_buf);
     } else {
         /****** Line 1 ******/
-        xstrfmtcat(out_buf, "MinWatts=%u CurrentWatts=%u ",
-                   ptr->min_watts, ptr->cur_max_watts);
+        xstrfmtcat(out_buf, "MinWatts=%u CurrentWatts=%u ", ptr->min_watts, ptr->cur_max_watts);
         if (ptr->power_cap == INFINITE) {
             xstrcat(out_buf, "PowerCap=INFINITE ");
         } else {
             xstrfmtcat(out_buf, "PowerCap=%u ", ptr->power_cap);
         }
-        xstrfmtcat(out_buf, "PowerFloor=%u PowerChangeRate=%u",
-                   ptr->power_floor, ptr->power_change);
-        xstrfmtcat(out_buf, "AdjustedMaxWatts=%u MaxWatts=%u",
-                   ptr->adj_max_watts, ptr->max_watts);
+        xstrfmtcat(out_buf, "PowerFloor=%u PowerChangeRate=%u", ptr->power_floor, ptr->power_change);
+        xstrfmtcat(out_buf, "AdjustedMaxWatts=%u MaxWatts=%u", ptr->adj_max_watts, ptr->max_watts);
 
         xstrcat(out_buf, "\n");
         fprintf(out, "%s", out_buf);

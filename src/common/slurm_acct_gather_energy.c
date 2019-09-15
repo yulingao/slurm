@@ -70,8 +70,7 @@ typedef struct slurm_acct_gather_energy_ops {
 
     int (*set_data)(enum acct_energy_type data_type, void *data);
 
-    void (*conf_options)(s_p_options_t **full_options,
-                         int *full_options_cnt);
+    void (*conf_options)(s_p_options_t **full_options, int *full_options_cnt);
 
     void (*conf_set)(s_p_hashtbl_t *tbl);
 
@@ -81,14 +80,9 @@ typedef struct slurm_acct_gather_energy_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_acct_gather_energy_ops_t.
  */
-static const char *syms[] = {
-        "acct_gather_energy_p_update_node_energy",
-        "acct_gather_energy_p_get_data",
-        "acct_gather_energy_p_set_data",
-        "acct_gather_energy_p_conf_options",
-        "acct_gather_energy_p_conf_set",
-        "acct_gather_energy_p_conf_values",
-};
+static const char *syms[] = {"acct_gather_energy_p_update_node_energy", "acct_gather_energy_p_get_data",
+                             "acct_gather_energy_p_set_data", "acct_gather_energy_p_conf_options",
+                             "acct_gather_energy_p_conf_set", "acct_gather_energy_p_conf_values",};
 
 static slurm_acct_gather_energy_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -97,8 +91,7 @@ static bool init_run = false;
 static bool acct_shutdown = true;
 static int freq = 0;
 static pthread_t watch_node_thread_id = 0;
-static acct_gather_profile_timer_t *profile_timer =
-        &acct_gather_profile_timer[PROFILE_ENERGY];
+static acct_gather_profile_timer_t *profile_timer = &acct_gather_profile_timer[PROFILE_ENERGY];
 
 static void *_watch_node(void *arg) {
     int delta = profile_timer->freq - 1;
@@ -117,8 +110,7 @@ static void *_watch_node(void *arg) {
         slurm_mutex_unlock(&g_context_lock);
 
         slurm_mutex_lock(&profile_timer->notify_mutex);
-        slurm_cond_wait(&profile_timer->notify,
-                        &profile_timer->notify_mutex);
+        slurm_cond_wait(&profile_timer->notify, &profile_timer->notify_mutex);
         slurm_mutex_unlock(&profile_timer->notify_mutex);
     }
 
@@ -141,8 +133,7 @@ extern int slurm_acct_gather_energy_init(void) {
 
     type = slurm_get_acct_gather_energy_type();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -194,8 +185,7 @@ extern void acct_gather_energy_destroy(acct_gather_energy_t *energy) {
     xfree(energy);
 }
 
-extern void acct_gather_energy_pack(acct_gather_energy_t *energy, Buf buffer,
-                                    uint16_t protocol_version) {
+extern void acct_gather_energy_pack(acct_gather_energy_t *energy, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         if (!energy) {
             pack64(0, buffer);
@@ -216,8 +206,8 @@ extern void acct_gather_energy_pack(acct_gather_energy_t *energy, Buf buffer,
     }
 }
 
-extern int acct_gather_energy_unpack(acct_gather_energy_t **energy, Buf buffer,
-                                     uint16_t protocol_version, bool need_alloc) {
+extern int
+acct_gather_energy_unpack(acct_gather_energy_t **energy, Buf buffer, uint16_t protocol_version, bool need_alloc) {
     acct_gather_energy_t *energy_ptr;
 
     if (need_alloc) {
@@ -259,8 +249,7 @@ extern int acct_gather_energy_g_update_node_energy(void) {
     return retval;
 }
 
-extern int acct_gather_energy_g_get_data(enum acct_energy_type data_type,
-                                         void *data) {
+extern int acct_gather_energy_g_get_data(enum acct_energy_type data_type, void *data) {
     int retval = SLURM_ERROR;
 
     if (slurm_acct_gather_energy_init() < 0)
@@ -271,8 +260,7 @@ extern int acct_gather_energy_g_get_data(enum acct_energy_type data_type,
     return retval;
 }
 
-extern int acct_gather_energy_g_set_data(enum acct_energy_type data_type,
-                                         void *data) {
+extern int acct_gather_energy_g_set_data(enum acct_energy_type data_type, void *data) {
     int retval = SLURM_ERROR;
 
     if (slurm_acct_gather_energy_init() < 0)
@@ -312,8 +300,7 @@ extern int acct_gather_energy_startpoll(uint32_t frequency) {
     return retval;
 }
 
-extern int acct_gather_energy_g_conf_options(s_p_options_t **full_options,
-                                             int *full_options_cnt) {
+extern int acct_gather_energy_g_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     if (slurm_acct_gather_energy_init() < 0)
         return SLURM_ERROR;
 

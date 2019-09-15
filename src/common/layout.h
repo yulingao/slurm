@@ -76,8 +76,7 @@ typedef struct layout_st {
  *      the entities managed by this layout (tree structure is the only
  *      relational structure supported for now)
  */
-void layout_init(layout_t *layout, const char *name, const char *type,
-                 uint32_t priority, int struct_type);
+void layout_init(layout_t *layout, const char *name, const char *type, uint32_t priority, int struct_type);
 
 /*
  * layout_free - destroy a particular layout struct 
@@ -140,7 +139,6 @@ const char *layout_hashable_identify(void *item);
  *
  * Note: it currently just returns the type of the layout
  */
-void layout_hashable_identify_by_type(void *item, const char **key,
-                                      uint32_t *key_len);
+void layout_hashable_identify_by_type(void *item, const char **key, uint32_t *key_len);
 
 #endif /* end of include guard: __LAYOUT_DGR6BCQ2_INC__ */

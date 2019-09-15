@@ -53,127 +53,129 @@
 #include "src/common/slurm_protocol_defs.h"
 #include "src/common/xhash.h"
 
-#define CONFIG_MAGIC    0xc065eded
-#define NODE_MAGIC    0x0de575ed
+#define CONFIG_MAGIC 0xc065eded
+#define NODE_MAGIC 0x0de575ed
 
-struct config_record {
-    uint32_t magic;        /* magic cookie to test data integrity */
-    uint16_t cpus;        /* count of processors running on the node */
-    char *cpu_spec_list;    /* arbitrary list of specialized cpus */
-    uint16_t boards;    /* count of boards configured */
-    uint16_t sockets;    /* number of sockets per node */
-    uint16_t cores;        /* number of cores per socket */
-    uint16_t core_spec_cnt;    /* number of specialized cores */
-    uint32_t cpu_bind;    /* default CPU binding type */
-    uint16_t threads;    /* number of threads per core */
+struct config_record
+{
+    uint32_t magic;          /* magic cookie to test data integrity */
+    uint16_t cpus;           /* count of processors running on the node */
+    char *cpu_spec_list;     /* arbitrary list of specialized cpus */
+    uint16_t boards;         /* count of boards configured */
+    uint16_t sockets;        /* number of sockets per node */
+    uint16_t cores;          /* number of cores per socket */
+    uint16_t core_spec_cnt;  /* number of specialized cores */
+    uint32_t cpu_bind;       /* default CPU binding type */
+    uint16_t threads;        /* number of threads per core */
     uint64_t mem_spec_limit; /* MB real memory for memory specialization */
     uint64_t real_memory;    /* MB real memory on the node */
-    uint32_t tmp_disk;    /* MB total storage in TMP_FS file system */
+    uint32_t tmp_disk;       /* MB total storage in TMP_FS file system */
     double *tres_weights;    /* array of TRES weights */
-    char *tres_weights_str; /* per TRES billing weight string */
-    uint32_t weight;    /* arbitrary priority of node for
+    char *tres_weights_str;  /* per TRES billing weight string */
+    uint32_t weight;         /* arbitrary priority of node for
 				 * scheduling work on */
-    char *feature;        /* arbitrary list of node's features */
-    char *gres;        /* arbitrary list of node's generic resources */
-    char *nodes;        /* name of nodes with this configuration */
-    bitstr_t *node_bitmap;    /* bitmap of nodes with this configuration */
+    char *feature;           /* arbitrary list of node's features */
+    char *gres;              /* arbitrary list of node's generic resources */
+    char *nodes;             /* name of nodes with this configuration */
+    bitstr_t *node_bitmap;   /* bitmap of nodes with this configuration */
 };
-extern List config_list;    /* list of config_record entries */
+extern List config_list; /* list of config_record entries */
 
-extern List front_end_list;    /* list of slurm_conf_frontend_t entries */
+extern List front_end_list; /* list of slurm_conf_frontend_t entries */
 
-struct node_record {
-    uint32_t magic;            /* magic cookie for data integrity */
-    char *name;            /* name of the node. NULL==defunct */
-    uint32_t next_state;        /* state after reboot */
-    char *node_hostname;        /* hostname of the node */
-    uint32_t node_state;        /* enum node_states, ORed with
+struct node_record
+{
+    uint32_t magic;                         /* magic cookie for data integrity */
+    char *name;                             /* name of the node. NULL==defunct */
+    uint32_t next_state;                    /* state after reboot */
+    char *node_hostname;                    /* hostname of the node */
+    uint32_t node_state;                    /* enum node_states, ORed with
 					 * NODE_STATE_NO_RESPOND if not
 					 * responding */
-    bool not_responding;        /* set if fails to respond,
+    bool not_responding;                    /* set if fails to respond,
 					 * clear after logging this */
-    time_t boot_req_time;        /* Time of node boot request */
-    time_t boot_time;        /* Time of node boot,
+    time_t boot_req_time;                   /* Time of node boot request */
+    time_t boot_time;                       /* Time of node boot,
 					 * computed from up_time */
-    uint32_t cpu_bind;        /* default CPU binding type */
-    time_t slurmd_start_time;    /* Time of slurmd startup */
-    time_t last_response;        /* last response from the node */
-    time_t last_idle;        /* time node last become idle */
-    uint16_t cpus;            /* count of processors on the node */
-    uint16_t boards;        /* count of boards configured */
-    uint16_t sockets;        /* number of sockets per node */
-    uint16_t cores;            /* number of cores per socket */
-    char *cpu_spec_list;        /* node's specialized cpus */
-    uint16_t core_spec_cnt;        /* number of specialized cores on node*/
-    uint16_t threads;        /* number of threads per core */
-    uint64_t real_memory;        /* MB real memory on the node */
-    uint64_t mem_spec_limit;    /* MB memory limit for specialization */
-    uint32_t tmp_disk;        /* MB total disk in TMP_FS */
-    uint32_t up_time;        /* seconds since node boot */
-    struct config_record *config_ptr;  /* configuration spec ptr */
-    uint16_t part_cnt;        /* number of associated partitions */
-    struct part_record **part_pptr;    /* array of pointers to partitions
+    uint32_t cpu_bind;                      /* default CPU binding type */
+    time_t slurmd_start_time;               /* Time of slurmd startup */
+    time_t last_response;                   /* last response from the node */
+    time_t last_idle;                       /* time node last become idle */
+    uint16_t cpus;                          /* count of processors on the node */
+    uint16_t boards;                        /* count of boards configured */
+    uint16_t sockets;                       /* number of sockets per node */
+    uint16_t cores;                         /* number of cores per socket */
+    char *cpu_spec_list;                    /* node's specialized cpus */
+    uint16_t core_spec_cnt;                 /* number of specialized cores on node*/
+    uint16_t threads;                       /* number of threads per core */
+    uint64_t real_memory;                   /* MB real memory on the node */
+    uint64_t mem_spec_limit;                /* MB memory limit for specialization */
+    uint32_t tmp_disk;                      /* MB total disk in TMP_FS */
+    uint32_t up_time;                       /* seconds since node boot */
+    struct config_record *config_ptr;       /* configuration spec ptr */
+    uint16_t part_cnt;                      /* number of associated partitions */
+    struct part_record **part_pptr;         /* array of pointers to partitions
 					 * associated with this node*/
-    char *comm_name;        /* communications path name to node */
-    uint16_t port;            /* TCP port number of the slurmd */
-    slurm_addr_t slurm_addr;    /* network address */
-    uint16_t comp_job_cnt;        /* count of jobs completing on node */
-    uint16_t run_job_cnt;        /* count of jobs running on node */
-    uint16_t sus_job_cnt;        /* count of jobs suspended on node */
-    uint16_t no_share_job_cnt;    /* count of jobs running that will
+    char *comm_name;                        /* communications path name to node */
+    uint16_t port;                          /* TCP port number of the slurmd */
+    slurm_addr_t slurm_addr;                /* network address */
+    uint16_t comp_job_cnt;                  /* count of jobs completing on node */
+    uint16_t run_job_cnt;                   /* count of jobs running on node */
+    uint16_t sus_job_cnt;                   /* count of jobs suspended on node */
+    uint16_t no_share_job_cnt;              /* count of jobs running that will
 					 * not share nodes */
-    char *reason;            /* why a node is DOWN or DRAINING */
-    time_t reason_time;        /* Time stamp when reason was
+    char *reason;                           /* why a node is DOWN or DRAINING */
+    time_t reason_time;                     /* Time stamp when reason was
 					 * set, ignore if no reason is set. */
-    uint32_t reason_uid;        /* User that set the reason, ignore if
+    uint32_t reason_uid;                    /* User that set the reason, ignore if
 					 * no reason is set. */
-    char *features;            /* node's available features, used only
+    char *features;                         /* node's available features, used only
 					 * for state save/restore, DO NOT
 					 * use for scheduling purposes */
-    char *features_act;        /* node's active features, used only
+    char *features_act;                     /* node's active features, used only
 					 * for state save/restore, DO NOT
 					 * use for scheduling purposes */
-    char *gres;            /* node's generic resources, used only
+    char *gres;                             /* node's generic resources, used only
 					 * for state save/restore, DO NOT
 					 * use for scheduling purposes */
-    List gres_list;            /* list of gres state info managed by
+    List gres_list;                         /* list of gres state info managed by
 					 * plugins */
-    uint64_t sched_weight;        /* Node's weight for scheduling
+    uint64_t sched_weight;                  /* Node's weight for scheduling
 					 * purposes. For cons_tres use */
-    uint32_t weight;        /* orignal weight, used only for state
+    uint32_t weight;                        /* orignal weight, used only for state
 					 * save/restore, DO NOT use for
 					 * scheduling purposes. */
-    char *arch;            /* computer architecture */
-    char *os;            /* operating system now running */
-    struct node_record *node_next;    /* next entry with same hash index */
-    uint32_t node_rank;        /* Hilbert number based on node name,
+    char *arch;                             /* computer architecture */
+    char *os;                               /* operating system now running */
+    struct node_record *node_next;          /* next entry with same hash index */
+    uint32_t node_rank;                     /* Hilbert number based on node name,
 					 * or other sequence number used to
 					 * order nodes by location,
 					 * no need to save/restore */
-    acct_gather_energy_t *energy;    /* power consumption data */
-    ext_sensors_data_t *ext_sensors; /* external sensor data */
-    power_mgmt_data_t *power;    /* power management data */
+    acct_gather_energy_t *energy;           /* power consumption data */
+    ext_sensors_data_t *ext_sensors;        /* external sensor data */
+    power_mgmt_data_t *power;               /* power management data */
     dynamic_plugin_data_t *select_nodeinfo; /* opaque data structure,
 						 * use select_g_get_nodeinfo()
 						 * to access contents */
-    uint32_t cpu_load;        /* CPU load * 100 */
-    time_t cpu_load_time;        /* Time when cpu_load last set */
-    uint64_t free_mem;        /* Free memory in MiB */
-    time_t free_mem_time;        /* Time when free_mem last set */
-    uint16_t protocol_version;    /* Slurm version number */
-    char *version;            /* Slurm version */
-    bitstr_t *node_spec_bitmap;    /* node cpu specialization bitmap */
-    uint32_t owner;            /* User allowed to use node or NO_VAL */
-    uint16_t owner_job_cnt;        /* Count of exclusive jobs by "owner" */
-    char *tres_str;                 /* tres this node has */
-    char *tres_fmt_str;        /* tres this node has */
-    uint64_t *tres_cnt;        /* tres this node has. NO_PACK*/
-    char *mcs_label;        /* mcs_label if mcs plugin in use */
+    uint32_t cpu_load;                      /* CPU load * 100 */
+    time_t cpu_load_time;                   /* Time when cpu_load last set */
+    uint64_t free_mem;                      /* Free memory in MiB */
+    time_t free_mem_time;                   /* Time when free_mem last set */
+    uint16_t protocol_version;              /* Slurm version number */
+    char *version;                          /* Slurm version */
+    bitstr_t *node_spec_bitmap;             /* node cpu specialization bitmap */
+    uint32_t owner;                         /* User allowed to use node or NO_VAL */
+    uint16_t owner_job_cnt;                 /* Count of exclusive jobs by "owner" */
+    char *tres_str;                         /* tres this node has */
+    char *tres_fmt_str;                     /* tres this node has */
+    uint64_t *tres_cnt;                     /* tres this node has. NO_PACK*/
+    char *mcs_label;                        /* mcs_label if mcs plugin in use */
 };
-extern struct node_record *node_record_table_ptr;  /* ptr to node records */
-extern int node_record_count;        /* count in node_record_table_ptr */
-extern xhash_t *node_hash_table;    /* hash table for node records */
-extern time_t last_node_update;        /* time of last node record update */
+extern struct node_record *node_record_table_ptr; /* ptr to node records */
+extern int node_record_count;                     /* count in node_record_table_ptr */
+extern xhash_t *node_hash_table;                  /* hash table for node records */
+extern time_t last_node_update;                   /* time of last node record update */
 
 extern uint16_t *cr_node_num_cores;
 extern uint32_t *cr_node_cores_offset;
@@ -246,8 +248,7 @@ extern struct config_record *create_config_record(void);
  * NOTE: allocates memory at node_record_table_ptr that must be xfreed when
  *	the global node table is no longer required
  */
-extern struct node_record *create_node_record(
-        struct config_record *config_ptr, char *node_name);
+extern struct node_record *create_node_record(struct config_record *config_ptr, char *node_name);
 
 /*
  * find_node_record - find a record for node with specified name
@@ -284,9 +285,14 @@ extern struct node_record *find_node_record_no_alias(char *name);
 extern int hostlist2bitmap(hostlist_t hl, bool best_effort, bitstr_t **bitmap);
 
 /*
- * init_node_conf - initialize the node configuration tables and values.
- *	this should be called before creating any node or configuration
- *	entries.
+ * init_node_conf 
+* -初始化节点配置表和值。
+ *应在创建任何节点或配置条目之前调用此方法。
+ *如果没有错误，则返回0，否则返回错误代码
+ * 
+ * 
+ * - initialize the node configuration tables and values.
+ *	this should be called before creating any node or configuration entries.
  * RET 0 if no error, otherwise an error code
  */
 extern int init_node_conf(void);
@@ -303,13 +309,14 @@ extern void node_fini2(void);
  * RET 0 if no error, otherwise EINVAL
  * NOTE: the caller must bit_free() memory at bitmap when no longer required
  */
-extern int node_name2bitmap(char *node_names, bool best_effort,
-                            bitstr_t **bitmap);
+extern int node_name2bitmap(char *node_names, bool best_effort, bitstr_t **bitmap);
 
 /* Purge the contents of a node record */
 extern void purge_node_rec(struct node_record *node_ptr);
 
 /*
+创建一个节点记录的hash表
+
  * rehash_node - build a hash table of the node_record entries.
  * NOTE: manages memory for node_hash_table
  */
@@ -319,8 +326,7 @@ extern void rehash_node(void);
 extern int state_str2int(const char *state_str, char *node_name);
 
 /* (re)set cr_node_num_cores arrays */
-extern void cr_init_global_core_data(struct node_record *node_ptr,
-                                     int node_cnt, uint16_t fast_schedule);
+extern void cr_init_global_core_data(struct node_record *node_ptr, int node_cnt, uint16_t fast_schedule);
 
 extern void cr_fini_global_core_data(void);
 
@@ -339,8 +345,7 @@ extern bitstr_t *cr_create_cluster_core_bitmap(int core_mult);
  * total_cpus IN - total number of CPUs on this node
  * RET count of usable CPUs on this node usable by this job
  */
-extern int adjust_cpus_nppcu(uint16_t ntasks_per_core, int cpus_per_task,
-                             int total_cores, int total_cpus);
+extern int adjust_cpus_nppcu(uint16_t ntasks_per_core, int cpus_per_task, int total_cores, int total_cpus);
 
 /*
  * find_hostname - Given a position and a string of hosts, return the hostname

@@ -54,10 +54,8 @@ extern int run_command_count(void);
  * tid IN - Thread we are calling from.
  * status OUT - Job exit code
  * Return stdout+stderr of spawned program, value must be xfreed. */
-extern char *run_command(char *script_type, char *script_path,
-                         char **script_argv, int max_wait,
-                         pthread_t tid,
-                         int *status);
+extern char *
+run_command(char *script_type, char *script_path, char **script_argv, int max_wait, pthread_t tid, int *status);
 
 /* Free an array of xmalloced records. The array must be NULL terminated. */
 extern void free_command_argv(char **script_argv);

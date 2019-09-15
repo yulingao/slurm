@@ -43,8 +43,7 @@
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int
-scontrol_update_layout(int argc, char **argv) {
+extern int scontrol_update_layout(int argc, char **argv) {
     int rc = 0;
     int i = 0, tag_len = 0;
     char *tag = NULL, *val = NULL;
@@ -61,10 +60,8 @@ scontrol_update_layout(int argc, char **argv) {
             val++;
         } else {
             exit_code = 1;
-            fprintf(stderr,
-                    "invalid option:%s for layouts "
-                    "(\"=\" mandatory)\n",
-                    tag);
+            fprintf(stderr, "invalid option:%s for layouts "
+                            "(\"=\" mandatory)\n", tag);
             goto done;
         }
         if (xstrncasecmp(tag, "layouts", MAX(tag_len, 2)) == 0) {
@@ -80,20 +77,17 @@ scontrol_update_layout(int argc, char **argv) {
 
     if (msg.layout == NULL) {
         exit_code = 1;
-        fprintf(stderr,
-                "No valid layout name in update command\n");
+        fprintf(stderr, "No valid layout name in update command\n");
         goto done;
     }
     if (msg.arg == NULL) {
         exit_code = 1;
-        fprintf(stderr,
-                "No valid layout enity in update command\n");
+        fprintf(stderr, "No valid layout enity in update command\n");
         goto done;
     }
     if (strlen(opt) <= 1) {
         exit_code = 1;
-        fprintf(stderr,
-                "No valid updates arguments in update command\n");
+        fprintf(stderr, "No valid updates arguments in update command\n");
         goto done;
     }
 

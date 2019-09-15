@@ -233,13 +233,11 @@ static void _set_procdatas(List lresp) {
         localid = pmixp_info_taskid2localid(i);
         /* this rank is local, store local info ab't it! */
         if (0 <= localid) {
-            PMIXP_KVP_CREATE(kvp, PMIX_LOCAL_RANK,
-                             &localid, PMIX_UINT16);
+            PMIXP_KVP_CREATE(kvp, PMIX_LOCAL_RANK, &localid, PMIX_UINT16);
             list_append(rankinfo, kvp);
 
             /* TODO: fix when several apps will appear */
-            PMIXP_KVP_CREATE(kvp, PMIX_NODE_RANK,
-                             &localid, PMIX_UINT16);
+            PMIXP_KVP_CREATE(kvp, PMIX_NODE_RANK, &localid, PMIX_UINT16);
             list_append(rankinfo, kvp);
         }
 
@@ -432,18 +430,15 @@ static void _set_localinfo(List lresp) {
 
 extern int pmixp_libpmix_init(void) {
     int rc;
-    mode_t rights = (S_IRUSR | S_IWUSR | S_IXUSR) |
-                    (S_IRGRP | S_IWGRP | S_IXGRP);
+    mode_t rights = (S_IRUSR | S_IWUSR | S_IXUSR) | (S_IRGRP | S_IWGRP | S_IXGRP);
 
     if (0 != (rc = pmixp_mkdir(pmixp_info_tmpdir_lib(), rights))) {
-        PMIXP_ERROR_STD("Cannot create server lib tmpdir: \"%s\"",
-                        pmixp_info_tmpdir_lib());
+        PMIXP_ERROR_STD("Cannot create server lib tmpdir: \"%s\"", pmixp_info_tmpdir_lib());
         return errno;
     }
 
     if (0 != (rc = pmixp_mkdir(pmixp_info_tmpdir_cli(), rights))) {
-        PMIXP_ERROR_STD("Cannot create client cli tmpdir: \"%s\"",
-                        pmixp_info_tmpdir_cli());
+        PMIXP_ERROR_STD("Cannot create client cli tmpdir: \"%s\"", pmixp_info_tmpdir_cli());
         return errno;
     }
 
@@ -472,24 +467,21 @@ extern int pmixp_libpmix_finalize(void) {
 
     rc1 = pmixp_rmdir_recursively(pmixp_info_tmpdir_lib());
     if (0 != rc1) {
-        PMIXP_ERROR_STD("Failed to remove %s\n",
-                        pmixp_info_tmpdir_lib());
+        PMIXP_ERROR_STD("Failed to remove %s\n", pmixp_info_tmpdir_lib());
         /* Not considering this as fatal error */
     }
 
     rc1 = pmixp_rmdir_recursively(pmixp_info_tmpdir_cli());
     if (0 != rc1) {
-        PMIXP_ERROR_STD("Failed to remove %s\n",
-                        pmixp_info_tmpdir_cli());
+        PMIXP_ERROR_STD("Failed to remove %s\n", pmixp_info_tmpdir_cli());
         /* Not considering this as fatal error */
     }
 
     return rc;
 }
 
-extern void pmixp_lib_modex_invoke(void *mdx_fn, int status,
-                                   const char *data, size_t ndata, void *cbdata,
-                                   void *rel_fn, void *rel_data) {
+extern void pmixp_lib_modex_invoke(void *mdx_fn, int status, const char *data, size_t ndata, void *cbdata, void *rel_fn,
+                                   void *rel_data) {
     pmix_status_t rc = PMIX_SUCCESS;
     pmix_modex_cbfunc_t cbfunc = (pmix_modex_cbfunc_t) mdx_fn;
     pmix_release_cbfunc_t release_fn = (pmix_release_cbfunc_t) rel_fn;
@@ -519,8 +511,7 @@ extern void pmixp_lib_release_invoke(void *rel_fn, void *rel_data) {
     cbfunc(rel_data);
 }
 
-extern int pmixp_lib_dmodex_request(
-        pmixp_proc_t *proc, void *dmdx_fn, void *caddy) {
+extern int pmixp_lib_dmodex_request(pmixp_proc_t *proc, void *dmdx_fn, void *caddy) {
     pmix_status_t rc;
     pmix_proc_t proc_v1;
     pmix_dmodex_response_fn_t cbfunc = (pmix_dmodex_response_fn_t) dmdx_fn;
@@ -572,8 +563,7 @@ extern int pmixp_libpmix_job_set(void) {
     gid_t gid = pmixp_info_jobgid();
     register_caddy_t *register_caddy;
 
-    register_caddy = xmalloc(sizeof(register_caddy_t) *
-                             (pmixp_info_tasks_loc() + 1));
+    register_caddy = xmalloc(sizeof(register_caddy_t) * (pmixp_info_tasks_loc() + 1));
     pmixp_debug_hang(0);
 
     /* Use list to safely expand/reduce key-value pairs. */
@@ -608,15 +598,12 @@ extern int pmixp_libpmix_job_set(void) {
     list_destroy(lresp);
 
     register_caddy[0].active = 1;
-    rc = PMIx_server_register_nspace(pmixp_info_namespace(),
-                                     pmixp_info_tasks_loc(), info,
-                                     ninfo, _release_cb,
+    rc = PMIx_server_register_nspace(pmixp_info_namespace(), pmixp_info_tasks_loc(), info, ninfo, _release_cb,
                                      &register_caddy[0]);
 
     if (PMIX_SUCCESS != rc) {
-        PMIXP_ERROR("Cannot register namespace %s, nlocalproc=%d, ninfo = %d",
-                    pmixp_info_namespace(), pmixp_info_tasks_loc(),
-                    ninfo);
+        PMIXP_ERROR("Cannot register namespace %s, nlocalproc=%d, ninfo = %d", pmixp_info_namespace(),
+                    pmixp_info_tasks_loc(), ninfo);
         return SLURM_ERROR;
     }
 
@@ -626,12 +613,9 @@ extern int pmixp_libpmix_job_set(void) {
         register_caddy[i + 1].active = 1;
         strncpy(proc.nspace, pmixp_info_namespace(), PMIX_MAX_NSLEN);
         proc.rank = pmixp_info_taskid(i);
-        rc = PMIx_server_register_client(&proc, uid, gid, NULL,
-                                         _release_cb,
-                                         &register_caddy[i + 1]);
+        rc = PMIx_server_register_client(&proc, uid, gid, NULL, _release_cb, &register_caddy[i + 1]);
         if (PMIX_SUCCESS != rc) {
-            PMIXP_ERROR("Cannot register client %d(%d) in namespace %s",
-                        pmixp_info_taskid(i), i,
+            PMIXP_ERROR("Cannot register client %d(%d) in namespace %s", pmixp_info_taskid(i), i,
                         pmixp_info_namespace());
             return SLURM_ERROR;
         }
@@ -677,9 +661,9 @@ extern int pmixp_libpmix_job_set(void) {
     return ret;
 }
 
-extern int pmixp_lib_fence(const pmixp_proc_t procs[], size_t nprocs,
-                           bool collect, char *data, size_t ndata,
-                           void *cbfunc, void *cbdata) {
+extern int
+pmixp_lib_fence(const pmixp_proc_t procs[], size_t nprocs, bool collect, char *data, size_t ndata, void *cbfunc,
+                void *cbdata) {
     pmixp_coll_t *coll;
     pmix_status_t status;
     pmix_modex_cbfunc_t modex_cbfunc = (pmix_modex_cbfunc_t) cbfunc;

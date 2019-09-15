@@ -143,29 +143,20 @@ extern srun_job_t *job_create_noalloc(void);
  * Create an srun job structure for a step w/out an allocation response msg.
  * (i.e. inside an allocation)
  */
-extern srun_job_t *job_step_create_allocation(
-        resource_allocation_response_msg_t *resp,
-        slurm_opt_t *opt_local);
+extern srun_job_t *job_step_create_allocation(resource_allocation_response_msg_t *resp, slurm_opt_t *opt_local);
 
 /*
  * Create an srun job structure from a resource allocation response msg
  */
-extern srun_job_t *job_create_allocation(
-        resource_allocation_response_msg_t *resp,
-        slurm_opt_t *opt_local);
+extern srun_job_t *job_create_allocation(resource_allocation_response_msg_t *resp, slurm_opt_t *opt_local);
 
-extern void init_srun(int argc, char **argv,
-                      log_options_t *logopt, int debug_level,
-                      bool handle_signals);
+extern void init_srun(int argc, char **argv, log_options_t *logopt, int debug_level, bool handle_signals);
 
-extern void create_srun_job(void **p_job, bool *got_alloc,
-                            bool slurm_started, bool handle_signals);
+extern void create_srun_job(void **p_job, bool *got_alloc, bool slurm_started, bool handle_signals);
 
-extern void pre_launch_srun_job(srun_job_t *job, bool slurm_started,
-                                bool handle_signals, slurm_opt_t *opt_local);
+extern void pre_launch_srun_job(srun_job_t *job, bool slurm_started, bool handle_signals, slurm_opt_t *opt_local);
 
-extern void fini_srun(srun_job_t *job, bool got_alloc, uint32_t *global_rc,
-                      bool slurm_started);
+extern void fini_srun(srun_job_t *job, bool got_alloc, uint32_t *global_rc, bool slurm_started);
 
 /*
  *  Update job filenames and modes for stderr, stdout, and stdin.

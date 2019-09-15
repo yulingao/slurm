@@ -129,24 +129,20 @@ static void *_monitor(void *arg) {
         _call_external_program(job);
 
         if (job->stepid == SLURM_BATCH_SCRIPT) {
-            snprintf(entity, sizeof(entity),
-                     "JOB %u", job->jobid);
+            snprintf(entity, sizeof(entity), "JOB %u", job->jobid);
         } else if (job->stepid == SLURM_EXTERN_CONT) {
-            snprintf(entity, sizeof(entity),
-                     "EXTERN STEP FOR %u", job->jobid);
+            snprintf(entity, sizeof(entity), "EXTERN STEP FOR %u", job->jobid);
         } else {
-            snprintf(entity, sizeof(entity), "STEP %u.%u",
-                     job->jobid, job->stepid);
+            snprintf(entity, sizeof(entity), "STEP %u.%u", job->jobid, job->stepid);
         }
         slurm_make_time_str(&now, time_str, sizeof(time_str));
 
         if (job->state < SLURMSTEPD_STEP_RUNNING) {
-            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT RUNNING ***",
-                  entity, job->node_name, time_str);
+            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT RUNNING ***", entity, job->node_name, time_str);
             rc = ESLURMD_JOB_NOTRUNNING;
         } else {
-            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT ENDING WITH SIGNALS ***",
-                  entity, job->node_name, time_str);
+            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT ENDING WITH SIGNALS ***", entity, job->node_name,
+                  time_str);
             rc = ESLURMD_KILL_TASK_FAILED;
         }
 
@@ -188,18 +184,15 @@ static int _call_external_program(stepd_step_rec_t *job) {
     if (program_name == NULL || program_name[0] == '\0')
         return 0;
 
-    debug("step_terminate_monitor: unkillable after %d sec, calling: %s",
-          timeout, program_name);
+    debug("step_terminate_monitor: unkillable after %d sec, calling: %s", timeout, program_name);
 
     if (access(program_name, R_OK | X_OK) < 0) {
-        debug("step_terminate_monitor not running %s: %m",
-              program_name);
+        debug("step_terminate_monitor not running %s: %m", program_name);
         return 0;
     }
 
     if ((cpid = fork()) < 0) {
-        error("step_terminate_monitor executing %s: fork: %m",
-              program_name);
+        error("step_terminate_monitor executing %s: fork: %m", program_name);
         return -1;
     }
     if (cpid == 0) {
@@ -213,8 +206,7 @@ static int _call_external_program(stepd_step_rec_t *job) {
            detacts itself from a child before we add the pid
            to the container in the parent of the fork.
         */
-        if (container_g_join(recorded_jobid, getuid())
-            != SLURM_SUCCESS)
+        if (container_g_join(recorded_jobid, getuid()) != SLURM_SUCCESS)
             error("container_g_join(%u): %m", recorded_jobid);
 
         snprintf(buf, 16, "%u", recorded_jobid);
@@ -248,8 +240,7 @@ static int _call_external_program(stepd_step_rec_t *job) {
             sleep(1);
             if ((--time_remaining) == 0) {
                 error("step_terminate_monitor: %s still running"
-                      " after %d seconds.  Killing.",
-                      program_name, max_wait);
+                      " after %d seconds.  Killing.", program_name, max_wait);
                 killpg(cpid, SIGKILL);
                 opt = 0;
             }

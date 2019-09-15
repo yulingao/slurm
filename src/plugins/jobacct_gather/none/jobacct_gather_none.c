@@ -84,8 +84,7 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin,
-                                       uint64_t cont_id) {
+extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin, uint64_t cont_id) {
     return;
 }
 
@@ -97,14 +96,12 @@ extern void jobacct_gather_p_destroy(struct jobacctinfo *jobacct) {
     return;
 }
 
-extern int jobacct_gather_p_setinfo(struct jobacctinfo *jobacct,
-                                    enum jobacct_data_type type, void *data) {
+extern int jobacct_gather_p_setinfo(struct jobacctinfo *jobacct, enum jobacct_data_type type, void *data) {
     return SLURM_SUCCESS;
 
 }
 
-extern int jobacct_gather_p_getinfo(struct jobacctinfo *jobacct,
-                                    enum jobacct_data_type type, void *data) {
+extern int jobacct_gather_p_getinfo(struct jobacctinfo *jobacct, enum jobacct_data_type type, void *data) {
     return SLURM_SUCCESS;
 }
 
@@ -117,8 +114,7 @@ extern int jobacct_gather_p_unpack(struct jobacctinfo **jobacct, Buf buffer) {
     return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_aggregate(struct jobacctinfo *dest,
-                                       struct jobacctinfo *from) {
+extern void jobacct_gather_p_aggregate(struct jobacctinfo *dest, struct jobacctinfo *from) {
     return;
 }
 
@@ -155,7 +151,6 @@ extern jobacctinfo_t *jobacct_gather_p_remove_task(pid_t pid) {
     return NULL;
 }
 
-extern void jobacct_gather_p_2_stats(slurmdb_stats_t *stats,
-                                     struct jobacctinfo *jobacct) {
+extern void jobacct_gather_p_2_stats(slurmdb_stats_t *stats, struct jobacctinfo *jobacct) {
     return;
 }

@@ -46,17 +46,15 @@
 int g_io_hdr_size = sizeof(uint32_t) + 3 * sizeof(uint16_t);
 
 /* If this changes, io_init_msg_pack|unpack must change. */
-static int g_io_init_msg_packed_size =
-        sizeof(uint16_t)    /* version */
-        + sizeof(uint32_t)  /* nodeid */
-        + (SLURM_IO_KEY_SIZE + sizeof(uint32_t)) /* signature */
-        + sizeof(uint32_t)  /* stdout_objs */
-        + sizeof(uint32_t); /* stderr_objs */
+static int g_io_init_msg_packed_size = sizeof(uint16_t)    /* version */
+                                       + sizeof(uint32_t)  /* nodeid */
+                                       + (SLURM_IO_KEY_SIZE + sizeof(uint32_t)) /* signature */
+                                       + sizeof(uint32_t)  /* stdout_objs */
+                                       + sizeof(uint32_t); /* stderr_objs */
 
 #define io_init_msg_packed_size() g_io_init_msg_packed_size
 
-void
-io_hdr_pack(io_hdr_t *hdr, Buf buffer) {
+void io_hdr_pack(io_hdr_t *hdr, Buf buffer) {
     /* If this function changes, io_hdr_packed_size must change. */
     pack16(hdr->type, buffer);
     pack16(hdr->gtaskid, buffer);
@@ -64,8 +62,7 @@ io_hdr_pack(io_hdr_t *hdr, Buf buffer) {
     pack32(hdr->length, buffer);
 }
 
-int
-io_hdr_unpack(io_hdr_t *hdr, Buf buffer) {
+int io_hdr_unpack(io_hdr_t *hdr, Buf buffer) {
     /* If this function changes, io_hdr_packed_size must change. */
     safe_unpack16(&hdr->type, buffer);
     safe_unpack16(&hdr->gtaskid, buffer);
@@ -92,9 +89,7 @@ static int _full_read(int fd, void *buf, size_t count) {
     while (left > 0) {
         again:
         if ((n = read(fd, (void *) ptr, left)) < 0) {
-            if (errno == EINTR
-                || errno == EAGAIN
-                || errno == EWOULDBLOCK)
+            if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
                 goto again;
             debug3("Leaving  _full_read on error!");
             return -1;
@@ -133,8 +128,7 @@ int io_hdr_read_fd(int fd, io_hdr_t *hdr) {
 }
 
 
-int
-io_init_msg_validate(struct slurm_io_init_msg *msg, const char *sig) {
+int io_init_msg_validate(struct slurm_io_init_msg *msg, const char *sig) {
     debug2("Entering io_init_msg_validate");
 
     debug3("  msg->version = %x", msg->version);
@@ -145,8 +139,7 @@ io_init_msg_validate(struct slurm_io_init_msg *msg, const char *sig) {
         return SLURM_ERROR;
     }
 
-    if (memcmp((void *) sig, (void *) msg->cred_signature,
-               SLURM_IO_KEY_SIZE)) {
+    if (memcmp((void *) sig, (void *) msg->cred_signature, SLURM_IO_KEY_SIZE)) {
         error("Invalid IO init header signature");
         return SLURM_ERROR;
     }
@@ -156,20 +149,17 @@ io_init_msg_validate(struct slurm_io_init_msg *msg, const char *sig) {
 }
 
 
-static void
-io_init_msg_pack(struct slurm_io_init_msg *hdr, Buf buffer) {
+static void io_init_msg_pack(struct slurm_io_init_msg *hdr, Buf buffer) {
     /* If this function changes, io_init_msg_packed_size must change. */
     pack16(hdr->version, buffer);
     pack32(hdr->nodeid, buffer);
     pack32(hdr->stdout_objs, buffer);
     pack32(hdr->stderr_objs, buffer);
-    packmem((char *) hdr->cred_signature,
-            (uint32_t) SLURM_IO_KEY_SIZE, buffer);
+    packmem((char *) hdr->cred_signature, (uint32_t) SLURM_IO_KEY_SIZE, buffer);
 }
 
 
-static int
-io_init_msg_unpack(struct slurm_io_init_msg *hdr, Buf buffer) {
+static int io_init_msg_unpack(struct slurm_io_init_msg *hdr, Buf buffer) {
     /* If this function changes, io_init_msg_packed_size must change. */
     uint32_t val;
     safe_unpack16(&hdr->version, buffer);
@@ -188,8 +178,7 @@ io_init_msg_unpack(struct slurm_io_init_msg *hdr, Buf buffer) {
 }
 
 
-int
-io_init_msg_write_to_fd(int fd, struct slurm_io_init_msg *msg) {
+int io_init_msg_write_to_fd(int fd, struct slurm_io_init_msg *msg) {
     Buf buf;
     int rc = SLURM_ERROR;
 
@@ -210,8 +199,7 @@ io_init_msg_write_to_fd(int fd, struct slurm_io_init_msg *msg) {
     return rc;
 }
 
-int
-io_init_msg_read_from_fd(int fd, struct slurm_io_init_msg *msg) {
+int io_init_msg_read_from_fd(int fd, struct slurm_io_init_msg *msg) {
     Buf buf;
     int n;
 

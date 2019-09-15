@@ -59,15 +59,9 @@ static char *_job_name2id(char *job_name, uint32_t job_uid);
 
 static char *_next_job_id(void);
 
-static int _parse_checkpoint_args(int argc,
-                                  char **argv,
-                                  uint16_t *max_wait,
-                                  char **image_dir);
+static int _parse_checkpoint_args(int argc, char **argv, uint16_t *max_wait, char **image_dir);
 
-static int _parse_restart_args(int argc,
-                               char **argv,
-                               uint16_t *stick,
-                               char **image_dir);
+static int _parse_restart_args(int argc, char **argv, uint16_t *stick, char **image_dir);
 
 static void _update_job_size(uint32_t job_id);
 
@@ -100,8 +94,7 @@ static bool _is_job_id(char *job_str) {
         } else if (local_job_str[i] == '-') {
             if ((bracket_cnt == 0) && !have_under)
                 goto fail; /* stray '-' */
-        } else if ((local_job_str[i] == ',') ||
-                   (local_job_str[i] == ' ')) {
+        } else if ((local_job_str[i] == ',') || (local_job_str[i] == ' ')) {
             if (bracket_cnt == 0) {
                 local_job_str[i] = '^'; /* New separator */
                 have_plus = false;
@@ -229,10 +222,7 @@ static char *_next_job_id(void) {
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int scontrol_checkpoint(char *op,
-                               char *job_step_id_str,
-                               int argc,
-                               char **argv) {
+extern int scontrol_checkpoint(char *op, char *job_step_id_str, int argc, char **argv) {
     int rc = SLURM_SUCCESS;
     uint32_t job_id = 0, step_id = 0;
     char *next_str;
@@ -245,8 +235,7 @@ extern int scontrol_checkpoint(char *op,
     if (job_step_id_str) {
         job_id = (uint32_t) strtol(job_step_id_str, &next_str, 10);
         if (next_str[0] == '.') {
-            step_id = (uint32_t) strtol(&next_str[1], &next_str,
-                                        10);
+            step_id = (uint32_t) strtol(&next_str[1], &next_str, 10);
         } else
             step_id = NO_VAL;
         if (next_str[0] != '\0') {
@@ -264,8 +253,7 @@ extern int scontrol_checkpoint(char *op,
         if (rc == SLURM_SUCCESS) {
             if (start_time) {
                 char time_str[32];
-                slurm_make_time_str(&start_time, time_str,
-                                    sizeof(time_str));
+                slurm_make_time_str(&start_time, time_str, sizeof(time_str));
                 printf("Began at %s\n", time_str);
             } else
                 printf("Yes\n");
@@ -278,8 +266,7 @@ extern int scontrol_checkpoint(char *op,
         static uint32_t error_code = 1;
         char error_msg[64];
         sprintf(error_msg, "test error message %d", error_code);
-        rc = slurm_checkpoint_complete(job_id, step_id, (time_t) 0,
-                                       error_code++, error_msg);
+        rc = slurm_checkpoint_complete(job_id, step_id, (time_t) 0, error_code++, error_msg);
     } else if (xstrncasecmp(op, "disable", MAX(oplen, 1)) == 0)
         rc = slurm_checkpoint_disable(job_id, step_id);
     else if (xstrncasecmp(op, "enable", MAX(oplen, 2)) == 0)
@@ -288,8 +275,7 @@ extern int scontrol_checkpoint(char *op,
         if (_parse_checkpoint_args(argc, argv, &max_wait, &image_dir)) {
             return 0;
         }
-        rc = slurm_checkpoint_create(job_id, step_id, max_wait,
-                                     image_dir);
+        rc = slurm_checkpoint_create(job_id, step_id, max_wait, image_dir);
     } else if (xstrncasecmp(op, "requeue", MAX(oplen, 2)) == 0) {
         if (_parse_checkpoint_args(argc, argv, &max_wait, &image_dir)) {
             return 0;
@@ -299,17 +285,14 @@ extern int scontrol_checkpoint(char *op,
         if (_parse_checkpoint_args(argc, argv, &max_wait, &image_dir)) {
             return 0;
         }
-        rc = slurm_checkpoint_vacate(job_id, step_id, max_wait,
-                                     image_dir);
+        rc = slurm_checkpoint_vacate(job_id, step_id, max_wait, image_dir);
     } else if (xstrncasecmp(op, "restart", MAX(oplen, 2)) == 0) {
         if (_parse_restart_args(argc, argv, &stick, &image_dir)) {
             return 0;
         }
-        rc = slurm_checkpoint_restart(job_id, step_id, stick,
-                                      image_dir);
+        rc = slurm_checkpoint_restart(job_id, step_id, stick, image_dir);
     } else if (xstrncasecmp(op, "error", MAX(oplen, 2)) == 0) {
-        rc = slurm_checkpoint_error(job_id, step_id,
-                                    &ckpt_errno, &ckpt_strerror);
+        rc = slurm_checkpoint_error(job_id, step_id, &ckpt_errno, &ckpt_strerror);
         if (rc == SLURM_SUCCESS) {
             printf("error(%u): %s\n", ckpt_errno, ckpt_strerror);
             free(ckpt_strerror);
@@ -322,16 +305,12 @@ extern int scontrol_checkpoint(char *op,
     return rc;
 }
 
-static int _parse_checkpoint_args(int argc,
-                                  char **argv,
-                                  uint16_t *max_wait,
-                                  char **image_dir) {
+static int _parse_checkpoint_args(int argc, char **argv, uint16_t *max_wait, char **image_dir) {
     int i;
 
     for (i = 0; i < argc; i++) {
         if (xstrncasecmp(argv[i], "MaxWait=", 8) == 0) {
-            *max_wait = (uint16_t) strtol(&argv[i][8],
-                                          (char **) NULL, 10);
+            *max_wait = (uint16_t) strtol(&argv[i][8], (char **) NULL, 10);
         } else if (xstrncasecmp(argv[i], "ImageDir=", 9) == 0) {
             *image_dir = &argv[i][9];
         } else {
@@ -344,10 +323,7 @@ static int _parse_checkpoint_args(int argc,
     return 0;
 }
 
-static int _parse_restart_args(int argc,
-                               char **argv,
-                               uint16_t *stick,
-                               char **image_dir) {
+static int _parse_restart_args(int argc, char **argv, uint16_t *stick, char **image_dir) {
     int i;
 
     for (i = 0; i < argc; i++) {
@@ -372,8 +348,7 @@ static int _parse_restart_args(int argc,
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *		error message and returns 0
  */
-extern int
-scontrol_hold(char *op, char *job_str) {
+extern int scontrol_hold(char *op, char *job_str) {
     static uint32_t last_job_id = NO_VAL;
     static job_info_msg_t *jobs = NULL;
     job_array_resp_msg_t *resp = NULL;
@@ -391,8 +366,7 @@ scontrol_hold(char *op, char *job_str) {
         job_str += 4;
 
     slurm_init_job_desc_msg(&job_msg);
-    if ((xstrncasecmp(op, "holdu", 5) == 0) ||
-        (xstrncasecmp(op, "uhold", 5) == 0)) {
+    if ((xstrncasecmp(op, "holdu", 5) == 0) || (xstrncasecmp(op, "uhold", 5) == 0)) {
         job_msg.priority = 0;
         job_msg.alloc_sid = ALLOC_SID_USER_HOLD;
     } else if (xstrncasecmp(op, "hold", 4) == 0) {
@@ -409,9 +383,7 @@ scontrol_hold(char *op, char *job_str) {
                 rc = MAX(rc, rc2);
                 exit_code = 1;
                 if (quiet_flag != 1) {
-                    fprintf(stderr, "%s for job %s\n",
-                            slurm_strerror(rc2),
-                            job_msg.job_id_str);
+                    fprintf(stderr, "%s for job %s\n", slurm_strerror(rc2), job_msg.job_id_str);
                 }
             } else if (resp) {
                 for (i = 0; i < resp->job_array_count; i++) {
@@ -420,9 +392,7 @@ scontrol_hold(char *op, char *job_str) {
                     exit_code = 1;
                     if (quiet_flag == 1)
                         continue;
-                    fprintf(stderr, "%s: %s\n",
-                            resp->job_array_id[i],
-                            slurm_strerror(resp->error_code[i]));
+                    fprintf(stderr, "%s: %s\n", resp->job_array_id[i], slurm_strerror(resp->error_code[i]));
                 }
                 slurm_free_job_array_resp(resp);
                 resp = NULL;
@@ -440,8 +410,7 @@ scontrol_hold(char *op, char *job_str) {
             rc = ESLURM_INVALID_JOB_ID;
             slurm_seterrno(rc);
             if (quiet_flag != 1) {
-                fprintf(stderr, "%s for job %s\n",
-                        slurm_strerror(rc), job_str);
+                fprintf(stderr, "%s for job %s\n", slurm_strerror(rc), job_str);
             }
             return rc;
         }
@@ -460,8 +429,7 @@ scontrol_hold(char *op, char *job_str) {
     }
 
     /* set current user, needed e.g., for AllowGroups checks */
-    for (i = 0, job_ptr = jobs->job_array; i < jobs->record_count;
-         i++, job_ptr++) {
+    for (i = 0, job_ptr = jobs->job_array; i < jobs->record_count; i++, job_ptr++) {
         if (xstrcmp(job_name, job_ptr->name))
             continue;
 
@@ -473,13 +441,9 @@ scontrol_hold(char *op, char *job_str) {
         }
 
         if (job_ptr->array_task_str) {
-            xstrfmtcat(job_id_str, "%u_%s",
-                       job_ptr->array_job_id,
-                       job_ptr->array_task_str);
+            xstrfmtcat(job_id_str, "%u_%s", job_ptr->array_job_id, job_ptr->array_task_str);
         } else if (job_ptr->array_task_id != NO_VAL) {
-            xstrfmtcat(job_id_str, "%u_%u",
-                       job_ptr->array_job_id,
-                       job_ptr->array_task_id);
+            xstrfmtcat(job_id_str, "%u_%u", job_ptr->array_job_id, job_ptr->array_task_id);
         } else {
             xstrfmtcat(job_id_str, "%u", job_ptr->job_id);
         }
@@ -490,21 +454,16 @@ scontrol_hold(char *op, char *job_str) {
             rc = MAX(rc, rc2);
             exit_code = 1;
             if (quiet_flag != 1) {
-                fprintf(stderr, "%s for job %s\n",
-                        slurm_strerror(rc2),
-                        job_msg.job_id_str);
+                fprintf(stderr, "%s for job %s\n", slurm_strerror(rc2), job_msg.job_id_str);
             }
         } else if (resp) {
             for (j = 0; j < resp->job_array_count; j++) {
-                if ((resp->error_code[j] == SLURM_SUCCESS) &&
-                    (resp->job_array_count == 1))
+                if ((resp->error_code[j] == SLURM_SUCCESS) && (resp->job_array_count == 1))
                     continue;
                 exit_code = 1;
                 if (quiet_flag == 1)
                     continue;
-                fprintf(stderr, "%s: %s\n",
-                        resp->job_array_id[j],
-                        slurm_strerror(resp->error_code[j]));
+                fprintf(stderr, "%s: %s\n", resp->job_array_id[j], slurm_strerror(resp->error_code[j]));
             }
             slurm_free_job_array_resp(resp);
             resp = NULL;
@@ -522,8 +481,7 @@ scontrol_hold(char *op, char *job_str) {
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *		error message and returns 0
  */
-extern void
-scontrol_suspend(char *op, char *job_str) {
+extern void scontrol_suspend(char *op, char *job_str) {
     int rc, i;
     job_array_resp_msg_t *resp = NULL;
     char *job_id_str;
@@ -543,9 +501,7 @@ scontrol_suspend(char *op, char *job_str) {
             if (rc != SLURM_SUCCESS) {
                 exit_code = 1;
                 if (quiet_flag != 1) {
-                    fprintf(stderr, "%s for job %s\n",
-                            slurm_strerror(slurm_get_errno()),
-                            job_id_str);
+                    fprintf(stderr, "%s for job %s\n", slurm_strerror(slurm_get_errno()), job_id_str);
                 }
             } else if (resp) {
                 for (i = 0; i < resp->job_array_count; i++) {
@@ -554,9 +510,7 @@ scontrol_suspend(char *op, char *job_str) {
                     exit_code = 1;
                     if (quiet_flag == 1)
                         continue;
-                    fprintf(stderr, "%s: %s\n",
-                            resp->job_array_id[i],
-                            slurm_strerror(resp->error_code[i]));
+                    fprintf(stderr, "%s: %s\n", resp->job_array_id[i], slurm_strerror(resp->error_code[i]));
                 }
                 slurm_free_job_array_resp(resp);
                 resp = NULL;
@@ -568,8 +522,7 @@ scontrol_suspend(char *op, char *job_str) {
         rc = ESLURM_INVALID_JOB_ID;
         slurm_seterrno(rc);
         if (quiet_flag != 1) {
-            fprintf(stderr, "%s for job %s\n",
-                    slurm_strerror(rc), job_str);
+            fprintf(stderr, "%s for job %s\n", slurm_strerror(rc), job_str);
         }
     }
 }
@@ -581,8 +534,7 @@ scontrol_suspend(char *op, char *job_str) {
  * - requeue a pending or running batch job
  * IN job_id_str - a job id
  */
-extern void
-scontrol_requeue(uint32_t flags, char *job_str) {
+extern void scontrol_requeue(uint32_t flags, char *job_str) {
     char *job_id_str;
     int rc, i;
     job_array_resp_msg_t *resp = NULL;
@@ -604,9 +556,7 @@ scontrol_requeue(uint32_t flags, char *job_str) {
             if (rc != SLURM_SUCCESS) {
                 exit_code = 1;
                 if (quiet_flag != 1) {
-                    fprintf(stderr, "%s for job %s\n",
-                            slurm_strerror(slurm_get_errno()),
-                            job_id_str);
+                    fprintf(stderr, "%s for job %s\n", slurm_strerror(slurm_get_errno()), job_id_str);
                 }
             } else if (resp) {
                 for (i = 0; i < resp->job_array_count; i++) {
@@ -615,9 +565,7 @@ scontrol_requeue(uint32_t flags, char *job_str) {
                     exit_code = 1;
                     if (quiet_flag == 1)
                         continue;
-                    fprintf(stderr, "%s: %s\n",
-                            resp->job_array_id[i],
-                            slurm_strerror(resp->error_code[i]));
+                    fprintf(stderr, "%s: %s\n", resp->job_array_id[i], slurm_strerror(resp->error_code[i]));
                 }
                 slurm_free_job_array_resp(resp);
                 resp = NULL;
@@ -629,14 +577,12 @@ scontrol_requeue(uint32_t flags, char *job_str) {
         rc = ESLURM_INVALID_JOB_ID;
         slurm_seterrno(rc);
         if (quiet_flag != 1) {
-            fprintf(stderr, "%s for job %s\n",
-                    slurm_strerror(rc), job_str);
+            fprintf(stderr, "%s for job %s\n", slurm_strerror(rc), job_str);
         }
     }
 }
 
-extern void
-scontrol_requeue_hold(uint32_t flags, char *job_str) {
+extern void scontrol_requeue_hold(uint32_t flags, char *job_str) {
     int rc, i;
     char *job_id_str;
     job_array_resp_msg_t *resp = NULL;
@@ -650,9 +596,7 @@ scontrol_requeue_hold(uint32_t flags, char *job_str) {
             if (rc != SLURM_SUCCESS) {
                 exit_code = 1;
                 if (quiet_flag != 1) {
-                    fprintf(stderr, "%s for job %s\n",
-                            slurm_strerror(slurm_get_errno()),
-                            job_id_str);
+                    fprintf(stderr, "%s for job %s\n", slurm_strerror(slurm_get_errno()), job_id_str);
                 }
             } else if (resp) {
                 for (i = 0; i < resp->job_array_count; i++) {
@@ -661,9 +605,7 @@ scontrol_requeue_hold(uint32_t flags, char *job_str) {
                     exit_code = 1;
                     if (quiet_flag == 1)
                         continue;
-                    fprintf(stderr, "%s: %s\n",
-                            resp->job_array_id[i],
-                            slurm_strerror(resp->error_code[i]));
+                    fprintf(stderr, "%s: %s\n", resp->job_array_id[i], slurm_strerror(resp->error_code[i]));
                 }
                 slurm_free_job_array_resp(resp);
                 resp = NULL;
@@ -675,8 +617,7 @@ scontrol_requeue_hold(uint32_t flags, char *job_str) {
         rc = ESLURM_INVALID_JOB_ID;
         slurm_seterrno(rc);
         if (quiet_flag != 1) {
-            fprintf(stderr, "%s for job %s\n",
-                    slurm_strerror(rc), job_str);
+            fprintf(stderr, "%s for job %s\n", slurm_strerror(rc), job_str);
         }
     }
 }
@@ -686,8 +627,7 @@ scontrol_requeue_hold(uint32_t flags, char *job_str) {
  *	a given user ID, partition, account, and QOS.
  * IN job_str - a job id
  */
-extern void
-scontrol_top_job(char *job_id_str) {
+extern void scontrol_top_job(char *job_id_str) {
     int rc;
 
     if (xstrncasecmp(job_id_str, "jobid=", 6) == 0)
@@ -699,8 +639,7 @@ scontrol_top_job(char *job_id_str) {
     if (rc != SLURM_SUCCESS) {
         exit_code = 1;
         if (quiet_flag != 1) {
-            fprintf(stderr, "%s for job %s\n",
-                    slurm_strerror(slurm_get_errno()), job_id_str);
+            fprintf(stderr, "%s for job %s\n", slurm_strerror(slurm_get_errno()), job_id_str);
         }
     }
 }
@@ -729,8 +668,7 @@ extern int scontrol_update_job(int argc, char **argv) {
         val = strchr(argv[i], '=');
         if (val) {
             taglen = val - argv[i];
-            if ((taglen > 0) && ((val[-1] == '+') ||
-                                 (val[-1] == '-'))) {
+            if ((taglen > 0) && ((val[-1] == '+') || (val[-1] == '-'))) {
                 add_info = val - 1;
                 taglen--;
             }
@@ -742,8 +680,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             job_msg.nice = NICE_OFFSET + 100;
             update_cnt++;
             continue;
-        } else if (!xstrncasecmp(tag, "ResetAccrueTime",
-                                 MAX(strlen(tag), 3))) {
+        } else if (!xstrncasecmp(tag, "ResetAccrueTime", MAX(strlen(tag), 3))) {
             job_msg.bitflags |= RESET_ACCRUE_TIME;
             update_cnt++;
             continue;
@@ -761,8 +698,7 @@ extern int scontrol_update_job(int argc, char **argv) {
 
         if (xstrncasecmp(tag, "JobId", MAX(taglen, 3)) == 0) {
             job_msg.job_id_str = val;
-        } else if (xstrncasecmp(tag, "AdminComment",
-                                MAX(taglen, 6)) == 0) {
+        } else if (xstrncasecmp(tag, "AdminComment", MAX(taglen, 6)) == 0) {
             if (add_info) {
                 if (add_info[0] == '-') {
                     error("Invalid syntax, AdminComment can not be subtracted from.");
@@ -779,20 +715,17 @@ extern int scontrol_update_job(int argc, char **argv) {
             } else
                 job_msg.admin_comment = val;
             update_cnt++;
-        } else if (xstrncasecmp(tag, "SiteFactor",
-                                MAX(taglen, 5)) == 0) {
+        } else if (xstrncasecmp(tag, "SiteFactor", MAX(taglen, 5)) == 0) {
             long long tmp_prio;
             tmp_prio = strtoll(val, (char **) NULL, 10);
             if (llabs(tmp_prio) > (NICE_OFFSET - 3)) {
-                error("SiteFactor value out of range (+/- %u). Value ignored",
-                      NICE_OFFSET - 3);
+                error("SiteFactor value out of range (+/- %u). Value ignored", NICE_OFFSET - 3);
                 exit_code = 1;
                 return 0;
             }
             job_msg.site_factor = NICE_OFFSET + tmp_prio;
             update_cnt++;
-        } else if (xstrncasecmp(tag, "ArrayTaskThrottle",
-                                MAX(taglen, 10)) == 0) {
+        } else if (xstrncasecmp(tag, "ArrayTaskThrottle", MAX(taglen, 10)) == 0) {
             int throttle;
             throttle = strtoll(val, (char **) NULL, 10);
             if (throttle < 0) {
@@ -808,8 +741,7 @@ extern int scontrol_update_job(int argc, char **argv) {
         } else if (xstrncasecmp(tag, "Clusters", MAX(taglen, 8)) == 0) {
             job_msg.clusters = val;
             update_cnt++;
-        } else if (xstrncasecmp(tag, "ClusterFeatures",
-                                MAX(taglen, 8)) == 0) {
+        } else if (xstrncasecmp(tag, "ClusterFeatures", MAX(taglen, 8)) == 0) {
             job_msg.cluster_features = val;
             update_cnt++;
         } else if (xstrncasecmp(tag, "DelayBoot", MAX(taglen, 5)) == 0) {
@@ -857,13 +789,11 @@ extern int scontrol_update_job(int argc, char **argv) {
                     time_limit += job_current_time;
                 } else if (time_limit > job_current_time) {
                     error("TimeLimit decrement larger than"
-                          " current time limit (%u > %u)",
-                          time_limit, job_current_time);
+                          " current time limit (%u > %u)", time_limit, job_current_time);
                     exit_code = 1;
                     return 0;
                 } else {
-                    time_limit = job_current_time -
-                                 time_limit;
+                    time_limit = job_current_time - time_limit;
                 }
                 /*
                  * Mark as unset so we know we handled this
@@ -895,8 +825,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             tmp_nice = strtoll(val, (char **) NULL, 10);
             if (llabs(tmp_nice) > (NICE_OFFSET - 3)) {
                 error("Nice value out of range (+/- %u). Value "
-                      "ignored",
-                      NICE_OFFSET - 3);
+                      "ignored", NICE_OFFSET - 3);
                 exit_code = 1;
                 return 0;
             }
@@ -914,9 +843,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             update_cnt++;
         } else if (xstrncasecmp(tag, "NumCPUs", MAX(taglen, 6)) == 0) {
             int min_cpus, max_cpus = 0;
-            if (!get_resource_arg_range(val, "NumCPUs", &min_cpus,
-                                        &max_cpus, false) ||
-                (min_cpus <= 0) ||
+            if (!get_resource_arg_range(val, "NumCPUs", &min_cpus, &max_cpus, false) || (min_cpus <= 0) ||
                 (max_cpus && (max_cpus < min_cpus))) {
                 error("Invalid NumCPUs value: %s", val);
                 exit_code = 1;
@@ -955,9 +882,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             } else {
                 min_nodes = (int) job_msg.min_nodes;
                 max_nodes = (int) job_msg.max_nodes;
-                rc = get_resource_arg_range(
-                        val, "requested node count",
-                        &min_nodes, &max_nodes, false);
+                rc = get_resource_arg_range(val, "requested node count", &min_nodes, &max_nodes, false);
                 if (!rc)
                     return rc;
                 job_msg.min_nodes = (uint32_t) min_nodes;
@@ -1000,16 +925,14 @@ extern int scontrol_update_job(int argc, char **argv) {
                 return 0;
             }
             update_cnt++;
-        } else if (xstrncasecmp(tag, "MinMemoryNode",
-                                MAX(taglen, 10)) == 0) {
+        } else if (xstrncasecmp(tag, "MinMemoryNode", MAX(taglen, 10)) == 0) {
             if (parse_uint64(val, &job_msg.pn_min_memory)) {
                 error("Invalid MinMemoryNode value: %s", val);
                 exit_code = 1;
                 return 0;
             }
             update_cnt++;
-        } else if (xstrncasecmp(tag, "MinMemoryCPU",
-                                MAX(taglen, 10)) == 0) {
+        } else if (xstrncasecmp(tag, "MinMemoryCPU", MAX(taglen, 10)) == 0) {
             if (parse_uint64(val, &job_msg.pn_min_memory)) {
                 error("Invalid MinMemoryCPU value: %s", val);
                 exit_code = 1;
@@ -1017,8 +940,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             }
             job_msg.pn_min_memory |= MEM_PER_CPU;
             update_cnt++;
-        } else if (xstrncasecmp(tag, "MinTmpDiskNode",
-                                MAX(taglen, 5)) == 0) {
+        } else if (xstrncasecmp(tag, "MinTmpDiskNode", MAX(taglen, 5)) == 0) {
             if (parse_uint32(val, &job_msg.pn_min_tmp_disk)) {
                 error("Invalid MinTmpDiskNode value: %s", val);
                 exit_code = 1;
@@ -1031,12 +953,10 @@ extern int scontrol_update_job(int argc, char **argv) {
         } else if (xstrncasecmp(tag, "QOS", MAX(taglen, 2)) == 0) {
             job_msg.qos = val;
             update_cnt++;
-        } else if (xstrncasecmp(tag, "ReservationName",
-                                MAX(taglen, 3)) == 0) {
+        } else if (xstrncasecmp(tag, "ReservationName", MAX(taglen, 3)) == 0) {
             job_msg.reservation = val;
             update_cnt++;
-        } else if (!xstrncasecmp(tag, "Name", MAX(taglen, 2)) ||
-                   !xstrncasecmp(tag, "JobName", MAX(taglen, 4))) {
+        } else if (!xstrncasecmp(tag, "Name", MAX(taglen, 2)) || !xstrncasecmp(tag, "JobName", MAX(taglen, 4))) {
             job_msg.name = val;
             update_cnt++;
         } else if (xstrncasecmp(tag, "WCKey", MAX(taglen, 1)) == 0) {
@@ -1047,8 +967,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             update_cnt++;
         } else if (xstrncasecmp(tag, "Switches", MAX(taglen, 5)) == 0) {
             char *sep_char;
-            job_msg.req_switch =
-                    (uint32_t) strtol(val, &sep_char, 10);
+            job_msg.req_switch = (uint32_t) strtol(val, &sep_char, 10);
             update_cnt++;
             if (sep_char && sep_char[0] == '@') {
                 job_msg.wait4switch = time_str2mins(sep_char + 1) * 60;
@@ -1140,8 +1059,7 @@ extern int scontrol_update_job(int argc, char **argv) {
             update_cnt++;
         } else if (xstrncasecmp(tag, "Gres", MAX(taglen, 2)) == 0) {
             /* "gres" replaced by "tres_per_node" in v18.08 */
-            if (!xstrcasecmp(val, "help") ||
-                !xstrcasecmp(val, "list")) {
+            if (!xstrcasecmp(val, "help") || !xstrcasecmp(val, "list")) {
                 print_gres_help();
             } else if (job_msg.tres_per_node) {
                 xstrfmtcat(job_msg.tres_per_node, ",%s", val);
@@ -1198,8 +1116,7 @@ extern int scontrol_update_job(int argc, char **argv) {
         } else {
             exit_code = 1;
             fprintf(stderr, "Update of this parameter is not "
-                            "supported: %s\n",
-                    argv[i]);
+                            "supported: %s\n", argv[i]);
             fprintf(stderr, "Request aborted\n");
             return 0;
         }
@@ -1256,9 +1173,7 @@ extern int scontrol_update_job(int argc, char **argv) {
                 rc = MAX(rc, rc2);
                 exit_code = 1;
                 if (quiet_flag != 1) {
-                    fprintf(stderr, "%s for job %s\n",
-                            slurm_strerror(slurm_get_errno()),
-                            job_msg.job_id_str);
+                    fprintf(stderr, "%s for job %s\n", slurm_strerror(slurm_get_errno()), job_msg.job_id_str);
                 }
             } else if (resp) {
                 for (i = 0; i < resp->job_array_count; i++) {
@@ -1267,9 +1182,7 @@ extern int scontrol_update_job(int argc, char **argv) {
                     exit_code = 1;
                     if (quiet_flag == 1)
                         continue;
-                    fprintf(stderr, "%s: %s\n",
-                            resp->job_array_id[i],
-                            slurm_strerror(resp->error_code[i]));
+                    fprintf(stderr, "%s: %s\n", resp->job_array_id[i], slurm_strerror(resp->error_code[i]));
                 }
                 slurm_free_job_array_resp(resp);
                 resp = NULL;
@@ -1281,8 +1194,7 @@ extern int scontrol_update_job(int argc, char **argv) {
         rc = ESLURM_INVALID_JOB_ID;
         slurm_seterrno(rc);
         if (quiet_flag != 1) {
-            fprintf(stderr, "%s for job %s\n",
-                    slurm_strerror(rc), job_msg.job_id_str);
+            fprintf(stderr, "%s for job %s\n", slurm_strerror(rc), job_msg.job_id_str);
         }
     }
 
@@ -1329,8 +1241,7 @@ static void _update_job_size(uint32_t job_id) {
     if (!getenv("SLURM_JOBID"))
         return; /* No job environment here to update */
 
-    if (slurm_allocation_lookup(job_id, &alloc_info) !=
-        SLURM_SUCCESS) {
+    if (slurm_allocation_lookup(job_id, &alloc_info) != SLURM_SUCCESS) {
         if (slurm_get_errno() != ESLURM_ALREADY_DONE) {
             slurm_perror("slurm_allocation_lookup");
             return;
@@ -1345,13 +1256,11 @@ static void _update_job_size(uint32_t job_id) {
     (void) unlink(fname_csh);
     (void) unlink(fname_sh);
     if (!(resize_csh = fopen(fname_csh, "w"))) {
-        fprintf(stderr, "Could not create file %s: %s\n", fname_csh,
-                strerror(errno));
+        fprintf(stderr, "Could not create file %s: %s\n", fname_csh, strerror(errno));
         goto fini;
     }
     if (!(resize_sh = fopen(fname_sh, "w"))) {
-        fprintf(stderr, "Could not create file %s: %s\n", fname_sh,
-                strerror(errno));
+        fprintf(stderr, "Could not create file %s: %s\n", fname_sh, strerror(errno));
         goto fini;
     }
     /*
@@ -1363,38 +1272,27 @@ static void _update_job_size(uint32_t job_id) {
         error("%s: chmod(%s): %m", __func__, fname_sh);
 
     if (getenv("SLURM_NODELIST")) {
-        fprintf(resize_sh, "export SLURM_NODELIST=\"%s\"\n",
-                alloc_info->node_list);
-        fprintf(resize_csh, "setenv SLURM_NODELIST \"%s\"\n",
-                alloc_info->node_list);
+        fprintf(resize_sh, "export SLURM_NODELIST=\"%s\"\n", alloc_info->node_list);
+        fprintf(resize_csh, "setenv SLURM_NODELIST \"%s\"\n", alloc_info->node_list);
     }
     if (getenv("SLURM_JOB_NODELIST")) {
-        fprintf(resize_sh, "export SLURM_JOB_NODELIST=\"%s\"\n",
-                alloc_info->node_list);
-        fprintf(resize_csh, "setenv SLURM_JOB_NODELIST \"%s\"\n",
-                alloc_info->node_list);
+        fprintf(resize_sh, "export SLURM_JOB_NODELIST=\"%s\"\n", alloc_info->node_list);
+        fprintf(resize_csh, "setenv SLURM_JOB_NODELIST \"%s\"\n", alloc_info->node_list);
     }
     if (getenv("SLURM_NNODES")) {
-        fprintf(resize_sh, "export SLURM_NNODES=%u\n",
-                alloc_info->node_cnt);
-        fprintf(resize_csh, "setenv SLURM_NNODES %u\n",
-                alloc_info->node_cnt);
+        fprintf(resize_sh, "export SLURM_NNODES=%u\n", alloc_info->node_cnt);
+        fprintf(resize_csh, "setenv SLURM_NNODES %u\n", alloc_info->node_cnt);
     }
     if (getenv("SLURM_JOB_NUM_NODES")) {
-        fprintf(resize_sh, "export SLURM_JOB_NUM_NODES=%u\n",
-                alloc_info->node_cnt);
-        fprintf(resize_csh, "setenv SLURM_JOB_NUM_NODES %u\n",
-                alloc_info->node_cnt);
+        fprintf(resize_sh, "export SLURM_JOB_NUM_NODES=%u\n", alloc_info->node_cnt);
+        fprintf(resize_csh, "setenv SLURM_JOB_NUM_NODES %u\n", alloc_info->node_cnt);
     }
     if (getenv("SLURM_JOB_CPUS_PER_NODE")) {
         char *tmp;
-        tmp = uint32_compressed_to_str(alloc_info->num_cpu_groups,
-                                       alloc_info->cpus_per_node,
+        tmp = uint32_compressed_to_str(alloc_info->num_cpu_groups, alloc_info->cpus_per_node,
                                        alloc_info->cpu_count_reps);
-        fprintf(resize_sh, "export SLURM_JOB_CPUS_PER_NODE=\"%s\"\n",
-                tmp);
-        fprintf(resize_csh, "setenv SLURM_JOB_CPUS_PER_NODE \"%s\"\n",
-                tmp);
+        fprintf(resize_sh, "export SLURM_JOB_CPUS_PER_NODE=\"%s\"\n", tmp);
+        fprintf(resize_csh, "setenv SLURM_JOB_CPUS_PER_NODE \"%s\"\n", tmp);
         xfree(tmp);
     }
     if (getenv("SLURM_TASKS_PER_NODE")) {
@@ -1491,8 +1389,7 @@ static uint32_t _get_job_time(const char *job_id_str) {
             return time_limit;
         }
         for (i = 0; i < resp->record_count; i++) {
-            if ((resp->job_array[i].job_id == job_id) &&
-                (resp->job_array[i].array_task_id == NO_VAL) &&
+            if ((resp->job_array[i].job_id == job_id) && (resp->job_array[i].array_task_id == NO_VAL) &&
                 (resp->job_array[i].array_bitmap == NULL)) {
                 /* Regular job match */
                 time_limit = resp->job_array[i].time_limit;
@@ -1500,14 +1397,9 @@ static uint32_t _get_job_time(const char *job_id_str) {
             }
             if (resp->job_array[i].array_job_id != job_id)
                 continue;
-            array_bitmap = (bitstr_t *)
-                    resp->job_array[i]
-                            .array_bitmap;
-            if ((task_id == NO_VAL) ||
-                (resp->job_array[i].array_task_id == task_id) ||
-                (array_bitmap &&
-                 (task_id < bit_size(array_bitmap)) &&
-                 bit_test(array_bitmap, task_id))) {
+            array_bitmap = (bitstr_t *) resp->job_array[i].array_bitmap;
+            if ((task_id == NO_VAL) || (resp->job_array[i].array_task_id == task_id) ||
+                (array_bitmap && (task_id < bit_size(array_bitmap)) && bit_test(array_bitmap, task_id))) {
                 /* Array job with task_id match */
                 time_limit = resp->job_array[i].time_limit;
                 break;
@@ -1515,8 +1407,7 @@ static uint32_t _get_job_time(const char *job_id_str) {
         }
         slurm_free_job_info_msg(resp);
     } else {
-        error("Could not load state information for job %s: %m",
-              job_id_str);
+        error("Could not load state information for job %s: %m", job_id_str);
     }
 
     return time_limit;
@@ -1558,8 +1449,7 @@ static bool _is_single_job(char *job_id_str) {
         is_single = true; /* Do not bother to validate */
         slurm_free_job_info_msg(resp);
     } else {
-        error("Could not load state information for job %s: %m",
-              job_id_str);
+        error("Could not load state information for job %s: %m", job_id_str);
     }
 
     return is_single;
@@ -1582,20 +1472,15 @@ static char *_job_name2id(char *job_name, uint32_t job_uid) {
             slurm_free_job_info_msg(resp);
             return job_id_str;
         }
-        for (i = 0, job_ptr = resp->job_array; i < resp->record_count;
-             i++, job_ptr++) {
-            if ((job_uid != NO_VAL) &&
-                (job_uid != job_ptr->user_id))
+        for (i = 0, job_ptr = resp->job_array; i < resp->record_count; i++, job_ptr++) {
+            if ((job_uid != NO_VAL) && (job_uid != job_ptr->user_id))
                 continue;
             if (!job_ptr->name || xstrcmp(job_name, job_ptr->name))
                 continue;
             if (job_ptr->array_task_id != NO_VAL) {
-                xstrfmtcat(job_id_str, "%s%u_%u", sep,
-                           job_ptr->array_job_id,
-                           job_ptr->array_task_id);
+                xstrfmtcat(job_id_str, "%s%u_%u", sep, job_ptr->array_job_id, job_ptr->array_task_id);
             } else {
-                xstrfmtcat(job_id_str, "%s%u", sep,
-                           job_ptr->job_id);
+                xstrfmtcat(job_id_str, "%s%u", sep, job_ptr->job_id);
             }
             sep = ",";
         }
@@ -1603,8 +1488,7 @@ static char *_job_name2id(char *job_name, uint32_t job_uid) {
             if (job_uid == NO_VAL) {
                 error("No jobs with name \'%s\'", job_name);
             } else {
-                error("No jobs with user ID %u and name \'%s\'",
-                      job_uid, job_name);
+                error("No jobs with user ID %u and name \'%s\'", job_uid, job_name);
             }
         }
     } else {

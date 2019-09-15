@@ -66,8 +66,7 @@ extern List slurmdb_config_get(void *db_conn) {
  * RET: List of slurmdb_event_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_events_get(void *db_conn,
-                               slurmdb_event_cond_t *event_cond) {
+extern List slurmdb_events_get(void *db_conn, slurmdb_event_cond_t *event_cond) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
@@ -80,8 +79,7 @@ extern List slurmdb_events_get(void *db_conn,
  * RET: List of slurmdb_assoc_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_problems_get(void *db_conn,
-                                 slurmdb_assoc_cond_t *assoc_cond) {
+extern List slurmdb_problems_get(void *db_conn, slurmdb_assoc_cond_t *assoc_cond) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
@@ -94,8 +92,7 @@ extern List slurmdb_problems_get(void *db_conn,
  * RET: List of slurmdb_reservation_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_reservations_get(void *db_conn,
-                                     slurmdb_reservation_cond_t *resv_cond) {
+extern List slurmdb_reservations_get(void *db_conn, slurmdb_reservation_cond_t *resv_cond) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 

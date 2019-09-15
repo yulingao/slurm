@@ -132,9 +132,7 @@ void xhash_delete_str(xhash_t *table, const char *key);
 uint32_t xhash_count(xhash_t *table);
 
 /** apply callback to each item contained in the hash table */
-void xhash_walk(xhash_t *table,
-                void (*callback)(void *item, void *arg),
-                void *arg);
+void xhash_walk(xhash_t *table, void (*callback)(void *item, void *arg), void *arg);
 
 /** This function frees the hash table items. It frees items too if the
  * freefunc was not null in the xhash_init function.

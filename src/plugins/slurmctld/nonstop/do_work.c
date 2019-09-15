@@ -124,10 +124,8 @@ static int _job_fail_find(void *x, void *key) {
     job_failures_t *job_fail_ptr = (job_failures_t *) x;
     uint32_t *job_id_ptr = (uint32_t *) key;
 
-    if ((job_fail_ptr->job_id == *job_id_ptr) &&
-        (job_fail_ptr->job_ptr != NULL) &&
-        (job_fail_ptr->job_ptr->job_id == *job_id_ptr) &&
-        (job_fail_ptr->job_ptr->magic == JOB_MAGIC))
+    if ((job_fail_ptr->job_id == *job_id_ptr) && (job_fail_ptr->job_ptr != NULL) &&
+        (job_fail_ptr->job_ptr->job_id == *job_id_ptr) && (job_fail_ptr->job_ptr->magic == JOB_MAGIC))
         return 1;
     return 0;
 }
@@ -140,39 +138,27 @@ static void _job_fail_log(job_failures_t *job_fail_ptr) {
     if (nonstop_debug > 0) {
         info("nonstop: =====================");
         info("nonstop: job_id: %u", job_fail_ptr->job_id);
-        slurm_get_ip_str(&job_fail_ptr->callback_addr, &port,
-                         ip, sizeof(ip));
+        slurm_get_ip_str(&job_fail_ptr->callback_addr, &port, ip, sizeof(ip));
         info("nonstop: callback_addr: %s", ip);
-        info("nonstop: callback_flags: %x",
-             job_fail_ptr->callback_flags);
-        info("nonstop: callback_port: %u",
-             job_fail_ptr->callback_port);
-        info("nonstop: fail_node_cnt: %u",
-             job_fail_ptr->fail_node_cnt);
+        info("nonstop: callback_flags: %x", job_fail_ptr->callback_flags);
+        info("nonstop: callback_port: %u", job_fail_ptr->callback_port);
+        info("nonstop: fail_node_cnt: %u", job_fail_ptr->fail_node_cnt);
         for (i = 0; i < job_fail_ptr->fail_node_cnt; i++) {
-            info("nonstop: fail_node_cpus[%d]: %u",
-                 i, job_fail_ptr->fail_node_cpus[i]);
-            info("nonstop: fail_node_names[%d]: %s",
-                 i, job_fail_ptr->fail_node_names[i]);
+            info("nonstop: fail_node_cpus[%d]: %u", i, job_fail_ptr->fail_node_cpus[i]);
+            info("nonstop: fail_node_names[%d]: %s", i, job_fail_ptr->fail_node_names[i]);
         }
-        info("nonstop: pending_job_delay: %hu",
-             job_fail_ptr->pending_job_delay);
-        info("nonstop: pending_job_id: %u",
-             job_fail_ptr->pending_job_id);
-        info("nonstop: pending_node_name: %s",
-             job_fail_ptr->pending_node_name);
-        info("nonstop: replace_node_cnt: %u",
-             job_fail_ptr->replace_node_cnt);
-        info("nonstop: time_extend_avail: %u",
-             job_fail_ptr->time_extend_avail);
+        info("nonstop: pending_job_delay: %hu", job_fail_ptr->pending_job_delay);
+        info("nonstop: pending_job_id: %u", job_fail_ptr->pending_job_id);
+        info("nonstop: pending_node_name: %s", job_fail_ptr->pending_node_name);
+        info("nonstop: replace_node_cnt: %u", job_fail_ptr->replace_node_cnt);
+        info("nonstop: time_extend_avail: %u", job_fail_ptr->time_extend_avail);
         info("nonstop: user_id: %u", job_fail_ptr->user_id);
         info("nonstop: =====================");
     }
 }
 
 static bool _valid_job_ptr(job_failures_t *job_fail_ptr) {
-    if ((job_fail_ptr->job_ptr != NULL) &&
-        (job_fail_ptr->job_ptr->job_id == job_fail_ptr->job_id) &&
+    if ((job_fail_ptr->job_ptr != NULL) && (job_fail_ptr->job_ptr->job_id == job_fail_ptr->job_id) &&
         (job_fail_ptr->job_ptr->magic == JOB_MAGIC))
         return true;
 
@@ -184,13 +170,11 @@ static bool _valid_drain_user(uid_t cmd_uid) {
     int i;
 
     for (i = 0; i < user_drain_deny_cnt; i++) {
-        if ((user_drain_deny[i] == cmd_uid) ||
-            (user_drain_deny[i] == NO_VAL)) /* ALL */
+        if ((user_drain_deny[i] == cmd_uid) || (user_drain_deny[i] == NO_VAL)) /* ALL */
             return false;
     }
     for (i = 0; i < user_drain_allow_cnt; i++) {
-        if ((user_drain_allow[i] == cmd_uid) ||
-            (user_drain_allow[i] == NO_VAL)) /* ALL */
+        if ((user_drain_allow[i] == cmd_uid) || (user_drain_allow[i] == NO_VAL)) /* ALL */
             return true;
     }
     return false;
@@ -222,27 +206,22 @@ static int _unpack_job_state(job_failures_t **job_pptr, Buf buffer) {
     int i;
 
     job_fail_ptr = xmalloc(sizeof(job_failures_t));
-    if (slurm_unpack_slurm_addr_no_alloc(&job_fail_ptr->callback_addr,
-                                         buffer))
+    if (slurm_unpack_slurm_addr_no_alloc(&job_fail_ptr->callback_addr, buffer))
         goto unpack_error;
     safe_unpack32(&job_fail_ptr->callback_flags, buffer);
     safe_unpack16(&job_fail_ptr->callback_port, buffer);
     safe_unpack32(&job_fail_ptr->job_id, buffer);
     safe_unpack32(&job_fail_ptr->fail_node_cnt, buffer);
-    safe_xcalloc(job_fail_ptr->fail_node_cpus, job_fail_ptr->fail_node_cnt,
-                 sizeof(uint32_t));
-    safe_xcalloc(job_fail_ptr->fail_node_names, job_fail_ptr->fail_node_cnt,
-                 sizeof(char *));
+    safe_xcalloc(job_fail_ptr->fail_node_cpus, job_fail_ptr->fail_node_cnt, sizeof(uint32_t));
+    safe_xcalloc(job_fail_ptr->fail_node_names, job_fail_ptr->fail_node_cnt, sizeof(char *));
     for (i = 0; i < job_fail_ptr->fail_node_cnt; i++) {
         safe_unpack32(&job_fail_ptr->fail_node_cpus[i], buffer);
-        safe_unpackstr_xmalloc(&job_fail_ptr->fail_node_names[i],
-                               &dummy32, buffer);
+        safe_unpackstr_xmalloc(&job_fail_ptr->fail_node_names[i], &dummy32, buffer);
     }
     job_fail_ptr->magic = FAILURE_MAGIC;
     safe_unpack16(&job_fail_ptr->pending_job_delay, buffer);
     safe_unpack32(&job_fail_ptr->pending_job_id, buffer);
-    safe_unpackstr_xmalloc(&job_fail_ptr->pending_node_name,
-                           &dummy32, buffer);
+    safe_unpackstr_xmalloc(&job_fail_ptr->pending_node_name, &dummy32, buffer);
     safe_unpack32(&job_fail_ptr->replace_node_cnt, buffer);
     safe_unpack32(&job_fail_ptr->time_extend_avail, buffer);
     safe_unpack32(&job_fail_ptr->user_id, buffer);
@@ -312,8 +291,7 @@ extern int save_nonstop_state(void) {
 
     log_fd = creat(new_file, 0600);
     if (log_fd < 0) {
-        error("Can't save state, create file %s error %m",
-              new_file);
+        error("Can't save state, create file %s error %m", new_file);
         error_code = errno;
     } else {
         int pos = 0, nwrite = get_buf_offset(buffer), amount, rc;
@@ -338,12 +316,10 @@ extern int save_nonstop_state(void) {
     else {            /* file shuffle */
         (void) unlink(old_file);
         if (link(reg_file, old_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   reg_file, old_file);
+            debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
         (void) unlink(reg_file);
         if (link(new_file, reg_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   new_file, reg_file);
+            debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
         (void) unlink(new_file);
     }
     xfree(dir_path);
@@ -400,8 +376,7 @@ extern int restore_nonstop_state(void) {
         if (error_code)
             break;
         job_fail_ptr->job_ptr = find_job_record(job_fail_ptr->job_id);
-        if (!job_fail_ptr->job_ptr ||
-            (job_fail_ptr->job_ptr->user_id != job_fail_ptr->user_id)) {
+        if (!job_fail_ptr->job_ptr || (job_fail_ptr->job_ptr->user_id != job_fail_ptr->user_id)) {
             _job_fail_del(job_fail_ptr);
             continue;
         }
@@ -439,9 +414,7 @@ static uint32_t _get_job_cpus(struct job_record *job_ptr, int node_inx) {
 
     node_ptr = node_record_table_ptr + node_inx;
     cpus_alloc = node_ptr->cpus;
-    if (job_ptr->job_resrcs &&
-        job_ptr->job_resrcs->cpus &&
-        job_ptr->job_resrcs->node_bitmap &&
+    if (job_ptr->job_resrcs && job_ptr->job_resrcs->cpus && job_ptr->job_resrcs->node_bitmap &&
         ((i = bit_ffs(job_ptr->job_resrcs->node_bitmap)) >= 0)) {
         for (j = 0; i <= node_inx; i++) {
             if (i == node_inx) {
@@ -479,8 +452,7 @@ static void _failing_node(struct node_record *node_ptr) {
         if (!_valid_job_ptr(job_fail_ptr))
             continue;
         job_ptr = job_fail_ptr->job_ptr;
-        if (IS_JOB_FINISHED(job_ptr) || !job_ptr->node_bitmap ||
-            !bit_test(job_ptr->node_bitmap, node_inx))
+        if (IS_JOB_FINISHED(job_ptr) || !job_ptr->node_bitmap || !bit_test(job_ptr->node_bitmap, node_inx))
             continue;
         job_fail_ptr->callback_flags |= event_flag;
         job_fail_update_time = now;
@@ -489,8 +461,7 @@ static void _failing_node(struct node_record *node_ptr) {
     slurm_mutex_unlock(&job_fail_mutex);
 }
 
-extern void node_fail_callback(struct job_record *job_ptr,
-                               struct node_record *node_ptr) {
+extern void node_fail_callback(struct job_record *job_ptr, struct node_record *node_ptr) {
     job_failures_t *job_fail_ptr;
     uint32_t event_flag = 0;
     int node_inx;
@@ -500,15 +471,13 @@ extern void node_fail_callback(struct job_record *job_ptr,
         return;
     }
 
-    info("node_fail_callback for job:%u node:%s",
-         job_ptr->job_id, node_ptr->name);
+    info("node_fail_callback for job:%u node:%s", job_ptr->job_id, node_ptr->name);
     if (IS_NODE_DOWN(node_ptr))
         event_flag |= SMD_EVENT_NODE_FAILED;
     if (IS_NODE_FAIL(node_ptr))
         event_flag |= SMD_EVENT_NODE_FAILING;
     slurm_mutex_lock(&job_fail_mutex);
-    job_fail_ptr = list_find_first(job_fail_list, _job_fail_find,
-                                   &job_ptr->job_id);
+    job_fail_ptr = list_find_first(job_fail_list, _job_fail_find, &job_ptr->job_id);
     if (!job_fail_ptr) {
         job_fail_ptr = xmalloc(sizeof(job_failures_t));
         job_fail_ptr->job_id = job_ptr->job_id;
@@ -519,15 +488,11 @@ extern void node_fail_callback(struct job_record *job_ptr,
     }
     job_fail_ptr->callback_flags |= event_flag;
     job_fail_ptr->fail_node_cnt++;
-    xrealloc(job_fail_ptr->fail_node_cpus,
-             (sizeof(uint32_t) * job_fail_ptr->fail_node_cnt));
+    xrealloc(job_fail_ptr->fail_node_cpus, (sizeof(uint32_t) * job_fail_ptr->fail_node_cnt));
     node_inx = node_ptr - node_record_table_ptr;
-    job_fail_ptr->fail_node_cpus[job_fail_ptr->fail_node_cnt - 1] =
-            _get_job_cpus(job_ptr, node_inx);
-    xrealloc(job_fail_ptr->fail_node_names,
-             (sizeof(char *) * job_fail_ptr->fail_node_cnt));
-    job_fail_ptr->fail_node_names[job_fail_ptr->fail_node_cnt - 1] =
-            xstrdup(node_ptr->name);
+    job_fail_ptr->fail_node_cpus[job_fail_ptr->fail_node_cnt - 1] = _get_job_cpus(job_ptr, node_inx);
+    xrealloc(job_fail_ptr->fail_node_names, (sizeof(char *) * job_fail_ptr->fail_node_cnt));
+    job_fail_ptr->fail_node_names[job_fail_ptr->fail_node_cnt - 1] = xstrdup(node_ptr->name);
     job_fail_ptr->time_extend_avail += time_limit_extend;
     job_fail_update_time = time(NULL);
     slurm_mutex_unlock(&job_fail_mutex);
@@ -539,21 +504,18 @@ extern void job_begin_callback(struct job_record *job_ptr) {
     ListIterator depend_iterator;
 
     info("job_begin_callback for job:%u", job_ptr->job_id);
-    if (!job_fail_list || !job_ptr->details ||
-        !job_ptr->details->depend_list)
+    if (!job_fail_list || !job_ptr->details || !job_ptr->details->depend_list)
         return;
     slurm_mutex_lock(&job_fail_mutex);
     depend_iterator = list_iterator_create(job_ptr->details->depend_list);
     depend_ptr = (struct depend_spec *) list_next(depend_iterator);
     if (depend_ptr && (depend_ptr->depend_type == SLURM_DEPEND_EXPAND)) {
-        job_fail_ptr = list_find_first(job_fail_list, _job_fail_find,
-                                       &depend_ptr->job_id);
+        job_fail_ptr = list_find_first(job_fail_list, _job_fail_find, &depend_ptr->job_id);
     }
     if (job_fail_ptr) {
         job_fail_ptr->callback_flags |= SMD_EVENT_NODE_REPLACE;
         job_fail_update_time = time(NULL);
-        debug("%s: jobid %d flags 0x%x", __func__, job_ptr->job_id,
-              job_fail_ptr->callback_flags);
+        debug("%s: jobid %d flags 0x%x", __func__, job_ptr->job_id, job_fail_ptr->callback_flags);
     }
     list_iterator_destroy(depend_iterator);
     slurm_mutex_unlock(&job_fail_mutex);
@@ -574,8 +536,7 @@ extern void job_fini_callback(struct job_record *job_ptr) {
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid,
-                              uint32_t protocol_version) {
+extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
     update_node_msg_t update_node_msg;
     char *node_names = NULL, *reason = NULL;
     char *sep1, *sep2;
@@ -663,8 +624,7 @@ extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid,
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid,
-                        uint32_t protocol_version) {
+extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
     job_failures_t *job_fail_ptr;
     struct node_record *node_ptr;
     struct job_record *job_ptr;
@@ -691,12 +651,9 @@ extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid,
         goto fini;
     }
 
-    if ((cmd_uid != job_ptr->user_id) &&
-        (cmd_uid != 0) &&
-        (cmd_uid != getuid())) {
+    if ((cmd_uid != job_ptr->user_id) && (cmd_uid != 0) && (cmd_uid != getuid())) {
         info("slurmctld/nonstop: Security violation, User ID %u "
-             "attempting to get information about job ID %u",
-             cmd_uid, job_ptr->job_id);
+             "attempting to get information about job ID %u", cmd_uid, job_ptr->job_id);
         xstrfmtcat(resp, "%s EPERM", SLURM_VERSION_STRING);
         goto fini;
     }
@@ -716,22 +673,16 @@ extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid,
                 continue;
             fail_cnt++;
             /* Format: nodename number_of_cpus state */
-            xstrfmtcat(resp, "%s %u %u ",
-                       node_ptr->name,
-                       _get_job_cpus(job_ptr, i),
-                       FAILING_NODES);
+            xstrfmtcat(resp, "%s %u %u ", node_ptr->name, _get_job_cpus(job_ptr, i), FAILING_NODES);
         }
     }
 
     if (state_flags & FAILED_NODES) {
-        job_fail_ptr = list_find_first(job_fail_list, _job_fail_find,
-                                       &job_id);
+        job_fail_ptr = list_find_first(job_fail_list, _job_fail_find, &job_id);
         if (job_fail_ptr && _valid_job_ptr(job_fail_ptr)) {
             for (i = 0; i < job_fail_ptr->fail_node_cnt; i++) {
                 /* Format: nodename number_of_cpus state */
-                xstrfmtcat(resp, "%s %u %u ",
-                           job_fail_ptr->fail_node_names[i],
-                           job_fail_ptr->fail_node_cpus[i],
+                xstrfmtcat(resp, "%s %u %u ", job_fail_ptr->fail_node_names[i], job_fail_ptr->fail_node_cpus[i],
                            FAILED_NODES);
             }
         }
@@ -748,8 +699,7 @@ static void _kill_job(uint32_t job_id, uid_t cmd_uid) {
 
     rc = job_signal_id(job_id, SIGKILL, 0, cmd_uid, false);
     if (rc) {
-        info("slurmctld/nonstop: can not kill job %u: %s",
-             job_id, slurm_strerror(rc));
+        info("slurmctld/nonstop: can not kill job %u: %s", job_id, slurm_strerror(rc));
     }
 }
 
@@ -761,9 +711,7 @@ static void _kill_job(uint32_t job_id, uid_t cmd_uid) {
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *register_callback(char *cmd_ptr, uid_t cmd_uid,
-                               slurm_addr_t cli_addr,
-                               uint32_t protocol_version) {
+extern char *register_callback(char *cmd_ptr, uid_t cmd_uid, slurm_addr_t cli_addr, uint32_t protocol_version) {
     job_failures_t *job_fail_ptr;
     struct job_record *job_ptr;
     char *resp = NULL, *sep1;
@@ -818,29 +766,23 @@ extern char *register_callback(char *cmd_ptr, uid_t cmd_uid,
  * and the node has the referenced feature, then the replacement node must have
  * the same feature(s).
  * Return value must be xfreed. */
-static char *_job_node_features(struct job_record *job_ptr,
-                                struct node_record *node_ptr) {
+static char *_job_node_features(struct job_record *job_ptr, struct node_record *node_ptr) {
     node_feature_t *node_feat_ptr;
     job_feature_t *job_feat_ptr;
     ListIterator job_iter, node_iter;
     char *req_feat = NULL;
     int node_inx;
 
-    if (!job_ptr->details || !job_ptr->details->features ||
-        !job_ptr->details->feature_list)
+    if (!job_ptr->details || !job_ptr->details->features || !job_ptr->details->feature_list)
         return req_feat;
 
     node_inx = node_ptr - node_record_table_ptr;
     job_iter = list_iterator_create(job_ptr->details->feature_list);
     while ((job_feat_ptr = (job_feature_t *) list_next(job_iter))) {
         node_iter = list_iterator_create(active_feature_list);
-        while ((node_feat_ptr = (node_feature_t *)
-                list_next(node_iter))) {
-            if (!job_feat_ptr->name ||
-                !node_feat_ptr->name ||
-                !node_feat_ptr->node_bitmap ||
-                !bit_test(node_feat_ptr->node_bitmap, node_inx) ||
-                xstrcmp(job_feat_ptr->name, node_feat_ptr->name))
+        while ((node_feat_ptr = (node_feature_t *) list_next(node_iter))) {
+            if (!job_feat_ptr->name || !node_feat_ptr->name || !node_feat_ptr->node_bitmap ||
+                !bit_test(node_feat_ptr->node_bitmap, node_inx) || xstrcmp(job_feat_ptr->name, node_feat_ptr->name))
                 continue;
             if (req_feat)
                 xstrcat(req_feat, "&");
@@ -860,8 +802,7 @@ static char *_job_node_features(struct job_record *job_ptr,
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
-                       uint32_t protocol_version) {
+extern char *drop_node(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
     job_desc_msg_t job_alloc_req;
     job_failures_t *job_fail_ptr;
     struct job_record *job_ptr, *new_job_ptr = NULL;
@@ -904,12 +845,9 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
         job_ptr = job_fail_ptr->job_ptr;
     }
 
-    if ((cmd_uid != job_ptr->user_id) &&
-        (cmd_uid != 0) &&
-        (cmd_uid != getuid())) {
+    if ((cmd_uid != job_ptr->user_id) && (cmd_uid != 0) && (cmd_uid != getuid())) {
         info("slurmctld/nonstop: Security violation, User ID %u "
-             "attempting to modify job ID %u",
-             cmd_uid, job_ptr->job_id);
+             "attempting to modify job ID %u", cmd_uid, job_ptr->job_id);
         xstrfmtcat(resp, "%s EPERM", SLURM_VERSION_STRING);
         goto fini;
     }
@@ -950,37 +888,29 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
     }
 
     /* Abort previously submitted job merge request */
-    if (job_fail_ptr->pending_node_name &&
-        (job_fail_ptr->pending_job_id == 0)) {
+    if (job_fail_ptr->pending_node_name && (job_fail_ptr->pending_job_id == 0)) {
         error("slurmctld/nonstop: pending_node_name set, but "
               "pending_job_id is zero for job %u", job_id);
         xfree(job_fail_ptr->pending_node_name);
     }
-    if (job_fail_ptr->pending_node_name &&
-        job_fail_ptr->pending_job_id) {
+    if (job_fail_ptr->pending_node_name && job_fail_ptr->pending_job_id) {
         new_job_ptr = find_job_record(job_fail_ptr->pending_job_id);
-        if (!new_job_ptr ||
-            (new_job_ptr->user_id != job_fail_ptr->user_id) ||
-            IS_JOB_FINISHED(new_job_ptr)) {
+        if (!new_job_ptr || (new_job_ptr->user_id != job_fail_ptr->user_id) || IS_JOB_FINISHED(new_job_ptr)) {
             info("slurmctld/nonstop: pending_job_id %u missing "
-                 "for merge to job %u",
-                 job_fail_ptr->pending_job_id, job_id);
+                 "for merge to job %u", job_fail_ptr->pending_job_id, job_id);
             job_fail_ptr->pending_job_delay = 0;
             job_fail_ptr->pending_job_id = 0;
             xfree(job_fail_ptr->pending_node_name);
         }
     }
-    if (job_fail_ptr->pending_node_name &&
-        !xstrcmp(job_fail_ptr->pending_node_name, node_name)) {
+    if (job_fail_ptr->pending_node_name && !xstrcmp(job_fail_ptr->pending_node_name, node_name)) {
         /* Abort pending replacement request and get back time
          * extension (if any) */
         _kill_job(job_fail_ptr->pending_job_id, cmd_uid);
-        if (job_fail_ptr->pending_job_delay >
-            job_fail_ptr->time_extend_avail) {
+        if (job_fail_ptr->pending_job_delay > job_fail_ptr->time_extend_avail) {
             job_fail_ptr->time_extend_avail = 0;
         } else {
-            job_fail_ptr->time_extend_avail -=
-                    job_fail_ptr->pending_job_delay;
+            job_fail_ptr->time_extend_avail -= job_fail_ptr->pending_job_delay;
         }
         job_fail_ptr->pending_job_delay = 0;
         job_fail_ptr->pending_job_id = 0;
@@ -997,10 +927,8 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
         xfree(job_fail_ptr->fail_node_names[failed_inx]);
         job_fail_ptr->fail_node_cnt--;
         for (i = failed_inx; i < job_fail_ptr->fail_node_cnt; i++) {
-            job_fail_ptr->fail_node_cpus[i] =
-                    job_fail_ptr->fail_node_cpus[i + 1];
-            job_fail_ptr->fail_node_names[i] =
-                    job_fail_ptr->fail_node_names[i + 1];
+            job_fail_ptr->fail_node_cpus[i] = job_fail_ptr->fail_node_cpus[i + 1];
+            job_fail_ptr->fail_node_names[i] = job_fail_ptr->fail_node_names[i + 1];
         }
     }
 
@@ -1016,26 +944,22 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
         rc = _update_job(&job_alloc_req, cmd_uid);
         if (rc) {
             info("slurmctld/nonstop: can remove failing node %s "
-                 "from job %u: %s",
-                 node_name, job_id, slurm_strerror(rc));
+                 "from job %u: %s", node_name, job_id, slurm_strerror(rc));
         }
     }
 
     /* Work complete */
-    xstrfmtcat(resp, "%s ENOERROR NewNodeList %s NewNodeCount %u",
-               SLURM_VERSION_STRING, job_ptr->nodes, job_ptr->node_cnt);
+    xstrfmtcat(resp, "%s ENOERROR NewNodeList %s NewNodeCount %u", SLURM_VERSION_STRING, job_ptr->nodes,
+               job_ptr->node_cnt);
     if (job_ptr->job_resrcs) {
         char *sep = "";
         xstrfmtcat(resp, " NewCpusPerNode ");
         for (i = 0; i < job_ptr->job_resrcs->cpu_array_cnt; i++) {
             if (job_ptr->job_resrcs->cpu_array_value[i] == 0)
                 continue;
-            xstrfmtcat(resp, "%s%u", sep,
-                       job_ptr->job_resrcs->cpu_array_value[i]);
+            xstrfmtcat(resp, "%s%u", sep, job_ptr->job_resrcs->cpu_array_value[i]);
             if (job_ptr->job_resrcs->cpu_array_reps[i] > 1) {
-                xstrfmtcat(resp, "(x%u)",
-                           job_ptr->job_resrcs->
-                                   cpu_array_reps[i]);
+                xstrfmtcat(resp, "(x%u)", job_ptr->job_resrcs->cpu_array_reps[i]);
             }
             sep = ",";
         }
@@ -1055,8 +979,7 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
-                          uint32_t protocol_version) {
+extern char *replace_node(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
     job_desc_msg_t job_alloc_req;
     job_failures_t *job_fail_ptr;
     struct job_record *job_ptr, *new_job_ptr = NULL;
@@ -1101,12 +1024,9 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
         job_ptr = job_fail_ptr->job_ptr;
     }
 
-    if ((cmd_uid != job_ptr->user_id) &&
-        (cmd_uid != 0) &&
-        (cmd_uid != getuid())) {
+    if ((cmd_uid != job_ptr->user_id) && (cmd_uid != 0) && (cmd_uid != getuid())) {
         info("slurmctld/nonstop: Security violation, User ID %u "
-             "attempting to modify job ID %u",
-             cmd_uid, job_ptr->job_id);
+             "attempting to modify job ID %u", cmd_uid, job_ptr->job_id);
         xstrfmtcat(resp, "%s EPERM", SLURM_VERSION_STRING);
         goto fini;
     }
@@ -1137,46 +1057,34 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
     }
 
     /* Process previously submitted job merge */
-    if (job_fail_ptr->pending_node_name &&
-        (job_fail_ptr->pending_job_id == 0)) {
+    if (job_fail_ptr->pending_node_name && (job_fail_ptr->pending_job_id == 0)) {
         error("slurmctld/nonstop: pending_node_name set, but "
               "pending_job_id is zero for job %u", job_id);
         xfree(job_fail_ptr->pending_node_name);
     }
-    if (job_fail_ptr->pending_node_name &&
-        job_fail_ptr->pending_job_id) {
+    if (job_fail_ptr->pending_node_name && job_fail_ptr->pending_job_id) {
         new_job_ptr = find_job_record(job_fail_ptr->pending_job_id);
-        if (!new_job_ptr ||
-            (new_job_ptr->user_id != job_fail_ptr->user_id) ||
-            IS_JOB_FINISHED(new_job_ptr)) {
+        if (!new_job_ptr || (new_job_ptr->user_id != job_fail_ptr->user_id) || IS_JOB_FINISHED(new_job_ptr)) {
             info("slurmctld/nonstop: pending_job_id %u missing "
-                 "for merge to job %u",
-                 job_fail_ptr->pending_job_id, job_id);
+                 "for merge to job %u", job_fail_ptr->pending_job_id, job_id);
             job_fail_ptr->pending_job_delay = 0;
             job_fail_ptr->pending_job_id = 0;
             xfree(job_fail_ptr->pending_node_name);
         } else if (IS_JOB_PENDING(new_job_ptr)) {
-            xstrfmtcat(resp,
-                       "%s EREPLACELATER %"PRIu64"",
-                       SLURM_VERSION_STRING,
-                       (uint64_t) new_job_ptr->start_time);
+            xstrfmtcat(resp, "%s EREPLACELATER %"PRIu64"", SLURM_VERSION_STRING, (uint64_t) new_job_ptr->start_time);
             goto fini;
         }
     }
     if (job_fail_ptr->pending_node_name) {
         if (xstrcmp(job_fail_ptr->pending_node_name, node_name)) {
-            xstrfmtcat(resp, "%s EREPLACEPENDING %s",
-                       SLURM_VERSION_STRING,
-                       job_fail_ptr->pending_node_name);
+            xstrfmtcat(resp, "%s EREPLACEPENDING %s", SLURM_VERSION_STRING, job_fail_ptr->pending_node_name);
             goto fini;
         }
         goto merge;
     }
 
-    if ((max_spare_node_count != 0) &&
-        (job_fail_ptr->replace_node_cnt >= max_spare_node_count)) {
-        xstrfmtcat(resp, "%s EMAXSPARECOUNT %u", SLURM_VERSION_STRING,
-                   max_spare_node_count);
+    if ((max_spare_node_count != 0) && (job_fail_ptr->replace_node_cnt >= max_spare_node_count)) {
+        xstrfmtcat(resp, "%s EMAXSPARECOUNT %u", SLURM_VERSION_STRING, max_spare_node_count);
         goto fini;
     }
 
@@ -1240,9 +1148,7 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
                       SLURM_PROTOCOL_VERSION);
     if (rc != SLURM_SUCCESS) {
         /* Determine expected start time */
-        i = job_allocate(&job_alloc_req, 1, 1, &will_run, 1,
-                         cmd_uid, &new_job_ptr, NULL,
-                         SLURM_PROTOCOL_VERSION);
+        i = job_allocate(&job_alloc_req, 1, 1, &will_run, 1, cmd_uid, &new_job_ptr, NULL, SLURM_PROTOCOL_VERSION);
         if (i == SLURM_SUCCESS) {
             will_run_idle = will_run->start_time;
             slurm_free_will_run_response_msg(will_run);
@@ -1253,33 +1159,25 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
         /* Second: Try to allocate from hot spare nodes */
         resv_desc_msg_t resv_desc;
 
-        xstrfmtcat(job_alloc_req.reservation, "HOT_SPARE_%s",
-                   job_ptr->partition);
+        xstrfmtcat(job_alloc_req.reservation, "HOT_SPARE_%s", job_ptr->partition);
         if (find_resv_name(job_alloc_req.reservation)) {
             slurm_init_resv_desc_msg(&resv_desc);
             resv_desc.name = job_alloc_req.reservation;
             xstrfmtcat(resv_desc.users, "+%u", cmd_uid);
             (void) update_resv(&resv_desc);
             xfree(resv_desc.users);
-            rc = job_allocate(&job_alloc_req, 1, 0, NULL, 1,
-                              cmd_uid, &new_job_ptr, NULL,
-                              SLURM_PROTOCOL_VERSION);
+            rc = job_allocate(&job_alloc_req, 1, 0, NULL, 1, cmd_uid, &new_job_ptr, NULL, SLURM_PROTOCOL_VERSION);
             if (rc != SLURM_SUCCESS) {
                 /* Determine expected start time */
-                i = job_allocate(&job_alloc_req, 1, 1,
-                                 &will_run, 1, cmd_uid,
-                                 &new_job_ptr, NULL,
+                i = job_allocate(&job_alloc_req, 1, 1, &will_run, 1, cmd_uid, &new_job_ptr, NULL,
                                  SLURM_PROTOCOL_VERSION);
                 if (i == SLURM_SUCCESS) {
                     will_run_resv = will_run->start_time;
-                    slurm_free_will_run_response_msg(
-                            will_run);
+                    slurm_free_will_run_response_msg(will_run);
                 }
                 if (will_run_resv) {
                     /* Submit job in resv for later use */
-                    i = job_allocate(&job_alloc_req, 0, 0,
-                                     NULL, 1, cmd_uid,
-                                     &new_job_ptr, NULL,
+                    i = job_allocate(&job_alloc_req, 0, 0, NULL, 1, cmd_uid, &new_job_ptr, NULL,
                                      SLURM_PROTOCOL_VERSION);
                     if (i == SLURM_SUCCESS)
                         will_run_time = will_run_resv;
@@ -1294,8 +1192,7 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
 
     if ((rc != SLURM_SUCCESS) && (will_run_time == 0) && will_run_idle) {
         /* Submit job for later use without using reservation */
-        i = job_allocate(&job_alloc_req, 0, 0, NULL, 1, cmd_uid,
-                         &new_job_ptr, NULL, SLURM_PROTOCOL_VERSION);
+        i = job_allocate(&job_alloc_req, 0, 0, NULL, 1, cmd_uid, &new_job_ptr, NULL, SLURM_PROTOCOL_VERSION);
         if (i == SLURM_SUCCESS)
             will_run_time = will_run_idle;
     }
@@ -1320,10 +1217,8 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
             delay = (long int) (will_run_time - time(NULL));
             delay = MIN(delay, 0);
             info("slurmctld/nonstop: job %u to get resources "
-                 "from job %u in %ld seconds)",
-                 job_ptr->job_id, new_job_ptr->job_id, delay);
-            xstrfmtcat(resp, "%s EREPLACELATER %"PRIu64"",
-                       SLURM_VERSION_STRING, (uint64_t) will_run_time);
+                 "from job %u in %ld seconds)", job_ptr->job_id, new_job_ptr->job_id, delay);
+            xstrfmtcat(resp, "%s EREPLACELATER %"PRIu64"", SLURM_VERSION_STRING, (uint64_t) will_run_time);
             job_fail_ptr->pending_job_id = new_job_ptr->job_id;
             xfree(job_fail_ptr->pending_node_name);
             job_fail_ptr->pending_node_name = xstrdup(node_name);
@@ -1335,8 +1230,7 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
                 job_fail_ptr->pending_job_delay = extend;
             }
         } else {
-            xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s",
-                       SLURM_VERSION_STRING, slurm_strerror(rc));
+            xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s", SLURM_VERSION_STRING, slurm_strerror(rc));
         }
         goto fini;
     }
@@ -1359,12 +1253,9 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
     slurm_mutex_unlock(&job_fail_mutex);
 
     if (rc) {
-        info("slurmctld/nonstop: can not shrink job %u: %s",
-             new_job_ptr->job_id, slurm_strerror(rc));
+        info("slurmctld/nonstop: can not shrink job %u: %s", new_job_ptr->job_id, slurm_strerror(rc));
         _kill_job(new_job_ptr->job_id, cmd_uid);
-        xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s:",
-                   SLURM_VERSION_STRING,
-                   slurm_strerror(rc));
+        xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s:", SLURM_VERSION_STRING, slurm_strerror(rc));
         slurm_mutex_lock(&job_fail_mutex);    /* Resume lock */
         goto fini;
     }
@@ -1377,11 +1268,8 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
     job_alloc_req.min_nodes = INFINITE;
     rc = _update_job(&job_alloc_req, cmd_uid);
     if (rc) {
-        info("slurmctld/nonstop: can not grow job %u: %s",
-             job_id, slurm_strerror(rc));
-        xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s:",
-                   SLURM_VERSION_STRING,
-                   slurm_strerror(rc));
+        info("slurmctld/nonstop: can not grow job %u: %s", job_id, slurm_strerror(rc));
+        xstrfmtcat(resp, "%s ENODEREPLACEFAIL %s:", SLURM_VERSION_STRING, slurm_strerror(rc));
         goto fini;
     }
 
@@ -1395,10 +1283,8 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
         xfree(job_fail_ptr->fail_node_names[failed_inx]);
         job_fail_ptr->fail_node_cnt--;
         for (i = failed_inx; i < job_fail_ptr->fail_node_cnt; i++) {
-            job_fail_ptr->fail_node_cpus[i] =
-                    job_fail_ptr->fail_node_cpus[i + 1];
-            job_fail_ptr->fail_node_names[i] =
-                    job_fail_ptr->fail_node_names[i + 1];
+            job_fail_ptr->fail_node_cpus[i] = job_fail_ptr->fail_node_cpus[i + 1];
+            job_fail_ptr->fail_node_names[i] = job_fail_ptr->fail_node_names[i + 1];
         }
     }
 
@@ -1414,28 +1300,23 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
         rc = _update_job(&job_alloc_req, cmd_uid);
         if (rc) {
             info("slurmctld/nonstop: can remove failing node %s "
-                 "from job %u: %s",
-                 node_name, job_id, slurm_strerror(rc));
+                 "from job %u: %s", node_name, job_id, slurm_strerror(rc));
         }
         xfree(job_alloc_req.req_nodes);
     }
 
     /* Work complete */
     xstrfmtcat(resp, "%s ENOERROR ReplacementNode %s NewNodeList %s "
-                     "NewNodeCount %u", SLURM_VERSION_STRING,
-               new_node_name, job_ptr->nodes, job_ptr->node_cnt);
+                     "NewNodeCount %u", SLURM_VERSION_STRING, new_node_name, job_ptr->nodes, job_ptr->node_cnt);
     if (job_ptr->job_resrcs) {
         char *sep = "";
         xstrfmtcat(resp, " NewCpusPerNode ");
         for (i = 0; i < job_ptr->job_resrcs->cpu_array_cnt; i++) {
             if (job_ptr->job_resrcs->cpu_array_value[i] == 0)
                 continue;
-            xstrfmtcat(resp, "%s%u", sep,
-                       job_ptr->job_resrcs->cpu_array_value[i]);
+            xstrfmtcat(resp, "%s%u", sep, job_ptr->job_resrcs->cpu_array_value[i]);
             if (job_ptr->job_resrcs->cpu_array_reps[i] > 1) {
-                xstrfmtcat(resp, "(x%u)",
-                           job_ptr->job_resrcs->
-                                   cpu_array_reps[i]);
+                xstrfmtcat(resp, "(x%u)", job_ptr->job_resrcs->cpu_array_reps[i]);
             }
             sep = ",";
         }
@@ -1457,8 +1338,7 @@ extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *show_config(char *cmd_ptr, uid_t cmd_uid,
-                         uint32_t protocol_version) {
+extern char *show_config(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
     char *resp = NULL;
 
     xstrfmtcat(resp, "%s ENOERROR ", SLURM_VERSION_STRING);
@@ -1478,8 +1358,7 @@ extern char *show_config(char *cmd_ptr, uid_t cmd_uid,
     xstrfmtcat(resp, "TimeLimitExtend %hu ", time_limit_extend);
 
     if (user_drain_allow_str)
-        xstrfmtcat(resp, "UserDrainAllow \"%s\" ",
-                   user_drain_allow_str);
+        xstrfmtcat(resp, "UserDrainAllow \"%s\" ", user_drain_allow_str);
     else
         xstrfmtcat(resp, "UserDrainAllow \"none\" ");
 
@@ -1529,8 +1408,7 @@ extern char *show_job(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
         list_append(job_fail_list, job_fail_ptr);
     }
 
-    if ((cmd_uid != 0) && (cmd_uid != getuid()) &&
-        (cmd_uid != job_fail_ptr->job_ptr->user_id)) {
+    if ((cmd_uid != 0) && (cmd_uid != getuid()) && (cmd_uid != job_fail_ptr->job_ptr->user_id)) {
         xstrfmtcat(resp, "%s EPERM", SLURM_VERSION_STRING);
         goto fini;
     }
@@ -1551,35 +1429,26 @@ extern char *show_job(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) {
             continue;
         failing_cnt++;
         /* Format: nodename number_of_cpus state */
-        xstrfmtcat(failing_nodes, "%s %u ",
-                   node_ptr->name,
-                   _get_job_cpus(job_ptr, i));
+        xstrfmtcat(failing_nodes, "%s %u ", node_ptr->name, _get_job_cpus(job_ptr, i));
     }
-    xstrfmtcat(resp, "FAIL_NODE_CNT %u ",
-               job_fail_ptr->fail_node_cnt + failing_cnt);
+    xstrfmtcat(resp, "FAIL_NODE_CNT %u ", job_fail_ptr->fail_node_cnt + failing_cnt);
     if (job_fail_ptr->fail_node_cnt) {
         for (i = 0; i < job_fail_ptr->fail_node_cnt; i++) {
-            xstrfmtcat(resp, "%s %u ",
-                       job_fail_ptr->fail_node_names[i],
-                       job_fail_ptr->fail_node_cpus[i]);
+            xstrfmtcat(resp, "%s %u ", job_fail_ptr->fail_node_names[i], job_fail_ptr->fail_node_cpus[i]);
         }
     }
     xstrfmtcat(resp, "%s", failing_nodes);
 
-    xstrfmtcat(resp, "PENDING_JOB_DELAY %hu ",
-               job_fail_ptr->pending_job_delay);
+    xstrfmtcat(resp, "PENDING_JOB_DELAY %hu ", job_fail_ptr->pending_job_delay);
     xstrfmtcat(resp, "PENDING_JOB_ID %u ", job_fail_ptr->pending_job_id);
 
     if (job_fail_ptr->pending_node_name)
-        xstrfmtcat(resp, "PENDING_NODE_NAME \"%s\" ",
-                   job_fail_ptr->pending_node_name);
+        xstrfmtcat(resp, "PENDING_NODE_NAME \"%s\" ", job_fail_ptr->pending_node_name);
     else
         xstrfmtcat(resp, "PENDING_NODE_NAME \"none\" ");
 
-    xstrfmtcat(resp, "REPLACE_NODE_CNT %u ",
-               job_fail_ptr->replace_node_cnt);
-    xstrfmtcat(resp, "TIME_EXTEND_AVAIL %u",
-               job_fail_ptr->time_extend_avail);
+    xstrfmtcat(resp, "REPLACE_NODE_CNT %u ", job_fail_ptr->replace_node_cnt);
+    xstrfmtcat(resp, "TIME_EXTEND_AVAIL %u", job_fail_ptr->time_extend_avail);
 
     fini:
     slurm_mutex_unlock(&job_fail_mutex);
@@ -1617,8 +1486,7 @@ extern char *time_incr(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) 
     job_fail_ptr = list_find_first(job_fail_list, _job_fail_find, &job_id);
     if (!job_fail_ptr || !_valid_job_ptr(job_fail_ptr)) {
         if (find_job_record(job_id)) {
-            xstrfmtcat(resp, "%s ENOINCREASETIMELIMIT",
-                       SLURM_VERSION_STRING);
+            xstrfmtcat(resp, "%s ENOINCREASETIMELIMIT", SLURM_VERSION_STRING);
         } else
             xstrfmtcat(resp, "%s EJOBID", SLURM_VERSION_STRING);
         goto fini;
@@ -1647,8 +1515,7 @@ extern char *time_incr(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version) 
         rc = _update_job(&job_specs, cmd_uid);
     }
     if (rc) {
-        xstrfmtcat(resp, "%s EJOBUPDATE %s", SLURM_VERSION_STRING,
-                   slurm_strerror(rc));
+        xstrfmtcat(resp, "%s EJOBUPDATE %s", SLURM_VERSION_STRING, slurm_strerror(rc));
         job_fail_ptr->time_extend_avail += minutes;
     } else {
         xstrfmtcat(resp, "%s ENOERROR", SLURM_VERSION_STRING);
@@ -1682,17 +1549,12 @@ static void _send_event_callbacks(void) {
             continue;
         if (job_fail_ptr->callback_port) {
             if (nonstop_debug > 0) {
-                info("nonstop: callback to job %u flags %x",
-                     job_fail_ptr->job_id,
-                     job_fail_ptr->callback_flags);
+                info("nonstop: callback to job %u flags %x", job_fail_ptr->job_id, job_fail_ptr->callback_flags);
             }
             callback_addr = job_fail_ptr->callback_addr;
-            callback_addr.sin_port =
-                    htons(job_fail_ptr->callback_port);
+            callback_addr.sin_port = htons(job_fail_ptr->callback_port);
             callback_flags = job_fail_ptr->callback_flags;
-            debug("%s: job_id %d flags 0x%x", __func__,
-                  job_fail_ptr->job_id,
-                  job_fail_ptr->callback_flags);
+            debug("%s: job_id %d flags 0x%x", __func__, job_fail_ptr->job_id, job_fail_ptr->callback_flags);
             job_fail_ptr->callback_flags = 0;
             callback_jobid = job_fail_ptr->job_id;
             /* Release locks for I/O, which could be slow */
@@ -1700,19 +1562,15 @@ static void _send_event_callbacks(void) {
             fd = slurm_open_msg_conn(&callback_addr);
             sent = 0;
             if (fd < 0) {
-                error("nonstop: socket open fail for job %u: %m",
-                      callback_jobid);
+                error("nonstop: socket open fail for job %u: %m", callback_jobid);
                 goto io_fini;
             }
-            sent = slurm_msg_sendto_timeout(fd,
-                                            (char *) &callback_flags,
-                                            sizeof(uint32_t), 100000);
+            sent = slurm_msg_sendto_timeout(fd, (char *) &callback_flags, sizeof(uint32_t), 100000);
             (void) close(fd);
             /* Reset locks and clean-up as needed */
             io_fini:
             slurm_mutex_lock(&job_fail_mutex);
-            if ((sent != sizeof(uint32_t)) &&
-                (job_fail_ptr->magic == FAILURE_MAGIC) &&
+            if ((sent != sizeof(uint32_t)) && (job_fail_ptr->magic == FAILURE_MAGIC) &&
                 (callback_jobid == job_fail_ptr->job_id)) {
                 /* Failed to send flags */
                 job_fail_ptr->callback_flags |= callback_flags;
@@ -1739,8 +1597,7 @@ static void *_state_thread(void *no_data) {
             _send_event_callbacks();
             last_callback_time = now;
         }
-        if (thread_shutdown ||
-            (difftime(now, last_save_time) >= NONSTOP_SAVE_PERIOD)) {
+        if (thread_shutdown || (difftime(now, last_save_time) >= NONSTOP_SAVE_PERIOD)) {
             save_nonstop_state();
             last_save_time = now;
         }

@@ -72,10 +72,7 @@ typedef struct {
 } srun_info_t;
 
 typedef enum {
-    STEPD_STEP_TASK_INIT,
-    STEPD_STEP_TASK_STARTING,
-    STEPD_STEP_TASK_RUNNING,
-    STEPD_STEP_TASK_COMPLETE
+    STEPD_STEP_TASK_INIT, STEPD_STEP_TASK_STARTING, STEPD_STEP_TASK_RUNNING, STEPD_STEP_TASK_COMPLETE
 } stepd_step_task_state_t;
 
 typedef struct {
@@ -259,29 +256,25 @@ typedef struct {
 } stepd_step_rec_t;
 
 
-stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
-                                        uint16_t protocol_version);
+stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg, uint16_t protocol_version);
 
 stepd_step_rec_t *batch_stepd_step_rec_create(batch_job_launch_msg_t *msg);
 
 void stepd_step_rec_destroy(stepd_step_rec_t *job);
 
-srun_info_t *srun_info_create(slurm_cred_t *cred, slurm_addr_t *respaddr,
-                              slurm_addr_t *ioaddr, uint16_t protocol_version);
+srun_info_t *
+srun_info_create(slurm_cred_t *cred, slurm_addr_t *respaddr, slurm_addr_t *ioaddr, uint16_t protocol_version);
 
 void srun_info_destroy(srun_info_t *srun);
 
-stepd_step_task_info_t *task_info_create(int taskid, int gtaskid,
-                                         char *ifname, char *ofname,
-                                         char *efname);
+stepd_step_task_info_t *task_info_create(int taskid, int gtaskid, char *ifname, char *ofname, char *efname);
 
 /*
  *  Return a task info structure corresponding to pid.
  *   We inline it here so that it can be included from src/common/plugstack.c
  *   without undefined symbol warnings.
  */
-static inline stepd_step_task_info_t *
-job_task_info_by_pid(stepd_step_rec_t *job, pid_t pid) {
+static inline stepd_step_task_info_t *job_task_info_by_pid(stepd_step_rec_t *job, pid_t pid) {
     uint32_t i;
 
     if (!job)

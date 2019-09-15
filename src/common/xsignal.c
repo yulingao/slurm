@@ -63,8 +63,7 @@ strong_alias(xsignal_unblock, slurm_xsignal_unblock
 strong_alias(xsignal_sigset_create, slurm_xsignal_sigset_create
 );
 
-SigFunc *
-xsignal(int signo, SigFunc *f) {
+SigFunc *xsignal(int signo, SigFunc *f) {
     struct sigaction sa, old_sa;
 
     sa.sa_handler = f;
@@ -79,8 +78,7 @@ xsignal(int signo, SigFunc *f) {
 /*
  *  Wrapper for pthread_sigmask.
  */
-static int
-_sigmask(int how, sigset_t *set, sigset_t *oset) {
+static int _sigmask(int how, sigset_t *set, sigset_t *oset) {
     int err;
 
     if ((err = pthread_sigmask(how, set, oset)))

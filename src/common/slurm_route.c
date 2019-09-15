@@ -56,14 +56,11 @@
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
 
-strong_alias(route_split_hostlist_treewidth,
-        slurm_route_split_hostlist_treewidth
+strong_alias(route_split_hostlist_treewidth, slurm_route_split_hostlist_treewidth
 );
 
 typedef struct slurm_route_ops {
-    int (*split_hostlist)(hostlist_t hl,
-                          hostlist_t **sp_hl,
-                          int *count, uint16_t tree_width);
+    int (*split_hostlist)(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width);
 
     int (*reconfigure)(void);
 
@@ -75,12 +72,8 @@ typedef struct slurm_route_ops {
 /*
  * Must be synchronized with slurm_route_ops_t above.
  */
-static const char *syms[] = {
-        "route_p_split_hostlist",
-        "route_p_reconfigure",
-        "route_p_next_collector",
-        "route_p_next_collector_backup"
-};
+static const char *syms[] = {"route_p_split_hostlist", "route_p_reconfigure", "route_p_next_collector",
+                             "route_p_next_collector_backup"};
 
 static slurm_route_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -182,8 +175,7 @@ static void _set_collectors(char *this_node_name) {
                 break;
         }
         if (i == hl_count) {
-            fatal("ROUTE -- %s not found in node_record_table",
-                  this_node_name);
+            fatal("ROUTE -- %s not found in node_record_table", this_node_name);
         }
         if (f == 0) {
             /*
@@ -195,40 +187,30 @@ static void _set_collectors(char *this_node_name) {
             xfree(msg_collect_node);
             msg_collect_node = xmalloc(sizeof(slurm_addr_t));
             if (ctldparent) {
-                slurm_set_addr(msg_collect_node, parent_port,
-                               parent);
+                slurm_set_addr(msg_collect_node, parent_port, parent);
             } else {
                 slurm_conf_get_addr(parent, msg_collect_node);
                 msg_collect_node->sin_port = htons(parent_port);
             }
             if (debug_flags & DEBUG_FLAG_ROUTE) {
-                slurm_print_slurm_addr(msg_collect_node,
-                                       addrbuf, 32);
-                info("ROUTE -- message collector (%s) address is %s",
-                     parent, addrbuf);
+                slurm_print_slurm_addr(msg_collect_node, addrbuf, 32);
+                info("ROUTE -- message collector (%s) address is %s", parent, addrbuf);
             }
             msg_backup_cnt = 0;
             xfree(msg_collect_backup[0]);
             for (i = 1; (i < backup_cnt) && backup[i]; i++) {
                 msg_backup_cnt = i;
-                msg_collect_backup[i - 1] =
-                        xmalloc(sizeof(slurm_addr_t));
+                msg_collect_backup[i - 1] = xmalloc(sizeof(slurm_addr_t));
                 if (ctldparent) {
-                    slurm_set_addr(msg_collect_backup[i - 1],
-                                   backup_port, backup[i]);
+                    slurm_set_addr(msg_collect_backup[i - 1], backup_port, backup[i]);
                 } else {
-                    slurm_conf_get_addr(backup[i],
-                                        msg_collect_backup[i - 1]);
-                    msg_collect_backup[i - 1]->sin_port =
-                            htons(backup_port);
+                    slurm_conf_get_addr(backup[i], msg_collect_backup[i - 1]);
+                    msg_collect_backup[i - 1]->sin_port = htons(backup_port);
                 }
                 if (debug_flags & DEBUG_FLAG_ROUTE) {
-                    slurm_print_slurm_addr(
-                            msg_collect_backup[i - 1],
-                            addrbuf, 32);
+                    slurm_print_slurm_addr(msg_collect_backup[i - 1], addrbuf, 32);
                     info("ROUTE -- message collector backup[%d] (%s) "
-                         "address is %s",
-                         i, backup[i], addrbuf);
+                         "address is %s", i, backup[i], addrbuf);
                 }
             }
             if ((i == 1) && (debug_flags & DEBUG_FLAG_ROUTE))
@@ -279,13 +261,10 @@ static void _set_collectors(char *this_node_name) {
     clean:
     if (debug_flags & DEBUG_FLAG_ROUTE) {
         slurm_print_slurm_addr(msg_collect_node, addrbuf, 32);
-        xstrfmtcat(tmp, "ROUTE -- %s is a %s node (parent:%s",
-                   this_node_name,
-                   this_is_collector ? "collector" : "leaf", addrbuf);
-        for (i = 0; (i < backup_cnt) && msg_collect_backup[i];
-             i++) {
-            slurm_print_slurm_addr(msg_collect_backup[i],
-                                   addrbuf, 32);
+        xstrfmtcat(tmp, "ROUTE -- %s is a %s node (parent:%s", this_node_name, this_is_collector ? "collector" : "leaf",
+                   addrbuf);
+        for (i = 0; (i < backup_cnt) && msg_collect_backup[i]; i++) {
+            slurm_print_slurm_addr(msg_collect_backup[i], addrbuf, 32);
             xstrfmtcat(tmp, " backup[%d]:%s", i, addrbuf);
         }
         info("%s)", tmp);
@@ -319,8 +298,7 @@ extern int route_init(char *node_name) {
 
     type = slurm_get_route_plugin();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -375,9 +353,7 @@ extern int route_fini(void) {
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_g_split_hostlist(hostlist_t hl,
-                                  hostlist_t **sp_hl,
-                                  int *count, uint16_t tree_width) {
+extern int route_g_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width) {
     int rc;
     int j, nnodes, nnodex;
     char *buf;
@@ -391,13 +367,11 @@ extern int route_g_split_hostlist(hostlist_t hl,
          * split_hostlise call.  */
         nnodes = hostlist_count(hl);
         buf = hostlist_ranged_string_xmalloc(hl);
-        info("ROUTE: split_hostlist: hl=%s tree_width %u",
-             buf, tree_width);
+        info("ROUTE: split_hostlist: hl=%s tree_width %u", buf, tree_width);
         xfree(buf);
     }
 
-    rc = (*(ops.split_hostlist))(hl, sp_hl, count,
-                                 tree_width ? tree_width : g_tree_width);
+    rc = (*(ops.split_hostlist))(hl, sp_hl, count, tree_width ? tree_width : g_tree_width);
     if (debug_flags & DEBUG_FLAG_ROUTE) {
         /* Sanity check to make sure all nodes in msg list are in
          * a child list */
@@ -407,8 +381,7 @@ extern int route_g_split_hostlist(hostlist_t hl,
         }
         if (nnodex != nnodes) {    /* CLANG false positive */
             info("ROUTE: number of nodes in split lists (%d)"
-                 " is not equal to number in input list (%d)",
-                 nnodex, nnodes);
+                 " is not equal to number in input list (%d)", nnodex, nnodes);
         }
     }
     return rc;
@@ -474,9 +447,7 @@ extern slurm_addr_t *route_g_next_collector_backup(void) {
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_split_hostlist_treewidth(hostlist_t hl,
-                                          hostlist_t **sp_hl,
-                                          int *count, uint16_t tree_width) {
+extern int route_split_hostlist_treewidth(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width) {
     int host_count;
     int *span = NULL;
     char *name = NULL;

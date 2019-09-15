@@ -96,8 +96,7 @@ extern void node_features_g_node_state(char **avail_modes, char **current_mode);
  * IN active_features - New active features
  * IN node_bitmap - bitmap of nodes changed
  * RET error code */
-extern int node_features_g_node_update(char *active_features,
-                                       bitstr_t *node_bitmap);
+extern int node_features_g_node_update(char *active_features, bitstr_t *node_bitmap);
 
 /*
  * Return TRUE if the specified node update request is valid with respect
@@ -106,8 +105,7 @@ extern int node_features_g_node_update(char *active_features,
  * node_ptr IN - Pointer to struct node_record record
  * update_node_msg IN - Pointer to update request
  */
-extern bool node_features_g_node_update_valid(void *node_ptr,
-                                              update_node_msg_t *update_node_msg);
+extern bool node_features_g_node_update_valid(void *node_ptr, update_node_msg_t *update_node_msg);
 
 /*
  * Translate a node's feature specification by replacing any features associated
@@ -119,8 +117,7 @@ extern bool node_features_g_node_update_valid(void *node_ptr,
  * IN node_inx - index of node in node table
  * RET node's new merged features, must be xfreed
  */
-extern char *node_features_g_node_xlate(char *new_features, char *orig_features,
-                                        char *avail_features, int node_inx);
+extern char *node_features_g_node_xlate(char *new_features, char *orig_features, char *avail_features, int node_inx);
 
 /* Translate a node's new feature specification into a "standard" ordering
  * RET node's new merged features, must be xfreed */

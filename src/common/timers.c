@@ -71,9 +71,9 @@ extern int slurm_delta_tv(struct timeval *tv) {
  * IN len_tv_str - size of tv_str in bytes
  * IN from - where the function was called form
  */
-extern void slurm_diff_tv_str(struct timeval *tv1, struct timeval *tv2,
-                              char *tv_str, int len_tv_str, const char *from,
-                              long limit, long *delta_t) {
+extern void
+slurm_diff_tv_str(struct timeval *tv1, struct timeval *tv2, char *tv_str, int len_tv_str, const char *from, long limit,
+                  long *delta_t) {
     char p[64] = "";
     struct tm tm;
     int debug_limit = limit;
@@ -98,14 +98,10 @@ extern void slurm_diff_tv_str(struct timeval *tv1, struct timeval *tv2,
                 error("strftime(): %m");
             if (*delta_t > limit) {
                 verbose("Warning: Note very large processing "
-                        "time from %s: %s began=%s.%3.3d",
-                        from, tv_str, p,
-                        (int) (tv1->tv_usec / 1000));
+                        "time from %s: %s began=%s.%3.3d", from, tv_str, p, (int) (tv1->tv_usec / 1000));
             } else {    /* Log anything over 1 second here */
                 debug("Note large processing time from %s: "
-                      "%s began=%s.%3.3d",
-                      from, tv_str, p,
-                      (int) (tv1->tv_usec / 1000));
+                      "%s began=%s.%3.3d", from, tv_str, p, (int) (tv1->tv_usec / 1000));
             }
         }
     }

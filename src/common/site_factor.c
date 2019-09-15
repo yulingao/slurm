@@ -54,11 +54,7 @@ typedef struct slurm_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_ops_t.
  */
-static const char *syms[] = {
-        "site_factor_p_reconfig",
-        "site_factor_p_set",
-        "site_factor_p_update",
-};
+static const char *syms[] = {"site_factor_p_reconfig", "site_factor_p_set", "site_factor_p_update",};
 
 /* Local variables */
 static slurm_ops_t ops;
@@ -86,8 +82,7 @@ extern int site_factor_plugin_init(void) {
 
     type = slurm_get_priority_site_factor_plugin();
 
-    g_context = plugin_context_create(plugin_type, type, (void **) &ops,
-                                      syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);

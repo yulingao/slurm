@@ -217,16 +217,14 @@ extern int task_p_slurmd_batch_request(batch_job_launch_msg_t *req) {
 /*
  * task_p_slurmd_launch_request()
  */
-extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req,
-                                        uint32_t node_id) {
+extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req, uint32_t node_id) {
     return SLURM_SUCCESS;
 }
 
 /*
  * task_p_slurmd_reserve_resources()
  */
-extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req,
-                                           uint32_t node_id) {
+extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req, uint32_t node_id) {
     debug("%s: %u %u", __func__, req->job_id, node_id);
     return SLURM_SUCCESS;
 }
@@ -400,8 +398,7 @@ extern int task_p_pre_launch_priv(stepd_step_rec_t *job, pid_t pid) {
  *	It is preceded by --task-epilog (from srun command line)
  *	followed by TaskEpilog program (from slurm.conf).
  */
-extern int task_p_post_term(stepd_step_rec_t *job,
-                            stepd_step_task_info_t *task) {
+extern int task_p_post_term(stepd_step_rec_t *job, stepd_step_task_info_t *task) {
     int rc = SLURM_SUCCESS;
     DEF_TIMERS;
 

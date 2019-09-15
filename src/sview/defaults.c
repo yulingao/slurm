@@ -70,38 +70,22 @@ enum {
  * known options) create it in function create_model_*.
  */
 
-static display_data_t display_data_defaults[] = {
-        {G_TYPE_INT,    SORTID_POS, NULL, false, EDIT_NONE,    NULL},
-        {G_TYPE_STRING, SORTID_ADMIN,           "Start in Admin Mode",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_BUTTON_SIZE,     "Node Button Size in Pixels",
-                                          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_DEFAULT_PAGE,    "Default Page",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_GRID_HORI,       "Grid: Nodes before Horizontal break",
-                                          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_GRID_VERT,       "Grid: Nodes before Vertical break",
-                                          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_GRID_X_WIDTH,    "Grid: Nodes in Row",
-                                          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_GRID_TOPO_ORDER, "Grid: Topology Order",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_PAGE_VISIBLE,    "Visible Pages",
-                                          true,  EDIT_ARRAY,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_REFRESH_DELAY,   "Refresh Delay in Secs",
-                                          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_RULED_TV,        "Ruled Tables",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_SHOW_GRID,       "Show Grid",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_SHOW_HIDDEN,     "Show Hidden",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_SAVE_PAGE_OPTS,  "Save Page Settings",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_STRING, SORTID_TAB_POS,         "Tab Position",
-                                          true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
-        {G_TYPE_NONE,   -1,         NULL, false, EDIT_NONE}
-};
+static display_data_t display_data_defaults[] = {{G_TYPE_INT,    SORTID_POS, NULL,                                              false, EDIT_NONE,    NULL},
+                                                 {G_TYPE_STRING, SORTID_ADMIN,           "Start in Admin Mode",                 true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_BUTTON_SIZE,     "Node Button Size in Pixels",          true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_DEFAULT_PAGE,    "Default Page",                        true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_GRID_HORI,       "Grid: Nodes before Horizontal break", true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_GRID_VERT,       "Grid: Nodes before Vertical break",   true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_GRID_X_WIDTH,    "Grid: Nodes in Row",                  true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_GRID_TOPO_ORDER, "Grid: Topology Order",                true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_PAGE_VISIBLE,    "Visible Pages",                       true,  EDIT_ARRAY,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_REFRESH_DELAY,   "Refresh Delay in Secs",               true,  EDIT_TEXTBOX, NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_RULED_TV,        "Ruled Tables",                        true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_SHOW_GRID,       "Show Grid",                           true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_SHOW_HIDDEN,     "Show Hidden",                         true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_SAVE_PAGE_OPTS,  "Save Page Settings",                  true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_STRING, SORTID_TAB_POS,         "Tab Position",                        true,  EDIT_MODEL,   NULL, create_model_defaults, NULL},
+                                                 {G_TYPE_NONE,   -1,         NULL,                                              false, EDIT_NONE}};
 
 
 extern display_data_t main_display_data[];
@@ -123,9 +107,7 @@ static int _trans_tab_pos(int tab_pos) {
     return 0;
 }
 
-static void _set_active_combo_defaults(GtkComboBox *combo,
-                                       sview_config_t *sview_config,
-                                       int type) {
+static void _set_active_combo_defaults(GtkComboBox *combo, sview_config_t *sview_config, int type) {
     int action = 0;
 
     switch (type) {
@@ -160,8 +142,7 @@ static void _set_active_combo_defaults(GtkComboBox *combo,
     gtk_combo_box_set_active(combo, action);
 }
 
-static const char *_set_sview_config(sview_config_t *sview_config,
-                                     const char *new_text, int column) {
+static const char *_set_sview_config(sview_config_t *sview_config, const char *new_text, int column) {
     char *type = "";
     int temp_int = 0;
 
@@ -292,16 +273,14 @@ static const char *_set_sview_config(sview_config_t *sview_config,
     return type;
 }
 
-static void _admin_focus_toggle(GtkToggleButton *toggle_button,
-                                bool *visible) {
+static void _admin_focus_toggle(GtkToggleButton *toggle_button, bool *visible) {
     if (visible) {
         (*visible) = gtk_toggle_button_get_active(toggle_button);
         global_send_update_msg = 1;
     }
 }
 
-static void _admin_edit_combo_box_defaults(GtkComboBox *combo,
-                                           sview_config_t *sview_config) {
+static void _admin_edit_combo_box_defaults(GtkComboBox *combo, sview_config_t *sview_config) {
     GtkTreeModel *model = NULL;
     GtkTreeIter iter;
     int column = 0;
@@ -325,9 +304,7 @@ static void _admin_edit_combo_box_defaults(GtkComboBox *combo,
     g_free(name);
 }
 
-static gboolean _admin_focus_out_defaults(GtkEntry *entry,
-                                          GdkEventFocus *event,
-                                          sview_config_t *sview_config) {
+static gboolean _admin_focus_out_defaults(GtkEntry *entry, GdkEventFocus *event, sview_config_t *sview_config) {
     if (global_entry_changed) {
         const char *col_name = NULL;
         int type = gtk_entry_get_max_length(entry);
@@ -337,10 +314,7 @@ static gboolean _admin_focus_out_defaults(GtkEntry *entry,
         if (global_edit_error) {
             if (global_edit_error_msg)
                 g_free(global_edit_error_msg);
-            global_edit_error_msg = g_strdup_printf(
-                    "Default for %s can't be set to %s",
-                    col_name,
-                    name);
+            global_edit_error_msg = g_strdup_printf("Default for %s can't be set to %s", col_name, name);
         }
 
         global_entry_changed = 0;
@@ -348,9 +322,8 @@ static gboolean _admin_focus_out_defaults(GtkEntry *entry,
     return false;
 }
 
-static void _local_display_admin_edit(GtkTable *table,
-                                      sview_config_t *sview_config, int *row,
-                                      display_data_t *display_data) {
+static void
+_local_display_admin_edit(GtkTable *table, sview_config_t *sview_config, int *row, display_data_t *display_data) {
     GtkWidget *label = NULL;
     GtkWidget *entry = NULL;
 
@@ -358,75 +331,55 @@ static void _local_display_admin_edit(GtkTable *table,
         /* edittable items that can only be known
            values */
         GtkCellRenderer *renderer = NULL;
-        GtkTreeModel *model2 = GTK_TREE_MODEL(
-                create_model_defaults(display_data->id));
+        GtkTreeModel *model2 = GTK_TREE_MODEL(create_model_defaults(display_data->id));
         if (!model2) {
-            g_print("no model set up for %d(%s)\n",
-                    display_data->id,
-                    display_data->name);
+            g_print("no model set up for %d(%s)\n", display_data->id, display_data->name);
             return;
         }
         entry = gtk_combo_box_new_with_model(model2);
         g_object_unref(model2);
 
-        _set_active_combo_defaults(GTK_COMBO_BOX(entry), sview_config,
-                                   display_data->id);
+        _set_active_combo_defaults(GTK_COMBO_BOX(entry), sview_config, display_data->id);
 
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(_admin_edit_combo_box_defaults),
-                         sview_config);
+        g_signal_connect(entry, "changed", G_CALLBACK(_admin_edit_combo_box_defaults), sview_config);
 
         renderer = gtk_cell_renderer_text_new();
-        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(entry),
-                                   renderer, true);
-        gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(entry),
-                                      renderer, "text", 0);
+        gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(entry), renderer, true);
+        gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(entry), renderer, "text", 0);
     } else if (display_data->extra == EDIT_TEXTBOX) {
         char *temp_char = NULL;
         /* other edittable items that are unknown */
         entry = create_entry();
         switch (display_data->id) {
             case SORTID_GRID_HORI:
-                temp_char = xstrdup_printf("%u",
-                                           sview_config->grid_hori);
+                temp_char = xstrdup_printf("%u", sview_config->grid_hori);
                 break;
             case SORTID_GRID_VERT:
-                temp_char = xstrdup_printf("%u",
-                                           sview_config->grid_vert);
+                temp_char = xstrdup_printf("%u", sview_config->grid_vert);
                 break;
             case SORTID_GRID_X_WIDTH:
-                temp_char = xstrdup_printf("%u",
-                                           sview_config->grid_x_width);
+                temp_char = xstrdup_printf("%u", sview_config->grid_x_width);
                 break;
             case SORTID_BUTTON_SIZE:
-                temp_char = xstrdup_printf("%u",
-                                           sview_config->button_size);
+                temp_char = xstrdup_printf("%u", sview_config->button_size);
                 break;
             case SORTID_REFRESH_DELAY:
-                temp_char = xstrdup_printf("%u",
-                                           sview_config->refresh_delay);
+                temp_char = xstrdup_printf("%u", sview_config->refresh_delay);
                 break;
             default:
                 break;
         }
 
-        gtk_entry_set_max_length(GTK_ENTRY(entry),
-                                 (DEFAULT_ENTRY_LENGTH +
-                                  display_data->id));
+        gtk_entry_set_max_length(GTK_ENTRY(entry), (DEFAULT_ENTRY_LENGTH + display_data->id));
 
         if (temp_char) {
-            gtk_entry_set_text(GTK_ENTRY(entry),
-                               temp_char);
+            gtk_entry_set_text(GTK_ENTRY(entry), temp_char);
             xfree(temp_char);
         }
-        g_signal_connect(entry, "focus-out-event",
-                         G_CALLBACK(_admin_focus_out_defaults),
-                         sview_config);
+        g_signal_connect(entry, "focus-out-event", G_CALLBACK(_admin_focus_out_defaults), sview_config);
 
         /* set global variable so we know something changed */
-        g_signal_connect(entry, "changed",
-                         G_CALLBACK(entry_changed),
-                         NULL);
+        g_signal_connect(entry, "changed", G_CALLBACK(entry_changed), NULL);
     } else if (display_data->extra == EDIT_ARRAY) {
         int i;
         switch (display_data->id) {
@@ -435,32 +388,19 @@ static void _local_display_admin_edit(GtkTable *table,
                 /* left justify */
                 gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
 
-                gtk_table_attach(table, label, 0, 1,
-                                 *row, (*row) + 1,
-                                 GTK_FILL | GTK_EXPAND,
-                                 GTK_SHRINK, 0, 0);
+                gtk_table_attach(table, label, 0, 1, *row, (*row) + 1, GTK_FILL | GTK_EXPAND, GTK_SHRINK, 0, 0);
                 for (i = 0; i < PAGE_CNT; i++) {
                     if (main_display_data[i].id == -1)
                         break;
 
-                    if (!main_display_data[i].name
-                        || (i == TAB_PAGE))
+                    if (!main_display_data[i].name || (i == TAB_PAGE))
                         continue;
-                    entry = gtk_check_button_new_with_label(
-                            main_display_data[i].name);
-                    gtk_toggle_button_set_active(
-                            GTK_TOGGLE_BUTTON(entry),
-                            sview_config->page_visible[i]);
-                    g_signal_connect(
-                            G_OBJECT(entry),
-                            "toggled",
-                            G_CALLBACK(_admin_focus_toggle),
-                            &sview_config->page_visible[i]);
+                    entry = gtk_check_button_new_with_label(main_display_data[i].name);
+                    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(entry), sview_config->page_visible[i]);
+                    g_signal_connect(G_OBJECT(entry), "toggled", G_CALLBACK(_admin_focus_toggle),
+                                     &sview_config->page_visible[i]);
 
-                    gtk_table_attach(table, entry, 1, 2,
-                                     *row, (*row) + 1,
-                                     GTK_FILL, GTK_SHRINK,
-                                     0, 0);
+                    gtk_table_attach(table, entry, 1, 2, *row, (*row) + 1, GTK_FILL, GTK_SHRINK, 0, 0);
                     (*row)++;
                 }
                 break;
@@ -474,12 +414,8 @@ static void _local_display_admin_edit(GtkTable *table,
     /* left justify */
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
 
-    gtk_table_attach(table, label, 0, 1, *row, (*row) + 1,
-                     GTK_FILL | GTK_EXPAND, GTK_SHRINK,
-                     0, 0);
-    gtk_table_attach(table, entry, 1, 2, *row, (*row) + 1,
-                     GTK_FILL, GTK_SHRINK,
-                     0, 0);
+    gtk_table_attach(table, label, 0, 1, *row, (*row) + 1, GTK_FILL | GTK_EXPAND, GTK_SHRINK, 0, 0);
+    gtk_table_attach(table, entry, 1, 2, *row, (*row) + 1, GTK_FILL, GTK_SHRINK, 0, 0);
     (*row)++;
 }
 
@@ -524,8 +460,7 @@ static void _init_sview_conf(void) {
     default_sview_config.convert_flags = CONVERT_NUM_UNIT_EXACT;
 
     for (i = 0; i < PAGE_CNT; i++) {
-        memset(&default_sview_config.page_opts[i],
-               0, sizeof(page_opts_t));
+        memset(&default_sview_config.page_opts[i], 0, sizeof(page_opts_t));
 
         if (!main_display_data[i].show)
             default_sview_config.page_visible[i] = false;
@@ -536,36 +471,34 @@ static void _init_sview_conf(void) {
 
 extern int load_defaults(void) {
     s_p_hashtbl_t *hashtbl = NULL;
-    s_p_options_t sview_conf_options[] = {
-            {"AdminMode",           S_P_BOOLEAN},
-            {"ButtonSize",          S_P_UINT16},
-            {"DefaultPage",         S_P_STRING},
-            {"ExcludedPartitions",  S_P_STRING},    /* Vestigial */
-            {"FullInfoPopupWidth",  S_P_UINT32},
-            {"FullInfoPopupHeight", S_P_UINT32},
-            {"GridHorizontal",      S_P_UINT32},
-            {"GridSpeedUp",         S_P_BOOLEAN},
-            {"GridTopo",            S_P_BOOLEAN},
-            {"GridVertical",        S_P_UINT32},
-            {"GridXWidth",          S_P_UINT32},
-            {"MainHeight",          S_P_UINT32},
-            {"MainWidth",           S_P_UINT32},
-            {"PageOptsBlock",       S_P_STRING},
-            {"PageOptsJob",         S_P_STRING},
-            {"PageOptsNode",        S_P_STRING},
-            {"PageOptsPartition",   S_P_STRING},
-            {"PageOptsReservation", S_P_STRING},
-            {"PageOptsFrontend",    S_P_STRING},
-            {"PageOptsBurstBuffer", S_P_STRING},
-            {"RefreshDelay",        S_P_UINT16},
-            {"RuledTables",         S_P_BOOLEAN},
-            {"SavePageSettings",    S_P_BOOLEAN},
-            {"ShowGrid",            S_P_BOOLEAN},
-            {"ShowHidden",          S_P_BOOLEAN},
-            {"TabPosition",         S_P_STRING},
-            {"VisiblePages",        S_P_STRING},
-            {NULL}
-    };
+    s_p_options_t sview_conf_options[] = {{"AdminMode",           S_P_BOOLEAN},
+                                          {"ButtonSize",          S_P_UINT16},
+                                          {"DefaultPage",         S_P_STRING},
+                                          {"ExcludedPartitions",  S_P_STRING},    /* Vestigial */
+                                          {"FullInfoPopupWidth",  S_P_UINT32},
+                                          {"FullInfoPopupHeight", S_P_UINT32},
+                                          {"GridHorizontal",      S_P_UINT32},
+                                          {"GridSpeedUp",         S_P_BOOLEAN},
+                                          {"GridTopo",            S_P_BOOLEAN},
+                                          {"GridVertical",        S_P_UINT32},
+                                          {"GridXWidth",          S_P_UINT32},
+                                          {"MainHeight",          S_P_UINT32},
+                                          {"MainWidth",           S_P_UINT32},
+                                          {"PageOptsBlock",       S_P_STRING},
+                                          {"PageOptsJob",         S_P_STRING},
+                                          {"PageOptsNode",        S_P_STRING},
+                                          {"PageOptsPartition",   S_P_STRING},
+                                          {"PageOptsReservation", S_P_STRING},
+                                          {"PageOptsFrontend",    S_P_STRING},
+                                          {"PageOptsBurstBuffer", S_P_STRING},
+                                          {"RefreshDelay",        S_P_UINT16},
+                                          {"RuledTables",         S_P_BOOLEAN},
+                                          {"SavePageSettings",    S_P_BOOLEAN},
+                                          {"ShowGrid",            S_P_BOOLEAN},
+                                          {"ShowHidden",          S_P_BOOLEAN},
+                                          {"TabPosition",         S_P_STRING},
+                                          {"VisiblePages",        S_P_STRING},
+                                          {NULL}};
     char *pathname = NULL;
     char *home = getenv("HOME");
     uint32_t hash_val = NO_VAL;
@@ -596,10 +529,8 @@ extern int load_defaults(void) {
         error("something wrong with opening/reading conf file");
 
     s_p_get_boolean(&default_sview_config.admin_mode, "AdminMode", hashtbl);
-    if (s_p_get_uint16(&default_sview_config.button_size, "ButtonSize",
-                       hashtbl)) {
-        default_sview_config.gap_size =
-                MAX(default_sview_config.button_size / 2, 2);
+    if (s_p_get_uint16(&default_sview_config.button_size, "ButtonSize", hashtbl)) {
+        default_sview_config.gap_size = MAX(default_sview_config.button_size / 2, 2);
     }
     if (s_p_get_string(&tmp_str, "DefaultPage", hashtbl)) {
         if (xstrcasestr(tmp_str, "job"))
@@ -617,34 +548,21 @@ extern int load_defaults(void) {
 
         xfree(tmp_str);
     }
-    s_p_get_uint32(&default_sview_config.grid_hori,
-                   "GridHorizontal", hashtbl);
-    s_p_get_boolean(&default_sview_config.grid_topological,
-                    "GridTopo", hashtbl);
+    s_p_get_uint32(&default_sview_config.grid_hori, "GridHorizontal", hashtbl);
+    s_p_get_boolean(&default_sview_config.grid_topological, "GridTopo", hashtbl);
     if (default_sview_config.grid_topological == 0)
         default_sview_config.grid_topological = false;
-    s_p_get_uint32(&default_sview_config.grid_vert,
-                   "GridVertical", hashtbl);
-    s_p_get_uint32(&default_sview_config.grid_x_width,
-                   "GridXWidth", hashtbl);
-    s_p_get_uint16(&default_sview_config.refresh_delay,
-                   "RefreshDelay", hashtbl);
-    s_p_get_boolean(&default_sview_config.ruled_treeview,
-                    "RuledTables", hashtbl);
-    s_p_get_boolean(&default_sview_config.show_grid,
-                    "ShowGrid", hashtbl);
-    s_p_get_boolean(&default_sview_config.show_hidden,
-                    "ShowHidden", hashtbl);
-    s_p_get_boolean(&default_sview_config.save_page_opts,
-                    "SavePageSettings", hashtbl);
-    s_p_get_uint32(&default_sview_config.main_width,
-                   "MainWidth", hashtbl);
-    s_p_get_uint32(&default_sview_config.main_height,
-                   "MainHeight", hashtbl);
-    s_p_get_uint32(&default_sview_config.fi_popup_width,
-                   "FullInfoPopupWidth", hashtbl);
-    s_p_get_uint32(&default_sview_config.fi_popup_height,
-                   "FullInfoPopupHeight", hashtbl);
+    s_p_get_uint32(&default_sview_config.grid_vert, "GridVertical", hashtbl);
+    s_p_get_uint32(&default_sview_config.grid_x_width, "GridXWidth", hashtbl);
+    s_p_get_uint16(&default_sview_config.refresh_delay, "RefreshDelay", hashtbl);
+    s_p_get_boolean(&default_sview_config.ruled_treeview, "RuledTables", hashtbl);
+    s_p_get_boolean(&default_sview_config.show_grid, "ShowGrid", hashtbl);
+    s_p_get_boolean(&default_sview_config.show_hidden, "ShowHidden", hashtbl);
+    s_p_get_boolean(&default_sview_config.save_page_opts, "SavePageSettings", hashtbl);
+    s_p_get_uint32(&default_sview_config.main_width, "MainWidth", hashtbl);
+    s_p_get_uint32(&default_sview_config.main_height, "MainHeight", hashtbl);
+    s_p_get_uint32(&default_sview_config.fi_popup_width, "FullInfoPopupWidth", hashtbl);
+    s_p_get_uint32(&default_sview_config.fi_popup_height, "FullInfoPopupHeight", hashtbl);
     if (s_p_get_string(&tmp_str, "TabPosition", hashtbl)) {
         if (xstrcasestr(tmp_str, "top"))
             default_sview_config.tab_pos = GTK_POS_TOP;
@@ -701,8 +619,7 @@ extern int load_defaults(void) {
     end_it:
     /* copy it all into the working struct (memory will work out
      * in the end the col_list doesn't change) */
-    memcpy(&working_sview_config, &default_sview_config,
-           sizeof(sview_config_t));
+    memcpy(&working_sview_config, &default_sview_config, sizeof(sview_config_t));
 
     xfree(pathname);
     return rc;
@@ -737,111 +654,87 @@ extern int save_defaults(bool final_save) {
         goto end_it;
     }
 
-    tmp_str = xstrdup_printf("AdminMode=%s\n",
-                             default_sview_config.admin_mode ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("AdminMode=%s\n", default_sview_config.admin_mode ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("DefaultPage=%s\n",
-                             page_to_str(default_sview_config.
-                                     default_page));
+    tmp_str = xstrdup_printf("DefaultPage=%s\n", page_to_str(default_sview_config.default_page));
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("GridHorizontal=%u\n",
-                             default_sview_config.grid_hori);
+    tmp_str = xstrdup_printf("GridHorizontal=%u\n", default_sview_config.grid_hori);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("GridTopo=%s\n",
-                             default_sview_config.grid_topological ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("GridTopo=%s\n", default_sview_config.grid_topological ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("GridVertical=%u\n",
-                             default_sview_config.grid_vert);
+    tmp_str = xstrdup_printf("GridVertical=%u\n", default_sview_config.grid_vert);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("GridXWidth=%u\n",
-                             default_sview_config.grid_x_width);
+    tmp_str = xstrdup_printf("GridXWidth=%u\n", default_sview_config.grid_x_width);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("ButtonSize=%u\n",
-                             default_sview_config.button_size);
+    tmp_str = xstrdup_printf("ButtonSize=%u\n", default_sview_config.button_size);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("RefreshDelay=%u\n",
-                             default_sview_config.refresh_delay);
+    tmp_str = xstrdup_printf("RefreshDelay=%u\n", default_sview_config.refresh_delay);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("MainWidth=%u\n",
-                             default_sview_config.main_width);
+    tmp_str = xstrdup_printf("MainWidth=%u\n", default_sview_config.main_width);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("MainHeight=%u\n",
-                             default_sview_config.main_height);
+    tmp_str = xstrdup_printf("MainHeight=%u\n", default_sview_config.main_height);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("FullInfoPopupWidth=%u\n",
-                             default_sview_config.fi_popup_width);
+    tmp_str = xstrdup_printf("FullInfoPopupWidth=%u\n", default_sview_config.fi_popup_width);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("FullInfoPopupHeight=%u\n",
-                             default_sview_config.fi_popup_height);
+    tmp_str = xstrdup_printf("FullInfoPopupHeight=%u\n", default_sview_config.fi_popup_height);
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("RuledTables=%s\n",
-                             default_sview_config.ruled_treeview ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("RuledTables=%s\n", default_sview_config.ruled_treeview ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("ShowGrid=%s\n",
-                             default_sview_config.show_grid ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("ShowGrid=%s\n", default_sview_config.show_grid ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("ShowHidden=%s\n",
-                             default_sview_config.show_hidden ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("ShowHidden=%s\n", default_sview_config.show_hidden ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("SavePageSettings=%s\n",
-                             default_sview_config.save_page_opts ?
-                             "YES" : "NO");
+    tmp_str = xstrdup_printf("SavePageSettings=%s\n", default_sview_config.save_page_opts ? "YES" : "NO");
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
         goto end_it;
-    tmp_str = xstrdup_printf("TabPosition=%s\n",
-                             tab_pos_to_str(default_sview_config.tab_pos));
+    tmp_str = xstrdup_printf("TabPosition=%s\n", tab_pos_to_str(default_sview_config.tab_pos));
     rc = _write_to_file(fd, tmp_str);
     xfree(tmp_str);
     if (rc != SLURM_SUCCESS)
@@ -856,8 +749,7 @@ extern int save_defaults(bool final_save) {
 
     /* save all current page options */
     for (i = 0; i < PAGE_CNT; i++) {
-        page_opts_t *page_opts =
-                &working_sview_config.page_opts[i];
+        page_opts_t *page_opts = &working_sview_config.page_opts[i];
 
         if (!page_opts->page_name)
             continue;
@@ -874,11 +766,8 @@ extern int save_defaults(bool final_save) {
                     xstrcat(tmp_str2, ",");
                 xstrfmtcat(tmp_str2, "%s", display_data->name);
             } //spin the menu options ^^
-        } else if (!page_opts->def_col_list
-                   && page_opts->col_list
-                   && list_count(page_opts->col_list)) {
-            ListIterator itr =
-                    list_iterator_create(page_opts->col_list);
+        } else if (!page_opts->def_col_list && page_opts->col_list && list_count(page_opts->col_list)) {
+            ListIterator itr = list_iterator_create(page_opts->col_list);
             char *col_name = NULL;
             //user requested no save of page options
             while ((col_name = list_next(itr))) {
@@ -891,9 +780,7 @@ extern int save_defaults(bool final_save) {
 
         if (tmp_str2) {
             replspace(tmp_str2);
-            tmp_str = xstrdup_printf("PageOpts%s=%s\n",
-                                     page_opts->page_name,
-                                     tmp_str2);
+            tmp_str = xstrdup_printf("PageOpts%s=%s\n", page_opts->page_name, tmp_str2);
             xfree(tmp_str2);
             rc = _write_to_file(fd, tmp_str);
             xfree(tmp_str);
@@ -911,12 +798,10 @@ extern int save_defaults(bool final_save) {
     else {            /* file shuffle */
         (void) unlink(old_file);
         if (link(reg_file, old_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   reg_file, old_file);
+            debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
         (void) unlink(reg_file);
         if (link(new_file, reg_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   new_file, reg_file);
+            debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
         (void) unlink(new_file);
     }
 
@@ -939,66 +824,33 @@ extern GtkListStore *create_model_defaults(int type) {
         case SORTID_SAVE_PAGE_OPTS:
             model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "no",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "no", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "yes",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "yes", 1, type, -1);
             break;
         case SORTID_DEFAULT_PAGE:
             model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "job",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "job", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "part",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "part", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "res",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "res", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "node",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "node", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "frontend",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "frontend", 1, type, -1);
             break;
         case SORTID_TAB_POS:
             model = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "top",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "top", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "bottom",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "bottom", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "left",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "left", 1, type, -1);
             gtk_list_store_append(model, &iter);
-            gtk_list_store_set(model, &iter,
-                               0, "right",
-                               1, type,
-                               -1);
+            gtk_list_store_set(model, &iter, 0, "right", 1, type, -1);
             break;
         default:
             break;
@@ -1008,13 +860,9 @@ extern GtkListStore *create_model_defaults(int type) {
 
 extern int configure_defaults(void) {
     GtkScrolledWindow *window = create_scrolled_window();
-    GtkWidget *popup = gtk_dialog_new_with_buttons(
-            "Sview Defaults",
-            GTK_WINDOW(main_window),
-            GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-            NULL);
-    GtkWidget *label = gtk_dialog_add_button(GTK_DIALOG(popup),
-                                             GTK_STOCK_OK, GTK_RESPONSE_OK);
+    GtkWidget *popup = gtk_dialog_new_with_buttons("Sview Defaults", GTK_WINDOW(main_window),
+                                                   GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
+    GtkWidget *label = gtk_dialog_add_button(GTK_DIALOG(popup), GTK_STOCK_OK, GTK_RESPONSE_OK);
     GtkBin *bin = NULL;
     GtkViewport *view = NULL;
     GtkTable *table = NULL;
@@ -1031,11 +879,9 @@ extern int configure_defaults(void) {
     apply_hidden_change = true;
 
     memcpy(&tmp_config, &default_sview_config, sizeof(sview_config_t));
-    gtk_window_set_type_hint(GTK_WINDOW(popup),
-                             GDK_WINDOW_TYPE_HINT_NORMAL);
+    gtk_window_set_type_hint(GTK_WINDOW(popup), GDK_WINDOW_TYPE_HINT_NORMAL);
     gtk_window_set_default(GTK_WINDOW(popup), label);
-    gtk_dialog_add_button(GTK_DIALOG(popup),
-                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(popup), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
 
     /*
       for(i=0;; i++) {
@@ -1050,13 +896,10 @@ extern int configure_defaults(void) {
     */
 
     gtk_window_set_default_size(GTK_WINDOW(popup), width, height);
-    snprintf(tmp_char, sizeof(tmp_char),
-             "Default Settings for Sview");
+    snprintf(tmp_char, sizeof(tmp_char), "Default Settings for Sview");
     label = gtk_label_new(tmp_char);
 
-    gtk_scrolled_window_set_policy(window,
-                                   GTK_POLICY_NEVER,
-                                   GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_policy(window, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     bin = GTK_BIN(&window->container);
     view = GTK_VIEWPORT(bin->child);
     bin = GTK_BIN(&view->bin);
@@ -1074,57 +917,45 @@ extern int configure_defaults(void) {
             if (display_data->id != i)
                 continue;
 
-            _local_display_admin_edit(
-                    table, &tmp_config, &row,
-                    display_data);
+            _local_display_admin_edit(table, &tmp_config, &row, display_data);
             break;
         }
         display_data = display_data_defaults;
     }
     gtk_table_resize(table, row, 2);
 
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(popup)->vbox),
-                       label, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(popup)->vbox), label, false, false, 0);
     if (window)
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(popup)->vbox),
-                           GTK_WIDGET(window), true, true, 0);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(popup)->vbox), GTK_WIDGET(window), true, true, 0);
     gtk_widget_show_all(popup);
     response = gtk_dialog_run(GTK_DIALOG(popup));
     if (response == GTK_RESPONSE_OK) {
-        tmp_char_ptr = g_strdup_printf(
-                "Defaults updated successfully");
+        tmp_char_ptr = g_strdup_printf("Defaults updated successfully");
         if (global_edit_error)
             tmp_char_ptr = global_edit_error_msg;
         else if (!global_send_update_msg)
-            tmp_char_ptr = g_strdup_printf(
-                    "No change detected.");
+            tmp_char_ptr = g_strdup_printf("No change detected.");
         else {
             int action = 0;
-            gdk_window_set_cursor(main_window->window,
-                                  in_process_cursor);
-            if (tmp_config.ruled_treeview
-                != working_sview_config.ruled_treeview) {
+            gdk_window_set_cursor(main_window->window, in_process_cursor);
+            if (tmp_config.ruled_treeview != working_sview_config.ruled_treeview) {
                 /* get rid of each existing table */
                 cluster_change_resv();
                 cluster_change_part();
                 cluster_change_job();
                 cluster_change_node();
                 cluster_change_front_end();
-            } else if (tmp_config.grid_topological !=
-                       working_sview_config.grid_topological) {
+            } else if (tmp_config.grid_topological != working_sview_config.grid_topological) {
                 apply_hidden_change = false;
                 if (tmp_config.grid_topological) {
-                    default_sview_config.grid_topological =
-                            tmp_config.grid_topological;
+                    default_sview_config.grid_topological = tmp_config.grid_topological;
                     if (!g_switch_nodes_maps)
                         rc = get_topo_conf();
                     if (rc != SLURM_SUCCESS) {
                         /*denied*/
-                        tmp_char_ptr = g_strdup_printf(
-                                "Valid topology not "
-                                "detected");
-                        tmp_config.grid_topological =
-                                false;
+                        tmp_char_ptr = g_strdup_printf("Valid topology not "
+                                                       "detected");
+                        tmp_config.grid_topological = false;
                         goto denied_change;
                     }
                 }
@@ -1139,28 +970,16 @@ extern int configure_defaults(void) {
 
             /*apply change*/
 
-            memcpy(&default_sview_config, &tmp_config,
-                   sizeof(sview_config_t));
-            memcpy(&working_sview_config, &tmp_config,
-                   sizeof(sview_config_t));
+            memcpy(&default_sview_config, &tmp_config, sizeof(sview_config_t));
+            memcpy(&working_sview_config, &tmp_config, sizeof(sview_config_t));
 
             /* set the current display to the default */
-            gtk_toggle_action_set_active(
-                    default_sview_config.action_admin,
-                    working_sview_config.admin_mode);
-            gtk_toggle_action_set_active(
-                    default_sview_config.action_ruled,
-                    working_sview_config.ruled_treeview);
-            gtk_toggle_action_set_active(
-                    default_sview_config.action_grid,
-                    working_sview_config.show_grid);
-            gtk_toggle_action_set_active(
-                    default_sview_config.action_hidden,
-                    working_sview_config.show_hidden);
+            gtk_toggle_action_set_active(default_sview_config.action_admin, working_sview_config.admin_mode);
+            gtk_toggle_action_set_active(default_sview_config.action_ruled, working_sview_config.ruled_treeview);
+            gtk_toggle_action_set_active(default_sview_config.action_grid, working_sview_config.show_grid);
+            gtk_toggle_action_set_active(default_sview_config.action_hidden, working_sview_config.show_hidden);
             apply_hidden_change = true;
-            gtk_toggle_action_set_active(
-                    default_sview_config.action_page_opts,
-                    working_sview_config.save_page_opts);
+            gtk_toggle_action_set_active(default_sview_config.action_page_opts, working_sview_config.save_page_opts);
 #ifdef GTK2_USE_RADIO_SET
             /* Since this value isn't a simple 0->n we
                need to translate if we don't have the
@@ -1175,16 +994,14 @@ extern int configure_defaults(void) {
             action = _trans_tab_pos(working_sview_config.tab_pos);
 #endif
 
-            sview_radio_action_set_current_value(
-                    default_sview_config.action_tab, action);
+            sview_radio_action_set_current_value(default_sview_config.action_tab, action);
 
 
             for (i = 0; i < PAGE_CNT; i++) {
                 if (main_display_data[i].id == -1)
                     break;
 
-                if (!main_display_data[i].name
-                    || (i == TAB_PAGE))
+                if (!main_display_data[i].name || (i == TAB_PAGE))
                     continue;
 
                 toggle_tab_visiblity(NULL, main_display_data + i);

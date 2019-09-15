@@ -41,9 +41,7 @@
 #include "as_mysql_problems.h"
 #include "src/common/uid.h"
 
-static int _setup_assoc_cond_limits(
-        slurmdb_assoc_cond_t *assoc_cond,
-        char **extra, bool user_query) {
+static int _setup_assoc_cond_limits(slurmdb_assoc_cond_t *assoc_cond, char **extra, bool user_query) {
     int set = 0;
     ListIterator itr = NULL;
     char *object = NULL;
@@ -85,8 +83,7 @@ static int _setup_assoc_cond_limits(
         xstrcat(*extra, " && (user!='')");
     }
 
-    if (assoc_cond->partition_list
-        && list_count(assoc_cond->partition_list)) {
+    if (assoc_cond->partition_list && list_count(assoc_cond->partition_list)) {
         set = 0;
         xstrcat(*extra, " && (");
         itr = list_iterator_create(assoc_cond->partition_list);
@@ -104,9 +101,7 @@ static int _setup_assoc_cond_limits(
 }
 
 
-extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn,
-                                   slurmdb_assoc_cond_t *assoc_cond,
-                                   List ret_list) {
+extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn, slurmdb_assoc_cond_t *assoc_cond, List ret_list) {
     int rc = SLURM_SUCCESS;
     char *query = NULL;
     MYSQL_RES *result = NULL;
@@ -117,10 +112,8 @@ extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn,
 
     xassert(ret_list);
 
-    query = xstrdup_printf("select name from %s where deleted=0",
-                           acct_table);
-    if (assoc_cond &&
-        assoc_cond->acct_list && list_count(assoc_cond->acct_list)) {
+    query = xstrdup_printf("select name from %s where deleted=0", acct_table);
+    if (assoc_cond && assoc_cond->acct_list && list_count(assoc_cond->acct_list)) {
         int set = 0;
         ListIterator itr = NULL;
         char *object = NULL;
@@ -136,15 +129,13 @@ extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn,
         xstrcat(query, ")");
     }
 
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         return SLURM_ERROR;
     }
     xfree(query);
 
-    if (assoc_cond &&
-        assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
+    if (assoc_cond && assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
         use_cluster_list = assoc_cond->cluster_list;
     else
         slurm_mutex_lock(&as_mysql_cluster_list_lock);
@@ -159,17 +150,14 @@ extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn,
         while ((cluster_name = list_next(itr))) {
             if (query)
                 xstrcat(query, " union ");
-            xstrfmtcat(query,
-                       "select distinct id_assoc from \"%s_%s\" "
-                       "where deleted=0 && "
-                       "acct='%s'",
-                       cluster_name, assoc_table, row[0]);
+            xstrfmtcat(query, "select distinct id_assoc from \"%s_%s\" "
+                              "where deleted=0 && "
+                              "acct='%s'", cluster_name, assoc_table, row[0]);
         }
         list_iterator_reset(itr);
         if (query)
             xstrcat(query, " limit 1");
-        if (!(result2 = mysql_db_query_ret(
-                mysql_conn, query, 0))) {
+        if (!(result2 = mysql_db_query_ret(mysql_conn, query, 0))) {
             xfree(query);
             rc = SLURM_ERROR;
             break;
@@ -197,9 +185,7 @@ extern int as_mysql_acct_no_assocs(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
-                                  slurmdb_assoc_cond_t *assoc_cond,
-                                  List ret_list) {
+extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn, slurmdb_assoc_cond_t *assoc_cond, List ret_list) {
     int rc = SLURM_SUCCESS;
     char *query = NULL, *tmp = NULL;
     char *extra = NULL;
@@ -215,20 +201,9 @@ extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
     _setup_assoc_cond_limits(assoc_cond, &extra, 0);
 
     /* if this changes you will need to edit the corresponding enum */
-    char *assoc_req_inx[] = {
-            "id_assoc",
-            "user",
-            "acct",
-            "`partition`",
-            "parent_acct",
-    };
+    char *assoc_req_inx[] = {"id_assoc", "user", "acct", "`partition`", "parent_acct",};
     enum {
-        ASSOC_REQ_ID,
-        ASSOC_REQ_USER,
-        ASSOC_REQ_ACCT,
-        ASSOC_REQ_PART,
-        ASSOC_REQ_PARENT,
-        ASSOC_REQ_COUNT
+        ASSOC_REQ_ID, ASSOC_REQ_USER, ASSOC_REQ_ACCT, ASSOC_REQ_PART, ASSOC_REQ_PARENT, ASSOC_REQ_COUNT
     };
 
     xfree(tmp);
@@ -237,8 +212,7 @@ extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
         xstrfmtcat(tmp, ", %s", assoc_req_inx[i]);
     }
 
-    if (assoc_cond &&
-        assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
+    if (assoc_cond && assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
         use_cluster_list = assoc_cond->cluster_list;
     else
         slurm_mutex_lock(&as_mysql_cluster_list_lock);
@@ -249,9 +223,8 @@ extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
         if (query)
             xstrcat(query, " union ");
         xstrfmtcat(query, "select distinct %s, '%s' as cluster "
-                          "from \"%s_%s\" %s && user='' && lft=(rgt-1) ",
-                   tmp, cluster_name, cluster_name,
-                   assoc_table, extra);
+                          "from \"%s_%s\" %s && user='' && lft=(rgt-1) ", tmp, cluster_name, cluster_name, assoc_table,
+                   extra);
     }
     list_iterator_destroy(itr);
     if (use_cluster_list == as_mysql_cluster_list)
@@ -264,16 +237,14 @@ extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
     xfree(extra);
     if (debug_flags & DEBUG_FLAG_DB_QUERY)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         return SLURM_ERROR;
     }
     xfree(query);
 
     while ((row = mysql_fetch_row(result))) {
-        slurmdb_assoc_rec_t *assoc =
-                xmalloc(sizeof(slurmdb_assoc_rec_t));
+        slurmdb_assoc_rec_t *assoc = xmalloc(sizeof(slurmdb_assoc_rec_t));
 
         list_append(ret_list, assoc);
 
@@ -295,10 +266,8 @@ extern int as_mysql_acct_no_users(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern int as_mysql_user_no_assocs_or_no_uid(
-        mysql_conn_t *mysql_conn,
-        slurmdb_assoc_cond_t *assoc_cond,
-        List ret_list) {
+extern int
+as_mysql_user_no_assocs_or_no_uid(mysql_conn_t *mysql_conn, slurmdb_assoc_cond_t *assoc_cond, List ret_list) {
     int rc = SLURM_SUCCESS;
     char *query = NULL;
     MYSQL_RES *result = NULL;
@@ -309,10 +278,8 @@ extern int as_mysql_user_no_assocs_or_no_uid(
 
     xassert(ret_list);
 
-    query = xstrdup_printf("select name from %s where deleted=0",
-                           user_table);
-    if (assoc_cond &&
-        assoc_cond->user_list && list_count(assoc_cond->user_list)) {
+    query = xstrdup_printf("select name from %s where deleted=0", user_table);
+    if (assoc_cond && assoc_cond->user_list && list_count(assoc_cond->user_list)) {
         int set = 0;
         char *object = NULL;
         xstrcat(query, " && (");
@@ -327,15 +294,13 @@ extern int as_mysql_user_no_assocs_or_no_uid(
         xstrcat(query, ")");
     }
 
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         return SLURM_ERROR;
     }
     xfree(query);
 
-    if (assoc_cond &&
-        assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
+    if (assoc_cond && assoc_cond->cluster_list && list_count(assoc_cond->cluster_list))
         use_cluster_list = assoc_cond->cluster_list;
     else
         slurm_mutex_lock(&as_mysql_cluster_list_lock);
@@ -361,19 +326,16 @@ extern int as_mysql_user_no_assocs_or_no_uid(
         while ((cluster_name = list_next(itr))) {
             if (query)
                 xstrcat(query, " union ");
-            xstrfmtcat(query,
-                       "select distinct id_assoc from \"%s_%s\" "
-                       "where deleted=0 && "
-                       "user='%s'",
-                       cluster_name, assoc_table, row[0]);
+            xstrfmtcat(query, "select distinct id_assoc from \"%s_%s\" "
+                              "where deleted=0 && "
+                              "user='%s'", cluster_name, assoc_table, row[0]);
         }
         list_iterator_reset(itr);
 
         if (query)
             xstrcat(query, " limit 1");
 
-        if (!(result2 = mysql_db_query_ret(
-                mysql_conn, query, 0))) {
+        if (!(result2 = mysql_db_query_ret(mysql_conn, query, 0))) {
             xfree(query);
             rc = SLURM_ERROR;
             break;

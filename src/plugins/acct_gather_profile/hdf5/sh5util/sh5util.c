@@ -199,8 +199,7 @@ static void _help_msg(void) {
 }
 
 
-int
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
     int cc;
 
     cc = _set_options(argc, argv);
@@ -213,19 +212,16 @@ main(int argc, char **argv) {
 
     switch (params.mode) {
         case SH5UTIL_MODE_MERGE:
-            info("Merging node-step files into %s",
-                 params.output);
+            info("Merging node-step files into %s", params.output);
             cc = _merge_step_files();
             break;
         case SH5UTIL_MODE_EXTRACT:
-            info("Extracting job data from %s into %s",
-                 params.input, params.output);
+            info("Extracting job data from %s into %s", params.input, params.output);
             cc = _extract_series();
             break;
         case SH5UTIL_MODE_ITEM_EXTRACT:
-            info("Extracting '%s' from '%s' data from %s into %s",
-                 params.data_item, params.series,
-                 params.input, params.output);
+            info("Extracting '%s' from '%s' data from %s into %s", params.data_item, params.series, params.input,
+                 params.output);
             cc = _extract_item();
             break;
         case SH5UTIL_MODE_ITEM_LIST:
@@ -280,8 +276,7 @@ static void _cleanup(void) {
 
 /* _free_options()
  */
-static void
-_free_options(void) {
+static void _free_options(void) {
     xfree(params.dir);
     xfree(params.input);
     xfree(params.node);
@@ -315,8 +310,7 @@ static void _remove_empty_output(void) {
      * way and the file is just left hanging...
      */
     if (!sb.st_size) {
-        info("Output file generated is empty, removing it: %s",
-             params.output);
+        info("Output file generated is empty, removing it: %s", params.output);
         if (remove(params.output) == -1)
             error("%s: remove(%s): %m", __func__, params.output);
     }
@@ -336,25 +330,24 @@ static int _set_options(const int argc, char **argv) {
     char *next_str = NULL;
     uid_t u;
 
-    static struct option long_options[] = {
-            {"extract",      no_argument,       0, 'E'},
-            {"item-extract", no_argument,       0, 'I'},
-            {"data",         required_argument, 0, 'd'},
-            {"help",         no_argument,       0, 'h'},
-            {"jobs",         required_argument, 0, 'j'},
-            {"input",        required_argument, 0, 'i'},
-            {"level",        required_argument, 0, 'l'},
-            {"list",         no_argument,       0, 'L'},
-            {"node",         required_argument, 0, 'N'},
-            {"output",       required_argument, 0, 'o'},
-            {"profiledir",   required_argument, 0, 'p'},
-            {"series",       required_argument, 0, 's'},
-            {"savefiles",    no_argument,       0, 'S'},
-            {"usage",        no_argument,       0, 'U'},
-            {"user",         required_argument, 0, 'u'},
-            {"verbose",      no_argument,       0, 'v'},
-            {"version",      no_argument,       0, 'V'},
-            {0, 0,                              0, 0}};
+    static struct option long_options[] = {{"extract",      no_argument,       0, 'E'},
+                                           {"item-extract", no_argument,       0, 'I'},
+                                           {"data",         required_argument, 0, 'd'},
+                                           {"help",         no_argument,       0, 'h'},
+                                           {"jobs",         required_argument, 0, 'j'},
+                                           {"input",        required_argument, 0, 'i'},
+                                           {"level",        required_argument, 0, 'l'},
+                                           {"list",         no_argument,       0, 'L'},
+                                           {"node",         required_argument, 0, 'N'},
+                                           {"output",       required_argument, 0, 'o'},
+                                           {"profiledir",   required_argument, 0, 'p'},
+                                           {"series",       required_argument, 0, 's'},
+                                           {"savefiles",    no_argument,       0, 'S'},
+                                           {"usage",        no_argument,       0, 'U'},
+                                           {"user",         required_argument, 0, 'u'},
+                                           {"verbose",      no_argument,       0, 'v'},
+                                           {"version",      no_argument,       0, 'V'},
+                                           {0, 0,                              0, 0}};
 
     log_init(xbasename(argv[0]), logopt, 0, NULL);
 
@@ -369,8 +362,7 @@ static int _set_options(const int argc, char **argv) {
 
     _init_opts();
 
-    while ((cc = getopt_long(argc, argv, "d:Ehi:Ij:l:LN:o:p:s:Su:UvV",
-                             long_options, &option_index)) != EOF) {
+    while ((cc = getopt_long(argc, argv, "d:Ehi:Ij:l:LN:o:p:s:Su:UvV", long_options, &option_index)) != EOF) {
         switch (cc) {
             case 'd':
                 params.data_item = xstrdup(optarg);
@@ -396,8 +388,7 @@ static int _set_options(const int argc, char **argv) {
             case 'j':
                 params.job_id = strtol(optarg, &next_str, 10);
                 if (next_str[0] == '.')
-                    params.step_id =
-                            strtol(next_str + 1, NULL, 10);
+                    params.step_id = strtol(next_str + 1, NULL, 10);
                 break;
             case 'l':
                 params.level = xstrdup(optarg);
@@ -412,13 +403,9 @@ static int _set_options(const int argc, char **argv) {
                 params.dir = xstrdup(optarg);
                 break;
             case 's':
-                if (xstrcmp(optarg, GRP_ENERGY)
-                    && xstrcmp(optarg, GRP_FILESYSTEM)
-                    && xstrcmp(optarg, GRP_NETWORK)
-                    && xstrncmp(optarg, GRP_TASK,
-                                strlen(GRP_TASK))) {
-                    error("Bad value for --series=\"%s\"",
-                          optarg);
+                if (xstrcmp(optarg, GRP_ENERGY) && xstrcmp(optarg, GRP_FILESYSTEM) && xstrcmp(optarg, GRP_NETWORK) &&
+                    xstrncmp(optarg, GRP_TASK, strlen(GRP_TASK))) {
+                    error("Bad value for --series=\"%s\"", optarg);
                     return -1;
                 }
                 params.series = xstrdup(optarg);
@@ -428,8 +415,7 @@ static int _set_options(const int argc, char **argv) {
                 break;
             case 'u':
                 if (uid_from_string(optarg, &u) < 0) {
-                    error("No such user --uid=\"%s\"",
-                          optarg);
+                    error("No such user --uid=\"%s\"", optarg);
                     return -1;
                 }
                 params.user = uid_to_string(u);
@@ -461,8 +447,7 @@ static int _set_options(const int argc, char **argv) {
 
 /* _check_params()
  */
-static int
-_check_params(void) {
+static int _check_params(void) {
     if (params.job_id == -1) {
         error("JobID must be specified.");
         return -1;
@@ -483,11 +468,9 @@ _check_params(void) {
         if (!params.level)
             params.level = xstrdup("Node:Totals");
         if (!params.input)
-            params.input = xstrdup_printf(
-                    "./job_%d.h5", params.job_id);
+            params.input = xstrdup_printf("./job_%d.h5", params.job_id);
         if (!params.output)
-            params.output = xstrdup_printf(
-                    "./extract_%d.csv", params.job_id);
+            params.output = xstrdup_printf("./extract_%d.csv", params.job_id);
         if (!params.series)
             fatal("Must specify series option --series");
 
@@ -500,19 +483,14 @@ _check_params(void) {
             fatal("Must specify series option --series");
 
         if (!params.input)
-            params.input = xstrdup_printf("./job_%d.h5",
-                                          params.job_id);
+            params.input = xstrdup_printf("./job_%d.h5", params.job_id);
 
         if (!params.output)
-            params.output = xstrdup_printf("./%s_%s_%d.csv",
-                                           params.series,
-                                           params.data_item,
-                                           params.job_id);
+            params.output = xstrdup_printf("./%s_%s_%d.csv", params.series, params.data_item, params.job_id);
     }
     if (params.mode == SH5UTIL_MODE_ITEM_LIST) {
         if (!params.input)
-            params.input = xstrdup_printf(
-                    "./job_%d.h5", params.job_id);
+            params.input = xstrdup_printf("./job_%d.h5", params.job_id);
         if (!params.series)
             fatal("Must specify series option --series");
     }
@@ -527,8 +505,7 @@ _check_params(void) {
  * Copy the group "/{NodeName}" of the hdf5 file file_name into the location
  * jgid_nodes
  */
-static int _merge_node_step_data(char *file_name, hid_t jgid_nodes,
-                                 sh5util_file_t *sh5util_file) {
+static int _merge_node_step_data(char *file_name, hid_t jgid_nodes, sh5util_file_t *sh5util_file) {
     hid_t fid_nodestep;
     char *group_name = NULL;
     int rc = SLURM_SUCCESS;
@@ -542,18 +519,14 @@ static int _merge_node_step_data(char *file_name, hid_t jgid_nodes,
     group_name = xstrdup_printf("/%s", sh5util_file->node_name);
     hid_t ocpypl_id = H5Pcreate(H5P_OBJECT_COPY); /* default copy */
     hid_t lcpl_id = H5Pcreate(H5P_LINK_CREATE); /* parameters */
-    if (H5Ocopy(fid_nodestep, group_name, jgid_nodes,
-                sh5util_file->node_name,
-                ocpypl_id, lcpl_id) < 0) {
+    if (H5Ocopy(fid_nodestep, group_name, jgid_nodes, sh5util_file->node_name, ocpypl_id, lcpl_id) < 0) {
         debug("Failed to copy node step data of %s into the job file, "
-              "trying with old method",
-              sh5util_file->node_name);
+              "trying with old method", sh5util_file->node_name);
         rc = SLURM_PROTOCOL_VERSION_ERROR;
         goto endit;
     }
 
-    if (!params.keepfiles &&
-        (remove(file_name) == -1))
+    if (!params.keepfiles && (remove(file_name) == -1))
         error("%s: remove(%s): %m", __func__, file_name);
 
     endit:
@@ -590,8 +563,7 @@ static int _merge_step_files(void) {
     step_dir = xstrdup_printf("%s/%s", params.dir, params.user);
 
     if (!(dir = opendir(step_dir))) {
-        error("Cannot open %s job profile directory: %m",
-              step_dir);
+        error("Cannot open %s job profile directory: %m", step_dir);
         rc = -1;
         goto endit;
     }
@@ -648,8 +620,7 @@ static int _merge_step_files(void) {
         goto endit;
     }
 
-    fid_job = H5Fcreate(
-            params.output, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid_job = H5Fcreate(params.output, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fid_job < 0) {
         error("Failed create HDF5 file %s", params.output);
         rc = -1;
@@ -658,8 +629,7 @@ static int _merge_step_files(void) {
 
     jgid_steps = make_group(fid_job, GRP_STEPS);
     if (jgid_steps < 0) {
-        error("Failed to create group %s",
-              GRP_STEPS);
+        error("Failed to create group %s", GRP_STEPS);
         rc = -1;
         goto endit;
     }
@@ -678,39 +648,31 @@ static int _merge_step_files(void) {
             step_cnt++;
             /* on to the next step, close down the last one */
             if (jgid_step) {
-                put_int_attribute(
-                        jgid_step, ATTR_NNODES, node_cnt);
+                put_int_attribute(jgid_step, ATTR_NNODES, node_cnt);
                 H5Gclose(jgid_nodes);
                 H5Gclose(jgid_step);
                 node_cnt = 0;
             }
 
             if (sh5util_file->step_id == -2)
-                jgrp_step_name = xstrdup_printf(
-                        "/%s/batch", GRP_STEPS);
+                jgrp_step_name = xstrdup_printf("/%s/batch", GRP_STEPS);
             else
-                jgrp_step_name = xstrdup_printf(
-                        "/%s/%d", GRP_STEPS,
-                        sh5util_file->step_id);
+                jgrp_step_name = xstrdup_printf("/%s/%d", GRP_STEPS, sh5util_file->step_id);
 
 //			info("making group for step %d", sh5util_file->step_id);
             jgid_step = make_group(fid_job, jgrp_step_name);
             if (jgid_step < 0) {
-                error("Failed to create %s",
-                      jgrp_step_name);
+                error("Failed to create %s", jgrp_step_name);
                 xfree(jgrp_step_name);
                 continue;
             }
 
-            jgrp_nodes_name = xstrdup_printf(
-                    "%s/%s", jgrp_step_name, GRP_NODES);
+            jgrp_nodes_name = xstrdup_printf("%s/%s", jgrp_step_name, GRP_NODES);
             xfree(jgrp_step_name);
 
-            jgid_nodes = make_group(
-                    jgid_step, jgrp_nodes_name);
+            jgid_nodes = make_group(jgid_step, jgrp_nodes_name);
             if (jgid_nodes < 0) {
-                error("Failed to create %s",
-                      jgrp_nodes_name);
+                error("Failed to create %s", jgrp_nodes_name);
                 xfree(jgrp_nodes_name);
                 continue;
             }
@@ -720,10 +682,8 @@ static int _merge_step_files(void) {
         node_cnt++;
 
         /* append onto the step */
-        step_path = xstrdup_printf(
-                "%s/%s", step_dir, sh5util_file->file_name);
-        rc = _merge_node_step_data(
-                step_path, jgid_nodes, sh5util_file);
+        step_path = xstrdup_printf("%s/%s", step_dir, sh5util_file->file_name);
+        rc = _merge_node_step_data(step_path, jgid_nodes, sh5util_file);
         xfree(step_path);
 
     }
@@ -765,17 +725,14 @@ static void _table_free(void *table) {
 }
 
 static void _table_path(table_t *t, char *path) {
-    snprintf(path, MAX_PROFILE_PATH,
-             "/"
-                     GRP_STEPS
-                     "/%s/"
-                     GRP_NODES
-                     "/%s/%s/%s",
-             t->step, t->node, t->group, t->name);
+    snprintf(path, MAX_PROFILE_PATH, "/"
+            GRP_STEPS
+            "/%s/"
+            GRP_NODES
+            "/%s/%s/%s", t->step, t->node, t->group, t->name);
 }
 
-static herr_t _collect_tables_group(hid_t g_id, const char *name,
-                                    const H5L_info_t *link_info, void *op_data) {
+static herr_t _collect_tables_group(hid_t g_id, const char *name, const H5L_info_t *link_info, void *op_data) {
     List tables = (List) op_data;
     hid_t table_id = -1;
 
@@ -798,17 +755,14 @@ static herr_t _collect_tables_group(hid_t g_id, const char *name,
     return 0;
 }
 
-static herr_t _collect_tables_node(hid_t g_id, const char *name,
-                                   const H5L_info_t *link_info, void *op_data) {
+static herr_t _collect_tables_node(hid_t g_id, const char *name, const H5L_info_t *link_info, void *op_data) {
     char object_path[MAX_PROFILE_PATH + 1];
     List tables = (List) op_data;
     hid_t object_id = -1;
     herr_t err;
 
     /* node filter */
-    if (params.node
-        && xstrcmp(params.node, "*") != 0
-        && xstrcmp(params.node, name) != 0)
+    if (params.node && xstrcmp(params.node, "*") != 0 && xstrcmp(params.node, name) != 0)
         return 0;
 
     snprintf(object_path, MAX_PROFILE_PATH + 1, "%s/%s", name, params.series);
@@ -828,11 +782,9 @@ static herr_t _collect_tables_node(hid_t g_id, const char *name,
         t->name = xstrdup(params.series);
         list_append(tables, t);
     } else if (H5Iget_type(object_id) == H5I_GROUP) {
-        err = H5Literate(object_id, H5_INDEX_NAME, H5_ITER_INC, NULL,
-                         _collect_tables_group, op_data);
+        err = H5Literate(object_id, H5_INDEX_NAME, H5_ITER_INC, NULL, _collect_tables_group, op_data);
         if (err < 0) {
-            debug("2 Failed to iterate through group %s",
-                  object_path);
+            debug("2 Failed to iterate through group %s", object_path);
             return SLURM_PROTOCOL_VERSION_ERROR;
         }
     } else {
@@ -846,8 +798,7 @@ static herr_t _collect_tables_node(hid_t g_id, const char *name,
     return 0;
 }
 
-static herr_t _collect_tables_step(hid_t g_id, const char *name,
-                                   const H5L_info_t *link_info, void *op_data) {
+static herr_t _collect_tables_step(hid_t g_id, const char *name, const H5L_info_t *link_info, void *op_data) {
     char nodes_path[MAX_PROFILE_PATH];
     herr_t err;
 
@@ -859,12 +810,10 @@ static herr_t _collect_tables_step(hid_t g_id, const char *name,
             GRP_NODES, name);
     current_step = name;
 
-    err = H5Literate_by_name(g_id, nodes_path, H5_INDEX_NAME,
-                             H5_ITER_INC, NULL, _collect_tables_node,
-                             op_data, H5P_DEFAULT);
+    err = H5Literate_by_name(g_id, nodes_path, H5_INDEX_NAME, H5_ITER_INC, NULL, _collect_tables_node, op_data,
+                             H5P_DEFAULT);
     if (err < 0) {
-        debug("3 Failed to iterate through group /"GRP_STEPS"/%s",
-              nodes_path);
+        debug("3 Failed to iterate through group /"GRP_STEPS"/%s", nodes_path);
         return err;
     }
 
@@ -877,8 +826,7 @@ static int _tables_list(hid_t fid_job, List tables) {
     table_t *t;
 
     /* Find the list of tables to be extracted */
-    err = H5Literate_by_name(fid_job, "/"GRP_STEPS, H5_INDEX_NAME,
-                             H5_ITER_INC, NULL, _collect_tables_step,
+    err = H5Literate_by_name(fid_job, "/"GRP_STEPS, H5_INDEX_NAME, H5_ITER_INC, NULL, _collect_tables_step,
                              (void *) tables, H5P_DEFAULT);
     if (err < 0) {
         debug("4 Failed to iterate through group /" GRP_STEPS);
@@ -888,8 +836,7 @@ static int _tables_list(hid_t fid_job, List tables) {
     debug("tables found (group mode: %d):", group_mode);
     it = list_iterator_create(tables);
     while ((t = list_next(it))) {
-        debug(" /"GRP_STEPS"/%s/"GRP_NODES"/%s/%s/%s",
-              t->step, t->node, t->group, t->name);
+        debug(" /"GRP_STEPS"/%s/"GRP_NODES"/%s/%s/%s", t->step, t->node, t->group, t->name);
     }
     list_iterator_destroy(it);
 
@@ -909,9 +856,9 @@ static int _tables_list(hid_t fid_job, List tables) {
  * @param node_name Name of the node containing this table
  * @param output    output file
  */
-static void _extract_totals(size_t nb_fields, size_t *offsets, hid_t *types,
-                            hsize_t type_size, hid_t table_id,
-                            table_t *table, FILE *output) {
+static void
+_extract_totals(size_t nb_fields, size_t *offsets, hid_t *types, hsize_t type_size, hid_t table_id, table_t *table,
+                FILE *output) {
     hsize_t nrecords;
     size_t i, j;
     uint8_t *data;
@@ -973,17 +920,10 @@ static void _extract_totals(size_t nb_fields, size_t *offsets, hid_t *types,
     /* aggregate values */
     for (j = 0; j < nb_fields; ++j) {
         if (H5Tequal(types[j], H5T_NATIVE_UINT64)) {
-            fprintf(output, ",%"PRIu64",%"PRIu64",%"PRIu64",%lf",
-                    agg_i[j * 4 + 0],
-                    agg_i[j * 4 + 1],
-                    agg_i[j * 4 + 2],
+            fprintf(output, ",%"PRIu64",%"PRIu64",%"PRIu64",%lf", agg_i[j * 4 + 0], agg_i[j * 4 + 1], agg_i[j * 4 + 2],
                     agg_d[j * 4 + 3]);
         } else if (H5Tequal(types[j], H5T_NATIVE_DOUBLE)) {
-            fprintf(output, ",%lf,%lf,%lf,%lf",
-                    agg_d[j * 4 + 0],
-                    agg_d[j * 4 + 1],
-                    agg_d[j * 4 + 2],
-                    agg_d[j * 4 + 3]);
+            fprintf(output, ",%lf,%lf,%lf,%lf", agg_d[j * 4 + 0], agg_d[j * 4 + 1], agg_d[j * 4 + 2], agg_d[j * 4 + 3]);
         }
     }
     fputc('\n', output);
@@ -995,8 +935,7 @@ static void _extract_totals(size_t nb_fields, size_t *offsets, hid_t *types,
  * Extract the content of a table within a node. This function first discovers
  * the content of the table and then handles both timeseries and totals levels.
  */
-static int _extract_series_table(hid_t fid_job, table_t *table, List fields,
-                                 FILE *output, bool level_total) {
+static int _extract_series_table(hid_t fid_job, table_t *table, List fields, FILE *output, bool level_total) {
     char path[MAX_PROFILE_PATH];
 
     size_t i, j;
@@ -1073,8 +1012,7 @@ static int _extract_series_table(hid_t fid_job, table_t *table, List fields,
     }
 
     if (level_total) {
-        _extract_totals(nb_fields, offsets, types, type_size,
-                        table_id, table, output);
+        _extract_totals(nb_fields, offsets, types, type_size, table_id, table, output);
     } else {
         /* Timeseries level */
         H5PTget_num_packets(table_id, &nrecords);
@@ -1089,12 +1027,9 @@ static int _extract_series_table(hid_t fid_job, table_t *table, List fields,
 
             for (j = 0; j < nb_fields; ++j) {
                 if (H5Tequal(types[j], H5T_NATIVE_UINT64)) {
-                    fprintf(output, ",%"PRIu64,
-                            *(uint64_t *) (data + offsets[j]));
-                } else if (H5Tequal(types[j],
-                                    H5T_NATIVE_DOUBLE)) {
-                    fprintf(output, ",%lf",
-                            *(double *) (data + offsets[j]));
+                    fprintf(output, ",%"PRIu64, *(uint64_t *) (data + offsets[j]));
+                } else if (H5Tequal(types[j], H5T_NATIVE_DOUBLE)) {
+                    fprintf(output, ",%lf", *(double *) (data + offsets[j]));
                 } else {
                     error("Unknown type");
                     goto error;
@@ -1135,8 +1070,7 @@ static int _extract_series(void) {
 
     output = fopen(params.output, "w");
     if (output == NULL) {
-        error("Failed to create output file %s -- %m",
-              params.output);
+        error("Failed to create output file %s -- %m", params.output);
         goto error;
     }
 
@@ -1155,8 +1089,7 @@ static int _extract_series(void) {
 
     /* Find the fields to be extracted */
     fields = list_create(_void_free);
-    if ((rc = _fields_intersection(fid_job, tables, fields))
-        != SLURM_SUCCESS) {
+    if ((rc = _fields_intersection(fid_job, tables, fields)) != SLURM_SUCCESS) {
         error("Failed to find data items for series %s", params.series);
         goto error;
     }
@@ -1177,8 +1110,7 @@ static int _extract_series(void) {
     it = list_iterator_create(fields);
     while ((field = list_next(it))) {
         if (level_total) {
-            fprintf(output, ",Min_%s,Max_%s,Sum_%s,Avg_%s",
-                    field, field, field, field);
+            fprintf(output, ",Min_%s,Max_%s,Sum_%s,Avg_%s", field, field, field, field);
         } else {
             fprintf(output, ",%s", field);
         }
@@ -1189,8 +1121,7 @@ static int _extract_series(void) {
     /* Extract from every table */
     it = list_iterator_create(tables);
     while ((t = list_next(it))) {
-        if (_extract_series_table(fid_job, t, fields,
-                                  output, level_total) < 0) {
+        if (_extract_series_table(fid_job, t, fields, output, level_total) < 0) {
             error("Failed to extract series");
             goto error;
         }
@@ -1229,11 +1160,8 @@ static int _extract_series(void) {
  * @param nodes      Name of the node for each table
  * @param step_name  Name of the current step
  */
-static void _item_analysis_uint(hsize_t nb_tables, hid_t *tables,
-                                hsize_t *nb_records, size_t buf_size,
-                                size_t *offsets,
-                                const char *names[], const char *nodes[],
-                                const char *step_name) {
+static void _item_analysis_uint(hsize_t nb_tables, hid_t *tables, hsize_t *nb_records, size_t buf_size, size_t *offsets,
+                                const char *names[], const char *nodes[], const char *step_name) {
     size_t i;
     uint64_t min_val;
     size_t min_idx = 0;
@@ -1291,21 +1219,13 @@ static void _item_analysis_uint(hsize_t nb_tables, hid_t *tables,
         }
 
         if (group_mode) {
-            fprintf(output_file,
-                    "%s,%"PRIu64",%s %s,%"PRIu64",%s %s,"
-                    "%"PRIu64",%"PRIu64",%lf,%zu",
-                    step_name, et,
-                    names[min_idx], nodes[min_idx], min_val,
-                    names[max_idx], nodes[max_idx], max_val,
-                    sum, avg, nb_series_in_smp);
+            fprintf(output_file, "%s,%"PRIu64",%s %s,%"PRIu64",%s %s,"
+                                 "%"PRIu64",%"PRIu64",%lf,%zu", step_name, et, names[min_idx], nodes[min_idx], min_val,
+                    names[max_idx], nodes[max_idx], max_val, sum, avg, nb_series_in_smp);
         } else {
-            fprintf(output_file,
-                    "%s,%"PRIu64",%s,%"PRIu64",%s,%"PRIu64",%"
-                    PRIu64",%lf,%zu",
-                    step_name, et,
-                    nodes[min_idx], min_val,
-                    nodes[max_idx], max_val,
-                    sum, avg, nb_series_in_smp);
+            fprintf(output_file, "%s,%"PRIu64",%s,%"PRIu64",%s,%"PRIu64",%"
+                                 PRIu64",%lf,%zu", step_name, et, nodes[min_idx], min_val, nodes[max_idx], max_val, sum,
+                    avg, nb_series_in_smp);
         }
 
         /* print value of each series */
@@ -1320,8 +1240,7 @@ static void _item_analysis_uint(hsize_t nb_tables, hid_t *tables,
     xfree(buffer);
 
     printf("    Step %s Maximum accumulated %s Value (%"PRIu64") occurred "
-           "at Time=%"PRIu64", Ave Node %lf\n",
-           step_name, params.data_item, sum_max, et_max, avg_max);
+           "at Time=%"PRIu64", Ave Node %lf\n", step_name, params.data_item, sum_max, et_max, avg_max);
 }
 
 /**
@@ -1329,11 +1248,9 @@ static void _item_analysis_uint(hsize_t nb_tables, hid_t *tables,
  * tables.
  * See _item_analysis_uint for parameters description.
  */
-static void _item_analysis_double(hsize_t nb_tables, hid_t *tables,
-                                  hsize_t *nb_records, size_t buf_size,
-                                  size_t *offsets,
-                                  const char *names[], const char *nodes[],
-                                  const char *step_name) {
+static void
+_item_analysis_double(hsize_t nb_tables, hid_t *tables, hsize_t *nb_records, size_t buf_size, size_t *offsets,
+                      const char *names[], const char *nodes[], const char *step_name) {
     size_t i;
     double min_val;
     size_t min_idx = 0;
@@ -1390,11 +1307,8 @@ static void _item_analysis_double(hsize_t nb_tables, hid_t *tables,
             et_max = et;
         }
 
-        fprintf(output_file,
-                "%s,%"PRIu64",%s,%lf,%s,%lf,%lf,%lf,%zu",
-                step_name, et,
-                names[min_idx], min_val, names[max_idx], max_val,
-                sum, avg, nb_series_in_smp);
+        fprintf(output_file, "%s,%"PRIu64",%s,%lf,%s,%lf,%lf,%lf,%zu", step_name, et, names[min_idx], min_val,
+                names[max_idx], max_val, sum, avg, nb_series_in_smp);
 
         /* print value of each series */
         for (i = 0; i < nb_tables; ++i) {
@@ -1408,12 +1322,10 @@ static void _item_analysis_double(hsize_t nb_tables, hid_t *tables,
     xfree(buffer);
 
     printf("    Step %s Maximum accumulated %s Value (%lf) occurred "
-           "at Time=%"PRIu64", Ave Node %lf\n",
-           step_name, params.data_item, sum_max, et_max, avg_max);
+           "at Time=%"PRIu64", Ave Node %lf\n", step_name, params.data_item, sum_max, et_max, avg_max);
 }
 
-static herr_t _extract_item_step(hid_t g_id, const char *step_name,
-                                 const H5L_info_t *link_info, void *op_data) {
+static herr_t _extract_item_step(hid_t g_id, const char *step_name, const H5L_info_t *link_info, void *op_data) {
     static bool first = true;
 
     char nodes_path[MAX_PROFILE_PATH];
@@ -1447,12 +1359,10 @@ static herr_t _extract_item_step(hid_t g_id, const char *step_name,
             GRP_NODES, step_name);
 
     tables = list_create(_table_free);
-    err = H5Literate_by_name(g_id, nodes_path, H5_INDEX_NAME,
-                             H5_ITER_INC, NULL, _collect_tables_node,
-                             (void *) tables, H5P_DEFAULT);
+    err = H5Literate_by_name(g_id, nodes_path, H5_INDEX_NAME, H5_ITER_INC, NULL, _collect_tables_node, (void *) tables,
+                             H5P_DEFAULT);
     if (err < 0) {
-        debug("1 Failed to iterate through group /"GRP_STEPS"/%s",
-              nodes_path);
+        debug("1 Failed to iterate through group /"GRP_STEPS"/%s", nodes_path);
         FREE_NULL_LIST(tables);
         return -1;
     }
@@ -1506,8 +1416,7 @@ static herr_t _extract_item_step(hid_t g_id, const char *step_name,
         }
 
         if (j == nmembers) {
-            error("Item %s not found in series %s",
-                  params.data_item, path);
+            error("Item %s not found in series %s", params.data_item, path);
             goto error;
         }
 
@@ -1553,8 +1462,7 @@ static herr_t _extract_item_step(hid_t g_id, const char *step_name,
             if (group_mode)
                 fprintf(output_file, ",%s", t->node);
             else
-                fprintf(output_file, ",%s %s",
-                        t->name, t->node);
+                fprintf(output_file, ",%s %s", t->name, t->node);
         }
         fputc('\n', output_file);
     }
@@ -1562,12 +1470,9 @@ static herr_t _extract_item_step(hid_t g_id, const char *step_name,
     list_iterator_destroy(it);
 
     if (H5Tequal(item_type, H5T_NATIVE_UINT64)) {
-        _item_analysis_uint(nb_tables, tables_id, nb_records, buf_size,
-                            offsets, names, nodes, step_name);
+        _item_analysis_uint(nb_tables, tables_id, nb_records, buf_size, offsets, names, nodes, step_name);
     } else if (H5Tequal(item_type, H5T_NATIVE_DOUBLE)) {
-        _item_analysis_double(nb_tables, tables_id,
-                              nb_records, buf_size,
-                              offsets, names, nodes, step_name);
+        _item_analysis_double(nb_tables, tables_id, nb_records, buf_size, offsets, names, nodes, step_name);
     } else {
         error("Unknown type");
         goto error;
@@ -1601,8 +1506,7 @@ static int _extract_item(void) {
 
     output_file = fopen(params.output, "w");
     if (output_file == NULL) {
-        error("Failed to create output file %s -- %m",
-              params.output);
+        error("Failed to create output file %s -- %m", params.output);
     }
 
     fid_job = H5Fopen(params.input, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1616,8 +1520,7 @@ static int _extract_item(void) {
     fputs("Step,ElaspedTime,MinNode,MinValue,MaxNode,MaxValue,Sum,Avg,"
           "NumNodes", output_file);
 
-    err = H5Literate_by_name(fid_job, "/" GRP_STEPS, H5_INDEX_NAME,
-                             H5_ITER_INC, NULL, _extract_item_step,
+    err = H5Literate_by_name(fid_job, "/" GRP_STEPS, H5_INDEX_NAME, H5_ITER_INC, NULL, _extract_item_step,
                              (void *) (&fid_job), H5P_DEFAULT);
     if (err < 0) {
         debug("hnere Failed to iterate through group /" GRP_STEPS);
@@ -1728,8 +1631,7 @@ static int _list_items(void) {
     }
 
     fields = list_create(_void_free);
-    if ((rc = _fields_intersection(fid_job, tables, fields))
-        != SLURM_SUCCESS) {
+    if ((rc = _fields_intersection(fid_job, tables, fields)) != SLURM_SUCCESS) {
         error("Failed to intersect fields");
         H5Fclose(fid_job);
         FREE_NULL_LIST(tables);

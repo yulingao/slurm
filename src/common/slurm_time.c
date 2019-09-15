@@ -123,8 +123,7 @@ extern time_t slurm_mktime(struct tm *tp) {
 extern char *slurm_ctime2(const time_t *timep) {
     static char time_str[25];
 
-    strftime(time_str, sizeof(time_str), "%a %b %d %T %Y",
-             slurm_localtime(timep));
+    strftime(time_str, sizeof(time_str), "%a %b %d %T %Y", slurm_localtime(timep));
 
     return time_str;
 }

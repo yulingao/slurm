@@ -73,11 +73,9 @@ typedef struct node_features_ops {
 
     int (*node_update)(char *active_features, bitstr_t *node_bitmap);
 
-    bool (*node_update_valid)(void *node_ptr,
-                              update_node_msg_t *update_node_msg);
+    bool (*node_update_valid)(void *node_ptr, update_node_msg_t *update_node_msg);
 
-    char *(*node_xlate)(char *new_features, char *orig_features,
-                        char *avail_features, int node_inx);
+    char *(*node_xlate)(char *new_features, char *orig_features, char *avail_features, int node_inx);
 
     char *(*node_xlate2)(char *new_features);
 
@@ -96,27 +94,14 @@ typedef struct node_features_ops {
  * These strings must be kept in the same order as the fields
  * declared for node_features_ops_t.
  */
-static const char *syms[] = {
-        "node_features_p_boot_time",
-        "node_features_p_changeable_feature",
-        "node_features_p_get_node",
-        "node_features_p_job_valid",
-        "node_features_p_job_xlate",
-        "node_features_p_get_node_bitmap",
-        "node_features_p_overlap",
-        "node_features_p_node_power",
-        "node_features_p_node_set",
-        "node_features_p_node_state",
-        "node_features_p_node_update",
-        "node_features_p_node_update_valid",
-        "node_features_p_node_xlate",
-        "node_features_p_node_xlate2",
-        "node_features_p_step_config",
-        "node_features_p_reboot_weight",
-        "node_features_p_reconfig",
-        "node_features_p_user_update",
-        "node_features_p_get_config"
-};
+static const char *syms[] = {"node_features_p_boot_time", "node_features_p_changeable_feature",
+                             "node_features_p_get_node", "node_features_p_job_valid", "node_features_p_job_xlate",
+                             "node_features_p_get_node_bitmap", "node_features_p_overlap", "node_features_p_node_power",
+                             "node_features_p_node_set", "node_features_p_node_state", "node_features_p_node_update",
+                             "node_features_p_node_update_valid", "node_features_p_node_xlate",
+                             "node_features_p_node_xlate2", "node_features_p_step_config",
+                             "node_features_p_reboot_weight", "node_features_p_reconfig", "node_features_p_user_update",
+                             "node_features_p_get_config"};
 
 static int g_context_cnt = -1;
 static node_features_ops_t *ops = NULL;
@@ -141,25 +126,20 @@ extern int node_features_g_init(void) {
 
     node_features_plugin_list = slurm_get_node_features_plugins();
     g_context_cnt = 0;
-    if ((node_features_plugin_list == NULL) ||
-        (node_features_plugin_list[0] == '\0'))
+    if ((node_features_plugin_list == NULL) || (node_features_plugin_list[0] == '\0'))
         goto fini;
 
     names = node_features_plugin_list;
     while ((type = strtok_r(names, ",", &last))) {
-        xrealloc(ops,
-                 (sizeof(node_features_ops_t) * (g_context_cnt + 1)));
-        xrealloc(g_context,
-                 (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
+        xrealloc(ops, (sizeof(node_features_ops_t) * (g_context_cnt + 1)));
+        xrealloc(g_context, (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
         if (xstrncmp(type, "node_features/", 14) == 0)
             type += 14; /* backward compatibility */
         type = xstrdup_printf("node_features/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;
@@ -431,8 +411,7 @@ extern void node_features_g_node_state(char **avail_modes, char **current_mode) 
  * IN active_features - New active features
  * IN node_bitmap - bitmap of nodes changed
  * RET error code */
-extern int node_features_g_node_update(char *active_features,
-                                       bitstr_t *node_bitmap) {
+extern int node_features_g_node_update(char *active_features, bitstr_t *node_bitmap) {
     DEF_TIMERS;
     int i, rc = SLURM_SUCCESS;
 
@@ -456,8 +435,7 @@ extern int node_features_g_node_update(char *active_features,
  * node_ptr IN - Pointer to struct node_record record
  * update_node_msg IN - Pointer to update request
  */
-extern bool node_features_g_node_update_valid(void *node_ptr,
-                                              update_node_msg_t *update_node_msg) {
+extern bool node_features_g_node_update_valid(void *node_ptr, update_node_msg_t *update_node_msg) {
     DEF_TIMERS;
     bool update_valid = true;
     int i;
@@ -466,8 +444,7 @@ extern bool node_features_g_node_update_valid(void *node_ptr,
     (void) node_features_g_init();
     slurm_mutex_lock(&g_context_lock);
     for (i = 0; i < g_context_cnt; i++) {
-        update_valid = (*(ops[i].node_update_valid))(node_ptr,
-                                                     update_node_msg);
+        update_valid = (*(ops[i].node_update_valid))(node_ptr, update_node_msg);
         if (!update_valid)
             break;
     }
@@ -487,8 +464,7 @@ extern bool node_features_g_node_update_valid(void *node_ptr,
  * IN node_inx - index of node in node table
  * RET node's new merged features, must be xfreed
  */
-extern char *node_features_g_node_xlate(char *new_features, char *orig_features,
-                                        char *avail_features, int node_inx) {
+extern char *node_features_g_node_xlate(char *new_features, char *orig_features, char *avail_features, int node_inx) {
     DEF_TIMERS;
     char *new_value = NULL, *tmp_str;
     int i;
@@ -507,8 +483,7 @@ extern char *node_features_g_node_xlate(char *new_features, char *orig_features,
             tmp_str = xstrdup(orig_features);
         else
             tmp_str = NULL;
-        new_value = (*(ops[i].node_xlate))(new_features, tmp_str,
-                                           avail_features, node_inx);
+        new_value = (*(ops[i].node_xlate))(new_features, tmp_str, avail_features, node_inx);
         xfree(tmp_str);
 
     }

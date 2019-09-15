@@ -83,11 +83,7 @@ static void *_cluster_rollup_usage(void *arg) {
     long rollup_time[ROLLUP_COUNT];
     DEF_TIMERS;
 
-    char *update_req_inx[] = {
-            "hourly_rollup",
-            "daily_rollup",
-            "monthly_rollup"
-    };
+    char *update_req_inx[] = {"hourly_rollup", "daily_rollup", "monthly_rollup"};
 
     memset(&mysql_conn, 0, sizeof(mysql_conn_t));
     memset(rollup_time, 0, sizeof(long) * ROLLUP_COUNT);
@@ -108,13 +104,10 @@ static void *_cluster_rollup_usage(void *arg) {
             xstrfmtcat(tmp, "%s%s", sep, update_req_inx[i]);
             sep = ", ";
         }
-        query = xstrdup_printf("select %s from \"%s_%s\"",
-                               tmp, local_rollup->cluster_name,
-                               last_ran_table);
+        query = xstrdup_printf("select %s from \"%s_%s\"", tmp, local_rollup->cluster_name, last_ran_table);
         xfree(tmp);
 
-        debug4("%d(%s:%d) query\n%s", mysql_conn.conn,
-               THIS_FILE, __LINE__, query);
+        debug4("%d(%s:%d) query\n%s", mysql_conn.conn, THIS_FILE, __LINE__, query);
         if (!(result = mysql_db_query_ret(&mysql_conn, query, 0))) {
             xfree(query);
             rc = SLURM_ERROR;
@@ -134,15 +127,12 @@ static void *_cluster_rollup_usage(void *arg) {
 
             mysql_free_result(result);
 
-            query = xstrdup_printf(
-                    "select time_start from \"%s_%s\" "
-                    "where node_name='' order by "
-                    "time_start asc limit 1;",
-                    local_rollup->cluster_name, event_table);
+            query = xstrdup_printf("select time_start from \"%s_%s\" "
+                                   "where node_name='' order by "
+                                   "time_start asc limit 1;", local_rollup->cluster_name, event_table);
             if (debug_flags & DEBUG_FLAG_DB_USAGE)
                 DB_DEBUG(mysql_conn.conn, "query\n%s", query);
-            if (!(result = mysql_db_query_ret(
-                    &mysql_conn, query, 0))) {
+            if (!(result = mysql_db_query_ret(&mysql_conn, query, 0))) {
                 xfree(query);
                 rc = SLURM_ERROR;
                 goto end_it;
@@ -160,12 +150,10 @@ static void *_cluster_rollup_usage(void *arg) {
              * will insert now as a starting point.
              */
 
-            query = xstrdup_printf(
-                    "insert into \"%s_%s\" "
-                    "(hourly_rollup, daily_rollup, monthly_rollup) "
-                    "values (%ld, %ld, %ld);",
-                    local_rollup->cluster_name, last_ran_table,
-                    lowest, lowest, lowest);
+            query = xstrdup_printf("insert into \"%s_%s\" "
+                                   "(hourly_rollup, daily_rollup, monthly_rollup) "
+                                   "values (%ld, %ld, %ld);", local_rollup->cluster_name, last_ran_table, lowest,
+                                   lowest, lowest);
 
             if (debug_flags & DEBUG_FLAG_DB_USAGE)
                 DB_DEBUG(mysql_conn.conn, "query\n%s", query);
@@ -178,8 +166,7 @@ static void *_cluster_rollup_usage(void *arg) {
 
             if (lowest == now) {
                 debug("Cluster %s not registered, "
-                      "not doing rollup",
-                      local_rollup->cluster_name);
+                      "not doing rollup", local_rollup->cluster_name);
                 rc = SLURM_SUCCESS;
                 goto end_it;
             }
@@ -288,13 +275,9 @@ static void *_cluster_rollup_usage(void *arg) {
 
     if ((hour_end - hour_start) > 0) {
         START_TIMER;
-        rc = as_mysql_hourly_rollup(&mysql_conn,
-                                    local_rollup->cluster_name,
-                                    hour_start,
-                                    hour_end,
+        rc = as_mysql_hourly_rollup(&mysql_conn, local_rollup->cluster_name, hour_start, hour_end,
                                     local_rollup->archive_data);
-        snprintf(timer_str, sizeof(timer_str),
-                 "hourly_rollup for %s", local_rollup->cluster_name);
+        snprintf(timer_str, sizeof(timer_str), "hourly_rollup for %s", local_rollup->cluster_name);
         END_TIMER3(timer_str, 5000000);
         rollup_time[ROLLUP_HOUR] += DELTA_TIMER;
         if (rc != SLURM_SUCCESS)
@@ -303,13 +286,9 @@ static void *_cluster_rollup_usage(void *arg) {
 
     if ((day_end - day_start) > 0) {
         START_TIMER;
-        rc = as_mysql_nonhour_rollup(&mysql_conn, 0,
-                                     local_rollup->cluster_name,
-                                     day_start,
-                                     day_end,
+        rc = as_mysql_nonhour_rollup(&mysql_conn, 0, local_rollup->cluster_name, day_start, day_end,
                                      local_rollup->archive_data);
-        snprintf(timer_str, sizeof(timer_str),
-                 "daily_rollup for %s", local_rollup->cluster_name);
+        snprintf(timer_str, sizeof(timer_str), "daily_rollup for %s", local_rollup->cluster_name);
         END_TIMER3(timer_str, 5000000);
         rollup_time[ROLLUP_DAY] += DELTA_TIMER;
         if (rc != SLURM_SUCCESS)
@@ -318,13 +297,9 @@ static void *_cluster_rollup_usage(void *arg) {
 
     if ((month_end - month_start) > 0) {
         START_TIMER;
-        rc = as_mysql_nonhour_rollup(&mysql_conn, 1,
-                                     local_rollup->cluster_name,
-                                     month_start,
-                                     month_end,
+        rc = as_mysql_nonhour_rollup(&mysql_conn, 1, local_rollup->cluster_name, month_start, month_end,
                                      local_rollup->archive_data);
-        snprintf(timer_str, sizeof(timer_str),
-                 "monthly_rollup for %s", local_rollup->cluster_name);
+        snprintf(timer_str, sizeof(timer_str), "monthly_rollup for %s", local_rollup->cluster_name);
         END_TIMER3(timer_str, 5000000);
         rollup_time[ROLLUP_MONTH] += DELTA_TIMER;
         if (rc != SLURM_SUCCESS)
@@ -334,37 +309,28 @@ static void *_cluster_rollup_usage(void *arg) {
     if ((hour_end - hour_start) > 0) {
         /* If we have a sent_end do not update the last_run_table */
         if (!local_rollup->sent_end)
-            query = xstrdup_printf(
-                    "update \"%s_%s\" set hourly_rollup=%ld",
-                    local_rollup->cluster_name,
-                    last_ran_table, hour_end);
+            query = xstrdup_printf("update \"%s_%s\" set hourly_rollup=%ld", local_rollup->cluster_name, last_ran_table,
+                                   hour_end);
     } else
-        debug2("No need to roll cluster %s this hour %ld <= %ld",
-               local_rollup->cluster_name, hour_end, hour_start);
+        debug2("No need to roll cluster %s this hour %ld <= %ld", local_rollup->cluster_name, hour_end, hour_start);
 
     if ((day_end - day_start) > 0) {
         if (query && !local_rollup->sent_end)
             xstrfmtcat(query, ", daily_rollup=%ld", day_end);
         else if (!local_rollup->sent_end)
-            query = xstrdup_printf(
-                    "update \"%s_%s\" set daily_rollup=%ld",
-                    local_rollup->cluster_name,
-                    last_ran_table, day_end);
+            query = xstrdup_printf("update \"%s_%s\" set daily_rollup=%ld", local_rollup->cluster_name, last_ran_table,
+                                   day_end);
     } else
-        debug2("No need to roll cluster %s this day %ld <= %ld",
-               local_rollup->cluster_name, day_end, day_start);
+        debug2("No need to roll cluster %s this day %ld <= %ld", local_rollup->cluster_name, day_end, day_start);
 
     if ((month_end - month_start) > 0) {
         if (query && !local_rollup->sent_end)
             xstrfmtcat(query, ", monthly_rollup=%ld", month_end);
         else if (!local_rollup->sent_end)
-            query = xstrdup_printf(
-                    "update \"%s_%s\" set monthly_rollup=%ld",
-                    local_rollup->cluster_name,
-                    last_ran_table, month_end);
+            query = xstrdup_printf("update \"%s_%s\" set monthly_rollup=%ld", local_rollup->cluster_name,
+                                   last_ran_table, month_end);
     } else
-        debug2("No need to roll cluster %s this month %ld <= %ld",
-               local_rollup->cluster_name, month_end, month_start);
+        debug2("No need to roll cluster %s this month %ld <= %ld", local_rollup->cluster_name, month_end, month_start);
 
     if (query) {
         if (debug_flags & DEBUG_FLAG_DB_USAGE)
@@ -375,8 +341,7 @@ static void *_cluster_rollup_usage(void *arg) {
     end_it:
     if (rc == SLURM_SUCCESS) {
         if (mysql_db_commit(&mysql_conn)) {
-            error("Couldn't commit rollup of cluster %s",
-                  local_rollup->cluster_name);
+            error("Couldn't commit rollup of cluster %s", local_rollup->cluster_name);
             rc = SLURM_ERROR;
         }
     } else {
@@ -392,8 +357,7 @@ static void *_cluster_rollup_usage(void *arg) {
     (*local_rollup->rolledup)++;
     if (local_rollup->rollup_stats) {
         for (i = 0; i < ROLLUP_COUNT; i++) {
-            local_rollup->rollup_stats->rollup_time[i] +=
-                    rollup_time[i];
+            local_rollup->rollup_stats->rollup_time[i] += rollup_time[i];
         }
     }
     if ((rc != SLURM_SUCCESS) && ((*local_rollup->rc) == SLURM_SUCCESS))
@@ -406,30 +370,19 @@ static void *_cluster_rollup_usage(void *arg) {
 }
 
 /* assoc_mgr locks need to be unlocked before coming here */
-static int _get_object_usage(mysql_conn_t *mysql_conn,
-                             slurmdbd_msg_type_t type, char *my_usage_table,
-                             char *cluster_name, char *id_str,
-                             time_t start, time_t end, List *usage_list) {
+static int
+_get_object_usage(mysql_conn_t *mysql_conn, slurmdbd_msg_type_t type, char *my_usage_table, char *cluster_name,
+                  char *id_str, time_t start, time_t end, List *usage_list) {
     char *tmp = NULL;
     int i = 0;
     MYSQL_RES *result = NULL;
     MYSQL_ROW row;
     char *query = NULL;
-    assoc_mgr_lock_t locks = {NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
-                              READ_LOCK, NO_LOCK, NO_LOCK};
+    assoc_mgr_lock_t locks = {NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
 
-    char *usage_req_inx[] = {
-            "t3.id_assoc",
-            "t1.id_tres",
-            "t1.time_start",
-            "t1.alloc_secs",
-    };
+    char *usage_req_inx[] = {"t3.id_assoc", "t1.id_tres", "t1.time_start", "t1.alloc_secs",};
     enum {
-        USAGE_ID,
-        USAGE_TRES,
-        USAGE_START,
-        USAGE_ALLOC,
-        USAGE_COUNT
+        USAGE_ID, USAGE_TRES, USAGE_START, USAGE_ALLOC, USAGE_COUNT
     };
 
     if (type == DBD_GET_WCKEY_USAGE)
@@ -442,23 +395,19 @@ static int _get_object_usage(mysql_conn_t *mysql_conn,
 
     switch (type) {
         case DBD_GET_ASSOC_USAGE:
-            query = xstrdup_printf(
-                    "select %s from \"%s_%s\" as t1, "
-                    "\"%s_%s\" as t2, \"%s_%s\" as t3 "
-                    "where (t1.time_start < %ld && t1.time_start >= %ld) "
-                    "&& t1.id=t2.id_assoc && (%s) && "
-                    "t2.lft between t3.lft and t3.rgt "
-                    "order by t3.id_assoc, time_start;",
-                    tmp, cluster_name, my_usage_table,
-                    cluster_name, assoc_table, cluster_name, assoc_table,
-                    end, start, id_str);
+            query = xstrdup_printf("select %s from \"%s_%s\" as t1, "
+                                   "\"%s_%s\" as t2, \"%s_%s\" as t3 "
+                                   "where (t1.time_start < %ld && t1.time_start >= %ld) "
+                                   "&& t1.id=t2.id_assoc && (%s) && "
+                                   "t2.lft between t3.lft and t3.rgt "
+                                   "order by t3.id_assoc, time_start;", tmp, cluster_name, my_usage_table, cluster_name,
+                                   assoc_table, cluster_name, assoc_table, end, start, id_str);
             break;
         case DBD_GET_WCKEY_USAGE:
-            query = xstrdup_printf(
-                    "select %s from \"%s_%s\" as t1 "
-                    "where (time_start < %ld && time_start >= %ld) "
-                    "&& (%s) order by id, time_start;",
-                    tmp, cluster_name, my_usage_table, end, start, id_str);
+            query = xstrdup_printf("select %s from \"%s_%s\" as t1 "
+                                   "where (time_start < %ld && time_start >= %ld) "
+                                   "&& (%s) order by id, time_start;", tmp, cluster_name, my_usage_table, end, start,
+                                   id_str);
             break;
         default:
             error("Unknown usage type %d", type);
@@ -482,17 +431,13 @@ static int _get_object_usage(mysql_conn_t *mysql_conn,
     assoc_mgr_lock(&locks);
     while ((row = mysql_fetch_row(result))) {
         slurmdb_tres_rec_t *tres_rec;
-        slurmdb_accounting_rec_t *accounting_rec =
-                xmalloc(sizeof(slurmdb_accounting_rec_t));
+        slurmdb_accounting_rec_t *accounting_rec = xmalloc(sizeof(slurmdb_accounting_rec_t));
 
         accounting_rec->tres_rec.id = slurm_atoul(row[USAGE_TRES]);
-        if ((tres_rec = list_find_first(
-                assoc_mgr_tres_list, slurmdb_find_tres_in_list,
-                &accounting_rec->tres_rec.id))) {
-            accounting_rec->tres_rec.name =
-                    xstrdup(tres_rec->name);
-            accounting_rec->tres_rec.type =
-                    xstrdup(tres_rec->type);
+        if ((tres_rec = list_find_first(assoc_mgr_tres_list, slurmdb_find_tres_in_list,
+                                        &accounting_rec->tres_rec.id))) {
+            accounting_rec->tres_rec.name = xstrdup(tres_rec->name);
+            accounting_rec->tres_rec.type = xstrdup(tres_rec->type);
         }
 
         accounting_rec->id = slurm_atoul(row[USAGE_ID]);
@@ -509,10 +454,9 @@ static int _get_object_usage(mysql_conn_t *mysql_conn,
 }
 
 /* assoc_mgr locks need to unlocked before you get here */
-static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
-                              slurmdb_cluster_rec_t *cluster_rec,
-                              slurmdbd_msg_type_t type,
-                              time_t start, time_t end) {
+static int
+_get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid, slurmdb_cluster_rec_t *cluster_rec, slurmdbd_msg_type_t type,
+                   time_t start, time_t end) {
     int rc = SLURM_SUCCESS;
     int i = 0;
     MYSQL_RES *result = NULL;
@@ -520,19 +464,9 @@ static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
     char *tmp = NULL;
     char *my_usage_table = cluster_day_table;
     char *query = NULL;
-    assoc_mgr_lock_t locks = {NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
-                              READ_LOCK, NO_LOCK, NO_LOCK};
-    char *cluster_req_inx[] = {
-            "id_tres",
-            "alloc_secs",
-            "down_secs",
-            "pdown_secs",
-            "idle_secs",
-            "resv_secs",
-            "over_secs",
-            "count",
-            "time_start",
-    };
+    assoc_mgr_lock_t locks = {NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
+    char *cluster_req_inx[] = {"id_tres", "alloc_secs", "down_secs", "pdown_secs", "idle_secs", "resv_secs",
+                               "over_secs", "count", "time_start",};
 
     enum {
         CLUSTER_TRES,
@@ -552,8 +486,7 @@ static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
         return SLURM_ERROR;
     }
 
-    if (set_usage_information(&my_usage_table, type, &start, &end)
-        != SLURM_SUCCESS) {
+    if (set_usage_information(&my_usage_table, type, &start, &end) != SLURM_SUCCESS) {
         return SLURM_ERROR;
     }
 
@@ -564,10 +497,8 @@ static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
         xstrfmtcat(tmp, ", %s", cluster_req_inx[i]);
     }
 
-    query = xstrdup_printf(
-            "select %s from \"%s_%s\" where (time_start < %ld "
-            "&& time_start >= %ld)",
-            tmp, cluster_rec->name, my_usage_table, end, start);
+    query = xstrdup_printf("select %s from \"%s_%s\" where (time_start < %ld "
+                           "&& time_start >= %ld)", tmp, cluster_rec->name, my_usage_table, end, start);
 
     xfree(tmp);
     if (debug_flags & DEBUG_FLAG_DB_USAGE)
@@ -580,24 +511,19 @@ static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
     xfree(query);
 
     if (!cluster_rec->accounting_list)
-        cluster_rec->accounting_list =
-                list_create(slurmdb_destroy_cluster_accounting_rec);
+        cluster_rec->accounting_list = list_create(slurmdb_destroy_cluster_accounting_rec);
 
     assoc_mgr_lock(&locks);
     while ((row = mysql_fetch_row(result))) {
         slurmdb_tres_rec_t *tres_rec;
-        slurmdb_cluster_accounting_rec_t *accounting_rec =
-                xmalloc(sizeof(slurmdb_cluster_accounting_rec_t));
+        slurmdb_cluster_accounting_rec_t *accounting_rec = xmalloc(sizeof(slurmdb_cluster_accounting_rec_t));
 
         accounting_rec->tres_rec.id = slurm_atoul(row[CLUSTER_TRES]);
         accounting_rec->tres_rec.count = slurm_atoul(row[CLUSTER_CNT]);
-        if ((tres_rec = list_find_first(
-                assoc_mgr_tres_list, slurmdb_find_tres_in_list,
-                &accounting_rec->tres_rec.id))) {
-            accounting_rec->tres_rec.name =
-                    xstrdup(tres_rec->name);
-            accounting_rec->tres_rec.type =
-                    xstrdup(tres_rec->type);
+        if ((tres_rec = list_find_first(assoc_mgr_tres_list, slurmdb_find_tres_in_list,
+                                        &accounting_rec->tres_rec.id))) {
+            accounting_rec->tres_rec.name = xstrdup(tres_rec->name);
+            accounting_rec->tres_rec.type = xstrdup(tres_rec->type);
         }
 
         accounting_rec->alloc_secs = slurm_atoull(row[CLUSTER_ACPU]);
@@ -619,9 +545,8 @@ static int _get_cluster_usage(mysql_conn_t *mysql_conn, uid_t uid,
 /* checks should already be done before this to see if this is a valid
    user or not.  The assoc_mgr locks should be unlocked before coming here.
 */
-extern int get_usage_for_list(mysql_conn_t *mysql_conn,
-                              slurmdbd_msg_type_t type, List object_list,
-                              char *cluster_name, time_t start, time_t end) {
+extern int get_usage_for_list(mysql_conn_t *mysql_conn, slurmdbd_msg_type_t type, List object_list, char *cluster_name,
+                              time_t start, time_t end) {
     int rc = SLURM_SUCCESS;
     char *my_usage_table = NULL;
     List usage_list = NULL;
@@ -695,21 +620,18 @@ extern int get_usage_for_list(mysql_conn_t *mysql_conn,
             if (lo >= hi)
                 xstrfmtcat(id_str, "%s=%lu", name_char, lo);
             else
-                xstrfmtcat(id_str, "%s between %lu and %lu",
-                           name_char, lo, hi);
+                xstrfmtcat(id_str, "%s between %lu and %lu", name_char, lo, hi);
         }
         hostlist_destroy(hl);
     }
 
-    if (set_usage_information(&my_usage_table, type, &start, &end)
-        != SLURM_SUCCESS) {
+    if (set_usage_information(&my_usage_table, type, &start, &end) != SLURM_SUCCESS) {
         xfree(id_str);
         return SLURM_ERROR;
     }
 
-    if (_get_object_usage(mysql_conn, type, my_usage_table, cluster_name,
-                          id_str, start, end, &usage_list)
-        != SLURM_SUCCESS) {
+    if (_get_object_usage(mysql_conn, type, my_usage_table, cluster_name, id_str, start, end, &usage_list) !=
+        SLURM_SUCCESS) {
         xfree(id_str);
         return SLURM_ERROR;
     }
@@ -732,16 +654,14 @@ extern int get_usage_for_list(mysql_conn_t *mysql_conn,
             case DBD_GET_ASSOC_USAGE:
                 assoc = (slurmdb_assoc_rec_t *) object;
                 if (!assoc->accounting_list)
-                    assoc->accounting_list = list_create(
-                            slurmdb_destroy_accounting_rec);
+                    assoc->accounting_list = list_create(slurmdb_destroy_accounting_rec);
                 acct_list = assoc->accounting_list;
                 id = assoc->id;
                 break;
             case DBD_GET_WCKEY_USAGE:
                 wckey = (slurmdb_wckey_rec_t *) object;
                 if (!wckey->accounting_list)
-                    wckey->accounting_list = list_create(
-                            slurmdb_destroy_accounting_rec);
+                    wckey->accounting_list = list_create(slurmdb_destroy_accounting_rec);
                 acct_list = wckey->accounting_list;
                 id = wckey->id;
                 break;
@@ -776,17 +696,15 @@ extern int get_usage_for_list(mysql_conn_t *mysql_conn,
 
     if (list_count(usage_list))
         error("we have %d records not added "
-              "to the association list",
-              list_count(usage_list));
+              "to the association list", list_count(usage_list));
     FREE_NULL_LIST(usage_list);
 
     return rc;
 }
 
 /*   The assoc_mgr locks should be unlocked before coming here. */
-extern int as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
-                              void *in, slurmdbd_msg_type_t type,
-                              time_t start, time_t end) {
+extern int
+as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid, void *in, slurmdbd_msg_type_t type, time_t start, time_t end) {
     int rc = SLURM_SUCCESS;
     int is_admin = 1;
     char *my_usage_table = NULL;
@@ -825,8 +743,7 @@ extern int as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
             my_usage_table = wckey_day_table;
             break;
         case DBD_GET_CLUSTER_USAGE:
-            rc = _get_cluster_usage(mysql_conn, uid, in,
-                                    type, start, end);
+            rc = _get_cluster_usage(mysql_conn, uid, in, type, start, end);
             return rc;
             break;
         default:
@@ -843,8 +760,7 @@ extern int as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
 
     private_data = slurm_get_private_data();
     if (private_data & PRIVATE_DATA_USAGE) {
-        if (!(is_admin = is_user_min_admin_level(
-                mysql_conn, uid, SLURMDB_ADMIN_OPERATOR))) {
+        if (!(is_admin = is_user_min_admin_level(mysql_conn, uid, SLURMDB_ADMIN_OPERATOR))) {
             ListIterator itr = NULL;
             slurmdb_coord_rec_t *coord = NULL;
             slurmdb_user_rec_t user;
@@ -876,8 +792,7 @@ extern int as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
             */
             itr = list_iterator_create(user.coord_accts);
             while ((coord = list_next(itr)))
-                if (!xstrcasecmp(coord->name,
-                                 slurmdb_assoc->acct))
+                if (!xstrcasecmp(coord->name, slurmdb_assoc->acct))
                     break;
             list_iterator_destroy(itr);
 
@@ -892,21 +807,18 @@ extern int as_mysql_get_usage(mysql_conn_t *mysql_conn, uid_t uid,
     }
     is_user:
 
-    if (set_usage_information(&my_usage_table, type, &start, &end)
-        != SLURM_SUCCESS) {
+    if (set_usage_information(&my_usage_table, type, &start, &end) != SLURM_SUCCESS) {
         xfree(id_str);
         return SLURM_ERROR;
     }
 
-    _get_object_usage(mysql_conn, type, my_usage_table, cluster_name,
-                      id_str, start, end, my_list);
+    _get_object_usage(mysql_conn, type, my_usage_table, cluster_name, id_str, start, end, my_list);
     xfree(id_str);
 
     return rc;
 }
 
-extern int as_mysql_roll_usage(mysql_conn_t *mysql_conn, time_t sent_start,
-                               time_t sent_end, uint16_t archive_data,
+extern int as_mysql_roll_usage(mysql_conn_t *mysql_conn, time_t sent_start, time_t sent_end, uint16_t archive_data,
                                rollup_stats_t *rollup_stats) {
     int rc = SLURM_SUCCESS;
     int rolledup = 0;
@@ -958,8 +870,7 @@ extern int as_mysql_roll_usage(mysql_conn_t *mysql_conn, time_t sent_start,
          * fashion buys a bunch on systems with lots
          * (millions) of jobs.
          */
-        slurm_thread_create_detached(NULL, _cluster_rollup_usage,
-                                     local_rollup);
+        slurm_thread_create_detached(NULL, _cluster_rollup_usage, local_rollup);
         roll_started++;
     }
     slurm_mutex_lock(&rolledup_lock);

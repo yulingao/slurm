@@ -94,8 +94,7 @@ static char *log_name = NULL;
 static int job_comp_fd = -1;
 
 /* get the user name for the give user_id */
-static void
-_get_user_name(uint32_t user_id, char *user_name, int buf_size) {
+static void _get_user_name(uint32_t user_id, char *user_name, int buf_size) {
     static uint32_t cache_uid = 0;
     static char cache_name[32] = "root", *uname;
 
@@ -109,8 +108,7 @@ _get_user_name(uint32_t user_id, char *user_name, int buf_size) {
 }
 
 /* get the group name for the give group_id */
-static void
-_get_group_name(uint32_t group_id, char *group_name, int buf_size) {
+static void _get_group_name(uint32_t group_id, char *group_name, int buf_size) {
     static uint32_t cache_gid = 0;
     static char cache_name[32] = "root", *gname;
 
@@ -178,11 +176,8 @@ static void _make_time_str(time_t *time, char *string, int size) {
         /* Format YYYY-MM-DDTHH:MM:SS, ISO8601 standard format,
          * NOTE: This is expected to break Maui, Moab and LSF
          * schedulers management of Slurm. */
-        snprintf(string, size,
-                 "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u",
-                 (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
-                 time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min,
-                 time_tm.tm_sec);
+        snprintf(string, size, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u", (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
+                 time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec);
 #else
         /* Format MM/DD-HH:MM:SS */
         snprintf(string, size,
@@ -222,19 +217,16 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
     if (time_limit == INFINITE)
         strcpy(lim_str, "UNLIMITED");
     else {
-        snprintf(lim_str, sizeof(lim_str), "%lu",
-                 (unsigned long) time_limit);
+        snprintf(lim_str, sizeof(lim_str), "%lu", (unsigned long) time_limit);
     }
 
     if (job_ptr->job_state & JOB_RESIZING) {
         time_t now = time(NULL);
         state_string = job_state_string(job_ptr->job_state);
         if (job_ptr->resize_time) {
-            _make_time_str(&job_ptr->resize_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->resize_time, start_str, sizeof(start_str));
         } else {
-            _make_time_str(&job_ptr->start_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->start_time, start_str, sizeof(start_str));
         }
         _make_time_str(&now, end_str, sizeof(end_str));
     } else {
@@ -244,15 +236,13 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         job_state = job_ptr->job_state & JOB_STATE_BASE;
         state_string = job_state_string(job_state);
         if (job_ptr->resize_time) {
-            _make_time_str(&job_ptr->resize_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->resize_time, start_str, sizeof(start_str));
         } else if (job_ptr->start_time > job_ptr->end_time) {
             /* Job cancelled while pending and
              * expected start time is in the future. */
             snprintf(start_str, sizeof(start_str), "Unknown");
         } else {
-            _make_time_str(&job_ptr->start_time, start_str,
-                           sizeof(start_str));
+            _make_time_str(&job_ptr->start_time, start_str, sizeof(start_str));
         }
         _make_time_str(&job_ptr->end_time, end_str, sizeof(end_str));
     }
@@ -293,31 +283,27 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         cluster = "unknown";
 
     if (job_ptr->details && job_ptr->details->submit_time) {
-        _make_time_str(&job_ptr->details->submit_time,
-                       submit_time, sizeof(submit_time));
+        _make_time_str(&job_ptr->details->submit_time, submit_time, sizeof(submit_time));
     } else {
         snprintf(submit_time, sizeof(submit_time), "unknown");
     }
 
     if (job_ptr->details && job_ptr->details->begin_time) {
-        _make_time_str(&job_ptr->details->begin_time,
-                       eligible_time, sizeof(eligible_time));
+        _make_time_str(&job_ptr->details->begin_time, eligible_time, sizeof(eligible_time));
     } else {
         snprintf(eligible_time, sizeof(eligible_time), "unknown");
     }
 
     if (job_ptr->array_task_id != NO_VAL) {
-        snprintf(array_id, sizeof(array_id),
-                 " ArrayJobId=%u ArrayTaskId=%u",
-                 job_ptr->array_job_id, job_ptr->array_task_id);
+        snprintf(array_id, sizeof(array_id), " ArrayJobId=%u ArrayTaskId=%u", job_ptr->array_job_id,
+                 job_ptr->array_task_id);
     } else {
         array_id[0] = '\0';
     }
 
     if (job_ptr->pack_job_id) {
-        snprintf(pack_id, sizeof(pack_id),
-                 " PackJobId=%u PackJobOffset=%u",
-                 job_ptr->pack_job_id, job_ptr->pack_job_offset);
+        snprintf(pack_id, sizeof(pack_id), " PackJobId=%u PackJobOffset=%u", job_ptr->pack_job_id,
+                 job_ptr->pack_job_offset);
     } else {
         pack_id[0] = '\0';
     }
@@ -338,23 +324,17 @@ extern int slurm_jobcomp_log_record(struct job_record *job_ptr) {
         tmp_int = WEXITSTATUS(job_ptr->exit_code);
     xstrfmtcat(exit_code_str, "%d:%d", tmp_int, tmp_int2);
 
-    select_g_select_jobinfo_sprint(job_ptr->select_jobinfo,
-                                   select_buf, sizeof(select_buf), SELECT_PRINT_MIXED);
+    select_g_select_jobinfo_sprint(job_ptr->select_jobinfo, select_buf, sizeof(select_buf), SELECT_PRINT_MIXED);
 
-    snprintf(job_rec, sizeof(job_rec), JOB_FORMAT,
-             (unsigned long) job_ptr->job_id, usr_str,
-             (unsigned long) job_ptr->user_id, grp_str,
-             (unsigned long) job_ptr->group_id, job_ptr->name,
-             state_string, job_ptr->partition, lim_str, start_str,
-             end_str, job_ptr->nodes, job_ptr->node_cnt,
-             job_ptr->total_cpus, work_dir, resv_name, gres, account, qos,
-             wckey, cluster, submit_time, eligible_time, array_id, pack_id,
+    snprintf(job_rec, sizeof(job_rec), JOB_FORMAT, (unsigned long) job_ptr->job_id, usr_str,
+             (unsigned long) job_ptr->user_id, grp_str, (unsigned long) job_ptr->group_id, job_ptr->name, state_string,
+             job_ptr->partition, lim_str, start_str, end_str, job_ptr->nodes, job_ptr->node_cnt, job_ptr->total_cpus,
+             work_dir, resv_name, gres, account, qos, wckey, cluster, submit_time, eligible_time, array_id, pack_id,
              derived_ec_str, exit_code_str, select_buf);
     tot_size = strlen(job_rec);
 
     while (offset < tot_size) {
-        wrote = write(job_comp_fd, job_rec + offset,
-                      tot_size - offset);
+        wrote = write(job_comp_fd, job_rec + offset, tot_size - offset);
         if (wrote == -1) {
             if (errno == EAGAIN)
                 continue;

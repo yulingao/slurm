@@ -601,8 +601,7 @@ extern void restore_front_end_state(int recover) {
  * NOTE: the caller must xfree the buffer at *buffer_ptr
  * NOTE: READ lock_slurmctld config before entry
  */
-extern void pack_all_front_end(char **buffer_ptr, int *buffer_size, uid_t uid,
-                               uint16_t protocol_version) {
+extern void pack_all_front_end(char **buffer_ptr, int *buffer_size, uid_t uid, uint16_t protocol_version) {
     time_t now = time(NULL);
     uint32_t nodes_packed = 0;
     Buf buffer;
@@ -896,8 +895,7 @@ unpack_error:
  * IN front_end_pt - pointer to the front end node
  * IN reason - why the node is DOWN
  */
-extern void set_front_end_down(front_end_record_t *front_end_ptr,
-                               char *reason) {
+extern void set_front_end_down(front_end_record_t *front_end_ptr, char *reason) {
 #ifdef HAVE_FRONT_END
     time_t now = time(NULL);
     uint16_t state_flags = front_end_ptr->node_state & NODE_STATE_FLAGS;

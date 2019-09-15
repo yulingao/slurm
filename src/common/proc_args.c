@@ -80,10 +80,8 @@ void print_gres_help(void) {
     xfree(msg);
 }
 
-void set_distribution(task_dist_states_t distribution,
-                      char **dist, char **lllp_dist) {
-    if (((int) distribution >= 0)
-        && ((distribution & SLURM_DIST_STATE_BASE) != SLURM_DIST_UNKNOWN)) {
+void set_distribution(task_dist_states_t distribution, char **dist, char **lllp_dist) {
+    if (((int) distribution >= 0) && ((distribution & SLURM_DIST_STATE_BASE) != SLURM_DIST_UNKNOWN)) {
         switch (distribution & SLURM_DIST_STATE_BASE) {
             case SLURM_DIST_CYCLIC:
                 *dist = "cyclic";
@@ -294,59 +292,41 @@ task_dist_states_t verify_dist_type(const char *arg, uint32_t *plane_size) {
                 result = SLURM_DIST_BLOCK_CFULL;
             } else if (xstrcasecmp(outstr, "cyclic:fcyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_CFULL;
-            } else if (xstrcasecmp(outstr, "cyclic:cyclic:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:cyclic:cyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_CYCLIC_CYCLIC;
-            } else if (xstrcasecmp(outstr, "cyclic:cyclic:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:cyclic:block") == 0) {
                 result = SLURM_DIST_CYCLIC_CYCLIC_BLOCK;
-            } else if (xstrcasecmp(outstr, "cyclic:cyclic:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:cyclic:fcyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_CYCLIC_CFULL;
-            } else if (xstrcasecmp(outstr, "cyclic:block:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:block:cyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_BLOCK_CYCLIC;
-            } else if (xstrcasecmp(outstr, "cyclic:block:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:block:block") == 0) {
                 result = SLURM_DIST_CYCLIC_BLOCK_BLOCK;
-            } else if (xstrcasecmp(outstr, "cyclic:block:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:block:fcyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_BLOCK_CFULL;
-            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:cyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_CFULL_CYCLIC;
-            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:block") == 0) {
                 result = SLURM_DIST_CYCLIC_CFULL_BLOCK;
-            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "cyclic:fcyclic:fcyclic") == 0) {
                 result = SLURM_DIST_CYCLIC_CFULL_CFULL;
-            } else if (xstrcasecmp(outstr, "block:cyclic:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:cyclic:cyclic") == 0) {
                 result = SLURM_DIST_BLOCK_CYCLIC_CYCLIC;
-            } else if (xstrcasecmp(outstr, "block:cyclic:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:cyclic:block") == 0) {
                 result = SLURM_DIST_BLOCK_CYCLIC_BLOCK;
-            } else if (xstrcasecmp(outstr, "block:cyclic:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:cyclic:fcyclic") == 0) {
                 result = SLURM_DIST_BLOCK_CYCLIC_CFULL;
-            } else if (xstrcasecmp(outstr, "block:block:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:block:cyclic") == 0) {
                 result = SLURM_DIST_BLOCK_BLOCK_CYCLIC;
-            } else if (xstrcasecmp(outstr, "block:block:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:block:block") == 0) {
                 result = SLURM_DIST_BLOCK_BLOCK_BLOCK;
-            } else if (xstrcasecmp(outstr, "block:block:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:block:fcyclic") == 0) {
                 result = SLURM_DIST_BLOCK_BLOCK_CFULL;
-            } else if (xstrcasecmp(outstr, "block:fcyclic:cyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:fcyclic:cyclic") == 0) {
                 result = SLURM_DIST_BLOCK_CFULL_CYCLIC;
-            } else if (xstrcasecmp(outstr, "block:fcyclic:block")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:fcyclic:block") == 0) {
                 result = SLURM_DIST_BLOCK_CFULL_BLOCK;
-            } else if (xstrcasecmp(outstr, "block:fcyclic:fcyclic")
-                       == 0) {
+            } else if (xstrcasecmp(outstr, "block:fcyclic:fcyclic") == 0) {
                 result = SLURM_DIST_BLOCK_CFULL_CFULL;
             }
         } else if (plane_dist) {
@@ -358,8 +338,7 @@ task_dist_states_t verify_dist_type(const char *arg, uint32_t *plane_size) {
                 result = SLURM_DIST_CYCLIC;
             } else if (xstrncasecmp(tok, "block", len) == 0) {
                 result = SLURM_DIST_BLOCK;
-            } else if ((xstrncasecmp(tok, "arbitrary", len) == 0) ||
-                       (xstrncasecmp(tok, "hostfile", len) == 0)) {
+            } else if ((xstrncasecmp(tok, "arbitrary", len) == 0) || (xstrncasecmp(tok, "hostfile", len) == 0)) {
                 result = SLURM_DIST_ARBITRARY;
             } else if (xstrncasecmp(tok, "nopack", len) == 0) {
                 no_pack_nodes = true;
@@ -548,8 +527,7 @@ extern char *mbytes2_to_str(uint64_t mbytes) {
 }
 
 /* Convert a string into a node count */
-static int
-_str_to_nodes(const char *num_str, char **leftover) {
+static int _str_to_nodes(const char *num_str, char **leftover) {
     long int num;
     char *endptr;
 
@@ -617,8 +595,7 @@ bool verify_node_count(const char *arg, int *min_nodes, int *max_nodes) {
     }
 
     if ((*max_nodes != 0) && (*max_nodes < *min_nodes)) {
-        error("Maximum node count %d is less than minimum node count %d",
-              *max_nodes, *min_nodes);
+        error("Maximum node count %d is less than minimum node count %d", *max_nodes, *min_nodes);
         return false;
     }
 
@@ -630,8 +607,7 @@ bool verify_node_count(const char *arg, int *min_nodes, int *max_nodes) {
  *	a list of nodes, we orphan the data pointed to
  * RET true if the node list is a valid one
  */
-bool verify_node_list(char **node_list_pptr, enum task_dist_states dist,
-                      int task_count) {
+bool verify_node_list(char **node_list_pptr, enum task_dist_states dist, int task_count) {
     char *nodelist = NULL;
 
     xassert(node_list_pptr);
@@ -669,8 +645,7 @@ bool verify_node_list(char **node_list_pptr, enum task_dist_states dist,
  * IN isFatal - if set, exit on error
  * RET true if valid
  */
-bool get_resource_arg_range(const char *arg, const char *what, int *min,
-                            int *max, bool isFatal) {
+bool get_resource_arg_range(const char *arg, const char *what, int *min, int *max, bool isFatal) {
     char *p;
     long int result;
 
@@ -742,8 +717,7 @@ bool get_resource_arg_range(const char *arg, const char *what, int *min,
  * X:X:X:X, where X is defined as either (count, min-max, or '*')
  * RET true if valid
  */
-bool verify_socket_core_thread_count(const char *arg, int *min_sockets,
-                                     int *min_cores, int *min_threads,
+bool verify_socket_core_thread_count(const char *arg, int *min_sockets, int *min_cores, int *min_threads,
                                      cpu_bind_type_t *cpu_bind_type) {
     bool tmp_val, ret_val;
     int i, j;
@@ -770,10 +744,7 @@ bool verify_socket_core_thread_count(const char *arg, int *min_sockets,
     /* if cpu_bind_type doesn't already have a auto preference, choose
      * the level based on the level of the -E specification
      */
-    if (cpu_bind_type &&
-        !(*cpu_bind_type & (CPU_BIND_TO_SOCKETS |
-                            CPU_BIND_TO_CORES |
-                            CPU_BIND_TO_THREADS))) {
+    if (cpu_bind_type && !(*cpu_bind_type & (CPU_BIND_TO_SOCKETS | CPU_BIND_TO_CORES | CPU_BIND_TO_THREADS))) {
         if (j == 0) {
             *cpu_bind_type |= CPU_BIND_TO_SOCKETS;
         } else if (j == 1) {
@@ -784,21 +755,18 @@ bool verify_socket_core_thread_count(const char *arg, int *min_sockets,
     }
 
     ret_val = true;
-    tmp_val = get_resource_arg_range(&buf[0][0], "first arg of -B",
-                                     min_sockets, &max_sockets, true);
+    tmp_val = get_resource_arg_range(&buf[0][0], "first arg of -B", min_sockets, &max_sockets, true);
     if ((*min_sockets == 1) && (max_sockets == INT_MAX))
         *min_sockets = NO_VAL;    /* Use full range of values */
     ret_val = ret_val && tmp_val;
 
 
-    tmp_val = get_resource_arg_range(&buf[1][0], "second arg of -B",
-                                     min_cores, &max_cores, true);
+    tmp_val = get_resource_arg_range(&buf[1][0], "second arg of -B", min_cores, &max_cores, true);
     if ((*min_cores == 1) && (max_cores == INT_MAX))
         *min_cores = NO_VAL;    /* Use full range of values */
     ret_val = ret_val && tmp_val;
 
-    tmp_val = get_resource_arg_range(&buf[2][0], "third arg of -B",
-                                     min_threads, &max_threads, true);
+    tmp_val = get_resource_arg_range(&buf[2][0], "third arg of -B", min_threads, &max_threads, true);
     if ((*min_threads == 1) && (max_threads == INT_MAX))
         *min_threads = NO_VAL;    /* Use full range of values */
     ret_val = ret_val && tmp_val;
@@ -810,8 +778,7 @@ bool verify_socket_core_thread_count(const char *arg, int *min_sockets,
  * verify that a hint is valid and convert it into the implied settings
  * RET true if valid
  */
-bool verify_hint(const char *arg, int *min_sockets, int *min_cores,
-                 int *min_threads, int *ntasks_per_core,
+bool verify_hint(const char *arg, int *min_sockets, int *min_cores, int *min_threads, int *ntasks_per_core,
                  cpu_bind_type_t *cpu_bind_type) {
     char *buf, *p, *tok;
 
@@ -831,13 +798,12 @@ bool verify_hint(const char *arg, int *min_sockets, int *min_cores,
     p = buf;
     while ((tok = strsep(&p, ";"))) {
         if (xstrcasecmp(tok, "help") == 0) {
-            printf(
-                    "Application hint options:\n"
-                    "    --hint=             Bind tasks according to application hints\n"
-                    "        compute_bound   use all cores in each socket\n"
-                    "        memory_bound    use only one core in each socket\n"
-                    "        [no]multithread [don't] use extra threads with in-core multi-threading\n"
-                    "        help            show this help message\n");
+            printf("Application hint options:\n"
+                   "    --hint=             Bind tasks according to application hints\n"
+                   "        compute_bound   use all cores in each socket\n"
+                   "        memory_bound    use only one core in each socket\n"
+                   "        [no]multithread [don't] use extra threads with in-core multi-threading\n"
+                   "        help            show this help message\n");
             xfree(buf);
             return 1;
         } else if (xstrcasecmp(tok, "compute_bound") == 0) {
@@ -855,8 +821,7 @@ bool verify_hint(const char *arg, int *min_sockets, int *min_cores,
             *min_threads = NO_VAL;
             if (cpu_bind_type) {
                 *cpu_bind_type |= CPU_BIND_TO_THREADS;
-                *cpu_bind_type &=
-                        (~CPU_BIND_ONE_THREAD_PER_CORE);
+                *cpu_bind_type &= (~CPU_BIND_ONE_THREAD_PER_CORE);
             }
             if (*ntasks_per_core == NO_VAL)
                 *ntasks_per_core = INFINITE;
@@ -907,8 +872,7 @@ uint16_t parse_mail_type(const char *arg) {
         else if (xstrcasecmp(tok, "REQUEUE") == 0)
             rc |= MAIL_JOB_REQUEUE;
         else if (xstrcasecmp(tok, "ALL") == 0)
-            rc |= MAIL_JOB_BEGIN | MAIL_JOB_END | MAIL_JOB_FAIL |
-                  MAIL_JOB_REQUEUE | MAIL_JOB_STAGE_OUT;
+            rc |= MAIL_JOB_BEGIN | MAIL_JOB_END | MAIL_JOB_FAIL | MAIL_JOB_REQUEUE | MAIL_JOB_STAGE_OUT;
         else if (!xstrcasecmp(tok, "STAGE_OUT"))
             rc |= MAIL_JOB_STAGE_OUT;
         else if (xstrcasecmp(tok, "TIME_LIMIT") == 0)
@@ -990,13 +954,11 @@ char *print_mail_type(const uint16_t type) {
     return buf;
 }
 
-static void
-_freeF(void *data) {
+static void _freeF(void *data) {
     xfree(data);
 }
 
-static List
-_create_path_list(void) {
+static List _create_path_list(void) {
     List l = list_create(_freeF);
     char *path;
     char *c, *lc;
@@ -1071,8 +1033,7 @@ static bool _accessible(const char *path, int access_mode) {
  * IN test_exec - if false, do not confirm access mode of cmd if full path
  * RET full path of cmd or NULL if not found
  */
-char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode,
-                  bool test_exec) {
+char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode, bool test_exec) {
     List l = NULL;
     ListIterator i = NULL;
     char *path, *fullpath = NULL;
@@ -1083,11 +1044,9 @@ char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode,
             char *cmd1 = xstrdup_printf("%s/%s", cwd, cmd);
             if (_exists(cmd1) && _accessible(cmd1, access_mode)) {
                 fullpath = xstrdup(cmd1);
-                debug5("%s: relative path found %s -> %s",
-                       __func__, cmd, cmd1);
+                debug5("%s: relative path found %s -> %s", __func__, cmd, cmd1);
             } else {
-                debug5("%s: relative path not found %s -> %s",
-                       __func__, cmd, cmd1);
+                debug5("%s: relative path not found %s -> %s", __func__, cmd, cmd1);
             }
             xfree(cmd1);
         }
@@ -1097,19 +1056,16 @@ char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode,
     if (cmd[0] == '/') {
         if (test_exec && _exists(cmd) && _accessible(cmd, access_mode)) {
             fullpath = xstrdup(cmd);
-            debug5("%s: absolute path found %s",
-                   __func__, cmd);
+            debug5("%s: absolute path found %s", __func__, cmd);
         } else {
-            debug5("%s: absolute path not found %s",
-                   __func__, cmd);
+            debug5("%s: absolute path not found %s", __func__, cmd);
         }
         return fullpath;
     }
     /* Otherwise search in PATH */
     l = _create_path_list();
     if (l == NULL) {
-        debug5("%s: empty PATH environment",
-               __func__);
+        debug5("%s: empty PATH environment", __func__);
         return NULL;
     }
 
@@ -1127,19 +1083,16 @@ char *search_path(char *cwd, char *cmd, bool check_cwd_last, int access_mode,
         /* Use first executable found in PATH */
         if (_exists(fullpath)) {
             if (!test_exec) {
-                debug5("%s: env PATH found: %s",
-                       __func__, fullpath);
+                debug5("%s: env PATH found: %s", __func__, fullpath);
                 break;
             }
             if (_accessible(path, access_mode)) {
-                debug5("%s: env PATH found: %s",
-                       __func__, fullpath);
+                debug5("%s: env PATH found: %s", __func__, fullpath);
                 break;
             }
         }
 
-        debug5("%s: env PATH not found: %s",
-               __func__, fullpath);
+        debug5("%s: env PATH not found: %s", __func__, fullpath);
 
         xfree(fullpath);
     }
@@ -1162,8 +1115,7 @@ char *print_commandline(const int script_argc, char **script_argv) {
 /* Translate a signal option string "--signal=<int>[@<time>]" into
  * it's warn_signal and warn_time components.
  * RET 0 on success, -1 on failure */
-int get_signal_opts(char *optarg, uint16_t *warn_signal, uint16_t *warn_time,
-                    uint16_t *warn_flags) {
+int get_signal_opts(char *optarg, uint16_t *warn_signal, uint16_t *warn_time, uint16_t *warn_flags) {
     char *endptr;
     long num;
 
@@ -1199,8 +1151,7 @@ int get_signal_opts(char *optarg, uint16_t *warn_signal, uint16_t *warn_time,
     return -1;
 }
 
-extern char *signal_opts_to_cmdline(uint16_t warn_signal, uint16_t warn_time,
-                                    uint16_t warn_flags) {
+extern char *signal_opts_to_cmdline(uint16_t warn_signal, uint16_t warn_time, uint16_t warn_flags) {
     char *cmdline = NULL, *sig_name;
 
     if (warn_flags == KILL_JOB_BATCH)
@@ -1219,23 +1170,22 @@ extern char *signal_opts_to_cmdline(uint16_t warn_signal, uint16_t warn_time,
 static struct {
     char *name;
     uint16_t val;
-} signals_mapping[] = {
-        {"HUP",  SIGHUP},
-        {"INT",  SIGINT},
-        {"QUIT", SIGQUIT},
-        {"ABRT", SIGABRT},
-        {"KILL", SIGKILL},
-        {"ALRM", SIGALRM},
-        {"TERM", SIGTERM},
-        {"USR1", SIGUSR1},
-        {"USR2", SIGUSR2},
-        {"URG",  SIGURG},
-        {"CONT", SIGCONT},
-        {"STOP", SIGSTOP},
-        {"TSTP", SIGTSTP},
-        {"TTIN", SIGTTIN},
-        {"TTOU", SIGTTOU},
-        {NULL, 0}    /* terminate array */
+} signals_mapping[] = {{"HUP",  SIGHUP},
+                       {"INT",  SIGINT},
+                       {"QUIT", SIGQUIT},
+                       {"ABRT", SIGABRT},
+                       {"KILL", SIGKILL},
+                       {"ALRM", SIGALRM},
+                       {"TERM", SIGTERM},
+                       {"USR1", SIGUSR1},
+                       {"USR2", SIGUSR2},
+                       {"URG",  SIGURG},
+                       {"CONT", SIGCONT},
+                       {"STOP", SIGSTOP},
+                       {"TSTP", SIGTSTP},
+                       {"TTIN", SIGTTIN},
+                       {"TTOU", SIGTTOU},
+                       {NULL, 0}    /* terminate array */
 };
 
 /* Convert a signal name to it's numeric equivalent.
@@ -1264,8 +1214,7 @@ int sig_name2num(const char *signal_name) {
         if (signals_mapping[i].name == NULL)
             return 0;
         siglen = strlen(signals_mapping[i].name);
-        if ((!xstrncasecmp(ptr, signals_mapping[i].name, siglen)
-             && xstring_is_whitespace(ptr + siglen))) {
+        if ((!xstrncasecmp(ptr, signals_mapping[i].name, siglen) && xstring_is_whitespace(ptr + siglen))) {
             /* found the signal name */
             return signals_mapping[i].val;
         }
@@ -1305,8 +1254,7 @@ extern int parse_uint16(char *aval, uint16_t *ival) {
      * Return error for invalid value.
      */
     tval = strtoll(aval, &p, 10);
-    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) ||
-        (tval < 0) || (tval >= max16uint))
+    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) || (tval < 0) || (tval >= max16uint))
         return 1;
 
     *ival = (uint16_t) tval;
@@ -1336,8 +1284,7 @@ extern int parse_uint32(char *aval, uint32_t *ival) {
      * Return error for invalid value.
      */
     tval = strtoll(aval, &p, 10);
-    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) ||
-        (tval < 0) || (tval >= max32uint))
+    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) || (tval < 0) || (tval >= max32uint))
         return 1;
 
     *ival = (uint32_t) tval;
@@ -1367,8 +1314,7 @@ extern int parse_uint64(char *aval, uint64_t *ival) {
       * Return error for invalid value.
      */
     tval = strtoll(aval, &p, 10);
-    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) ||
-        (tval < 0) || (tval >= max64uint))
+    if (p[0] || (tval == LLONG_MIN) || (tval == LLONG_MAX) || (tval < 0) || (tval >= max64uint))
         return 1;
 
     *ival = (uint64_t) tval;
@@ -1388,8 +1334,7 @@ extern int parse_int(const char *name, const char *val, bool positive) {
     if (val)
         result = strtol(val, &p, 10);
 
-    if ((p == NULL) || (p[0] != '\0') || (result < 0L) ||
-        (positive && (result <= 0L))) {
+    if ((p == NULL) || (p[0] != '\0') || (result < 0L) || (positive && (result <= 0L))) {
         error("Invalid numeric value \"%s\" for %s.", val, name);
         exit(1);
     } else if (result == LONG_MAX) {
@@ -1413,16 +1358,14 @@ void print_db_notok(const char *cname, bool isenv) {
         error("There is a problem talking to the database: %m.  "
               "Only local cluster communication is available, remove "
               "%s or contact your admin to resolve the problem.",
-              isenv ? "SLURM_CLUSTERS from your environment" :
-              "--cluster from your command line");
+              isenv ? "SLURM_CLUSTERS from your environment" : "--cluster from your command line");
     else if (!xstrcasecmp("all", cname))
         error("No clusters can be reached now. "
               "Contact your admin to resolve the problem.");
     else
         error("'%s' can't be reached now, "
               "or it is an invalid entry for %s.  "
-              "Use 'sacctmgr list clusters' to see available clusters.",
-              cname, isenv ? "SLURM_CLUSTERS" : "--cluster");
+              "Use 'sacctmgr list clusters' to see available clusters.", cname, isenv ? "SLURM_CLUSTERS" : "--cluster");
 }
 
 /*
@@ -1458,8 +1401,7 @@ extern uint64_t parse_resv_flags(const char *flagstr, const char *msg) {
                 outflags |= RESERVE_FLAG_NO_MAINT;
             else
                 outflags |= RESERVE_FLAG_MAINT;
-        } else if ((xstrncasecmp(curr, "Overlap", MAX(taglen, 1))
-                    == 0) && (!flip)) {
+        } else if ((xstrncasecmp(curr, "Overlap", MAX(taglen, 1)) == 0) && (!flip)) {
             curr += taglen;
             outflags |= RESERVE_FLAG_OVERLAP;
             /*
@@ -1473,8 +1415,7 @@ extern uint64_t parse_resv_flags(const char *flagstr, const char *msg) {
                 outflags |= RESERVE_FLAG_NO_FLEX;
             else
                 outflags |= RESERVE_FLAG_FLEX;
-        } else if (xstrncasecmp(curr, "Ignore_Jobs", MAX(taglen, 1))
-                   == 0) {
+        } else if (xstrncasecmp(curr, "Ignore_Jobs", MAX(taglen, 1)) == 0) {
             curr += taglen;
             if (flip)
                 outflags |= RESERVE_FLAG_NO_IGN_JOB;
@@ -1511,45 +1452,37 @@ extern uint64_t parse_resv_flags(const char *flagstr, const char *msg) {
                 outflags |= RESERVE_FLAG_NO_ANY_NODES;
             else
                 outflags |= RESERVE_FLAG_ANY_NODES;
-        } else if (xstrncasecmp(curr, "Static_Alloc", MAX(taglen, 1))
-                   == 0) {
+        } else if (xstrncasecmp(curr, "Static_Alloc", MAX(taglen, 1)) == 0) {
             curr += taglen;
             if (flip)
                 outflags |= RESERVE_FLAG_NO_STATIC;
             else
                 outflags |= RESERVE_FLAG_STATIC;
-        } else if (xstrncasecmp(curr, "Part_Nodes", MAX(taglen, 2))
-                   == 0) {
+        } else if (xstrncasecmp(curr, "Part_Nodes", MAX(taglen, 2)) == 0) {
             curr += taglen;
             if (flip)
                 outflags |= RESERVE_FLAG_NO_PART_NODES;
             else
                 outflags |= RESERVE_FLAG_PART_NODES;
-        } else if (xstrncasecmp(curr, "PURGE_COMP", MAX(taglen, 2))
-                   == 0) {
+        } else if (xstrncasecmp(curr, "PURGE_COMP", MAX(taglen, 2)) == 0) {
             curr += taglen;
             if (flip)
                 outflags |= RESERVE_FLAG_NO_PURGE_COMP;
             else
                 outflags |= RESERVE_FLAG_PURGE_COMP;
-        } else if (!xstrncasecmp(curr, "First_Cores", MAX(taglen, 1)) &&
-                   !flip) {
+        } else if (!xstrncasecmp(curr, "First_Cores", MAX(taglen, 1)) && !flip) {
             curr += taglen;
             outflags |= RESERVE_FLAG_FIRST_CORES;
-        } else if (!xstrncasecmp(curr, "Time_Float", MAX(taglen, 1)) &&
-                   !flip) {
+        } else if (!xstrncasecmp(curr, "Time_Float", MAX(taglen, 1)) && !flip) {
             curr += taglen;
             outflags |= RESERVE_FLAG_TIME_FLOAT;
-        } else if (!xstrncasecmp(curr, "Replace", MAX(taglen, 1)) &&
-                   !flip) {
+        } else if (!xstrncasecmp(curr, "Replace", MAX(taglen, 1)) && !flip) {
             curr += taglen;
             outflags |= RESERVE_FLAG_REPLACE;
-        } else if (!xstrncasecmp(curr, "Replace_Down", MAX(taglen, 8))
-                   && !flip) {
+        } else if (!xstrncasecmp(curr, "Replace_Down", MAX(taglen, 8)) && !flip) {
             curr += taglen;
             outflags |= RESERVE_FLAG_REPLACE_DOWN;
-        } else if (!xstrncasecmp(curr, "NO_HOLD_JOBS_AFTER_END",
-                                 MAX(taglen, 1)) && !flip) {
+        } else if (!xstrncasecmp(curr, "NO_HOLD_JOBS_AFTER_END", MAX(taglen, 1)) && !flip) {
             curr += taglen;
             outflags |= RESERVE_FLAG_NO_HOLD_JOBS;
         } else {
@@ -1586,8 +1519,7 @@ uint16_t parse_compress_type(const char *arg) {
     else if (!strcasecmp(arg, "none"))
         return COMPRESS_OFF;
 
-    error("Compression type '%s' unknown, disabling compression support.",
-          arg);
+    error("Compression type '%s' unknown, disabling compression support.", arg);
     return COMPRESS_OFF;
 }
 

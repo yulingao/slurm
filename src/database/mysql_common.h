@@ -53,8 +53,7 @@
 #include <mysqld_error.h>
 
 typedef enum {
-    SLURM_MYSQL_PLUGIN_NOTSET,
-    SLURM_MYSQL_PLUGIN_AS, /* accounting_storage */
+    SLURM_MYSQL_PLUGIN_NOTSET, SLURM_MYSQL_PLUGIN_AS, /* accounting_storage */
     SLURM_MYSQL_PLUGIN_JC, /* jobcomp */
 } slurm_mysql_plugin_type_t;
 
@@ -82,8 +81,7 @@ typedef struct {
     char *options;
 } storage_field_t;
 
-extern mysql_conn_t *create_mysql_conn(int conn_num, bool rollback,
-                                       char *cluster_name);
+extern mysql_conn_t *create_mysql_conn(int conn_num, bool rollback, char *cluster_name);
 
 extern int destroy_mysql_conn(mysql_conn_t *mysql_conn);
 
@@ -91,8 +89,7 @@ extern mysql_db_info_t *create_mysql_db_info(slurm_mysql_plugin_type_t type);
 
 extern int destroy_mysql_db_info(mysql_db_info_t *db_info);
 
-extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
-                                      mysql_db_info_t *db_info);
+extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name, mysql_db_info_t *db_info);
 
 extern int mysql_db_close_db_connection(mysql_conn_t *mysql_conn);
 
@@ -108,14 +105,12 @@ extern int mysql_db_commit(mysql_conn_t *mysql_conn);
 
 extern int mysql_db_rollback(mysql_conn_t *mysql_conn);
 
-extern MYSQL_RES *mysql_db_query_ret(mysql_conn_t *mysql_conn,
-                                     char *query, bool last);
+extern MYSQL_RES *mysql_db_query_ret(mysql_conn_t *mysql_conn, char *query, bool last);
 
 extern int mysql_db_query_check_after(mysql_conn_t *mysql_conn, char *query);
 
 extern uint64_t mysql_db_insert_ret_id(mysql_conn_t *mysql_conn, char *query);
 
-extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name,
-                                 storage_field_t *fields, char *ending);
+extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name, storage_field_t *fields, char *ending);
 
 #endif

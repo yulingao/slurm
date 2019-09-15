@@ -144,8 +144,7 @@ int plugrack_destroy(plugrack_t *rack) {
     it = list_iterator_create(rack->entries);
     while ((e = list_next(it))) {
         if (e->refcount > 0) {
-            debug2("%s: attempt to destroy plugin rack that is still in use",
-                   __func__);
+            debug2("%s: attempt to destroy plugin rack that is still in use", __func__);
             list_iterator_destroy(it);
             return SLURM_ERROR; /* plugins still in use. */
         }
@@ -158,9 +157,7 @@ int plugrack_destroy(plugrack_t *rack) {
     return SLURM_SUCCESS;
 }
 
-static int plugrack_add_plugin_path(plugrack_t *rack,
-                                    const char *full_type,
-                                    const char *fq_path) {
+static int plugrack_add_plugin_path(plugrack_t *rack, const char *full_type, const char *fq_path) {
     plugrack_entry_t *e;
 
     if ((!rack) || (!fq_path))
@@ -189,14 +186,12 @@ int plugrack_read_dir(plugrack_t *rack, const char *dir) {
     head = dir_array;
     for (i = 0;; i++) {
         if (dir_array[i] == '\0') {
-            if (_plugrack_read_single_dir(rack, head) ==
-                SLURM_ERROR)
+            if (_plugrack_read_single_dir(rack, head) == SLURM_ERROR)
                 rc = SLURM_ERROR;
             break;
         } else if (dir_array[i] == ':') {
             dir_array[i] = '\0';
-            if (_plugrack_read_single_dir(rack, head) ==
-                SLURM_ERROR)
+            if (_plugrack_read_single_dir(rack, head) == SLURM_ERROR)
                 rc = SLURM_ERROR;
             head = dir_array + i + 1;
         }
@@ -255,9 +250,7 @@ static int _plugrack_read_single_dir(plugrack_t *rack, char *dir) {
         strcpy(tail, e->d_name);
 
         /* Check only regular files. */
-        if ((xstrncmp(e->d_name, ".", 1) == 0) ||
-            (stat(fq_path, &st) < 0) ||
-            (!S_ISREG(st.st_mode)))
+        if ((xstrncmp(e->d_name, ".", 1) == 0) || (stat(fq_path, &st) < 0) || (!S_ISREG(st.st_mode)))
             continue;
 
         /* Check only shared object files */
@@ -268,19 +261,15 @@ static int _plugrack_read_single_dir(plugrack_t *rack, char *dir) {
          * to avoid having some program try to open a
          * plugin designed for a different program and
          * discovering undefined symbols */
-        if ((rack->major_type) &&
-            (!_match_major(e->d_name, rack->major_type)))
+        if ((rack->major_type) && (!_match_major(e->d_name, rack->major_type)))
             continue;
 
         /* Test the type. */
-        if (plugin_peek(fq_path, plugin_type, type_len, NULL) ==
-            SLURM_ERROR) {
+        if (plugin_peek(fq_path, plugin_type, type_len, NULL) == SLURM_ERROR) {
             continue;
         }
 
-        if (rack->major_type &&
-            (xstrncmp(rack->major_type, plugin_type,
-                      strlen(rack->major_type)) != 0)) {
+        if (rack->major_type && (xstrncmp(rack->major_type, plugin_type, strlen(rack->major_type)) != 0)) {
             continue;
         }
 
@@ -305,8 +294,8 @@ static bool _so_file(char *file_name) {
         return false;
 
     for (i = 0; file_name[i]; i++) {
-        if ((file_name[i] == '.') && (file_name[i + 1] == 's') &&
-            (file_name[i + 2] == 'o') && (file_name[i + 3] == '\0'))
+        if ((file_name[i] == '.') && (file_name[i + 1] == 's') && (file_name[i + 2] == 'o') &&
+            (file_name[i + 3] == '\0'))
             return true;
     }
     return false;
@@ -339,8 +328,7 @@ plugin_handle_t plugrack_use_by_type(plugrack_t *rack, const char *full_type) {
             continue;
 
         /* See if plugin is loaded. */
-        if (e->plug == PLUGIN_INVALID_HANDLE &&
-            (err = plugin_load_from_file(&e->plug, e->fq_path)))
+        if (e->plug == PLUGIN_INVALID_HANDLE && (err = plugin_load_from_file(&e->plug, e->fq_path)))
             error("%s: %s", e->fq_path, plugin_strerror(err));
 
         /* If load was successful, increment the reference count. */

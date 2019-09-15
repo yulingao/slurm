@@ -134,8 +134,7 @@ static List _build_gpu_list(List gres_list) {
             continue;
         if (!gres_record->file) {
             if (log_fname) {
-                error("%s: GPU configuration lacks \"File\" specification",
-                      plugin_name);
+                error("%s: GPU configuration lacks \"File\" specification", plugin_name);
                 log_fname = false;
             }
             continue;
@@ -145,15 +144,13 @@ static List _build_gpu_list(List gres_list) {
             gpu_record = xmalloc(sizeof(gres_slurmd_conf_t));
             gpu_record->config_flags = gres_record->config_flags;
             if (gres_record->type_name) {
-                gpu_record->config_flags |=
-                        GRES_CONF_HAS_TYPE;
+                gpu_record->config_flags |= GRES_CONF_HAS_TYPE;
             }
             gpu_record->count = 1;
             gpu_record->cpu_cnt = gres_record->cpu_cnt;
             gpu_record->cpus = xstrdup(gres_record->cpus);
             if (gres_record->cpus_bitmap) {
-                gpu_record->cpus_bitmap =
-                        bit_copy(gres_record->cpus_bitmap);
+                gpu_record->cpus_bitmap = bit_copy(gres_record->cpus_bitmap);
             }
             gpu_record->file = xstrdup(f_name);
             gpu_record->links = xstrdup(gres_record->links);
@@ -208,8 +205,7 @@ static List _build_mps_list(List gres_list) {
             mps_record->cpu_cnt = gres_record->cpu_cnt;
             mps_record->cpus = xstrdup(gres_record->cpus);
             if (gres_record->cpus_bitmap) {
-                mps_record->cpus_bitmap =
-                        bit_copy(gres_record->cpus_bitmap);
+                mps_record->cpus_bitmap = bit_copy(gres_record->cpus_bitmap);
             }
             mps_record->name = xstrdup(gres_record->name);
             mps_record->plugin_id = gres_record->plugin_id;
@@ -223,24 +219,20 @@ static List _build_mps_list(List gres_list) {
             count_per_file = gres_record->count / hostlist_count(hl);
             while ((f_name = hostlist_shift(hl))) {
                 mps_record = xmalloc(sizeof(gres_slurmd_conf_t));
-                mps_record->config_flags =
-                        gres_record->config_flags;
+                mps_record->config_flags = gres_record->config_flags;
                 if (gres_record->type_name) {
-                    mps_record->config_flags |=
-                            GRES_CONF_HAS_TYPE;
+                    mps_record->config_flags |= GRES_CONF_HAS_TYPE;
                 }
                 mps_record->count = count_per_file;
                 mps_record->cpu_cnt = gres_record->cpu_cnt;
                 mps_record->cpus = xstrdup(gres_record->cpus);
                 if (gres_record->cpus_bitmap) {
-                    mps_record->cpus_bitmap =
-                            bit_copy(gres_record->cpus_bitmap);
+                    mps_record->cpus_bitmap = bit_copy(gres_record->cpus_bitmap);
                 }
                 mps_record->file = xstrdup(f_name);
                 mps_record->name = xstrdup(gres_record->name);
                 mps_record->plugin_id = gres_record->plugin_id;
-                mps_record->type_name =
-                        xstrdup(gres_record->type_name);
+                mps_record->type_name = xstrdup(gres_record->type_name);
                 list_append(mps_list, mps_record);
                 free(f_name);
             }
@@ -274,8 +266,7 @@ static void _remove_mps_recs(List gres_list) {
 }
 
 /* Distribute MPS Count to records on original list */
-static void _distribute_count(List gres_conf_list, List gpu_conf_list,
-                              uint64_t count) {
+static void _distribute_count(List gres_conf_list, List gpu_conf_list, uint64_t count) {
     ListIterator gpu_itr;
     gres_slurmd_conf_t *gpu_record, *mps_record;
     int rem_gpus = list_count(gpu_conf_list);
@@ -290,8 +281,7 @@ static void _distribute_count(List gres_conf_list, List gpu_conf_list,
         mps_record->cpu_cnt = gpu_record->cpu_cnt;
         mps_record->cpus = xstrdup(gpu_record->cpus);
         if (gpu_record->cpus_bitmap) {
-            mps_record->cpus_bitmap =
-                    bit_copy(gpu_record->cpus_bitmap);
+            mps_record->cpus_bitmap = bit_copy(gpu_record->cpus_bitmap);
         }
         mps_record->file = xstrdup(gpu_record->file);
         mps_record->name = xstrdup("mps");
@@ -306,8 +296,7 @@ static void _distribute_count(List gres_conf_list, List gpu_conf_list,
 }
 
 /* Merge MPS records back to original list, updating and reordering as needed */
-static void _merge_lists(List gres_conf_list, List gpu_conf_list,
-                         List mps_conf_list) {
+static void _merge_lists(List gres_conf_list, List gpu_conf_list, List mps_conf_list) {
     ListIterator gpu_itr, mps_itr;
     gres_slurmd_conf_t *gpu_record, *mps_record;
 
@@ -316,12 +305,10 @@ static void _merge_lists(List gres_conf_list, List gpu_conf_list,
      * than one gres/gpu record, then evenly distribute gres/mps Count
      * evenly over all gres/gpu file records
      */
-    if ((list_count(mps_conf_list) == 1) &&
-        (list_count(gpu_conf_list) > 1)) {
+    if ((list_count(mps_conf_list) == 1) && (list_count(gpu_conf_list) > 1)) {
         mps_record = list_peek(mps_conf_list);
         if (!mps_record->file) {
-            _distribute_count(gres_conf_list, gpu_conf_list,
-                              mps_record->count);
+            _distribute_count(gres_conf_list, gpu_conf_list, mps_record->count);
             list_flush(mps_conf_list);
             return;
         }
@@ -335,25 +322,19 @@ static void _merge_lists(List gres_conf_list, List gpu_conf_list,
             if (!xstrcmp(gpu_record->file, mps_record->file)) {
                 /* Copy gres/gpu Type & CPU info to gres/mps */
                 if (gpu_record->type_name) {
-                    mps_record->config_flags |=
-                            GRES_CONF_HAS_TYPE;
+                    mps_record->config_flags |= GRES_CONF_HAS_TYPE;
                 }
                 if (gpu_record->cpus) {
                     xfree(mps_record->cpus);
-                    mps_record->cpus =
-                            xstrdup(gpu_record->cpus);
+                    mps_record->cpus = xstrdup(gpu_record->cpus);
                 }
                 if (gpu_record->cpus_bitmap) {
-                    mps_record->cpu_cnt =
-                            gpu_record->cpu_cnt;
-                    FREE_NULL_BITMAP(
-                            mps_record->cpus_bitmap);
-                    mps_record->cpus_bitmap =
-                            bit_copy(gpu_record->cpus_bitmap);
+                    mps_record->cpu_cnt = gpu_record->cpu_cnt;
+                    FREE_NULL_BITMAP(mps_record->cpus_bitmap);
+                    mps_record->cpus_bitmap = bit_copy(gpu_record->cpus_bitmap);
                 }
                 xfree(mps_record->type_name);
-                mps_record->type_name =
-                        xstrdup(gpu_record->type_name);
+                mps_record->type_name = xstrdup(gpu_record->type_name);
                 list_append(gres_conf_list, mps_record);
                 (void) list_remove(mps_itr);
                 break;
@@ -368,8 +349,7 @@ static void _merge_lists(List gres_conf_list, List gpu_conf_list,
             mps_record->cpu_cnt = gpu_record->cpu_cnt;
             mps_record->cpus = xstrdup(gpu_record->cpus);
             if (gpu_record->cpus_bitmap) {
-                mps_record->cpus_bitmap =
-                        bit_copy(gpu_record->cpus_bitmap);
+                mps_record->cpus_bitmap = bit_copy(gpu_record->cpus_bitmap);
             }
             mps_record->file = xstrdup(gpu_record->file);
             mps_record->name = xstrdup("mps");
@@ -385,8 +365,8 @@ static void _merge_lists(List gres_conf_list, List gpu_conf_list,
     /* Remove any remaining MPS records (no matching File) */
     mps_itr = list_iterator_create(mps_conf_list);
     while ((mps_record = list_next(mps_itr))) {
-        error("%s: Discarding gres/mps configuration (File=%s) without matching gres/gpu record",
-              plugin_name, mps_record->file);
+        error("%s: Discarding gres/mps configuration (File=%s) without matching gres/gpu record", plugin_name,
+              mps_record->file);
         (void) list_delete_item(mps_itr);
     }
     list_iterator_destroy(mps_itr);
@@ -556,18 +536,16 @@ static uint64_t _get_dev_count(int global_id) {
     }
     list_iterator_destroy(itr);
     if (count == NO_VAL64) {
-        error("%s: Could not find gres/mps count for device ID %d",
-              __func__, global_id);
+        error("%s: Could not find gres/mps count for device ID %d", __func__, global_id);
         return 100;
     }
 
     return count;
 }
 
-static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
-                     bitstr_t *usable_gres,
-                     bool *already_seen, int *local_inx,
-                     bool reset, bool is_job) {
+static void
+_set_env(char ***env_ptr, void *gres_ptr, int node_inx, bitstr_t *usable_gres, bool *already_seen, int *local_inx,
+         bool reset, bool is_job) {
     char *global_list = NULL, *local_list = NULL, *perc_env = NULL;
     char perc_str[64], *slurm_env_var = NULL;
     uint64_t count_on_dev, gres_per_node = 0, percentage;
@@ -580,21 +558,15 @@ static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
 
     if (*already_seen) {
         global_list = xstrdup(getenvp(*env_ptr, slurm_env_var));
-        local_list = xstrdup(getenvp(*env_ptr,
-                                     "CUDA_VISIBLE_DEVICES"));
-        perc_env = xstrdup(getenvp(*env_ptr,
-                                   "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"));
+        local_list = xstrdup(getenvp(*env_ptr, "CUDA_VISIBLE_DEVICES"));
+        perc_env = xstrdup(getenvp(*env_ptr, "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"));
     }
 
-    common_gres_set_env(gres_devices, env_ptr, gres_ptr, node_inx,
-                        usable_gres, "", local_inx,
-                        &gres_per_node, &local_list, &global_list,
-                        reset, is_job, &global_id);
+    common_gres_set_env(gres_devices, env_ptr, gres_ptr, node_inx, usable_gres, "", local_inx, &gres_per_node,
+                        &local_list, &global_list, reset, is_job, &global_id);
 
     if (perc_env) {
-        env_array_overwrite(env_ptr,
-                            "CUDA_MPS_ACTIVE_THREAD_perc_str",
-                            perc_env);
+        env_array_overwrite(env_ptr, "CUDA_MPS_ACTIVE_THREAD_perc_str", perc_env);
         xfree(perc_env);
     } else if (gres_per_node && mps_info) {
         count_on_dev = _get_dev_count(global_id);
@@ -605,16 +577,12 @@ static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
             percentage = 0;
         snprintf(perc_str, sizeof(perc_str), "%"
                 PRIu64, percentage);
-        env_array_overwrite(env_ptr,
-                            "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE",
-                            perc_str);
+        env_array_overwrite(env_ptr, "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE", perc_str);
     } else if (gres_per_node) {
         error("%s: mps_info list is NULL", __func__);
         snprintf(perc_str, sizeof(perc_str), "%"
                 PRIu64, gres_per_node);
-        env_array_overwrite(env_ptr,
-                            "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE",
-                            perc_str);
+        env_array_overwrite(env_ptr, "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE", perc_str);
     }
 
     if (global_list) {
@@ -651,8 +619,7 @@ extern void job_set_env(char ***job_env_ptr, void *gres_ptr, int node_inx) {
     int local_inx = 0;
     bool already_seen = false;
 
-    _set_env(job_env_ptr, gres_ptr, node_inx, NULL,
-             &already_seen, &local_inx, false, true);
+    _set_env(job_env_ptr, gres_ptr, node_inx, NULL, &already_seen, &local_inx, false, true);
 }
 
 /*
@@ -663,21 +630,18 @@ extern void step_set_env(char ***step_env_ptr, void *gres_ptr) {
     static int local_inx = 0;
     static bool already_seen = false;
 
-    _set_env(step_env_ptr, gres_ptr, 0, NULL,
-             &already_seen, &local_inx, false, false);
+    _set_env(step_env_ptr, gres_ptr, 0, NULL, &already_seen, &local_inx, false, false);
 }
 
 /*
  * Reset environment variables as appropriate for a job (i.e. this one task)
  * based upon the job step's GRES state and assigned CPUs.
  */
-extern void step_reset_env(char ***step_env_ptr, void *gres_ptr,
-                           bitstr_t *usable_gres) {
+extern void step_reset_env(char ***step_env_ptr, void *gres_ptr, bitstr_t *usable_gres) {
     static int local_inx = 0;
     static bool already_seen = false;
 
-    _set_env(step_env_ptr, gres_ptr, 0, usable_gres,
-             &already_seen, &local_inx, true, false);
+    _set_env(step_env_ptr, gres_ptr, 0, usable_gres, &already_seen, &local_inx, true, false);
 }
 
 /* Send GRES information to slurmstepd on the specified file descriptor */
@@ -744,8 +708,7 @@ extern void recv_stepd(int fd) {
  *            DO NOT FREE: This is a pointer into the job's data structure
  * RET - SLURM_SUCCESS or error code
  */
-extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx,
-                    enum gres_job_data_type data_type, void *data) {
+extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx, enum gres_job_data_type data_type, void *data) {
     return EINVAL;
 }
 
@@ -760,8 +723,8 @@ extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx,
  *            DO NOT FREE: This is a pointer into the step's data structure
  * RET - SLURM_SUCCESS or error code
  */
-extern int step_info(gres_step_state_t *step_gres_data, uint32_t node_inx,
-                     enum gres_step_data_type data_type, void *data) {
+extern int
+step_info(gres_step_state_t *step_gres_data, uint32_t node_inx, enum gres_step_data_type data_type, void *data) {
     return EINVAL;
 }
 
@@ -791,20 +754,14 @@ extern gres_epilog_info_t *epilog_build_env(gres_job_state_t *gres_job_ptr) {
 
     epilog_info = xmalloc(sizeof(gres_epilog_info_t));
     epilog_info->node_cnt = gres_job_ptr->node_cnt;
-    epilog_info->gres_bit_alloc = xcalloc(epilog_info->node_cnt,
-                                          sizeof(bitstr_t * ));
-    epilog_info->gres_cnt_node_alloc = xcalloc(epilog_info->node_cnt,
-                                               sizeof(uint64_t));
+    epilog_info->gres_bit_alloc = xcalloc(epilog_info->node_cnt, sizeof(bitstr_t * ));
+    epilog_info->gres_cnt_node_alloc = xcalloc(epilog_info->node_cnt, sizeof(uint64_t));
     for (i = 0; i < epilog_info->node_cnt; i++) {
-        if (gres_job_ptr->gres_bit_alloc &&
-            gres_job_ptr->gres_bit_alloc[i]) {
-            epilog_info->gres_bit_alloc[i] =
-                    bit_copy(gres_job_ptr->gres_bit_alloc[i]);
+        if (gres_job_ptr->gres_bit_alloc && gres_job_ptr->gres_bit_alloc[i]) {
+            epilog_info->gres_bit_alloc[i] = bit_copy(gres_job_ptr->gres_bit_alloc[i]);
         }
-        if (gres_job_ptr->gres_bit_alloc &&
-            gres_job_ptr->gres_bit_alloc[i]) {
-            epilog_info->gres_cnt_node_alloc[i] =
-                    gres_job_ptr->gres_cnt_node_alloc[i];
+        if (gres_job_ptr->gres_bit_alloc && gres_job_ptr->gres_bit_alloc[i]) {
+            epilog_info->gres_cnt_node_alloc[i] = gres_job_ptr->gres_cnt_node_alloc[i];
         }
     }
 
@@ -815,8 +772,7 @@ extern gres_epilog_info_t *epilog_build_env(gres_job_state_t *gres_job_ptr) {
  * Set environment variables as appropriate for a job's prolog or epilog based
  * GRES allocated to the job.
  */
-extern void epilog_set_env(char ***epilog_env_ptr,
-                           gres_epilog_info_t *epilog_info, int node_inx) {
+extern void epilog_set_env(char ***epilog_env_ptr, gres_epilog_info_t *epilog_info, int node_inx) {
     int dev_inx = -1, env_inx = 0, global_id = -1, i;
     uint64_t count_on_dev, gres_per_node = 0, percentage;
     gres_device_t *gres_device;
@@ -831,8 +787,7 @@ extern void epilog_set_env(char ***epilog_env_ptr,
         return;
 
     if (node_inx > epilog_info->node_cnt) {
-        error("%s: %s: bad node index (%d > %u)", plugin_type, __func__,
-              node_inx, epilog_info->node_cnt);
+        error("%s: %s: bad node index (%d > %u)", plugin_type, __func__, node_inx, epilog_info->node_cnt);
         return;
     }
 
@@ -843,8 +798,7 @@ extern void epilog_set_env(char ***epilog_env_ptr,
         *epilog_env_ptr = xcalloc(3, sizeof(char *));
     }
 
-    if (epilog_info->gres_bit_alloc &&
-        epilog_info->gres_bit_alloc[node_inx])
+    if (epilog_info->gres_bit_alloc && epilog_info->gres_bit_alloc[node_inx])
         dev_inx = bit_ffs(epilog_info->gres_bit_alloc[node_inx]);
     if (dev_inx >= 0) {
         /* Translate bit to device number, may differ */
@@ -860,12 +814,9 @@ extern void epilog_set_env(char ***epilog_env_ptr,
         list_iterator_destroy(iter);
     }
     if (global_id >= 0) {
-        xstrfmtcat((*epilog_env_ptr)[env_inx++],
-                   "CUDA_VISIBLE_DEVICES=%d", global_id);
+        xstrfmtcat((*epilog_env_ptr)[env_inx++], "CUDA_VISIBLE_DEVICES=%d", global_id);
     }
-    if ((global_id >= 0) &&
-        epilog_info->gres_cnt_node_alloc &&
-        epilog_info->gres_cnt_node_alloc[node_inx]) {
+    if ((global_id >= 0) && epilog_info->gres_cnt_node_alloc && epilog_info->gres_cnt_node_alloc[node_inx]) {
         gres_per_node = epilog_info->gres_cnt_node_alloc[node_inx];
         count_on_dev = _get_dev_count(global_id);
         if (count_on_dev > 0) {
@@ -873,9 +824,7 @@ extern void epilog_set_env(char ***epilog_env_ptr,
             percentage = MAX(percentage, 1);
         } else
             percentage = 0;
-        xstrfmtcat((*epilog_env_ptr)[env_inx++],
-                   "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=%"PRIu64,
-                   percentage);
+        xstrfmtcat((*epilog_env_ptr)[env_inx++], "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=%"PRIu64, percentage);
     }
 
     return;

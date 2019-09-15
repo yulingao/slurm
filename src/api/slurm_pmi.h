@@ -50,12 +50,10 @@
 #define PMI_MAX_VAL_LEN     1024 /* Maximum size of a PMI value */
 
 /* Transmit PMI Keyval space data */
-int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr,
-                            int pmi_rank, int pmi_size);
+int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr, int pmi_rank, int pmi_size);
 
 /* Wait for barrier and get full PMI Keyval space data */
-int slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr,
-                           int pmi_rank, int pmi_size);
+int slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr, int pmi_rank, int pmi_size);
 
 /* Finalization processing */
 void slurm_pmi_finalize(void);

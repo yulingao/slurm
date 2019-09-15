@@ -59,8 +59,7 @@ static void _cpuset_to_cpustr(const cpu_set_t *mask, char *str) {
     }
 }
 
-static void _cpuset_to_memsstr(const cpu_set_t *mask, char *str,
-                               int cpu_cnt, int mem_cnt) {
+static void _cpuset_to_memsstr(const cpu_set_t *mask, char *str, int cpu_cnt, int mem_cnt) {
     int cpu_per_mem, i, n, nlast = -1;
     char tmp[16];
 
@@ -95,16 +94,14 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid) {
 
     /* Copy "cpus" contents from parent directory
      * "cpus" must be set before any tasks can be added. */
-    snprintf(file_path, sizeof(file_path), "%s/%scpus",
-             base, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%scpus", base, cpuset_prefix);
 
     fd = open(file_path, O_RDONLY);
     if (fd < 0) {
         if (!cpuset_prefix_set) {
             cpuset_prefix_set = 1;
             cpuset_prefix = "cpuset.";
-            snprintf(file_path, sizeof(file_path), "%s/%scpus",
-                     base, cpuset_prefix);
+            snprintf(file_path, sizeof(file_path), "%s/%scpus", base, cpuset_prefix);
             fd = open(file_path, O_RDONLY);
             if (fd < 0) {
                 cpuset_prefix = "";
@@ -122,8 +119,7 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid) {
         error("%s: read(%s): %m", __func__, file_path);
         return SLURM_ERROR;
     }
-    snprintf(file_path, sizeof(file_path), "%s/%scpus",
-             path, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%scpus", path, cpuset_prefix);
     fd = open(file_path, O_CREAT | O_WRONLY, 0700);
     if (fd < 0) {
         error("%s: open(%s): %m", __func__, file_path);
@@ -138,8 +134,7 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid) {
 
     /* Copy "mems" contents from parent directory, if it exists.
      * "mems" must be set before any tasks can be added. */
-    snprintf(file_path, sizeof(file_path), "%s/%smems",
-             base, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%smems", base, cpuset_prefix);
     fd = open(file_path, O_RDONLY);
     if (fd < 0) {
         error("open(%s): %m", file_path);
@@ -151,8 +146,7 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid) {
         error("read(%s): %m", file_path);
         return SLURM_ERROR;
     }
-    snprintf(file_path, sizeof(file_path), "%s/%smems",
-             path, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%smems", path, cpuset_prefix);
     fd = open(file_path, O_CREAT | O_WRONLY, 0700);
     if (fd < 0) {
         error("open(%s): %m", file_path);
@@ -186,8 +180,7 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid) {
     return SLURM_SUCCESS;
 }
 
-int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
-                     const cpu_set_t *mask) {
+int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size, const cpu_set_t *mask) {
     int fd, rc;
     int cpu_cnt = 0, mem_cnt = 0;
     char file_path[PATH_MAX];
@@ -199,8 +192,7 @@ int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
     }
 
     /* Read "cpus" contents from parent directory for CPU count */
-    snprintf(file_path, sizeof(file_path), "%s/%scpus",
-             base, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%scpus", base, cpuset_prefix);
     fd = open(file_path, O_RDONLY);
     if (fd >= 0) {
         rc = read(fd, mstr, sizeof(mstr) - 1);
@@ -212,8 +204,7 @@ int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
     }
 
     /* Set "cpus" per user request */
-    snprintf(file_path, sizeof(file_path), "%s/%scpus",
-             path, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%scpus", path, cpuset_prefix);
     _cpuset_to_cpustr(mask, mstr);
     fd = open(file_path, O_CREAT | O_WRONLY, 0700);
     if (fd < 0) {
@@ -229,8 +220,7 @@ int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
 
     /* copy "mems" contents from parent directory, if it exists.
      * "mems" must be set before any tasks can be added. */
-    snprintf(file_path, sizeof(file_path), "%s/%smems",
-             base, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%smems", base, cpuset_prefix);
     fd = open(file_path, O_RDONLY);
     if (fd < 0) {
         error("open(%s): %m", file_path);
@@ -248,8 +238,7 @@ int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
             mem_cnt = str_to_cnt(mstr);
         if ((cpu_cnt > 1) && (mem_cnt > 1))
             _cpuset_to_memsstr(mask, mstr, cpu_cnt, mem_cnt);
-        snprintf(file_path, sizeof(file_path), "%s/%smems",
-                 path, cpuset_prefix);
+        snprintf(file_path, sizeof(file_path), "%s/%smems", path, cpuset_prefix);
         fd = open(file_path, O_CREAT | O_WRONLY, 0700);
         if (fd < 0) {
             error("open(%s): %m", file_path);
@@ -301,8 +290,7 @@ int slurm_get_cpuset(char *path, pid_t pid, size_t size, cpu_set_t *mask) {
     char file_path[PATH_MAX];
     char mstr[2 + CPU_SETSIZE * 4];
 
-    snprintf(file_path, sizeof(file_path), "%s/%scpus",
-             path, cpuset_prefix);
+    snprintf(file_path, sizeof(file_path), "%s/%scpus", path, cpuset_prefix);
     fd = open(file_path, O_RDONLY);
     if (fd < 0) {
         error("open(%s): %m", file_path);

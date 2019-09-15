@@ -55,32 +55,27 @@ extern void parse_command_line(int argc, char **argv) {
     int option_index;
     int tmp = 0;
 
-    static struct option long_options[] = {
-            {"commandline", no_argument,       0, 'c'},
-            {"display",     required_argument, 0, 'D'},
-            {"noheader",    no_argument,       0, 'h'},
-            {"iterate",     required_argument, 0, 'i'},
-            {"cluster",     required_argument, 0, 'M'},
-            {"clusters",    required_argument, 0, 'M'},
-            {"nodes",       required_argument, 0, 'n'},
-            {"quiet",       no_argument,       0, 'Q'},
-            {"verbose",     no_argument,       0, 'v'},
-            {"version",     no_argument,       0, 'V'},
-            {"help",        no_argument,       0, OPT_LONG_HELP},
-            {"usage",       no_argument,       0, OPT_LONG_USAGE},
-            {"show_hidden", no_argument,       0, 'H'},
-            {NULL,          0,                 0, 0}
-    };
+    static struct option long_options[] = {{"commandline", no_argument,       0, 'c'},
+                                           {"display",     required_argument, 0, 'D'},
+                                           {"noheader",    no_argument,       0, 'h'},
+                                           {"iterate",     required_argument, 0, 'i'},
+                                           {"cluster",     required_argument, 0, 'M'},
+                                           {"clusters",    required_argument, 0, 'M'},
+                                           {"nodes",       required_argument, 0, 'n'},
+                                           {"quiet",       no_argument,       0, 'Q'},
+                                           {"verbose",     no_argument,       0, 'v'},
+                                           {"version",     no_argument,       0, 'V'},
+                                           {"help",        no_argument,       0, OPT_LONG_HELP},
+                                           {"usage",       no_argument,       0, OPT_LONG_USAGE},
+                                           {"show_hidden", no_argument,       0, 'H'},
+                                           {NULL,          0,                 0, 0}};
 
     memset(&params, 0, sizeof(params));
 
-    while ((opt_char =
-                    getopt_long(argc, argv, "cD:hHi:M:n:QvV",
-                                long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "cD:hHi:M:n:QvV", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case '?':
-                fprintf(stderr,
-                        "Try \"smap --help\" for more information\n");
+                fprintf(stderr, "Try \"smap --help\" for more information\n");
                 exit(1);
                 break;
             case 'c':
@@ -111,8 +106,7 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'M':
                 FREE_NULL_LIST(params.clusters);
-                if (!(params.clusters =
-                              slurmdb_get_info_cluster(optarg))) {
+                if (!(params.clusters = slurmdb_get_info_cluster(optarg))) {
                     print_db_notok(optarg, 0);
                     exit(1);
                 }
@@ -124,8 +118,7 @@ extern void parse_command_line(int argc, char **argv) {
                  */
                 params.hl = hostlist_create(optarg);
                 if (!params.hl) {
-                    error("'%s' invalid entry for --nodes",
-                          optarg);
+                    error("'%s' invalid entry for --nodes", optarg);
                     exit(1);
                 }
                 break;
@@ -160,9 +153,7 @@ extern void print_date(void) {
     if (params.commandline) {
         printf("%s", slurm_ctime(&now_time));
     } else {
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "%s",
-                  slurm_ctime2(&now_time));
+        mvwprintw(text_win, main_ycord, main_xcord, "%s", slurm_ctime2(&now_time));
         main_ycord++;
     }
 }

@@ -35,42 +35,41 @@
 #include <unistd.h>
 #include <string.h>
 
-int main(int argc, char **argv)
-{
-	char buf1[128], buf2[128], *tmp;
-	int size, j, procid = -1, rc = 0;
+int main(int argc, char **argv) {
+    char buf1[128], buf2[128], *tmp;
+    int size, j, procid = -1, rc = 0;
 
-	tmp = getenv("SLURM_PROCID");
-	if (tmp)
-		procid = atoi(tmp);
-	sprintf(buf1, "task %d write to stdout:", procid);
-	rc = write(STDOUT_FILENO, buf1, strlen(buf1));
-	sprintf(buf1, "task %d write to stderr:", procid);
-	rc = write(STDOUT_FILENO, buf1, strlen(buf1));
-	while  ((size = read(STDIN_FILENO, buf1, sizeof(buf1))) != 0) {
-		if (size > 0) {
-			int offset;
-			sprintf(buf2, "task %d read from stdin:", procid);
-			offset = strlen(buf2);
-			for (j = 0; j < size; j++) /* may lack null terminator */
-				buf2[offset+j] = buf1[j];
-			buf2[offset+j] = ':';
-			buf2[offset+j+1] = '\0';
-			rc = write(STDOUT_FILENO, buf2, strlen(buf2));
-			break;
-		} else {
-			if ((errno == EINTR) || (errno == EAGAIN)) {
-				sleep(1);
-				continue;
-			}
-			sprintf(buf1, "io read errno:%d:", errno);
-			rc = write(STDOUT_FILENO, buf1, strlen(buf1));
-			break;
-		}
-	}
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
+    tmp = getenv("SLURM_PROCID");
+    if (tmp)
+        procid = atoi(tmp);
+    sprintf(buf1, "task %d write to stdout:", procid);
+    rc = write(STDOUT_FILENO, buf1, strlen(buf1));
+    sprintf(buf1, "task %d write to stderr:", procid);
+    rc = write(STDOUT_FILENO, buf1, strlen(buf1));
+    while ((size = read(STDIN_FILENO, buf1, sizeof(buf1))) != 0) {
+        if (size > 0) {
+            int offset;
+            sprintf(buf2, "task %d read from stdin:", procid);
+            offset = strlen(buf2);
+            for (j = 0; j < size; j++) /* may lack null terminator */
+                buf2[offset + j] = buf1[j];
+            buf2[offset + j] = ':';
+            buf2[offset + j + 1] = '\0';
+            rc = write(STDOUT_FILENO, buf2, strlen(buf2));
+            break;
+        } else {
+            if ((errno == EINTR) || (errno == EAGAIN)) {
+                sleep(1);
+                continue;
+            }
+            sprintf(buf1, "io read errno:%d:", errno);
+            rc = write(STDOUT_FILENO, buf1, strlen(buf1));
+            break;
+        }
+    }
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
-	return (0);
+    return (0);
 }

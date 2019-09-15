@@ -107,19 +107,15 @@ int switch_p_libstate_clear(void) {
 /*
  * switch functions for job step specific credential
  */
-int switch_p_alloc_jobinfo(switch_jobinfo_t **switch_job,
-                           uint32_t job_id, uint32_t step_id) {
+int switch_p_alloc_jobinfo(switch_jobinfo_t **switch_job, uint32_t job_id, uint32_t step_id) {
     return SLURM_SUCCESS;
 }
 
-int switch_p_build_jobinfo(switch_jobinfo_t *switch_job,
-                           slurm_step_layout_t *step_layout,
-                           char *network) {
+int switch_p_build_jobinfo(switch_jobinfo_t *switch_job, slurm_step_layout_t *step_layout, char *network) {
     return SLURM_SUCCESS;
 }
 
-int switch_p_duplicate_jobinfo(switch_jobinfo_t *tmp,
-                               switch_jobinfo_t **dest) {
+int switch_p_duplicate_jobinfo(switch_jobinfo_t *tmp, switch_jobinfo_t **dest) {
     return SLURM_SUCCESS;
 }
 
@@ -127,13 +123,11 @@ void switch_p_free_jobinfo(switch_jobinfo_t *switch_job) {
     return;
 }
 
-int switch_p_pack_jobinfo(switch_jobinfo_t *switch_job, Buf buffer,
-                          uint16_t protocol_version) {
+int switch_p_pack_jobinfo(switch_jobinfo_t *switch_job, Buf buffer, uint16_t protocol_version) {
     return 0;
 }
 
-int switch_p_unpack_jobinfo(switch_jobinfo_t **switch_job, Buf buffer,
-                            uint16_t protocol_version) {
+int switch_p_unpack_jobinfo(switch_jobinfo_t **switch_job, Buf buffer, uint16_t protocol_version) {
     return SLURM_SUCCESS;
 }
 
@@ -141,8 +135,7 @@ void switch_p_print_jobinfo(FILE *fp, switch_jobinfo_t *jobinfo) {
     return;
 }
 
-char *switch_p_sprint_jobinfo(switch_jobinfo_t *switch_jobinfo, char *buf,
-                              size_t size) {
+char *switch_p_sprint_jobinfo(switch_jobinfo_t *switch_jobinfo, char *buf, size_t size) {
     if ((buf != NULL) && size) {
         buf[0] = '\0';
         return buf;
@@ -174,18 +167,15 @@ extern int switch_p_job_suspend_test(switch_jobinfo_t *jobinfo) {
     return SLURM_SUCCESS;
 }
 
-extern void switch_p_job_suspend_info_get(switch_jobinfo_t *jobinfo,
-                                          void **suspend_info) {
+extern void switch_p_job_suspend_info_get(switch_jobinfo_t *jobinfo, void **suspend_info) {
     return;
 }
 
-extern void switch_p_job_suspend_info_pack(void *suspend_info, Buf buffer,
-                                           uint16_t protocol_version) {
+extern void switch_p_job_suspend_info_pack(void *suspend_info, Buf buffer, uint16_t protocol_version) {
     return;
 }
 
-extern int switch_p_job_suspend_info_unpack(void **suspend_info, Buf buffer,
-                                            uint16_t protocol_version) {
+extern int switch_p_job_suspend_info_unpack(void **suspend_info, Buf buffer, uint16_t protocol_version) {
     return SLURM_SUCCESS;
 }
 
@@ -211,24 +201,20 @@ int switch_p_job_postfini(stepd_step_rec_t *job) {
      *  Kill all processes in the job's session
      */
     if (pgid) {
-        debug2("Sending SIGKILL to pgid %lu",
-               (unsigned long) pgid);
+        debug2("Sending SIGKILL to pgid %lu", (unsigned long) pgid);
         kill(-pgid, SIGKILL);
     } else
-        debug("Job %u.%u: Bad pid valud %lu", job->jobid,
-              job->stepid, (unsigned long) pgid);
+        debug("Job %u.%u: Bad pid valud %lu", job->jobid, job->stepid, (unsigned long) pgid);
 
     return SLURM_SUCCESS;
 }
 
-int switch_p_job_attach(switch_jobinfo_t *jobinfo, char ***env,
-                        uint32_t nodeid, uint32_t procid, uint32_t nnodes,
+int switch_p_job_attach(switch_jobinfo_t *jobinfo, char ***env, uint32_t nodeid, uint32_t procid, uint32_t nnodes,
                         uint32_t nprocs, uint32_t rank) {
     return SLURM_SUCCESS;
 }
 
-extern int switch_p_get_jobinfo(switch_jobinfo_t *switch_job,
-                                int key, void *resulting_data) {
+extern int switch_p_get_jobinfo(switch_jobinfo_t *switch_job, int key, void *resulting_data) {
     slurm_seterrno(EINVAL);
     return SLURM_ERROR;
 }
@@ -249,13 +235,11 @@ extern int switch_p_build_node_info(switch_node_info_t *switch_node) {
     return SLURM_SUCCESS;
 }
 
-extern int switch_p_pack_node_info(switch_node_info_t *switch_node,
-                                   Buf buffer, uint16_t protocol_version) {
+extern int switch_p_pack_node_info(switch_node_info_t *switch_node, Buf buffer, uint16_t protocol_version) {
     return 0;
 }
 
-extern int switch_p_unpack_node_info(switch_node_info_t **switch_node,
-                                     Buf buffer, uint16_t protocol_version) {
+extern int switch_p_unpack_node_info(switch_node_info_t **switch_node, Buf buffer, uint16_t protocol_version) {
     return SLURM_SUCCESS;
 }
 
@@ -263,8 +247,7 @@ extern int switch_p_free_node_info(switch_node_info_t **switch_node) {
     return SLURM_SUCCESS;
 }
 
-extern char *switch_p_sprintf_node_info(switch_node_info_t *switch_node,
-                                        char *buf, size_t size) {
+extern char *switch_p_sprintf_node_info(switch_node_info_t *switch_node, char *buf, size_t size) {
     if ((buf != NULL) && size) {
         buf[0] = '\0';
         return buf;
@@ -273,13 +256,11 @@ extern char *switch_p_sprintf_node_info(switch_node_info_t *switch_node,
     return NULL;
 }
 
-extern int switch_p_job_step_complete(switch_jobinfo_t *jobinfo,
-                                      char *nodelist) {
+extern int switch_p_job_step_complete(switch_jobinfo_t *jobinfo, char *nodelist) {
     return SLURM_SUCCESS;
 }
 
-extern int switch_p_job_step_part_comp(switch_jobinfo_t *jobinfo,
-                                       char *nodelist) {
+extern int switch_p_job_step_part_comp(switch_jobinfo_t *jobinfo, char *nodelist) {
     return SLURM_SUCCESS;
 }
 
@@ -287,8 +268,7 @@ extern bool switch_p_part_comp(void) {
     return false;
 }
 
-extern int switch_p_job_step_allocated(switch_jobinfo_t *jobinfo,
-                                       char *nodelist) {
+extern int switch_p_job_step_allocated(switch_jobinfo_t *jobinfo, char *nodelist) {
     return SLURM_SUCCESS;
 }
 

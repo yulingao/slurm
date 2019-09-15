@@ -110,8 +110,7 @@ int _slurm_cgroup_init(void) {
     }
 
     /* initialize the root freezer cg */
-    if (xcgroup_create(&freezer_ns, &freezer_cg, "", 0, 0)
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&freezer_ns, &freezer_cg, "", 0, 0) != XCGROUP_SUCCESS) {
         error("proctrack/cgroup unable to create root freezer xcgroup");
         xcgroup_ns_destroy(&freezer_ns);
         return SLURM_ERROR;
@@ -146,8 +145,7 @@ int _slurm_cgroup_create(stepd_step_rec_t *job, uint64_t id, uid_t uid, gid_t gi
     }
 #endif
 
-    if (xcgroup_create(&freezer_ns, &slurm_freezer_cg, pre,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&freezer_ns, &slurm_freezer_cg, pre, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xfree(pre);
         return SLURM_ERROR;
     }
@@ -171,10 +169,8 @@ int _slurm_cgroup_create(stepd_step_rec_t *job, uint64_t id, uid_t uid, gid_t gi
 
     /* build user cgroup relative path if not set (should not be) */
     if (*user_cgroup_path == '\0') {
-        if (snprintf(user_cgroup_path, PATH_MAX,
-                     "%s/uid_%u", pre, uid) >= PATH_MAX) {
-            error("unable to build uid %u cgroup relative path : %m",
-                  uid);
+        if (snprintf(user_cgroup_path, PATH_MAX, "%s/uid_%u", pre, uid) >= PATH_MAX) {
+            error("unable to build uid %u cgroup relative path : %m", uid);
             goto bail;
         }
     }
@@ -186,10 +182,8 @@ int _slurm_cgroup_create(stepd_step_rec_t *job, uint64_t id, uid_t uid, gid_t gi
     else
         jobid = job->jobid;
     if (*job_cgroup_path == '\0') {
-        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u",
-                     user_cgroup_path, jobid) >= PATH_MAX) {
-            error("unable to build job %u cgroup relative path : %m",
-                  jobid);
+        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u", user_cgroup_path, jobid) >= PATH_MAX) {
+            error("unable to build job %u cgroup relative path : %m", jobid);
             goto bail;
         }
     }
@@ -198,45 +192,34 @@ int _slurm_cgroup_create(stepd_step_rec_t *job, uint64_t id, uid_t uid, gid_t gi
     if (*jobstep_cgroup_path == '\0') {
         int cc;
         if (job->stepid == SLURM_BATCH_SCRIPT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_batch", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_batch", job_cgroup_path);
         } else if (job->stepid == SLURM_EXTERN_CONT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_extern", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_extern", job_cgroup_path);
         } else {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_%u",
-                          job_cgroup_path, job->stepid);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_%u", job_cgroup_path, job->stepid);
         }
         if (cc >= PATH_MAX) {
             error("proctrack/cgroup unable to build job step %u.%u "
-                  "freezer cg relative path: %m",
-                  jobid, job->stepid);
+                  "freezer cg relative path: %m", jobid, job->stepid);
             goto bail;
         }
     }
 
     /* create user cgroup in the freezer ns (it could already exist) */
-    if (xcgroup_create(&freezer_ns, &user_freezer_cg,
-                       user_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&freezer_ns, &user_freezer_cg, user_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&slurm_freezer_cg);
         goto bail;
     }
 
     /* create job cgroup in the freezer ns (it could already exist) */
-    if (xcgroup_create(&freezer_ns, &job_freezer_cg,
-                       job_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&freezer_ns, &job_freezer_cg, job_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&slurm_freezer_cg);
         xcgroup_destroy(&user_freezer_cg);
         goto bail;
     }
 
     /* create step cgroup in the freezer ns (it should not exists) */
-    if (xcgroup_create(&freezer_ns, &step_freezer_cg,
-                       jobstep_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&freezer_ns, &step_freezer_cg, jobstep_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&slurm_freezer_cg);
         xcgroup_destroy(&user_freezer_cg);
         xcgroup_destroy(&job_freezer_cg);
@@ -294,8 +277,7 @@ int _slurm_cgroup_destroy(void) {
      *   because slurmstepd is still in the cgroup!
      */
     if (_move_current_to_root_cgroup(&freezer_ns) != SLURM_SUCCESS) {
-        error("%s: Unable to move pid %d to root cgroup",
-              __func__, getpid());
+        error("%s: Unable to move pid %d to root cgroup", __func__, getpid());
         xcgroup_unlock(&freezer_cg);
         return SLURM_ERROR;
     }
@@ -304,8 +286,7 @@ int _slurm_cgroup_destroy(void) {
 
     if (jobstep_cgroup_path[0] != '\0') {
         if (xcgroup_delete(&step_freezer_cg) != XCGROUP_SUCCESS) {
-            debug("_slurm_cgroup_destroy: problem deleting step cgroup path %s: %m",
-                  step_freezer_cg.path);
+            debug("_slurm_cgroup_destroy: problem deleting step cgroup path %s: %m", step_freezer_cg.path);
             xcgroup_unlock(&freezer_cg);
             return SLURM_ERROR;
         }
@@ -347,8 +328,7 @@ int _slurm_cgroup_stick_stepd(uint64_t id, pid_t pid) {
     return xcgroup_add_pids(&job_freezer_cg, &pid, 1);
 }
 
-int
-_slurm_cgroup_get_pids(uint64_t id, pid_t **pids, int *npids) {
+int _slurm_cgroup_get_pids(uint64_t id, pid_t **pids, int *npids) {
     if (*jobstep_cgroup_path == '\0')
         return SLURM_ERROR;
 
@@ -359,20 +339,17 @@ int _slurm_cgroup_suspend(uint64_t id) {
     if (*jobstep_cgroup_path == '\0')
         return SLURM_ERROR;
 
-    return xcgroup_set_param(&step_freezer_cg,
-                             "freezer.state", "FROZEN");
+    return xcgroup_set_param(&step_freezer_cg, "freezer.state", "FROZEN");
 }
 
 int _slurm_cgroup_resume(uint64_t id) {
     if (*jobstep_cgroup_path == '\0')
         return SLURM_ERROR;
 
-    return xcgroup_set_param(&step_freezer_cg,
-                             "freezer.state", "THAWED");
+    return xcgroup_set_param(&step_freezer_cg, "freezer.state", "THAWED");
 }
 
-bool
-_slurm_cgroup_has_pid(pid_t pid) {
+bool _slurm_cgroup_has_pid(pid_t pid) {
     bool fstatus;
     xcgroup_t cg;
 
@@ -390,15 +367,13 @@ _slurm_cgroup_has_pid(pid_t pid) {
     return fstatus;
 }
 
-int
-_slurm_cgroup_is_pid_a_slurm_task(uint64_t id, pid_t pid) {
+int _slurm_cgroup_is_pid_a_slurm_task(uint64_t id, pid_t pid) {
     int fstatus = -1;
     int fd;
     pid_t ppid;
     char file_path[PATH_MAX], buf[2048];
 
-    if (snprintf(file_path, PATH_MAX, "/proc/%ld/stat",
-                 (long) pid) >= PATH_MAX) {
+    if (snprintf(file_path, PATH_MAX, "/proc/%ld/stat", (long) pid) >= PATH_MAX) {
         debug2("unable to build pid '%d' stat file: %m ", pid);
         return fstatus;
     }
@@ -464,8 +439,7 @@ extern int proctrack_p_create(stepd_step_rec_t *job) {
     int fstatus;
 
     /* create a new cgroup for that container */
-    fstatus = _slurm_cgroup_create(job, (uint64_t) job->jmgr_pid,
-                                   job->uid, job->gid);
+    fstatus = _slurm_cgroup_create(job, (uint64_t) job->jmgr_pid, job->uid, job->gid);
     if (fstatus)
         return SLURM_ERROR;
 
@@ -475,8 +449,7 @@ extern int proctrack_p_create(stepd_step_rec_t *job) {
      * properties so we need to let the slurmstepd outside of
      * this one)
      */
-    fstatus = _slurm_cgroup_stick_stepd((uint64_t) job->jmgr_pid,
-                                        job->jmgr_pid);
+    fstatus = _slurm_cgroup_stick_stepd((uint64_t) job->jmgr_pid, job->jmgr_pid);
     if (fstatus) {
         _slurm_cgroup_destroy();
         return SLURM_ERROR;
@@ -501,8 +474,7 @@ extern int proctrack_p_signal(uint64_t id, int signal) {
     int slurm_task;
 
     /* get all the pids associated with the step */
-    if (_slurm_cgroup_get_pids(id, &pids, &npids) !=
-        SLURM_SUCCESS) {
+    if (_slurm_cgroup_get_pids(id, &pids, &npids) != SLURM_SUCCESS) {
         debug3("unable to get pids list for cont_id=%"PRIu64"", id);
         /* that could mean that all the processes already exit */
         /* the container so return success */
@@ -531,8 +503,7 @@ extern int proctrack_p_signal(uint64_t id, int signal) {
         slurm_task = _slurm_cgroup_is_pid_a_slurm_task(id, pids[i]);
         if (slurm_task == 1 || signal == SIGKILL) {
             debug2("killing process %d (%s) with signal %d", pids[i],
-                   (slurm_task == 1) ? "slurm_task" : "inherited_task",
-                   signal);
+                   (slurm_task == 1) ? "slurm_task" : "inherited_task", signal);
             kill(pids[i], signal);
         }
     }
@@ -577,8 +548,8 @@ extern int proctrack_p_wait(uint64_t cont_id) {
         if (delay < 120) {
             delay *= 2;
         } else {
-            error("%s: Unable to destroy container %"PRIu64" in cgroup plugin, giving up after %d sec",
-                  __func__, cont_id, delay);
+            error("%s: Unable to destroy container %"PRIu64" in cgroup plugin, giving up after %d sec", __func__,
+                  cont_id, delay);
             break;
         }
     }
@@ -586,7 +557,6 @@ extern int proctrack_p_wait(uint64_t cont_id) {
     return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_get_pids(uint64_t cont_id,
-                                pid_t **pids, int *npids) {
+extern int proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
     return _slurm_cgroup_get_pids(cont_id, pids, npids);
 }

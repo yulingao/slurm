@@ -132,8 +132,7 @@ extern void priority_p_set_assoc_usage(slurmdb_assoc_rec_t *assoc) {
     return;
 }
 
-extern double priority_p_calc_fs_factor(long double usage_efctv,
-                                        long double shares_norm) {
+extern double priority_p_calc_fs_factor(long double usage_efctv, long double shares_norm) {
     /* This calculation is needed for sshare when ran from a
      * non-multifactor machine to a multifactor machine.  It
      * doesn't do anything on regular systems, it should always
@@ -150,8 +149,7 @@ extern double priority_p_calc_fs_factor(long double usage_efctv,
     return priority_fs;
 }
 
-extern List priority_p_get_priority_factors_list(
-        priority_factors_request_msg_t *req_msg, uid_t uid) {
+extern List priority_p_get_priority_factors_list(priority_factors_request_msg_t *req_msg, uid_t uid) {
     return (list_create(NULL));
 }
 
@@ -160,58 +158,44 @@ extern void priority_p_job_end(struct job_record *job_ptr) {
     slurmdb_assoc_rec_t *assoc_ptr;
     int i;
     uint64_t *unused_tres_run_secs;
-    assoc_mgr_lock_t locks = {NO_LOCK, WRITE_LOCK, NO_LOCK,
-                              WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    assoc_mgr_lock_t locks = {NO_LOCK, WRITE_LOCK, NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
 
     /* No decaying in basic priority. Just remove the total secs. */
     unused_tres_run_secs = xmalloc(sizeof(uint64_t) * slurmctld_tres_cnt);
     for (i = 0; i < slurmctld_tres_cnt; i++) {
-        unused_tres_run_secs[i] =
-                job_ptr->tres_alloc_cnt[i] * time_limit_secs;
+        unused_tres_run_secs[i] = job_ptr->tres_alloc_cnt[i] * time_limit_secs;
     }
 
     assoc_mgr_lock(&locks);
     if (job_ptr->qos_ptr) {
         slurmdb_qos_rec_t *qos_ptr = job_ptr->qos_ptr;
         for (i = 0; i < slurmctld_tres_cnt; i++) {
-            if (unused_tres_run_secs[i] >
-                qos_ptr->usage->grp_used_tres_run_secs[i]) {
+            if (unused_tres_run_secs[i] > qos_ptr->usage->grp_used_tres_run_secs[i]) {
                 qos_ptr->usage->grp_used_tres_run_secs[i] = 0;
                 debug2("acct_policy_job_fini: "
                        "grp_used_tres_run_secs "
-                       "underflow for qos %s tres %s",
-                       qos_ptr->name,
-                       assoc_mgr_tres_name_array[i]);
+                       "underflow for qos %s tres %s", qos_ptr->name, assoc_mgr_tres_name_array[i]);
             } else
-                qos_ptr->usage->grp_used_tres_run_secs[i] -=
-                        unused_tres_run_secs[i];
+                qos_ptr->usage->grp_used_tres_run_secs[i] -= unused_tres_run_secs[i];
         }
     }
     assoc_ptr = job_ptr->assoc_ptr;
     while (assoc_ptr) {
         /* If the job finished early remove the extra time now. */
         for (i = 0; i < slurmctld_tres_cnt; i++) {
-            if (unused_tres_run_secs[i] >
-                assoc_ptr->usage->grp_used_tres_run_secs[i]) {
+            if (unused_tres_run_secs[i] > assoc_ptr->usage->grp_used_tres_run_secs[i]) {
                 assoc_ptr->usage->grp_used_tres_run_secs[i] = 0;
                 debug2("acct_policy_job_fini: "
                        "grp_used_tres_run_secs "
-                       "underflow for account %s tres %s",
-                       assoc_ptr->acct,
-                       assoc_mgr_tres_name_array[i]);
+                       "underflow for account %s tres %s", assoc_ptr->acct, assoc_mgr_tres_name_array[i]);
 
             } else {
-                assoc_ptr->usage->grp_used_tres_run_secs[i] -=
-                        unused_tres_run_secs[i];
+                assoc_ptr->usage->grp_used_tres_run_secs[i] -= unused_tres_run_secs[i];
                 debug4("acct_policy_job_fini: job %u. "
                        "Removed %"PRIu64" unused seconds "
                        "from acct %s tres %s "
-                       "grp_used_tres_run_secs = %"PRIu64"",
-                       job_ptr->job_id, unused_tres_run_secs[i],
-                       assoc_ptr->acct,
-                       assoc_mgr_tres_name_array[i],
-                       assoc_ptr->usage->
-                               grp_used_tres_run_secs[i]);
+                       "grp_used_tres_run_secs = %"PRIu64"", job_ptr->job_id, unused_tres_run_secs[i], assoc_ptr->acct,
+                       assoc_mgr_tres_name_array[i], assoc_ptr->usage->grp_used_tres_run_secs[i]);
             }
         }
         /* now handle all the group limits of the parents */

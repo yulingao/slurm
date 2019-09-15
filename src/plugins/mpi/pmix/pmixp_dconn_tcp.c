@@ -49,8 +49,7 @@ static void *_tcp_init(int nodeid, pmixp_p2p_data_t direct_hdr);
 
 static void _tcp_fini(void *_priv);
 
-static int _tcp_connect(void *_priv, void *ep_data, size_t ep_len,
-                        void *init_msg);
+static int _tcp_connect(void *_priv, void *ep_data, size_t ep_len, void *init_msg);
 
 static int _tcp_send(void *_priv, void *msg);
 
@@ -58,8 +57,7 @@ static pmixp_io_engine_t *_tcp_getio(void *_priv);
 
 static void _tcp_regio(eio_handle_t *h);
 
-int pmixp_dconn_tcp_prepare(pmixp_dconn_handlers_t *handlers,
-                            char **ep_data, size_t *ep_len) {
+int pmixp_dconn_tcp_prepare(pmixp_dconn_handlers_t *handlers, char **ep_data, size_t *ep_len) {
     memset(handlers, 0, sizeof(*handlers));
     handlers->init = _tcp_init;
     handlers->fini = _tcp_fini;
@@ -99,8 +97,7 @@ static void _tcp_fini(void *_priv) {
     xfree(priv);
 }
 
-static int _tcp_connect(void *_priv, void *ep_data, size_t ep_len,
-                        void *init_msg) {
+static int _tcp_connect(void *_priv, void *ep_data, size_t ep_len, void *init_msg) {
     pmixp_dconn_tcp_t *priv = (pmixp_dconn_tcp_t *) _priv;
     slurm_addr_t address;
     int fd, i, conn_timeout = 5;
@@ -160,8 +157,7 @@ static int _tcp_send(void *_priv, void *msg) {
     if (SLURM_SUCCESS != rc) {
         char *nodename = pmixp_info_job_host(priv->nodeid);
         xassert(NULL != nodename);
-        PMIXP_ERROR("Fail to enqueue to engine, node: %s (%d)",
-                    nodename, priv->nodeid);
+        PMIXP_ERROR("Fail to enqueue to engine, node: %s (%d)", nodename, priv->nodeid);
         xassert(pmixp_io_enqueue_ok(&priv->eng));
         xfree(nodename);
     }

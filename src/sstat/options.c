@@ -128,8 +128,7 @@ void _do_help(void) {
             _usage();
             break;
         default:
-            fprintf(stderr, "stats bug: params.opt_help=%d\n",
-                    params.opt_help);
+            fprintf(stderr, "stats bug: params.opt_help=%d\n", params.opt_help);
     }
 }
 
@@ -175,8 +174,7 @@ static int _addto_job_list(List job_list, char *names) {
                     name = xmalloc((i - start + 1));
                     memcpy(name, names + start, (i - start));
 
-                    selected_step = xmalloc(
-                            sizeof(slurmdb_selected_step_t));
+                    selected_step = xmalloc(sizeof(slurmdb_selected_step_t));
                     dot = strstr(name, ".");
                     if (dot == NULL) {
                         debug2("No jobstep requested");
@@ -186,51 +184,38 @@ static int _addto_job_list(List job_list, char *names) {
                         /* can't use NO_VAL
                          * since that means all */
                         if (!xstrcasecmp(dot, "batch"))
-                            selected_step->stepid =
-                                    SSTAT_BATCH_STEP;
-                        else if (!xstrcasecmp(dot,
-                                              "extern"))
-                            selected_step->stepid =
-                                    SSTAT_EXTERN_STEP;
+                            selected_step->stepid = SSTAT_BATCH_STEP;
+                        else if (!xstrcasecmp(dot, "extern"))
+                            selected_step->stepid = SSTAT_EXTERN_STEP;
                         else
-                            selected_step->stepid =
-                                    atoi(dot);
+                            selected_step->stepid = atoi(dot);
                     }
 
                     selected_step->array_task_id = NO_VAL;
                     selected_step->pack_job_offset = NO_VAL;
                     if ((under = strstr(name, "_"))) {
                         *under++ = 0;
-                        selected_step->array_task_id =
-                                atoi(under);
+                        selected_step->array_task_id = atoi(under);
                     } else if ((plus = strstr(name, "+"))) {
                         *plus++ = 0;
-                        selected_step->pack_job_offset =
-                                atoi(plus);
+                        selected_step->pack_job_offset = atoi(plus);
                     } else {
                         debug2("No array/pack job requested");
                     }
 
-                    selected_step->jobid =
-                            slurm_xlate_job_id(name);
+                    selected_step->jobid = slurm_xlate_job_id(name);
                     xfree(name);
 
                     while ((curr_step = list_next(itr))) {
-                        if ((curr_step->jobid
-                             == selected_step->jobid)
-                            && (curr_step->stepid
-                                == selected_step->
-                                stepid))
+                        if ((curr_step->jobid == selected_step->jobid) && (curr_step->stepid == selected_step->stepid))
                             break;
                     }
 
                     if (!curr_step) {
-                        list_append(job_list,
-                                    selected_step);
+                        list_append(job_list, selected_step);
                         count++;
                     } else
-                        slurmdb_destroy_selected_step(
-                                selected_step);
+                        slurmdb_destroy_selected_step(selected_step);
                     list_iterator_reset(itr);
                 }
                 i++;
@@ -242,8 +227,7 @@ static int _addto_job_list(List job_list, char *names) {
             name = xmalloc((i - start) + 1);
             memcpy(name, names + start, (i - start));
 
-            selected_step =
-                    xmalloc(sizeof(slurmdb_selected_step_t));
+            selected_step = xmalloc(sizeof(slurmdb_selected_step_t));
             dot = strstr(name, ".");
             if (dot == NULL) {
                 debug2("No jobstep requested");
@@ -252,11 +236,9 @@ static int _addto_job_list(List job_list, char *names) {
                 *dot++ = 0;
                 /* can't use NO_VAL since that means all */
                 if (!xstrcasecmp(dot, "batch"))
-                    selected_step->stepid =
-                            SSTAT_BATCH_STEP;
+                    selected_step->stepid = SSTAT_BATCH_STEP;
                 else if (!xstrcasecmp(dot, "extern"))
-                    selected_step->stepid =
-                            SSTAT_EXTERN_STEP;
+                    selected_step->stepid = SSTAT_EXTERN_STEP;
                 else
                     selected_step->stepid = atoi(dot);
             }
@@ -277,9 +259,7 @@ static int _addto_job_list(List job_list, char *names) {
             xfree(name);
 
             while ((curr_step = list_next(itr))) {
-                if ((curr_step->jobid == selected_step->jobid)
-                    && (curr_step->stepid
-                        == selected_step->stepid))
+                if ((curr_step->jobid == selected_step->jobid) && (curr_step->stepid == selected_step->stepid))
                     break;
             }
 
@@ -287,8 +267,7 @@ static int _addto_job_list(List job_list, char *names) {
                 list_append(job_list, selected_step);
                 count++;
             } else
-                slurmdb_destroy_selected_step(
-                        selected_step);
+                slurmdb_destroy_selected_step(selected_step);
         }
     }
     list_iterator_destroy(itr);
@@ -330,22 +309,21 @@ void parse_command_line(int argc, char **argv) {
     ListIterator itr = NULL;
     log_options_t logopt = LOG_OPTS_STDERR_ONLY;
 
-    static struct option long_options[] = {
-            {"allsteps",   0,          0,                'a'},
-            {"helpformat", 0,          0,                'e'},
-            {"help",       0,          0,                'h'},
-            {"jobs",       1,          0,                'j'},
-            {"noheader",   0,          0,                'n'},
-            {"fields",     1,          0,                'o'},
-            {"format",     1,          0,                'o'},
-            {"noconvert", no_argument, 0, OPT_LONG_NOCONVERT},
-            {"pidformat",  0,          0,                'i'},
-            {"parsable",   0,          0,                'p'},
-            {"parsable2",  0,          0,                'P'},
-            {"usage",      0,          &params.opt_help, 3},
-            {"verbose",    0,          0,                'v'},
-            {"version",    0,          0,                'V'},
-            {0,            0,          0,                0}};
+    static struct option long_options[] = {{"allsteps",   0,          0,                'a'},
+                                           {"helpformat", 0,          0,                'e'},
+                                           {"help",       0,          0,                'h'},
+                                           {"jobs",       1,          0,                'j'},
+                                           {"noheader",   0,          0,                'n'},
+                                           {"fields",     1,          0,                'o'},
+                                           {"format",     1,          0,                'o'},
+                                           {"noconvert", no_argument, 0, OPT_LONG_NOCONVERT},
+                                           {"pidformat",  0,          0,                'i'},
+                                           {"parsable",   0,          0,                'p'},
+                                           {"parsable2",  0,          0,                'P'},
+                                           {"usage",      0,          &params.opt_help, 3},
+                                           {"verbose",    0,          0,                'v'},
+                                           {"version",    0,          0,                'V'},
+                                           {0,            0,          0,                0}};
 
     log_init(xbasename(argv[0]), logopt, 0, NULL);
 
@@ -354,8 +332,7 @@ void parse_command_line(int argc, char **argv) {
     opterr = 1;        /* Let getopt report problems to the user */
 
     while (1) {        /* now cycle through the command line */
-        c = getopt_long(argc, argv, "aehij:no:pPvV",
-                        long_options, &optionIndex);
+        c = getopt_long(argc, argv, "aehij:no:pPvV", long_options, &optionIndex);
         if (c == -1)
             break;
         switch (c) {
@@ -370,13 +347,11 @@ void parse_command_line(int argc, char **argv) {
                 break;
             case 'i':
                 params.pid_format = 1;
-                xstrfmtcat(params.opt_field_list, "%s,",
-                           STAT_FIELDS_PID);
+                xstrfmtcat(params.opt_field_list, "%s,", STAT_FIELDS_PID);
                 break;
             case 'j':
                 if (!params.opt_job_list)
-                    params.opt_job_list = list_create(
-                            slurmdb_destroy_selected_step);
+                    params.opt_job_list = list_create(slurmdb_destroy_selected_step);
                 _addto_job_list(params.opt_job_list, optarg);
                 break;
             case 'n':
@@ -389,12 +364,10 @@ void parse_command_line(int argc, char **argv) {
                 xstrfmtcat(params.opt_field_list, "%s,", optarg);
                 break;
             case 'p':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_ENDING;
                 break;
             case 'P':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_NO_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_NO_ENDING;
                 break;
             case 'v':
                 /* Handle -vvv thusly...
@@ -424,8 +397,7 @@ void parse_command_line(int argc, char **argv) {
     if (optind < argc) {
         optarg = argv[optind];
         if (!params.opt_job_list)
-            params.opt_job_list = list_create(
-                    slurmdb_destroy_selected_step);
+            params.opt_job_list = list_create(slurmdb_destroy_selected_step);
         _addto_job_list(params.opt_job_list, optarg);
     }
 
@@ -439,18 +411,14 @@ void parse_command_line(int argc, char **argv) {
     }
 
     /* specific jobs requested? */
-    if (params.opt_verbose && params.opt_job_list
-        && list_count(params.opt_job_list)) {
+    if (params.opt_verbose && params.opt_job_list && list_count(params.opt_job_list)) {
         debug("Jobs requested:\n");
         itr = list_iterator_create(params.opt_job_list);
         while ((selected_step = list_next(itr))) {
             if (selected_step->stepid != NO_VAL)
-                debug("\t: %d.%d\n",
-                      selected_step->jobid,
-                      selected_step->stepid);
+                debug("\t: %d.%d\n", selected_step->jobid, selected_step->stepid);
             else
-                debug("\t: %d\n",
-                      selected_step->jobid);
+                debug("\t: %d\n", selected_step->jobid);
         }
         list_iterator_destroy(itr);
     }

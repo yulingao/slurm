@@ -58,8 +58,7 @@ typedef struct {
 
 
 static void _destroy_filetxt_jobcomp_info(void *object) {
-    filetxt_jobcomp_info_t *jobcomp_info =
-            (filetxt_jobcomp_info_t *) object;
+    filetxt_jobcomp_info_t *jobcomp_info = (filetxt_jobcomp_info_t *) object;
     if (jobcomp_info) {
         xfree(jobcomp_info);
     }
@@ -109,8 +108,7 @@ static jobcomp_job_rec_t *_parse_line(List job_info_list) {
             temp = strstr(jobcomp_info->val, "(");
             if (!temp) {
                 job->uid = atoi(jobcomp_info->val);
-                error("problem getting correct uid from %s",
-                      jobcomp_info->val);
+                error("problem getting correct uid from %s", jobcomp_info->val);
             } else {
                 job->uid = atoi(temp + 1);
                 job->uid_name = xstrdup(jobcomp_info->val);
@@ -119,8 +117,7 @@ static jobcomp_job_rec_t *_parse_line(List job_info_list) {
             temp = strstr(jobcomp_info->val, "(");
             if (!temp) {
                 job->gid = atoi(jobcomp_info->val);
-                error("problem getting correct gid from %s",
-                      jobcomp_info->val);
+                error("problem getting correct gid from %s", jobcomp_info->val);
             } else {
                 job->gid = atoi(temp + 1);
                 job->gid_name = xstrdup(jobcomp_info->val);
@@ -160,8 +157,7 @@ static jobcomp_job_rec_t *_parse_line(List job_info_list) {
         } else if (!xstrcasecmp("ExitCode", jobcomp_info->name)) {
             job->exit_code = xstrdup(jobcomp_info->val);
         } else {
-            error("Unknown type %s: %s", jobcomp_info->name,
-                  jobcomp_info->val);
+            error("Unknown type %s: %s", jobcomp_info->name, jobcomp_info->val);
         }
     }
     job->elapsed_time = end_time - start_time;
@@ -197,8 +193,7 @@ extern List filetxt_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
         partition = NULL;
         job_info_list = list_create(_destroy_filetxt_jobcomp_info);
         while (fptr) {
-            jobcomp_info =
-                    xmalloc(sizeof(filetxt_jobcomp_info_t));
+            jobcomp_info = xmalloc(sizeof(filetxt_jobcomp_info_t));
             list_append(job_info_list, jobcomp_info);
             jobcomp_info->name = fptr;
             fptr = strstr(fptr, "=");
@@ -243,8 +238,7 @@ extern List filetxt_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
         }
         foundjob:
 
-        if (job_cond->partition_list
-            && list_count(job_cond->partition_list)) {
+        if (job_cond->partition_list && list_count(job_cond->partition_list)) {
             if (!partition)
                 continue;
             itr = list_iterator_create(job_cond->partition_list);

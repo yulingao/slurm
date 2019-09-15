@@ -136,8 +136,7 @@ int mpi_hook_client_init(char *mpi_type);
  * to MPI state for this job step.  Free the state by calling
  * mpi_hook_client_fini().
  */
-mpi_plugin_client_state_t *
-mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env);
+mpi_plugin_client_state_t *mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env);
 
 /* Call the plugin p_mpi_hook_client_fini() function. */
 int mpi_hook_client_fini(mpi_plugin_client_state_t *state);

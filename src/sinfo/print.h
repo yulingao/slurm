@@ -62,12 +62,10 @@ typedef struct sinfo_format {
 /*****************************************************************************
  * Print Format Functions
  *****************************************************************************/
-int format_add_function(List list, int width, bool right_justify,
-                        char *suffix,
+int format_add_function(List list, int width, bool right_justify, char *suffix,
                         int (*function)(sinfo_data_t *, int, bool, char *));
 
-int format_prepend_function(List list, int width, bool right_justify,
-                            char *suffix,
+int format_prepend_function(List list, int width, bool right_justify, char *suffix,
                             int (*function)(sinfo_data_t *, int, bool, char *));
 
 void print_date(void);
@@ -179,145 +177,98 @@ void print_sinfo_reservation(reserve_info_msg_t *resv_ptr);
  * Print Field Functions
  *****************************************************************************/
 
-int _print_avail(sinfo_data_t *sinfo_data, int width,
-                 bool right_justify, char *suffix);
+int _print_avail(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_cpus(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_cpus(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_cpus_aiot(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_cpus_aiot(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_sct(sinfo_data_t *sinfo_data, int width,
-               bool right_justify, char *suffix);
+int _print_sct(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_sockets(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix);
+int _print_sockets(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_cores(sinfo_data_t *sinfo_data, int width,
-                 bool right_justify, char *suffix);
+int _print_cores(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_threads(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix);
+int _print_threads(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_disk(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_disk(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_features(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix);
+int _print_features(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_features_act(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix);
+int _print_features_act(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_groups(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix);
+int _print_groups(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_gres(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_gres(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_gres_used(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_gres_used(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_memory(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix);
+int _print_memory(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_node_hostnames(sinfo_data_t *sinfo_data, int width,
-                          bool right_justify, char *suffix);
+int _print_node_hostnames(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_node_address(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix);
+int _print_node_address(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_node_list(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_node_list(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_nodes_t(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix);
+int _print_nodes_t(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_nodes_ai(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix);
+int _print_nodes_ai(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_nodes_aiot(sinfo_data_t *sinfo_data, int width,
-                      bool right_justify, char *suffix);
+int _print_nodes_aiot(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_oversubscribe(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix);
+int _print_oversubscribe(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_partition(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_partition(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_partition_name(sinfo_data_t *sinfo_data, int width,
-                          bool right_justify, char *suffix);
+int _print_partition_name(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_port(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_port(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_prefix(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix);
+int _print_prefix(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_preempt_mode(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix);
+int _print_preempt_mode(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_priority_job_factor(sinfo_data_t *sinfo_data, int width,
-                               bool right_justify, char *suffix);
+int _print_priority_job_factor(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_priority_tier(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix);
+int _print_priority_tier(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_reason(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix);
+int _print_reason(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_root(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_root(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_size(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_size(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_state_compact(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix);
+int _print_state_compact(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_state_long(sinfo_data_t *sinfo_data, int width,
-                      bool right_justify, char *suffix);
+int _print_state_long(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_time(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_time(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_timestamp(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_timestamp(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_user(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix);
+int _print_user(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_user_long(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_user_long(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_default_time(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix);
+int _print_default_time(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_weight(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix);
+int _print_weight(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_alloc_nodes(sinfo_data_t *sinfo_data, int width,
-                       bool right_justify, char *suffix);
+int _print_alloc_nodes(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_com_invalid(sinfo_data_t *sinfo_data, int width,
-                       bool right_justify, char *suffix);
+int _print_com_invalid(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_cpu_load(sinfo_data_t *node_ptr, int width,
-                    bool right_justify, char *suffix);
+int _print_cpu_load(sinfo_data_t *node_ptr, int width, bool right_justify, char *suffix);
 
-int _print_free_mem(sinfo_data_t *node_ptr, int width,
-                    bool right_justify, char *suffix);
+int _print_free_mem(sinfo_data_t *node_ptr, int width, bool right_justify, char *suffix);
 
-int _print_max_cpus_per_node(sinfo_data_t *sinfo_data, int width,
-                             bool right_justify, char *suffix);
+int _print_max_cpus_per_node(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_version(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix);
+int _print_version(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_alloc_mem(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix);
+int _print_alloc_mem(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
-int _print_cluster_name(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix);
+int _print_cluster_name(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix);
 
 #endif

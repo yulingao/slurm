@@ -176,8 +176,7 @@ slurm_auth_credential_t *slurm_auth_create(char *opts) {
     err = munge_encode(&cred->m_str, ctx, NULL, 0);
     if (err != EMUNGE_SUCCESS) {
         if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge encode failed: %s (retrying ...)",
-                  munge_ctx_strerror(ctx));
+            debug("Munge encode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
             usleep(RETRY_USEC);    /* Likely munged too busy */
             goto again;
         }
@@ -309,9 +308,8 @@ char *slurm_auth_get_host(slurm_auth_credential_t *cred) {
 
     xassert(cred->magic == MUNGE_MAGIC);
 
-    he = get_host_by_addr((char *) &cred->addr.s_addr,
-                          sizeof(cred->addr.s_addr),
-                          AF_INET, (void *) &h_buf, sizeof(h_buf), &h_err);
+    he = get_host_by_addr((char *) &cred->addr.s_addr, sizeof(cred->addr.s_addr), AF_INET, (void *) &h_buf,
+                          sizeof(h_buf), &h_err);
     if (he)
         hostname = xstrdup(he->h_name);
     else
@@ -324,8 +322,7 @@ char *slurm_auth_get_host(slurm_auth_credential_t *cred) {
  * Marshall a credential for transmission over the network, according to
  * Slurm's marshalling protocol.
  */
-int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf,
-                    uint16_t protocol_version) {
+int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf, uint16_t protocol_version) {
     if (!cred || !buf) {
         slurm_seterrno(ESLURM_AUTH_BADARG);
         return SLURM_ERROR;
@@ -336,8 +333,7 @@ int slurm_auth_pack(slurm_auth_credential_t *cred, Buf buf,
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         packstr(cred->m_str, buf);
     } else {
-        error("%s: Unknown protocol version %d",
-              __func__, protocol_version);
+        error("%s: Unknown protocol version %d", __func__, protocol_version);
         return SLURM_ERROR;
     }
 
@@ -367,8 +363,7 @@ slurm_auth_credential_t *slurm_auth_unpack(Buf buf, uint16_t protocol_version) {
 
         safe_unpackstr_malloc(&cred->m_str, &size, buf);
     } else {
-        error("%s: unknown protocol version %u",
-              __func__, protocol_version);
+        error("%s: unknown protocol version %u", __func__, protocol_version);
         goto unpack_error;
     }
 
@@ -401,8 +396,7 @@ static int _decode_cred(slurm_auth_credential_t *c, char *socket) {
         error("munge_ctx_create failure");
         return SLURM_ERROR;
     }
-    if (socket &&
-        (munge_ctx_set(ctx, MUNGE_OPT_SOCKET, socket) != EMUNGE_SUCCESS)) {
+    if (socket && (munge_ctx_set(ctx, MUNGE_OPT_SOCKET, socket) != EMUNGE_SUCCESS)) {
         error("munge_ctx_set failure");
         munge_ctx_destroy(ctx);
         return SLURM_ERROR;
@@ -412,8 +406,7 @@ static int _decode_cred(slurm_auth_credential_t *c, char *socket) {
     err = munge_decode(c->m_str, ctx, NULL, NULL, &c->uid, &c->gid);
     if (err != EMUNGE_SUCCESS) {
         if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge decode failed: %s (retrying ...)",
-                  munge_ctx_strerror(ctx));
+            debug("Munge decode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
             usleep(RETRY_USEC);    /* Likely munged too busy */
             goto again;
         }
@@ -434,8 +427,7 @@ static int _decode_cred(slurm_auth_credential_t *c, char *socket) {
         /*
          *  Print any valid credential data
          */
-        error("Munge decode failed: %s",
-              munge_ctx_strerror(ctx));
+        error("Munge decode failed: %s", munge_ctx_strerror(ctx));
         _print_cred(ctx);
         if (err == EMUNGE_CRED_REWOUND)
             error("Check for out of sync clocks");
@@ -451,8 +443,7 @@ static int _decode_cred(slurm_auth_credential_t *c, char *socket) {
      * needed.
      */
     if (munge_ctx_get(ctx, MUNGE_OPT_ADDR4, &c->addr) != EMUNGE_SUCCESS)
-        error("auth_munge: Unable to retrieve addr: %s",
-              munge_ctx_strerror(ctx));
+        error("auth_munge: Unable to retrieve addr: %s", munge_ctx_strerror(ctx));
 
     c->verified = true;
 
@@ -471,15 +462,13 @@ static void _print_cred(munge_ctx_t ctx) {
 
     e = munge_ctx_get(ctx, MUNGE_OPT_ENCODE_TIME, &encoded);
     if (e != EMUNGE_SUCCESS)
-        debug("%s: Unable to retrieve encode time: %s",
-              plugin_type, munge_ctx_strerror(ctx));
+        debug("%s: Unable to retrieve encode time: %s", plugin_type, munge_ctx_strerror(ctx));
     else
         info("ENCODED: %s", slurm_ctime2_r(&encoded, buf));
 
     e = munge_ctx_get(ctx, MUNGE_OPT_DECODE_TIME, &decoded);
     if (e != EMUNGE_SUCCESS)
-        debug("%s: Unable to retrieve decode time: %s",
-              plugin_type, munge_ctx_strerror(ctx));
+        debug("%s: Unable to retrieve decode time: %s", plugin_type, munge_ctx_strerror(ctx));
     else
         info("DECODED: %s", slurm_ctime2_r(&decoded, buf));
 }

@@ -105,8 +105,7 @@ extern void acct_gather_interconnect_p_conf_set(s_p_hashtbl_t *tbl) {
     return;
 }
 
-extern void acct_gather_interconnect_p_conf_options(
-        s_p_options_t **full_options, int *full_options_cnt) {
+extern void acct_gather_interconnect_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     return;
 }
 

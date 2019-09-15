@@ -44,12 +44,13 @@
 
 extern uint16_t slurmsmwd_cabinets_per_row;
 extern uint16_t slurmsmwd_debug_level;
-extern char *   slurmsmwd_log_file;
+extern char *slurmsmwd_log_file;
 
 /* Configuration functions */
 
 /* Load configuration file contents into global variables. */
 extern void slurmsmwd_read_config(void);
+
 extern void slurmsmwd_print_config(void);
 
-#endif	/* _HAVE_SLURMSMWD_READ_CONFIG_H */
+#endif    /* _HAVE_SLURMSMWD_READ_CONFIG_H */

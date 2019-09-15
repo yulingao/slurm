@@ -58,8 +58,7 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 static uint32_t _gen_job_prio(struct job_record *job_ptr);
 
-static bool _qos_preemptable(struct job_record *preemptee,
-                             struct job_record *preemptor);
+static bool _qos_preemptable(struct job_record *preemptee, struct job_record *preemptor);
 
 static int _sort_by_prio(void *x, void *y);
 
@@ -100,8 +99,7 @@ extern List find_preemptable_jobs(struct job_record *job_ptr) {
         return preemptee_job_list;
     }
     if (job_ptr->part_ptr->node_bitmap == NULL) {
-        error("find_preemptable_jobs: partition %s node_bitmap=NULL",
-              job_ptr->part_ptr->name);
+        error("find_preemptable_jobs: partition %s node_bitmap=NULL", job_ptr->part_ptr->name);
         return preemptee_job_list;
     }
 
@@ -112,12 +110,9 @@ extern List find_preemptable_jobs(struct job_record *job_ptr) {
             continue;
         if (!_qos_preemptable(job_p, job_ptr))
             continue;
-        if ((job_p->node_bitmap == NULL) ||
-            (bit_overlap(job_p->node_bitmap,
-                         job_ptr->part_ptr->node_bitmap) == 0))
+        if ((job_p->node_bitmap == NULL) || (bit_overlap(job_p->node_bitmap, job_ptr->part_ptr->node_bitmap) == 0))
             continue;
-        if (job_ptr->details &&
-            (job_ptr->details->expanding_jobid == job_p->job_id))
+        if (job_ptr->details && (job_ptr->details->expanding_jobid == job_p->job_id))
             continue;
         if (acct_policy_is_job_preempt_exempt(job_p))
             continue;
@@ -138,14 +133,11 @@ extern List find_preemptable_jobs(struct job_record *job_ptr) {
     return preemptee_job_list;
 }
 
-static bool _qos_preemptable(struct job_record *preemptee,
-                             struct job_record *preemptor) {
+static bool _qos_preemptable(struct job_record *preemptee, struct job_record *preemptor) {
     slurmdb_qos_rec_t *qos_ee = preemptee->qos_ptr;
     slurmdb_qos_rec_t *qos_or = preemptor->qos_ptr;
 
-    if ((qos_ee == NULL) || (qos_or == NULL) ||
-        (qos_or->id == qos_ee->id) ||
-        (qos_or->preempt_bitstr == NULL) ||
+    if ((qos_ee == NULL) || (qos_or == NULL) || (qos_or->id == qos_ee->id) || (qos_or->preempt_bitstr == NULL) ||
         !bit_test(qos_or->preempt_bitstr, qos_ee->id))
         return false;
     return true;
@@ -223,7 +215,6 @@ extern bool preemption_enabled(void) {
 }
 
 /* Return true if the preemptor can preempt the preemptee, otherwise false */
-extern bool job_preempt_check(job_queue_rec_t *preemptor,
-                              job_queue_rec_t *preemptee) {
+extern bool job_preempt_check(job_queue_rec_t *preemptor, job_queue_rec_t *preemptee) {
     return _qos_preemptable(preemptee->job_ptr, preemptor->job_ptr);
 }

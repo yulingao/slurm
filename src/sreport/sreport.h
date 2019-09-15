@@ -99,8 +99,7 @@ extern char *cluster_flag;
 extern char *tres_usage_str;
 extern bool user_case_norm;
 
-extern void slurmdb_report_print_time(print_field_t *field,
-                                      uint64_t value, uint64_t total_time, int last);
+extern void slurmdb_report_print_time(print_field_t *field, uint64_t value, uint64_t total_time, int last);
 
 extern int parse_option_end(char *option);
 
@@ -120,18 +119,16 @@ extern int get_uint(char *in_value, uint32_t *out_value, char *type);
  * allocated seconds.  As we still want to print a line if the usage
  * is zero NULLs must be handled after the function is called.
  */
-extern void sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec,
-                                  slurmdb_tres_rec_t **tres_rec,
-                                  List cluster_tres_list, List tres_list,
-                                  slurmdb_tres_rec_t *tres_rec_in);
+extern void
+sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec, slurmdb_tres_rec_t **tres_rec, List cluster_tres_list,
+                      List tres_list, slurmdb_tres_rec_t *tres_rec_in);
 
 /* Since usage columns can get big, instead of always giving a 20
  * column spacing, figure it out here.
  */
 extern void sreport_set_usage_col_width(print_field_t *field, uint64_t number);
 
-extern void sreport_set_usage_column_width(print_field_t *usage_field,
-                                           print_field_t *energy_field,
+extern void sreport_set_usage_column_width(print_field_t *usage_field, print_field_t *energy_field,
                                            List slurmdb_report_cluster_list);
 
 /* For duplicate user/account records, combine TRES records into the original

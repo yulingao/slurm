@@ -77,9 +77,7 @@
 #define PRINT_PARTITIONS 0x02
 
 typedef enum {
-    SSHARE_TIME_SECS,
-    SSHARE_TIME_MINS,
-    SSHARE_TIME_HOURS,
+    SSHARE_TIME_SECS, SSHARE_TIME_MINS, SSHARE_TIME_HOURS,
 } sshare_time_format_t;
 
 enum {

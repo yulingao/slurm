@@ -80,8 +80,7 @@ static acct_gather_energy_t *local_energy = NULL;
 static uint64_t debug_flags = 0;
 
 enum {
-    GET_ENERGY,
-    GET_POWER
+    GET_ENERGY, GET_POWER
 };
 
 extern void acct_gather_energy_p_conf_set(s_p_hashtbl_t *tbl);
@@ -155,8 +154,7 @@ static void _get_joules_task(acct_gather_energy_t *energy) {
         diff_energy = curr_energy - energy->previous_consumed_energy;
 
         energy->consumed_energy += diff_energy;
-        energy->ave_watts = ((energy->ave_watts * readings) +
-                             energy->current_watts) / (readings + 1);
+        energy->ave_watts = ((energy->ave_watts * readings) + energy->current_watts) / (readings + 1);
     } else {
         energy->base_consumed_energy = curr_energy;
         energy->ave_watts = 0;
@@ -168,10 +166,8 @@ static void _get_joules_task(acct_gather_energy_t *energy) {
         info("_get_joules_task: %"
     PRIu64
     " Joules consumed over last"
-    " %ld secs. Currently at %u watts, ave watts %u",
-            diff_energy,
-            energy->poll_time ? now - energy->poll_time : 0,
-            curr_power, energy->ave_watts);
+    " %ld secs. Currently at %u watts, ave watts %u", diff_energy, energy->poll_time ? now - energy->poll_time
+                                                                                     : 0, curr_power, energy->ave_watts);
 
     energy->previous_consumed_energy = curr_energy;
     energy->poll_time = now;
@@ -182,8 +178,7 @@ static int _running_profile(void) {
     static uint32_t profile_opt = ACCT_GATHER_PROFILE_NOT_SET;
 
     if (profile_opt == ACCT_GATHER_PROFILE_NOT_SET) {
-        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING,
-                                  &profile_opt);
+        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING, &profile_opt);
         if (profile_opt & ACCT_GATHER_PROFILE_ENERGY)
             run = true;
     }
@@ -193,10 +188,8 @@ static int _running_profile(void) {
 
 static int _send_profile(void) {
     uint64_t curr_watts;
-    acct_gather_profile_dataset_t dataset[] = {
-            {"Power", PROFILE_FIELD_UINT64},
-            {NULL,    PROFILE_FIELD_NOT_SET}
-    };
+    acct_gather_profile_dataset_t dataset[] = {{"Power", PROFILE_FIELD_UINT64},
+                                               {NULL,    PROFILE_FIELD_NOT_SET}};
 
     static int dataset_id = -1; /* id of the dataset for profile data */
 
@@ -204,12 +197,10 @@ static int _send_profile(void) {
         return SLURM_SUCCESS;
 
     if (debug_flags & DEBUG_FLAG_ENERGY)
-        info("_send_profile: consumed %d watts",
-             local_energy->current_watts);
+        info("_send_profile: consumed %d watts", local_energy->current_watts);
 
     if (dataset_id < 0) {
-        dataset_id = acct_gather_profile_g_create_dataset(
-                "Energy", NO_PARENT, dataset);
+        dataset_id = acct_gather_profile_g_create_dataset("Energy", NO_PARENT, dataset);
         if (debug_flags & DEBUG_FLAG_ENERGY)
             debug("Energy: dataset created (id = %d)", dataset_id);
         if (dataset_id == SLURM_ERROR) {
@@ -224,9 +215,7 @@ static int _send_profile(void) {
         info("PROFILE-Energy: power=%u", local_energy->current_watts);
     }
 
-    return acct_gather_profile_g_add_sample_data(dataset_id,
-                                                 (void *) &curr_watts,
-                                                 local_energy->poll_time);
+    return acct_gather_profile_g_add_sample_data(dataset_id, (void *) &curr_watts, local_energy->poll_time);
 }
 
 extern int acct_gather_energy_p_update_node_energy(void) {
@@ -265,8 +254,7 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern int acct_gather_energy_p_get_data(enum acct_energy_type data_type,
-                                         void *data) {
+extern int acct_gather_energy_p_get_data(enum acct_energy_type data_type, void *data) {
     int rc = SLURM_SUCCESS;
     acct_gather_energy_t *energy = (acct_gather_energy_t *) data;
     time_t *last_poll = (time_t *) data;
@@ -275,8 +263,7 @@ extern int acct_gather_energy_p_get_data(enum acct_energy_type data_type,
     xassert(_run_in_daemon());
 
     if (!local_energy) {
-        debug("%s: trying to get data %d, but no local_energy yet.",
-              __func__, data_type);
+        debug("%s: trying to get data %d, but no local_energy yet.", __func__, data_type);
         acct_gather_energy_p_conf_set(NULL);
     }
 
@@ -299,16 +286,14 @@ extern int acct_gather_energy_p_get_data(enum acct_energy_type data_type,
             *sensor_cnt = 1;
             break;
         default:
-            error("acct_gather_energy_p_get_data: unknown enum %d",
-                  data_type);
+            error("acct_gather_energy_p_get_data: unknown enum %d", data_type);
             rc = SLURM_ERROR;
             break;
     }
     return rc;
 }
 
-extern int acct_gather_energy_p_set_data(enum acct_energy_type data_type,
-                                         void *data) {
+extern int acct_gather_energy_p_set_data(enum acct_energy_type data_type, void *data) {
     int rc = SLURM_SUCCESS;
 
     xassert(_run_in_daemon());
@@ -322,16 +307,14 @@ extern int acct_gather_energy_p_set_data(enum acct_energy_type data_type,
             _send_profile();
             break;
         default:
-            error("acct_gather_energy_p_set_data: unknown enum %d",
-                  data_type);
+            error("acct_gather_energy_p_set_data: unknown enum %d", data_type);
             rc = SLURM_ERROR;
             break;
     }
     return rc;
 }
 
-extern void acct_gather_energy_p_conf_options(s_p_options_t **full_options,
-                                              int *full_options_cnt) {
+extern void acct_gather_energy_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     return;
 }
 

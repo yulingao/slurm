@@ -46,15 +46,13 @@
 /*
  * expire old info from the storage
  */
-extern int slurmdb_archive(void *db_conn,
-                           slurmdb_archive_cond_t *arch_cond) {
+extern int slurmdb_archive(void *db_conn, slurmdb_archive_cond_t *arch_cond) {
     return jobacct_storage_g_archive(db_conn, arch_cond);
 }
 
 /*
  * expire old info from the storage
  */
-extern int slurmdb_archive_load(void *db_conn,
-                                slurmdb_archive_rec_t *arch_rec) {
+extern int slurmdb_archive_load(void *db_conn, slurmdb_archive_rec_t *arch_rec) {
     return jobacct_storage_g_archive_load(db_conn, arch_rec);
 }

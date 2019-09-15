@@ -552,20 +552,18 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 
 /* Construct a string literal encoding the version number components. */
 #ifdef COMPILER_VERSION_MAJOR
-char const info_version[] = {
-        'I', 'N', 'F', 'O', ':',
-        'c', 'o', 'm', 'p', 'i', 'l', 'e', 'r', '_', 'v', 'e', 'r', 's', 'i', 'o', 'n', '[',
-        COMPILER_VERSION_MAJOR,
+char const info_version[] = {'I', 'N', 'F', 'O', ':', 'c', 'o', 'm', 'p', 'i', 'l', 'e', 'r', '_', 'v', 'e', 'r', 's',
+                             'i', 'o', 'n', '[', COMPILER_VERSION_MAJOR,
 # ifdef COMPILER_VERSION_MINOR
-        '.', COMPILER_VERSION_MINOR,
+                             '.', COMPILER_VERSION_MINOR,
 #  ifdef COMPILER_VERSION_PATCH
-        '.', COMPILER_VERSION_PATCH,
+                             '.', COMPILER_VERSION_PATCH,
 #   ifdef COMPILER_VERSION_TWEAK
-        '.', COMPILER_VERSION_TWEAK,
+                             '.', COMPILER_VERSION_TWEAK,
 #   endif
 #  endif
 # endif
-        ']', '\0'};
+                             ']', '\0'};
 #endif
 
 /* Construct a string literal encoding the internal version number. */
@@ -617,8 +615,7 @@ char const *info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
 #else
 # define C_DIALECT "90"
 #endif
-const char *info_language_dialect_default =
-        "INFO" ":" "dialect_default[" C_DIALECT "]";
+const char *info_language_dialect_default = "INFO" ":" "dialect_default[" C_DIALECT "]";
 
 /*--------------------------------------------------------------------------*/
 

@@ -112,11 +112,8 @@ static int shutdown_timeout = 0;
  * Static list of signals to block in this process
  * *Must be zero-terminated*
  */
-static int backup_sigarray[] = {
-        SIGINT, SIGTERM, SIGCHLD, SIGUSR1,
-        SIGUSR2, SIGTSTP, SIGXCPU, SIGQUIT,
-        SIGPIPE, SIGALRM, SIGABRT, SIGHUP, 0
-};
+static int backup_sigarray[] = {SIGINT, SIGTERM, SIGCHLD, SIGUSR1, SIGUSR2, SIGTSTP, SIGXCPU, SIGQUIT, SIGPIPE, SIGALRM,
+                                SIGABRT, SIGHUP, 0};
 
 /*
  * run_backup - this is the backup controller, it should run in standby
@@ -125,10 +122,8 @@ static int backup_sigarray[] = {
 void run_backup(slurm_trigger_callbacks_t *callbacks) {
     int i;
     time_t last_ping = 0;
-    slurmctld_lock_t config_read_lock = {
-            READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
-    slurmctld_lock_t config_write_lock = {
-            WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, NO_LOCK};
+    slurmctld_lock_t config_read_lock = {READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t config_write_lock = {WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, NO_LOCK};
 
     info("slurmctld running in background mode");
     takeover = false;
@@ -148,14 +143,12 @@ void run_backup(slurm_trigger_callbacks_t *callbacks) {
     /*
      * create attached thread to process RPCs
      */
-    slurm_thread_create(&slurmctld_config.thread_id_rpc,
-                        _background_rpc_mgr, NULL);
+    slurm_thread_create(&slurmctld_config.thread_id_rpc, _background_rpc_mgr, NULL);
 
     /*
      * create attached thread for signal handling
      */
-    slurm_thread_create(&slurmctld_config.thread_id_sig,
-                        _background_signal_hand, NULL);
+    slurm_thread_create(&slurmctld_config.thread_id_sig, _background_signal_hand, NULL);
 
     slurm_thread_create_detached(NULL, _trigger_slurmctld_event, NULL);
 
@@ -167,10 +160,8 @@ void run_backup(slurm_trigger_callbacks_t *callbacks) {
     while (slurmctld_config.shutdown_time == 0) {
         sleep(1);
         /* Lock of slurmctld_conf below not important */
-        if (slurmctld_conf.slurmctld_timeout &&
-            (takeover == false) &&
-            ((time(NULL) - last_ping) <
-             (slurmctld_conf.slurmctld_timeout / 3)))
+        if (slurmctld_conf.slurmctld_timeout && (takeover == false) &&
+            ((time(NULL) - last_ping) < (slurmctld_conf.slurmctld_timeout / 3)))
             continue;
 
         last_ping = time(NULL);
@@ -186,25 +177,21 @@ void run_backup(slurm_trigger_callbacks_t *callbacks) {
             time_t use_time, last_heartbeat;
             int server_inx = -1;
             last_heartbeat = get_last_heartbeat(&server_inx);
-            debug("%s: last_heartbeat %ld from server %d",
-                  __func__, last_heartbeat, server_inx);
+            debug("%s: last_heartbeat %ld from server %d", __func__, last_heartbeat, server_inx);
 
             use_time = last_controller_response;
             if (server_inx > backup_inx) {
-                info("Lower priority slurmctld is currently primary (%d > %d)",
-                     server_inx, backup_inx);
+                info("Lower priority slurmctld is currently primary (%d > %d)", server_inx, backup_inx);
             } else if (last_heartbeat > last_controller_response) {
                 /* Race condition for time stamps */
                 debug("Last message to the controller was at %ld,"
                       " but the last heartbeat was written at %ld,"
                       " trusting the filesystem instead of the network"
-                      " and not asserting control at this time.",
-                      last_controller_response, last_heartbeat);
+                      " and not asserting control at this time.", last_controller_response, last_heartbeat);
                 use_time = last_heartbeat;
             }
 
-            if ((time(NULL) - use_time) >
-                slurmctld_conf.slurmctld_timeout)
+            if ((time(NULL) - use_time) > slurmctld_conf.slurmctld_timeout)
                 break;
         }
     }
@@ -217,8 +204,7 @@ void run_backup(slurm_trigger_callbacks_t *callbacks) {
          * No longer need slurmctld_conf lock after above join.
          */
         if (unlink(slurmctld_conf.slurmctld_pidfile) < 0)
-            verbose("Unable to remove pidfile '%s': %m",
-                    slurmctld_conf.slurmctld_pidfile);
+            verbose("Unable to remove pidfile '%s': %m", slurmctld_conf.slurmctld_pidfile);
 
         info("BackupController terminating");
         pthread_join(slurmctld_config.thread_id_sig, NULL);
@@ -230,9 +216,8 @@ void run_backup(slurm_trigger_callbacks_t *callbacks) {
     }
 
     lock_slurmctld(config_read_lock);
-    error("ControlMachine %s not responding, BackupController%d %s taking over",
-          slurmctld_conf.control_machine[0], backup_inx,
-          slurmctld_config.node_name_short);
+    error("ControlMachine %s not responding, BackupController%d %s taking over", slurmctld_conf.control_machine[0],
+          backup_inx, slurmctld_config.node_name_short);
     unlock_slurmctld(config_read_lock);
 
     backup_slurmctld_restart();
@@ -279,8 +264,7 @@ static void *_background_signal_hand(void *no_data) {
     int sig, rc;
     sigset_t set;
     /* Locks: Write configuration, job, node, and partition */
-    slurmctld_lock_t config_write_lock = {
-            WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, NO_LOCK};
+    slurmctld_lock_t config_write_lock = {WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, WRITE_LOCK, NO_LOCK};
 
     (void) pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
     (void) pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
@@ -330,8 +314,7 @@ static void *_background_signal_hand(void *no_data) {
  * slurmctld_conf is locked on entry.
  */
 static void _update_cred_key(void) {
-    slurm_cred_ctx_key_update(slurmctld_config.cred_ctx,
-                              slurmctld_conf.job_credential_private_key);
+    slurm_cred_ctx_key_update(slurmctld_config.cred_ctx, slurmctld_conf.job_credential_private_key);
 }
 
 static void _sig_handler(int signal) {
@@ -348,8 +331,7 @@ static void *_background_rpc_mgr(void *no_data) {
     int error_code;
 
     /* Read configuration only */
-    slurmctld_lock_t config_read_lock = {
-            READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t config_read_lock = {READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
     int sigarray[] = {SIGUSR1, 0};
 
     (void) pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -359,12 +341,8 @@ static void *_background_rpc_mgr(void *no_data) {
     /* initialize port for RPCs */
     lock_slurmctld(config_read_lock);
 
-    if ((sockfd =
-                 slurm_init_msg_engine_addrname_port(slurmctld_conf.
-                                                             control_machine[backup_inx],
-                                                     slurmctld_conf.
-                                                             slurmctld_port))
-        == SLURM_ERROR)
+    if ((sockfd = slurm_init_msg_engine_addrname_port(slurmctld_conf.control_machine[backup_inx],
+                                                      slurmctld_conf.slurmctld_port)) == SLURM_ERROR)
         fatal("slurm_init_msg_engine_addrname_port error %m");
     unlock_slurmctld(config_read_lock);
 
@@ -385,8 +363,7 @@ static void *_background_rpc_mgr(void *no_data) {
          * accept needed for stream implementation is a no-op in
          * message implementation that just passes sockfd to newsockfd
          */
-        if ((newsockfd = slurm_accept_msg_conn(sockfd, &cli_addr))
-            == SLURM_ERROR) {
+        if ((newsockfd = slurm_accept_msg_conn(sockfd, &cli_addr)) == SLURM_ERROR) {
             if (errno != EINTR)
                 error("slurm_accept_msg_conn: %m");
             continue;
@@ -397,8 +374,7 @@ static void *_background_rpc_mgr(void *no_data) {
             error("slurm_receive_msg: %m");
 
         error_code = _background_process_msg(&msg);
-        if ((error_code == SLURM_SUCCESS) &&
-            (msg.msg_type == REQUEST_SHUTDOWN_IMMEDIATE) &&
+        if ((error_code == SLURM_SUCCESS) && (msg.msg_type == REQUEST_SHUTDOWN_IMMEDIATE) &&
             (slurmctld_config.shutdown_time == 0))
             slurmctld_config.shutdown_time = time(NULL);
 
@@ -444,22 +420,18 @@ static int _background_process_msg(slurm_msg_t *msg) {
         if (validate_slurm_user(uid))
             super_user = true;
 
-        if (super_user &&
-            (msg->msg_type == REQUEST_SHUTDOWN_IMMEDIATE)) {
+        if (super_user && (msg->msg_type == REQUEST_SHUTDOWN_IMMEDIATE)) {
             info("Performing RPC: REQUEST_SHUTDOWN_IMMEDIATE");
             send_rc = false;
-        } else if (super_user &&
-                   (msg->msg_type == REQUEST_SHUTDOWN)) {
+        } else if (super_user && (msg->msg_type == REQUEST_SHUTDOWN)) {
             info("Performing RPC: REQUEST_SHUTDOWN");
             pthread_kill(slurmctld_config.thread_id_sig, SIGTERM);
-        } else if (super_user &&
-                   (msg->msg_type == REQUEST_TAKEOVER)) {
+        } else if (super_user && (msg->msg_type == REQUEST_TAKEOVER)) {
             info("Performing RPC: REQUEST_TAKEOVER");
             (void) _shutdown_primary_controller(SHUTDOWN_WAIT);
             takeover = true;
             error_code = SLURM_SUCCESS;
-        } else if (super_user &&
-                   (msg->msg_type == REQUEST_CONTROL)) {
+        } else if (super_user && (msg->msg_type == REQUEST_CONTROL)) {
             debug3("Ignoring RPC: REQUEST_CONTROL");
             error_code = ESLURM_DISABLED;
             last_controller_response = time(NULL);
@@ -467,8 +439,7 @@ static int _background_process_msg(slurm_msg_t *msg) {
             _slurm_rpc_control_status(msg);
             send_rc = false;
         } else {
-            error("Invalid RPC received %d while in standby mode",
-                  msg->msg_type);
+            error("Invalid RPC received %d while in standby mode", msg->msg_type);
             error_code = ESLURM_IN_STANDBY_MODE;
         }
     }
@@ -492,17 +463,14 @@ static void *_ping_ctld_thread(void *arg) {
             case RESPONSE_CONTROL_STATUS:
                 control_msg = (control_status_msg_t *) resp.data;
                 if (ping->backup_inx != control_msg->backup_inx) {
-                    error("%s: BackupController# index mismatch (%d != %u) from host %s",
-                          __func__, ping->backup_inx,
-                          control_msg->backup_inx,
-                          ping->control_machine);
+                    error("%s: BackupController# index mismatch (%d != %u) from host %s", __func__, ping->backup_inx,
+                          control_msg->backup_inx, ping->control_machine);
                 }
                 control_time = control_msg->control_time;
                 responding = true;
                 break;
             default:
-                error("%s:, Unknown response message %u from host %s",
-                      __func__, resp.msg_type, ping->control_machine);
+                error("%s:, Unknown response message %u from host %s", __func__, resp.msg_type, ping->control_machine);
                 break;
         }
         slurm_free_msg_data(resp.msg_type, resp.data);
@@ -531,8 +499,7 @@ extern int ping_controllers(bool active_controller) {
     ping_struct_t *ping;
     pthread_t *ping_tids;
     /* Locks: Read configuration */
-    slurmctld_lock_t config_read_lock = {
-            READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t config_read_lock = {READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
     bool active_ctld = false, avail_ctld = false;
 
     if (active_controller)
@@ -618,21 +585,17 @@ static void *_shutdown_controller(void *arg) {
     xfree(arg);
 
     slurm_msg_t_init(&req);
-    slurm_set_addr(&req.address, slurmctld_conf.slurmctld_port,
-                   slurmctld_conf.control_addr[shutdown_inx]);
+    slurm_set_addr(&req.address, slurmctld_conf.slurmctld_port, slurmctld_conf.control_addr[shutdown_inx]);
     req.msg_type = REQUEST_CONTROL;
     if (slurm_send_recv_rc_msg_only_one(&req, &rc2, shutdown_timeout) < 0) {
-        error("%s: send/recv(%s): %m", __func__,
-              slurmctld_conf.control_machine[shutdown_inx]);
+        error("%s: send/recv(%s): %m", __func__, slurmctld_conf.control_machine[shutdown_inx]);
         rc = SLURM_ERROR;
     } else if (rc2 == ESLURM_DISABLED) {
         debug("primary controller responding");
     } else if (rc2 == SLURM_SUCCESS) {
         debug("primary controller has relinquished control");
     } else {
-        error("%s(%s): %s", __func__,
-              slurmctld_conf.control_machine[shutdown_inx],
-              slurm_strerror(rc2));
+        error("%s(%s): %s", __func__, slurmctld_conf.control_machine[shutdown_inx], slurm_strerror(rc2));
         rc = SLURM_ERROR;
     }
 
@@ -663,8 +626,7 @@ static int _shutdown_primary_controller(int wait_time) {
         shutdown_timeout *= 1000;    /* sec to msec */
     }
 
-    if ((slurmctld_conf.control_addr[0] == NULL) ||
-        (slurmctld_conf.control_addr[0][0] == '\0')) {
+    if ((slurmctld_conf.control_addr[0] == NULL) || (slurmctld_conf.control_addr[0][0] == '\0')) {
         error("%s: no primary controller to shutdown", __func__);
         return SLURM_ERROR;
     }
@@ -710,8 +672,7 @@ static void *_trigger_slurmctld_event(void *arg) {
     ti.trig_type = TRIGGER_TYPE_BU_CTLD_RES_OP;
     ti.control_inx = backup_inx;
     if (slurm_pull_trigger(&ti)) {
-        error("%s: TRIGGER_TYPE_BU_CTLD_RES_OP send failure: %m",
-              __func__);
+        error("%s: TRIGGER_TYPE_BU_CTLD_RES_OP send failure: %m", __func__);
     } else {
         verbose("%s: TRIGGER_TYPE_BU_CTLD_RES_OP sent", __func__);
     }

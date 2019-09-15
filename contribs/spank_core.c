@@ -43,137 +43,110 @@
 #define LIB_LIGHT   "liblwcf-preload.so"
 
 struct core_format_info {
-	int type;
-	const char *name;
-	const char *descr;
+    int type;
+    const char *name;
+    const char *descr;
 };
 
 /*
  * Supported types for core=%s
  */
-struct core_format_info core_types[] = {
-	{ CORE_NORMAL,
-	  "normal",
-	  "Default full corefile (do nothing)"
-        },
-	{ CORE_LIGHT,
-	  "light",
-	  "liblwcf default lightweight corefile format"
-        },
-	{ CORE_LCB,
-	  "lcb",
-	  "liblwcf Lightweight Corefile Browser compliant"
-	},
-	{ CORE_LIST,
-	  "list",
-	  "list valid core format types"
-	},
-	{ CORE_INVALID,
-	  NULL,
-	  "Invalid format"
-	}
-};
+struct core_format_info core_types[] = {{CORE_NORMAL, "normal", "Default full corefile (do nothing)"},
+                                        {CORE_LIGHT,  "light",  "liblwcf default lightweight corefile format"},
+                                        {CORE_LCB,    "lcb",    "liblwcf Lightweight Corefile Browser compliant"},
+                                        {CORE_LIST,   "list",   "list valid core format types"},
+                                        {CORE_INVALID, NULL,    "Invalid format"}};
 
 /*
  * All spank plugins must define this macro for the Slurm plugin loader.
  */
-SPANK_PLUGIN(core, 1)
+SPANK_PLUGIN(core,
+1)
 
 static int core_mode = CORE_NORMAL;
 
-static int _opt_process (int val, const char *optarg, int remote);
+static int _opt_process(int val, const char *optarg, int remote);
 
-struct spank_option spank_option_array[] =
-{
-	{ "core", "format", "Core file format", 1, 0,
-	  (spank_opt_cb_f) _opt_process },
-	SPANK_OPTIONS_TABLE_END
-};
+struct spank_option spank_option_array[] = {{"core", "format", "Core file format", 1, 0, (spank_opt_cb_f) _opt_process},
+                                            SPANK_OPTIONS_TABLE_END};
 
-static void _print_valid_core_types (void)
-{
-	struct core_format_info *ci;
+static void _print_valid_core_types(void) {
+    struct core_format_info *ci;
 
-	info ("Valid corefile format types:");
-	for (ci = core_types; ci && ci->name; ci++) {
-		if ((ci->type == CORE_LIGHT) ||
-		    (ci->type == CORE_LCB)) {
-			struct stat buf;
-			if ((stat("/lib/"           LIB_LIGHT, &buf) < 0) &&
-			    (stat("/usr/lib/"       LIB_LIGHT, &buf) < 0) &&
-			    (stat("/usr/local/lib/" LIB_LIGHT, &buf) < 0))
-				continue;
-		}
-		if (ci->type != CORE_LIST)
-			info(" %-8s -- %s", ci->name, ci->descr);
-	}
-	return;
+    info("Valid corefile format types:");
+    for (ci = core_types; ci && ci->name; ci++) {
+        if ((ci->type == CORE_LIGHT) || (ci->type == CORE_LCB)) {
+            struct stat buf;
+            if ((stat("/lib/"           LIB_LIGHT, &buf) < 0) && (stat("/usr/lib/"       LIB_LIGHT, &buf) < 0) &&
+                (stat("/usr/local/lib/" LIB_LIGHT, &buf) < 0))
+                continue;
+        }
+        if (ci->type != CORE_LIST)
+            info(" %-8s -- %s", ci->name, ci->descr);
+    }
+    return;
 }
 
-static int _opt_process (int val, const char *optarg, int remote)
-{
-	int i;
-	struct core_format_info *ci;
+static int _opt_process(int val, const char *optarg, int remote) {
+    int i;
+    struct core_format_info *ci;
 
-	for (ci = core_types; ci && ci->name; ci++) {
-		if (strcasecmp(optarg, ci->name))
-			continue;
-		core_mode = ci->type;
-		if (core_mode == CORE_LIST) {
-			_print_valid_core_types();
-			exit(0);
-		}
-		return ESPANK_SUCCESS;
-	}
+    for (ci = core_types; ci && ci->name; ci++) {
+        if (strcasecmp(optarg, ci->name))
+            continue;
+        core_mode = ci->type;
+        if (core_mode == CORE_LIST) {
+            _print_valid_core_types();
+            exit(0);
+        }
+        return ESPANK_SUCCESS;
+    }
 
-	slurm_error("Invalid core option: %s", optarg);
-	exit(-1);
+    slurm_error("Invalid core option: %s", optarg);
+    exit(-1);
 }
 
-int slurm_spank_init(spank_t sp, int ac, char **av)
-{
-	spank_context_t context;
-	int i, j, rc = ESPANK_SUCCESS;
-	char *core_env;
+int slurm_spank_init(spank_t sp, int ac, char **av) {
+    spank_context_t context;
+    int i, j, rc = ESPANK_SUCCESS;
+    char *core_env;
 
-	for (i=0; spank_option_array[i].name; i++) {
-		j = spank_option_register(sp, &spank_option_array[i]);
-		if (j != ESPANK_SUCCESS) {
-			slurm_error("Could not register Spank option %s",
-				    spank_option_array[i].name);
-			rc = j;
-		}
-	}
+    for (i = 0; spank_option_array[i].name; i++) {
+        j = spank_option_register(sp, &spank_option_array[i]);
+        if (j != ESPANK_SUCCESS) {
+            slurm_error("Could not register Spank option %s", spank_option_array[i].name);
+            rc = j;
+        }
+    }
 
-	context = spank_context();
-	if (context == S_CTX_LOCAL) {
-		core_env = getenv("SLURM_CORE_FORMAT");
-		if (core_env)
-			rc = _opt_process(0, core_env, 0);
-	}
+    context = spank_context();
+    if (context == S_CTX_LOCAL) {
+        core_env = getenv("SLURM_CORE_FORMAT");
+        if (core_env)
+            rc = _opt_process(0, core_env, 0);
+    }
 
-	return rc;
+    return rc;
 }
 
-int slurm_spank_init_post_opt (spank_t sp, int ac, char **av)
-{
-	spank_context_t context;
-	int rc = ESPANK_SUCCESS;
+int slurm_spank_init_post_opt(spank_t sp, int ac, char **av) {
+    spank_context_t context;
+    int rc = ESPANK_SUCCESS;
 
-	context = spank_context();
-	if (context != S_CTX_LOCAL)
-		return rc;
+    context = spank_context();
+    if (context != S_CTX_LOCAL)
+        return rc;
 
-	switch (core_mode) {
-	case CORE_NORMAL:
-	case CORE_INVALID:
-		break;
-	case CORE_LCB:
-		setenvfs("LWCF_CORE_FORMAT=LCB");
-	case CORE_LIGHT:
-		setenvfs("LD_PRELOAD=" LIB_LIGHT);
-		break;
-	}
+    switch (core_mode) {
+        case CORE_NORMAL:
+        case CORE_INVALID:
+            break;
+        case CORE_LCB:
+            setenvfs("LWCF_CORE_FORMAT=LCB");
+        case CORE_LIGHT:
+            setenvfs("LD_PRELOAD=" LIB_LIGHT);
+            break;
+    }
 
-	return rc;
+    return rc;
 }

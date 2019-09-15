@@ -44,8 +44,7 @@ extern int get_procs(uint16_t *procs);
 
 /* read or load topology and write if needed
  * init and destroy topology must be outside this function */
-extern int xcpuinfo_hwloc_topo_load(
-        void *topology_in, char *topo_file, bool full);
+extern int xcpuinfo_hwloc_topo_load(void *topology_in, char *topo_file, bool full);
 
 /*
  * Get the node's cpu info.
@@ -61,11 +60,9 @@ extern int xcpuinfo_hwloc_topo_load(
  *
  * RET SLURM_SUCCESS on success and 1 or 2 on failure.
  */
-extern int xcpuinfo_hwloc_topo_get(
-        uint16_t *cpus, uint16_t *boards,
-        uint16_t *sockets, uint16_t *cores, uint16_t *threads,
-        uint16_t *block_map_size,
-        uint16_t **block_map, uint16_t **block_map_inv);
+extern int
+xcpuinfo_hwloc_topo_get(uint16_t *cpus, uint16_t *boards, uint16_t *sockets, uint16_t *cores, uint16_t *threads,
+                        uint16_t *block_map_size, uint16_t **block_map, uint16_t **block_map_inv);
 
 /*
  * Initialize xcpuinfo internal data
@@ -164,8 +161,7 @@ int xcpuinfo_map_to_mac(uint16_t *map, uint16_t map_size, char **range);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size,
-                              uint16_t **bmap, uint16_t *bmap_size);
+int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size);
 
 /*
  * Use xcpuinfo internal data to convert a machine map of cores
@@ -177,7 +173,6 @@ int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size,
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size,
-                              uint16_t **bmap, uint16_t *bmap_size);
+int xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size);
 
 #endif

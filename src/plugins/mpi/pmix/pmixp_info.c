@@ -141,8 +141,7 @@ int pmixp_info_set(const stepd_step_rec_t *job, char ***env) {
         msize = _pmixp_job_info.node_tasks * sizeof(uint32_t);
         _pmixp_job_info.gtids = xmalloc(msize);
         for (i = 0; i < job->node_tasks; i++) {
-            _pmixp_job_info.gtids[i] = job->task[i]->gtid +
-                                       job->pack_task_offset;
+            _pmixp_job_info.gtids[i] = job->task[i]->gtid + job->pack_task_offset;
         }
     } else {
         _pmixp_job_info.jobid = job->jobid;
@@ -186,8 +185,7 @@ int pmixp_info_set(const stepd_step_rec_t *job, char ***env) {
         return rc;
     }
 
-    snprintf(_pmixp_job_info.nspace, PMIXP_MAX_NSLEN, "slurm.pmix.%d.%d",
-             pmixp_info_jobid(), pmixp_info_stepid());
+    snprintf(_pmixp_job_info.nspace, PMIXP_MAX_NSLEN, "slurm.pmix.%d.%d", pmixp_info_jobid(), pmixp_info_stepid());
 
     return SLURM_SUCCESS;
 }
@@ -295,8 +293,7 @@ static int _resources_set(char ***env) {
     /* Save step host list */
     p = getenvp(*env, PMIXP_STEP_NODES_ENV);
     if (!p) {
-        PMIXP_ERROR_NO(ENOENT, "Environment variable %s not found",
-                       PMIXP_STEP_NODES_ENV);
+        PMIXP_ERROR_NO(ENOENT, "Environment variable %s not found", PMIXP_STEP_NODES_ENV);
         goto err_exit;
     }
     hostlist_push(_pmixp_job_info.step_hl, p);
@@ -312,17 +309,14 @@ static int _resources_set(char ***env) {
         p = getenvp(*env, PMIXP_JOB_NODES_ENV_DEP);
         if (!p) {
             /* shouldn't happen if we are under Slurm! */
-            PMIXP_ERROR_NO(ENOENT,
-                           "Neither of nodelist environment variables: %s OR %s was found!",
-                           PMIXP_JOB_NODES_ENV,
-                           PMIXP_JOB_NODES_ENV_DEP);
+            PMIXP_ERROR_NO(ENOENT, "Neither of nodelist environment variables: %s OR %s was found!",
+                           PMIXP_JOB_NODES_ENV, PMIXP_JOB_NODES_ENV_DEP);
             goto err_exit;
         }
     }
     hostlist_push(_pmixp_job_info.job_hl, p);
     _pmixp_job_info.nnodes_job = hostlist_count(_pmixp_job_info.job_hl);
-    _pmixp_job_info.node_id_job = hostlist_find(_pmixp_job_info.job_hl,
-                                                _pmixp_job_info.hostname);
+    _pmixp_job_info.node_id_job = hostlist_find(_pmixp_job_info.job_hl, _pmixp_job_info.hostname);
 
     /* FIXME!! ------------------------------------------------------- */
     /* TODO: _get_task_count not always works well.
@@ -340,8 +334,7 @@ static int _resources_set(char ***env) {
     p = getenvp(*env, PMIXP_SLURM_MAPPING_ENV);
     if (!p) {
         /* Direct modex won't work */
-        PMIXP_ERROR_NO(ENOENT, "No %s environment variable found!",
-                       PMIXP_SLURM_MAPPING_ENV);
+        PMIXP_ERROR_NO(ENOENT, "No %s environment variable found!", PMIXP_SLURM_MAPPING_ENV);
         goto err_exit;
     }
 
@@ -364,19 +357,15 @@ static int _env_set(char ***env) {
 
     _pmixp_job_info.server_addr_unfmt = slurm_get_slurmd_spooldir(NULL);
 
-    _pmixp_job_info.lib_tmpdir = slurm_conf_expand_slurmd_path(
-            _pmixp_job_info.server_addr_unfmt,
-            _pmixp_job_info.hostname);
+    _pmixp_job_info.lib_tmpdir = slurm_conf_expand_slurmd_path(_pmixp_job_info.server_addr_unfmt,
+                                                               _pmixp_job_info.hostname);
 
-    xstrfmtcat(_pmixp_job_info.server_addr_unfmt,
-               "/stepd.slurm.pmix.%d.%d",
-               pmixp_info_jobid(), pmixp_info_stepid());
+    xstrfmtcat(_pmixp_job_info.server_addr_unfmt, "/stepd.slurm.pmix.%d.%d", pmixp_info_jobid(), pmixp_info_stepid());
 
     _pmixp_job_info.spool_dir = xstrdup(_pmixp_job_info.lib_tmpdir);
 
     /* ----------- Temp directories settings ------------- */
-    xstrfmtcat(_pmixp_job_info.lib_tmpdir, "/pmix.%d.%d/",
-               pmixp_info_jobid(), pmixp_info_stepid());
+    xstrfmtcat(_pmixp_job_info.lib_tmpdir, "/pmix.%d.%d/", pmixp_info_jobid(), pmixp_info_stepid());
 
     /* save client temp directory if requested
      * TODO: We want to get TmpFS value as well if exists.
@@ -387,15 +376,11 @@ static int _env_set(char ***env) {
     if (p) {
         _pmixp_job_info.cli_tmpdir_base = xstrdup(p);
     } else {
-        _pmixp_job_info.cli_tmpdir_base = slurm_get_tmp_fs(
-                _pmixp_job_info.hostname);
+        _pmixp_job_info.cli_tmpdir_base = slurm_get_tmp_fs(_pmixp_job_info.hostname);
     }
 
-    _pmixp_job_info.cli_tmpdir =
-            xstrdup_printf("%s/spmix_appdir_%d.%d",
-                           _pmixp_job_info.cli_tmpdir_base,
-                           pmixp_info_jobid(),
-                           pmixp_info_stepid());
+    _pmixp_job_info.cli_tmpdir = xstrdup_printf("%s/spmix_appdir_%d.%d", _pmixp_job_info.cli_tmpdir_base,
+                                                pmixp_info_jobid(), pmixp_info_stepid());
 
 
     /* ----------- Timeout setting ------------- */
@@ -427,11 +412,9 @@ static int _env_set(char ***env) {
     /* NOTE: Heterogen support is not tested */
     p = getenvp(*env, PMIXP_DIRECT_SAMEARCH);
     if (p) {
-        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) ||
-            !xstrcasecmp("yes", p)) {
+        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) || !xstrcasecmp("yes", p)) {
             _srv_same_arch = true;
-        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) ||
-                   !xstrcasecmp("no", p)) {
+        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) || !xstrcasecmp("no", p)) {
             _srv_same_arch = false;
         }
     }
@@ -439,21 +422,17 @@ static int _env_set(char ***env) {
     /*------------- Direct connection setting ----------*/
     p = getenvp(*env, PMIXP_DIRECT_CONN);
     if (p) {
-        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) ||
-            !xstrcasecmp("yes", p)) {
+        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) || !xstrcasecmp("yes", p)) {
             _srv_use_direct_conn = true;
-        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) ||
-                   !xstrcasecmp("no", p)) {
+        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) || !xstrcasecmp("no", p)) {
             _srv_use_direct_conn = false;
         }
     }
     p = getenvp(*env, PMIXP_DIRECT_CONN_EARLY);
     if (p) {
-        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) ||
-            !xstrcasecmp("yes", p)) {
+        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) || !xstrcasecmp("yes", p)) {
             _srv_use_direct_conn_early = true;
-        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) ||
-                   !xstrcasecmp("no", p)) {
+        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) || !xstrcasecmp("no", p)) {
             _srv_use_direct_conn_early = false;
         }
     }
@@ -471,11 +450,9 @@ static int _env_set(char ***env) {
     }
     p = getenvp(*env, SLURM_PMIXP_FENCE_BARRIER);
     if (p) {
-        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) ||
-            !xstrcasecmp("yes", p)) {
+        if (!xstrcmp("1", p) || !xstrcasecmp("true", p) || !xstrcasecmp("yes", p)) {
             _srv_fence_coll_barrier = true;
-        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) ||
-                   !xstrcasecmp("no", p)) {
+        } else if (!xstrcmp("0", p) || !xstrcasecmp("false", p) || !xstrcasecmp("no", p)) {
             _srv_fence_coll_barrier = false;
         }
     }

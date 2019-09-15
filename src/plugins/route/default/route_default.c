@@ -113,9 +113,7 @@ extern int fini(void) {
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_p_split_hostlist(hostlist_t hl,
-                                  hostlist_t **sp_hl,
-                                  int *count, uint16_t tree_width) {
+extern int route_p_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width) {
     return route_split_hostlist_treewidth(hl, sp_hl, count, tree_width);
 }
 

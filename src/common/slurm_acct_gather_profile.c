@@ -70,13 +70,11 @@
 typedef struct slurm_acct_gather_profile_ops {
     void (*child_forked)(void);
 
-    void (*conf_options)(s_p_options_t **full_options,
-                         int *full_options_cnt);
+    void (*conf_options)(s_p_options_t **full_options, int *full_options_cnt);
 
     void (*conf_set)(s_p_hashtbl_t *tbl);
 
-    void *(*get)(enum acct_gather_profile_info info_type,
-                 void *data);
+    void *(*get)(enum acct_gather_profile_info info_type, void *data);
 
     int (*node_step_start)(stepd_step_rec_t *);
 
@@ -88,8 +86,7 @@ typedef struct slurm_acct_gather_profile_ops {
 
     int64_t (*create_group)(const char *);
 
-    int (*create_dataset)(const char *, int64_t,
-                          acct_gather_profile_dataset_t *);
+    int (*create_dataset)(const char *, int64_t, acct_gather_profile_dataset_t *);
 
     int (*add_sample_data)(uint32_t, void *, time_t);
 
@@ -103,21 +100,13 @@ typedef struct slurm_acct_gather_profile_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_acct_gather_profile_ops_t.
  */
-static const char *syms[] = {
-        "acct_gather_profile_p_child_forked",
-        "acct_gather_profile_p_conf_options",
-        "acct_gather_profile_p_conf_set",
-        "acct_gather_profile_p_get",
-        "acct_gather_profile_p_node_step_start",
-        "acct_gather_profile_p_node_step_end",
-        "acct_gather_profile_p_task_start",
-        "acct_gather_profile_p_task_end",
-        "acct_gather_profile_p_create_group",
-        "acct_gather_profile_p_create_dataset",
-        "acct_gather_profile_p_add_sample_data",
-        "acct_gather_profile_p_conf_values",
-        "acct_gather_profile_p_is_active",
-};
+static const char *syms[] = {"acct_gather_profile_p_child_forked", "acct_gather_profile_p_conf_options",
+                             "acct_gather_profile_p_conf_set", "acct_gather_profile_p_get",
+                             "acct_gather_profile_p_node_step_start", "acct_gather_profile_p_node_step_end",
+                             "acct_gather_profile_p_task_start", "acct_gather_profile_p_task_end",
+                             "acct_gather_profile_p_create_group", "acct_gather_profile_p_create_dataset",
+                             "acct_gather_profile_p_add_sample_data", "acct_gather_profile_p_conf_values",
+                             "acct_gather_profile_p_is_active",};
 
 acct_gather_profile_timer_t acct_gather_profile_timer[PROFILE_CNT];
 
@@ -134,10 +123,8 @@ static pthread_cond_t timer_thread_cond = PTHREAD_COND_INITIALIZER;
 static bool init_run = false;
 
 static void _set_freq(int type, char *freq, char *freq_def) {
-    if ((acct_gather_profile_timer[type].freq =
-                 acct_gather_parse_freq(type, freq)) == -1)
-        if ((acct_gather_profile_timer[type].freq =
-                     acct_gather_parse_freq(type, freq_def)) == -1)
+    if ((acct_gather_profile_timer[type].freq = acct_gather_parse_freq(type, freq)) == -1)
+        if ((acct_gather_profile_timer[type].freq = acct_gather_parse_freq(type, freq_def)) == -1)
             acct_gather_profile_timer[type].freq = 0;
 }
 
@@ -174,11 +161,9 @@ static void *_timer_thread(void *args) {
                 if (!acct_gather_profile_timer[i].freq)
                     continue;
                 if (acct_gather_profile_timer[i].last_notify)
-                    acct_gather_profile_timer[i].
-                            last_notify += SLEEP_TIME;
+                    acct_gather_profile_timer[i].last_notify += SLEEP_TIME;
                 else
-                    acct_gather_profile_timer[i].
-                            last_notify = now;
+                    acct_gather_profile_timer[i].last_notify = now;
                 continue;
             }
 
@@ -186,21 +171,16 @@ static void *_timer_thread(void *args) {
             /* info ("%d is %d and %d", i, */
             /*       acct_gather_profile_timer[i].freq, */
             /*       diff); */
-            if (!acct_gather_profile_timer[i].freq
-                || (diff < acct_gather_profile_timer[i].freq))
+            if (!acct_gather_profile_timer[i].freq || (diff < acct_gather_profile_timer[i].freq))
                 continue;
             if (!acct_gather_profile_test())
                 break;    /* Shutting down */
-            debug2("profile signaling type %s",
-                   acct_gather_profile_type_t_name(i));
+            debug2("profile signaling type %s", acct_gather_profile_type_t_name(i));
 
             /* signal poller to start */
-            slurm_mutex_lock(&acct_gather_profile_timer[i].
-                    notify_mutex);
-            slurm_cond_signal(
-                    &acct_gather_profile_timer[i].notify);
-            slurm_mutex_unlock(&acct_gather_profile_timer[i].
-                    notify_mutex);
+            slurm_mutex_lock(&acct_gather_profile_timer[i].notify_mutex);
+            slurm_cond_signal(&acct_gather_profile_timer[i].notify);
+            slurm_mutex_unlock(&acct_gather_profile_timer[i].notify_mutex);
             acct_gather_profile_timer[i].last_notify = now;
         }
         slurm_mutex_unlock(&g_context_lock);
@@ -212,8 +192,7 @@ static void *_timer_thread(void *args) {
 
         abs.tv_sec += 1;
         slurm_mutex_lock(&timer_thread_mutex);
-        slurm_cond_timedwait(&timer_thread_cond, &timer_thread_mutex,
-                             &abs);
+        slurm_cond_timedwait(&timer_thread_cond, &timer_thread_mutex, &abs);
         slurm_mutex_unlock(&timer_thread_mutex);
     }
 
@@ -235,8 +214,7 @@ extern int acct_gather_profile_init(void) {
 
     type = slurm_get_acct_gather_profile_type();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -411,26 +389,20 @@ extern char *acct_gather_profile_type_t_name(acct_gather_profile_type_t type) {
     return "Unknown";
 }
 
-extern char *acct_gather_profile_dataset_str(
-        acct_gather_profile_dataset_t *dataset, void *data,
-        char *str, int str_len) {
+extern char *
+acct_gather_profile_dataset_str(acct_gather_profile_dataset_t *dataset, void *data, char *str, int str_len) {
     int cur_loc = 0;
 
     while (dataset && (dataset->type != PROFILE_FIELD_NOT_SET)) {
         switch (dataset->type) {
             case PROFILE_FIELD_UINT64:
-                cur_loc += snprintf(str + cur_loc, str_len - cur_loc,
-                                    "%s%s=%"
-                PRIu64,
-                        cur_loc ? " " : "",
-                        dataset->name, *(uint64_t *) data);
+                cur_loc += snprintf(str + cur_loc, str_len - cur_loc, "%s%s=%"
+                PRIu64, cur_loc ? " " : "", dataset->name, *(uint64_t *) data);
                 data += sizeof(uint64_t);
                 break;
             case PROFILE_FIELD_DOUBLE:
-                cur_loc += snprintf(str + cur_loc, str_len - cur_loc,
-                                    "%s%s=%lf",
-                                    cur_loc ? " " : "",
-                                    dataset->name, *(double *) data);
+                cur_loc += snprintf(str + cur_loc, str_len - cur_loc, "%s%s=%lf", cur_loc ? " " : "", dataset->name,
+                                    *(double *) data);
                 data += sizeof(double);
                 break;
             case PROFILE_FIELD_NOT_SET:
@@ -465,8 +437,7 @@ extern int acct_gather_profile_startpoll(char *freq, char *freq_def) {
     xassert(profile != ACCT_GATHER_PROFILE_NOT_SET);
 
     for (i = 0; i < PROFILE_CNT; i++) {
-        memset(&acct_gather_profile_timer[i], 0,
-               sizeof(acct_gather_profile_timer_t));
+        memset(&acct_gather_profile_timer[i], 0, sizeof(acct_gather_profile_timer_t));
         slurm_cond_init(&acct_gather_profile_timer[i].notify, NULL);
         slurm_mutex_init(&acct_gather_profile_timer[i].notify_mutex);
 
@@ -476,8 +447,7 @@ extern int acct_gather_profile_startpoll(char *freq, char *freq_def) {
                     break;
                 _set_freq(i, freq, freq_def);
 
-                acct_gather_energy_startpoll(
-                        acct_gather_profile_timer[i].freq);
+                acct_gather_energy_startpoll(acct_gather_profile_timer[i].freq);
                 break;
             case PROFILE_TASK:
                 /* Always set up the task (always first) to be
@@ -487,8 +457,7 @@ extern int acct_gather_profile_startpoll(char *freq, char *freq_def) {
                 */
                 _set_freq(i, freq, freq_def);
 
-                jobacct_gather_startpoll(
-                        acct_gather_profile_timer[i].freq);
+                jobacct_gather_startpoll(acct_gather_profile_timer[i].freq);
 
                 break;
             case PROFILE_FILESYSTEM:
@@ -496,16 +465,14 @@ extern int acct_gather_profile_startpoll(char *freq, char *freq_def) {
                     break;
                 _set_freq(i, freq, freq_def);
 
-                acct_gather_filesystem_startpoll(
-                        acct_gather_profile_timer[i].freq);
+                acct_gather_filesystem_startpoll(acct_gather_profile_timer[i].freq);
                 break;
             case PROFILE_NETWORK:
                 if (!(profile & ACCT_GATHER_PROFILE_NETWORK))
                     break;
                 _set_freq(i, freq, freq_def);
 
-                acct_gather_interconnect_startpoll(
-                        acct_gather_profile_timer[i].freq);
+                acct_gather_interconnect_startpoll(acct_gather_profile_timer[i].freq);
                 break;
             default:
                 fatal("Unhandled profile option %d please update "
@@ -566,8 +533,7 @@ extern int acct_gather_profile_g_child_forked(void) {
     return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_g_conf_options(s_p_options_t **full_options,
-                                              int *full_options_cnt) {
+extern int acct_gather_profile_g_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     if (acct_gather_profile_init() < 0)
         return SLURM_ERROR;
 
@@ -583,8 +549,7 @@ extern int acct_gather_profile_g_conf_set(s_p_hashtbl_t *tbl) {
     return SLURM_SUCCESS;
 }
 
-extern int acct_gather_profile_g_get(enum acct_gather_profile_info info_type,
-                                     void *data) {
+extern int acct_gather_profile_g_get(enum acct_gather_profile_info info_type, void *data) {
     if (acct_gather_profile_init() < 0)
         return SLURM_ERROR;
 
@@ -643,9 +608,8 @@ extern int64_t acct_gather_profile_g_create_group(const char *name) {
     return retval;
 }
 
-extern int acct_gather_profile_g_create_dataset(
-        const char *name, int64_t parent,
-        acct_gather_profile_dataset_t *dataset) {
+extern int
+acct_gather_profile_g_create_dataset(const char *name, int64_t parent, acct_gather_profile_dataset_t *dataset) {
     int retval = SLURM_ERROR;
 
     if (acct_gather_profile_init() < 0)
@@ -657,8 +621,7 @@ extern int acct_gather_profile_g_create_dataset(
     return retval;
 }
 
-extern int acct_gather_profile_g_add_sample_data(int dataset_id, void *data,
-                                                 time_t sample_time) {
+extern int acct_gather_profile_g_add_sample_data(int dataset_id, void *data, time_t sample_time) {
     int retval = SLURM_ERROR;
 
     if (acct_gather_profile_init() < 0)

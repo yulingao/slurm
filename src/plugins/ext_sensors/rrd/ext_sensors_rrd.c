@@ -60,8 +60,7 @@
 #include <rrd.h>
 
 enum ext_sensors_value_type {
-    EXT_SENSORS_VALUE_ENERGY,
-    EXT_SENSORS_VALUE_TEMPERATURE,
+    EXT_SENSORS_VALUE_ENERGY, EXT_SENSORS_VALUE_TEMPERATURE,
 };
 
 #define _WATT_MIN 10
@@ -115,40 +114,30 @@ extern int _ext_sensors_read_conf(void);
 static void _ext_sensors_clear_free_conf(void);
 
 /* Local RRD functions */
-static rrd_value_t _get_additional_consumption(time_t time0, time_t time1,
-                                               rrd_value_t watt0,
-                                               rrd_value_t watt1);
+static rrd_value_t _get_additional_consumption(time_t time0, time_t time1, rrd_value_t watt0, rrd_value_t watt1);
 
 static rrd_value_t _validate_watt(rrd_value_t *v);
 
-static char *_get_node_rrd_path(char *component_name,
-                                enum ext_sensors_value_type sensor_type);
+static char *_get_node_rrd_path(char *component_name, enum ext_sensors_value_type sensor_type);
 
 static uint32_t _rrd_get_last_one(char *filename, char *rra_name);
 
-static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
-                                     char *filename, char *rra_name,
-                                     bool flag_approximate);
+static uint64_t _rrd_consolidate_one(time_t t0, time_t t1, char *filename, char *rra_name, bool flag_approximate);
 
 
-static rrd_value_t _get_additional_consumption(time_t time0, time_t time1,
-                                               rrd_value_t watt0,
-                                               rrd_value_t watt1) {
+static rrd_value_t _get_additional_consumption(time_t time0, time_t time1, rrd_value_t watt0, rrd_value_t watt1) {
     rrd_value_t consumption = (time1 - time0) * (watt1 + watt0) / 2;
     return consumption;
 }
 
 static rrd_value_t _validate_watt(rrd_value_t *v) {
     rrd_value_t r = (rrd_value_t) NO_VAL;
-    if (v != NULL &&
-        *v > ext_sensors_cnf->min_watt &&
-        *v < ext_sensors_cnf->max_watt)
+    if (v != NULL && *v > ext_sensors_cnf->min_watt && *v < ext_sensors_cnf->max_watt)
         r = *v;
     return r;
 }
 
-static char *_get_node_rrd_path(char *component_name,
-                                enum ext_sensors_value_type sensor_type) {
+static char *_get_node_rrd_path(char *component_name, enum ext_sensors_value_type sensor_type) {
     char *p;
     char *rrd_file;
     struct stat buf;
@@ -161,8 +150,7 @@ static char *_get_node_rrd_path(char *component_name,
             rrd_file = ext_sensors_cnf->temp_rrd_file;
             break;
         default:
-            error("ext_sensors: _get_node_rrd_path: unknown enum %d",
-                  sensor_type);
+            error("ext_sensors: _get_node_rrd_path: unknown enum %d", sensor_type);
             return NULL;
     }
 
@@ -247,9 +235,7 @@ static uint32_t _rrd_get_last_one(char *filename, char *rra_name) {
     return temperature;
 }
 
-static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
-                                     char *filename, char *rra_name,
-                                     bool flag_approximate) {
+static uint64_t _rrd_consolidate_one(time_t t0, time_t t1, char *filename, char *rra_name, bool flag_approximate) {
     int status, rra_nb = -1;
     unsigned long step = 1, ds_count, ii;
     char cf[] = "AVERAGE";
@@ -263,10 +249,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
     last_valid_time = 0;
     last_valid_watt = (rrd_value_t) NO_VAL;
 
-    status = rrd_fetch_r(filename, cf,
-                         &start, &end, &step,
-                         &ds_count, &ds_names,
-                         &rrd_data);
+    status = rrd_fetch_r(filename, cf, &start, &end, &step, &ds_count, &ds_names, &rrd_data);
 
     if (status != 0) {
         if (debug_flags & DEBUG_FLAG_EXT_SENSORS)
@@ -283,8 +266,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
         }
         if (ds_count == 0) {
             if (debug_flags & DEBUG_FLAG_EXT_SENSORS)
-                info("ext_sensors: error ds_count==0 in RRD %s",
-                     filename);
+                info("ext_sensors: error ds_count==0 in RRD %s", filename);
             consumed_energy = (rrd_value_t) NO_VAL64;
             break;
         } else if (ds_count == 1 || rra_name == NULL)
@@ -299,8 +281,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
             if (rra_nb == -1) {
                 if (debug_flags & DEBUG_FLAG_EXT_SENSORS)
                     info("ext_sensors: error RRA %s not "
-                         "found in RRD %s",
-                         rra_name, filename);
+                         "found in RRD %s", rra_name, filename);
                 consumed_energy = (rrd_value_t) NO_VAL64;
                 break;
             }
@@ -323,9 +304,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
             current_watt = _validate_watt(rrd_data_p);
 
             if (current_watt != (rrd_value_t) NO_VAL) {
-                temp_energy = _get_additional_consumption(
-                        t0, ti < t1 ? ti : t1,
-                        current_watt, current_watt);
+                temp_energy = _get_additional_consumption(t0, ti < t1 ? ti : t1, current_watt, current_watt);
                 last_valid_watt = current_watt;
                 last_valid_time = ti;
                 consumed_energy += temp_energy;
@@ -352,11 +331,8 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
             for (ii = 0; ii < rra_nb; ii++)
                 rrd_data_p++;
             current_watt = _validate_watt(rrd_data_p);
-            if (current_watt != (rrd_value_t) NO_VAL &&
-                last_valid_watt != (rrd_value_t) NO_VAL) {
-                temp_energy = _get_additional_consumption(
-                        ti - step, ti,
-                        last_valid_watt, current_watt);
+            if (current_watt != (rrd_value_t) NO_VAL && last_valid_watt != (rrd_value_t) NO_VAL) {
+                temp_energy = _get_additional_consumption(ti - step, ti, last_valid_watt, current_watt);
                 last_valid_watt = current_watt;
                 last_valid_time = ti;
                 consumed_energy += temp_energy;
@@ -369,9 +345,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
         }
         if ((ti > t1) && (t1 > (t0 + step)) && (ti - step < t1)) {
             if (current_watt != (rrd_value_t) NO_VAL) {
-                temp_energy = _get_additional_consumption(
-                        ti - step, t1,
-                        current_watt, current_watt);
+                temp_energy = _get_additional_consumption(ti - step, t1, current_watt, current_watt);
                 consumed_energy += temp_energy;
                 nb_values += 1;
             } else {
@@ -386,15 +360,10 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
         nb_miss -= 10000;
     }
     if (debug_flags & DEBUG_FLAG_EXT_SENSORS)
-        info("ext_sensors: RRD: have %d values and miss %d values",
-             nb_values, nb_miss);
+        info("ext_sensors: RRD: have %d values and miss %d values", nb_values, nb_miss);
 
-    if (flag_approximate &&
-        current_watt == (rrd_value_t) NO_VAL &&
-        last_valid_watt != (rrd_value_t) NO_VAL) {
-        temp_energy = _get_additional_consumption(
-                last_valid_time, t1,
-                last_valid_watt, last_valid_watt);
+    if (flag_approximate && current_watt == (rrd_value_t) NO_VAL && last_valid_watt != (rrd_value_t) NO_VAL) {
+        temp_energy = _get_additional_consumption(last_valid_time, t1, last_valid_watt, last_valid_watt);
         consumed_energy += temp_energy;
     }
 
@@ -407,8 +376,7 @@ static uint64_t _rrd_consolidate_one(time_t t0, time_t t1,
     return (uint64_t) consumed_energy;
 }
 
-extern uint64_t RRD_consolidate(time_t step_starttime, time_t step_endtime,
-                                bitstr_t *bitmap_of_nodes) {
+extern uint64_t RRD_consolidate(time_t step_starttime, time_t step_endtime, bitstr_t *bitmap_of_nodes) {
     uint64_t consumed_energy = 0;
     uint64_t tmp;
     char *node_name = NULL;
@@ -419,14 +387,11 @@ extern uint64_t RRD_consolidate(time_t step_starttime, time_t step_endtime,
     hl = hostlist_create(node_name);
     xfree(node_name);
     while ((node_name = hostlist_shift(hl))) {
-        if (!(path = _get_node_rrd_path(node_name,
-                                        EXT_SENSORS_VALUE_ENERGY)))
+        if (!(path = _get_node_rrd_path(node_name, EXT_SENSORS_VALUE_ENERGY)))
             consumed_energy = NO_VAL64;
         free(node_name);
-        if ((tmp = _rrd_consolidate_one(
-                step_starttime, step_endtime, path,
-                ext_sensors_cnf->energy_rra_name, true))
-            == NO_VAL64)
+        if ((tmp = _rrd_consolidate_one(step_starttime, step_endtime, path, ext_sensors_cnf->energy_rra_name, true)) ==
+            NO_VAL64)
             consumed_energy = NO_VAL64;
         xfree(path);
         if (consumed_energy == NO_VAL64)
@@ -455,33 +420,23 @@ static int _update_node_data(void) {
                 ext_sensors->current_watts = 0;
                 continue;
             }
-            if (!(path = _get_node_rrd_path(
-                    node_record_table_ptr[i].name,
-                    EXT_SENSORS_VALUE_ENERGY))) {
+            if (!(path = _get_node_rrd_path(node_record_table_ptr[i].name, EXT_SENSORS_VALUE_ENERGY))) {
                 ext_sensors->consumed_energy = NO_VAL64;
                 ext_sensors->current_watts = NO_VAL;
                 continue;
             }
-            tmp = _rrd_consolidate_one(
-                    ext_sensors->energy_update_time,
-                    now, path,
-                    ext_sensors_cnf->energy_rra_name,
-                    false);
+            tmp = _rrd_consolidate_one(ext_sensors->energy_update_time, now, path, ext_sensors_cnf->energy_rra_name,
+                                       false);
             xfree(path);
-            if ((tmp != (uint64_t) NO_VAL) && (tmp != 0) &&
-                (last_valid_time != 0) &&
+            if ((tmp != (uint64_t) NO_VAL) && (tmp != 0) && (last_valid_time != 0) &&
                 (last_valid_watt != (rrd_value_t) NO_VAL)) {
-                if ((ext_sensors->consumed_energy <= 0) ||
-                    (ext_sensors->consumed_energy ==
-                     NO_VAL64)) {
+                if ((ext_sensors->consumed_energy <= 0) || (ext_sensors->consumed_energy == NO_VAL64)) {
                     ext_sensors->consumed_energy = tmp;
                 } else {
                     ext_sensors->consumed_energy += tmp;
                 }
-                ext_sensors->energy_update_time =
-                        last_valid_time;
-                ext_sensors->current_watts =
-                        (uint32_t) last_valid_watt;
+                ext_sensors->energy_update_time = last_valid_time;
+                ext_sensors->current_watts = (uint32_t) last_valid_watt;
             }
         }
     }
@@ -489,18 +444,13 @@ static int _update_node_data(void) {
     if (ext_sensors_cnf->dataopts & EXT_SENSORS_OPT_NODE_TEMP) {
         for (i = 0; i < node_record_count; i++) {
             ext_sensors = node_record_table_ptr[i].ext_sensors;
-            if (!(path = _get_node_rrd_path(
-                    node_record_table_ptr[i].name,
-                    EXT_SENSORS_VALUE_TEMPERATURE))) {
+            if (!(path = _get_node_rrd_path(node_record_table_ptr[i].name, EXT_SENSORS_VALUE_TEMPERATURE))) {
                 ext_sensors->temperature = NO_VAL;
                 continue;
             }
-            tmp32 = _rrd_get_last_one(
-                    path, ext_sensors_cnf->temp_rra_name);
+            tmp32 = _rrd_get_last_one(path, ext_sensors_cnf->temp_rra_name);
             xfree(path);
-            if (tmp32 != NO_VAL &&
-                tmp32 > ext_sensors_cnf->min_temp &&
-                tmp32 < ext_sensors_cnf->max_temp) {
+            if (tmp32 != NO_VAL && tmp32 > ext_sensors_cnf->min_temp && tmp32 < ext_sensors_cnf->max_temp) {
                 ext_sensors->temperature = tmp32;
             } else {
                 ext_sensors->temperature = NO_VAL;
@@ -525,20 +475,19 @@ static int _update_door_data(void) {
 }
 
 extern int _ext_sensors_read_conf(void) {
-    s_p_options_t options[] = {
-            {"JobData",       S_P_STRING},
-            {"NodeData",      S_P_STRING},
-            {"SwitchData",    S_P_STRING},
-            {"ColdDoorData",  S_P_STRING},
-            {"MinWatt",       S_P_UINT32},
-            {"MaxWatt",       S_P_UINT32},
-            {"MinTemp",       S_P_UINT32},
-            {"MaxTemp",       S_P_UINT32},
-            {"EnergyRRA",     S_P_STRING},
-            {"TempRRA",       S_P_STRING},
-            {"EnergyPathRRD", S_P_STRING},
-            {"TempPathRRD",   S_P_STRING},
-            {NULL}};
+    s_p_options_t options[] = {{"JobData",       S_P_STRING},
+                               {"NodeData",      S_P_STRING},
+                               {"SwitchData",    S_P_STRING},
+                               {"ColdDoorData",  S_P_STRING},
+                               {"MinWatt",       S_P_UINT32},
+                               {"MaxWatt",       S_P_UINT32},
+                               {"MinTemp",       S_P_UINT32},
+                               {"MaxTemp",       S_P_UINT32},
+                               {"EnergyRRA",     S_P_STRING},
+                               {"TempRRA",       S_P_STRING},
+                               {"EnergyPathRRD", S_P_STRING},
+                               {"TempPathRRD",   S_P_STRING},
+                               {NULL}};
     s_p_hashtbl_t *tbl = NULL;
     char *conf_path = NULL;
     struct stat buf;
@@ -556,40 +505,33 @@ extern int _ext_sensors_read_conf(void) {
     } else {
         debug2("ext_sensors: Reading ext_sensors file %s", conf_path);
         tbl = s_p_hashtbl_create(options);
-        if (s_p_parse_file(tbl, NULL, conf_path, false) ==
-            SLURM_ERROR) {
+        if (s_p_parse_file(tbl, NULL, conf_path, false) == SLURM_ERROR) {
             fatal("ext_sensors: Could not open/read/parse "
                   "ext_sensors file %s", conf_path);
         }
         /* ext_sensors initialization parameters */
         if (s_p_get_string(&temp_str, "JobData", tbl)) {
             if (strstr(temp_str, "energy"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_JOB_ENERGY;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_JOB_ENERGY;
         }
         xfree(temp_str);
         if (s_p_get_string(&temp_str, "NodeData", tbl)) {
             if (strstr(temp_str, "energy"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_NODE_ENERGY;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_NODE_ENERGY;
             if (strstr(temp_str, "temp"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_NODE_TEMP;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_NODE_TEMP;
         }
         xfree(temp_str);
         if (s_p_get_string(&temp_str, "SwitchData", tbl)) {
             if (strstr(temp_str, "energy"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_SWITCH_ENERGY;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_SWITCH_ENERGY;
             if (strstr(temp_str, "temp"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_SWITCH_TEMP;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_SWITCH_TEMP;
         }
         xfree(temp_str);
         if (s_p_get_string(&temp_str, "ColdDoorData", tbl)) {
             if (strstr(temp_str, "temp"))
-                ext_sensors_cnf->dataopts
-                        |= EXT_SENSORS_OPT_COLDDOOR_TEMP;
+                ext_sensors_cnf->dataopts |= EXT_SENSORS_OPT_COLDDOOR_TEMP;
         }
         xfree(temp_str);
 
@@ -598,29 +540,23 @@ extern int _ext_sensors_read_conf(void) {
         s_p_get_uint32(&ext_sensors_cnf->max_watt, "MaxWatt", tbl);
         s_p_get_uint32(&ext_sensors_cnf->min_temp, "MinTemp", tbl);
         s_p_get_uint32(&ext_sensors_cnf->max_temp, "MaxTemp", tbl);
-        if (!s_p_get_string(&ext_sensors_cnf->energy_rra_name,
-                            "EnergyRRA", tbl)) {
-            if (ext_sensors_cnf->dataopts
-                & EXT_SENSORS_OPT_JOB_ENERGY)
+        if (!s_p_get_string(&ext_sensors_cnf->energy_rra_name, "EnergyRRA", tbl)) {
+            if (ext_sensors_cnf->dataopts & EXT_SENSORS_OPT_JOB_ENERGY)
                 fatal("ext_sensors/rrd: EnergyRRA "
                       "must be set to gather JobData=energy.  "
                       "Please set this value in your "
                       "ext_sensors.conf file.");
         }
 
-        if (!s_p_get_string(&ext_sensors_cnf->temp_rra_name,
-                            "TempRRA", tbl)) {
-            if (ext_sensors_cnf->dataopts
-                & EXT_SENSORS_OPT_NODE_TEMP)
+        if (!s_p_get_string(&ext_sensors_cnf->temp_rra_name, "TempRRA", tbl)) {
+            if (ext_sensors_cnf->dataopts & EXT_SENSORS_OPT_NODE_TEMP)
                 fatal("ext_sensors/rrd: TempRRA "
                       "must be set to gather NodeData=temp.  "
                       "Please set this value in your "
                       "ext_sensors.conf file.");
         }
-        s_p_get_string(&ext_sensors_cnf->energy_rrd_file,
-                       "EnergyPathRRD", tbl);
-        s_p_get_string(&ext_sensors_cnf->temp_rrd_file,
-                       "TempPathRRD", tbl);
+        s_p_get_string(&ext_sensors_cnf->energy_rrd_file, "EnergyPathRRD", tbl);
+        s_p_get_string(&ext_sensors_cnf->temp_rrd_file, "TempPathRRD", tbl);
 
         s_p_hashtbl_destroy(tbl);
     }
@@ -646,9 +582,7 @@ extern int ext_sensors_p_update_component_data(void) {
     rc_node = _update_node_data();
     rc_switch = _update_switch_data();
     rc_door = _update_door_data();
-    if ((rc_node == SLURM_SUCCESS) &&
-        (rc_switch == SLURM_SUCCESS) &&
-        (rc_door == SLURM_SUCCESS))
+    if ((rc_node == SLURM_SUCCESS) && (rc_switch == SLURM_SUCCESS) && (rc_door == SLURM_SUCCESS))
         return SLURM_SUCCESS;
     return SLURM_ERROR;
 }
@@ -664,15 +598,11 @@ extern int ext_sensors_p_get_stependdata(struct step_record *step_rec) {
     int rc = SLURM_SUCCESS;
 
     if (ext_sensors_cnf->dataopts & EXT_SENSORS_OPT_JOB_ENERGY) {
-        step_rec->ext_sensors->consumed_energy =
-                RRD_consolidate(step_rec->start_time, step_endtime,
-                                step_rec->step_node_bitmap);
+        step_rec->ext_sensors->consumed_energy = RRD_consolidate(step_rec->start_time, step_endtime,
+                                                                 step_rec->step_node_bitmap);
         if (step_rec->jobacct &&
-            (!step_rec->jobacct->energy.consumed_energy
-             || (step_rec->jobacct->energy.consumed_energy ==
-                 NO_VAL64))) {
-            step_rec->jobacct->energy.consumed_energy =
-                    step_rec->ext_sensors->consumed_energy;
+            (!step_rec->jobacct->energy.consumed_energy || (step_rec->jobacct->energy.consumed_energy == NO_VAL64))) {
+            step_rec->jobacct->energy.consumed_energy = step_rec->ext_sensors->consumed_energy;
         }
     }
 

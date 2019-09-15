@@ -120,8 +120,7 @@ int initialize_and_process_args(int argc, char **argv) {
  *  Returns the integer on success, exits program on failure.
  *
  */
-static int
-_get_pos_int(const char *arg, const char *what) {
+static int _get_pos_int(const char *arg, const char *what) {
     char *p;
     long int result = strtol(arg, &p, 10);
 
@@ -195,9 +194,7 @@ struct env_vars {
     void *set_flag;
 };
 
-env_vars_t env_vars[] = {
-        {NULL, 0, NULL, NULL}
-};
+env_vars_t env_vars[] = {{NULL, 0, NULL, NULL}};
 
 
 /*
@@ -217,8 +214,7 @@ static void _opt_env(void) {
 }
 
 
-static void
-_process_env_var(env_vars_t *e, const char *val) {
+static void _process_env_var(env_vars_t *e, const char *val) {
     debug2("now processing env var %s=%s", e->var, val);
 
     if (e->set_flag) {
@@ -234,27 +230,24 @@ _process_env_var(env_vars_t *e, const char *val) {
 
 void set_options(const int argc, char **argv) {
     int opt_char, option_index = 0;
-    static struct option long_options[] = {
-            {"help",          no_argument,       0, 'h'},
-            {"label",         no_argument,       0, 'l'},
-            {"quiet",         no_argument,       0, 'Q'},
-            {"usage",         no_argument,       0, 'u'},
-            {"verbose",       no_argument,       0, 'v'},
-            {"version",       no_argument,       0, 'V'},
-            {"layout",        no_argument,       0, LONG_OPT_LAYOUT_ONLY},
-            {"debugger-test", no_argument,       0, LONG_OPT_DEBUGGER_TEST},
-            {"input-filter",  required_argument, 0, LONG_OPT_IN_FILTER},
-            {"output-filter", required_argument, 0, LONG_OPT_OUT_FILTER},
-            {"error-filter",  required_argument, 0, LONG_OPT_ERR_FILTER},
-            {"pty",           no_argument,       0, LONG_OPT_PTY},
-            {NULL}
-    };
+    static struct option long_options[] = {{"help",          no_argument,       0, 'h'},
+                                           {"label",         no_argument,       0, 'l'},
+                                           {"quiet",         no_argument,       0, 'Q'},
+                                           {"usage",         no_argument,       0, 'u'},
+                                           {"verbose",       no_argument,       0, 'v'},
+                                           {"version",       no_argument,       0, 'V'},
+                                           {"layout",        no_argument,       0, LONG_OPT_LAYOUT_ONLY},
+                                           {"debugger-test", no_argument,       0, LONG_OPT_DEBUGGER_TEST},
+                                           {"input-filter",  required_argument, 0, LONG_OPT_IN_FILTER},
+                                           {"output-filter", required_argument, 0, LONG_OPT_OUT_FILTER},
+                                           {"error-filter",  required_argument, 0, LONG_OPT_ERR_FILTER},
+                                           {"pty",           no_argument,       0, LONG_OPT_PTY},
+                                           {NULL}};
     char *opt_string = "+hlQuvV";
 
     opt.progname = xbasename(argv[0]);
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, opt_string,
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, opt_string, long_options, &option_index)) != -1) {
         switch (opt_char) {
 
             case '?':
@@ -283,22 +276,19 @@ void set_options(const int argc, char **argv) {
                 break;
             case LONG_OPT_IN_FILTER:
                 if (xstrcmp(optarg, "-") != 0) {
-                    opt.input_filter = (uint32_t)
-                            _get_pos_int(optarg, "input-filter");
+                    opt.input_filter = (uint32_t) _get_pos_int(optarg, "input-filter");
                 }
                 opt.input_filter_set = true;
                 break;
             case LONG_OPT_OUT_FILTER:
                 if (xstrcmp(optarg, "-") != 0) {
-                    opt.output_filter = (uint32_t)
-                            _get_pos_int(optarg, "output-filter");
+                    opt.output_filter = (uint32_t) _get_pos_int(optarg, "output-filter");
                 }
                 opt.output_filter_set = true;
                 break;
             case LONG_OPT_ERR_FILTER:
                 if (xstrcmp(optarg, "-") != 0) {
-                    opt.error_filter = (uint32_t)
-                            _get_pos_int(optarg, "error-filter");
+                    opt.error_filter = (uint32_t) _get_pos_int(optarg, "error-filter");
                 }
                 opt.error_filter_set = true;
                 break;
@@ -317,8 +307,7 @@ void set_options(const int argc, char **argv) {
 #endif
                 break;
             default:
-                error("Unrecognized command line parameter %c",
-                      opt_char);
+                error("Unrecognized command line parameter %c", opt_char);
                 exit(error_exit);
         }
     }
@@ -405,8 +394,7 @@ static bool _opt_verify(void) {
     /*
      * set up standard IO filters
      */
-    if ((opt.input_filter_set || opt.output_filter_set ||
-         opt.error_filter_set) && opt.pty) {
+    if ((opt.input_filter_set || opt.output_filter_set || opt.error_filter_set) && opt.pty) {
         error("don't specify both --pty and I/O filtering");
         verified = false;
     }
@@ -443,18 +431,17 @@ static void _usage(void) {
 
 static void _help(void) {
     printf("Usage: sattach [options] <jobid.stepid>\n");
-    printf(
-            "      --input-filter=taskid  send stdin to only the specified task\n"
-            "      --output-filter=taskid only print stdout from the specified task\n"
-            "      --error-filter=taskid  only print stderr from the specified task\n"
-            "  -l, --label        prepend task number to lines of stdout & stderr\n"
-            "      --layout       print task layout info and exit (does not attach to tasks)\n"
-            "  -Q, --quiet        quiet mode (suppress informational messages)\n"
-            "  -v, --verbose      verbose mode (multiple -v's increase verbosity)\n"
-            "  -V, --version      print the Slurm version and exit\n\n"
-            "Help options:\n"
-            "  -h, --help         print this help message\n"
-            "  -u, --usage        print a brief usage message\n"
+    printf("      --input-filter=taskid  send stdin to only the specified task\n"
+           "      --output-filter=taskid only print stdout from the specified task\n"
+           "      --error-filter=taskid  only print stderr from the specified task\n"
+           "  -l, --label        prepend task number to lines of stdout & stderr\n"
+           "      --layout       print task layout info and exit (does not attach to tasks)\n"
+           "  -Q, --quiet        quiet mode (suppress informational messages)\n"
+           "  -v, --verbose      verbose mode (multiple -v's increase verbosity)\n"
+           "  -V, --version      print the Slurm version and exit\n\n"
+           "Help options:\n"
+           "  -h, --help         print this help message\n"
+           "  -u, --usage        print a brief usage message\n"
 
     );
 }

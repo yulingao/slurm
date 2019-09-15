@@ -41,8 +41,7 @@
 #include "sreport.h"
 #include "src/common/proc_args.h"
 
-extern void slurmdb_report_print_time(print_field_t *field, uint64_t value,
-                                      uint64_t total_time, int last) {
+extern void slurmdb_report_print_time(print_field_t *field, uint64_t value, uint64_t total_time, int last) {
     int abs_len = abs(field->len);
 
     if (!total_time)
@@ -50,9 +49,7 @@ extern void slurmdb_report_print_time(print_field_t *field, uint64_t value,
 
     /* (value == unset)  || (value == cleared) */
     if ((value == NO_VAL) || (value == INFINITE)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print)
             printf("|");
         else
@@ -82,22 +79,19 @@ extern void slurmdb_report_print_time(print_field_t *field, uint64_t value,
             case SLURMDB_REPORT_TIME_SECS_PER:
                 percent /= total_time;
                 percent *= 100;
-                output = xstrdup_printf("%"PRIu64"(%.2lf%%)",
-                                        value, percent);
+                output = xstrdup_printf("%"PRIu64"(%.2lf%%)", value, percent);
                 break;
             case SLURMDB_REPORT_TIME_MINS_PER:
                 percent /= total_time;
                 percent *= 100;
                 temp_d /= 60;
-                output = xstrdup_printf("%.0lf(%.2lf%%)",
-                                        temp_d, percent);
+                output = xstrdup_printf("%.0lf(%.2lf%%)", temp_d, percent);
                 break;
             case SLURMDB_REPORT_TIME_HOURS_PER:
                 percent /= total_time;
                 percent *= 100;
                 temp_d /= 3600;
-                output = xstrdup_printf("%.0lf(%.2lf%%)",
-                                        temp_d, percent);
+                output = xstrdup_printf("%.0lf(%.2lf%%)", temp_d, percent);
                 break;
             default:
                 temp_d /= 60;
@@ -105,9 +99,7 @@ extern void slurmdb_report_print_time(print_field_t *field, uint64_t value,
                 break;
         }
 
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%s", output);
         else if (print_fields_parsable_print)
             printf("%s|", output);
@@ -201,8 +193,7 @@ extern void addto_char_list(List char_list, char *names) {
                     memcpy(name, names + start, (i - start));
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -256,14 +247,10 @@ extern int sort_user_dec(void *v1, void *v2) {
         if (!user_a->tres_list || !user_b->tres_list)
             return 0;
 
-        if (!(tres_a = list_find_first(user_a->tres_list,
-                                       slurmdb_find_tres_in_list,
-                                       &tres_id)))
+        if (!(tres_a = list_find_first(user_a->tres_list, slurmdb_find_tres_in_list, &tres_id)))
             return 1;
 
-        if (!(tres_b = list_find_first(user_b->tres_list,
-                                       slurmdb_find_tres_in_list,
-                                       &tres_id)))
+        if (!(tres_b = list_find_first(user_b->tres_list, slurmdb_find_tres_in_list, &tres_id)))
             return -1;
 
 
@@ -383,34 +370,20 @@ extern int get_uint(char *in_value, uint32_t *out_value, char *type) {
     return SLURM_SUCCESS;
 }
 
-extern void sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec,
-                                  slurmdb_tres_rec_t **tres_rec,
-                                  List cluster_tres_list, List tres_list,
-                                  slurmdb_tres_rec_t *tres_rec_in) {
-    if (!(*cluster_tres_rec = list_find_first(cluster_tres_list,
-                                              slurmdb_find_tres_in_list,
-                                              &tres_rec_in->id))) {
-        debug2("No cluster TRES %s%s%s(%d)",
-               tres_rec_in->type,
-               tres_rec_in->name ? "/" : "",
-               tres_rec_in->name ? tres_rec_in->name : "",
-               tres_rec_in->id);
+extern void
+sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec, slurmdb_tres_rec_t **tres_rec, List cluster_tres_list,
+                      List tres_list, slurmdb_tres_rec_t *tres_rec_in) {
+    if (!(*cluster_tres_rec = list_find_first(cluster_tres_list, slurmdb_find_tres_in_list, &tres_rec_in->id))) {
+        debug2("No cluster TRES %s%s%s(%d)", tres_rec_in->type, tres_rec_in->name ? "/" : "",
+               tres_rec_in->name ? tres_rec_in->name : "", tres_rec_in->id);
     }
 
-    if (!(*tres_rec = list_find_first(tres_list,
-                                      slurmdb_find_tres_in_list,
-                                      &tres_rec_in->id))) {
-        debug2("No TRES %s%s%s(%d)",
-               tres_rec_in->type,
-               tres_rec_in->name ? "/" : "",
-               tres_rec_in->name ? tres_rec_in->name : "",
-               tres_rec_in->id);
+    if (!(*tres_rec = list_find_first(tres_list, slurmdb_find_tres_in_list, &tres_rec_in->id))) {
+        debug2("No TRES %s%s%s(%d)", tres_rec_in->type, tres_rec_in->name ? "/" : "",
+               tres_rec_in->name ? tres_rec_in->name : "", tres_rec_in->id);
     } else if (!(*tres_rec)->alloc_secs) {
-        debug2("No TRES %s%s%s(%d) usage",
-               tres_rec_in->type,
-               tres_rec_in->name ? "/" : "",
-               tres_rec_in->name ? tres_rec_in->name : "",
-               tres_rec_in->id);
+        debug2("No TRES %s%s%s(%d) usage", tres_rec_in->type, tres_rec_in->name ? "/" : "",
+               tres_rec_in->name ? tres_rec_in->name : "", tres_rec_in->id);
     }
 }
 
@@ -436,14 +409,12 @@ extern void sreport_set_usage_col_width(print_field_t *field, uint64_t number) {
         order *= 10;
     }
 
-    if (time_format == SLURMDB_REPORT_TIME_SECS_PER
-        || time_format == SLURMDB_REPORT_TIME_MINS_PER
-        || time_format == SLURMDB_REPORT_TIME_HOURS_PER)
+    if (time_format == SLURMDB_REPORT_TIME_SECS_PER || time_format == SLURMDB_REPORT_TIME_MINS_PER ||
+        time_format == SLURMDB_REPORT_TIME_HOURS_PER)
         field->len += 9;
 }
 
-extern void sreport_set_usage_column_width(print_field_t *usage_field,
-                                           print_field_t *energy_field,
+extern void sreport_set_usage_column_width(print_field_t *usage_field, print_field_t *energy_field,
                                            List slurmdb_report_cluster_list) {
     uint64_t max_usage = 0, max_energy = 0;
     ListIterator tres_itr, cluster_itr;
@@ -464,54 +435,38 @@ extern void sreport_set_usage_column_width(print_field_t *usage_field,
          */
 
         if (slurmdb_report_cluster->assoc_list) {
-            slurmdb_report_assoc_rec_t *slurmdb_report =
-                    list_peek(slurmdb_report_cluster->assoc_list);
+            slurmdb_report_assoc_rec_t *slurmdb_report = list_peek(slurmdb_report_cluster->assoc_list);
             if (slurmdb_report)
                 use_list = slurmdb_report->tres_list;
         } else if (slurmdb_report_cluster->user_list) {
             slurmdb_report_user_rec_t *slurmdb_report;
-            list_sort(slurmdb_report_cluster->user_list,
-                      (ListCmpF) sort_user_dec);
-            slurmdb_report =
-                    list_peek(slurmdb_report_cluster->user_list);
+            list_sort(slurmdb_report_cluster->user_list, (ListCmpF) sort_user_dec);
+            slurmdb_report = list_peek(slurmdb_report_cluster->user_list);
             if (slurmdb_report)
                 use_list = slurmdb_report->tres_list;
         } else {
             error("%s: unknown type of slurmdb_report_cluster "
-                  "given for cluster %s",
-                  __func__, slurmdb_report_cluster->name);
+                  "given for cluster %s", __func__, slurmdb_report_cluster->name);
             continue;
         }
 
         if (energy_field) {
             uint32_t tres_id = TRES_CPU;
-            if ((tres_rec = list_find_first(
-                    use_list,
-                    slurmdb_find_tres_in_list,
-                    &tres_id))) {
-                max_usage = MAX(max_usage,
-                                tres_rec->alloc_secs);
+            if ((tres_rec = list_find_first(use_list, slurmdb_find_tres_in_list, &tres_id))) {
+                max_usage = MAX(max_usage, tres_rec->alloc_secs);
             }
             tres_id = TRES_ENERGY;
-            if ((tres_rec = list_find_first(
-                    use_list,
-                    slurmdb_find_tres_in_list,
-                    &tres_id))) {
-                max_energy = MAX(max_energy,
-                                 tres_rec->alloc_secs);
+            if ((tres_rec = list_find_first(use_list, slurmdb_find_tres_in_list, &tres_id))) {
+                max_energy = MAX(max_energy, tres_rec->alloc_secs);
             }
         } else {
             list_iterator_reset(tres_itr);
             while ((tres = list_next(tres_itr))) {
                 if (tres->id == NO_VAL)
                     continue;
-                if (!(tres_rec = list_find_first(
-                        use_list,
-                        slurmdb_find_tres_in_list,
-                        &tres->id)))
+                if (!(tres_rec = list_find_first(use_list, slurmdb_find_tres_in_list, &tres->id)))
                     continue;
-                max_usage = MAX(max_usage,
-                                tres_rec->alloc_secs);
+                max_usage = MAX(max_usage, tres_rec->alloc_secs);
             }
         }
     }
@@ -557,13 +512,10 @@ extern void combine_assoc_tres(List first_assoc_list, List new_assoc_list) {
 
     iter = list_iterator_create(first_assoc_list);
     while ((orig_report_assoc = list_next(iter))) {
-        dup_report_assoc = list_find_first(new_assoc_list,
-                                           _match_assoc,
-                                           orig_report_assoc);
+        dup_report_assoc = list_find_first(new_assoc_list, _match_assoc, orig_report_assoc);
         if (!dup_report_assoc)
             continue;
-        combine_tres_list(orig_report_assoc->tres_list,
-                          dup_report_assoc->tres_list);
+        combine_tres_list(orig_report_assoc->tres_list, dup_report_assoc->tres_list);
         FREE_NULL_LIST(dup_report_assoc->tres_list);
     }
     list_iterator_destroy(iter);
@@ -604,8 +556,7 @@ extern void combine_tres_list(List orig_tres_list, List dup_tres_list) {
     /* Merge counts for common TRES */
     iter = list_iterator_create(orig_tres_list);
     while ((orig_tres = list_next(iter))) {
-        dup_tres = list_find_first(dup_tres_list, _match_tres_id,
-                                   orig_tres);
+        dup_tres = list_find_first(dup_tres_list, _match_tres_id, orig_tres);
         if (!dup_tres)
             continue;
 
@@ -639,8 +590,7 @@ static int _match_user_acct(void *x, void *key) {
 
     orig_report_user = (slurmdb_report_user_rec_t *) key;
     dup_report_user = (slurmdb_report_user_rec_t *) x;
-    if ((orig_report_user->uid == dup_report_user->uid) &&
-        !xstrcmp(orig_report_user->acct, dup_report_user->acct))
+    if ((orig_report_user->uid == dup_report_user->uid) && !xstrcmp(orig_report_user->acct, dup_report_user->acct))
         return 1;
     return 0;
 }
@@ -657,13 +607,10 @@ extern void combine_user_tres(List first_user_list, List new_user_list) {
 
     iter = list_iterator_create(first_user_list);
     while ((orig_report_user = list_next(iter))) {
-        dup_report_user = list_find_first(new_user_list,
-                                          _match_user_acct,
-                                          orig_report_user);
+        dup_report_user = list_find_first(new_user_list, _match_user_acct, orig_report_user);
         if (!dup_report_user)
             continue;
-        combine_tres_list(orig_report_user->tres_list,
-                          dup_report_user->tres_list);
+        combine_tres_list(orig_report_user->tres_list, dup_report_user->tres_list);
         FREE_NULL_LIST(dup_report_user->tres_list);
     }
     list_iterator_destroy(iter);

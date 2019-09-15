@@ -72,8 +72,7 @@ extern hid_t get_attribute_handle(hid_t parent, char *name) {
     H5Oget_info(parent, &object_info);
     nattr = object_info.num_attrs;
     for (i = 0; (nattr > 0) && (i < nattr); i++) {
-        aid = H5Aopen_by_idx(parent, ".", H5_INDEX_NAME, H5_ITER_INC,
-                             i, H5P_DEFAULT, H5P_DEFAULT);
+        aid = H5Aopen_by_idx(parent, ".", H5_INDEX_NAME, H5_ITER_INC, i, H5P_DEFAULT, H5P_DEFAULT);
         // Get the name of the attribute.
         len = H5Aget_name(aid, MAX_ATTR_NAME, buf);
         if (len < MAX_ATTR_NAME) {
@@ -103,15 +102,12 @@ extern hid_t get_group(hid_t parent, const char *name) {
     nobj = group_info.nlinks;
     for (i = 0; (nobj > 0) && (i < nobj); i++) {
         // Get the name of the group.
-        len = H5Lget_name_by_idx(parent, ".", H5_INDEX_NAME,
-                                 H5_ITER_INC, i, buf, MAX_GROUP_NAME,
-                                 H5P_DEFAULT);
+        len = H5Lget_name_by_idx(parent, ".", H5_INDEX_NAME, H5_ITER_INC, i, buf, MAX_GROUP_NAME, H5P_DEFAULT);
         if ((len > 0) && (len < MAX_GROUP_NAME)) {
             if (xstrcmp(buf, name) == 0) {
                 gid = H5Gopen(parent, name, H5P_DEFAULT);
                 if (gid < 0)
-                    error("PROFILE: Failed to open %s",
-                          name);
+                    error("PROFILE: Failed to open %s", name);
                 return gid;
             }
         }
@@ -155,12 +151,10 @@ extern void put_string_attribute(hid_t parent, char *name, char *value) {
     space_attr = H5Screate_simple(1, dim_attr, NULL);
     if (space_attr < 0) {
         H5Tclose(typ_attr);
-        debug3("PROFILE: failed to create space for attribute %s",
-               name);
+        debug3("PROFILE: failed to create space for attribute %s", name);
         return;
     }
-    attr = H5Acreate(parent, name, typ_attr, space_attr,
-                     H5P_DEFAULT, H5P_DEFAULT);
+    attr = H5Acreate(parent, name, typ_attr, space_attr, H5P_DEFAULT, H5P_DEFAULT);
     if (attr < 0) {
         H5Tclose(typ_attr);
         H5Sclose(space_attr);
@@ -183,12 +177,10 @@ extern void put_int_attribute(hid_t parent, char *name, int value) {
     hsize_t dim_attr[1] = {1}; // Single dimension array of values
     space_attr = H5Screate_simple(1, dim_attr, NULL);
     if (space_attr < 0) {
-        debug3("PROFILE: failed to create space for attribute %s",
-               name);
+        debug3("PROFILE: failed to create space for attribute %s", name);
         return;
     }
-    attr = H5Acreate(parent, name, H5T_NATIVE_INT, space_attr,
-                     H5P_DEFAULT, H5P_DEFAULT);
+    attr = H5Acreate(parent, name, H5T_NATIVE_INT, space_attr, H5P_DEFAULT, H5P_DEFAULT);
     if (attr < 0) {
         H5Sclose(space_attr);
         debug3("PROFILE: failed to create attribute %s", name);

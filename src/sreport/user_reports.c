@@ -54,8 +54,7 @@ static List print_fields_list = NULL; /* types are of print_field_t */
 static bool group_accts = false;
 static uint32_t top_limit = 10;
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_user_cond_t *user_cond, List format_list) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_user_cond_t *user_cond, List format_list) {
     int i;
     int set = 0;
     int end = 0;
@@ -72,8 +71,7 @@ static int _set_cond(int *start, int argc, char **argv,
     user_cond->with_deleted = 1;
     user_cond->with_assocs = 1;
     if (!user_cond->assoc_cond) {
-        user_cond->assoc_cond =
-                xmalloc(sizeof(slurmdb_assoc_cond_t));
+        user_cond->assoc_cond = xmalloc(sizeof(slurmdb_assoc_cond_t));
         user_cond->assoc_cond->with_usage = 1;
     }
     assoc_cond = user_cond->assoc_cond;
@@ -90,54 +88,37 @@ static int _set_cond(int *start, int argc, char **argv,
         else
             command_len = end - 1;
 
-        if (!end && !xstrncasecmp(argv[i], "all_clusters",
-                                  MAX(command_len, 1))) {
+        if (!end && !xstrncasecmp(argv[i], "all_clusters", MAX(command_len, 1))) {
             local_cluster_flag = 1;
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "group",
-                                         MAX(command_len, 1))) {
+        } else if (!end && !xstrncasecmp(argv[i], "group", MAX(command_len, 1))) {
             group_accts = 1;
-        } else if (!end
-                   || !xstrncasecmp(argv[i], "Users",
-                                    MAX(command_len, 1))) {
+        } else if (!end || !xstrncasecmp(argv[i], "Users", MAX(command_len, 1))) {
             if (!assoc_cond->user_list)
-                assoc_cond->user_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list_with_case(assoc_cond->user_list,
-                                            argv[i] + end,
-                                            user_case_norm);
+                assoc_cond->user_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list_with_case(assoc_cond->user_list, argv[i] + end, user_case_norm);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Accounts",
-                                 MAX(command_len, 2))
-                   || !xstrncasecmp(argv[i], "Acct",
-                                    MAX(command_len, 4))) {
+        } else if (!xstrncasecmp(argv[i], "Accounts", MAX(command_len, 2)) ||
+                   !xstrncasecmp(argv[i], "Acct", MAX(command_len, 4))) {
             if (!assoc_cond->acct_list)
-                assoc_cond->acct_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(assoc_cond->acct_list,
-                                  argv[i] + end);
+                assoc_cond->acct_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(assoc_cond->acct_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Clusters",
-                                 MAX(command_len, 1))) {
-            slurm_addto_char_list(assoc_cond->cluster_list,
-                                  argv[i] + end);
+        } else if (!xstrncasecmp(argv[i], "Clusters", MAX(command_len, 1))) {
+            slurm_addto_char_list(assoc_cond->cluster_list, argv[i] + end);
             set = 1;
         } else if (!xstrncasecmp(argv[i], "End", MAX(command_len, 1))) {
             assoc_cond->usage_end = parse_time(argv[i] + end, 1);
             assoc_cond->usage_end = sanity_check_endtime(assoc_cond->usage_end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 1))) {
             if (format_list)
                 slurm_addto_char_list(format_list, argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "Start",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Start", MAX(command_len, 1))) {
             assoc_cond->usage_start = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "TopCount",
-                                 MAX(command_len, 1))) {
-            if (get_uint(argv[i] + end, &top_limit, "TopCount")
-                != SLURM_SUCCESS)
+        } else if (!xstrncasecmp(argv[i], "TopCount", MAX(command_len, 1))) {
+            if (get_uint(argv[i] + end, &top_limit, "TopCount") != SLURM_SUCCESS)
                 exit_code = 1;
         } else {
             exit_code = 1;
@@ -174,8 +155,7 @@ static int _setup_print_fields_list(List format_list) {
 
     if (!format_list || !list_count(format_list)) {
         exit_code = 1;
-        fprintf(stderr,
-                " We need a format list to set up the print.\n");
+        fprintf(stderr, " We need a format list to set up the print.\n");
         return SLURM_ERROR;
     }
 
@@ -201,37 +181,31 @@ static int _setup_print_fields_list(List format_list) {
             field->name = xstrdup("Account");
             field->len = 15;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Cluster", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Cluster", object, MAX(command_len, 1))) {
             field->type = PRINT_USER_CLUSTER;
             field->name = xstrdup("Cluster");
             field->len = 9;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Energy", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Energy", object, MAX(command_len, 1))) {
             field->type = PRINT_USER_ENERGY;
             field->name = xstrdup("Energy");
-            if (time_format == SLURMDB_REPORT_TIME_SECS_PER
-                || time_format == SLURMDB_REPORT_TIME_MINS_PER
-                || time_format == SLURMDB_REPORT_TIME_HOURS_PER)
+            if (time_format == SLURMDB_REPORT_TIME_SECS_PER || time_format == SLURMDB_REPORT_TIME_MINS_PER ||
+                time_format == SLURMDB_REPORT_TIME_HOURS_PER)
                 field->len = 18;
             else
                 field->len = 10;
             field->print_routine = slurmdb_report_print_time;
-        } else if (!xstrncasecmp("Login", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Login", object, MAX(command_len, 1))) {
             field->type = PRINT_USER_LOGIN;
             field->name = xstrdup("Login");
             field->len = 9;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Proper", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Proper", object, MAX(command_len, 1))) {
             field->type = PRINT_USER_PROPER;
             field->name = xstrdup("Proper Name");
             field->len = 15;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("TresName", object,
-                                 MAX(command_len, 5))) {
+        } else if (!xstrncasecmp("TresName", object, MAX(command_len, 5))) {
             field->type = PRINT_USER_TRES_NAME;
             field->name = xstrdup("TRES Name");
             field->len = 14;
@@ -239,9 +213,8 @@ static int _setup_print_fields_list(List format_list) {
         } else if (!xstrncasecmp("Used", object, MAX(command_len, 1))) {
             field->type = PRINT_USER_USED;
             field->name = xstrdup("Used");
-            if (time_format == SLURMDB_REPORT_TIME_SECS_PER
-                || time_format == SLURMDB_REPORT_TIME_MINS_PER
-                || time_format == SLURMDB_REPORT_TIME_HOURS_PER)
+            if (time_format == SLURMDB_REPORT_TIME_SECS_PER || time_format == SLURMDB_REPORT_TIME_MINS_PER ||
+                time_format == SLURMDB_REPORT_TIME_HOURS_PER)
                 field->len = 18;
             else
                 field->len = 10;
@@ -284,8 +257,7 @@ static int _set_user_acct(void *x, void *arg) {
     return 0;
 }
 
-static void _user_top_tres_report(slurmdb_tres_rec_t *tres,
-                                  slurmdb_report_cluster_rec_t *slurmdb_report_cluster,
+static void _user_top_tres_report(slurmdb_tres_rec_t *tres, slurmdb_report_cluster_rec_t *slurmdb_report_cluster,
                                   slurmdb_report_user_rec_t *slurmdb_report_user) {
     slurmdb_tres_rec_t *cluster_tres_rec, *tres_rec, *total_energy;
     ListIterator iter = NULL;
@@ -296,10 +268,8 @@ static void _user_top_tres_report(slurmdb_tres_rec_t *tres,
     uint32_t tres_energy;
     uint64_t cluster_energy_cnt = 0, user_energy_cnt = 0;
 
-    sreport_set_tres_recs(&cluster_tres_rec, &tres_rec,
-                          slurmdb_report_cluster->tres_list,
-                          slurmdb_report_user->tres_list,
-                          tres);
+    sreport_set_tres_recs(&cluster_tres_rec, &tres_rec, slurmdb_report_cluster->tres_list,
+                          slurmdb_report_user->tres_list, tres);
 
     field_count = list_count(print_fields_list);
     iter = list_iterator_create(print_fields_list);
@@ -308,17 +278,13 @@ static void _user_top_tres_report(slurmdb_tres_rec_t *tres,
             case PRINT_USER_ACCT:
                 if (!slurmdb_report_user->acct)
                     _set_user_acct(slurmdb_report_user, NULL);
-                field->print_routine(field, slurmdb_report_user->acct,
-                                     (curr_inx == field_count));
+                field->print_routine(field, slurmdb_report_user->acct, (curr_inx == field_count));
                 break;
             case PRINT_USER_CLUSTER:
-                field->print_routine(field,
-                                     slurmdb_report_cluster->name,
-                                     (curr_inx == field_count));
+                field->print_routine(field, slurmdb_report_cluster->name, (curr_inx == field_count));
                 break;
             case PRINT_USER_LOGIN:
-                field->print_routine(field, slurmdb_report_user->name,
-                                     (curr_inx == field_count));
+                field->print_routine(field, slurmdb_report_user->name, (curr_inx == field_count));
                 break;
             case PRINT_USER_PROPER:
                 pwd = getpwnam(slurmdb_report_user->name);
@@ -327,49 +293,33 @@ static void _user_top_tres_report(slurmdb_tres_rec_t *tres,
                     if (!tmp_char)
                         tmp_char = pwd->pw_gecos;
                 }
-                field->print_routine(field, tmp_char,
-                                     (curr_inx == field_count));
+                field->print_routine(field, tmp_char, (curr_inx == field_count));
                 tmp_char = NULL;    /* Not xmalloced */
                 break;
             case PRINT_USER_USED:
-                field->print_routine(field,
-                                     tres_rec ?
-                                     tres_rec->alloc_secs : 0,
-                                     cluster_tres_rec ?
-                                     cluster_tres_rec->alloc_secs : 0,
-                                     (curr_inx == field_count));
+                field->print_routine(field, tres_rec ? tres_rec->alloc_secs : 0,
+                                     cluster_tres_rec ? cluster_tres_rec->alloc_secs : 0, (curr_inx == field_count));
                 break;
             case PRINT_USER_ENERGY:
                 /* For backward compatibility with pre-TRES logic,
                  * get energy_cnt here */
                 tres_energy = TRES_ENERGY;
-                if ((total_energy = list_find_first(
-                        slurmdb_report_cluster->tres_list,
-                        slurmdb_find_tres_in_list,
-                        &tres_energy)))
+                if ((total_energy = list_find_first(slurmdb_report_cluster->tres_list, slurmdb_find_tres_in_list,
+                                                    &tres_energy)))
                     cluster_energy_cnt = total_energy->alloc_secs;
-                if ((total_energy = list_find_first(
-                        slurmdb_report_user->tres_list,
-                        slurmdb_find_tres_in_list,
-                        &tres_energy)))
+                if ((total_energy = list_find_first(slurmdb_report_user->tres_list, slurmdb_find_tres_in_list,
+                                                    &tres_energy)))
                     user_energy_cnt = total_energy->alloc_secs;
-                field->print_routine(field, user_energy_cnt,
-                                     cluster_energy_cnt,
-                                     (curr_inx == field_count));
+                field->print_routine(field, user_energy_cnt, cluster_energy_cnt, (curr_inx == field_count));
                 break;
             case PRINT_USER_TRES_NAME:
-                xstrfmtcat(tres_tmp, "%s%s%s",
-                           tres->type,
-                           tres->name ? "/" : "",
-                           tres->name ? tres->name : "");
+                xstrfmtcat(tres_tmp, "%s%s%s", tres->type, tres->name ? "/" : "", tres->name ? tres->name : "");
 
-                field->print_routine(field, tres_tmp,
-                                     (curr_inx == field_count));
+                field->print_routine(field, tres_tmp, (curr_inx == field_count));
                 xfree(tres_tmp);
                 break;
             default:
-                field->print_routine(field, NULL,
-                                     (curr_inx == field_count));
+                field->print_routine(field, NULL, (curr_inx == field_count));
                 break;
         }
         curr_inx++;
@@ -378,8 +328,7 @@ static void _user_top_tres_report(slurmdb_tres_rec_t *tres,
     printf("\n");
 }
 
-static void _set_usage_column_width(List print_fields_list,
-                                    List slurmdb_report_cluster_list) {
+static void _set_usage_column_width(List print_fields_list, List slurmdb_report_cluster_list) {
     print_field_t *field, *usage_field = NULL, *energy_field = NULL;
     ListIterator itr;
 
@@ -399,8 +348,7 @@ static void _set_usage_column_width(List print_fields_list,
     }
     list_iterator_destroy(itr);
 
-    sreport_set_usage_column_width(usage_field, energy_field,
-                                   slurmdb_report_cluster_list);
+    sreport_set_usage_column_width(usage_field, energy_field, slurmdb_report_cluster_list);
 }
 
 /* Merge line user/account record List into a single list of unique records */
@@ -416,28 +364,22 @@ static void _merge_user_report(List slurmdb_report_cluster_list) {
      * removing duplicates. */
     iter = list_iterator_create(slurmdb_report_cluster_list);
     while ((slurmdb_report_cluster = list_next(iter))) {
-        (void) list_for_each(slurmdb_report_cluster->user_list,
-                             _set_user_acct, NULL);
+        (void) list_for_each(slurmdb_report_cluster->user_list, _set_user_acct, NULL);
         if (!first_report_cluster) {
             first_report_cluster = slurmdb_report_cluster;
             xfree(first_report_cluster->name);
             if (fed_name) {
-                xstrfmtcat(first_report_cluster->name, "FED:%s",
-                           fed_name);
+                xstrfmtcat(first_report_cluster->name, "FED:%s", fed_name);
             } else {
-                first_report_cluster->name =
-                        xstrdup("FEDERATION");
+                first_report_cluster->name = xstrdup("FEDERATION");
             }
             continue;
         }
         if (!first_report_cluster->user_list) {
-            first_report_cluster->user_list =
-                    slurmdb_report_cluster->user_list;
+            first_report_cluster->user_list = slurmdb_report_cluster->user_list;
         } else {
-            combine_user_tres(first_report_cluster->user_list,
-                              slurmdb_report_cluster->user_list);
-            combine_tres_list(first_report_cluster->tres_list,
-                              slurmdb_report_cluster->tres_list);
+            combine_user_tres(first_report_cluster->user_list, slurmdb_report_cluster->user_list);
+            combine_tres_list(first_report_cluster->tres_list, slurmdb_report_cluster->tres_list);
         }
         list_delete_item(iter);
     }
@@ -461,8 +403,7 @@ extern int user_top(int argc, char **argv) {
 
     if (!list_count(format_list)) {
         if (tres_str) {
-            slurm_addto_char_list(format_list,
-                                  "Cl,L,P,A,TresName,Used");
+            slurm_addto_char_list(format_list, "Cl,L,P,A,TresName,Used");
         } else {
             slurm_addto_char_list(format_list, "Cl,L,P,A,U,Energy");
         }
@@ -471,8 +412,7 @@ extern int user_top(int argc, char **argv) {
     _setup_print_fields_list(format_list);
     FREE_NULL_LIST(format_list);
 
-    if (!(slurmdb_report_cluster_list =
-                  slurmdb_report_user_top_usage(db_conn, user_cond, group_accts))) {
+    if (!(slurmdb_report_cluster_list = slurmdb_report_user_top_usage(db_conn, user_cond, group_accts))) {
         exit_code = 1;
         goto end_it;
     }
@@ -489,18 +429,15 @@ extern int user_top(int argc, char **argv) {
         slurm_make_time_str(&my_end, end_char, sizeof(end_char));
         printf("----------------------------------------"
                "----------------------------------------\n");
-        printf("Top %u Users %s - %s (%d secs)\n",
-               top_limit, start_char, end_char,
-               (int) (user_cond->assoc_cond->usage_end
-                      - user_cond->assoc_cond->usage_start));
+        printf("Top %u Users %s - %s (%d secs)\n", top_limit, start_char, end_char,
+               (int) (user_cond->assoc_cond->usage_end - user_cond->assoc_cond->usage_start));
 
         switch (time_format) {
             case SLURMDB_REPORT_TIME_PERCENT:
                 printf("Usage reported in %s\n", time_format_string);
                 break;
             default:
-                printf("Usage reported in %s %s\n",
-                       tres_usage_str, time_format_string);
+                printf("Usage reported in %s %s\n", tres_usage_str, time_format_string);
                 break;
         }
         printf("----------------------------------------"
@@ -515,8 +452,7 @@ extern int user_top(int argc, char **argv) {
     while ((slurmdb_report_cluster = list_next(cluster_itr))) {
         int count = 0;
 
-        list_sort(slurmdb_report_cluster->user_list,
-                  (ListCmpF) sort_user_dec);
+        list_sort(slurmdb_report_cluster->user_list, (ListCmpF) sort_user_dec);
 
         itr = list_iterator_create(slurmdb_report_cluster->user_list);
         while ((slurmdb_report_user = list_next(itr))) {
@@ -525,9 +461,7 @@ extern int user_top(int argc, char **argv) {
             while ((tres = list_next(itr2))) {
                 if (tres->id == NO_VAL)
                     continue;
-                _user_top_tres_report(tres,
-                                      slurmdb_report_cluster,
-                                      slurmdb_report_user);
+                _user_top_tres_report(tres, slurmdb_report_cluster, slurmdb_report_user);
             }
             list_iterator_destroy(itr2);
             count++;

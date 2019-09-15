@@ -51,8 +51,7 @@
  *                                 HELPERS                                   *
 \*****************************************************************************/
 
-static void _entity_data_identify(void *item, const char **key,
-                                  uint32_t *key_len) {
+static void _entity_data_identify(void *item, const char **key, uint32_t *key_len) {
     entity_data_t *data_item = (entity_data_t *) item;
     *key = data_item->key;
     *key_len = strlen(data_item->key);
@@ -74,9 +73,8 @@ static void _entity_node_destroy(void *x) {
     }
 }
 
-static int _entity_add_data(const entity_t *entity, const char *key,
-                            void *value, size_t size,
-                            void (*_free)(void *), bool byreference) {
+static int _entity_add_data(const entity_t *entity, const char *key, void *value, size_t size, void (*_free)(void *),
+                            bool byreference) {
     entity_data_t *result;
     entity_data_t *new_data_item;
 
@@ -143,8 +141,7 @@ const char *entity_get_type(const entity_t *entity) {
     return entity->type;
 }
 
-int entity_get_data(const entity_t *entity, const char *key,
-                    void *value, size_t size) {
+int entity_get_data(const entity_t *entity, const char *key, void *value, size_t size) {
     void *data = NULL;
     data = entity_get_data_ref(entity, key);
     if (data != NULL) {
@@ -162,13 +159,11 @@ void *entity_get_data_ref(const entity_t *entity, const char *key) {
     return NULL;
 }
 
-int entity_set_data(const entity_t *entity, const char *key,
-                    void *value, size_t size) {
+int entity_set_data(const entity_t *entity, const char *key, void *value, size_t size) {
     return _entity_add_data(entity, key, value, size, NULL, false);
 }
 
-int entity_set_data_ref(const entity_t *entity, const char *key, void *value,
-                        void (*_free)(void *)) {
+int entity_set_data_ref(const entity_t *entity, const char *key, void *value, void (*_free)(void *)) {
     return _entity_add_data(entity, key, value, 0, _free, true);
 }
 
@@ -182,8 +177,7 @@ void entity_clear_data(entity_t *entity) {
 
 entity_node_t *entity_add_node(entity_t *entity, layout_t *layout) {
 
-    entity_node_t *entity_node = (entity_node_t *) xmalloc(
-            sizeof(entity_node_t));
+    entity_node_t *entity_node = (entity_node_t *) xmalloc(sizeof(entity_node_t));
     entity_node->layout = layout;
     entity_node->entity = entity;
     entity_node->node = NULL;
@@ -196,10 +190,8 @@ typedef struct _entity_get_node_walk_st {
     entity_node_t *node;
 } _entity_get_node_walk_t;
 
-static void _entity_get_node_walkfunc(layout_t *layout,
-                                      entity_node_t *node, void *arg) {
-    _entity_get_node_walk_t *real_arg =
-            (_entity_get_node_walk_t *) arg;
+static void _entity_get_node_walkfunc(layout_t *layout, entity_node_t *node, void *arg) {
+    _entity_get_node_walk_t *real_arg = (_entity_get_node_walk_t *) arg;
     /* Note that if multiple nodes of the same layout are added
      * to a single entity, the last one will be returned.
      * An entity MUST NOT be added more than once /!\ */
@@ -250,19 +242,13 @@ typedef struct _entity_nodes_walkstruct_st {
 
 static int _entity_nodes_walkfunc(void *x, void *arg) {
     entity_node_t *entity_node = (entity_node_t *) x;
-    _entity_nodes_walkstruct_t *real_arg =
-            (_entity_nodes_walkstruct_t *) arg;
-    real_arg->callback(entity_node->layout,
-                       entity_node,
-                       real_arg->arg);
+    _entity_nodes_walkstruct_t *real_arg = (_entity_nodes_walkstruct_t *) arg;
+    real_arg->callback(entity_node->layout, entity_node, real_arg->arg);
     return 0;
 }
 
-void entity_nodes_walk(entity_t *entity,
-                       void (*callback)(layout_t *layout,
-                                        entity_node_t *node,
-                                        void *arg),
-                       void *arg) {
+void
+entity_nodes_walk(entity_t *entity, void (*callback)(layout_t *layout, entity_node_t *node, void *arg), void *arg) {
     _entity_nodes_walkstruct_t real_arg;
     real_arg.callback = callback;
     real_arg.arg = arg;

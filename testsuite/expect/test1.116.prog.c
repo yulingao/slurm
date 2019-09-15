@@ -33,33 +33,31 @@
 #define _DEBUG 0
 #define ARRAY_LEN 4
 
-int main(int argc, char * argv[])
-{
-	int i;
-	int size, rank;
-	int local_sum = 0, global_sum = 0;
-	int array[ARRAY_LEN];
+int main(int argc, char *argv[]) {
+    int i;
+    int size, rank;
+    int local_sum = 0, global_sum = 0;
+    int array[ARRAY_LEN];
 
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	if (rank == 0) {
-		for (i = 0; i < ARRAY_LEN; i++)
-			array[i] = rank + i;
-	}
-	MPI_Bcast(array, ARRAY_LEN, MPI_INT, 0, MPI_COMM_WORLD);
-	for (i = 0; i < ARRAY_LEN; i++)
-		local_sum += array[i];
+    if (rank == 0) {
+        for (i = 0; i < ARRAY_LEN; i++)
+            array[i] = rank + i;
+    }
+    MPI_Bcast(array, ARRAY_LEN, MPI_INT, 0, MPI_COMM_WORLD);
+    for (i = 0; i < ARRAY_LEN; i++)
+        local_sum += array[i];
 #if _DEBUG
-	for (i = 0; i < ARRAY_LEN; i++)
-		printf("Rank[%d] Array[%d]=%d\n", rank, i, array[i]);
-	printf("Rank[%d] LocalSum=%d\n", rank, local_sum);
+    for (i = 0; i < ARRAY_LEN; i++)
+        printf("Rank[%d] Array[%d]=%d\n", rank, i, array[i]);
+    printf("Rank[%d] LocalSum=%d\n", rank, local_sum);
 #endif
-	MPI_Reduce(&local_sum, &global_sum, 1, MPI_INT, MPI_SUM, 0,
-		   MPI_COMM_WORLD);
-	if (rank == 0)
-		printf("Rank[%d] GlobalSum=%d\n", rank, global_sum);
-	MPI_Finalize();
-	return 0;
+    MPI_Reduce(&local_sum, &global_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (rank == 0)
+        printf("Rank[%d] GlobalSum=%d\n", rank, global_sum);
+    MPI_Finalize();
+    return 0;
 }

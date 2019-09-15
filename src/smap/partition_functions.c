@@ -61,8 +61,7 @@ extern void get_slurm_part(void) {
     if (part_info_ptr) {
         if (show_flags != last_flags)
             part_info_ptr->last_update = 0;
-        error_code = slurm_load_partitions(part_info_ptr->last_update,
-                                           &new_part_ptr, show_flags);
+        error_code = slurm_load_partitions(part_info_ptr->last_update, &new_part_ptr, show_flags);
         if (error_code == SLURM_SUCCESS)
             slurm_free_partition_info_msg(part_info_ptr);
         else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) {
@@ -70,22 +69,17 @@ extern void get_slurm_part(void) {
             new_part_ptr = part_info_ptr;
         }
     } else {
-        error_code = slurm_load_partitions((time_t) NULL,
-                                           &new_part_ptr, show_flags);
+        error_code = slurm_load_partitions((time_t) NULL, &new_part_ptr, show_flags);
     }
 
     last_flags = show_flags;
     if (error_code) {
         if (quiet_flag != 1) {
             if (!params.commandline) {
-                mvwprintw(text_win,
-                          main_ycord, 1,
-                          "slurm_load_partitions: %s",
-                          slurm_strerror(slurm_get_errno()));
+                mvwprintw(text_win, main_ycord, 1, "slurm_load_partitions: %s", slurm_strerror(slurm_get_errno()));
                 main_ycord++;
             } else {
-                printf("slurm_load_partitions: %s\n",
-                       slurm_strerror(slurm_get_errno()));
+                printf("slurm_load_partitions: %s\n", slurm_strerror(slurm_get_errno()));
             }
         }
         return;
@@ -118,19 +112,16 @@ extern void get_slurm_part(void) {
         }
         j = 0;
         while (part.node_inx[j] >= 0) {
-            set_grid_inx(part.node_inx[j],
-                         part.node_inx[j + 1], count);
+            set_grid_inx(part.node_inx[j], part.node_inx[j + 1], count);
             j += 2;
         }
 
         if (!params.commandline) {
             if (i >= text_line_cnt) {
                 part.flags = (int) letters[count % 62];
-                wattron(text_win,
-                        COLOR_PAIR(colors[count % 6]));
+                wattron(text_win, COLOR_PAIR(colors[count % 6]));
                 _print_text_part(&part);
-                wattroff(text_win,
-                         COLOR_PAIR(colors[count % 6]));
+                wattroff(text_win, COLOR_PAIR(colors[count % 6]));
             }
         } else {
             part.flags = (int) letters[count % 62];
@@ -148,25 +139,19 @@ extern void get_slurm_part(void) {
 
 static void _print_header_part(void) {
     if (!params.commandline) {
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "ID");
+        mvwprintw(text_win, main_ycord, main_xcord, "ID");
         main_xcord += 4;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "PARTITION");
+        mvwprintw(text_win, main_ycord, main_xcord, "PARTITION");
         main_xcord += 10;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "AVAIL");
+        mvwprintw(text_win, main_ycord, main_xcord, "AVAIL");
         main_xcord += 7;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "TIMELIMIT");
+        mvwprintw(text_win, main_ycord, main_xcord, "TIMELIMIT");
         main_xcord += 11;
 
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "NODES");
+        mvwprintw(text_win, main_ycord, main_xcord, "NODES");
         main_xcord += 7;
-        mvwprintw(text_win, main_ycord,
-                  main_xcord, "NODELIST");
+        mvwprintw(text_win, main_ycord, main_xcord, "NODELIST");
         main_xcord = 1;
         main_ycord++;
     } else {
@@ -190,17 +175,11 @@ static int _print_text_part(partition_info_t *part_ptr) {
     snprintf(tmp_cnt, sizeof(tmp_cnt), "%u", part_ptr->total_nodes);
 
     if (!params.commandline) {
-        mvwprintw(text_win,
-                  main_ycord,
-                  main_xcord, "%c",
-                  part_ptr->flags);
+        mvwprintw(text_win, main_ycord, main_xcord, "%c", part_ptr->flags);
         main_xcord += 4;
 
         if (part_ptr->name) {
-            mvwprintw(text_win,
-                      main_ycord,
-                      main_xcord, "%.9s",
-                      part_ptr->name);
+            mvwprintw(text_win, main_ycord, main_xcord, "%.9s", part_ptr->name);
             main_xcord += 10;
 
             char *tmp_state;
@@ -214,28 +193,21 @@ static int _print_text_part(partition_info_t *part_ptr) {
                 tmp_state = "drain";
             else
                 tmp_state = "unk";
-            mvwprintw(text_win, main_ycord, main_xcord,
-                      tmp_state);
+            mvwprintw(text_win, main_ycord, main_xcord, tmp_state);
             main_xcord += 7;
 
             if (part_ptr->max_time == INFINITE)
-                snprintf(time_buf, sizeof(time_buf),
-                         "infinite");
+                snprintf(time_buf, sizeof(time_buf), "infinite");
             else
-                secs2time_str((part_ptr->max_time * 60),
-                              time_buf, sizeof(time_buf));
+                secs2time_str((part_ptr->max_time * 60), time_buf, sizeof(time_buf));
 
             width = strlen(time_buf);
-            mvwprintw(text_win, main_ycord,
-                      main_xcord + (9 - width),
-                      "%s", time_buf);
+            mvwprintw(text_win, main_ycord, main_xcord + (9 - width), "%s", time_buf);
             main_xcord += 11;
         } else
             main_xcord += 10;
 
-        mvwprintw(text_win,
-                  main_ycord,
-                  main_xcord, "%5s", tmp_cnt);
+        mvwprintw(text_win, main_ycord, main_xcord, "%5s", tmp_cnt);
 
         main_xcord += 7;
 
@@ -247,8 +219,7 @@ static int _print_text_part(partition_info_t *part_ptr) {
         while (nodes && nodes[i]) {
             width = getmaxx(text_win) - 1 - main_xcord;
 
-            if (!prefixlen && (nodes[i] == '[') &&
-                (nodes[i - 1] == ','))
+            if (!prefixlen && (nodes[i] == '[') && (nodes[i - 1] == ','))
                 prefixlen = i + 1;
 
             if (nodes[i - 1] == ',' && (width - 12) <= 0) {
@@ -259,10 +230,7 @@ static int _print_text_part(partition_info_t *part_ptr) {
                 main_xcord = tempxcord + prefixlen;
             }
 
-            if ((printed = mvwaddch(text_win,
-                                    main_ycord,
-                                    main_xcord,
-                                    nodes[i])) < 0)
+            if ((printed = mvwaddch(text_win, main_ycord, main_xcord, nodes[i])) < 0)
                 return printed;
             main_xcord++;
 
@@ -287,11 +255,9 @@ static int _print_text_part(partition_info_t *part_ptr) {
                 printf(" unk ");
 
             if (part_ptr->max_time == INFINITE)
-                snprintf(time_buf, sizeof(time_buf),
-                         "infinite");
+                snprintf(time_buf, sizeof(time_buf), "infinite");
             else
-                secs2time_str((part_ptr->max_time * 60),
-                              time_buf, sizeof(time_buf));
+                secs2time_str((part_ptr->max_time * 60), time_buf, sizeof(time_buf));
 
             printf("%9.9s ", time_buf);
         }

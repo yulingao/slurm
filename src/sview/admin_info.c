@@ -33,30 +33,21 @@
 #define _DEBUG 0
 
 enum {
-    SORTID_POS = POS_LOC,
-    SORTID_PARTITION,
-    SORTID_AVAIL,
-    SORTID_TIMELIMIT,
-    SORTID_NODES,
-    SORTID_NODELIST,
-    SORTID_CNT
+    SORTID_POS = POS_LOC, SORTID_PARTITION, SORTID_AVAIL, SORTID_TIMELIMIT, SORTID_NODES, SORTID_NODELIST, SORTID_CNT
 };
 
-static display_data_t display_data_admin[] = {
-        {G_TYPE_INT,    SORTID_POS,       NULL,        false, -1},
-        {G_TYPE_STRING, SORTID_PARTITION, "PARTITION", true,  -1},
-        {G_TYPE_STRING, SORTID_AVAIL,     "AVAIL",     true,  -1},
-        {G_TYPE_STRING, SORTID_TIMELIMIT, "TIMELIMIT", true,  -1},
-        {G_TYPE_STRING, SORTID_NODES,     "NODES",     true,  -1},
-        {G_TYPE_STRING, SORTID_NODELIST,  "NODELIST",  true,  -1},
-        {G_TYPE_NONE,   -1,               NULL,        false, -1}};
+static display_data_t display_data_admin[] = {{G_TYPE_INT,    SORTID_POS,       NULL,        false, -1},
+                                              {G_TYPE_STRING, SORTID_PARTITION, "PARTITION", true,  -1},
+                                              {G_TYPE_STRING, SORTID_AVAIL,     "AVAIL",     true,  -1},
+                                              {G_TYPE_STRING, SORTID_TIMELIMIT, "TIMELIMIT", true,  -1},
+                                              {G_TYPE_STRING, SORTID_NODES,     "NODES",     true,  -1},
+                                              {G_TYPE_STRING, SORTID_NODELIST,  "NODELIST",  true,  -1},
+                                              {G_TYPE_NONE,   -1,               NULL,        false, -1}};
 
-static display_data_t options_data_admin[] = {
-        {G_TYPE_STRING, JOB_PAGE,    "Jobs",       true,  -1},
-        {G_TYPE_STRING, NODE_PAGE,   "Nodes",      true,  -1},
-        {G_TYPE_STRING, SUBMIT_PAGE, "Job Submit", true,  -1},
-        {G_TYPE_NONE,   -1,          NULL,         false, -1}
-};
+static display_data_t options_data_admin[] = {{G_TYPE_STRING, JOB_PAGE,    "Jobs",       true,  -1},
+                                              {G_TYPE_STRING, NODE_PAGE,   "Nodes",      true,  -1},
+                                              {G_TYPE_STRING, SUBMIT_PAGE, "Job Submit", true,  -1},
+                                              {G_TYPE_NONE,   -1,          NULL,         false, -1}};
 
 static display_data_t *local_display_data = NULL;
 
@@ -65,8 +56,7 @@ extern void get_info_admin(GtkTable *table, display_data_t *display_data) {
 }
 
 
-extern void set_menus_admin(void *arg, GtkTreePath *path,
-                            GtkMenu *menu, int type) {
+extern void set_menus_admin(void *arg, GtkTreePath *path, GtkMenu *menu, int type) {
     GtkTreeView *tree_view = (GtkTreeView *) arg;
     popup_info_t *popup_win = (popup_info_t *) arg;
     switch (type) {
@@ -77,18 +67,15 @@ extern void set_menus_admin(void *arg, GtkTreePath *path,
             make_options_menu(tree_view, path, menu, options_data_admin);
             break;
         case POPUP_CLICKED:
-            make_fields_menu(popup_win, menu,
-                             popup_win->display_data, SORTID_CNT);
+            make_fields_menu(popup_win, menu, popup_win->display_data, SORTID_CNT);
             break;
         default:
             g_error("UNKNOWN type %d given to set_fields\n", type);
     }
 }
 
-extern void row_clicked_admin(GtkTreeView *tree_view,
-                              GtkTreePath *path,
-                              GtkTreeViewColumn *column,
-                              gpointer user_data) {
+extern void
+row_clicked_admin(GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column, gpointer user_data) {
     int line = get_row_number(tree_view, path);
     GtkWidget *popup = NULL;
     GtkWidget *label = NULL;
@@ -100,11 +87,9 @@ extern void row_clicked_admin(GtkTreeView *tree_view,
 
     popup = gtk_dialog_new();
 
-    gtk_window_set_type_hint(GTK_WINDOW(popup),
-                             GDK_WINDOW_TYPE_HINT_NORMAL);
+    gtk_window_set_type_hint(GTK_WINDOW(popup), GDK_WINDOW_TYPE_HINT_NORMAL);
     label = gtk_label_new(info);
-    gtk_box_pack_end(GTK_BOX(GTK_DIALOG(popup)->vbox),
-                     label, true, true, 0);
+    gtk_box_pack_end(GTK_BOX(GTK_DIALOG(popup)->vbox), label, true, true, 0);
     xfree(info);
     gtk_widget_show(label);
 

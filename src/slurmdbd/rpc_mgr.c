@@ -75,8 +75,7 @@ extern void *rpc_mgr(void *no_data) {
     master_thread_id = pthread_self();
 
     /* initialize port for RPCs */
-    if ((sockfd = slurm_init_msg_engine_port(get_dbd_port()))
-        == SLURM_ERROR)
+    if ((sockfd = slurm_init_msg_engine_port(get_dbd_port())) == SLURM_ERROR)
         fatal("slurm_init_msg_engine_port error %m");
 
     slurm_persist_conn_recv_server_init();
@@ -84,15 +83,12 @@ extern void *rpc_mgr(void *no_data) {
     /*
      * Process incoming RPCs until told to shutdown
      */
-    while (!shutdown_time &&
-           (i = slurm_persist_conn_wait_for_thread_loc()) >= 0) {
+    while (!shutdown_time && (i = slurm_persist_conn_wait_for_thread_loc()) >= 0) {
         /*
          * accept needed for stream implementation is a no-op in
          * message implementation that just passes sockfd to newsockfd
          */
-        if ((newsockfd = slurm_accept_msg_conn(sockfd,
-                                               &cli_addr)) ==
-            SLURM_ERROR) {
+        if ((newsockfd = slurm_accept_msg_conn(sockfd, &cli_addr)) == SLURM_ERROR) {
             slurm_persist_conn_free_thread_loc(i);
             if (errno != EINTR)
                 error("slurm_accept_msg_conn: %m");
@@ -111,11 +107,9 @@ extern void *rpc_mgr(void *no_data) {
         conn_arg->conn->rem_host = xmalloc_nz(16);
         /* Don't fill in the rem_port here.  It will be filled in
          * later if it is a slurmctld connection. */
-        slurm_get_ip_str(&cli_addr, &port,
-                         conn_arg->conn->rem_host, 16);
+        slurm_get_ip_str(&cli_addr, &port, conn_arg->conn->rem_host, 16);
 
-        slurm_persist_conn_recv_thread_init(
-                conn_arg->conn, i, conn_arg);
+        slurm_persist_conn_recv_thread_init(conn_arg->conn, i, conn_arg);
     }
 
     debug("rpc_mgr shutting down");
@@ -145,11 +139,9 @@ static void _connection_fini_callback(void *arg) {
             cluster_rec.control_port = conn->conn->rem_port;
             cluster_rec.rpc_version = conn->conn->version;
             cluster_rec.tres_str = conn->tres_str;
-            debug("cluster %s has disconnected",
-                  conn->conn->cluster_name);
+            debug("cluster %s has disconnected", conn->conn->cluster_name);
 
-            clusteracct_storage_g_fini_ctld(
-                    conn->db_conn, &cluster_rec);
+            clusteracct_storage_g_fini_ctld(conn->db_conn, &cluster_rec);
 
             slurm_mutex_lock(&registered_lock);
             itr = list_iterator_create(registered_clusters);

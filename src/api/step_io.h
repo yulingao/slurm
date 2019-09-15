@@ -104,10 +104,9 @@ typedef struct client_io client_io_t;
  *	back to the client when it establishes the IO connection as a sort
  *	of validity check.
  */
-client_io_t *client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks,
-                                      int num_nodes, slurm_cred_t *cred,
-                                      bool label, uint32_t pack_offset,
-                                      uint32_t task_offset);
+client_io_t *
+client_io_handler_create(slurm_step_io_fds_t fds, int num_tasks, int num_nodes, slurm_cred_t *cred, bool label,
+                         uint32_t pack_offset, uint32_t task_offset);
 
 int client_io_handler_start(client_io_t *cio);
 
@@ -122,8 +121,7 @@ int client_io_handler_start(client_io_t *cio);
  *               within a job step.
  * IN num_node_ids - the length of the node_ids array
  */
-void client_io_handler_downnodes(client_io_t *cio,
-                                 const int *node_ids, int num_node_ids);
+void client_io_handler_downnodes(client_io_t *cio, const int *node_ids, int num_node_ids);
 
 /*
  * Tell the client IO handler to test the communication path to a
@@ -131,8 +129,7 @@ void client_io_handler_downnodes(client_io_t *cio,
  * ignored by the slurmstepd.  If the write fails the step_launch_state
  * will be notified.
  */
-int client_io_handler_send_test_message(client_io_t *cio, int node_id,
-                                        bool *sent_message);
+int client_io_handler_send_test_message(client_io_t *cio, int node_id, bool *sent_message);
 
 /*
  * Tell the client IO handler that the step has been aborted, and if

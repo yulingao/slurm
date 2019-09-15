@@ -76,8 +76,7 @@ static void _parse_pbs_resource_list(char *rl);
  * Build an argv-style array of options from the script "body",
  * then pass the array to _set_*_options for further parsing.
  */
-extern bool xlate_batch_script(const char *file, const void *body,
-                               int size, int magic) {
+extern bool xlate_batch_script(const char *file, const void *body, int size, int magic) {
     char *magic_word;
     void (*wrp_func)(int, char **) = NULL;
     int magic_word_len;
@@ -169,23 +168,19 @@ static void _set_bsub_options(int argc, char **argv) {
     char *bsub_opt_string = "+c:e:J:m:M:n:o:q:W:x";
     char *char_ptr;
 
-    struct option bsub_long_options[] = {
-            {"cwd",          required_argument, 0, 'c'},
-            {"error_file",   required_argument, 0, 'e'},
-            {"job_name",     required_argument, 0, 'J'},
-            {"hostname",     required_argument, 0, 'm'},
-            {"memory_limit", required_argument, 0, 'M'},
-            {"output_file",  required_argument, 0, 'o'},
-            {"queue_name",   required_argument, 0, 'q'},
-            {"time",         required_argument, 0, 'W'},
-            {"exclusive",    no_argument,       0, 'x'},
-            {NULL, 0,                           0, 0}
-    };
+    struct option bsub_long_options[] = {{"cwd",          required_argument, 0, 'c'},
+                                         {"error_file",   required_argument, 0, 'e'},
+                                         {"job_name",     required_argument, 0, 'J'},
+                                         {"hostname",     required_argument, 0, 'm'},
+                                         {"memory_limit", required_argument, 0, 'M'},
+                                         {"output_file",  required_argument, 0, 'o'},
+                                         {"queue_name",   required_argument, 0, 'q'},
+                                         {"time",         required_argument, 0, 'W'},
+                                         {"exclusive",    no_argument,       0, 'x'},
+                                         {NULL, 0,                           0, 0}};
 
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, bsub_opt_string,
-                                   bsub_long_options, &option_index))
-           != -1) {
+    while ((opt_char = getopt_long(argc, argv, bsub_opt_string, bsub_long_options, &option_index)) != -1) {
         int xlate_val = 0;
         char *xlate_arg = NULL;
 
@@ -225,8 +220,7 @@ static void _set_bsub_options(int argc, char **argv) {
                     char_ptr++;
                     if (!char_ptr[0]) {
                         error("#BSUB -n format not correct "
-                              "given: '%s'",
-                              optarg);
+                              "given: '%s'", optarg);
                         exit(error_exit);
                     }
                 } else
@@ -248,14 +242,12 @@ static void _set_bsub_options(int argc, char **argv) {
                 xlate_val = LONG_OPT_EXCLUSIVE;
                 break;
             default:
-                error("Unrecognized command line parameter %c",
-                      opt_char);
+                error("Unrecognized command line parameter %c", opt_char);
                 exit(error_exit);
         }
 
         if (xlate_val)
-            slurm_process_option(&opt, xlate_val, xlate_arg,
-                                 false, false);
+            slurm_process_option(&opt, xlate_val, xlate_arg, false, false);
         xfree(xlate_arg);
     }
 
@@ -271,39 +263,35 @@ static void _set_pbs_options(int argc, char **argv) {
     int opt_char, option_index = 0;
     char *pbs_opt_string = "+a:A:c:C:e:hIj:J:k:l:m:M:N:o:p:q:r:S:t:u:v:VW:z";
 
-    struct option pbs_long_options[] = {
-            {"start_time",     required_argument, 0, 'a'},
-            {"account",        required_argument, 0, 'A'},
-            {"checkpoint",     required_argument, 0, 'c'},
-            {"working_dir",    required_argument, 0, 'C'},
-            {"error",          required_argument, 0, 'e'},
-            {"hold",           no_argument,       0, 'h'},
-            {"interactive",    no_argument,       0, 'I'},
-            {"join",           optional_argument, 0, 'j'},
-            {"job_array",      required_argument, 0, 'J'},
-            {"keep",           required_argument, 0, 'k'},
-            {"resource_list",  required_argument, 0, 'l'},
-            {"mail_options",   required_argument, 0, 'm'},
-            {"mail_user_list", required_argument, 0, 'M'},
-            {"job_name",       required_argument, 0, 'N'},
-            {"out",            required_argument, 0, 'o'},
-            {"priority",       required_argument, 0, 'p'},
-            {"destination",    required_argument, 0, 'q'},
-            {"rerunable",      required_argument, 0, 'r'},
-            {"script_path",    required_argument, 0, 'S'},
-            {"array",          required_argument, 0, 't'},
-            {"running_user",   required_argument, 0, 'u'},
-            {"variable_list",  required_argument, 0, 'v'},
-            {"all_env",        no_argument,       0, 'V'},
-            {"attributes",     required_argument, 0, 'W'},
-            {"no_std",         no_argument,       0, 'z'},
-            {NULL, 0,                             0, 0}
-    };
+    struct option pbs_long_options[] = {{"start_time",     required_argument, 0, 'a'},
+                                        {"account",        required_argument, 0, 'A'},
+                                        {"checkpoint",     required_argument, 0, 'c'},
+                                        {"working_dir",    required_argument, 0, 'C'},
+                                        {"error",          required_argument, 0, 'e'},
+                                        {"hold",           no_argument,       0, 'h'},
+                                        {"interactive",    no_argument,       0, 'I'},
+                                        {"join",           optional_argument, 0, 'j'},
+                                        {"job_array",      required_argument, 0, 'J'},
+                                        {"keep",           required_argument, 0, 'k'},
+                                        {"resource_list",  required_argument, 0, 'l'},
+                                        {"mail_options",   required_argument, 0, 'm'},
+                                        {"mail_user_list", required_argument, 0, 'M'},
+                                        {"job_name",       required_argument, 0, 'N'},
+                                        {"out",            required_argument, 0, 'o'},
+                                        {"priority",       required_argument, 0, 'p'},
+                                        {"destination",    required_argument, 0, 'q'},
+                                        {"rerunable",      required_argument, 0, 'r'},
+                                        {"script_path",    required_argument, 0, 'S'},
+                                        {"array",          required_argument, 0, 't'},
+                                        {"running_user",   required_argument, 0, 'u'},
+                                        {"variable_list",  required_argument, 0, 'v'},
+                                        {"all_env",        no_argument,       0, 'V'},
+                                        {"attributes",     required_argument, 0, 'W'},
+                                        {"no_std",         no_argument,       0, 'z'},
+                                        {NULL, 0,                             0, 0}};
 
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, pbs_opt_string,
-                                   pbs_long_options, &option_index))
-           != -1) {
+    while ((opt_char = getopt_long(argc, argv, pbs_opt_string, pbs_long_options, &option_index)) != -1) {
         int xlate_val = 0;
         char *xlate_arg = NULL;
 
@@ -394,14 +382,12 @@ static void _set_pbs_options(int argc, char **argv) {
             case 'z':
                 break;
             default:
-                error("Unrecognized command line parameter %c",
-                      opt_char);
+                error("Unrecognized command line parameter %c", opt_char);
                 exit(error_exit);
         }
 
         if (xlate_val)
-            slurm_process_option(&opt, xlate_val, xlate_arg,
-                                 false, false);
+            slurm_process_option(&opt, xlate_val, xlate_arg, false, false);
         xfree(xlate_arg);
     }
 
@@ -415,9 +401,7 @@ static char *_get_pbs_node_name(char *node_options, int *i) {
     int start = (*i);
     char *value = NULL;
 
-    while (node_options[*i] &&
-           (node_options[*i] != '+') &&
-           (node_options[*i] != ':'))
+    while (node_options[*i] && (node_options[*i] != '+') && (node_options[*i] != ':'))
         (*i)++;
 
     value = xmalloc((*i) - start + 1);
@@ -430,9 +414,7 @@ static char *_get_pbs_node_name(char *node_options, int *i) {
 }
 
 static void _get_next_pbs_node_part(char *node_options, int *i) {
-    while (node_options[*i] &&
-           (node_options[*i] != '+') &&
-           (node_options[*i] != ':'))
+    while (node_options[*i] && (node_options[*i] != '+') && (node_options[*i] != ':'))
         (*i)++;
     if (node_options[*i])
         (*i)++;
@@ -549,8 +531,7 @@ static void _parse_pbs_resource_list(char *rl) {
                  */
                 temp[end] = '\0';
             }
-            slurm_process_option(&opt, LONG_OPT_TMP, temp,
-                                 false, false);
+            slurm_process_option(&opt, LONG_OPT_TMP, temp, false, false);
             xfree(temp);
         } else if (!xstrncmp(rl + i, "host=", 5)) {
             i += 5;
@@ -572,17 +553,14 @@ static void _parse_pbs_resource_list(char *rl) {
                  */
                 temp[end] = '\0';
             }
-            slurm_process_option(&opt, LONG_OPT_MEM, temp,
-                                 false, false);
+            slurm_process_option(&opt, LONG_OPT_MEM, temp, false, false);
             xfree(temp);
         } else if (!xstrncasecmp(rl + i, "mpiprocs=", 9)) {
             i += 9;
             temp = _get_pbs_option_value(rl, &i, ':');
             if (temp) {
                 pbs_pro_flag |= 4;
-                slurm_process_option(&opt,
-                                     LONG_OPT_NTASKSPERNODE,
-                                     temp, false, false);
+                slurm_process_option(&opt, LONG_OPT_NTASKSPERNODE, temp, false, false);
                 xfree(temp);
             }
 #ifdef HAVE_NATIVE_CRAY
@@ -630,8 +608,7 @@ static void _parse_pbs_resource_list(char *rl) {
             i += 14;
             temp = _get_pbs_option_value(rl, &i, ',');
             if (temp) {
-                slurm_process_option(&opt, 'G', temp,
-                                     false, false);
+                slurm_process_option(&opt, 'G', temp, false, false);
                 xfree(temp);
             }
         } else if (!xstrncasecmp(rl + i, "ncpus=", 6)) {
@@ -639,15 +616,13 @@ static void _parse_pbs_resource_list(char *rl) {
             temp = _get_pbs_option_value(rl, &i, ':');
             if (temp) {
                 pbs_pro_flag |= 2;
-                slurm_process_option(&opt, LONG_OPT_MINCPUS,
-                                     temp, false, false);
+                slurm_process_option(&opt, LONG_OPT_MINCPUS, temp, false, false);
                 xfree(temp);
             }
         } else if (!xstrncmp(rl + i, "nice=", 5)) {
             i += 5;
             temp = _get_pbs_option_value(rl, &i, ',');
-            slurm_process_option(&opt, LONG_OPT_NICE, temp,
-                                 false, false);
+            slurm_process_option(&opt, LONG_OPT_NICE, temp, false, false);
             xfree(temp);
         } else if (!xstrncmp(rl + i, "nodes=", 6)) {
             i += 6;

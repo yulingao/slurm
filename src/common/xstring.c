@@ -584,8 +584,7 @@ char *xstrcasestr(const char *haystack, const char *needle) {
 
     for (hay_inx = 0; hay_inx < hay_size; hay_inx++) {
         for (need_inx = 0; need_inx < need_size; need_inx++) {
-            if (tolower((int) hay_ptr[need_inx]) !=
-                tolower((int) needle[need_inx]))
+            if (tolower((int) hay_ptr[need_inx]) != tolower((int) needle[need_inx]))
                 break; /* mis-match */
         }
 

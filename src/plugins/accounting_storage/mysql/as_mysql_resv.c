@@ -40,9 +40,7 @@
 #include "as_mysql_resv.h"
 #include "as_mysql_jobacct_process.h"
 
-static int _setup_resv_limits(slurmdb_reservation_rec_t *resv,
-                              char **cols, char **vals,
-                              char **extra) {
+static int _setup_resv_limits(slurmdb_reservation_rec_t *resv, char **cols, char **vals, char **extra) {
     /* strip off the action item from the flags */
 
     if (resv->assocs) {
@@ -61,8 +59,7 @@ static int _setup_resv_limits(slurmdb_reservation_rec_t *resv,
                time so it isn't that important.
             */
             while (i < len) {
-                if (resv->assocs[i] == ',' &&
-                    resv->assocs[i + 1] == '-') {
+                if (resv->assocs[i] == ',' && resv->assocs[i + 1] == '-') {
                     i += 2;
                     while (i < len) {
                         i++;
@@ -135,8 +132,7 @@ static int _setup_resv_limits(slurmdb_reservation_rec_t *resv,
     return SLURM_SUCCESS;
 }
 
-static int _setup_resv_cond_limits(slurmdb_reservation_cond_t *resv_cond,
-                                   char **extra) {
+static int _setup_resv_cond_limits(slurmdb_reservation_cond_t *resv_cond, char **extra) {
     int set = 0;
     ListIterator itr = NULL;
     char *object = NULL;
@@ -173,8 +169,7 @@ static int _setup_resv_cond_limits(slurmdb_reservation_cond_t *resv_cond,
         while ((object = list_next(itr))) {
             if (set)
                 xstrcat(*extra, " || ");
-            xstrfmtcat(*extra, "%s.resv_name='%s'",
-                       prefix, object);
+            xstrfmtcat(*extra, "%s.resv_name='%s'", prefix, object);
             set = 1;
         }
         list_iterator_destroy(itr);
@@ -189,28 +184,23 @@ static int _setup_resv_cond_limits(slurmdb_reservation_cond_t *resv_cond,
             xstrcat(*extra, " && (");
         else
             xstrcat(*extra, " where (");
-        xstrfmtcat(*extra,
-                   "(t1.time_start < %ld "
-                   "&& (t1.time_end >= %ld || t1.time_end = 0)))",
-                   resv_cond->time_end, resv_cond->time_start);
+        xstrfmtcat(*extra, "(t1.time_start < %ld "
+                           "&& (t1.time_end >= %ld || t1.time_end = 0)))", resv_cond->time_end, resv_cond->time_start);
     } else if (resv_cond->time_end) {
         if (*extra)
             xstrcat(*extra, " && (");
         else
             xstrcat(*extra, " where (");
-        xstrfmtcat(*extra,
-                   "(t1.time_start < %ld))", resv_cond->time_end);
+        xstrfmtcat(*extra, "(t1.time_start < %ld))", resv_cond->time_end);
     }
 
 
     return set;
 }
 
-extern int as_mysql_add_resv(mysql_conn_t *mysql_conn,
-                             slurmdb_reservation_rec_t *resv) {
+extern int as_mysql_add_resv(mysql_conn_t *mysql_conn, slurmdb_reservation_rec_t *resv) {
     int rc = SLURM_SUCCESS;
-    char *cols = NULL, *vals = NULL, *extra = NULL,
-            *query = NULL;
+    char *cols = NULL, *vals = NULL, *extra = NULL, *query = NULL;
 
     if (!resv) {
         error("No reservation was given to add.");
@@ -232,10 +222,8 @@ extern int as_mysql_add_resv(mysql_conn_t *mysql_conn,
 
     _setup_resv_limits(resv, &cols, &vals, &extra);
 
-    xstrfmtcat(query,
-               "insert into \"%s_%s\" (id_resv%s) values (%u%s) "
-               "on duplicate key update deleted=0%s;",
-               resv->cluster, resv_table, cols, resv->id, vals, extra);
+    xstrfmtcat(query, "insert into \"%s_%s\" (id_resv%s) values (%u%s) "
+                      "on duplicate key update deleted=0%s;", resv->cluster, resv_table, cols, resv->id, vals, extra);
 
     if (debug_flags & DEBUG_FLAG_DB_RESV)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
@@ -250,37 +238,19 @@ extern int as_mysql_add_resv(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
-                                slurmdb_reservation_rec_t *resv) {
+extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn, slurmdb_reservation_rec_t *resv) {
     MYSQL_RES *result = NULL;
     MYSQL_ROW row;
     int rc = SLURM_SUCCESS;
-    char *cols = NULL, *vals = NULL, *extra = NULL,
-            *query = NULL;
+    char *cols = NULL, *vals = NULL, *extra = NULL, *query = NULL;
     time_t start = 0, now = time(NULL);
     int i;
     int set = 0;
 
-    char *resv_req_inx[] = {
-            "assoclist",
-            "time_start",
-            "time_end",
-            "resv_name",
-            "nodelist",
-            "node_inx",
-            "flags",
-            "tres"
-    };
+    char *resv_req_inx[] = {"assoclist", "time_start", "time_end", "resv_name", "nodelist", "node_inx", "flags",
+                            "tres"};
     enum {
-        RESV_ASSOCS,
-        RESV_START,
-        RESV_END,
-        RESV_NAME,
-        RESV_NODES,
-        RESV_NODE_INX,
-        RESV_FLAGS,
-        RESV_TRES,
-        RESV_COUNT
+        RESV_ASSOCS, RESV_START, RESV_END, RESV_NAME, RESV_NODES, RESV_NODE_INX, RESV_FLAGS, RESV_TRES, RESV_COUNT
     };
 
     if (!resv) {
@@ -316,13 +286,9 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
     query = xstrdup_printf("select %s from \"%s_%s\" where id_resv=%u "
                            "and time_start >= %ld "
                            "and deleted=0 order by time_start desc "
-                           "limit 1 FOR UPDATE;",
-                           cols, resv->cluster, resv_table, resv->id,
-                           resv->time_start_prev);
-    debug4("%d(%s:%d) query\n%s",
-           mysql_conn->conn, THIS_FILE, __LINE__, query);
-    if (!(result = mysql_db_query_ret(
-            mysql_conn, query, 0))) {
+                           "limit 1 FOR UPDATE;", cols, resv->cluster, resv_table, resv->id, resv->time_start_prev);
+    debug4("%d(%s:%d) query\n%s", mysql_conn->conn, THIS_FILE, __LINE__, query);
+    if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         rc = SLURM_ERROR;
         goto end_it;
     }
@@ -330,8 +296,7 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
         rc = SLURM_ERROR;
         mysql_free_result(result);
         error("There is no reservation by id %u, "
-              "time_start %ld, and cluster '%s'", resv->id,
-              resv->time_start_prev, resv->cluster);
+              "time_start %ld, and cluster '%s'", resv->id, resv->time_start_prev, resv->cluster);
         goto end_it;
     }
 
@@ -346,13 +311,10 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
      * away.
      */
     if (start > resv->time_start) {
-        error("There is newer record for reservation with id %u, drop modification request:",
-              resv->id);
+        error("There is newer record for reservation with id %u, drop modification request:", resv->id);
         error("assocs:'%s', cluster:'%s', flags:%u, id:%u, name:'%s', nodes:'%s', nodes_inx:'%s', time_end:%ld, time_start:%ld, time_start_prev:%ld, tres_str:'%s', unused_wall:%f",
-              resv->assocs, resv->cluster, resv->flags, resv->id,
-              resv->name, resv->nodes, resv->node_inx, resv->time_end,
-              resv->time_start, resv->time_start_prev, resv->tres_str,
-              resv->unused_wall);
+              resv->assocs, resv->cluster, resv->flags, resv->id, resv->name, resv->nodes, resv->node_inx,
+              resv->time_end, resv->time_start, resv->time_start_prev, resv->tres_str, resv->unused_wall);
         mysql_free_result(result);
         rc = SLURM_SUCCESS;
         goto end_it;
@@ -361,8 +323,7 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
 
     /* check differences here */
 
-    if (!resv->name
-        && row[RESV_NAME] && row[RESV_NAME][0])
+    if (!resv->name && row[RESV_NAME] && row[RESV_NAME][0])
         // if this changes we just update the
         // record, no need to create a new one since
         // this doesn't really effect the
@@ -407,25 +368,18 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
            time which we can just update it */
         query = xstrdup_printf("update \"%s_%s\" set deleted=0%s "
                                "where deleted=0 and id_resv=%u "
-                               "and time_start=%ld;",
-                               resv->cluster, resv_table,
-                               extra, resv->id, start);
+                               "and time_start=%ld;", resv->cluster, resv_table, extra, resv->id, start);
     } else {
         /* time_start is already done above and we
          * changed something that is in need on a new
          * entry. */
         query = xstrdup_printf("update \"%s_%s\" set time_end=%ld "
                                "where deleted=0 && id_resv=%u "
-                               "and time_start=%ld;",
-                               resv->cluster, resv_table,
-                               resv->time_start,
-                               resv->id, start);
-        xstrfmtcat(query,
-                   "insert into \"%s_%s\" (id_resv%s) "
-                   "values (%u%s) "
-                   "on duplicate key update deleted=0%s;",
-                   resv->cluster, resv_table, cols, resv->id,
-                   vals, extra);
+                               "and time_start=%ld;", resv->cluster, resv_table, resv->time_start, resv->id, start);
+        xstrfmtcat(query, "insert into \"%s_%s\" (id_resv%s) "
+                          "values (%u%s) "
+                          "on duplicate key update deleted=0%s;", resv->cluster, resv_table, cols, resv->id, vals,
+                   extra);
     }
 
     if (debug_flags & DEBUG_FLAG_DB_RESV)
@@ -443,8 +397,7 @@ extern int as_mysql_modify_resv(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern int as_mysql_remove_resv(mysql_conn_t *mysql_conn,
-                                slurmdb_reservation_rec_t *resv) {
+extern int as_mysql_remove_resv(mysql_conn_t *mysql_conn, slurmdb_reservation_rec_t *resv) {
     int rc = SLURM_SUCCESS;
     char *query = NULL;
 
@@ -471,19 +424,15 @@ extern int as_mysql_remove_resv(mysql_conn_t *mysql_conn,
 
     /* first delete the resv that hasn't happened yet. */
     query = xstrdup_printf("delete from \"%s_%s\" where time_start > %ld "
-                           "and id_resv=%u and time_start=%ld;",
-                           resv->cluster, resv_table, resv->time_start_prev,
-                           resv->id,
-                           resv->time_start);
+                           "and id_resv=%u and time_start=%ld;", resv->cluster, resv_table, resv->time_start_prev,
+                           resv->id, resv->time_start);
     /* then update the remaining ones with a deleted flag and end
      * time of the time_start_prev which is set to when the
      * command was issued */
-    xstrfmtcat(query,
-               "update \"%s_%s\" set time_end=%ld, "
-               "deleted=1 where deleted=0 and "
-               "id_resv=%u and time_start=%ld;",
-               resv->cluster, resv_table, resv->time_start_prev,
-               resv->id, resv->time_start);
+    xstrfmtcat(query, "update \"%s_%s\" set time_end=%ld, "
+                      "deleted=1 where deleted=0 and "
+                      "id_resv=%u and time_start=%ld;", resv->cluster, resv_table, resv->time_start_prev, resv->id,
+               resv->time_start);
 
     if (debug_flags & DEBUG_FLAG_DB_RESV)
         DB_DEBUG(mysql_conn->conn, "query\n%s", query);
@@ -495,8 +444,7 @@ extern int as_mysql_remove_resv(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
-                               slurmdb_reservation_cond_t *resv_cond) {
+extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid, slurmdb_reservation_cond_t *resv_cond) {
     //DEF_TIMERS;
     char *query = NULL;
     char *extra = NULL;
@@ -516,18 +464,8 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
     uint16_t with_usage = 0;
 
     /* if this changes you will need to edit the corresponding enum */
-    char *resv_req_inx[] = {
-            "id_resv",
-            "assoclist",
-            "flags",
-            "nodelist",
-            "node_inx",
-            "resv_name",
-            "time_start",
-            "time_end",
-            "tres",
-            "unused_wall"
-    };
+    char *resv_req_inx[] = {"id_resv", "assoclist", "flags", "nodelist", "node_inx", "resv_name", "time_start",
+                            "time_end", "tres", "unused_wall"};
 
     enum {
         RESV_REQ_ID,
@@ -553,8 +491,7 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
 
     private_data = slurm_get_private_data();
     if (private_data & PRIVATE_DATA_RESERVATIONS) {
-        if (!(is_admin = is_user_min_admin_level(
-                mysql_conn, uid, SLURMDB_ADMIN_OPERATOR))) {
+        if (!(is_admin = is_user_min_admin_level(mysql_conn, uid, SLURMDB_ADMIN_OPERATOR))) {
             error("Only admins can look at reservations");
             errno = ESLURM_ACCESS_DENIED;
             return NULL;
@@ -570,18 +507,15 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
         job_cond.usage_end = resv_cond->time_end;
         job_cond.used_nodes = resv_cond->nodes;
         if (!resv_cond->cluster_list)
-            resv_cond->cluster_list =
-                    list_create(slurm_destroy_char);
+            resv_cond->cluster_list = list_create(slurm_destroy_char);
         /*
          * If they didn't specify a cluster, give them the one they are
          * calling from.
          */
         if (!list_count(resv_cond->cluster_list))
-            list_append(resv_cond->cluster_list,
-                        xstrdup(mysql_conn->cluster_name));
+            list_append(resv_cond->cluster_list, xstrdup(mysql_conn->cluster_name));
         job_cond.cluster_list = resv_cond->cluster_list;
-        local_cluster_list = setup_cluster_list_with_inx(
-                mysql_conn, &job_cond, (void **) &curr_cluster);
+        local_cluster_list = setup_cluster_list_with_inx(mysql_conn, &job_cond, (void **) &curr_cluster);
     } else if (with_usage) {
         job_cond.usage_start = resv_cond->time_start;
         job_cond.usage_end = resv_cond->time_end;
@@ -607,9 +541,7 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
             xstrcat(query, " union ");
         //START_TIMER;
         xstrfmtcat(query, "select distinct %s,'%s' as cluster "
-                          "from \"%s_%s\" as t1%s",
-                   tmp, cluster_name, cluster_name, resv_table,
-                   extra ? extra : "");
+                          "from \"%s_%s\" as t1%s", tmp, cluster_name, cluster_name, resv_table, extra ? extra : "");
     }
     list_iterator_destroy(itr);
     if (use_cluster_list == as_mysql_cluster_list)
@@ -635,8 +567,7 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
         slurmdb_reservation_rec_t *resv;
         int start = slurm_atoul(row[RESV_REQ_START]);
 
-        if (!good_nodes_from_inx(local_cluster_list, &curr_cluster,
-                                 row[RESV_REQ_NODE_INX], start))
+        if (!good_nodes_from_inx(local_cluster_list, &curr_cluster, row[RESV_REQ_NODE_INX], start))
             continue;
 
         resv = xmalloc(sizeof(slurmdb_reservation_rec_t));
@@ -662,8 +593,7 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
     FREE_NULL_LIST(local_cluster_list);
 
     if (with_usage && resv_list && list_count(resv_list)) {
-        List job_list = as_mysql_jobacct_process_get_jobs(
-                mysql_conn, uid, &job_cond);
+        List job_list = as_mysql_jobacct_process_get_jobs(mysql_conn, uid, &job_cond);
         ListIterator itr = NULL, itr2 = NULL;
         slurmdb_job_rec_t *job = NULL;
         slurmdb_reservation_rec_t *resv = NULL;
@@ -696,9 +626,7 @@ extern List as_mysql_get_resvs(mysql_conn_t *mysql_conn, uid_t uid,
                 if ((elapsed = (end - start)) < 1)
                     continue;
 
-                slurmdb_transfer_tres_time(
-                        &resv->tres_list, job->tres_alloc_str,
-                        elapsed);
+                slurmdb_transfer_tres_time(&resv->tres_list, job->tres_alloc_str, elapsed);
             }
             list_iterator_reset(itr2);
             if (!set) {

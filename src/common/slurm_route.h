@@ -44,6 +44,8 @@
 \*****************************************************************************/
 
 /*
+初始化路由插件。
+
  * Initialize the route plugin.
  *
  * IN - the name of the node this is running on.  Only needed on the slurmd.
@@ -79,9 +81,7 @@ extern int route_fini(void);
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_g_split_hostlist(hostlist_t hl,
-                                  hostlist_t **sp_hl,
-                                  int *count, uint16_t tree_width);
+extern int route_g_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width);
 
 /*
  * route_g_reconfigure - reset during reconfigure
@@ -105,7 +105,6 @@ extern slurm_addr_t *route_g_next_collector(bool *is_collector);
  * RET: slurm_addr_t* - address of backup node to send messages to be aggregated
  */
 extern slurm_addr_t *route_g_next_collector_backup(void);
-
 
 /*****************************************************************************\
  *  Plugin Common Functions
@@ -131,9 +130,7 @@ extern slurm_addr_t *route_g_next_collector_backup(void);
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_split_hostlist_treewidth(hostlist_t hl,
-                                          hostlist_t **sp_hl,
-                                          int *count, uint16_t tree_width);
+extern int route_split_hostlist_treewidth(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width);
 
 /*
  * route_next_collector - return address of next collector

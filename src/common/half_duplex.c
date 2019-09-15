@@ -46,10 +46,7 @@ static bool _half_duplex_readable(eio_obj_t *obj);
 
 static int _half_duplex(eio_obj_t *obj, List objs);
 
-struct io_operations half_duplex_ops = {
-        .readable = _half_duplex_readable,
-        .handle_read = _half_duplex,
-};
+struct io_operations half_duplex_ops = {.readable = _half_duplex_readable, .handle_read = _half_duplex,};
 
 static bool _half_duplex_readable(eio_obj_t *obj) {
     if (obj->shutdown) {
@@ -74,8 +71,7 @@ static int _half_duplex(eio_obj_t *obj, List objs) {
 
     in = read(obj->fd, buf, sizeof(buf));
     if (in == 0) {
-        debug("%s: shutting down %d -> %d",
-              __func__, obj->fd, *fd_out);
+        debug("%s: shutting down %d -> %d", __func__, obj->fd, *fd_out);
         goto shutdown;
     } else if (in < 0) {
         error("%s: read error %zd %m", __func__, in);

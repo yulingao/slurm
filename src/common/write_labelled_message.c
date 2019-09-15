@@ -48,8 +48,7 @@
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
 
-static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset,
-                          uint32_t task_offset);
+static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset, uint32_t task_offset);
 
 static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len);
 
@@ -72,9 +71,9 @@ static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len);
  * in a '\n'), then add a newline to the output file, but only
  * in label mode.
  */
-extern int write_labelled_message(int fd, void *buf, int len, int task_id,
-                                  uint32_t pack_offset, uint32_t task_offset,
-                                  bool label, int task_id_width) {
+extern int
+write_labelled_message(int fd, void *buf, int len, int task_id, uint32_t pack_offset, uint32_t task_offset, bool label,
+                       int task_id_width) {
     void *start, *end;
     char *prefix = NULL, *suffix = NULL;
     int remaining = len;
@@ -83,8 +82,7 @@ extern int write_labelled_message(int fd, void *buf, int len, int task_id,
     int rc = -1;
 
     if (label) {
-        prefix = _build_label(task_id, task_id_width, pack_offset,
-                              task_offset);
+        prefix = _build_label(task_id, task_id_width, pack_offset, task_offset);
     }
 
     while (remaining > 0) {
@@ -123,17 +121,14 @@ extern int write_labelled_message(int fd, void *buf, int len, int task_id,
 /*
  * Build line label. Call xfree() to release returned memory
  */
-static char *_build_label(int task_id, int task_id_width,
-                          uint32_t pack_offset, uint32_t task_offset) {
+static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset, uint32_t task_offset) {
     char *buf = NULL;
 
     if (pack_offset != NO_VAL) {
         if (task_offset != NO_VAL) {
-            xstrfmtcat(buf, "%*d: ", task_id_width,
-                       (task_id + task_offset));
+            xstrfmtcat(buf, "%*d: ", task_id_width, (task_id + task_offset));
         } else {
-            xstrfmtcat(buf, "P%u %*d: ", pack_offset, task_id_width,
-                       task_id);
+            xstrfmtcat(buf, "P%u %*d: ", pack_offset, task_id_width, task_id);
         }
     } else {
         xstrfmtcat(buf, "%*d: ", task_id_width, task_id);

@@ -94,8 +94,7 @@ int get_cpuset(cpu_set_t *mask, stepd_step_rec_t *job) {
     char buftype[1024];
 
     slurm_sprint_cpu_bind_type(buftype, job->cpu_bind_type);
-    debug3("get_cpuset (%s[%d]) %s", buftype, job->cpu_bind_type,
-           job->cpu_bind);
+    debug3("get_cpuset (%s[%d]) %s", buftype, job->cpu_bind_type, job->cpu_bind);
     CPU_ZERO(mask);
 
     if (job->cpu_bind_type & CPU_BIND_NONE) {
@@ -332,8 +331,7 @@ int slurm_setaffinity(pid_t pid, size_t size, const cpu_set_t *mask) {
     rval = sched_setaffinity(pid, size, mask);
 #endif
     if (rval) {
-        verbose("sched_setaffinity(%d,%zu,0x%s) failed: %m",
-                pid, size, task_cpuset_to_str(mask, mstr));
+        verbose("sched_setaffinity(%d,%zu,0x%s) failed: %m", pid, size, task_cpuset_to_str(mask, mstr));
     }
     return (rval);
 }
@@ -359,11 +357,10 @@ int slurm_getaffinity(pid_t pid, size_t size, cpu_set_t *mask) {
     rval = sched_getaffinity(pid, size, mask);
 #endif
     if (rval) {
-        verbose("sched_getaffinity(%d,%zu,0x%s) failed with status %d",
-                pid, size, task_cpuset_to_str(mask, mstr), rval);
+        verbose("sched_getaffinity(%d,%zu,0x%s) failed with status %d", pid, size, task_cpuset_to_str(mask, mstr),
+                rval);
     } else {
-        debug3("sched_getaffinity(%d) = 0x%s",
-               pid, task_cpuset_to_str(mask, mstr));
+        debug3("sched_getaffinity(%d) = 0x%s", pid, task_cpuset_to_str(mask, mstr));
     }
     return (rval);
 }

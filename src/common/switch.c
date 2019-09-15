@@ -60,34 +60,23 @@ typedef struct slurm_switch_ops {
 
     int (*state_restore)(char *dir_name, bool recover);
 
-    int (*alloc_jobinfo)(switch_jobinfo_t **jobinfo,
-                         uint32_t job_id, uint32_t step_id);
+    int (*alloc_jobinfo)(switch_jobinfo_t **jobinfo, uint32_t job_id, uint32_t step_id);
 
-    int (*build_jobinfo)(switch_jobinfo_t *jobinfo,
-                         slurm_step_layout_t *step_layout,
-                         char *network);
+    int (*build_jobinfo)(switch_jobinfo_t *jobinfo, slurm_step_layout_t *step_layout, char *network);
 
-    int (*duplicate_jobinfo)(switch_jobinfo_t *source,
-                             switch_jobinfo_t **dest);
+    int (*duplicate_jobinfo)(switch_jobinfo_t *source, switch_jobinfo_t **dest);
 
     void (*free_jobinfo)(switch_jobinfo_t *jobinfo);
 
-    int (*pack_jobinfo)(switch_jobinfo_t *jobinfo,
-                        Buf buffer,
-                        uint16_t protocol_version);
+    int (*pack_jobinfo)(switch_jobinfo_t *jobinfo, Buf buffer, uint16_t protocol_version);
 
-    int (*unpack_jobinfo)(switch_jobinfo_t **jobinfo,
-                          Buf buffer,
-                          uint16_t protocol_version);
+    int (*unpack_jobinfo)(switch_jobinfo_t **jobinfo, Buf buffer, uint16_t protocol_version);
 
-    int (*get_jobinfo)(switch_jobinfo_t *switch_job,
-                       int key, void *data);
+    int (*get_jobinfo)(switch_jobinfo_t *switch_job, int key, void *data);
 
-    void (*print_jobinfo)(FILE *fp,
-                          switch_jobinfo_t *jobinfo);
+    void (*print_jobinfo)(FILE *fp, switch_jobinfo_t *jobinfo);
 
-    char *(*string_jobinfo)(switch_jobinfo_t *jobinfo,
-                            char *buf, size_t size);
+    char *(*string_jobinfo)(switch_jobinfo_t *jobinfo, char *buf, size_t size);
 
     int (*node_init)(void);
 
@@ -99,32 +88,23 @@ typedef struct slurm_switch_ops {
 
     int (*job_suspend_test)(switch_jobinfo_t *jobinfo);
 
-    void (*job_suspend_info_get)(switch_jobinfo_t *jobinfo,
-                                 void *suspend_info);
+    void (*job_suspend_info_get)(switch_jobinfo_t *jobinfo, void *suspend_info);
 
-    void (*job_suspend_info_pack)(void *suspend_info,
-                                  Buf buffer,
-                                  uint16_t protocol_version);
+    void (*job_suspend_info_pack)(void *suspend_info, Buf buffer, uint16_t protocol_version);
 
-    int (*job_suspend_info_unpack)(void **suspend_info,
-                                   Buf buffer,
-                                   uint16_t protocol_version);
+    int (*job_suspend_info_unpack)(void **suspend_info, Buf buffer, uint16_t protocol_version);
 
     void (*job_suspend_info_free)(void *suspend_info);
 
-    int (*job_suspend)(void *suspend_info,
-                       int max_wait);
+    int (*job_suspend)(void *suspend_info, int max_wait);
 
-    int (*job_resume)(void *suspend_info,
-                      int max_wait);
+    int (*job_resume)(void *suspend_info, int max_wait);
 
     int (*job_fini)(switch_jobinfo_t *jobinfo);
 
     int (*job_postfini)(stepd_step_rec_t *job);
 
-    int (*job_attach)(switch_jobinfo_t *jobinfo,
-                      char ***env, uint32_t nodeid,
-                      uint32_t procid, uint32_t nnodes,
+    int (*job_attach)(switch_jobinfo_t *jobinfo, char ***env, uint32_t nodeid, uint32_t procid, uint32_t nnodes,
                       uint32_t nprocs, uint32_t rank);
 
     int (*clear_node)(void);
@@ -133,29 +113,21 @@ typedef struct slurm_switch_ops {
 
     int (*build_nodeinfo)(switch_node_info_t *nodeinfo);
 
-    int (*pack_nodeinfo)(switch_node_info_t *nodeinfo,
-                         Buf buffer,
-                         uint16_t protocol_version);
+    int (*pack_nodeinfo)(switch_node_info_t *nodeinfo, Buf buffer, uint16_t protocol_version);
 
-    int (*unpack_nodeinfo)(switch_node_info_t **nodeinfo,
-                           Buf buffer,
-                           uint16_t protocol_version);
+    int (*unpack_nodeinfo)(switch_node_info_t **nodeinfo, Buf buffer, uint16_t protocol_version);
 
     int (*free_nodeinfo)(switch_node_info_t **nodeinfo);
 
-    char *(*sprintf_nodeinfo)(switch_node_info_t *nodeinfo,
-                              char *buf, size_t size);
+    char *(*sprintf_nodeinfo)(switch_node_info_t *nodeinfo, char *buf, size_t size);
 
-    int (*step_complete)(switch_jobinfo_t *jobinfo,
-                         char *nodelist);
+    int (*step_complete)(switch_jobinfo_t *jobinfo, char *nodelist);
 
-    int (*step_part_comp)(switch_jobinfo_t *jobinfo,
-                          char *nodelist);
+    int (*step_part_comp)(switch_jobinfo_t *jobinfo, char *nodelist);
 
     bool (*part_comp)(void);
 
-    int (*step_allocated)(switch_jobinfo_t *jobinfo,
-                          char *nodelist);
+    int (*step_allocated)(switch_jobinfo_t *jobinfo, char *nodelist);
 
     int (*state_clear)(void);
 
@@ -180,54 +152,22 @@ typedef struct slurm_switch_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_switch_ops_t.
  */
-static const char *syms[] = {
-        "plugin_id",
-        "switch_p_libstate_save",
-        "switch_p_libstate_restore",
-        "switch_p_alloc_jobinfo",
-        "switch_p_build_jobinfo",
-        "switch_p_duplicate_jobinfo",
-        "switch_p_free_jobinfo",
-        "switch_p_pack_jobinfo",
-        "switch_p_unpack_jobinfo",
-        "switch_p_get_jobinfo",
-        "switch_p_print_jobinfo",
-        "switch_p_sprint_jobinfo",
-        "switch_p_node_init",
-        "switch_p_node_fini",
-        "switch_p_job_preinit",
-        "switch_p_job_init",
-        "switch_p_job_suspend_test",
-        "switch_p_job_suspend_info_get",
-        "switch_p_job_suspend_info_pack",
-        "switch_p_job_suspend_info_unpack",
-        "switch_p_job_suspend_info_free",
-        "switch_p_job_suspend",
-        "switch_p_job_resume",
-        "switch_p_job_fini",
-        "switch_p_job_postfini",
-        "switch_p_job_attach",
-        "switch_p_clear_node_state",
-        "switch_p_alloc_node_info",
-        "switch_p_build_node_info",
-        "switch_p_pack_node_info",
-        "switch_p_unpack_node_info",
-        "switch_p_free_node_info",
-        "switch_p_sprintf_node_info",
-        "switch_p_job_step_complete",
-        "switch_p_job_step_part_comp",
-        "switch_p_part_comp",
-        "switch_p_job_step_allocated",
-        "switch_p_libstate_clear",
-        "switch_p_slurmctld_init",
-        "switch_p_slurmd_init",
-        "switch_p_slurmd_step_init",
-        "switch_p_reconfig",
-        "switch_p_job_step_pre_suspend",
-        "switch_p_job_step_post_suspend",
-        "switch_p_job_step_pre_resume",
-        "switch_p_job_step_post_resume",
-};
+static const char *syms[] = {"plugin_id", "switch_p_libstate_save", "switch_p_libstate_restore",
+                             "switch_p_alloc_jobinfo", "switch_p_build_jobinfo", "switch_p_duplicate_jobinfo",
+                             "switch_p_free_jobinfo", "switch_p_pack_jobinfo", "switch_p_unpack_jobinfo",
+                             "switch_p_get_jobinfo", "switch_p_print_jobinfo", "switch_p_sprint_jobinfo",
+                             "switch_p_node_init", "switch_p_node_fini", "switch_p_job_preinit", "switch_p_job_init",
+                             "switch_p_job_suspend_test", "switch_p_job_suspend_info_get",
+                             "switch_p_job_suspend_info_pack", "switch_p_job_suspend_info_unpack",
+                             "switch_p_job_suspend_info_free", "switch_p_job_suspend", "switch_p_job_resume",
+                             "switch_p_job_fini", "switch_p_job_postfini", "switch_p_job_attach",
+                             "switch_p_clear_node_state", "switch_p_alloc_node_info", "switch_p_build_node_info",
+                             "switch_p_pack_node_info", "switch_p_unpack_node_info", "switch_p_free_node_info",
+                             "switch_p_sprintf_node_info", "switch_p_job_step_complete", "switch_p_job_step_part_comp",
+                             "switch_p_part_comp", "switch_p_job_step_allocated", "switch_p_libstate_clear",
+                             "switch_p_slurmctld_init", "switch_p_slurmd_init", "switch_p_slurmd_step_init",
+                             "switch_p_reconfig", "switch_p_job_step_pre_suspend", "switch_p_job_step_post_suspend",
+                             "switch_p_job_step_pre_resume", "switch_p_job_step_post_resume",};
 
 static slurm_switch_ops_t *ops = NULL;
 static plugin_context_t **switch_context = NULL;
@@ -246,10 +186,8 @@ static int _load_plugins(void *x, void *arg) {
     char *plugin_name = (char *) x;
     _plugin_args_t *pargs = (_plugin_args_t *) arg;
 
-    switch_context[switch_context_cnt] =
-            plugin_context_create(pargs->plugin_type, plugin_name,
-                                  (void **) &ops[switch_context_cnt], syms,
-                                  sizeof(syms));
+    switch_context[switch_context_cnt] = plugin_context_create(pargs->plugin_type, plugin_name,
+                                                               (void **) &ops[switch_context_cnt], syms, sizeof(syms));
 
     if (switch_context[switch_context_cnt]) {
         /* set the default */
@@ -316,8 +254,7 @@ extern int switch_init(bool only_default) {
     }
     if (plugin_names && (plugin_cnt = list_count(plugin_names))) {
         ops = xcalloc(plugin_cnt, sizeof(slurm_switch_ops_t));
-        switch_context = xcalloc(plugin_cnt,
-                                 sizeof(plugin_context_t * ));
+        switch_context = xcalloc(plugin_cnt, sizeof(plugin_context_t * ));
 
         list_for_each(plugin_names, _load_plugins, &plugin_args);
     }
@@ -328,19 +265,13 @@ extern int switch_init(bool only_default) {
     /* Ensure that plugin_id is valid and unique */
     for (i = 0; i < switch_context_cnt; i++) {
         for (j = i + 1; j < switch_context_cnt; j++) {
-            if (*(ops[i].plugin_id) !=
-                *(ops[j].plugin_id))
+            if (*(ops[i].plugin_id) != *(ops[j].plugin_id))
                 continue;
             fatal("switchPlugins: Duplicate plugin_id %u for "
-                  "%s and %s",
-                  *(ops[i].plugin_id),
-                  switch_context[i]->type,
-                  switch_context[j]->type);
+                  "%s and %s", *(ops[i].plugin_id), switch_context[i]->type, switch_context[j]->type);
         }
         if (*(ops[i].plugin_id) < 100) {
-            fatal("switchPlugins: Invalid plugin_id %u (<100) %s",
-                  *(ops[i].plugin_id),
-                  switch_context[i]->type);
+            fatal("switchPlugins: Invalid plugin_id %u (<100) %s", *(ops[i].plugin_id), switch_context[i]->type);
         }
     }
 
@@ -401,8 +332,7 @@ extern int switch_g_clear(void) {
     return (*(ops[switch_context_default].state_clear))();
 }
 
-extern int switch_g_alloc_jobinfo(dynamic_plugin_data_t **jobinfo,
-                                  uint32_t job_id, uint32_t step_id) {
+extern int switch_g_alloc_jobinfo(dynamic_plugin_data_t **jobinfo, uint32_t job_id, uint32_t step_id) {
     dynamic_plugin_data_t *jobinfo_ptr = NULL;
 
     if (switch_init(0) < 0)
@@ -414,8 +344,7 @@ extern int switch_g_alloc_jobinfo(dynamic_plugin_data_t **jobinfo,
     return (*(ops[jobinfo_ptr->plugin_id].alloc_jobinfo))((switch_jobinfo_t * *) & jobinfo_ptr->data, job_id, step_id);
 }
 
-extern int switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo,
-                                  slurm_step_layout_t *step_layout, char *network) {
+extern int switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo, slurm_step_layout_t *step_layout, char *network) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -431,8 +360,7 @@ extern int switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo,
     return (*(ops[plugin_id].build_jobinfo))(data, step_layout, network);
 }
 
-extern int switch_g_duplicate_jobinfo(dynamic_plugin_data_t *source,
-                                      dynamic_plugin_data_t **dest) {
+extern int switch_g_duplicate_jobinfo(dynamic_plugin_data_t *source, dynamic_plugin_data_t **dest) {
     dynamic_plugin_data_t *dest_ptr = NULL;
     uint32_t plugin_id = source->plugin_id;
 
@@ -442,8 +370,7 @@ extern int switch_g_duplicate_jobinfo(dynamic_plugin_data_t *source,
     dest_ptr = _create_dynamic_plugin_data(plugin_id);
     *dest = dest_ptr;
 
-    return (*(ops[plugin_id].duplicate_jobinfo))(
-            source->data, (switch_jobinfo_t * *) & dest_ptr->data);
+    return (*(ops[plugin_id].duplicate_jobinfo))(source->data, (switch_jobinfo_t * *) & dest_ptr->data);
 }
 
 extern void switch_g_free_jobinfo(dynamic_plugin_data_t *jobinfo) {
@@ -457,8 +384,7 @@ extern void switch_g_free_jobinfo(dynamic_plugin_data_t *jobinfo) {
     }
 }
 
-extern int switch_g_pack_jobinfo(dynamic_plugin_data_t *jobinfo, Buf buffer,
-                                 uint16_t protocol_version) {
+extern int switch_g_pack_jobinfo(dynamic_plugin_data_t *jobinfo, Buf buffer, uint16_t protocol_version) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -474,16 +400,14 @@ extern int switch_g_pack_jobinfo(dynamic_plugin_data_t *jobinfo, Buf buffer,
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         pack32(*(ops[plugin_id].plugin_id), buffer);
     } else {
-        error("%s: protocol_version %hu not supported",
-              __func__, protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
         return SLURM_ERROR;
     }
 
     return (*(ops[plugin_id].pack_jobinfo))(data, buffer, protocol_version);
 }
 
-extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer,
-                                   uint16_t protocol_version) {
+extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer, uint16_t protocol_version) {
     dynamic_plugin_data_t *jobinfo_ptr = NULL;
 
     if (switch_init(0) < 0)
@@ -517,8 +441,7 @@ extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer,
      * Free nodeinfo_ptr if it is different from local cluster as it is not
      * relevant to this cluster.
      */
-    if ((jobinfo_ptr->plugin_id != switch_context_default) &&
-        _running_in_slurmctld()) {
+    if ((jobinfo_ptr->plugin_id != switch_context_default) && _running_in_slurmctld()) {
         switch_g_free_jobinfo(jobinfo_ptr);
         *jobinfo = _create_dynamic_plugin_data(switch_context_default);
     }
@@ -532,8 +455,7 @@ extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer,
     return SLURM_ERROR;
 }
 
-extern int switch_g_get_jobinfo(dynamic_plugin_data_t *jobinfo,
-                                int data_type, void *data) {
+extern int switch_g_get_jobinfo(dynamic_plugin_data_t *jobinfo, int data_type, void *data) {
     void *jobdata = NULL;
     uint32_t plugin_id;
 
@@ -565,8 +487,7 @@ extern void switch_g_print_jobinfo(FILE *fp, dynamic_plugin_data_t *jobinfo) {
     (*(ops[plugin_id].print_jobinfo))(fp, data);
 }
 
-extern char *switch_g_sprint_jobinfo(dynamic_plugin_data_t *jobinfo,
-                                     char *buf, size_t size) {
+extern char *switch_g_sprint_jobinfo(dynamic_plugin_data_t *jobinfo, char *buf, size_t size) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -635,8 +556,7 @@ extern int switch_g_job_suspend_test(dynamic_plugin_data_t *jobinfo) {
     return (*(ops[plugin_id].job_suspend_test))(data);
 }
 
-extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo,
-                                          void **suspend_info) {
+extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo, void **suspend_info) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -652,16 +572,14 @@ extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo,
     (*(ops[plugin_id].job_suspend_info_get))(data, suspend_info);
 }
 
-extern void switch_g_job_suspend_info_pack(void *suspend_info, Buf buffer,
-                                           uint16_t protocol_version) {
+extern void switch_g_job_suspend_info_pack(void *suspend_info, Buf buffer, uint16_t protocol_version) {
     if (switch_init(0) < 0)
         return;
 
     (*(ops[switch_context_default].job_suspend_info_pack))(suspend_info, buffer, protocol_version);
 }
 
-extern int switch_g_job_suspend_info_unpack(void **suspend_info, Buf buffer,
-                                            uint16_t protocol_version) {
+extern int switch_g_job_suspend_info_unpack(void **suspend_info, Buf buffer, uint16_t protocol_version) {
     if (switch_init(0) < 0)
         return SLURM_ERROR;
 
@@ -712,9 +630,9 @@ extern int switch_g_job_postfini(stepd_step_rec_t *job) {
     return (*(ops[switch_context_default].job_postfini))(job);
 }
 
-extern int switch_g_job_attach(dynamic_plugin_data_t *jobinfo, char ***env,
-                               uint32_t nodeid, uint32_t procid,
-                               uint32_t nnodes, uint32_t nprocs, uint32_t gid) {
+extern int
+switch_g_job_attach(dynamic_plugin_data_t *jobinfo, char ***env, uint32_t nodeid, uint32_t procid, uint32_t nnodes,
+                    uint32_t nprocs, uint32_t gid) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -755,16 +673,14 @@ extern int switch_g_build_node_info(switch_node_info_t *switch_node) {
     return (*(ops[switch_context_default].build_nodeinfo))(switch_node);
 }
 
-extern int switch_g_pack_node_info(switch_node_info_t *switch_node,
-                                   Buf buffer, uint16_t protocol_version) {
+extern int switch_g_pack_node_info(switch_node_info_t *switch_node, Buf buffer, uint16_t protocol_version) {
     if (switch_init(0) < 0)
         return SLURM_ERROR;
 
     return (*(ops[switch_context_default].pack_nodeinfo))(switch_node, buffer, protocol_version);
 }
 
-extern int switch_g_unpack_node_info(switch_node_info_t **switch_node,
-                                     Buf buffer, uint16_t protocol_version) {
+extern int switch_g_unpack_node_info(switch_node_info_t **switch_node, Buf buffer, uint16_t protocol_version) {
     if (switch_init(0) < 0)
         return SLURM_ERROR;
 
@@ -778,16 +694,14 @@ extern int switch_g_free_node_info(switch_node_info_t **switch_node) {
     return (*(ops[switch_context_default].free_nodeinfo))(switch_node);
 }
 
-extern char *switch_g_sprintf_node_info(switch_node_info_t *switch_node,
-                                        char *buf, size_t size) {
+extern char *switch_g_sprintf_node_info(switch_node_info_t *switch_node, char *buf, size_t size) {
     if (switch_init(0) < 0)
         return NULL;
 
     return (*(ops[switch_context_default].sprintf_nodeinfo))(switch_node, buf, size);
 }
 
-extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo,
-                                      char *nodelist) {
+extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo, char *nodelist) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -803,8 +717,7 @@ extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo,
     return (*(ops[plugin_id].step_complete))(data, nodelist);
 }
 
-extern int switch_g_job_step_part_comp(dynamic_plugin_data_t *jobinfo,
-                                       char *nodelist) {
+extern int switch_g_job_step_part_comp(dynamic_plugin_data_t *jobinfo, char *nodelist) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -827,8 +740,7 @@ extern bool switch_g_part_comp(void) {
     return (*(ops[switch_context_default].part_comp))();
 }
 
-extern int switch_g_job_step_allocated(dynamic_plugin_data_t *jobinfo,
-                                       char *nodelist) {
+extern int switch_g_job_step_allocated(dynamic_plugin_data_t *jobinfo, char *nodelist) {
     void *data = NULL;
     uint32_t plugin_id;
 

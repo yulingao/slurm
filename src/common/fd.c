@@ -217,8 +217,7 @@ extern int fsync_and_close(int fd, const char *file_type) {
     for (retval = 1, pos = 1; retval && pos < 4; pos++) {
         retval = fsync(fd);
         if (retval && (errno != EINTR)) {
-            error("fsync() error writing %s state save file: %m",
-                  file_type);
+            error("fsync() error writing %s state save file: %m", file_type);
         }
     }
     END_TIMER2("fsync_and_close:fsync");
@@ -229,8 +228,7 @@ extern int fsync_and_close(int fd, const char *file_type) {
     for (retval = 1, pos = 1; retval && pos < 4; pos++) {
         retval = close(fd);
         if (retval && (errno != EINTR)) {
-            error("close () error on %s state save file: %m",
-                  file_type);
+            error("close () error on %s state save file: %m", file_type);
         }
     }
     END_TIMER2("fsync_and_close:close");

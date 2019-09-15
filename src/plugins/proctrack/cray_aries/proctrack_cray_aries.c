@@ -182,8 +182,7 @@ extern int proctrack_p_create(stepd_step_rec_t *job) {
         slurm_mutex_unlock(&notify_mutex);
         slurm_mutex_unlock(&thread_mutex);
         if (job->cont_id != (jid_t) - 1)
-            debug("proctrack_p_create: created jid 0x%08lx thread 0x%08lx",
-                  job->cont_id, threadid);
+            debug("proctrack_p_create: created jid 0x%08lx thread 0x%08lx", job->cont_id, threadid);
     } else
         error("proctrack_p_create: already have a cont_id");
 
@@ -218,8 +217,7 @@ int proctrack_p_add(stepd_step_rec_t *job, pid_t pid) {
         if (errno == EINVAL && (count < 1)) {
             jid_t jid;
             if (proctrack_p_has_pid(job->cont_id, pid)) {
-                debug("%s: Trying to add pid (%d) again to the same container, ignoring.",
-                      __func__, pid);
+                debug("%s: Trying to add pid (%d) again to the same container, ignoring.", __func__, pid);
                 return SLURM_SUCCESS;
             }
 
@@ -229,13 +227,11 @@ int proctrack_p_add(stepd_step_rec_t *job, pid_t pid) {
                 count++;
                 goto try_again;
             } else {
-                error("%s: Couldn't detach pid %d from container: %m",
-                      __func__, pid);
+                error("%s: Couldn't detach pid %d from container: %m", __func__, pid);
                 return SLURM_ERROR;
             }
         } else {
-            error("Failed to attach pid %d to job container: %m",
-                  pid);
+            error("Failed to attach pid %d to job container: %m", pid);
             return SLURM_ERROR;
         }
     }
@@ -277,8 +273,7 @@ int proctrack_p_signal(uint64_t id, int sig) {
     DEF_TIMERS;
     START_TIMER;
     if (!threadid) {
-        if ((job_killjid((jid_t) id, sig) < 0)
-            && (errno != ENODATA) && (errno != EBADF))
+        if ((job_killjid((jid_t) id, sig) < 0) && (errno != ENODATA) && (errno != EBADF))
             return (SLURM_ERROR);
     } else if (sig == SIGKILL) {
         /* job ended before it started */

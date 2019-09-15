@@ -66,8 +66,7 @@
 
 /* Given a program name, translate it to a fully qualified pathname
  * as needed based upon the PATH environment variable */
-static char *
-_build_path(const char *cwd, char *fname) {
+static char *_build_path(const char *cwd, char *fname) {
     int i;
     char *path_env = NULL, *dir = NULL, *ptrptr = NULL;
     char *file_name = NULL, *file_path = NULL;
@@ -90,8 +89,7 @@ _build_path(const char *cwd, char *fname) {
 
     /* search for the file using cwd*/
     xstrfmtcat(file_path, "%s/%s", cwd, file_name);
-    if ((stat(file_path, &buf) == 0)
-        && (!S_ISDIR(buf.st_mode))) {
+    if ((stat(file_path, &buf) == 0) && (!S_ISDIR(buf.st_mode))) {
         xfree(file_name);
         return file_path;
     }
@@ -109,8 +107,7 @@ _build_path(const char *cwd, char *fname) {
     dir = strtok_r(path_env, ":", &ptrptr);
     while (dir) {
         xstrfmtcat(file_path, "%s/%s", dir, file_name);
-        if ((stat(file_path, &buf) == 0)
-            && (!S_ISDIR(buf.st_mode)))
+        if ((stat(file_path, &buf) == 0) && (!S_ISDIR(buf.st_mode)))
             break;
         dir = strtok_r(NULL, ":", &ptrptr);
         xfree(file_path);
@@ -125,8 +122,7 @@ _build_path(const char *cwd, char *fname) {
     return file_path;
 }
 
-static void
-_set_range(int low_num, int high_num, char *exec_name, bool ignore_duplicates) {
+static void _set_range(int low_num, int high_num, char *exec_name, bool ignore_duplicates) {
     int i;
 
     for (i = low_num; i <= high_num; i++) {
@@ -135,14 +131,12 @@ _set_range(int low_num, int high_num, char *exec_name, bool ignore_duplicates) {
         if (tv->executable_name == NULL) {
             tv->executable_name = xstrdup(exec_name);
         } else if (!ignore_duplicates) {
-            error("duplicate configuration for task %d ignored",
-                  i);
+            error("duplicate configuration for task %d ignored", i);
         }
     }
 }
 
-static void
-_set_exec_names(char *ranks, const char *cwd, char *exec_name, int ntasks) {
+static void _set_exec_names(char *ranks, const char *cwd, char *exec_name, int ntasks) {
     char *ptrptr = NULL, *exec_path = NULL;
     int low_num, high_num, num, i;
 
@@ -188,8 +182,7 @@ _set_exec_names(char *ranks, const char *cwd, char *exec_name, int ntasks) {
     return;
 }
 
-extern int
-mpir_set_multi_name(int ntasks, const char *config_fname, const char *cwd) {
+extern int mpir_set_multi_name(int ntasks, const char *config_fname, const char *cwd) {
     FILE *config_fd;
     char line[BUF_SIZE];
     char *ranks, *exec_name, *p, *ptrptr;
@@ -213,14 +206,12 @@ mpir_set_multi_name(int ntasks, const char *config_fname, const char *cwd) {
         line_num++;
         line_len = strlen(line);
         if (line_len >= (sizeof(line) - 1)) {
-            error("Line %d of configuration file %s too long",
-                  line_num, config_fname);
+            error("Line %d of configuration file %s too long", line_num, config_fname);
             fclose(config_fd);
             return -1;
         }
         if ((line_len > 0 && line[line_len - 1] == '\\') ||  /* EOF */
-            (line_len > 1 && line[line_len - 2] == '\\' &&
-             line[line_len - 1] == '\n'))
+            (line_len > 1 && line[line_len - 2] == '\\' && line[line_len - 1] == '\n'))
             line_break = true;
         else
             line_break = false;
@@ -243,8 +234,7 @@ mpir_set_multi_name(int ntasks, const char *config_fname, const char *cwd) {
         ranks = strtok_r(p, " \t\n", &ptrptr);
         exec_name = strtok_r(NULL, " \t\n", &ptrptr);
         if (!ranks || !exec_name) {
-            error("Line %d of configuration file %s is invalid",
-                  line_num, config_fname);
+            error("Line %d of configuration file %s is invalid", line_num, config_fname);
             fclose(config_fd);
             return -1;
         }
@@ -254,8 +244,7 @@ mpir_set_multi_name(int ntasks, const char *config_fname, const char *cwd) {
     return 0;
 }
 
-extern void
-mpir_init(int num_tasks) {
+extern void mpir_init(int num_tasks) {
     MPIR_proctable_size = num_tasks;
     MPIR_proctable = xmalloc(sizeof(MPIR_PROCDESC) * num_tasks);
     if (MPIR_proctable == NULL) {
@@ -264,8 +253,7 @@ mpir_init(int num_tasks) {
     }
 }
 
-extern void
-mpir_cleanup(void) {
+extern void mpir_cleanup(void) {
     int i;
 
     for (i = 0; i < MPIR_proctable_size; i++) {
@@ -275,9 +263,7 @@ mpir_cleanup(void) {
     xfree(MPIR_proctable);
 }
 
-extern void mpir_set_executable_names(const char *executable_name,
-                                      uint32_t task_offset,
-                                      uint32_t task_count) {
+extern void mpir_set_executable_names(const char *executable_name, uint32_t task_offset, uint32_t task_count) {
     int i;
 
     if (task_offset == NO_VAL)
@@ -289,21 +275,18 @@ extern void mpir_set_executable_names(const char *executable_name,
     }
 }
 
-extern void
-mpir_dump_proctable(void) {
+extern void mpir_dump_proctable(void) {
     MPIR_PROCDESC *tv;
     int i;
 
     for (i = 0; i < MPIR_proctable_size; i++) {
         tv = &MPIR_proctable[i];
-        info("task:%d, host:%s, pid:%d, executable:%s",
-             i, tv->host_name, tv->pid, tv->executable_name);
+        info("task:%d, host:%s, pid:%d, executable:%s", i, tv->host_name, tv->pid, tv->executable_name);
     }
 }
 
 static int
-_update_task_mask(int low_num, int high_num, slurm_opt_t *opt_local,
-                  bitstr_t **task_mask, bool ignore_duplicates) {
+_update_task_mask(int low_num, int high_num, slurm_opt_t *opt_local, bitstr_t **task_mask, bool ignore_duplicates) {
     int i;
 
     if (low_num > high_num) {
@@ -323,8 +306,7 @@ _update_task_mask(int low_num, int high_num, slurm_opt_t *opt_local,
             opt_local->ntasks = high_num + 1;
             opt_local->ntasks_set = true;
             i_set_ntasks = true;
-            (*task_mask) = bit_realloc((*task_mask),
-                                       opt_local->ntasks);
+            (*task_mask) = bit_realloc((*task_mask), opt_local->ntasks);
         }
     }
     for (i = low_num; i <= high_num; i++) {
@@ -339,8 +321,7 @@ _update_task_mask(int low_num, int high_num, slurm_opt_t *opt_local,
     return 0;
 }
 
-static int
-_validate_ranks(char *ranks, slurm_opt_t *opt_local, bitstr_t **task_mask) {
+static int _validate_ranks(char *ranks, slurm_opt_t *opt_local, bitstr_t **task_mask) {
     static bool has_asterisk = false;
     char *range = NULL, *p = NULL;
     char *ptrptr = NULL, *upper = NULL;
@@ -352,12 +333,10 @@ _validate_ranks(char *ranks, slurm_opt_t *opt_local, bitstr_t **task_mask) {
         opt_local->ntasks_set = true; /* do not allow to change later */
         has_asterisk = true;    /* must be last MPMD spec line */
         opt_local->srun_opt->multi_prog_cmds++;
-        return _update_task_mask(low_num, high_num, opt_local,
-                                 task_mask, true);
+        return _update_task_mask(low_num, high_num, opt_local, task_mask, true);
     }
 
-    for (range = strtok_r(ranks, ",", &ptrptr); range != NULL;
-         range = strtok_r(NULL, ",", &ptrptr)) {
+    for (range = strtok_r(ranks, ",", &ptrptr); range != NULL; range = strtok_r(NULL, ",", &ptrptr)) {
         /*
          * Non-contiguous tasks are split into multiple commands
          * in the mpmd_set so count each token separately
@@ -385,13 +364,11 @@ _validate_ranks(char *ranks, slurm_opt_t *opt_local, bitstr_t **task_mask) {
             low_num = atoi(range);
             high_num = atoi(upper);
         } else {
-            error("Invalid task range specification (%s)",
-                  range);
+            error("Invalid task range specification (%s)", range);
             return -1;
         }
 
-        if (_update_task_mask(low_num, high_num, opt_local,
-                              task_mask, false))
+        if (_update_task_mask(low_num, high_num, opt_local, task_mask, false))
             return -1;
     }
     return 0;
@@ -404,8 +381,7 @@ _validate_ranks(char *ranks, slurm_opt_t *opt_local, bitstr_t **task_mask) {
  * IN/OUT opt_local - slurm options
  * RET 0 on success, -1 otherwise
  */
-extern int
-verify_multi_name(char *config_fname, slurm_opt_t *opt_local) {
+extern int verify_multi_name(char *config_fname, slurm_opt_t *opt_local) {
     FILE *config_fd;
     char line[BUF_SIZE];
     char *ranks, *exec_name, *p, *ptrptr, *fullpath = NULL;
@@ -432,14 +408,12 @@ verify_multi_name(char *config_fname, slurm_opt_t *opt_local) {
         line_num++;
         line_len = strlen(line);
         if (line_len >= (sizeof(line) - 1)) {
-            error("Line %d of configuration file %s too long",
-                  line_num, config_fname);
+            error("Line %d of configuration file %s too long", line_num, config_fname);
             rc = -1;
             goto fini;
         }
         if ((line_len > 0 && line[line_len - 1] == '\\') ||  /* EOF */
-            (line_len > 1 && line[line_len - 2] == '\\' &&
-             line[line_len - 1] == '\n'))
+            (line_len > 1 && line[line_len - 2] == '\\' && line[line_len - 1] == '\n'))
             line_break = true;
         else
             line_break = false;
@@ -461,22 +435,18 @@ verify_multi_name(char *config_fname, slurm_opt_t *opt_local) {
         ranks = strtok_r(p, " \t\n", &ptrptr);
         exec_name = strtok_r(NULL, " \t\n", &ptrptr);
         if (!ranks || !exec_name) {
-            error("Line %d of configuration file %s invalid",
-                  line_num, config_fname);
+            error("Line %d of configuration file %s invalid", line_num, config_fname);
             rc = -1;
             goto fini;
         }
         if (_validate_ranks(ranks, opt_local, &task_mask)) {
-            error("Line %d of configuration file %s invalid",
-                  line_num, config_fname);
+            error("Line %d of configuration file %s invalid", line_num, config_fname);
             rc = -1;
             goto fini;
         }
         if (opt_local->srun_opt->test_exec &&
-            !(fullpath = search_path(
-                    opt_local->chdir, exec_name, true, X_OK, true))) {
-            error("Line %d of configuration file %s, program %s not executable",
-                  line_num, config_fname, exec_name);
+            !(fullpath = search_path(opt_local->chdir, exec_name, true, X_OK, true))) {
+            error("Line %d of configuration file %s, program %s not executable", line_num, config_fname, exec_name);
             rc = -1;
             goto fini;
         }
@@ -486,8 +456,7 @@ verify_multi_name(char *config_fname, slurm_opt_t *opt_local) {
     for (i = 0; i < opt_local->ntasks; i++) {
         if (!bit_test(task_mask, i)) {
             error("Configuration file %s invalid, "
-                  "no record for task id %d",
-                  config_fname, i);
+                  "no record for task id %d", config_fname, i);
             rc = -1;
             goto fini;
         }

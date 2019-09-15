@@ -68,32 +68,26 @@ extern void nodes_to_hilbert_curve(void) {
 
     /* Get the coordinates for each node based upon its numeric suffix */
     coords = xmalloc(sizeof(int) * node_record_count * dims);
-    for (i = 0, coord_inx = 0, node_ptr = node_record_table_ptr;
-         i < node_record_count; i++, node_ptr++) {
+    for (i = 0, coord_inx = 0, node_ptr = node_record_table_ptr; i < node_record_count; i++, node_ptr++) {
         j = strlen(node_ptr->name);
         if (j < dims) {
-            fatal("hostname %s lacks numeric %d dimension suffix",
-                  node_ptr->name, dims);
+            fatal("hostname %s lacks numeric %d dimension suffix", node_ptr->name, dims);
         }
         for (k = dims; k; k--) {
-            coords[coord_inx] = select_char2coord(
-                    node_ptr->name[j - k]);
+            coords[coord_inx] = select_char2coord(node_ptr->name[j - k]);
             if (coords[coord_inx] < 0) {
-                fatal("hostname %s lacks valid numeric suffix",
-                      node_ptr->name);
+                fatal("hostname %s lacks valid numeric suffix", node_ptr->name);
             }
             max_coord = MAX(max_coord, coords[coord_inx]);
             coord_inx++;    /* Don't put into MAX macro */
         }
     }
     if (max_coord > 31) {
-        fatal("maximum node coordinate exceeds system limit (%d>32)",
-              max_coord);
+        fatal("maximum node coordinate exceeds system limit (%d>32)", max_coord);
     }
 
     /* Generate each node's Hilbert integer */
-    for (i = 0, coord_inx = 0, node_ptr = node_record_table_ptr;
-         i < node_record_count; i++, node_ptr++) {
+    for (i = 0, coord_inx = 0, node_ptr = node_record_table_ptr; i < node_record_count; i++, node_ptr++) {
         for (j = 0; j < dims; j++)
             hilbert[j] = coords[coord_inx++];
         AxestoTranspose(hilbert, 5, dims);
@@ -101,20 +95,10 @@ extern void nodes_to_hilbert_curve(void) {
         /* A variation on the below calculation would be required here
          * for other dimension counts */
         node_ptr->node_rank =
-                ((hilbert[0] >> 4 & 1) << 14) +
-                ((hilbert[1] >> 4 & 1) << 13) +
-                ((hilbert[2] >> 4 & 1) << 12) +
-                ((hilbert[0] >> 3 & 1) << 11) +
-                ((hilbert[1] >> 3 & 1) << 10) +
-                ((hilbert[2] >> 3 & 1) << 9) +
-                ((hilbert[0] >> 2 & 1) << 8) +
-                ((hilbert[1] >> 2 & 1) << 7) +
-                ((hilbert[2] >> 2 & 1) << 6) +
-                ((hilbert[0] >> 1 & 1) << 5) +
-                ((hilbert[1] >> 1 & 1) << 4) +
-                ((hilbert[2] >> 1 & 1) << 3) +
-                ((hilbert[0] >> 0 & 1) << 2) +
-                ((hilbert[1] >> 0 & 1) << 1) +
-                ((hilbert[2] >> 0 & 1) << 0);
+                ((hilbert[0] >> 4 & 1) << 14) + ((hilbert[1] >> 4 & 1) << 13) + ((hilbert[2] >> 4 & 1) << 12) +
+                ((hilbert[0] >> 3 & 1) << 11) + ((hilbert[1] >> 3 & 1) << 10) + ((hilbert[2] >> 3 & 1) << 9) +
+                ((hilbert[0] >> 2 & 1) << 8) + ((hilbert[1] >> 2 & 1) << 7) + ((hilbert[2] >> 2 & 1) << 6) +
+                ((hilbert[0] >> 1 & 1) << 5) + ((hilbert[1] >> 1 & 1) << 4) + ((hilbert[2] >> 1 & 1) << 3) +
+                ((hilbert[0] >> 0 & 1) << 2) + ((hilbert[1] >> 0 & 1) << 1) + ((hilbert[2] >> 0 & 1) << 0);
     }
 }

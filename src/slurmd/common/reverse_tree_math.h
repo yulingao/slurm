@@ -47,11 +47,9 @@
 
 #include "src/slurmd/common/reverse_tree.h"
 
-void reverse_tree_info(int rank, int num_nodes, int width,
-                       int *parent, int *num_children,
-                       int *depth, int *total_depth);
+void
+reverse_tree_info(int rank, int num_nodes, int width, int *parent, int *num_children, int *depth, int *total_depth);
 
-int reverse_tree_direct_children(int rank, int num_nodes,
-                                 int width, int depth, int *children);
+int reverse_tree_direct_children(int rank, int num_nodes, int width, int depth, int *children);
 
 #endif /* !_REVERSE_TREE_MATH_H */

@@ -54,8 +54,7 @@ extern uint16_t slurmctld_comm_port;
  * Returns a pointer to a resource_allocation_response_msg which must
  * be freed with slurm_free_resource_allocation_response_msg()
  */
-extern resource_allocation_response_msg_t *
-allocate_nodes(bool handle_signals, slurm_opt_t *opt_local);
+extern resource_allocation_response_msg_t *allocate_nodes(bool handle_signals, slurm_opt_t *opt_local);
 
 /*
 从slurm控制器为异构/包作业分配节点——如果控制器出现故障，则重试尝试，如果当前没有可用资源，则可选择等待资源(参见opt.immediate)

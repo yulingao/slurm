@@ -82,11 +82,7 @@
 /* On output, use fields 12-37 from JOB_STEP */
 
 typedef enum {
-    HEADLINE,
-    UNDERSCORE,
-    JOB,
-    JOBSTEP,
-    JOBCOMP
+    HEADLINE, UNDERSCORE, JOB, JOBSTEP, JOBCOMP
 } type_t;
 
 typedef enum {

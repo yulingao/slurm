@@ -41,8 +41,7 @@
  * scontrol_print_layout - print information about the supplied layout
  * IN layout_type - print information about the supplied layout 
  */
-extern void
-scontrol_print_layout(int argc, char **argv) {
+extern void scontrol_print_layout(int argc, char **argv) {
     int i = 0, tag_len = 0;
     char *tag = NULL, *val = NULL;
     char *layout_type = NULL, *entities = NULL, *type = NULL;
@@ -74,14 +73,11 @@ scontrol_print_layout(int argc, char **argv) {
         } else {
             exit_code = 1;
             if (quiet_flag != 1)
-                fprintf(stderr,
-                        "invalid option for layouts: %s\n",
-                        tag);
+                fprintf(stderr, "invalid option for layouts: %s\n", tag);
         }
         i++;
     }
-    if (slurm_load_layout(layout_type, entities, type, flags,
-                          &layout_info_ptr) == SLURM_SUCCESS) {
+    if (slurm_load_layout(layout_type, entities, type, flags, &layout_info_ptr) == SLURM_SUCCESS) {
         slurm_print_layout_info(stdout, layout_info_ptr, one_liner);
         slurm_free_layout_info_msg(layout_info_ptr);
     }

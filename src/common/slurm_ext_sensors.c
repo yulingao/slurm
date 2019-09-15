@@ -69,12 +69,8 @@ typedef struct slurm_ext_sensors_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_ext_sensors_ops_t.
  */
-static const char *syms[] = {
-        "ext_sensors_p_update_component_data",
-        "ext_sensors_p_get_stepstartdata",
-        "ext_sensors_p_get_stependdata",
-        "ext_sensors_p_get_config",
-};
+static const char *syms[] = {"ext_sensors_p_update_component_data", "ext_sensors_p_get_stepstartdata",
+                             "ext_sensors_p_get_stependdata", "ext_sensors_p_get_config",};
 
 static slurm_ext_sensors_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -96,8 +92,7 @@ extern int ext_sensors_init(void) {
 
     type = slurm_get_ext_sensors_type();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -127,8 +122,7 @@ extern int ext_sensors_fini(void) {
 }
 
 extern ext_sensors_data_t *ext_sensors_alloc(void) {
-    ext_sensors_data_t *ext_sensors =
-            xmalloc(sizeof(struct ext_sensors_data));
+    ext_sensors_data_t *ext_sensors = xmalloc(sizeof(struct ext_sensors_data));
 
     ext_sensors->consumed_energy = NO_VAL64;
     ext_sensors->temperature = NO_VAL;
@@ -140,8 +134,7 @@ extern void ext_sensors_destroy(ext_sensors_data_t *ext_sensors) {
     xfree(ext_sensors);
 }
 
-extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer,
-                                  uint16_t protocol_version) {
+extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         if (!ext_sensors) {
             pack64(0, buffer);
@@ -158,8 +151,7 @@ extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer,
     }
 }
 
-extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer,
-                                   uint16_t protocol_version) {
+extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer, uint16_t protocol_version) {
     ext_sensors_data_t *ext_sensors_ptr = ext_sensors_alloc();
     *ext_sensors = ext_sensors_ptr;
     if (ext_sensors_ptr == NULL)

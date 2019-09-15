@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+import codecs
+import os
 import re
 import sys
-import os
-import codecs
 
 canonical_url = 'https://slurm.schedmd.com/'
 
@@ -30,6 +30,7 @@ ids = {}
 title = ''
 dirname = ''
 
+
 # Instert tags for options
 #   Two styles are processed.
 #       <DT><B>pppppp</B><DD>
@@ -42,7 +43,7 @@ def insert_tag(html, lineIn):
         posEnd = lineIn.find("</H2>")
         if posEnd != -1:
             id_name = lineIn[4:posEnd]
-            id_name = id_name.replace(' ','-')
+            id_name = id_name.replace(' ', '-')
             if id_name in ids:
                 ids[id_name] += 1
                 id_name += "_" + str(ids[id_name])
@@ -58,13 +59,13 @@ def insert_tag(html, lineIn):
         # 1st form
         posBgn = 5
     posBgn = posBgn + 2
-    posEnd = lineIn.find("</B>",posBgn)
+    posEnd = lineIn.find("</B>", posBgn)
     if posEnd == -1:
         # poorly constructed
         return
 
     id_name = lineIn[posBgn:posEnd]
-    id_name = id_name.replace(' ','-')
+    id_name = id_name.replace(' ', '-')
     if id_name in ids:
         ids[id_name] += 1
         id_name += "_" + str(ids[id_name])
@@ -75,78 +76,79 @@ def insert_tag(html, lineIn):
 
 
 def llnl_references(line):
-        manStr = "Refer to mc_support.html"
-        htmlStr = 'Refer to <a href="mc_support.html">mc_support</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/mc_support.html">https://slurm.schedmd.com/mc_support.html</A>'
-        htmlStr = 'the <a href="mc_support.html">mc_support</a> document'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/dist_plane.html.">https://slurm.schedmd.com/dist_plane.html.</A>'
-        htmlStr = 'the <a href="dist_plane.html">dist_plane</a> document'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '&lt;<A HREF="https://slurm.schedmd.com/mpi_guide.html">https://slurm.schedmd.com/mpi_guide.html</A>&gt;'
-        htmlStr = '<a href="mpi_guide.html">mpi_guide</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '(<A HREF="https://slurm.schedmd.com/power_save.html).">https://slurm.schedmd.com/power_save.html).</A>'
-        htmlStr = '<a href="power_save.html">power_save</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/cons_res.html">https://slurm.schedmd.com/cons_res.html</A>'
-        htmlStr = '<a href="cons_res.html">cons_res</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/cons_res_share.html">https://slurm.schedmd.com/cons_res_share.html</A>'
-        htmlStr = '<a href="cons_res_share.html">cons_res_share</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/gang_scheduling.html">https://slurm.schedmd.com/gang_scheduling.html</A>'
-        htmlStr = '<a href="gang_scheduling.html">gang_scheduling</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        manStr = '<A HREF="https://slurm.schedmd.com/preempt.html">https://slurm.schedmd.com/preempt.html</A>'
-        htmlStr = '<a href="preempt.html">preempt</a>'
-        lineFix = line.replace(manStr,htmlStr)
-        if lineFix != line:
-            return lineFix
-        return line
+    manStr = "Refer to mc_support.html"
+    htmlStr = 'Refer to <a href="mc_support.html">mc_support</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/mc_support.html">https://slurm.schedmd.com/mc_support.html</A>'
+    htmlStr = 'the <a href="mc_support.html">mc_support</a> document'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/dist_plane.html.">https://slurm.schedmd.com/dist_plane.html.</A>'
+    htmlStr = 'the <a href="dist_plane.html">dist_plane</a> document'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '&lt;<A HREF="https://slurm.schedmd.com/mpi_guide.html">https://slurm.schedmd.com/mpi_guide.html</A>&gt;'
+    htmlStr = '<a href="mpi_guide.html">mpi_guide</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '(<A HREF="https://slurm.schedmd.com/power_save.html).">https://slurm.schedmd.com/power_save.html).</A>'
+    htmlStr = '<a href="power_save.html">power_save</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/cons_res.html">https://slurm.schedmd.com/cons_res.html</A>'
+    htmlStr = '<a href="cons_res.html">cons_res</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/cons_res_share.html">https://slurm.schedmd.com/cons_res_share.html</A>'
+    htmlStr = '<a href="cons_res_share.html">cons_res_share</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/gang_scheduling.html">https://slurm.schedmd.com/gang_scheduling.html</A>'
+    htmlStr = '<a href="gang_scheduling.html">gang_scheduling</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    manStr = '<A HREF="https://slurm.schedmd.com/preempt.html">https://slurm.schedmd.com/preempt.html</A>'
+    htmlStr = '<a href="preempt.html">preempt</a>'
+    lineFix = line.replace(manStr, htmlStr)
+    if lineFix != line:
+        return lineFix
+    return line
+
 
 def relative_reference(lineIn):
     fullRef = "/cgi-bin/man/man2html"
     lenRef = len(fullRef)
-    refAnchor="<A HREF=";
+    refAnchor = "<A HREF=";
     lenRefAnchor = len(refAnchor)
     lineOt = ""
     cursor = 0
 
-    posHREF = lineIn.find(fullRef,cursor)
+    posHREF = lineIn.find(fullRef, cursor)
     if posHREF == -1:
         return lineIn
-    if lineIn[posHREF+lenRef] != "?":
-        pos = lineIn.find("Return to Main Contents",cursor)
+    if lineIn[posHREF + lenRef] != "?":
+        pos = lineIn.find("Return to Main Contents", cursor)
         if pos != -1:
             return ""
         return "<i>man2html</i> "
     while posHREF != -1:
-        posRefAnchor = lineIn.find(refAnchor,cursor)
-        lineOt = lineOt + lineIn[cursor:posRefAnchor+lenRefAnchor]
+        posRefAnchor = lineIn.find(refAnchor, cursor)
+        lineOt = lineOt + lineIn[cursor:posRefAnchor + lenRefAnchor]
         cursor = posHREF + lenRef + 3
         lineOt = lineOt + '"'
-        posQuote = lineIn.find('"',cursor)
+        posQuote = lineIn.find('"', cursor)
         lineOt = lineOt + lineIn[cursor:posQuote] + ".html"
         cursor = posQuote
-        posHREF = lineIn.find(fullRef,cursor)
+        posHREF = lineIn.find(fullRef, cursor)
     lineOt = lineOt + lineIn[cursor:]
     return lineOt
 
@@ -159,19 +161,22 @@ def include_virtual(matchobj):
         filename = matchobj.group(2)
 
     if os.access(filename, os.F_OK):
-        #print 'Including file', filename
+        # print 'Including file', filename
         lines = open(filename, 'r').read()
         return lines
     else:
         return matchobj.group(0)
 
+
 def canonical_rewrite(matchobj):
     global newfilename
     return '<link rel="canonical" href="' + canonical_url + newfilename + '" />'
 
+
 def page_title_rewrite(matchobj):
     global title
     return '<title>Slurm Workload Manager - ' + title + '</title>'
+
 
 def url_rewrite(matchobj):
     global dirname
@@ -186,14 +191,16 @@ def url_rewrite(matchobj):
             newname = location[:-6] + '.html'
         else:
             newname = location[:-6] + '.html' + matchobj.group(3)
-        #print 'Rewriting', location, 'to', newname
+        # print 'Rewriting', location, 'to', newname
         return matchobj.group(1) + newname + matchobj.group(4)
     else:
         return matchobj.group(0)
 
+
 def version_rewrite(matchobj):
     global version
     return version
+
 
 files = []
 version = sys.argv[1]
@@ -220,12 +227,12 @@ for filename in files:
     shtml.seek(0)
 
     lines = open(sys.argv[2], 'r').read()
-    lines = lines.replace(".shtml",".html")
+    lines = lines.replace(".shtml", ".html")
     lines = version_regex.sub(version_rewrite, lines)
     lines = page_title_regex.sub(page_title_rewrite, lines)
     lines = canonical_regex.sub(canonical_rewrite, lines)
     html.write(lines)
-#    html.write(<!--#include virtual="header.txt"-->)
+    #    html.write(<!--#include virtual="header.txt"-->)
     for line in shtml.readlines():
         # Remove html header/footer created by man2html
         if line == "Content-type: text/html\n":
@@ -243,7 +250,7 @@ for filename in files:
         line = include_regex.sub(include_virtual, line)
         # Special case some html references
         line = llnl_references(line)
-        #insert tags for some options
+        # insert tags for some options
         insert_tag(html, line)
         # Make man2html links relative ones
         line = relative_reference(line)
@@ -251,10 +258,10 @@ for filename in files:
         line = url_regex.sub(url_rewrite, line)
         html.write(line)
     lines = open(sys.argv[3], 'r').read()
-    lines = lines.replace(".shtml",".html")
+    lines = lines.replace(".shtml", ".html")
     lines = version_regex.sub(version_rewrite, lines)
     html.write(lines)
-#    html.write(<!--#include virtual="footer.txt"-->)
+    #    html.write(<!--#include virtual="footer.txt"-->)
     html.close()
     shtml.close()
     os.remove(filename)

@@ -75,8 +75,7 @@ typedef struct {
 
     char *(*get_host)(void *cred);
 
-    int (*pack)(void *cred, Buf buf,
-                uint16_t protocol_version);
+    int (*pack)(void *cred, Buf buf, uint16_t protocol_version);
 
     void *(*unpack)(Buf buf, uint16_t protocol_version);
 } slurm_auth_ops_t;
@@ -84,18 +83,9 @@ typedef struct {
  * These strings must be kept in the same order as the fields
  * declared for slurm_auth_ops_t.
  */
-static const char *syms[] = {
-        "plugin_id",
-        "plugin_type",
-        "slurm_auth_create",
-        "slurm_auth_destroy",
-        "slurm_auth_verify",
-        "slurm_auth_get_uid",
-        "slurm_auth_get_gid",
-        "slurm_auth_get_host",
-        "slurm_auth_pack",
-        "slurm_auth_unpack",
-};
+static const char *syms[] = {"plugin_id", "plugin_type", "slurm_auth_create", "slurm_auth_destroy", "slurm_auth_verify",
+                             "slurm_auth_get_uid", "slurm_auth_get_gid", "slurm_auth_get_host", "slurm_auth_pack",
+                             "slurm_auth_unpack",};
 
 /*
  * A global authentication context.  "Global" in the sense that there's
@@ -142,12 +132,10 @@ extern int slurm_auth_init(char *auth_type) {
      */
     while (type) {
         xrecalloc(ops, g_context_num + 1, sizeof(slurm_auth_ops_t));
-        xrecalloc(g_context, g_context_num + 1,
-                  sizeof(plugin_context_t));
+        xrecalloc(g_context, g_context_num + 1, sizeof(plugin_context_t));
 
-        g_context[g_context_num] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_num],
-                syms, sizeof(syms));
+        g_context[g_context_num] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_num], syms,
+                                                         sizeof(syms));
 
         if (!g_context[g_context_num]) {
             error("cannot create %s context for %s", plugin_type, type);
@@ -185,9 +173,7 @@ extern int slurm_auth_fini(void) {
     for (i = 0; i < g_context_num; i++) {
         rc2 = plugin_context_destroy(g_context[i]);
         if (rc2) {
-            debug("%s: %s: %s",
-                  __func__, g_context[i]->type,
-                  slurm_strerror(rc2));
+            debug("%s: %s: %s", __func__, g_context[i]->type, slurm_strerror(rc2));
             rc = SLURM_ERROR;
         }
     }
@@ -305,8 +291,7 @@ int g_slurm_auth_pack(void *cred, Buf buf, uint16_t protocol_version) {
         pack32(0, buf);
         return (*(ops[wrap->index].pack))(cred, buf, protocol_version);
     } else {
-        error("%s: protocol_version %hu not supported",
-              __func__, protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
         return SLURM_ERROR;
     }
 }
@@ -322,15 +307,13 @@ void *g_slurm_auth_unpack(Buf buf, uint16_t protocol_version) {
         safe_unpack32(&plugin_id, buf);
         for (int i = 0; i < g_context_num; i++) {
             if (plugin_id == *(ops[i].plugin_id)) {
-                cred = (*(ops[i].unpack))(buf,
-                                          protocol_version);
+                cred = (*(ops[i].unpack))(buf, protocol_version);
                 if (cred)
                     cred->index = i;
                 return cred;
             }
         }
-        error("%s: remote plugin_id %u not found",
-              __func__, plugin_id);
+        error("%s: remote plugin_id %u not found", __func__, plugin_id);
         return NULL;
     } else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         char *plugin_type;
@@ -339,19 +322,16 @@ void *g_slurm_auth_unpack(Buf buf, uint16_t protocol_version) {
         safe_unpack32(&version, buf);
         for (int i = 0; i < g_context_num; i++) {
             if (!xstrcmp(plugin_type, ops[i].plugin_type)) {
-                cred = (*(ops[i].unpack))(buf,
-                                          protocol_version);
+                cred = (*(ops[i].unpack))(buf, protocol_version);
                 if (cred)
                     cred->index = i;
                 return cred;
             }
         }
-        error("%s: remote plugin_type %s not found",
-              __func__, plugin_type);
+        error("%s: remote plugin_type %s not found", __func__, plugin_type);
         return NULL;
     } else {
-        error("%s: protocol_version %hu not supported",
-              __func__, protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
         return NULL;
     }
 

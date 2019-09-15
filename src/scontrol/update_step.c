@@ -54,23 +54,20 @@ static uint32_t _get_step_time(uint32_t job_id, uint32_t step_id) {
     rc = slurm_get_job_steps((time_t) 0, job_id, step_id, &resp, SHOW_ALL);
     if (rc == SLURM_SUCCESS) {
         for (i = 0; i < resp->job_step_count; i++) {
-            if ((resp->job_steps[i].job_id != job_id) ||
-                (resp->job_steps[i].step_id != step_id))
+            if ((resp->job_steps[i].job_id != job_id) || (resp->job_steps[i].step_id != step_id))
                 continue;    /* should not happen */
             time_limit = resp->job_steps[i].time_limit;
             break;
         }
         slurm_free_job_step_info_response_msg(resp);
     } else {
-        error("Could not load state information for step %u.%u: %m",
-              job_id, step_id);
+        error("Could not load state information for step %u.%u: %m", job_id, step_id);
     }
 
     return time_limit;
 }
 
-static int _parse_comp_file(
-        char *file, step_update_request_msg_t *step_msg) {
+static int _parse_comp_file(char *file, step_update_request_msg_t *step_msg) {
     int i;
     FILE *fd = fopen(file, "r");
     char line[BUFFER_SIZE];
@@ -130,30 +127,23 @@ static int _parse_comp_file(
     switch (version) {
         case 1:
             if (i != UPDATE_STEP_VER1_LENGTH) {
-                fprintf(stderr,
-                        "Bad step update completion file length\n");
+                fprintf(stderr, "Bad step update completion file length\n");
                 return SLURM_ERROR;
             }
             step_msg->jobacct = jobacctinfo_create(NULL);
             step_msg->exit_code = atoi(update[UPDATE_STEP_EXITCODE]);
             step_msg->start_time = atoi(update[UPDATE_STEP_START]);
             step_msg->end_time = atoi(update[UPDATE_STEP_END]);
-            step_msg->jobacct->user_cpu_sec =
-                    atoi(update[UPDATE_STEP_USER_SEC]);
-            step_msg->jobacct->sys_cpu_sec =
-                    atoi(update[UPDATE_STEP_SYS_SEC]);
+            step_msg->jobacct->user_cpu_sec = atoi(update[UPDATE_STEP_USER_SEC]);
+            step_msg->jobacct->sys_cpu_sec = atoi(update[UPDATE_STEP_SYS_SEC]);
             step_msg->jobacct->tres_usage_in_min[TRES_ARRAY_CPU] =
-                    step_msg->jobacct->user_cpu_sec
-                    + step_msg->jobacct->sys_cpu_sec;
-            step_msg->jobacct->tres_usage_in_max[TRES_ARRAY_MEM] =
-                    atoi(update[UPDATE_STEP_MAX_RSS]);
-            step_msg->name =
-                    xstrdup(xbasename(update[UPDATE_STEP_STEPNAME]));
+                    step_msg->jobacct->user_cpu_sec + step_msg->jobacct->sys_cpu_sec;
+            step_msg->jobacct->tres_usage_in_max[TRES_ARRAY_MEM] = atoi(update[UPDATE_STEP_MAX_RSS]);
+            step_msg->name = xstrdup(xbasename(update[UPDATE_STEP_STEPNAME]));
             break;
         default:
             fprintf(stderr, "Unsupported step update "
-                            "completion file version: %d\n",
-                    version);
+                            "completion file version: %d\n", version);
             return SLURM_ERROR;
             break;
     }
@@ -195,8 +185,7 @@ extern int scontrol_update_step(int argc, char **argv) {
             char *end_ptr;
             step_msg.job_id = (uint32_t) strtol(val, &end_ptr, 10);
             if (end_ptr[0] == '.') {
-                step_msg.step_id = (uint32_t)
-                        strtol(end_ptr + 1, (char **) NULL, 10);
+                step_msg.step_id = (uint32_t) strtol(end_ptr + 1, (char **) NULL, 10);
             } else if (end_ptr[0] != '\0') {
                 exit_code = 1;
                 fprintf(stderr, "Invalid StepID parameter: "
@@ -219,9 +208,7 @@ extern int scontrol_update_step(int argc, char **argv) {
                 return 0;
             }
             if (incr || decr) {
-                step_current_time = _get_step_time(
-                        step_msg.job_id,
-                        step_msg.step_id);
+                step_current_time = _get_step_time(step_msg.job_id, step_msg.step_id);
                 if (step_current_time == NO_VAL) {
                     exit_code = 1;
                     return 0;
@@ -230,13 +217,11 @@ extern int scontrol_update_step(int argc, char **argv) {
                     time_limit += step_current_time;
                 } else if (time_limit > step_current_time) {
                     error("TimeLimit decrement larger than"
-                          " current time limit (%u > %u)",
-                          time_limit, step_current_time);
+                          " current time limit (%u > %u)", time_limit, step_current_time);
                     exit_code = 1;
                     return 0;
                 } else {
-                    time_limit = step_current_time -
-                                 time_limit;
+                    time_limit = step_current_time - time_limit;
                 }
             }
             step_msg.time_limit = time_limit;
@@ -244,9 +229,8 @@ extern int scontrol_update_step(int argc, char **argv) {
         } else if (xstrncasecmp(tag, "CompFile", MAX(taglen, 2)) == 0) {
             if (_parse_comp_file(val, &step_msg)) {
                 exit_code = 1;
-                fprintf(stderr,
-                        "Bad completion file (%s) given\n"
-                        "Request aborted\n", val);
+                fprintf(stderr, "Bad completion file (%s) given\n"
+                                "Request aborted\n", val);
                 return 0;
             }
             update_cnt++;

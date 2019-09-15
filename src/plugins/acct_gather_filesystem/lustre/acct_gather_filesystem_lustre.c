@@ -124,11 +124,7 @@ static char *_llite_path(void) {
     static char *llite_path = NULL;
     int i = 0;
     DIR *llite_dir;
-    static char *test_paths[] = {
-            "/proc/fs/lustre/llite",
-            "/sys/kernel/debug/lustre/llite",
-            NULL
-    };
+    static char *test_paths[] = {"/proc/fs/lustre/llite", "/sys/kernel/debug/lustre/llite", NULL};
 
     if (llite_path)
         return llite_path;
@@ -159,16 +155,14 @@ static int _check_lustre_fs(void) {
         uint32_t profile = 0;
 
         set = true;
-        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING,
-                                  &profile);
+        acct_gather_profile_g_get(ACCT_GATHER_PROFILE_RUNNING, &profile);
         if ((profile & ACCT_GATHER_PROFILE_LUSTRE)) {
             char *llite_path = _llite_path();
             if (!llite_path) {
                 error("%s: can't find Lustre stats", __func__);
                 rc = SLURM_ERROR;
             } else
-                debug("%s: using Lustre stats in %s",
-                      __func__, llite_path);
+                debug("%s: using Lustre stats in %s", __func__, llite_path);
         } else
             rc = SLURM_ERROR;
     }
@@ -218,12 +212,10 @@ static int _read_lustre_counters(void) {
         uint64_t write_samples = 0, write_bytes = 0;
         uint64_t read_samples = 0, read_bytes = 0;
 
-        if (!xstrcmp(entry->d_name, ".") ||
-            !xstrcmp(entry->d_name, ".."))
+        if (!xstrcmp(entry->d_name, ".") || !xstrcmp(entry->d_name, ".."))
             continue;
 
-        xstrfmtcat(path_stats, "%s/%s/stats",
-                   lustre_dir, entry->d_name);
+        xstrfmtcat(path_stats, "%s/%s/stats", lustre_dir, entry->d_name);
         debug3("%s: Found file %s", __func__, path_stats);
 
         fff = fopen(path_stats, "r");
@@ -241,34 +233,28 @@ static int _read_lustre_counters(void) {
                 break;
 
             if (strstr(buffer, "write_bytes")) {
-                sscanf(buffer,
-                       "%*s %"
+                sscanf(buffer, "%*s %"
                 PRIu64
                 " %*s %*s %*d %*d %"
-                PRIu64,
-                        &write_samples, &write_bytes);
+                PRIu64, &write_samples, &write_bytes);
                 debug3("%s %"
                 PRIu64
                 " write_bytes %"
                 PRIu64
-                " writes",
-                        __func__, write_bytes, write_samples);
+                " writes", __func__, write_bytes, write_samples);
                 bwrote = true;
             }
 
             if (strstr(buffer, "read_bytes")) {
-                sscanf(buffer,
-                       "%*s %"
+                sscanf(buffer, "%*s %"
                 PRIu64
                 " %*s %*s %*d %*d %"
-                PRIu64,
-                        &read_samples, &read_bytes);
+                PRIu64, &read_samples, &read_bytes);
                 debug3("%s %"
                 PRIu64
                 " read_bytes %"
                 PRIu64
-                " reads",
-                        __func__, read_bytes, read_samples);
+                " reads", __func__, read_bytes, read_samples);
                 bread = true;
             }
         }
@@ -281,13 +267,11 @@ static int _read_lustre_counters(void) {
         debug3("%s: write_bytes %"
         PRIu64
         " read_bytes %"
-        PRIu64,
-                __func__, lstats.write_bytes, lstats.read_bytes);
+        PRIu64, __func__, lstats.write_bytes, lstats.read_bytes);
         debug3("%s: write_samples %"
         PRIu64
         " read_samples %"
-        PRIu64,
-                __func__, lstats.write_samples, lstats.read_samples);
+        PRIu64, __func__, lstats.write_samples, lstats.read_samples);
     } /* while ((entry = readdir(proc_dir))) */
     closedir(proc_dir);
 
@@ -313,20 +297,14 @@ static int _update_node_filesystem(void) {
     static bool first = true;
 
     enum {
-        FIELD_READ,
-        FIELD_READMB,
-        FIELD_WRITE,
-        FIELD_WRITEMB,
-        FIELD_CNT
+        FIELD_READ, FIELD_READMB, FIELD_WRITE, FIELD_WRITEMB, FIELD_CNT
     };
 
-    acct_gather_profile_dataset_t dataset[] = {
-            {"Reads",   PROFILE_FIELD_UINT64},
-            {"ReadMB",  PROFILE_FIELD_DOUBLE},
-            {"Writes",  PROFILE_FIELD_UINT64},
-            {"WriteMB", PROFILE_FIELD_DOUBLE},
-            {NULL,      PROFILE_FIELD_NOT_SET}
-    };
+    acct_gather_profile_dataset_t dataset[] = {{"Reads",   PROFILE_FIELD_UINT64},
+                                               {"ReadMB",  PROFILE_FIELD_DOUBLE},
+                                               {"Writes",  PROFILE_FIELD_UINT64},
+                                               {"WriteMB", PROFILE_FIELD_DOUBLE},
+                                               {NULL,      PROFILE_FIELD_NOT_SET}};
 
     union {
         double d;
@@ -342,8 +320,7 @@ static int _update_node_filesystem(void) {
     }
 
     if (first) {
-        dataset_id = acct_gather_profile_g_create_dataset(
-                "Filesystem", NO_PARENT, dataset);
+        dataset_id = acct_gather_profile_g_create_dataset("Filesystem", NO_PARENT, dataset);
         if (dataset_id == SLURM_ERROR) {
             error("FileSystem: Failed to create the dataset for Lustre");
             slurm_mutex_unlock(&lustre_lock);
@@ -359,26 +336,17 @@ static int _update_node_filesystem(void) {
     }
 
     /* Compute the current values read from all lustre-xxxx directories */
-    data[FIELD_READ].u64 =
-            lstats.read_samples - lstats_prev.read_samples;
-    data[FIELD_READMB].d =
-            (double) (lstats.read_bytes - lstats_prev.read_bytes) /
-            (1 << 20);
-    data[FIELD_WRITE].u64 =
-            lstats.write_samples - lstats_prev.write_samples;
-    data[FIELD_WRITEMB].d =
-            (double) (lstats.write_bytes - lstats_prev.write_bytes) /
-            (1 << 20);
+    data[FIELD_READ].u64 = lstats.read_samples - lstats_prev.read_samples;
+    data[FIELD_READMB].d = (double) (lstats.read_bytes - lstats_prev.read_bytes) / (1 << 20);
+    data[FIELD_WRITE].u64 = lstats.write_samples - lstats_prev.write_samples;
+    data[FIELD_WRITEMB].d = (double) (lstats.write_bytes - lstats_prev.write_bytes) / (1 << 20);
 
     /* record sample */
     if (debug_flags & DEBUG_FLAG_PROFILE) {
         char str[256];
-        info("PROFILE-Lustre: %s",
-             acct_gather_profile_dataset_str(
-                     dataset, data, str, sizeof(str)));
+        info("PROFILE-Lustre: %s", acct_gather_profile_dataset_str(dataset, data, str, sizeof(str)));
     }
-    acct_gather_profile_g_add_sample_data(dataset_id, (void *) data,
-                                          lstats.update_time);
+    acct_gather_profile_g_add_sample_data(dataset_id, (void *) data, lstats.update_time);
 
     /* Save current as previous. */
     memcpy(&lstats_prev, &lstats, sizeof(lustre_stats_t));
@@ -446,8 +414,7 @@ extern void acct_gather_filesystem_p_conf_set(s_p_hashtbl_t *tbl) {
     debug("%s loaded", plugin_name);
 }
 
-extern void acct_gather_filesystem_p_conf_options(s_p_options_t **full_options,
-                                                  int *full_options_cnt) {
+extern void acct_gather_filesystem_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
 
     return;
 }
@@ -473,16 +440,10 @@ extern int acct_gather_filesystem_p_get_data(acct_gather_data_t *data) {
     }
 
     /* Obtain the current values read from all lustre-xxxx directories */
-    data[tres_pos].num_reads =
-            lstats.read_samples - lstats_prev.read_samples;
-    data[tres_pos].num_writes =
-            lstats.write_samples - lstats_prev.write_samples;
-    data[tres_pos].size_read =
-            (double) (lstats.read_bytes - lstats_prev.read_bytes) /
-            (1 << 20);
-    data[tres_pos].size_write =
-            (double) (lstats.write_bytes - lstats_prev.write_bytes) /
-            (1 << 20);
+    data[tres_pos].num_reads = lstats.read_samples - lstats_prev.read_samples;
+    data[tres_pos].num_writes = lstats.write_samples - lstats_prev.write_samples;
+    data[tres_pos].size_read = (double) (lstats.read_bytes - lstats_prev.read_bytes) / (1 << 20);
+    data[tres_pos].size_write = (double) (lstats.write_bytes - lstats_prev.write_bytes) / (1 << 20);
 
     memcpy(&lstats_prev, &lstats, sizeof(lustre_stats_t));
 

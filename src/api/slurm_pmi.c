@@ -165,8 +165,7 @@ static void _set_pmi_time(void) {
 }
 
 /* Transmit PMI Keyval space data */
-int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr,
-                            int pmi_rank, int pmi_size) {
+int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr, int pmi_rank, int pmi_size) {
     slurm_msg_t msg_send;
     int rc, retries = 0, timeout = 0;
 
@@ -213,8 +212,7 @@ int slurm_send_kvs_comm_set(kvs_comm_set_t *kvs_set_ptr,
 }
 
 /* Wait for barrier and get full PMI Keyval space data */
-int slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr,
-                           int pmi_rank, int pmi_size) {
+int slurm_get_kvs_comm_set(kvs_comm_set_t **kvs_set_ptr, int pmi_rank, int pmi_size) {
     int rc, srun_fd, retries = 0, timeout = 0;
     slurm_msg_t msg_send, msg_rcv;
     slurm_addr_t slurm_addr, srun_reply_addr;
@@ -344,13 +342,9 @@ static int _forward_comm_set(kvs_comm_set_t *kvs_set_ptr) {
         slurm_msg_t_init(&msg_send);
         msg_send.msg_type = PMI_KVS_GET_RESP;
         msg_send.data = (void *) kvs_set_ptr;
-        slurm_set_addr(&msg_send.address,
-                       kvs_set_ptr->kvs_host_ptr[i].port,
-                       kvs_set_ptr->kvs_host_ptr[i].hostname);
-        if (slurm_send_recv_rc_msg_only_one(&msg_send,
-                                            &msg_rc, 0) < 0) {
-            error("Could not forward msg to %s",
-                  kvs_set_ptr->kvs_host_ptr[i].hostname);
+        slurm_set_addr(&msg_send.address, kvs_set_ptr->kvs_host_ptr[i].port, kvs_set_ptr->kvs_host_ptr[i].hostname);
+        if (slurm_send_recv_rc_msg_only_one(&msg_send, &msg_rc, 0) < 0) {
+            error("Could not forward msg to %s", kvs_set_ptr->kvs_host_ptr[i].hostname);
             msg_rc = 1;
         }
         rc = MAX(rc, msg_rc);

@@ -1,4 +1,3 @@
-
 /*****************************************************************************\
  *  slurm_jobcomp.c - implementation-independent job completion logging
  *  functions
@@ -66,20 +65,15 @@ typedef struct slurm_jobcomp_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_jobcomp_ops_t.
  */
-static const char *syms[] = {
-        "slurm_jobcomp_set_location",
-        "slurm_jobcomp_log_record",
-        "slurm_jobcomp_get_jobs",
-        "slurm_jobcomp_archive"
-};
+static const char *syms[] = {"slurm_jobcomp_set_location", "slurm_jobcomp_log_record", "slurm_jobcomp_get_jobs",
+                             "slurm_jobcomp_archive"};
 
 static slurm_jobcomp_ops_t ops;
 static plugin_context_t *g_context = NULL;
 static pthread_mutex_t context_lock = PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
-extern void
-jobcomp_destroy_job(void *object) {
+extern void jobcomp_destroy_job(void *object) {
     jobcomp_job_rec_t *job = (jobcomp_job_rec_t *) object;
     if (job) {
         xfree(job->partition);
@@ -113,8 +107,7 @@ jobcomp_destroy_job(void *object) {
 }
 
 
-extern int
-g_slurm_jobcomp_init(char *jobcomp_loc) {
+extern int g_slurm_jobcomp_init(char *jobcomp_loc) {
     int retval = SLURM_SUCCESS;
     char *plugin_type = "jobcomp";
     char *type = NULL;
@@ -128,8 +121,7 @@ g_slurm_jobcomp_init(char *jobcomp_loc) {
         plugin_context_destroy(g_context);
 
     type = slurm_get_jobcomp_type();
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -146,8 +138,7 @@ g_slurm_jobcomp_init(char *jobcomp_loc) {
     return retval;
 }
 
-extern int
-g_slurm_jobcomp_fini(void) {
+extern int g_slurm_jobcomp_fini(void) {
     slurm_mutex_lock(&context_lock);
 
     if (!g_context)
@@ -162,8 +153,7 @@ g_slurm_jobcomp_fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern int
-g_slurm_jobcomp_write(struct job_record *job_ptr) {
+extern int g_slurm_jobcomp_write(struct job_record *job_ptr) {
     int retval = SLURM_SUCCESS;
 
     slurm_mutex_lock(&context_lock);
@@ -177,8 +167,7 @@ g_slurm_jobcomp_write(struct job_record *job_ptr) {
     return retval;
 }
 
-extern List
-g_slurm_jobcomp_get_jobs(slurmdb_job_cond_t *job_cond) {
+extern List g_slurm_jobcomp_get_jobs(slurmdb_job_cond_t *job_cond) {
     List job_list = NULL;
 
     slurm_mutex_lock(&context_lock);
@@ -190,8 +179,7 @@ g_slurm_jobcomp_get_jobs(slurmdb_job_cond_t *job_cond) {
     return job_list;
 }
 
-extern int
-g_slurm_jobcomp_archive(slurmdb_archive_cond_t *arch_cond) {
+extern int g_slurm_jobcomp_archive(slurmdb_archive_cond_t *arch_cond) {
     int rc = SLURM_ERROR;
 
     slurm_mutex_lock(&context_lock);

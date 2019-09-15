@@ -71,8 +71,7 @@ extern List mysql_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
         while ((selected_step = list_next(itr))) {
             if (set)
                 xstrcat(extra, " || ");
-            tmp = xstrdup_printf("jobid=%u",
-                                 selected_step->jobid);
+            tmp = xstrdup_printf("jobid=%u", selected_step->jobid);
             xstrcat(extra, tmp);
             set = 1;
             xfree(tmp);
@@ -92,8 +91,7 @@ extern List mysql_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
         while ((selected_part = list_next(itr))) {
             if (set)
                 xstrcat(extra, " || ");
-            tmp = xstrdup_printf("`partition`='%s'",
-                                 selected_part);
+            tmp = xstrdup_printf("`partition`='%s'", selected_part);
             xstrcat(extra, tmp);
             set = 1;
             xfree(tmp);
@@ -119,8 +117,7 @@ extern List mysql_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
     }
 
     //info("query = %s", query);
-    if (!(result =
-                  mysql_db_query_ret(jobcomp_mysql_conn, query, 0))) {
+    if (!(result = mysql_db_query_ret(jobcomp_mysql_conn, query, 0))) {
         xfree(query);
         FREE_NULL_LIST(job_list);
         return NULL;
@@ -135,18 +132,13 @@ extern List mysql_jobcomp_process_get_jobs(slurmdb_job_cond_t *job_cond) {
             job->jobid = slurm_atoul(row[JOBCOMP_REQ_JOBID]);
         job->partition = xstrdup(row[JOBCOMP_REQ_PARTITION]);
         temp_time = atoi(row[JOBCOMP_REQ_STARTTIME]);
-        slurm_make_time_str(&temp_time,
-                            time_str,
-                            sizeof(time_str));
+        slurm_make_time_str(&temp_time, time_str, sizeof(time_str));
 
         job->start_time = xstrdup(time_str);
         temp_time = atoi(row[JOBCOMP_REQ_ENDTIME]);
-        slurm_make_time_str(&temp_time,
-                            time_str,
-                            sizeof(time_str));
+        slurm_make_time_str(&temp_time, time_str, sizeof(time_str));
 
-        job->elapsed_time = atoi(row[JOBCOMP_REQ_ENDTIME])
-                            - atoi(row[JOBCOMP_REQ_STARTTIME]);
+        job->elapsed_time = atoi(row[JOBCOMP_REQ_ENDTIME]) - atoi(row[JOBCOMP_REQ_STARTTIME]);
 
         job->end_time = xstrdup(time_str);
         if (row[JOBCOMP_REQ_UID])

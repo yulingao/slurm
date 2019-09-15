@@ -112,8 +112,7 @@ typedef struct {
  * Completion of slurm credential context
  */
 enum ctx_type {
-    SLURM_CRED_CREATOR,
-    SLURM_CRED_VERIFIER
+    SLURM_CRED_CREATOR, SLURM_CRED_VERIFIER
 };
 
 /*
@@ -215,14 +214,9 @@ typedef struct {
 
     void (*cred_destroy_key)(void *key);
 
-    int (*cred_sign)(void *key, char *buffer,
-                     int buf_size, char **sig_pp,
-                     uint32_t *sig_size_p);
+    int (*cred_sign)(void *key, char *buffer, int buf_size, char **sig_pp, uint32_t *sig_size_p);
 
-    int (*cred_verify_sign)(void *key, char *buffer,
-                            uint32_t buf_size,
-                            char *signature,
-                            uint32_t sig_size);
+    int (*cred_verify_sign)(void *key, char *buffer, uint32_t buf_size, char *signature, uint32_t sig_size);
 
     const char *(*cred_str_error)(int);
 } slurm_cred_ops_t;
@@ -231,14 +225,8 @@ typedef struct {
  * These strings must be in the same order as the fields declared
  * for slurm_cred_ops_t.
  */
-static const char *syms[] = {
-        "cred_p_read_private_key",
-        "cred_p_read_public_key",
-        "cred_p_destroy_key",
-        "cred_p_sign",
-        "cred_p_verify_sign",
-        "cred_p_str_error",
-};
+static const char *syms[] = {"cred_p_read_private_key", "cred_p_read_public_key", "cred_p_destroy_key", "cred_p_sign",
+                             "cred_p_verify_sign", "cred_p_str_error",};
 
 struct sbcast_cache {
     time_t expire;    /* Time that the cred was created	*/
@@ -295,11 +283,9 @@ static bool _credential_replayed(slurm_cred_ctx_t ctx, slurm_cred_t *cred);
 
 static bool _credential_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred);
 
-static int _slurm_cred_sign(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
-                            uint16_t protocol_version);
+static int _slurm_cred_sign(slurm_cred_ctx_t ctx, slurm_cred_t *cred, uint16_t protocol_version);
 
-static int _slurm_cred_verify_signature(slurm_cred_ctx_t ctx, slurm_cred_t *c,
-                                        uint16_t protocol_version);
+static int _slurm_cred_verify_signature(slurm_cred_ctx_t ctx, slurm_cred_t *c, uint16_t protocol_version);
 
 static int _slurm_cred_init(void);
 
@@ -309,8 +295,7 @@ static job_state_t *_job_state_unpack_one(Buf buffer);
 
 static cred_state_t *_cred_state_unpack_one(Buf buffer);
 
-static void _pack_cred(slurm_cred_t *cred, Buf buffer,
-                       uint16_t protocol_version);
+static void _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version);
 
 static void _job_state_unpack(slurm_cred_ctx_t ctx, Buf buffer);
 
@@ -341,8 +326,7 @@ static int _slurm_cred_init(void) {
         if ((tok = strstr(auth_info, "cred_expire="))) {
             cred_expire = atoi(tok + 12);
             if (cred_expire < 5) {
-                error("AuthInfo=cred_expire=%d invalid",
-                      cred_expire);
+                error("AuthInfo=cred_expire=%d invalid", cred_expire);
                 cred_expire = DEFAULT_EXPIRATION_WINDOW;
             }
             xfree(auth_info);
@@ -364,8 +348,7 @@ static int _slurm_cred_init(void) {
         goto done;
 
     type = slurm_get_cred_type();
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -411,8 +394,7 @@ extern int slurm_cred_fini(void) {
     return SLURM_SUCCESS;
 }
 
-slurm_cred_ctx_t
-slurm_cred_creator_ctx_create(const char *path) {
+slurm_cred_ctx_t slurm_cred_creator_ctx_create(const char *path) {
     slurm_cred_ctx_t ctx = NULL;
 
     if (_slurm_cred_init() < 0)
@@ -438,8 +420,7 @@ slurm_cred_creator_ctx_create(const char *path) {
 }
 
 
-slurm_cred_ctx_t
-slurm_cred_verifier_ctx_create(const char *path) {
+slurm_cred_ctx_t slurm_cred_verifier_ctx_create(const char *path) {
     slurm_cred_ctx_t ctx = NULL;
 
     if (_slurm_cred_init() < 0)
@@ -467,8 +448,7 @@ slurm_cred_verifier_ctx_create(const char *path) {
 }
 
 
-void
-slurm_cred_ctx_destroy(slurm_cred_ctx_t ctx) {
+void slurm_cred_ctx_destroy(slurm_cred_ctx_t ctx) {
     if (ctx == NULL)
         return;
     if (_slurm_cred_init() < 0)
@@ -494,8 +474,7 @@ slurm_cred_ctx_destroy(slurm_cred_ctx_t ctx) {
     return;
 }
 
-int
-slurm_cred_ctx_set(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
+int slurm_cred_ctx_set(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
     int rc = SLURM_SUCCESS;
     va_list ap;
 
@@ -523,8 +502,7 @@ slurm_cred_ctx_set(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
     return rc;
 }
 
-int
-slurm_cred_ctx_get(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
+int slurm_cred_ctx_get(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
     int rc = SLURM_SUCCESS;
     va_list ap;
     int *intp;
@@ -554,8 +532,7 @@ slurm_cred_ctx_get(slurm_cred_ctx_t ctx, slurm_cred_opt_t opt, ...) {
     return rc;
 }
 
-int
-slurm_cred_ctx_key_update(slurm_cred_ctx_t ctx, const char *path) {
+int slurm_cred_ctx_key_update(slurm_cred_ctx_t ctx, const char *path) {
     if (_slurm_cred_init() < 0)
         return SLURM_ERROR;
 
@@ -566,9 +543,7 @@ slurm_cred_ctx_key_update(slurm_cred_ctx_t ctx, const char *path) {
 }
 
 
-slurm_cred_t *
-slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
-                  uint16_t protocol_version) {
+slurm_cred_t *slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg, uint16_t protocol_version) {
     slurm_cred_t *cred = NULL;
     int i = 0, sock_recs = 0;
 
@@ -612,17 +587,13 @@ slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
     cred->sockets_per_node = xcalloc(i, sizeof(uint16_t));
     cred->sock_core_rep_count = xcalloc(i, sizeof(uint32_t));
     if (arg->cores_per_socket) {
-        memcpy(cred->cores_per_socket, arg->cores_per_socket,
-               (sizeof(uint16_t) * i));
+        memcpy(cred->cores_per_socket, arg->cores_per_socket, (sizeof(uint16_t) * i));
     }
     if (arg->sockets_per_node) {
-        memcpy(cred->sockets_per_node, arg->sockets_per_node,
-               (sizeof(uint16_t) * i));
+        memcpy(cred->sockets_per_node, arg->sockets_per_node, (sizeof(uint16_t) * i));
     }
     if (arg->sock_core_rep_count) {
-        memcpy(cred->sock_core_rep_count,
-               arg->sock_core_rep_count,
-               (sizeof(uint32_t) * i));
+        memcpy(cred->sock_core_rep_count, arg->sock_core_rep_count, (sizeof(uint32_t) * i));
     }
     cred->job_constraints = xstrdup(arg->job_constraints);
     cred->job_nhosts = arg->job_nhosts;
@@ -633,11 +604,9 @@ slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
         struct passwd pwd, *result;
         char buffer[PW_BUF_SIZE];
 
-        int rc = slurm_getpwuid_r(arg->uid, &pwd, buffer,
-                                  PW_BUF_SIZE, &result);
+        int rc = slurm_getpwuid_r(arg->uid, &pwd, buffer, PW_BUF_SIZE, &result);
         if (rc || !result) {
-            error("%s: getpwuid failed for uid=%u",
-                  __func__, arg->uid);
+            error("%s: getpwuid failed for uid=%u", __func__, arg->uid);
             goto fail;
         }
         cred->pw_name = xstrdup(result->pw_name);
@@ -645,16 +614,14 @@ slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
         cred->pw_dir = xstrdup(result->pw_dir);
         cred->pw_shell = xstrdup(result->pw_shell);
 
-        cred->ngids = group_cache_lookup(arg->uid, arg->gid,
-                                         arg->pw_name, &cred->gids);
+        cred->ngids = group_cache_lookup(arg->uid, arg->gid, arg->pw_name, &cred->gids);
     }
 
     if (enable_nss_slurm) {
         if (cred->ngids) {
             cred->gr_names = xcalloc(cred->ngids, sizeof(char *));
             for (int i = 0; i < cred->ngids; i++) {
-                cred->gr_names[i] =
-                        gid_to_string(cred->gids[i]);
+                cred->gr_names[i] = gid_to_string(cred->gids[i]);
             }
         }
     }
@@ -677,8 +644,7 @@ slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
     return NULL;
 }
 
-slurm_cred_t *
-slurm_cred_copy(slurm_cred_t *cred) {
+slurm_cred_t *slurm_cred_copy(slurm_cred_t *cred) {
     slurm_cred_t *rcred = NULL;
 
     xassert(cred != NULL);
@@ -710,18 +676,12 @@ slurm_cred_copy(slurm_cred_t *cred) {
     rcred->job_core_bitmap = bit_copy(cred->job_core_bitmap);
     rcred->step_core_bitmap = bit_copy(cred->step_core_bitmap);
     rcred->core_array_size = cred->core_array_size;
-    rcred->cores_per_socket = xcalloc(rcred->core_array_size,
-                                      sizeof(uint16_t));
-    memcpy(rcred->cores_per_socket, cred->cores_per_socket,
-           (sizeof(uint16_t) * rcred->core_array_size));
-    rcred->sockets_per_node = xcalloc(rcred->core_array_size,
-                                      sizeof(uint16_t));
-    memcpy(rcred->sockets_per_node, cred->sockets_per_node,
-           (sizeof(uint16_t) * rcred->core_array_size));
-    rcred->sock_core_rep_count = xcalloc(rcred->core_array_size,
-                                         sizeof(uint32_t));
-    memcpy(rcred->sock_core_rep_count, cred->sock_core_rep_count,
-           (sizeof(uint32_t) * rcred->core_array_size));
+    rcred->cores_per_socket = xcalloc(rcred->core_array_size, sizeof(uint16_t));
+    memcpy(rcred->cores_per_socket, cred->cores_per_socket, (sizeof(uint16_t) * rcred->core_array_size));
+    rcred->sockets_per_node = xcalloc(rcred->core_array_size, sizeof(uint16_t));
+    memcpy(rcred->sockets_per_node, cred->sockets_per_node, (sizeof(uint16_t) * rcred->core_array_size));
+    rcred->sock_core_rep_count = xcalloc(rcred->core_array_size, sizeof(uint32_t));
+    memcpy(rcred->sock_core_rep_count, cred->sock_core_rep_count, (sizeof(uint32_t) * rcred->core_array_size));
     rcred->job_constraints = xstrdup(cred->job_constraints);
     rcred->job_nhosts = cred->job_nhosts;
     rcred->job_hostlist = xstrdup(cred->job_hostlist);
@@ -736,8 +696,7 @@ slurm_cred_copy(slurm_cred_t *cred) {
     return rcred;
 }
 
-slurm_cred_t *
-slurm_cred_faker(slurm_cred_arg_t *arg) {
+slurm_cred_t *slurm_cred_faker(slurm_cred_arg_t *arg) {
     int fd, i;
     slurm_cred_t *cred = NULL;
 
@@ -773,14 +732,11 @@ slurm_cred_faker(slurm_cred_arg_t *arg) {
     cred->step_core_bitmap = bit_copy(arg->step_core_bitmap);
     cred->core_array_size = i;
     cred->cores_per_socket = xcalloc(i, sizeof(uint16_t));
-    memcpy(cred->cores_per_socket, arg->cores_per_socket,
-           (sizeof(uint16_t) * i));
+    memcpy(cred->cores_per_socket, arg->cores_per_socket, (sizeof(uint16_t) * i));
     cred->sockets_per_node = xcalloc(i, sizeof(uint16_t));
-    memcpy(cred->sockets_per_node, arg->sockets_per_node,
-           (sizeof(uint16_t) * i));
+    memcpy(cred->sockets_per_node, arg->sockets_per_node, (sizeof(uint16_t) * i));
     cred->sock_core_rep_count = xcalloc(i, sizeof(uint32_t));
-    memcpy(cred->sock_core_rep_count, arg->sock_core_rep_count,
-           (sizeof(uint32_t) * i));
+    memcpy(cred->sock_core_rep_count, arg->sock_core_rep_count, (sizeof(uint32_t) * i));
     cred->job_constraints = xstrdup(arg->job_constraints);
     cred->job_nhosts = arg->job_nhosts;
     cred->job_hostlist = xstrdup(arg->job_hostlist);
@@ -855,18 +811,12 @@ static void _copy_cred_to_arg(slurm_cred_t *cred, slurm_cred_arg_t *arg) {
     arg->x11 = cred->x11;
     arg->job_core_bitmap = bit_copy(cred->job_core_bitmap);
     arg->step_core_bitmap = bit_copy(cred->step_core_bitmap);
-    arg->cores_per_socket = xcalloc(cred->core_array_size,
-                                    sizeof(uint16_t));
-    memcpy(arg->cores_per_socket, cred->cores_per_socket,
-           (sizeof(uint16_t) * cred->core_array_size));
-    arg->sockets_per_node = xcalloc(cred->core_array_size,
-                                    sizeof(uint16_t));
-    memcpy(arg->sockets_per_node, cred->sockets_per_node,
-           (sizeof(uint16_t) * cred->core_array_size));
-    arg->sock_core_rep_count = xcalloc(cred->core_array_size,
-                                       sizeof(uint32_t));
-    memcpy(arg->sock_core_rep_count, cred->sock_core_rep_count,
-           (sizeof(uint32_t) * cred->core_array_size));
+    arg->cores_per_socket = xcalloc(cred->core_array_size, sizeof(uint16_t));
+    memcpy(arg->cores_per_socket, cred->cores_per_socket, (sizeof(uint16_t) * cred->core_array_size));
+    arg->sockets_per_node = xcalloc(cred->core_array_size, sizeof(uint16_t));
+    memcpy(arg->sockets_per_node, cred->sockets_per_node, (sizeof(uint16_t) * cred->core_array_size));
+    arg->sock_core_rep_count = xcalloc(cred->core_array_size, sizeof(uint32_t));
+    memcpy(arg->sock_core_rep_count, cred->sock_core_rep_count, (sizeof(uint32_t) * cred->core_array_size));
     arg->job_constraints = xstrdup(cred->job_constraints);
     arg->job_nhosts = cred->job_nhosts;
     arg->job_hostlist = xstrdup(cred->job_hostlist);
@@ -901,8 +851,7 @@ extern void *slurm_cred_get_arg(slurm_cred_t *cred, int cred_arg_type) {
     if (cred_arg_type == CRED_ARG_JOB_GRES_LIST) {
         rc = (void *) cred->job_gres_list;
     } else {
-        error("%s: Invalid arg type requested (%d)", __func__,
-              cred_arg_type);
+        error("%s: Invalid arg type requested (%d)", __func__, cred_arg_type);
     }
     slurm_mutex_unlock(&cred->mutex);
 
@@ -910,8 +859,7 @@ extern void *slurm_cred_get_arg(slurm_cred_t *cred, int cred_arg_type) {
 }
 
 extern int
-slurm_cred_verify(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
-                  slurm_cred_arg_t *arg, uint16_t protocol_version) {
+slurm_cred_verify(slurm_cred_ctx_t ctx, slurm_cred_t *cred, slurm_cred_arg_t *arg, uint16_t protocol_version) {
     time_t now = time(NULL);
     int errnum;
 
@@ -969,8 +917,7 @@ slurm_cred_verify(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
 }
 
 
-void
-slurm_cred_destroy(slurm_cred_t *cred) {
+void slurm_cred_destroy(slurm_cred_t *cred) {
     if (cred == NULL)
         return;
 
@@ -1005,8 +952,7 @@ slurm_cred_destroy(slurm_cred_t *cred) {
 }
 
 
-bool
-slurm_cred_jobid_cached(slurm_cred_ctx_t ctx, uint32_t jobid) {
+bool slurm_cred_jobid_cached(slurm_cred_ctx_t ctx, uint32_t jobid) {
     bool retval = false;
 
     xassert(ctx != NULL);
@@ -1027,8 +973,7 @@ slurm_cred_jobid_cached(slurm_cred_ctx_t ctx, uint32_t jobid) {
     return retval;
 }
 
-int
-slurm_cred_insert_jobid(slurm_cred_ctx_t ctx, uint32_t jobid) {
+int slurm_cred_insert_jobid(slurm_cred_ctx_t ctx, uint32_t jobid) {
     xassert(ctx != NULL);
     xassert(ctx->magic == CRED_CTX_MAGIC);
     xassert(ctx->type == SLURM_CRED_VERIFIER);
@@ -1043,8 +988,7 @@ slurm_cred_insert_jobid(slurm_cred_ctx_t ctx, uint32_t jobid) {
     return SLURM_SUCCESS;
 }
 
-int
-slurm_cred_rewind(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+int slurm_cred_rewind(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     int rc = 0;
 
     xassert(ctx != NULL);
@@ -1054,17 +998,14 @@ slurm_cred_rewind(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     xassert(ctx->magic == CRED_CTX_MAGIC);
     xassert(ctx->type == SLURM_CRED_VERIFIER);
 
-    rc = list_delete_all(ctx->state_list,
-                         (ListFindF) _find_cred_state, cred);
+    rc = list_delete_all(ctx->state_list, (ListFindF) _find_cred_state, cred);
 
     slurm_mutex_unlock(&ctx->mutex);
 
     return (rc > 0 ? SLURM_SUCCESS : SLURM_ERROR);
 }
 
-int
-slurm_cred_revoke(slurm_cred_ctx_t ctx, uint32_t jobid, time_t time,
-                  time_t start_time) {
+int slurm_cred_revoke(slurm_cred_ctx_t ctx, uint32_t jobid, time_t time, time_t start_time) {
     job_state_t *j = NULL;
 
     xassert(ctx != NULL);
@@ -1104,8 +1045,7 @@ slurm_cred_revoke(slurm_cred_ctx_t ctx, uint32_t jobid, time_t time,
     return SLURM_ERROR;
 }
 
-int
-slurm_cred_begin_expiration(slurm_cred_ctx_t ctx, uint32_t jobid) {
+int slurm_cred_begin_expiration(slurm_cred_ctx_t ctx, uint32_t jobid) {
     job_state_t *j = NULL;
 
     xassert(ctx != NULL);
@@ -1130,8 +1070,7 @@ slurm_cred_begin_expiration(slurm_cred_ctx_t ctx, uint32_t jobid) {
     j->expiration = time(NULL) + ctx->expiry_window;
     debug2("set revoke expiration for jobid %u to %"
     PRIu64
-    " UTS",
-            j->jobid, (uint64_t) j->expiration);
+    " UTS", j->jobid, (uint64_t) j->expiration);
     slurm_mutex_unlock(&ctx->mutex);
     return SLURM_SUCCESS;
 
@@ -1140,8 +1079,7 @@ slurm_cred_begin_expiration(slurm_cred_ctx_t ctx, uint32_t jobid) {
     return SLURM_ERROR;
 }
 
-int
-slurm_cred_get_signature(slurm_cred_t *cred, char **datap, uint32_t *datalen) {
+int slurm_cred_get_signature(slurm_cred_t *cred, char **datap, uint32_t *datalen) {
     xassert(cred != NULL);
     xassert(datap != NULL);
     xassert(datalen != NULL);
@@ -1178,9 +1116,9 @@ static char *_core_format(bitstr_t *core_bitmap) {
  *
  * NOTE: caller must xfree the returned strings.
  */
-void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
-                        char **job_alloc_cores, char **step_alloc_cores,
-                        uint64_t *job_mem_limit, uint64_t *step_mem_limit) {
+void
+format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus, char **job_alloc_cores, char **step_alloc_cores,
+                   uint64_t *job_mem_limit, uint64_t *step_mem_limit) {
     bitstr_t *job_core_bitmap, *step_core_bitmap;
     hostset_t hset = NULL;
     int host_index = -1;
@@ -1191,8 +1129,7 @@ void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
     xassert(job_alloc_cores);
     xassert(step_alloc_cores);
     if (!(hset = hostset_create(cred->job_hostlist))) {
-        error("Unable to create job hostset: `%s'",
-              cred->job_hostlist);
+        error("Unable to create job hostset: `%s'", cred->job_hostlist);
         return;
     }
 #ifdef HAVE_FRONT_END
@@ -1201,27 +1138,19 @@ void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
     host_index = hostset_find(hset, node_name);
 #endif
     if ((host_index < 0) || (host_index >= cred->job_nhosts)) {
-        error("Invalid host_index %d for job %u",
-              host_index, cred->jobid);
-        error("Host %s not in hostlist %s",
-              node_name, cred->job_hostlist);
+        error("Invalid host_index %d for job %u", host_index, cred->jobid);
+        error("Host %s not in hostlist %s", node_name, cred->job_hostlist);
         hostset_destroy(hset);
         return;
     }
     host_index++;    /* change from 0-origin to 1-origin */
     for (i = 0; host_index; i++) {
         if (host_index > cred->sock_core_rep_count[i]) {
-            i_first_bit += cred->sockets_per_node[i] *
-                           cred->cores_per_socket[i] *
-                           cred->sock_core_rep_count[i];
+            i_first_bit += cred->sockets_per_node[i] * cred->cores_per_socket[i] * cred->sock_core_rep_count[i];
             host_index -= cred->sock_core_rep_count[i];
         } else {
-            i_first_bit += cred->sockets_per_node[i] *
-                           cred->cores_per_socket[i] *
-                           (host_index - 1);
-            i_last_bit = i_first_bit +
-                         cred->sockets_per_node[i] *
-                         cred->cores_per_socket[i];
+            i_first_bit += cred->sockets_per_node[i] * cred->cores_per_socket[i] * (host_index - 1);
+            i_last_bit = i_first_bit + cred->sockets_per_node[i] * cred->cores_per_socket[i];
             break;
         }
     }
@@ -1245,21 +1174,18 @@ void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
     else {
         uint32_t i = cpus / (i_last_bit - i_first_bit);
         if (i > 1) {
-            debug2("scaling CPU count by factor of %d (%u/(%u-%u)",
-                   i, cpus, i_last_bit, i_first_bit);
+            debug2("scaling CPU count by factor of %d (%u/(%u-%u)", i, cpus, i_last_bit, i_first_bit);
             step_cpu_cnt *= i;
             job_cpu_cnt *= i;
         }
     }
 
     if (cred->job_mem_limit & MEM_PER_CPU) {
-        *job_mem_limit = (cred->job_mem_limit & (~MEM_PER_CPU)) *
-                         job_cpu_cnt;
+        *job_mem_limit = (cred->job_mem_limit & (~MEM_PER_CPU)) * job_cpu_cnt;
     } else
         *job_mem_limit = cred->job_mem_limit;
     if (cred->step_mem_limit & MEM_PER_CPU) {
-        *step_mem_limit = (cred->step_mem_limit & (~MEM_PER_CPU)) *
-                          step_cpu_cnt;
+        *step_mem_limit = (cred->step_mem_limit & (~MEM_PER_CPU)) * step_cpu_cnt;
     } else if (cred->step_mem_limit)
         *step_mem_limit = cred->step_mem_limit;
     else
@@ -1278,8 +1204,7 @@ void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
  *
  * NOTE: Caller must destroy the returned lists
  */
-extern void get_cred_gres(slurm_cred_t *cred, char *node_name,
-                          List *job_gres_list, List *step_gres_list) {
+extern void get_cred_gres(slurm_cred_t *cred, char *node_name, List *job_gres_list, List *step_gres_list) {
     hostset_t hset = NULL;
     int host_index = -1;
 
@@ -1293,8 +1218,7 @@ extern void get_cred_gres(slurm_cred_t *cred, char *node_name,
         return;
 
     if (!(hset = hostset_create(cred->job_hostlist))) {
-        error("Unable to create job hostset: `%s'",
-              cred->job_hostlist);
+        error("Unable to create job hostset: `%s'", cred->job_hostlist);
         return;
     }
 #ifdef HAVE_FRONT_END
@@ -1304,22 +1228,17 @@ extern void get_cred_gres(slurm_cred_t *cred, char *node_name,
 #endif
     hostset_destroy(hset);
     if ((host_index < 0) || (host_index >= cred->job_nhosts)) {
-        error("Invalid host_index %d for job %u",
-              host_index, cred->jobid);
-        error("Host %s not in credential hostlist %s",
-              node_name, cred->job_hostlist);
+        error("Invalid host_index %d for job %u", host_index, cred->jobid);
+        error("Host %s not in credential hostlist %s", node_name, cred->job_hostlist);
         return;
     }
 
-    *job_gres_list = gres_plugin_job_state_extract(cred->job_gres_list,
-                                                   host_index);
-    *step_gres_list = gres_plugin_step_state_extract(cred->step_gres_list,
-                                                     host_index);
+    *job_gres_list = gres_plugin_job_state_extract(cred->job_gres_list, host_index);
+    *step_gres_list = gres_plugin_step_state_extract(cred->step_gres_list, host_index);
     return;
 }
 
-void
-slurm_cred_pack(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
+void slurm_cred_pack(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
     xassert(cred != NULL);
     xassert(cred->magic == CRED_MAGIC);
 
@@ -1334,8 +1253,7 @@ slurm_cred_pack(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
     return;
 }
 
-slurm_cred_t *
-slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
+slurm_cred_t *slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
     uint32_t cred_uid, cred_gid, u32_ngids, len;
     slurm_cred_t *cred = NULL;
     char *bit_fmt_str = NULL;
@@ -1361,19 +1279,13 @@ slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
         cred->ngids = u32_ngids;
         safe_unpackstr_array(&cred->gr_names, &u32_ngids, buffer);
         if (u32_ngids && cred->ngids != u32_ngids) {
-            error("%s: mismatch on gr_names array, %u != %u",
-                  __func__, u32_ngids, cred->ngids);
+            error("%s: mismatch on gr_names array, %u != %u", __func__, u32_ngids, cred->ngids);
             goto unpack_error;
         }
-        if (gres_plugin_job_state_unpack(&cred->job_gres_list, buffer,
-                                         cred->jobid, protocol_version)
-            != SLURM_SUCCESS)
+        if (gres_plugin_job_state_unpack(&cred->job_gres_list, buffer, cred->jobid, protocol_version) != SLURM_SUCCESS)
             goto unpack_error;
-        if (gres_plugin_step_state_unpack(&cred->step_gres_list,
-                                          buffer, cred->jobid,
-                                          cred->stepid,
-                                          protocol_version)
-            != SLURM_SUCCESS) {
+        if (gres_plugin_step_state_unpack(&cred->step_gres_list, buffer, cred->jobid, cred->stepid, protocol_version) !=
+            SLURM_SUCCESS) {
             goto unpack_error;
         }
         safe_unpack16(&cred->job_core_spec, buffer);
@@ -1388,16 +1300,13 @@ slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
         unpack_bit_str_hex(&cred->step_core_bitmap, buffer);
         safe_unpack16(&cred->core_array_size, buffer);
         if (cred->core_array_size) {
-            safe_unpack16_array(&cred->cores_per_socket, &len,
-                                buffer);
+            safe_unpack16_array(&cred->cores_per_socket, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
-            safe_unpack16_array(&cred->sockets_per_node, &len,
-                                buffer);
+            safe_unpack16_array(&cred->sockets_per_node, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
-            safe_unpack32_array(&cred->sock_core_rep_count, &len,
-                                buffer);
+            safe_unpack32_array(&cred->sock_core_rep_count, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
         }
@@ -1419,15 +1328,10 @@ slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
         safe_unpackstr_xmalloc(&cred->pw_name, &len, buffer);
         safe_unpack32_array(&cred->gids, &u32_ngids, buffer);
         cred->ngids = u32_ngids;
-        if (gres_plugin_job_state_unpack(&cred->job_gres_list, buffer,
-                                         cred->jobid, protocol_version)
-            != SLURM_SUCCESS)
+        if (gres_plugin_job_state_unpack(&cred->job_gres_list, buffer, cred->jobid, protocol_version) != SLURM_SUCCESS)
             goto unpack_error;
-        if (gres_plugin_step_state_unpack(&cred->step_gres_list,
-                                          buffer, cred->jobid,
-                                          cred->stepid,
-                                          protocol_version)
-            != SLURM_SUCCESS) {
+        if (gres_plugin_step_state_unpack(&cred->step_gres_list, buffer, cred->jobid, cred->stepid, protocol_version) !=
+            SLURM_SUCCESS) {
             goto unpack_error;
         }
         safe_unpack16(&cred->job_core_spec, buffer);
@@ -1442,16 +1346,13 @@ slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
         unpack_bit_str_hex(&cred->step_core_bitmap, buffer);
         safe_unpack16(&cred->core_array_size, buffer);
         if (cred->core_array_size) {
-            safe_unpack16_array(&cred->cores_per_socket, &len,
-                                buffer);
+            safe_unpack16_array(&cred->cores_per_socket, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
-            safe_unpack16_array(&cred->sockets_per_node, &len,
-                                buffer);
+            safe_unpack16_array(&cred->sockets_per_node, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
-            safe_unpack32_array(&cred->sock_core_rep_count, &len,
-                                buffer);
+            safe_unpack32_array(&cred->sock_core_rep_count, &len, buffer);
             if (len != cred->core_array_size)
                 goto unpack_error;
         }
@@ -1478,8 +1379,7 @@ slurm_cred_unpack(Buf buffer, uint16_t protocol_version) {
     return NULL;
 }
 
-int
-slurm_cred_ctx_pack(slurm_cred_ctx_t ctx, Buf buffer) {
+int slurm_cred_ctx_pack(slurm_cred_ctx_t ctx, Buf buffer) {
     slurm_mutex_lock(&ctx->mutex);
     _job_state_pack(ctx, buffer);
     _cred_state_pack(ctx, buffer);
@@ -1488,8 +1388,7 @@ slurm_cred_ctx_pack(slurm_cred_ctx_t ctx, Buf buffer) {
     return SLURM_SUCCESS;
 }
 
-int
-slurm_cred_ctx_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
+int slurm_cred_ctx_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
     xassert(ctx != NULL);
     xassert(ctx->magic == CRED_CTX_MAGIC);
     xassert(ctx->type == SLURM_CRED_VERIFIER);
@@ -1508,8 +1407,7 @@ slurm_cred_ctx_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
     return SLURM_SUCCESS;
 }
 
-void
-slurm_cred_print(slurm_cred_t *cred) {
+void slurm_cred_print(slurm_cred_t *cred) {
     char *spec_type;
     int spec_count;
     int i;
@@ -1546,15 +1444,11 @@ slurm_cred_print(slurm_cred_t *cred) {
     info("Cred: Step hostlist     %s", cred->step_hostlist);
     info("Cred: ctime             %s", slurm_ctime2(&cred->ctime));
     info("Cred: siglen            %u", cred->siglen);
-    info("Cred: job_core_bitmap   %s",
-         bit_fmt(str, sizeof(str), cred->job_core_bitmap));
-    info("Cred: step_core_bitmap  %s",
-         bit_fmt(str, sizeof(str), cred->step_core_bitmap));
+    info("Cred: job_core_bitmap   %s", bit_fmt(str, sizeof(str), cred->job_core_bitmap));
+    info("Cred: step_core_bitmap  %s", bit_fmt(str, sizeof(str), cred->step_core_bitmap));
     info("Cred: sockets_per_node, cores_per_socket, rep_count");
     for (i = 0; i < cred->core_array_size; i++) {
-        info("      socks:%u cores:%u reps:%u",
-             cred->sockets_per_node[i],
-             cred->cores_per_socket[i],
+        info("      socks:%u cores:%u reps:%u", cred->sockets_per_node[i], cred->cores_per_socket[i],
              cred->sock_core_rep_count[i]);
     }
     info("Cred: job_nhosts        %u", cred->job_nhosts);
@@ -1564,8 +1458,7 @@ slurm_cred_print(slurm_cred_t *cred) {
 
 }
 
-static void
-_verifier_ctx_init(slurm_cred_ctx_t ctx) {
+static void _verifier_ctx_init(slurm_cred_ctx_t ctx) {
     xassert(ctx != NULL);
     xassert(ctx->magic == CRED_CTX_MAGIC);
     xassert(ctx->type == SLURM_CRED_VERIFIER);
@@ -1577,8 +1470,7 @@ _verifier_ctx_init(slurm_cred_ctx_t ctx) {
 }
 
 
-static int
-_ctx_update_private_key(slurm_cred_ctx_t ctx, const char *path) {
+static int _ctx_update_private_key(slurm_cred_ctx_t ctx, const char *path) {
     void *pk = NULL;
     void *tmpk = NULL;
 
@@ -1604,8 +1496,7 @@ _ctx_update_private_key(slurm_cred_ctx_t ctx, const char *path) {
 }
 
 
-static int
-_ctx_update_public_key(slurm_cred_ctx_t ctx, const char *path) {
+static int _ctx_update_public_key(slurm_cred_ctx_t ctx, const char *path) {
     void *pk = NULL;
 
     xassert(ctx != NULL);
@@ -1635,8 +1526,7 @@ _ctx_update_public_key(slurm_cred_ctx_t ctx, const char *path) {
 }
 
 
-static bool
-_exkey_is_valid(slurm_cred_ctx_t ctx) {
+static bool _exkey_is_valid(slurm_cred_ctx_t ctx) {
     if (!ctx->exkey)
         return false;
 
@@ -1651,8 +1541,7 @@ _exkey_is_valid(slurm_cred_ctx_t ctx) {
 }
 
 
-static slurm_cred_ctx_t
-_slurm_cred_ctx_alloc(void) {
+static slurm_cred_ctx_t _slurm_cred_ctx_alloc(void) {
     slurm_cred_ctx_t ctx = xmalloc(sizeof(*ctx));
     /* Contents initialized to zero */
 
@@ -1668,8 +1557,7 @@ _slurm_cred_ctx_alloc(void) {
     return ctx;
 }
 
-static slurm_cred_t *
-_slurm_cred_alloc(void) {
+static slurm_cred_t *_slurm_cred_alloc(void) {
     slurm_cred_t *cred = xmalloc(sizeof(*cred));
     /* Contents initialized to zero */
 
@@ -1682,32 +1570,23 @@ _slurm_cred_alloc(void) {
     return cred;
 }
 
-static int
-_slurm_cred_sign(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
-                 uint16_t protocol_version) {
+static int _slurm_cred_sign(slurm_cred_ctx_t ctx, slurm_cred_t *cred, uint16_t protocol_version) {
     Buf buffer;
     int rc;
 
     buffer = init_buf(4096);
     _pack_cred(cred, buffer, protocol_version);
-    rc = (*(ops.cred_sign))(ctx->key,
-                            get_buf_data(buffer),
-                            get_buf_offset(buffer),
-                            &cred->signature,
-                            &cred->siglen);
+    rc = (*(ops.cred_sign))(ctx->key, get_buf_data(buffer), get_buf_offset(buffer), &cred->signature, &cred->siglen);
     free_buf(buffer);
 
     if (rc) {
-        error("Credential sign: %s",
-              (*(ops.cred_str_error))(rc));
+        error("Credential sign: %s", (*(ops.cred_str_error))(rc));
         return SLURM_ERROR;
     }
     return SLURM_SUCCESS;
 }
 
-static int
-_slurm_cred_verify_signature(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
-                             uint16_t protocol_version) {
+static int _slurm_cred_verify_signature(slurm_cred_ctx_t ctx, slurm_cred_t *cred, uint16_t protocol_version) {
     Buf buffer;
     int rc;
 
@@ -1715,31 +1594,23 @@ _slurm_cred_verify_signature(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
     buffer = init_buf(4096);
     _pack_cred(cred, buffer, protocol_version);
 
-    rc = (*(ops.cred_verify_sign))(ctx->key,
-                                   get_buf_data(buffer),
-                                   get_buf_offset(buffer),
-                                   cred->signature,
+    rc = (*(ops.cred_verify_sign))(ctx->key, get_buf_data(buffer), get_buf_offset(buffer), cred->signature,
                                    cred->siglen);
     if (rc && _exkey_is_valid(ctx)) {
-        rc = (*(ops.cred_verify_sign))(ctx->exkey,
-                                       get_buf_data(buffer),
-                                       get_buf_offset(buffer),
-                                       cred->signature,
+        rc = (*(ops.cred_verify_sign))(ctx->exkey, get_buf_data(buffer), get_buf_offset(buffer), cred->signature,
                                        cred->siglen);
     }
     free_buf(buffer);
 
     if (rc) {
-        error("Credential signature check: %s",
-              (*(ops.cred_str_error))(rc));
+        error("Credential signature check: %s", (*(ops.cred_str_error))(rc));
         return SLURM_ERROR;
     }
     return SLURM_SUCCESS;
 }
 
 
-static void
-_pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
+static void _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
     uint32_t cred_uid = (uint32_t) cred->uid;
     uint32_t tot_core_cnt = 0;
     /*
@@ -1760,12 +1631,8 @@ _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
         pack32_array(cred->gids, cred->ngids, buffer);
         packstr_array(cred->gr_names, gr_names_cnt, buffer);
 
-        (void) gres_plugin_job_state_pack(cred->job_gres_list, buffer,
-                                          cred->jobid, false,
-                                          protocol_version);
-        gres_plugin_step_state_pack(cred->step_gres_list, buffer,
-                                    cred->jobid, cred->stepid,
-                                    protocol_version);
+        (void) gres_plugin_job_state_pack(cred->job_gres_list, buffer, cred->jobid, false, protocol_version);
+        gres_plugin_step_state_pack(cred->step_gres_list, buffer, cred->jobid, cred->stepid, protocol_version);
         pack16(cred->job_core_spec, buffer);
         pack64(cred->job_mem_limit, buffer);
         pack64(cred->step_mem_limit, buffer);
@@ -1781,15 +1648,9 @@ _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
         pack_bit_str_hex(cred->step_core_bitmap, buffer);
         pack16(cred->core_array_size, buffer);
         if (cred->core_array_size) {
-            pack16_array(cred->cores_per_socket,
-                         cred->core_array_size,
-                         buffer);
-            pack16_array(cred->sockets_per_node,
-                         cred->core_array_size,
-                         buffer);
-            pack32_array(cred->sock_core_rep_count,
-                         cred->core_array_size,
-                         buffer);
+            pack16_array(cred->cores_per_socket, cred->core_array_size, buffer);
+            pack16_array(cred->sockets_per_node, cred->core_array_size, buffer);
+            pack32_array(cred->sock_core_rep_count, cred->core_array_size, buffer);
         }
         pack32(cred->job_nhosts, buffer);
         packstr(cred->job_hostlist, buffer);
@@ -1801,12 +1662,8 @@ _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
         packstr(cred->pw_name, buffer);
         pack32_array(cred->gids, cred->ngids, buffer);
 
-        (void) gres_plugin_job_state_pack(cred->job_gres_list, buffer,
-                                          cred->jobid, false,
-                                          protocol_version);
-        gres_plugin_step_state_pack(cred->step_gres_list, buffer,
-                                    cred->jobid, cred->stepid,
-                                    protocol_version);
+        (void) gres_plugin_job_state_pack(cred->job_gres_list, buffer, cred->jobid, false, protocol_version);
+        gres_plugin_step_state_pack(cred->step_gres_list, buffer, cred->jobid, cred->stepid, protocol_version);
         pack16(cred->job_core_spec, buffer);
         pack64(cred->job_mem_limit, buffer);
         pack64(cred->step_mem_limit, buffer);
@@ -1822,15 +1679,9 @@ _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
         pack_bit_str_hex(cred->step_core_bitmap, buffer);
         pack16(cred->core_array_size, buffer);
         if (cred->core_array_size) {
-            pack16_array(cred->cores_per_socket,
-                         cred->core_array_size,
-                         buffer);
-            pack16_array(cred->sockets_per_node,
-                         cred->core_array_size,
-                         buffer);
-            pack32_array(cred->sock_core_rep_count,
-                         cred->core_array_size,
-                         buffer);
+            pack16_array(cred->cores_per_socket, cred->core_array_size, buffer);
+            pack16_array(cred->sockets_per_node, cred->core_array_size, buffer);
+            pack32_array(cred->sock_core_rep_count, cred->core_array_size, buffer);
         }
         pack32(cred->job_nhosts, buffer);
         packstr(cred->job_hostlist, buffer);
@@ -1840,16 +1691,13 @@ _pack_cred(slurm_cred_t *cred, Buf buffer, uint16_t protocol_version) {
 static int _list_find_cred_state(void *x, void *key) {
     cred_state_t *s = (cred_state_t *) x;
     slurm_cred_t *cred = (slurm_cred_t *) key;
-    if ((s->jobid == cred->jobid) &&
-        (s->stepid == cred->stepid) &&
-        (s->ctime == cred->ctime))
+    if ((s->jobid == cred->jobid) && (s->stepid == cred->stepid) && (s->ctime == cred->ctime))
         return 1;
     return 0;
 }
 
 
-static bool
-_credential_replayed(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+static bool _credential_replayed(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     cred_state_t *s = NULL;
 
     _clear_expired_credential_states(ctx);
@@ -1869,8 +1717,7 @@ _credential_replayed(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     return false;
 }
 
-extern void
-slurm_cred_handle_reissue(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+extern void slurm_cred_handle_reissue(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     job_state_t *j = _find_job_state(ctx, cred->jobid);
 
     if (j != NULL && j->revoked && (cred->ctime > j->revoked)) {
@@ -1887,8 +1734,7 @@ slurm_cred_handle_reissue(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     }
 }
 
-extern bool
-slurm_cred_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+extern bool slurm_cred_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     job_state_t *j = _find_job_state(ctx, cred->jobid);
 
     if ((j == NULL) || (j->revoked == (time_t) 0))
@@ -1900,8 +1746,7 @@ slurm_cred_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     return false;
 }
 
-static bool
-_credential_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+static bool _credential_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     job_state_t *j = NULL;
 
     _clear_expired_job_states(ctx);
@@ -1914,8 +1759,7 @@ _credential_revoked(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     if (cred->ctime <= j->revoked) {
         debug3("cred for %u revoked. expires at %"
         PRIu64
-        " UTS",
-                j->jobid, (uint64_t) j->expiration);
+        " UTS", j->jobid, (uint64_t) j->expiration);
         return true;
     }
 
@@ -1930,35 +1774,27 @@ static int _list_find_job_state(void *x, void *key) {
     return 0;
 }
 
-static job_state_t *
-_find_job_state(slurm_cred_ctx_t ctx, uint32_t jobid) {
-    job_state_t *j =
-            list_find_first(ctx->job_list, _list_find_job_state, &jobid);
+static job_state_t *_find_job_state(slurm_cred_ctx_t ctx, uint32_t jobid) {
+    job_state_t *j = list_find_first(ctx->job_list, _list_find_job_state, &jobid);
     return j;
 }
 
-static int
-_find_cred_state(cred_state_t *c, slurm_cred_t *cred) {
-    return ((c->jobid == cred->jobid) && (c->stepid == cred->stepid) &&
-            (c->ctime == cred->ctime));
+static int _find_cred_state(cred_state_t *c, slurm_cred_t *cred) {
+    return ((c->jobid == cred->jobid) && (c->stepid == cred->stepid) && (c->ctime == cred->ctime));
 }
 
-static job_state_t *
-_insert_job_state(slurm_cred_ctx_t ctx, uint32_t jobid) {
-    job_state_t *j = list_find_first(
-            ctx->job_list, _list_find_job_state, &jobid);;
+static job_state_t *_insert_job_state(slurm_cred_ctx_t ctx, uint32_t jobid) {
+    job_state_t *j = list_find_first(ctx->job_list, _list_find_job_state, &jobid);;
     if (!j) {
         j = _job_state_create(jobid);
         list_append(ctx->job_list, j);
     } else
-        debug2("%s: we already have a job state for job %u.  No big deal, just an FYI.",
-               __func__, jobid);
+        debug2("%s: we already have a job state for job %u.  No big deal, just an FYI.", __func__, jobid);
     return j;
 }
 
 
-static job_state_t *
-_job_state_create(uint32_t jobid) {
+static job_state_t *_job_state_create(uint32_t jobid) {
     job_state_t *j = xmalloc(sizeof(*j));
 
     j->jobid = jobid;
@@ -1969,15 +1805,13 @@ _job_state_create(uint32_t jobid) {
     return j;
 }
 
-static void
-_job_state_destroy(job_state_t *j) {
+static void _job_state_destroy(job_state_t *j) {
     debug3("destroying job %u state", j->jobid);
     xfree(j);
 }
 
 
-static void
-_clear_expired_job_states(slurm_cred_ctx_t ctx) {
+static void _clear_expired_job_states(slurm_cred_ctx_t ctx) {
     static time_t last_scan = 0;
     time_t now = time(NULL);
     ListIterator i = NULL;
@@ -1996,9 +1830,7 @@ _clear_expired_job_states(slurm_cred_ctx_t ctx) {
         " "
         "expires:%"
         PRIu64
-        "",
-                j->jobid, (uint64_t) j->ctime, (uint64_t) j->revoked,
-                (uint64_t) j->expiration);
+        "", j->jobid, (uint64_t) j->ctime, (uint64_t) j->revoked, (uint64_t) j->expiration);
         if (j->revoked && (now > j->expiration)) {
             list_delete_item(i);
         }
@@ -2016,8 +1848,7 @@ static int _list_find_expired(void *x, void *key) {
     return 0;
 }
 
-static void
-_clear_expired_credential_states(slurm_cred_ctx_t ctx) {
+static void _clear_expired_credential_states(slurm_cred_ctx_t ctx) {
     static time_t last_scan = 0;
     time_t now = time(NULL);
 
@@ -2029,15 +1860,13 @@ _clear_expired_credential_states(slurm_cred_ctx_t ctx) {
 }
 
 
-static void
-_insert_cred_state(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+static void _insert_cred_state(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     cred_state_t *s = _cred_state_create(ctx, cred);
     list_append(ctx->state_list, s);
 }
 
 
-static cred_state_t *
-_cred_state_create(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
+static cred_state_t *_cred_state_create(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     cred_state_t *s = xmalloc(sizeof(*s));
 
     s->jobid = cred->jobid;
@@ -2048,14 +1877,12 @@ _cred_state_create(slurm_cred_ctx_t ctx, slurm_cred_t *cred) {
     return s;
 }
 
-static void
-_cred_state_destroy(cred_state_t *s) {
+static void _cred_state_destroy(cred_state_t *s) {
     xfree(s);
 }
 
 
-static void
-_cred_state_pack_one(cred_state_t *s, Buf buffer) {
+static void _cred_state_pack_one(cred_state_t *s, Buf buffer) {
     pack32(s->jobid, buffer);
     pack32(s->stepid, buffer);
     pack_time(s->ctime, buffer);
@@ -2063,8 +1890,7 @@ _cred_state_pack_one(cred_state_t *s, Buf buffer) {
 }
 
 
-static cred_state_t *
-_cred_state_unpack_one(Buf buffer) {
+static cred_state_t *_cred_state_unpack_one(Buf buffer) {
     cred_state_t *s = xmalloc(sizeof(*s));
 
     safe_unpack32(&s->jobid, buffer);
@@ -2079,8 +1905,7 @@ _cred_state_unpack_one(Buf buffer) {
 }
 
 
-static void
-_job_state_pack_one(job_state_t *j, Buf buffer) {
+static void _job_state_pack_one(job_state_t *j, Buf buffer) {
     pack32(j->jobid, buffer);
     pack_time(j->revoked, buffer);
     pack_time(j->ctime, buffer);
@@ -2101,13 +1926,10 @@ static job_state_t *_job_state_unpack_one(Buf buffer) {
     " revoked:%"
     PRIu64
     " expires:%"
-    PRIu64,
-            j->jobid, (uint64_t) j->ctime, (uint64_t) j->revoked,
-            (uint64_t) j->expiration);
+    PRIu64, j->jobid, (uint64_t) j->ctime, (uint64_t) j->revoked, (uint64_t) j->expiration);
 
     if ((j->revoked) && (j->expiration == (time_t) MAX_TIME)) {
-        info("Warning: revoke on job %u has no expiration",
-             j->jobid);
+        info("Warning: revoke on job %u has no expiration", j->jobid);
         j->expiration = j->revoked + 600;
     }
 
@@ -2119,8 +1941,7 @@ static job_state_t *_job_state_unpack_one(Buf buffer) {
 }
 
 
-static void
-_cred_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
+static void _cred_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
     ListIterator i = NULL;
     cred_state_t *s = NULL;
 
@@ -2133,8 +1954,7 @@ _cred_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
 }
 
 
-static void
-_cred_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
+static void _cred_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
     time_t now = time(NULL);
     uint32_t n;
     int i = 0;
@@ -2161,8 +1981,7 @@ _cred_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
 }
 
 
-static void
-_job_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
+static void _job_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
     ListIterator i = NULL;
     job_state_t *j = NULL;
 
@@ -2176,8 +1995,7 @@ _job_state_pack(slurm_cred_ctx_t ctx, Buf buffer) {
 }
 
 
-static void
-_job_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
+static void _job_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
     time_t now = time(NULL);
     uint32_t n = 0;
     int i = 0;
@@ -2193,8 +2011,7 @@ _job_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
         if (!j->revoked || (j->revoked && (now < j->expiration)))
             list_append(ctx->job_list, j);
         else {
-            debug3("not appending expired job %u state",
-                   j->jobid);
+            debug3("not appending expired job %u state", j->jobid);
             _job_state_destroy(j);
         }
     }
@@ -2211,8 +2028,7 @@ _job_state_unpack(slurm_cred_ctx_t ctx, Buf buffer) {
 \*****************************************************************************/
 
 /* Pack sbcast credential without the digital signature */
-static void _pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer,
-                              uint16_t protocol_version) {
+static void _pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_19_05_PROTOCOL_VERSION) {
         pack_time(sbcast_cred->ctime, buffer);
         pack_time(sbcast_cred->expiration, buffer);
@@ -2238,9 +2054,7 @@ static void _pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer,
 /* Create an sbcast credential for the specified job and nodes
  *	including digital signature.
  * RET the sbcast credential or NULL on error */
-sbcast_cred_t *create_sbcast_cred(slurm_cred_ctx_t ctx,
-                                  sbcast_cred_arg_t *arg,
-                                  uint16_t protocol_version) {
+sbcast_cred_t *create_sbcast_cred(slurm_cred_ctx_t ctx, sbcast_cred_arg_t *arg, uint16_t protocol_version) {
     Buf buffer;
     int rc;
     sbcast_cred_t *sbcast_cred;
@@ -2265,21 +2079,17 @@ sbcast_cred_t *create_sbcast_cred(slurm_cred_ctx_t ctx,
         /* this may still be null, in which case slurmd will handle */
         sbcast_cred->user_name = uid_to_string_or_null(arg->uid);
         /* lookup and send extended gids list */
-        sbcast_cred->ngids = group_cache_lookup(arg->uid, arg->gid,
-                                                sbcast_cred->user_name,
-                                                &sbcast_cred->gids);
+        sbcast_cred->ngids = group_cache_lookup(arg->uid, arg->gid, sbcast_cred->user_name, &sbcast_cred->gids);
     }
 
     buffer = init_buf(4096);
     _pack_sbcast_cred(sbcast_cred, buffer, protocol_version);
-    rc = (*(ops.cred_sign))(
-            ctx->key, get_buf_data(buffer), get_buf_offset(buffer),
-            &sbcast_cred->signature, &sbcast_cred->siglen);
+    rc = (*(ops.cred_sign))(ctx->key, get_buf_data(buffer), get_buf_offset(buffer), &sbcast_cred->signature,
+                            &sbcast_cred->siglen);
     free_buf(buffer);
 
     if (rc) {
-        error("sbcast_cred sign: %s",
-              (*(ops.cred_str_error))(rc));
+        error("sbcast_cred sign: %s", (*(ops.cred_str_error))(rc));
         delete_sbcast_cred(sbcast_cred);
         return NULL;
     }
@@ -2308,8 +2118,7 @@ static void _sbast_cache_add(sbcast_cred_t *sbcast_cred) {
     /* Using two bytes at a time gives us a larger number
      * and reduces the possibility of a duplicate value */
     for (i = 0; i < sbcast_cred->siglen; i += 2) {
-        sig_num += (sbcast_cred->signature[i] << 8) +
-                   sbcast_cred->signature[i + 1];
+        sig_num += (sbcast_cred->signature[i] << 8) + sbcast_cred->signature[i + 1];
     }
 
     new_cache_rec = xmalloc(sizeof(struct sbcast_cache));
@@ -2329,10 +2138,8 @@ static void _sbcast_cache_del(void *x) {
  *	recent signature on file (in our cache) or the slurmd must have
  *	recently been restarted.
  * RET 0 on success, -1 on error */
-sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
-                                       sbcast_cred_t *sbcast_cred,
-                                       uint16_t block_no,
-                                       uint16_t protocol_version) {
+sbcast_cred_arg_t *
+extract_sbcast_cred(slurm_cred_ctx_t ctx, sbcast_cred_t *sbcast_cred, uint16_t block_no, uint16_t protocol_version) {
     sbcast_cred_arg_t *arg;
     struct sbcast_cache *next_cache_rec;
     uint32_t sig_num = 0;
@@ -2353,14 +2160,12 @@ sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
         _pack_sbcast_cred(sbcast_cred, buffer, protocol_version);
         /* NOTE: the verification checks that the credential was
          * created by SlurmUser or root */
-        rc = (*(ops.cred_verify_sign))(
-                ctx->key, get_buf_data(buffer), get_buf_offset(buffer),
-                sbcast_cred->signature, sbcast_cred->siglen);
+        rc = (*(ops.cred_verify_sign))(ctx->key, get_buf_data(buffer), get_buf_offset(buffer), sbcast_cred->signature,
+                                       sbcast_cred->siglen);
         free_buf(buffer);
 
         if (rc) {
-            error("sbcast_cred verify: %s",
-                  (*(ops.cred_str_error))(rc));
+            error("sbcast_cred verify: %s", (*(ops.cred_str_error))(rc));
             return NULL;
         }
         _sbast_cache_add(sbcast_cred);
@@ -2370,15 +2175,12 @@ sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
         bool cache_match_found = false;
         ListIterator sbcast_iter;
         for (i = 0; i < sbcast_cred->siglen; i += 2) {
-            sig_num += (sbcast_cred->signature[i] << 8) +
-                       sbcast_cred->signature[i + 1];
+            sig_num += (sbcast_cred->signature[i] << 8) + sbcast_cred->signature[i + 1];
         }
 
         sbcast_iter = list_iterator_create(sbcast_cache_list);
-        while ((next_cache_rec =
-                        (struct sbcast_cache *) list_next(sbcast_iter))) {
-            if ((next_cache_rec->expire == sbcast_cred->expiration) &&
-                (next_cache_rec->value == sig_num)) {
+        while ((next_cache_rec = (struct sbcast_cache *) list_next(sbcast_iter))) {
+            if ((next_cache_rec->expire == sbcast_cred->expiration) && (next_cache_rec->value == sig_num)) {
                 cache_match_found = true;
                 break;
             }
@@ -2392,12 +2194,9 @@ sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
             if (SLURM_DIFFTIME(now, cred_restart_time) > 60)
                 return NULL;    /* restarted >60 secs ago */
             buffer = init_buf(4096);
-            _pack_sbcast_cred(sbcast_cred, buffer,
-                              protocol_version);
-            rc = (*(ops.cred_verify_sign))(
-                    ctx->key, get_buf_data(buffer),
-                    get_buf_offset(buffer),
-                    sbcast_cred->signature, sbcast_cred->siglen);
+            _pack_sbcast_cred(sbcast_cred, buffer, protocol_version);
+            rc = (*(ops.cred_verify_sign))(ctx->key, get_buf_data(buffer), get_buf_offset(buffer),
+                                           sbcast_cred->signature, sbcast_cred->siglen);
             free_buf(buffer);
             if (rc)
                 err_str = (char *) (*(ops.cred_str_error))(rc);
@@ -2422,8 +2221,7 @@ sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
 }
 
 /* Pack an sbcast credential into a buffer including the digital signature */
-void pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer,
-                      uint16_t protocol_version) {
+void pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer, uint16_t protocol_version) {
     static int bad_cred_test = -1;
     xassert(sbcast_cred);
     xassert(sbcast_cred->siglen > 0);
@@ -2460,15 +2258,12 @@ sbcast_cred_t *unpack_sbcast_cred(Buf buffer, uint16_t protocol_version) {
         safe_unpack32(&sbcast_cred->pack_jobid, buffer);
         safe_unpack32(&sbcast_cred->uid, buffer);
         safe_unpack32(&sbcast_cred->gid, buffer);
-        safe_unpackstr_xmalloc(&sbcast_cred->user_name, &uint32_tmp,
-                               buffer);
-        safe_unpack32_array(&sbcast_cred->gids, &sbcast_cred->ngids,
-                            buffer);
+        safe_unpackstr_xmalloc(&sbcast_cred->user_name, &uint32_tmp, buffer);
+        safe_unpack32_array(&sbcast_cred->gids, &sbcast_cred->ngids, buffer);
         safe_unpackstr_xmalloc(&sbcast_cred->nodes, &uint32_tmp, buffer);
 
         /* "sigp" must be last */
-        safe_unpackmem_xmalloc(&sbcast_cred->signature,
-                               &sbcast_cred->siglen, buffer);
+        safe_unpackmem_xmalloc(&sbcast_cred->signature, &sbcast_cred->siglen, buffer);
         if (!sbcast_cred->siglen)
             goto unpack_error;
     } else if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
@@ -2477,15 +2272,12 @@ sbcast_cred_t *unpack_sbcast_cred(Buf buffer, uint16_t protocol_version) {
         safe_unpack32(&sbcast_cred->jobid, buffer);
         safe_unpack32(&sbcast_cred->uid, buffer);
         safe_unpack32(&sbcast_cred->gid, buffer);
-        safe_unpackstr_xmalloc(&sbcast_cred->user_name, &uint32_tmp,
-                               buffer);
-        safe_unpack32_array(&sbcast_cred->gids, &sbcast_cred->ngids,
-                            buffer);
+        safe_unpackstr_xmalloc(&sbcast_cred->user_name, &uint32_tmp, buffer);
+        safe_unpack32_array(&sbcast_cred->gids, &sbcast_cred->ngids, buffer);
         safe_unpackstr_xmalloc(&sbcast_cred->nodes, &uint32_tmp, buffer);
 
         /* "sigp" must be last */
-        safe_unpackmem_xmalloc(&sbcast_cred->signature,
-                               &sbcast_cred->siglen, buffer);
+        safe_unpackmem_xmalloc(&sbcast_cred->signature, &sbcast_cred->siglen, buffer);
         if (!sbcast_cred->siglen)
             goto unpack_error;
     } else

@@ -38,53 +38,52 @@
 #include "src/common/xassert.h"
 #include "src/common/xstring.h"
 
-void _ct(const char *time_string, int value)
-{
-	int t = time_str2secs(time_string);
+void _ct(const char *time_string, int value) {
+    int t = time_str2secs(time_string);
 
-	if (t != value)
-		fatal("check_time: %s -> %u != %u", time_string, t, value);
+    if (t != value)
+        fatal("check_time: %s -> %u != %u", time_string, t, value);
 }
 
-int main (int argc, char **argv)
-{
-	log_options_t logopt = LOG_OPTS_STDERR_ONLY;
-	logopt.prefix_level = 1;
-	log_init(xbasename(argv[0]), logopt, 0, NULL);
-	logopt.stderr_level += 5;
-	log_alter(logopt, 0, NULL);
+int main(int argc, char **argv) {
+    log_options_t logopt = LOG_OPTS_STDERR_ONLY;
+    logopt.prefix_level = 1;
+    log_init(xbasename(argv[0]), logopt, 0, NULL);
+    logopt.stderr_level += 5;
+    log_alter(logopt, 0, NULL);
 
-	_ct("INVALID TIME", NO_VAL);
-	_ct("-1", INFINITE);
-	_ct("INFINITE", INFINITE);
-	_ct("infinite", INFINITE);
-	_ct("UNLIMITED", INFINITE);
-	_ct("unlimited", INFINITE);
-	_ct("LONG --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- INVALID TIME", NO_VAL);
-	_ct("0", 0);
-	_ct("60", 60*60);
-	_ct("60:15", 60*60 + 15);
-	_ct("60:0", 60*60);
-	_ct("60:", NO_VAL);
-	_ct("60:-10", NO_VAL);
-	_ct("-60:10", NO_VAL);
-	_ct("1:60:15", 1*60*60 + 60*60 + 15);
-	_ct("2:60:15", 2*60*60 + 60*60 + 15);
-	_ct("0:0:15", 15);
-	_ct("0:60:0", 60*60);
-	_ct("0:0:0", 0);
-	_ct("-0:-0:-0", NO_VAL);
-	_ct(" 0:0:0 ", NO_VAL); //TODO: should we trim()?
-	_ct("0-1:60:15", 1*60*60 + 60*60 + 15);
-	_ct("1-1:60:15", 1*60*60*24 + 1*60*60 + 60*60 + 15);
-	_ct("365-1:60:15", 365*60*60*24 + 1*60*60 + 60*60 + 15);
-	_ct("365-0:0:0", 365*60*60*24);
-	/*
-	 * ct("9999999-0:0:0", 365*60*60*24)
-	 * doesn't work with 32-bit int (sets high bit)
-	 * TODO: Ignoring this edge for now until time_t
-	 */
-	//_ct("9999999-0:0:0", NO_VAL);
+    _ct("INVALID TIME", NO_VAL);
+    _ct("-1", INFINITE);
+    _ct("INFINITE", INFINITE);
+    _ct("infinite", INFINITE);
+    _ct("UNLIMITED", INFINITE);
+    _ct("unlimited", INFINITE);
+    _ct("LONG --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- INVALID TIME",
+        NO_VAL);
+    _ct("0", 0);
+    _ct("60", 60 * 60);
+    _ct("60:15", 60 * 60 + 15);
+    _ct("60:0", 60 * 60);
+    _ct("60:", NO_VAL);
+    _ct("60:-10", NO_VAL);
+    _ct("-60:10", NO_VAL);
+    _ct("1:60:15", 1 * 60 * 60 + 60 * 60 + 15);
+    _ct("2:60:15", 2 * 60 * 60 + 60 * 60 + 15);
+    _ct("0:0:15", 15);
+    _ct("0:60:0", 60 * 60);
+    _ct("0:0:0", 0);
+    _ct("-0:-0:-0", NO_VAL);
+    _ct(" 0:0:0 ", NO_VAL); //TODO: should we trim()?
+    _ct("0-1:60:15", 1 * 60 * 60 + 60 * 60 + 15);
+    _ct("1-1:60:15", 1 * 60 * 60 * 24 + 1 * 60 * 60 + 60 * 60 + 15);
+    _ct("365-1:60:15", 365 * 60 * 60 * 24 + 1 * 60 * 60 + 60 * 60 + 15);
+    _ct("365-0:0:0", 365 * 60 * 60 * 24);
+    /*
+     * ct("9999999-0:0:0", 365*60*60*24)
+     * doesn't work with 32-bit int (sets high bit)
+     * TODO: Ignoring this edge for now until time_t
+     */
+    //_ct("9999999-0:0:0", NO_VAL);
 
-	return 0;
+    return 0;
 }

@@ -19,8 +19,7 @@ extern int errno;
  * if file exists is_symlink variable is set if the file
  * is a symlink
  */
-static int
-_file_exists(char *path) {
+static int _file_exists(char *path) {
     struct stat buf;
 
     if (stat(path, &buf)) {
@@ -28,16 +27,14 @@ _file_exists(char *path) {
             /* OK. this symlink was removed by somebody else */
             return 0;
         } else {
-            fprintf(stderr, "Error while stat'ing symlink %s: %s (%d)\n",
-                    path, strerror(errno), errno);
+            fprintf(stderr, "Error while stat'ing symlink %s: %s (%d)\n", path, strerror(errno), errno);
             return -1;
         }
     }
     return 1;
 }
 
-static int
-_symlink_exists(char *path) {
+static int _symlink_exists(char *path) {
     struct stat buf;
 
     if (lstat(path, &buf)) {
@@ -50,15 +47,13 @@ _symlink_exists(char *path) {
     return 1;
 }
 
-static int
-_create_locked_cmd(char *path, int cmd) {
+static int _create_locked_cmd(char *path, int cmd) {
     int ret = 0, fd;
     struct flock flk;
 
     fd = open(path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (0 > fd) {
-        fprintf(stderr, "Error opening file %s: %s (%d)\n",
-                path, strerror(errno), errno);
+        fprintf(stderr, "Error opening file %s: %s (%d)\n", path, strerror(errno), errno);
         return -1;
     }
 
@@ -72,8 +67,7 @@ _create_locked_cmd(char *path, int cmd) {
         if (0 == (ret = fcntl(fd, cmd, &flk))) {
             break;
         } else if (EINTR != errno) {
-            fprintf(stderr, "Error locking file %s: %s (%d)\n",
-                    path, strerror(errno), errno);
+            fprintf(stderr, "Error locking file %s: %s (%d)\n", path, strerror(errno), errno);
             close(fd);
             return -errno;
         }
@@ -86,8 +80,7 @@ _create_locked_cmd(char *path, int cmd) {
     return ret;
 }
 
-static int
-_is_locked(char *path) {
+static int _is_locked(char *path) {
     int ret, fd;
     struct flock flk;
     memset(&flk, 0, sizeof(flk));
@@ -97,8 +90,7 @@ _is_locked(char *path) {
         if (EEXIST == errno) {
             return 0;
         } else {
-            fprintf(stderr, "Error opening file %s: %s (%d)\n",
-                    path, strerror(errno), errno);
+            fprintf(stderr, "Error opening file %s: %s (%d)\n", path, strerror(errno), errno);
             return -1;
         }
     }
@@ -110,8 +102,7 @@ _is_locked(char *path) {
     } while (EINTR == errno);
 
     if (ret) {
-        fprintf(stderr, "Error getting file lock information for %s: %s (%d)\n",
-                path, strerror(errno), errno);
+        fprintf(stderr, "Error getting file lock information for %s: %s (%d)\n", path, strerror(errno), errno);
         return -1;
     }
 
@@ -128,8 +119,7 @@ int pmix_leader_is_alive(char *lname) {
 
     ret = _symlink_exists(lname);
     if (0 > ret) {
-        fprintf(stderr, "Error accessing symlink %s: %d:%s\n",
-                lname, error, strerror(error));
+        fprintf(stderr, "Error accessing symlink %s: %d:%s\n", lname, error, strerror(error));
         return -1;
     }
     if (0 > readlink(lname, fname, FILENAME_MAX - 1)) {
@@ -137,8 +127,7 @@ int pmix_leader_is_alive(char *lname) {
             /* Symlink was removed between _symlink_exists & readlink */
             return 0;
         } else {
-            fprintf(stderr, "Error reading symlink %s: %d:%s\n",
-                    lname, error, strerror(error));
+            fprintf(stderr, "Error reading symlink %s: %d:%s\n", lname, error, strerror(error));
             return -1;
         }
     }

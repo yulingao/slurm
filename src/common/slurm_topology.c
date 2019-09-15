@@ -63,19 +63,13 @@ typedef struct slurm_topo_ops {
 
     bool (*node_ranking)(void);
 
-    int (*get_node_addr)(char *node_name,
-                         char **addr,
-                         char **pattern);
+    int (*get_node_addr)(char *node_name, char **addr, char **pattern);
 } slurm_topo_ops_t;
 
 /*
  * Must be synchronized with slurm_topo_ops_t above.
  */
-static const char *syms[] = {
-        "topo_build_config",
-        "topo_generate_node_ranking",
-        "topo_get_node_addr",
-};
+static const char *syms[] = {"topo_build_config", "topo_generate_node_ranking", "topo_get_node_addr",};
 
 static slurm_topo_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -103,8 +97,7 @@ extern int slurm_topo_init(void) {
 
     type = slurm_get_topology_plugin();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -156,9 +149,7 @@ extern bool slurm_topo_generate_node_ranking(void) {
     return (*(ops.node_ranking))();
 }
 
-extern int slurm_topo_get_node_addr(char *node_name,
-                                    char **addr,
-                                    char **pattern) {
+extern int slurm_topo_get_node_addr(char *node_name, char **addr, char **pattern) {
     if (slurm_topo_init() < 0)
         return SLURM_ERROR;
 

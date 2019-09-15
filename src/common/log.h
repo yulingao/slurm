@@ -147,14 +147,12 @@ size_t log_timestamp(char *, size_t);
  *
  * log function automatically takes the basename() of argv0.
  */
-int log_init(char *argv0, log_options_t opts,
-             log_facility_t fac, char *logfile);
+int log_init(char *argv0, log_options_t opts, log_facility_t fac, char *logfile);
 
 /*
  * initialize scheduler log module (called only once)
  */
-int sched_log_init(char *argv0, log_options_t opts, log_facility_t fac,
-                   char *logfile);
+int sched_log_init(char *argv0, log_options_t opts, log_facility_t fac, char *logfile);
 
 /* reinitialize log module.
  * Keep same log options as previously initialized log, but reinit mutex

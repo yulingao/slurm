@@ -68,8 +68,7 @@ void pmixp_state_finalize(void) {
     list_destroy(_pmixp_state.coll);
 }
 
-static bool _compare_ranges(const pmixp_proc_t *r1, const pmixp_proc_t *r2,
-                            size_t nprocs) {
+static bool _compare_ranges(const pmixp_proc_t *r1, const pmixp_proc_t *r2, size_t nprocs) {
     int i;
     for (i = 0; i < nprocs; i++) {
         if (0 != xstrcmp(r1[i].nspace, r2[i].nspace)) {
@@ -82,9 +81,7 @@ static bool _compare_ranges(const pmixp_proc_t *r1, const pmixp_proc_t *r2,
     return true;
 }
 
-static pmixp_coll_t *_find_collective(pmixp_coll_type_t type,
-                                      const pmixp_proc_t *procs,
-                                      size_t nprocs) {
+static pmixp_coll_t *_find_collective(pmixp_coll_type_t type, const pmixp_proc_t *procs, size_t nprocs) {
     pmixp_coll_t *coll = NULL, *ret = NULL;
     ListIterator it;
 
@@ -111,9 +108,7 @@ static pmixp_coll_t *_find_collective(pmixp_coll_type_t type,
     return ret;
 }
 
-pmixp_coll_t *pmixp_state_coll_get(pmixp_coll_type_t type,
-                                   const pmixp_proc_t *procs,
-                                   size_t nprocs) {
+pmixp_coll_t *pmixp_state_coll_get(pmixp_coll_type_t type, const pmixp_proc_t *procs, size_t nprocs) {
     pmixp_coll_t *ret = NULL;
 
     /* Collectives are created once for each type and process set

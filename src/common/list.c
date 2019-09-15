@@ -232,8 +232,7 @@ int list_count(List l) {
 
 /* list_append()
  */
-void *
-list_append(List l, void *x) {
+void *list_append(List l, void *x) {
     void *v;
 
     xassert(l != NULL);
@@ -306,8 +305,7 @@ int list_transfer(List l, List sub) {
 
 /* list_prepend()
  */
-void *
-list_prepend(List l, void *x) {
+void *list_prepend(List l, void *x) {
     void *v;
 
     xassert(l != NULL);
@@ -323,8 +321,7 @@ list_prepend(List l, void *x) {
 
 /* list_find_first()
  */
-void *
-list_find_first(List l, ListFindF f, void *key) {
+void *list_find_first(List l, ListFindF f, void *key) {
     ListNode p;
     void *v = NULL;
 
@@ -347,8 +344,7 @@ list_find_first(List l, ListFindF f, void *key) {
 
 /* list_remove_first()
  */
-void *
-list_remove_first(List l, ListFindF f, void *key) {
+void *list_remove_first(List l, ListFindF f, void *key) {
     ListNode *pp;
     void *v = NULL;
 
@@ -450,8 +446,7 @@ int list_flush(List l) {
 
 /* list_push()
  */
-void *
-list_push(List l, void *x) {
+void *list_push(List l, void *x) {
     void *v;
 
     xassert(l != NULL);
@@ -525,8 +520,7 @@ void list_sort(List l, ListCmpF f) {
 
 /* list_pop()
  */
-void *
-list_pop(List l) {
+void *list_pop(List l) {
     void *v;
 
     xassert(l != NULL);
@@ -541,8 +535,7 @@ list_pop(List l) {
 
 /* list_peek()
  */
-void *
-list_peek(List l) {
+void *list_peek(List l) {
     void *v;
 
     xassert(l != NULL);
@@ -557,8 +550,7 @@ list_peek(List l) {
 
 /* list_enqueue()
  */
-void *
-list_enqueue(List l, void *x) {
+void *list_enqueue(List l, void *x) {
     void *v;
 
     xassert(l != NULL);
@@ -574,8 +566,7 @@ list_enqueue(List l, void *x) {
 
 /* list_dequeue()
  */
-void *
-list_dequeue(List l) {
+void *list_dequeue(List l) {
     void *v;
 
     xassert(l != NULL);
@@ -590,8 +581,7 @@ list_dequeue(List l) {
 
 /* list_iterator_create()
  */
-ListIterator
-list_iterator_create(List l) {
+ListIterator list_iterator_create(List l) {
     ListIterator i;
 
     xassert(l != NULL);
@@ -651,8 +641,7 @@ void list_iterator_destroy(ListIterator i) {
 
 /* list_next()
  */
-void *
-list_next(ListIterator i) {
+void *list_next(ListIterator i) {
     ListNode p;
 
     xassert(i != NULL);
@@ -672,8 +661,7 @@ list_next(ListIterator i) {
 
 /* list_peek_next()
  */
-void *
-list_peek_next(ListIterator i) {
+void *list_peek_next(ListIterator i) {
     ListNode p;
 
     xassert(i != NULL);
@@ -690,8 +678,7 @@ list_peek_next(ListIterator i) {
 
 /* list_insert()
  */
-void *
-list_insert(ListIterator i, void *x) {
+void *list_insert(ListIterator i, void *x) {
     void *v;
 
     xassert(i != NULL);
@@ -708,8 +695,7 @@ list_insert(ListIterator i, void *x) {
 
 /* list_find()
  */
-void *
-list_find(ListIterator i, ListFindF f, void *key) {
+void *list_find(ListIterator i, ListFindF f, void *key) {
     void *v;
 
     xassert(i != NULL);
@@ -725,8 +711,7 @@ list_find(ListIterator i, ListFindF f, void *key) {
 
 /* list_remove()
  */
-void *
-list_remove(ListIterator i) {
+void *list_remove(ListIterator i) {
     void *v = NULL;
 
     xassert(i != NULL);
@@ -788,8 +773,7 @@ static void *_list_node_create(List l, ListNode *pp, void *x) {
             i->prev = &p->next;
         else if (i->pos == p->next)
             i->pos = p;
-        xassert((i->pos == *i->prev) ||
-                ((*i->prev) && (i->pos == (*i->prev)->next)));
+        xassert((i->pos == *i->prev) || ((*i->prev) && (i->pos == (*i->prev)->next)));
     }
 
     return x;
@@ -826,8 +810,7 @@ static void *_list_node_destroy(List l, ListNode *pp) {
             i->pos = p->next, i->prev = pp;
         else if (i->prev == &p->next)
             i->prev = pp;
-        xassert((i->pos == *i->prev) ||
-                ((*i->prev) && (i->pos == (*i->prev)->next)));
+        xassert((i->pos == *i->prev) || ((*i->prev) && (i->pos == (*i->prev)->next)));
     }
     list_node_free(p);
 
@@ -836,8 +819,7 @@ static void *_list_node_destroy(List l, ListNode *pp) {
 
 #ifndef NDEBUG
 
-static int
-_list_mutex_is_locked(pthread_mutex_t *mutex) {
+static int _list_mutex_is_locked(pthread_mutex_t *mutex) {
     /*  Returns true if the mutex is locked; o/w, returns false.
  */
     int rc;
@@ -854,8 +836,7 @@ _list_mutex_is_locked(pthread_mutex_t *mutex) {
  * Pop an item from the list assuming the
  * the list is already locked.
  */
-static void *
-_list_pop_locked(List l) {
+static void *_list_pop_locked(List l) {
     void *v;
 
     v = _list_node_destroy(l, &l->head);
@@ -868,8 +849,7 @@ _list_pop_locked(List l) {
  * Append an item to the list. The function assumes
  * the list is already locked.
  */
-static void *
-_list_append_locked(List l, void *x) {
+static void *_list_append_locked(List l, void *x) {
     void *v;
 
     v = _list_node_create(l, l->tail, x);

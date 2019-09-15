@@ -77,10 +77,7 @@ typedef enum {
 } step_msg_t;
 
 typedef enum {
-    SLURMSTEPD_NOT_RUNNING = 0,
-    SLURMSTEPD_STEP_STARTING,
-    SLURMSTEPD_STEP_RUNNING,
-    SLURMSTEPD_STEP_ENDING
+    SLURMSTEPD_NOT_RUNNING = 0, SLURMSTEPD_STEP_STARTING, SLURMSTEPD_STEP_RUNNING, SLURMSTEPD_STEP_ENDING
 } slurmstepd_state_t;
 
 typedef enum {
@@ -147,8 +144,8 @@ int stepd_terminate(int fd, uint16_t protocol_version);
  * and -1 on error.  Also fills in protocol_version with the version
  * of the running stepd.
  */
-extern int stepd_connect(const char *directory, const char *nodename,
-                         uint32_t jobid, uint32_t stepid, uint16_t *protocol_version);
+extern int
+stepd_connect(const char *directory, const char *nodename, uint32_t jobid, uint32_t stepid, uint16_t *protocol_version);
 
 /*
  * Retrieve a job step's current state.
@@ -170,14 +167,12 @@ int stepd_notify_job(int fd, uint16_t protocol_version, char *message);
 /*
  * Send a checkpoint request to all tasks of a job step.
  */
-int stepd_checkpoint(int fd, uint16_t protocol_version,
-                     time_t timestamp, char *image_dir);
+int stepd_checkpoint(int fd, uint16_t protocol_version, time_t timestamp, char *image_dir);
 
 /*
  * Send a signal to the proctrack container of a job step.
  */
-int stepd_signal_container(int fd, uint16_t protocol_version, int signal,
-                           int flags, uid_t uid);
+int stepd_signal_container(int fd, uint16_t protocol_version, int signal, int flags, uid_t uid);
 
 /*
  * Attach a client to a running job step.
@@ -189,9 +184,8 @@ int stepd_signal_container(int fd, uint16_t protocol_version, int signal,
  *         probably be moved into a more generic stepd_api call so that
  *         this header does not need to include slurm_protocol_defs.h.
  */
-int stepd_attach(int fd, uint16_t protocol_version,
-                 slurm_addr_t *ioaddr, slurm_addr_t *respaddr,
-                 void *job_cred_sig, reattach_tasks_response_msg_t *resp);
+int stepd_attach(int fd, uint16_t protocol_version, slurm_addr_t *ioaddr, slurm_addr_t *respaddr, void *job_cred_sig,
+                 reattach_tasks_response_msg_t *resp);
 
 /*
  * Scan for available running slurm step daemons by checking
@@ -224,15 +218,13 @@ extern int stepd_add_extern_pid(int fd, uint16_t protocol_version, pid_t pid);
  * otherwise NULL.
  * Returns 0 to indicate no display forwarded.
  */
-extern int stepd_get_x11_display(int fd, uint16_t protocol_version,
-                                 char **xauthority);
+extern int stepd_get_x11_display(int fd, uint16_t protocol_version, char **xauthority);
 
 /*
  * Get the 'struct passwd' info for the user running this job step iff
  * the cluster is running with enable_nss_slurm.
  */
-extern struct passwd *stepd_getpw(int fd, uint16_t protocol_version,
-                                  int mode, uid_t uid, const char *name);
+extern struct passwd *stepd_getpw(int fd, uint16_t protocol_version, int mode, uid_t uid, const char *name);
 
 extern void xfree_struct_passwd(struct passwd *pwd);
 
@@ -243,8 +235,7 @@ extern void xfree_struct_passwd(struct passwd *pwd);
  * Returns a NULL-terminated array of 'struct group' elements, with all
  * fields allocated with xmalloc().
  */
-extern struct group **stepd_getgr(int fd, uint16_t protocol_version,
-                                  int mode, gid_t gid, const char *name);
+extern struct group **stepd_getgr(int fd, uint16_t protocol_version, int mode, gid_t gid, const char *name);
 
 extern void xfree_struct_group_array(struct group **grp);
 
@@ -260,8 +251,7 @@ pid_t stepd_daemon_pid(int fd, uint16_t protocol_version);
  * Returns SLURM_SUCCESS if successful.  On error returns SLURM_ERROR
  * and sets errno.
  */
-extern int stepd_suspend(int fd, uint16_t protocol_version,
-                         suspend_int_msg_t *susp_req, int phase);
+extern int stepd_suspend(int fd, uint16_t protocol_version, suspend_int_msg_t *susp_req, int phase);
 
 /*
  * Resume execution of the job step that has been suspended by a
@@ -271,8 +261,7 @@ extern int stepd_suspend(int fd, uint16_t protocol_version,
  * Returns SLURM_SUCCESS if successful.  On error returns SLURM_ERROR
  * and sets errno.
  */
-extern int stepd_resume(int fd, uint16_t protocol_version,
-                        suspend_int_msg_t *susp_req, int phase);
+extern int stepd_resume(int fd, uint16_t protocol_version, suspend_int_msg_t *susp_req, int phase);
 
 /*
  * Reconfigure the job step (Primarily to allow the stepd to refresh
@@ -288,31 +277,25 @@ int stepd_reconfig(int fd, uint16_t protocol_version);
  * Returns SLURM_SUCCESS if successful.  On error returns SLURM_ERROR
  * and sets errno.
  */
-int stepd_completion(int fd, uint16_t protocol_version,
-                     step_complete_msg_t *sent);
+int stepd_completion(int fd, uint16_t protocol_version, step_complete_msg_t *sent);
 
 /*
  *
  * Returns SLURM_SUCCESS on success or SLURM_ERROR on error.
  * resp receives a jobacctinfo_t which must be freed if SUCCESS.
  */
-int stepd_stat_jobacct(int fd, uint16_t protocol_version,
-                       job_step_id_msg_t *sent, job_step_stat_t *resp);
+int stepd_stat_jobacct(int fd, uint16_t protocol_version, job_step_id_msg_t *sent, job_step_stat_t *resp);
 
 
-int stepd_task_info(int fd, uint16_t protocol_version,
-                    slurmstepd_task_info_t **task_info,
-                    uint32_t *task_info_count);
+int stepd_task_info(int fd, uint16_t protocol_version, slurmstepd_task_info_t **task_info, uint32_t *task_info_count);
 
-int stepd_list_pids(int fd, uint16_t protocol_version,
-                    uint32_t **pids_array, uint32_t *pids_count);
+int stepd_list_pids(int fd, uint16_t protocol_version, uint32_t **pids_array, uint32_t *pids_count);
 
 /*
  * Get the memory limits of the step
  * Returns uid of the running step if successful.  On error returns -1.
  */
-extern int stepd_get_mem_limits(int fd, uint16_t protocol_version,
-                                slurmstepd_mem_info_t *stepd_mem_info);
+extern int stepd_get_mem_limits(int fd, uint16_t protocol_version, slurmstepd_mem_info_t *stepd_mem_info);
 
 /*
  * Get the uid of the step

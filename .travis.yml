@@ -5,20 +5,20 @@ addons:
   mariadb: '10.1'
   apt:
     packages:
-    - cmake
-    - libmunge-dev
-    - liblua5.2-dev
-    - munge
-    - expect
-    - libhwloc-dev
-    - libnuma1
-    - libnuma-dev
-    - libpam-dev
-    - libhwloc-dev
-    - gdb
-    - valgrind
-    - libfreeipmi-dev
-    - man2html
+      - cmake
+      - libmunge-dev
+      - liblua5.2-dev
+      - munge
+      - expect
+      - libhwloc-dev
+      - libnuma1
+      - libnuma-dev
+      - libpam-dev
+      - libhwloc-dev
+      - gdb
+      - valgrind
+      - libfreeipmi-dev
+      - man2html
 compiler:
   - clang
   - gcc

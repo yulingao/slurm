@@ -84,8 +84,7 @@ int print_steps_array(job_step_info_t *steps, int size, List format);
 /*****************************************************************************
  * Job Line Format Options
  *****************************************************************************/
-int job_format_add_function(List list, int width, bool right_justify,
-                            char *suffix,
+int job_format_add_function(List list, int width, bool right_justify, char *suffix,
                             int (*function)(job_info_t *, int, bool, char *));
 
 #define job_format_add_array_job_id(list, wid, right, suffix) \
@@ -346,359 +345,243 @@ int job_format_add_function(List list, int width, bool right_justify,
 /*****************************************************************************
  * Job Line Print Functions
  *****************************************************************************/
-int _print_job_array_job_id(job_info_t *job, int width, bool right_justify,
-                            char *suffix);
+int _print_job_array_job_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_array_task_id(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_array_task_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_batch_host(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_batch_host(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_burst_buffer(job_info_t *job, int width, bool right_justify,
-                            char *suffix);
+int _print_job_burst_buffer(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_burst_buffer_state(job_info_t *job, int width,
-                                  bool right_justify, char *suffix);
+int _print_job_burst_buffer_state(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_cluster_name(job_info_t *job, int width, bool right,
-                            char *suffix);
+int _print_job_cluster_name(job_info_t *job, int width, bool right, char *suffix);
 
-int _print_job_core_spec(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_core_spec(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_delay_boot(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_delay_boot(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_job_id(job_info_t *job, int width, bool right_justify,
-                      char *suffix);
+int _print_job_job_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_job_id2(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_job_id2(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_prefix(job_info_t *job, int width, bool right_justify,
-                      char *suffix);
+int _print_job_prefix(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_reason(job_info_t *job, int width, bool right_justify,
-                      char *suffix);
+int _print_job_reason(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_reason_list(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_job_reason_list(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_name(job_info_t *job, int width, bool right_justify,
-                    char *suffix);
+int _print_job_name(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_licenses(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_licenses(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_wckey(job_info_t *job, int width, bool right_justify,
-                     char *suffix);
+int _print_job_wckey(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_user_id(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_user_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_user_name(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_user_name(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_group_id(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_group_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_group_name(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_group_name(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_job_state(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_job_state(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_last_sched_eval(job_info_t *job, int width, bool right,
-                               char *suffix);
+int _print_job_last_sched_eval(job_info_t *job, int width, bool right, char *suffix);
 
-int _print_job_job_state_compact(job_info_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_job_job_state_compact(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_left(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_time_left(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_limit(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_time_limit(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_used(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_time_used(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_submit(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_job_time_submit(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_start(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_time_start(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_time_end(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_time_end(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_deadline(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_deadline(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_priority(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_priority(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_priority_long(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_priority_long(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_nodes(job_info_t *job, int width, bool right_justify,
-                     char *suffix);
+int _print_job_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_schednodes(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_schednodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_node_inx(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_node_inx(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_partition(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_partition(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_num_cpus(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_num_cpus(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_num_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_num_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_num_sct(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_num_sct(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_num_tasks(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_num_tasks(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_over_subscribe(job_info_t *job, int width, bool right_justify,
-                              char *suffix);
+int _print_job_over_subscribe(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_contiguous(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_contiguous(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_pn_min_cpus(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_pn_min_cpus(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_sockets(job_info_t *job, int width, bool right_justify,
-                   char *suffix);
+int _print_sockets(job_info_t *job, int width, bool right_justify, char *suffix);
 
 int _print_cores(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_threads(job_info_t *job, int width, bool right_justify,
-                   char *suffix);
+int _print_threads(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_pn_min_memory(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_pn_min_memory(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_pn_min_tmp_disk(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_pn_min_tmp_disk(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_req_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_req_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_exc_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_exc_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_req_node_inx(job_info_t *job, int width, bool right_justify,
-                            char *suffix);
+int _print_job_req_node_inx(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_exc_node_inx(job_info_t *job, int width, bool right_justify,
-                            char *suffix);
+int _print_job_exc_node_inx(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_features(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_features(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_cluster_features(job_info_t *job, int width, bool right_justify,
-                                char *suffix);
+int _print_job_cluster_features(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_account(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_account(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_dependency(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_dependency(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_qos(job_info_t *job, int width, bool right_justify,
-                   char *suffix);
+int _print_job_qos(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_select_jobinfo(job_info_t *job, int width, bool right_justify,
-                              char *suffix);
+int _print_job_select_jobinfo(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_admin_comment(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_admin_comment(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_system_comment(job_info_t *job, int width, bool right_justify,
-                              char *suffix);
+int _print_job_system_comment(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_comment(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_comment(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_reservation(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_job_reservation(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_command(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_command(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_work_dir(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_work_dir(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_nice(job_info_t *job, int width, bool right_justify,
-                    char *suffix);
+int _print_job_nice(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_accrue_time(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_job_accrue_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_alloc_nodes(job_info_t *job, int width, bool right_justify,
-                           char *suffix);
+int _print_job_alloc_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_alloc_sid(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_alloc_sid(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_assoc_id(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_assoc_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_batch_flag(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_batch_flag(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_boards_per_node(job_info_t *job, int width, bool right_justify,
-                               char *suffix);
+int _print_job_boards_per_node(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_derived_ec(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_derived_ec(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_eligible_time(job_info_t *job, int width, bool right_justify,
-                             char *suffix);
+int _print_job_eligible_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_exit_code(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_exit_code(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_origin(job_info_t *job, int width, bool right_justify,
-                          char *suffix);
+int _print_job_fed_origin(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_origin_raw(job_info_t *job, int width, bool right_justify,
-                              char *suffix);
+int _print_job_fed_origin_raw(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_siblings_active(job_info_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_job_fed_siblings_active(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_siblings_active_raw(job_info_t *job, int width,
-                                       bool right_justify, char *suffix);
+int _print_job_fed_siblings_active_raw(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_siblings_viable(job_info_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_job_fed_siblings_viable(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_fed_siblings_viable_raw(job_info_t *job, int width,
-                                       bool right_justify, char *suffix);
+int _print_job_fed_siblings_viable_raw(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_max_cpus(job_info_t *job, int width, bool right_justify,
-                        char *suffix);
+int _print_job_max_cpus(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_max_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix);
+int _print_job_max_nodes(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_network(job_info_t *job, int width, bool right_justify,
-                       char *suffix);
+int _print_job_network(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_ntasks_per_core(job_info_t *job, int width, bool right_justify,
-                               char *suffix);
+int _print_job_ntasks_per_core(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_ntasks_per_node(job_info_t *job, int width, bool right_justify,
-                               char *suffix);
+int _print_job_ntasks_per_node(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_ntasks_per_socket(job_info_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_job_ntasks_per_socket(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_ntasks_per_board(job_info_t *job, int width,
-                                bool right_justify, char *suffix);
+int _print_job_ntasks_per_board(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_preempt_time(job_info_t *job, int width,
-                            bool right_justify, char *suffix);
+int _print_job_preempt_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_preempt_time(job_info_t *job, int width,
-                            bool right_justify, char *suffix);
+int _print_job_preempt_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_profile(job_info_t *job, int width,
-                       bool right_justify, char *suffix);
+int _print_job_profile(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_reboot(job_info_t *job, int width,
-                      bool right_justify, char *suffix);
+int _print_job_reboot(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_req_switch(job_info_t *job, int width,
-                          bool right_justify, char *suffix);
+int _print_job_req_switch(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_requeue(job_info_t *job, int width,
-                       bool right_justify, char *suffix);
+int _print_job_requeue(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_resize_time(job_info_t *job, int width,
-                           bool right_justify, char *suffix);
+int _print_job_resize_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_restart_cnt(job_info_t *job, int width,
-                           bool right_justify, char *suffix);
+int _print_job_restart_cnt(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_sockets_per_board(job_info_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_job_sockets_per_board(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_std_err(job_info_t *job, int width,
-                       bool right_justify, char *suffix);
+int _print_job_std_err(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_std_in(job_info_t *job, int width,
-                      bool right_justify, char *suffix);
+int _print_job_std_in(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_std_out(job_info_t *job, int width,
-                       bool right_justify, char *suffix);
+int _print_job_std_out(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_min_time(job_info_t *job, int width,
-                        bool right_justify, char *suffix);
+int _print_job_min_time(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_wait4switch(job_info_t *job, int width,
-                           bool right_justify, char *suffix);
+int _print_job_wait4switch(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_cpus_per_tres(job_info_t *job, int width,
-                             bool right_justify, char *suffix);
+int _print_job_cpus_per_tres(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_mem_per_tres(job_info_t *job, int width,
-                            bool right_justify, char *suffix);
+int _print_job_mem_per_tres(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_alloc(job_info_t *job, int width,
-                          bool right_justify, char *suffix);
+int _print_job_tres_alloc(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_bind(job_info_t *job, int width,
-                         bool right_justify, char *suffix);
+int _print_job_tres_bind(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_freq(job_info_t *job, int width,
-                         bool right_justify, char *suffix);
+int _print_job_tres_freq(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_per_job(job_info_t *job, int width,
-                            bool right_justify, char *suffix);
+int _print_job_tres_per_job(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_per_node(job_info_t *job, int width,
-                             bool right_justify, char *suffix);
+int _print_job_tres_per_node(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_per_socket(job_info_t *job, int width,
-                               bool right_justify, char *suffix);
+int _print_job_tres_per_socket(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_tres_per_task(job_info_t *job, int width,
-                             bool right_justify, char *suffix);
+int _print_job_tres_per_task(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_mcs_label(job_info_t *job, int width,
-                         bool right_justify, char *suffix);
+int _print_job_mcs_label(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_pack_job_id(job_info_t *job, int width,
-                           bool right_justify, char *suffix);
+int _print_job_pack_job_id(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_pack_job_offset(job_info_t *job, int width,
-                               bool right_justify, char *suffix);
+int _print_job_pack_job_offset(job_info_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_pack_job_id_set(job_info_t *job, int width,
-                               bool right_justify, char *suffix);
+int _print_job_pack_job_id_set(job_info_t *job, int width, bool right_justify, char *suffix);
 
 
 /*****************************************************************************
  * Step Print Format Functions
  *****************************************************************************/
-int step_format_add_function(List list, int width, bool right_justify,
-                             char *suffix,
+int step_format_add_function(List list, int width, bool right_justify, char *suffix,
                              int (*function)(job_step_info_t *, int, bool, char *));
 
 #define step_format_add_cluster_name(list, wid, right, suffix) \
@@ -774,98 +657,67 @@ int step_format_add_function(List list, int width, bool right_justify,
 /*****************************************************************************
  * Step Line Print Functions
  *****************************************************************************/
-int _print_step_cluster_name(job_step_info_t *step, int width,
-                             bool right_justify, char *suffix);
+int _print_step_cluster_name(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_id(job_step_info_t *step, int width, bool right_justify,
-                   char *suffix);
+int _print_step_id(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_partition(job_step_info_t *step, int width,
-                          bool right_justify, char *suffix);
+int _print_step_partition(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_prefix(job_step_info_t *step, int width,
-                       bool right_justify, char *suffix);
+int _print_step_prefix(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_user_id(job_step_info_t *step, int width,
-                        bool right_justify, char *suffix);
+int _print_step_user_id(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_user_name(job_step_info_t *step, int width,
-                          bool right_justify, char *suffix);
+int _print_step_user_name(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_time_limit(job_step_info_t *step, int width,
-                           bool right_justify, char *suffix);
+int _print_step_time_limit(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_time_start(job_step_info_t *step, int width,
-                           bool right_justify, char *suffix);
+int _print_step_time_start(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_time_used(job_step_info_t *step, int width,
-                          bool right_justify, char *suffix);
+int _print_step_time_used(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_name(job_step_info_t *step, int width,
-                     bool right_justify, char *suffix);
+int _print_step_name(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_nodes(job_step_info_t *step, int width,
-                      bool right_justify, char *suffix);
+int _print_step_nodes(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_num_tasks(job_step_info_t *step, int width,
-                          bool right_justify, char *suffix);
+int _print_step_num_tasks(job_step_info_t *step, int width, bool right_justify, char *suffix);
 
-int _print_step_array_job_id(job_step_info_t *step, int width, bool right,
-                             char *suffix);
+int _print_step_array_job_id(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_array_task_id(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_array_task_id(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_chpt_dir(job_step_info_t *step, int width, bool right,
-                         char *suffix);
+int _print_step_chpt_dir(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_chpt_interval(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_chpt_interval(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_job_id(job_step_info_t *step, int width, bool right,
-                       char *suffix);
+int _print_step_job_id(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_network(job_step_info_t *step, int width, bool right,
-                        char *suffix);
+int _print_step_network(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_node_inx(job_step_info_t *step, int width, bool right,
-                         char *suffix);
+int _print_step_node_inx(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_num_cpus(job_step_info_t *step, int width, bool right,
-                         char *suffix);
+int _print_step_num_cpus(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_cpu_freq(job_step_info_t *step, int width, bool right,
-                         char *suffix);
+int _print_step_cpu_freq(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_resv_ports(job_step_info_t *step, int width, bool right,
-                           char *suffix);
+int _print_step_resv_ports(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_state(job_step_info_t *step, int width, bool right,
-                      char *suffix);
+int _print_step_state(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_cpus_per_tres(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_cpus_per_tres(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_mem_per_tres(job_step_info_t *step, int width, bool right,
-                             char *suffix);
+int _print_step_mem_per_tres(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_bind(job_step_info_t *step, int width, bool right,
-                          char *suffix);
+int _print_step_tres_bind(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_freq(job_step_info_t *step, int width, bool right,
-                          char *suffix);
+int _print_step_tres_freq(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_per_step(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_tres_per_step(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_per_node(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_tres_per_node(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_per_socket(job_step_info_t *step, int width, bool right,
-                                char *suffix);
+int _print_step_tres_per_socket(job_step_info_t *step, int width, bool right, char *suffix);
 
-int _print_step_tres_per_task(job_step_info_t *step, int width, bool right,
-                              char *suffix);
+int _print_step_tres_per_task(job_step_info_t *step, int width, bool right, char *suffix);
 
 /*****************************************************************************
  * Common Line Print Functions

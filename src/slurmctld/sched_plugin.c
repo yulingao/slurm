@@ -50,8 +50,7 @@
 #include "src/slurmctld/slurmctld.h"
 
 typedef struct slurm_sched_ops {
-    uint32_t (*initial_priority)(uint32_t,
-                                 struct job_record *);
+    uint32_t (*initial_priority)(uint32_t, struct job_record *);
 
     int (*reconfig)(void);
 } slurm_sched_ops_t;
@@ -59,10 +58,7 @@ typedef struct slurm_sched_ops {
 /*
  * Must be synchronized with slurm_sched_ops_t above.
  */
-static const char *syms[] = {
-        "slurm_sched_p_initial_priority",
-        "slurm_sched_p_reconfig",
-};
+static const char *syms[] = {"slurm_sched_p_initial_priority", "slurm_sched_p_reconfig",};
 
 static slurm_sched_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -89,8 +85,7 @@ extern int slurm_sched_init(void) {
         goto done;
 
     type = slurm_get_sched_type();
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -129,8 +124,7 @@ extern int slurm_sched_g_reconfig(void) {
     return (*(ops.reconfig))();
 }
 
-uint32_t slurm_sched_g_initial_priority(uint32_t last_prio,
-                                        struct job_record *job_ptr) {
+uint32_t slurm_sched_g_initial_priority(uint32_t last_prio, struct job_record *job_ptr) {
     if (slurm_sched_init() < 0)
         return SLURM_ERROR;
 

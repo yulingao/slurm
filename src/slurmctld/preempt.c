@@ -55,19 +55,13 @@ typedef struct slurm_preempt_ops {
 
     bool (*preemption_enabled)(void);
 
-    bool (*job_preempt_check)(job_queue_rec_t *preemptor,
-                              job_queue_rec_t *preemptee);
+    bool (*job_preempt_check)(job_queue_rec_t *preemptor, job_queue_rec_t *preemptee);
 } slurm_preempt_ops_t;
 
 /*
  * Must be synchronized with slurm_preempt_ops_t above.
  */
-static const char *syms[] = {
-        "find_preemptable_jobs",
-        "job_preempt_mode",
-        "preemption_enabled",
-        "job_preempt_check",
-};
+static const char *syms[] = {"find_preemptable_jobs", "job_preempt_mode", "preemption_enabled", "job_preempt_check",};
 
 static slurm_preempt_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -79,20 +73,17 @@ static void _preempt_signal(struct job_record *job_ptr, uint32_t grace_time) {
         return;
 
     job_ptr->preempt_time = time(NULL);
-    job_ptr->end_time = MIN(job_ptr->end_time,
-                            (job_ptr->preempt_time + (time_t) grace_time));
+    job_ptr->end_time = MIN(job_ptr->end_time, (job_ptr->preempt_time + (time_t) grace_time));
 
     /* Signal the job at the beginning of preemption GraceTime */
     job_signal(job_ptr, SIGCONT, 0, 0, 0);
-    if (preempt_send_user_signal && job_ptr->warn_signal &&
-        !(job_ptr->warn_flags & WARN_SENT))
+    if (preempt_send_user_signal && job_ptr->warn_signal && !(job_ptr->warn_flags & WARN_SENT))
         send_job_warn_signal(job_ptr, true);
     else
         job_signal(job_ptr, SIGTERM, 0, 0, 0);
 }
 
-extern int slurm_job_check_grace(struct job_record *job_ptr,
-                                 struct job_record *preemptor_ptr) {
+extern int slurm_job_check_grace(struct job_record *job_ptr, struct job_record *preemptor_ptr) {
     /* Preempt modes: -1 (unset), 0 (none), 1 (partition), 2 (QOS) */
     static int preempt_mode = 0;
     static time_t last_update_time = (time_t) 0;
@@ -121,15 +112,14 @@ extern int slurm_job_check_grace(struct job_record *job_ptr,
         grace_time = job_ptr->part_ptr->grace_time;
     else if (preempt_mode == 2) {
         if (!job_ptr->qos_ptr)
-            error("%s: %pJ has no QOS ptr!  This should never happen",
-                  __func__, job_ptr);
+            error("%s: %pJ has no QOS ptr!  This should never happen", __func__, job_ptr);
         else
             grace_time = job_ptr->qos_ptr->grace_time;
     }
 
     if (grace_time) {
-        debug("setting %u sec preemption grace time for %pJ to reclaim resources for %pJ",
-              grace_time, job_ptr, preemptor_ptr);
+        debug("setting %u sec preemption grace time for %pJ to reclaim resources for %pJ", grace_time, job_ptr,
+              preemptor_ptr);
         _preempt_signal(job_ptr, grace_time);
     } else
         rc = SLURM_ERROR;
@@ -154,8 +144,7 @@ extern int slurm_preempt_init(void) {
         goto done;
 
     type = slurm_get_preempt_type();
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -212,11 +201,9 @@ extern bool slurm_preemption_enabled(void) {
 /*
  * Return true if the preemptor can preempt the preemptee, otherwise false
  */
-extern bool slurm_job_preempt_check(job_queue_rec_t *preemptor,
-                                    job_queue_rec_t *preemptee) {
+extern bool slurm_job_preempt_check(job_queue_rec_t *preemptor, job_queue_rec_t *preemptee) {
     if (slurm_preempt_init() < 0)
         return false;
 
-    return (*(ops.job_preempt_check))
-            (preemptor, preemptee);
+    return (*(ops.job_preempt_check))(preemptor, preemptee);
 }

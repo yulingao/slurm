@@ -261,8 +261,7 @@ char *hostlist_pop_range(hostlist_t hl);
  * Returns 0 if no ranges exist 1 otherwise.
  * The range associated with the returned lo and hi is removed from hl.
  */
-int hostlist_pop_range_values(
-        hostlist_t hl, unsigned long *lo, unsigned long *hi);
+int hostlist_pop_range_values(hostlist_t hl, unsigned long *lo, unsigned long *hi);
 
 /* hostlist_shift_range():
  *
@@ -356,8 +355,7 @@ void hostlist_parse_int_to_array(int in, int *out, int dims, int hostlist_base);
  * do the same thing as hostlist_ranged_string, but provide the
  * dimensions you are looking for.
  */
-ssize_t hostlist_ranged_string_dims(hostlist_t hl, size_t n,
-                                    char *buf, int dims, int brackets);
+ssize_t hostlist_ranged_string_dims(hostlist_t hl, size_t n, char *buf, int dims, int brackets);
 
 /* hostlist_ranged_string():
  *
@@ -386,8 +384,7 @@ char *hostlist_ranged_string_malloc(hostlist_t hl);
 /* Variant of hostlist_ranged_string().
  * Returns the buffer which must be released using xfree().
  */
-char *hostlist_ranged_string_xmalloc_dims(
-        hostlist_t hl, int dims, int brackets);
+char *hostlist_ranged_string_xmalloc_dims(hostlist_t hl, int dims, int brackets);
 
 char *hostlist_ranged_string_xmalloc(hostlist_t hl);
 
@@ -400,8 +397,7 @@ char *hostlist_ranged_string_xmalloc(hostlist_t hl);
  * hostlist_deranged_string() will not attempt to write a bracketed
  * hostlist representation. Every hostname will be explicitly written.
  */
-ssize_t hostlist_deranged_string_dims(
-        hostlist_t hl, size_t n, char *buf, int dims);
+ssize_t hostlist_deranged_string_dims(hostlist_t hl, size_t n, char *buf, int dims);
 
 ssize_t hostlist_deranged_string(hostlist_t hl, size_t n, char *buf);
 

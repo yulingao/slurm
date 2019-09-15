@@ -18,14 +18,14 @@
 #define FALSE 0
 
 #ifdef DEBUG
-    #define PMI2U_printf(x...) do {				\
-	char logstr[1024];					\
-	snprintf(logstr, 1024, x);      			\
-	fprintf(stderr, "[%s (%d): %s] %s\n",			\
-		__FILE__, __LINE__, __func__, logstr);		\
+#define PMI2U_printf(x...) do {				\
+    char logstr[1024];					\
+    snprintf(logstr, 1024, x);      			\
+    fprintf(stderr, "[%s (%d): %s] %s\n",			\
+        __FILE__, __LINE__, __func__, logstr);		\
     } while (0)
 #else
-    #define PMI2U_printf(x...)
+#define PMI2U_printf(x...)
 #endif
 
 #define PMI2U_Assert(a_) do { \
@@ -42,7 +42,7 @@
 
 #define PMI2U_ERR_SETANDJUMP(err, class, x...) do { \
     char errstr[PMI2_MAXLINE * 3]; \
-    snprintf(errstr, sizeof(errstr), x);	\
+    snprintf(errstr, sizeof(errstr), x);    \
     PMI2U_printf("err. %s", errstr);\
     pmi2_errno = class; \
     goto fn_fail; \
@@ -72,7 +72,7 @@
 
 #define PMI2U_CHKMEM_COMMIT() pmi2u_chkmem_stk_sp_ = 0
 
-#define PMI2U_CHKMEM_MALLOC(pointer_,type_,nbytes_,rc_,name_) do { \
+#define PMI2U_CHKMEM_MALLOC(pointer_, type_, nbytes_, rc_, name_) do { \
     pointer_ = (type_)malloc(nbytes_); \
     if (pointer_ && (pmi2u_chkmem_stk_sp_< pmi2u_chkmem_stk_sz_)) { \
         pmi2u_chkmem_stk_[pmi2u_chkmem_stk_sp_++] = pointer_; \
@@ -88,14 +88,22 @@
 }
 
 /* prototypes for PMIU routines */
-void PMI2U_Set_rank( int PMI_rank );
-void PMI2U_SetServer( void );
-int  PMI2U_readline( int fd, char *buf, int max );
-int  PMI2U_writeline( int fd, char *buf );
-int  PMI2U_parse_keyvals( char *st );
-void PMI2U_dump_keyvals( void );
-char *PMI2U_getval( const char *keystr, char *valstr, int vallen );
-void PMI2U_chgval( const char *keystr, char *valstr );
+void PMI2U_Set_rank(int PMI_rank);
+
+void PMI2U_SetServer(void);
+
+int PMI2U_readline(int fd, char *buf, int max);
+
+int PMI2U_writeline(int fd, char *buf);
+
+int PMI2U_parse_keyvals(char *st);
+
+void PMI2U_dump_keyvals(void);
+
+char *PMI2U_getval(const char *keystr, char *valstr, int vallen);
+
+void PMI2U_chgval(const char *keystr, char *valstr);
+
 int MPIU_Strncpy(char *, const char *, size_t);
 
 #endif /* PMI2UTIL_H_INCLUDED */

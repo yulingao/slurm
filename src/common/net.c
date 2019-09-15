@@ -118,8 +118,7 @@ int net_stream_listen(int *fd, uint16_t *port) {
 }
 
 int net_set_low_water(int sock, socklen_t size) {
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVLOWAT,
-                   (const void *) &size, sizeof(size)) < 0) {
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVLOWAT, (const void *) &size, sizeof(size)) < 0) {
         error("Unable to set low water socket option: %m");
         return -1;
     }

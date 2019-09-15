@@ -52,8 +52,7 @@
  * Prepare task for parallel debugger attach
  * Returns SLURM_SUCCESS or SLURM_ERROR.
  */
-int
-pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
+int pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
     /*  If task to be debugged, wait for it to stop via
      *  child's ptrace(PTRACE_TRACEME), then SIGSTOP, and
      *  ptrace(PTRACE_DETACH).
@@ -68,12 +67,9 @@ pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
                   " for pid %d", pid);
             if (WIFEXITED(status)) {
                 error("Process %d exited \"normally\""
-                      " with return code %d",
-                      pid,
-                      WEXITSTATUS(status));
+                      " with return code %d", pid, WEXITSTATUS(status));
             } else if (WIFSIGNALED(status)) {
-                error("Process %d killed by signal %d",
-                      pid, WTERMSIG(status));
+                error("Process %d killed by signal %d", pid, WTERMSIG(status));
             }
 
             /*
@@ -82,8 +78,7 @@ pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
              */
             for (i = 0; i < job->node_tasks; i++) {
                 if (job->task[i]->pid == pid) {
-                    job->task[i]->state =
-                            STEPD_STEP_TASK_COMPLETE;
+                    job->task[i]->state = STEPD_STEP_TASK_COMPLETE;
                 }
             }
 
@@ -111,8 +106,7 @@ pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
 /*
  * Stop current task on exec() for connection from a parallel debugger
  */
-void
-pdebug_stop_current(stepd_step_rec_t *job) {
+void pdebug_stop_current(stepd_step_rec_t *job) {
     /*
      * Stop the task on exec for TotalView to connect
      */
@@ -180,8 +174,7 @@ void pdebug_wake_process(stepd_step_rec_t *job, pid_t pid) {
             else
                 debug("woke pid %lu", (unsigned long) pid);
         } else {
-            debug("pid %lu not stopped or being traced",
-                  (unsigned long) pid);
+            debug("pid %lu not stopped or being traced", (unsigned long) pid);
         }
     }
 }

@@ -66,8 +66,7 @@
  * OUT offset - the task's offset within rank range of the configuration file
  * RET 1 if within range, 0 otherwise
  */
-static int
-_in_range(int rank, char *spec, int *offset) {
+static int _in_range(int rank, char *spec, int *offset) {
     char *range;
     char *p;
     char *upper;
@@ -80,8 +79,7 @@ _in_range(int rank, char *spec, int *offset) {
         return 1;
     }
 
-    for (range = strtok(spec, ","); range != NULL;
-         range = strtok(NULL, ",")) {
+    for (range = strtok(spec, ","); range != NULL; range = strtok(NULL, ",")) {
         p = range;
         while (*p != '\0' && isdigit(*p))
             p++;
@@ -110,8 +108,7 @@ _in_range(int rank, char *spec, int *offset) {
                 passed += (1 + high_num - low_num);
 
         } else {
-            error("Invalid task range specification (%s) ignored.",
-                  range);
+            error("Invalid task range specification (%s) ignored.", range);
         }
     }
     return 0;
@@ -122,9 +119,9 @@ _in_range(int rank, char *spec, int *offset) {
  *	to retrieve the argv arrays for each task on this node, rather
  *	than calling multi_prog_get_argv once for each task.
  */
-extern int multi_prog_get_argv(char *config_data, char **prog_env,
-                               int task_rank, uint32_t *argc, char ***argv,
-                               int global_argc, char **global_argv) {
+extern int
+multi_prog_get_argv(char *config_data, char **prog_env, int task_rank, uint32_t *argc, char ***argv, int global_argc,
+                    char **global_argv) {
     char *line = NULL;
     int i, line_num = 0;
     int task_offset;
@@ -209,8 +206,7 @@ extern int multi_prog_get_argv(char *config_data, char **prog_env,
             }
             CONT:
             p = args_spec;
-            while ((*args_spec != '\0') && (*args_spec != '\\') &&
-                   (*args_spec != '%') && (*args_spec != '\'') &&
+            while ((*args_spec != '\0') && (*args_spec != '\\') && (*args_spec != '%') && (*args_spec != '\'') &&
                    !isspace(*args_spec)) {
                 args_spec++;
             }
@@ -223,13 +219,11 @@ extern int multi_prog_get_argv(char *config_data, char **prog_env,
                 args_spec++;
                 if (*args_spec == 't') {
                     /* task rank */
-                    snprintf(tmp_buf, tmp_buf_len, "%d",
-                             task_rank);
+                    snprintf(tmp_buf, tmp_buf_len, "%d", task_rank);
                     xstrcat(arg_buf, tmp_buf);
                 } else if (*args_spec == 'o') {
                     /* task offset */
-                    snprintf(tmp_buf, tmp_buf_len, "%d",
-                             task_offset);
+                    snprintf(tmp_buf, tmp_buf_len, "%d", task_offset);
                     xstrcat(arg_buf, tmp_buf);
                 }
                 args_spec++;
@@ -255,23 +249,20 @@ extern int multi_prog_get_argv(char *config_data, char **prog_env,
                  * preserve all characters quoted. */
                 p = ++args_spec;
                 LINE_BREAK:
-                while ((*args_spec != '\0') &&
-                       (*args_spec != '\'')) {
+                while ((*args_spec != '\0') && (*args_spec != '\'')) {
                     args_spec++;
                 }
                 if (*args_spec == '\0') {
                     /* closing quote not found */
                     if (*(args_spec - 1) == '\\') {
-                        line = strtok_r(NULL, "\n",
-                                        &ptrptr);
+                        line = strtok_r(NULL, "\n", &ptrptr);
                         if (line) {
                             line_num++;
                             args_spec = line;
                             goto LINE_BREAK;
                         }
                     }
-                    error("Program arguments specification format invalid: %s.",
-                          prog_argv[prog_argc - 1]);
+                    error("Program arguments specification format invalid: %s.", prog_argv[prog_argc - 1]);
                     goto fail;
                 }
                 xstrncat(arg_buf, p, (args_spec - p));
@@ -280,8 +271,7 @@ extern int multi_prog_get_argv(char *config_data, char **prog_env,
 
             } else {
                 /* space */
-                while ((*args_spec != '\0') &&
-                       isspace(*args_spec)) {
+                while ((*args_spec != '\0') && isspace(*args_spec)) {
                     args_spec++;
                 }
             }
@@ -365,16 +355,14 @@ extern void multi_prog_parse(stepd_step_rec_t *job, uint32_t **gtid) {
 
             while ((one_rank = hostlist_pop(hl))) {
                 rank_id = strtol(one_rank, &end_ptr, 10);
-                if ((end_ptr[0] != '\0') || (rank_id < 0) ||
-                    (rank_id >= job->ntasks)) {
+                if ((end_ptr[0] != '\0') || (rank_id < 0) || (rank_id >= job->ntasks)) {
                     free(one_rank);
                     hostlist_destroy(hl);
                     goto fail;
                 }
                 free(one_rank);
                 args_len = strlen(tmp_args[rank_id]);
-                if (!tmp_args[rank_id] ||
-                    tmp_args[rank_id][args_len - 1] != '\\') {
+                if (!tmp_args[rank_id] || tmp_args[rank_id][args_len - 1] != '\\') {
                     hostlist_destroy(hl);
                     goto fail;
                 }
@@ -427,8 +415,7 @@ extern void multi_prog_parse(stepd_step_rec_t *job, uint32_t **gtid) {
             goto fail;
         while ((one_rank = hostlist_pop(hl))) {
             rank_id = strtol(one_rank, &end_ptr, 10);
-            if ((end_ptr[0] != '\0') || (rank_id < 0) ||
-                (rank_id >= job->ntasks)) {
+            if ((end_ptr[0] != '\0') || (rank_id < 0) || (rank_id >= job->ntasks)) {
                 free(one_rank);
                 hostlist_destroy(hl);
                 goto fail;
@@ -450,14 +437,12 @@ extern void multi_prog_parse(stepd_step_rec_t *job, uint32_t **gtid) {
     if (total_ranks != job->ntasks)
         goto fail;
 
-    if (job->msg->complete_nodelist &&
-        ((hl = hostlist_create(job->msg->complete_nodelist)))) {
+    if (job->msg->complete_nodelist && ((hl = hostlist_create(job->msg->complete_nodelist)))) {
         i = 0;
         while ((one_rank = hostlist_shift(hl))) {
             if (i >= job->nnodes) {
                 error("MPMD more nodes in nodelist than count "
-                      "(cnt:%u nodelist:%s)", job->nnodes,
-                      job->msg->complete_nodelist);
+                      "(cnt:%u nodelist:%s)", job->nnodes, job->msg->complete_nodelist);
             }
             for (j = 0; one_rank[j] && !isdigit(one_rank[j]); j++);
             node_id2nid[i++] = strtol(one_rank + j, &end_ptr, 10);
@@ -485,8 +470,7 @@ extern void multi_prog_parse(stepd_step_rec_t *job, uint32_t **gtid) {
         }
         for (j = 0; j < job->task_cnts[i]; j++) {
             if (gtid[i][j] >= job->ntasks) {
-                error("MPMD gtid[%d][%d] is invalid (%u >= %u)",
-                      i, j, gtid[i][j], job->ntasks);
+                error("MPMD gtid[%d][%d] is invalid (%u >= %u)", i, j, gtid[i][j], job->ntasks);
                 break;
             }
             ranks_node_id[gtid[i][j]] = i;
@@ -519,11 +503,9 @@ extern void multi_prog_parse(stepd_step_rec_t *job, uint32_t **gtid) {
             job->mpmd_set->command[j] = xstrdup(tmp_cmd[i]);
             job->mpmd_set->start_pe[j] = i;
             job->mpmd_set->total_pe[j]++;
-        } else if (!xstrcmp(tmp_cmd[i - 1], tmp_cmd[i]) &&
-                   !xstrcmp(tmp_args[i - 1], tmp_args[i]) &&
+        } else if (!xstrcmp(tmp_cmd[i - 1], tmp_cmd[i]) && !xstrcmp(tmp_args[i - 1], tmp_args[i]) &&
                    !xstrchr(tmp_args[i - 1], '%')) {
-            if ((ranks_node_id[i] == job->nodeid) &&
-                (job->mpmd_set->first_pe[j] == -1))
+            if ((ranks_node_id[i] == job->nodeid) && (job->mpmd_set->first_pe[j] == -1))
                 job->mpmd_set->first_pe[j] = i;
             job->mpmd_set->total_pe[j]++;
         } else {

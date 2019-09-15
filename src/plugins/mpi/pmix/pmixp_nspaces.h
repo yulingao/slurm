@@ -80,9 +80,9 @@ pmixp_namespace_t *pmixp_nspaces_find(const char *name);
 
 pmixp_namespace_t *pmixp_nspaces_local(void);
 
-int pmixp_nspaces_add(char *name, uint32_t nnodes, int node_id,
-                      uint32_t ntasks, uint32_t *task_cnts,
-                      char *task_map_packed, hostlist_t hl);
+int
+pmixp_nspaces_add(char *name, uint32_t nnodes, int node_id, uint32_t ntasks, uint32_t *task_cnts, char *task_map_packed,
+                  hostlist_t hl);
 
 /* operations on the specific namespace */
 static inline hostlist_t pmixp_nspace_hostlist(pmixp_namespace_t *nsptr) {
@@ -90,8 +90,7 @@ static inline hostlist_t pmixp_nspace_hostlist(pmixp_namespace_t *nsptr) {
     return hl;
 }
 
-hostlist_t pmixp_nspace_rankhosts(pmixp_namespace_t *nsptr,
-                                  const uint32_t *ranks, size_t nranks);
+hostlist_t pmixp_nspace_rankhosts(pmixp_namespace_t *nsptr, const uint32_t *ranks, size_t nranks);
 
 int pmixp_nspace_resolve(const char *name, int rank);
 

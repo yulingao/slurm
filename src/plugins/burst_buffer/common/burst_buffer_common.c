@@ -104,14 +104,12 @@ static uid_t *_parse_users(char *buf) {
     user_array = xmalloc(sizeof(uid_t) * array_size);
     tok = strtok_r(tmp, ",", &save_ptr);
     while (tok) {
-        if ((uid_from_string(tok, user_array + inx) == -1) ||
-            (user_array[inx] == 0)) {
+        if ((uid_from_string(tok, user_array + inx) == -1) || (user_array[inx] == 0)) {
             error("%s: ignoring invalid user: %s", __func__, tok);
         } else {
             if (++inx >= array_size) {
                 array_size *= 2;
-                user_array = xrealloc(user_array,
-                                      sizeof(uid_t) * array_size);
+                user_array = xrealloc(user_array, sizeof(uid_t) * array_size);
             }
         }
         tok = strtok_r(NULL, ",", &save_ptr);
@@ -237,8 +235,7 @@ extern void bb_clear_config(bb_config_t *config_ptr, bool fini) {
 
 /* Find a per-job burst buffer record for a specific job.
  * If not found, return NULL. */
-extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr,
-                                     struct job_record *job_ptr) {
+extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr, struct job_record *job_ptr) {
     bb_alloc_t *bb_alloc = NULL;
 
     xassert(job_ptr);
@@ -250,9 +247,8 @@ extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr,
                 xassert(bb_alloc->magic == BB_ALLOC_MAGIC);
                 return bb_alloc;
             }
-            error("%s: Slurm state inconsistent with burst buffer. %pJ has UserID mismatch (%u != %u)",
-                  __func__, job_ptr,
-                  bb_alloc->user_id, job_ptr->user_id);
+            error("%s: Slurm state inconsistent with burst buffer. %pJ has UserID mismatch (%u != %u)", __func__,
+                  job_ptr, bb_alloc->user_id, job_ptr->user_id);
             /* This has been observed when slurmctld crashed and
              * the job state recovered was missing some jobs
              * which already had burst buffers configured. */
@@ -266,8 +262,7 @@ extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr,
  * bb_name IN - Buffer's name
  * user_id IN - Possible user ID, advisory use only
  * RET the buffer or NULL if not found */
-extern bb_alloc_t *bb_find_name_rec(char *bb_name, uint32_t user_id,
-                                    bb_state_t *state_ptr) {
+extern bb_alloc_t *bb_find_name_rec(char *bb_name, uint32_t user_id, bb_state_t *state_ptr) {
     bb_alloc_t *bb_alloc = NULL;
     int i, hash_inx = user_id % BB_HASH_SIZE;
 
@@ -348,8 +343,7 @@ extern void bb_set_tres_pos(bb_state_t *state_ptr) {
     inx = assoc_mgr_find_tres_pos(&tres_rec, false);
     state_ptr->tres_pos = inx;
     if (inx == -1) {
-        debug3("%s: Tres %s not found by assoc_mgr",
-               __func__, state_ptr->name);
+        debug3("%s: Tres %s not found by assoc_mgr", __func__, state_ptr->name);
     } else {
         state_ptr->tres_id = assoc_mgr_tres_array[inx]->id;
     }
@@ -364,29 +358,18 @@ extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type) {
     uint32_t pool_cnt;
 #endif
     int fd, i;
-    static s_p_options_t bb_options[] = {
-            {"AllowUsers", S_P_STRING},
+    static s_p_options_t bb_options[] = {{"AllowUsers", S_P_STRING},
 #if _SUPPORT_ALT_POOL
             {"AltPool", S_P_STRING},
 #endif
-            {"CreateBuffer", S_P_STRING},
-            {"DefaultPool", S_P_STRING},
-            {"DenyUsers", S_P_STRING},
-            {"DestroyBuffer", S_P_STRING},
-            {"Flags", S_P_STRING},
-            {"GetSysState", S_P_STRING},
-            {"GetSysStatus", S_P_STRING},
-            {"Granularity", S_P_STRING},
-            {"OtherTimeout", S_P_UINT32},
-            {"StageInTimeout", S_P_UINT32},
-            {"StageOutTimeout", S_P_UINT32},
-            {"StartStageIn", S_P_STRING},
-            {"StartStageOut", S_P_STRING},
-            {"StopStageIn", S_P_STRING},
-            {"StopStageOut", S_P_STRING},
-            {"ValidateTimeout", S_P_UINT32},
-            {NULL}
-    };
+                                         {"CreateBuffer", S_P_STRING}, {"DefaultPool", S_P_STRING},
+                                         {"DenyUsers", S_P_STRING}, {"DestroyBuffer", S_P_STRING},
+                                         {"Flags", S_P_STRING}, {"GetSysState", S_P_STRING},
+                                         {"GetSysStatus", S_P_STRING}, {"Granularity", S_P_STRING},
+                                         {"OtherTimeout", S_P_UINT32}, {"StageInTimeout", S_P_UINT32},
+                                         {"StageOutTimeout", S_P_UINT32}, {"StartStageIn", S_P_STRING},
+                                         {"StartStageOut", S_P_STRING}, {"StopStageIn", S_P_STRING},
+                                         {"StopStageOut", S_P_STRING}, {"ValidateTimeout", S_P_UINT32}, {NULL}};
 
     xfree(state_ptr->name);
     if (plugin_type) {
@@ -433,25 +416,17 @@ extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type) {
 
     bb_hashtbl = s_p_hashtbl_create(bb_options);
     if (s_p_parse_file(bb_hashtbl, NULL, bb_conf, false) == SLURM_ERROR) {
-        fatal("%s: something wrong with opening/reading %s: %m",
-              __func__, bb_conf);
+        fatal("%s: something wrong with opening/reading %s: %m", __func__, bb_conf);
     }
-    if (s_p_get_string(&state_ptr->bb_config.allow_users_str, "AllowUsers",
-                       bb_hashtbl)) {
-        state_ptr->bb_config.allow_users = _parse_users(
-                state_ptr->bb_config.allow_users_str);
+    if (s_p_get_string(&state_ptr->bb_config.allow_users_str, "AllowUsers", bb_hashtbl)) {
+        state_ptr->bb_config.allow_users = _parse_users(state_ptr->bb_config.allow_users_str);
     }
-    s_p_get_string(&state_ptr->bb_config.create_buffer, "CreateBuffer",
-                   bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.default_pool, "DefaultPool",
-                   bb_hashtbl);
-    if (s_p_get_string(&state_ptr->bb_config.deny_users_str, "DenyUsers",
-                       bb_hashtbl)) {
-        state_ptr->bb_config.deny_users = _parse_users(
-                state_ptr->bb_config.deny_users_str);
+    s_p_get_string(&state_ptr->bb_config.create_buffer, "CreateBuffer", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.default_pool, "DefaultPool", bb_hashtbl);
+    if (s_p_get_string(&state_ptr->bb_config.deny_users_str, "DenyUsers", bb_hashtbl)) {
+        state_ptr->bb_config.deny_users = _parse_users(state_ptr->bb_config.deny_users_str);
     }
-    s_p_get_string(&state_ptr->bb_config.destroy_buffer, "DestroyBuffer",
-                   bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.destroy_buffer, "DestroyBuffer", bb_hashtbl);
 
     if (s_p_get_string(&tmp, "Flags", bb_hashtbl)) {
         state_ptr->bb_config.flags = slurm_bb_str2flags(tmp);
@@ -461,10 +436,8 @@ extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type) {
     if (state_ptr->bb_config.flags & BB_FLAG_ENABLE_PERSISTENT)
         state_ptr->bb_config.flags &= (~BB_FLAG_DISABLE_PERSISTENT);
 
-    s_p_get_string(&state_ptr->bb_config.get_sys_state, "GetSysState",
-                   bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.get_sys_status, "GetSysStatus",
-                   bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.get_sys_state, "GetSysState", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.get_sys_status, "GetSysStatus", bb_hashtbl);
     if (s_p_get_string(&tmp, "Granularity", bb_hashtbl)) {
         state_ptr->bb_config.granularity = bb_get_size_num(tmp, 1);
         xfree(tmp);
@@ -500,22 +473,14 @@ extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type) {
     }
 #endif
 
-    (void) s_p_get_uint32(&state_ptr->bb_config.other_timeout,
-                          "OtherTimeout", bb_hashtbl);
-    (void) s_p_get_uint32(&state_ptr->bb_config.stage_in_timeout,
-                          "StageInTimeout", bb_hashtbl);
-    (void) s_p_get_uint32(&state_ptr->bb_config.stage_out_timeout,
-                          "StageOutTimeout", bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.start_stage_in, "StartStageIn",
-                   bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.start_stage_out, "StartStageOut",
-                   bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.stop_stage_in, "StopStageIn",
-                   bb_hashtbl);
-    s_p_get_string(&state_ptr->bb_config.stop_stage_out, "StopStageOut",
-                   bb_hashtbl);
-    (void) s_p_get_uint32(&state_ptr->bb_config.validate_timeout,
-                          "ValidateTimeout", bb_hashtbl);
+    (void) s_p_get_uint32(&state_ptr->bb_config.other_timeout, "OtherTimeout", bb_hashtbl);
+    (void) s_p_get_uint32(&state_ptr->bb_config.stage_in_timeout, "StageInTimeout", bb_hashtbl);
+    (void) s_p_get_uint32(&state_ptr->bb_config.stage_out_timeout, "StageOutTimeout", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.start_stage_in, "StartStageIn", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.start_stage_out, "StartStageOut", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.stop_stage_in, "StopStageIn", bb_hashtbl);
+    s_p_get_string(&state_ptr->bb_config.stop_stage_out, "StopStageOut", bb_hashtbl);
+    (void) s_p_get_uint32(&state_ptr->bb_config.validate_timeout, "ValidateTimeout", bb_hashtbl);
 
     s_p_hashtbl_destroy(bb_hashtbl);
     xfree(bb_conf);
@@ -524,51 +489,34 @@ extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type) {
         value = _print_users(state_ptr->bb_config.allow_users);
         info("%s: AllowUsers:%s", __func__, value);
         xfree(value);
-        info("%s: CreateBuffer:%s", __func__,
-             state_ptr->bb_config.create_buffer);
-        info("%s: DefaultPool:%s", __func__,
-             state_ptr->bb_config.default_pool);
+        info("%s: CreateBuffer:%s", __func__, state_ptr->bb_config.create_buffer);
+        info("%s: DefaultPool:%s", __func__, state_ptr->bb_config.default_pool);
         value = _print_users(state_ptr->bb_config.deny_users);
         info("%s: DenyUsers:%s", __func__, value);
         xfree(value);
-        info("%s: DestroyBuffer:%s", __func__,
-             state_ptr->bb_config.destroy_buffer);
-        info("%s: GetSysState:%s", __func__,
-             state_ptr->bb_config.get_sys_state);
-        info("%s: GetSysStatus:%s", __func__,
-             state_ptr->bb_config.get_sys_status);
+        info("%s: DestroyBuffer:%s", __func__, state_ptr->bb_config.destroy_buffer);
+        info("%s: GetSysState:%s", __func__, state_ptr->bb_config.get_sys_state);
+        info("%s: GetSysStatus:%s", __func__, state_ptr->bb_config.get_sys_status);
         info("%s: Granularity:%"
         PRIu64
-        "", __func__,
-                state_ptr->bb_config.granularity);
+        "", __func__, state_ptr->bb_config.granularity);
         for (i = 0; i < state_ptr->bb_config.pool_cnt; i++) {
             info("%s: AltPoolName[%d]:%s:%"
             PRIu64
-            "", __func__, i,
-                    state_ptr->bb_config.pool_ptr[i].name,
-                    state_ptr->bb_config.pool_ptr[i].total_space);
+            "", __func__, i, state_ptr->bb_config.pool_ptr[i].name, state_ptr->bb_config.pool_ptr[i].total_space);
         }
-        info("%s: OtherTimeout:%u", __func__,
-             state_ptr->bb_config.other_timeout);
-        info("%s: StageInTimeout:%u", __func__,
-             state_ptr->bb_config.stage_in_timeout);
-        info("%s: StageOutTimeout:%u", __func__,
-             state_ptr->bb_config.stage_out_timeout);
-        info("%s: StartStageIn:%s", __func__,
-             state_ptr->bb_config.start_stage_in);
-        info("%s: StartStageOut:%s", __func__,
-             state_ptr->bb_config.start_stage_out);
-        info("%s: StopStageIn:%s", __func__,
-             state_ptr->bb_config.stop_stage_in);
-        info("%s: StopStageOut:%s", __func__,
-             state_ptr->bb_config.stop_stage_out);
-        info("%s: ValidateTimeout:%u", __func__,
-             state_ptr->bb_config.validate_timeout);
+        info("%s: OtherTimeout:%u", __func__, state_ptr->bb_config.other_timeout);
+        info("%s: StageInTimeout:%u", __func__, state_ptr->bb_config.stage_in_timeout);
+        info("%s: StageOutTimeout:%u", __func__, state_ptr->bb_config.stage_out_timeout);
+        info("%s: StartStageIn:%s", __func__, state_ptr->bb_config.start_stage_in);
+        info("%s: StartStageOut:%s", __func__, state_ptr->bb_config.start_stage_out);
+        info("%s: StopStageIn:%s", __func__, state_ptr->bb_config.stop_stage_in);
+        info("%s: StopStageOut:%s", __func__, state_ptr->bb_config.stop_stage_out);
+        info("%s: ValidateTimeout:%u", __func__, state_ptr->bb_config.validate_timeout);
     }
 }
 
-static void _pack_alloc(struct bb_alloc *bb_alloc, Buf buffer,
-                        uint16_t protocol_version) {
+static void _pack_alloc(struct bb_alloc *bb_alloc, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         packstr(bb_alloc->account, buffer);
         pack32(bb_alloc->array_job_id, buffer);
@@ -586,8 +534,7 @@ static void _pack_alloc(struct bb_alloc *bb_alloc, Buf buffer,
 }
 
 /* Pack individual burst buffer records into a buffer */
-extern int bb_pack_bufs(uid_t uid, bb_state_t *state_ptr, Buf buffer,
-                        uint16_t protocol_version) {
+extern int bb_pack_bufs(uid_t uid, bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version) {
     int i, rec_count = 0;
     struct bb_alloc *bb_alloc;
     int eof, offset;
@@ -619,8 +566,7 @@ extern int bb_pack_bufs(uid_t uid, bb_state_t *state_ptr, Buf buffer,
 }
 
 /* Pack state and configuration parameters into a buffer */
-extern void bb_pack_state(bb_state_t *state_ptr, Buf buffer,
-                          uint16_t protocol_version) {
+extern void bb_pack_state(bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version) {
     bb_config_t *config_ptr = &state_ptr->bb_config;
     int i;
 
@@ -658,8 +604,7 @@ extern void bb_pack_state(bb_state_t *state_ptr, Buf buffer,
 }
 
 /* Pack individual burst buffer usage records into a buffer (used for limits) */
-extern int bb_pack_usage(uid_t uid, bb_state_t *state_ptr, Buf buffer,
-                         uint16_t protocol_version) {
+extern int bb_pack_usage(uid_t uid, bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version) {
     int i, rec_count = 0;
     bb_user_t *bb_usage;
     int eof, offset;
@@ -673,8 +618,7 @@ extern int bb_pack_usage(uid_t uid, bb_state_t *state_ptr, Buf buffer,
     for (i = 0; i < BB_HASH_SIZE; i++) {
         bb_usage = state_ptr->bb_uhash[i];
         while (bb_usage) {
-            if (((uid == 0) || (uid == bb_usage->user_id)) &&
-                (bb_usage->size != 0)) {
+            if (((uid == 0) || (uid == bb_usage->user_id)) && (bb_usage->size != 0)) {
                 pack64(bb_usage->size, buffer);
                 pack32(bb_usage->user_id, buffer);
                 rec_count++;
@@ -708,9 +652,7 @@ extern uint64_t bb_get_size_num(char *tok, uint64_t granularity) {
         bb_size_u = bb_size_i;
         unit = xstrdup(tmp);
         strtok(unit, " ");
-        if (!xstrcasecmp(unit, "n") ||
-            !xstrcasecmp(unit, "node") ||
-            !xstrcasecmp(unit, "nodes")) {
+        if (!xstrcasecmp(unit, "n") || !xstrcasecmp(unit, "node") || !xstrcasecmp(unit, "nodes")) {
             bb_size_u |= BB_SIZE_IN_NODES;
             granularity = 1;
         } else if ((mult = suffix_mult(unit)) != NO_VAL64) {
@@ -720,8 +662,7 @@ extern uint64_t bb_get_size_num(char *tok, uint64_t granularity) {
     }
 
     if (granularity > 1) {
-        bb_size_u = ((bb_size_u + granularity - 1) / granularity) *
-                    granularity;
+        bb_size_u = ((bb_size_u + granularity - 1) / granularity) * granularity;
     }
 
     return bb_size_u;
@@ -858,13 +799,11 @@ extern void bb_set_use_time(bb_state_t *state_ptr) {
         bb_alloc = state_ptr->bb_ahash[i];
         while (bb_alloc) {
             if (bb_alloc->job_id &&
-                ((bb_alloc->state == BB_STATE_STAGING_IN) ||
-                 (bb_alloc->state == BB_STATE_STAGED_IN))) {
+                ((bb_alloc->state == BB_STATE_STAGING_IN) || (bb_alloc->state == BB_STATE_STAGED_IN))) {
                 job_ptr = find_job_record(bb_alloc->job_id);
                 if (!job_ptr && !bb_alloc->orphaned) {
                     bb_alloc->orphaned = true;
-                    error("%s: JobId=%u not found for allocated burst buffer",
-                          __func__, bb_alloc->job_id);
+                    error("%s: JobId=%u not found for allocated burst buffer", __func__, bb_alloc->job_id);
                     bb_alloc->use_time = now + 24 * 60 * 60;
                 } else if (!job_ptr) {
                     bb_alloc->use_time = now + 24 * 60 * 60;
@@ -885,10 +824,8 @@ extern void bb_set_use_time(bb_state_t *state_ptr) {
             if (bb_alloc->end_time && bb_alloc->size) {
                 if (bb_alloc->end_time <= now)
                     state_ptr->next_end_time = now;
-                else if (state_ptr->next_end_time >
-                         bb_alloc->end_time) {
-                    state_ptr->next_end_time =
-                            bb_alloc->end_time;
+                else if (state_ptr->next_end_time > bb_alloc->end_time) {
+                    state_ptr->next_end_time = bb_alloc->end_time;
                 }
             }
             bb_alloc = bb_alloc->next;
@@ -910,8 +847,7 @@ extern void bb_sleep(bb_state_t *state_ptr, int add_secs) {
     ts.tv_nsec = tv.tv_usec * 1000;
     slurm_mutex_lock(&state_ptr->term_mutex);
     if (!state_ptr->term_flag) {
-        slurm_cond_timedwait(&state_ptr->term_cond,
-                             &state_ptr->term_mutex, &ts);
+        slurm_cond_timedwait(&state_ptr->term_cond, &state_ptr->term_mutex, &ts);
     }
     slurm_mutex_unlock(&state_ptr->term_mutex);
 }
@@ -920,8 +856,7 @@ extern void bb_sleep(bb_state_t *state_ptr, int add_secs) {
 /* Allocate a named burst buffer record for a specific user.
  * Return a pointer to that record.
  * Use bb_free_name_rec() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_name_rec(bb_state_t *state_ptr, char *name,
-                                     uint32_t user_id) {
+extern bb_alloc_t *bb_alloc_name_rec(bb_state_t *state_ptr, char *name, uint32_t user_id) {
     bb_alloc_t *bb_alloc = NULL;
     time_t now = time(NULL);
     int i;
@@ -946,9 +881,7 @@ extern bb_alloc_t *bb_alloc_name_rec(bb_state_t *state_ptr, char *name,
 /* Allocate a per-job burst buffer record for a specific job.
  * Return a pointer to that record.
  * Use bb_free_alloc_rec() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_job_rec(bb_state_t *state_ptr,
-                                    struct job_record *job_ptr,
-                                    bb_job_t *bb_job) {
+extern bb_alloc_t *bb_alloc_job_rec(bb_state_t *state_ptr, struct job_record *job_ptr, bb_job_t *bb_job) {
     bb_alloc_t *bb_alloc = NULL;
     int i;
 
@@ -981,8 +914,7 @@ extern bb_alloc_t *bb_alloc_job_rec(bb_state_t *state_ptr,
 /* Allocate a burst buffer record for a job and increase the job priority
  * if so configured.
  * Use bb_free_alloc_rec() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_job(bb_state_t *state_ptr,
-                                struct job_record *job_ptr, bb_job_t *bb_job) {
+extern bb_alloc_t *bb_alloc_job(bb_state_t *state_ptr, struct job_record *job_ptr, bb_job_t *bb_job) {
     bb_alloc_t *bb_alloc;
 
     bb_alloc = bb_alloc_job_rec(state_ptr, job_ptr, bb_job);
@@ -1118,28 +1050,21 @@ extern void bb_job_log(bb_state_t *state_ptr, bb_job_t *bb_job) {
     int i;
 
     if (bb_job) {
-        xstrfmtcat(out_buf, "%s: JobId=%u UserID:%u ",
-                   state_ptr->name, bb_job->job_id, bb_job->user_id);
-        xstrfmtcat(out_buf, "Swap:%ux%u ", bb_job->swap_size,
-                   bb_job->swap_nodes);
+        xstrfmtcat(out_buf, "%s: JobId=%u UserID:%u ", state_ptr->name, bb_job->job_id, bb_job->user_id);
+        xstrfmtcat(out_buf, "Swap:%ux%u ", bb_job->swap_size, bb_job->swap_nodes);
         xstrfmtcat(out_buf, "TotalSize:%"
         PRIu64
         "", bb_job->total_size);
         info("%s", out_buf);
         xfree(out_buf);
-        for (i = 0, buf_ptr = bb_job->buf_ptr; i < bb_job->buf_cnt;
-             i++, buf_ptr++) {
+        for (i = 0, buf_ptr = bb_job->buf_ptr; i < bb_job->buf_cnt; i++, buf_ptr++) {
             if (buf_ptr->create) {
                 info("  Create  Name:%s Pool:%s Size:%"
                 PRIu64
-                " Access:%s Type:%s State:%s",
-                        buf_ptr->name, buf_ptr->pool,
-                        buf_ptr->size, buf_ptr->access,
-                        buf_ptr->type,
-                        bb_state_string(buf_ptr->state));
+                " Access:%s Type:%s State:%s", buf_ptr->name, buf_ptr->pool, buf_ptr->size, buf_ptr->access, buf_ptr->type, bb_state_string(
+                        buf_ptr->state));
             } else if (buf_ptr->destroy) {
-                info("  Destroy Name:%s Hurry:%d",
-                     buf_ptr->name, (int) buf_ptr->hurry);
+                info("  Destroy Name:%s Hurry:%d", buf_ptr->name, (int) buf_ptr->hurry);
             } else {
                 info("  Use  Name:%s", buf_ptr->name);
             }
@@ -1153,8 +1078,8 @@ extern void bb_job_log(bb_state_t *state_ptr, bb_job_t *bb_job) {
  * pool IN - Pool containing the burst buffer
  * state_ptr IN - Global state to update
  * update_pool_unfree IN - If true, update the pool's unfree space */
-extern void bb_limit_add(uint32_t user_id, uint64_t bb_size, char *pool,
-                         bb_state_t *state_ptr, bool update_pool_unfree) {
+extern void
+bb_limit_add(uint32_t user_id, uint64_t bb_size, char *pool, bb_state_t *state_ptr, bool update_pool_unfree) {
     burst_buffer_pool_t *pool_ptr;
     bb_user_t *bb_user;
     int i;
@@ -1186,8 +1111,7 @@ extern void bb_limit_add(uint32_t user_id, uint64_t bb_size, char *pool,
 }
 
 /* Release claim against resource limit for a user */
-extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
-                         bb_state_t *state_ptr) {
+extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool, bb_state_t *state_ptr) {
     burst_buffer_pool_t *pool_ptr;
     bb_user_t *bb_user;
     int i;
@@ -1211,8 +1135,7 @@ extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
             PRIu64
             " < %"
             PRIu64
-            ")",
-                    __func__, state_ptr->unfree_space, bb_size);
+            ")", __func__, state_ptr->unfree_space, bb_size);
             state_ptr->unfree_space = 0;
         }
     } else {
@@ -1223,8 +1146,7 @@ extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
             if (pool_ptr->used_space >= bb_size) {
                 pool_ptr->used_space -= bb_size;
             } else {
-                error("%s: used_space underflow for pool %s",
-                      __func__, pool);
+                error("%s: used_space underflow for pool %s", __func__, pool);
                 pool_ptr->used_space = 0;
             }
             if (pool_ptr->unfree_space >= bb_size) {
@@ -1235,8 +1157,7 @@ extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
                  * state after making a claim against resources,
                  * but before the buffer actually gets created.
                  */
-                debug2("%s: unfree_space underflow for pool %s",
-                       __func__, pool);
+                debug2("%s: unfree_space underflow for pool %s", __func__, pool);
                 pool_ptr->unfree_space = 0;
             }
             break;
@@ -1262,8 +1183,7 @@ extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
  * state_ptr IN - Pointer to burst_buffer plugin state info
  * NOTE: assoc_mgr association and qos read lock should be set before this.
  */
-extern int bb_post_persist_create(struct job_record *job_ptr,
-                                  bb_alloc_t *bb_alloc, bb_state_t *state_ptr) {
+extern int bb_post_persist_create(struct job_record *job_ptr, bb_alloc_t *bb_alloc, bb_state_t *state_ptr) {
     int rc = SLURM_SUCCESS;
     slurmdb_reservation_rec_t resv;
     uint64_t size_mb;
@@ -1291,18 +1211,11 @@ extern int bb_post_persist_create(struct job_record *job_ptr,
         slurmdb_assoc_rec_t *assoc_ptr = bb_alloc->assoc_ptr;
 
         while (assoc_ptr) {
-            assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos] +=
-                    size_mb;
+            assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos] += size_mb;
             debug2("%s: after adding persistent bb %s(%u), "
                    "assoc %u(%s/%s/%s) grp_used_tres(%s) "
                    "is %"
-            PRIu64,
-                    __func__, bb_alloc->name, bb_alloc->id,
-                    assoc_ptr->id, assoc_ptr->acct,
-                    assoc_ptr->user, assoc_ptr->partition,
-                    assoc_mgr_tres_name_array[state_ptr->tres_pos],
-                    assoc_ptr->usage->
-                            grp_used_tres[state_ptr->tres_pos]);
+            PRIu64, __func__, bb_alloc->name, bb_alloc->id, assoc_ptr->id, assoc_ptr->acct, assoc_ptr->user, assoc_ptr->partition, assoc_mgr_tres_name_array[state_ptr->tres_pos], assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos]);
 
             /* FIXME: should grp_used_tres_run_secs be
              * done some how? Same for QOS below.
@@ -1323,8 +1236,7 @@ extern int bb_post_persist_create(struct job_record *job_ptr,
             job_ptr->tres_alloc_cnt[state_ptr->tres_pos] -= size_mb;
 
         if (bb_alloc->qos_ptr) {
-            bb_alloc->qos_ptr->usage->grp_used_tres[
-                    state_ptr->tres_pos] += size_mb;
+            bb_alloc->qos_ptr->usage->grp_used_tres[state_ptr->tres_pos] += size_mb;
         }
     }
 
@@ -1362,38 +1274,20 @@ extern int bb_post_persist_delete(bb_alloc_t *bb_alloc, bb_state_t *state_ptr) {
         slurmdb_assoc_rec_t *assoc_ptr = bb_alloc->assoc_ptr;
 
         while (assoc_ptr) {
-            if (assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos]
-                >= size_mb) {
-                assoc_ptr->usage->grp_used_tres[
-                        state_ptr->tres_pos] -= size_mb;
+            if (assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos] >= size_mb) {
+                assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos] -= size_mb;
                 debug2("%s: after removing persistent "
                        "bb %s(%u), assoc %u(%s/%s/%s) "
                        "grp_used_tres(%s) is %"
-                PRIu64,
-                        __func__, bb_alloc->name, bb_alloc->id,
-                        assoc_ptr->id, assoc_ptr->acct,
-                        assoc_ptr->user, assoc_ptr->partition,
-                        assoc_mgr_tres_name_array[
-                                state_ptr->tres_pos],
-                        assoc_ptr->usage->
-                                grp_used_tres[state_ptr->tres_pos]);
+                PRIu64, __func__, bb_alloc->name, bb_alloc->id, assoc_ptr->id, assoc_ptr->acct, assoc_ptr->user, assoc_ptr->partition, assoc_mgr_tres_name_array[state_ptr->tres_pos], assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos]);
             } else {
                 error("%s: underflow removing persistent "
                       "bb %s(%u), assoc %u(%s/%s/%s) "
                       "grp_used_tres(%s) had %"
                 PRIu64
                 " but we are trying to remove %"
-                PRIu64,
-                        __func__, bb_alloc->name, bb_alloc->id,
-                        assoc_ptr->id, assoc_ptr->acct,
-                        assoc_ptr->user, assoc_ptr->partition,
-                        assoc_mgr_tres_name_array[
-                                state_ptr->tres_pos],
-                        assoc_ptr->usage->
-                                grp_used_tres[state_ptr->tres_pos],
-                        size_mb);
-                assoc_ptr->usage->grp_used_tres[
-                        state_ptr->tres_pos] = 0;
+                PRIu64, __func__, bb_alloc->name, bb_alloc->id, assoc_ptr->id, assoc_ptr->acct, assoc_ptr->user, assoc_ptr->partition, assoc_mgr_tres_name_array[state_ptr->tres_pos], assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos], size_mb);
+                assoc_ptr->usage->grp_used_tres[state_ptr->tres_pos] = 0;
             }
 
             /* FIXME: should grp_used_tres_run_secs be
@@ -1411,13 +1305,10 @@ extern int bb_post_persist_delete(bb_alloc_t *bb_alloc, bb_state_t *state_ptr) {
         }
 
         if (bb_alloc->qos_ptr) {
-            if (bb_alloc->qos_ptr->usage->grp_used_tres[
-                        state_ptr->tres_pos] >= size_mb)
-                bb_alloc->qos_ptr->usage->grp_used_tres[
-                        state_ptr->tres_pos] -= size_mb;
+            if (bb_alloc->qos_ptr->usage->grp_used_tres[state_ptr->tres_pos] >= size_mb)
+                bb_alloc->qos_ptr->usage->grp_used_tres[state_ptr->tres_pos] -= size_mb;
             else
-                bb_alloc->qos_ptr->usage->grp_used_tres[
-                        state_ptr->tres_pos] = 0;
+                bb_alloc->qos_ptr->usage->grp_used_tres[state_ptr->tres_pos] = 0;
         }
     }
 

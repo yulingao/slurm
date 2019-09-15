@@ -96,12 +96,10 @@ static int _get_switch_inx(const char *name);
 
 static void _log_switches(void);
 
-static int _node_name2bitmap(char *node_names, bitstr_t **bitmap,
-                             hostlist_t *invalid_hostlist);
+static int _node_name2bitmap(char *node_names, bitstr_t **bitmap, hostlist_t *invalid_hostlist);
 
-static int _parse_switches(void **dest, slurm_parser_enum_t type,
-                           const char *key, const char *value,
-                           const char *line, char **leftover);
+static int _parse_switches(void **dest, slurm_parser_enum_t type, const char *key, const char *value, const char *line,
+                           char **leftover);
 
 extern int _read_topo_file(slurm_conf_switches_t **ptr_array[]);
 
@@ -189,16 +187,12 @@ extern int topo_get_node_addr(char *node_name, char **paddr, char **ppattern) {
         for (i = 0; i < switch_record_cnt; i++) {
             if (switch_record_table[i].level != j)
                 continue;
-            if (!bit_test(switch_record_table[i].node_bitmap,
-                          node_inx))
+            if (!bit_test(switch_record_table[i].node_bitmap, node_inx))
                 continue;
             if (sl == NULL) {
-                sl = hostlist_create(switch_record_table[i].
-                        name);
+                sl = hostlist_create(switch_record_table[i].name);
             } else {
-                hostlist_push_host(sl,
-                                   switch_record_table[i].
-                                           name);
+                hostlist_push_host(sl, switch_record_table[i].name);
             }
         }
         if (sl) {
@@ -232,9 +226,7 @@ static void _find_child_switches(int sw) {
 
     swlist = hostlist_create(switch_record_table[sw].switches);
     switch_record_table[sw].num_switches = hostlist_count(swlist);
-    switch_record_table[sw].switch_index =
-            xmalloc(switch_record_table[sw].num_switches
-                    * sizeof(uint16_t));
+    switch_record_table[sw].switch_index = xmalloc(switch_record_table[sw].num_switches * sizeof(uint16_t));
 
     hi = hostlist_iterator_create(swlist);
     cldx = 0;
@@ -275,8 +267,7 @@ static void _validate_switches(void) {
         return;
     }
 
-    switch_record_table = xmalloc(sizeof(struct switch_record) *
-                                  switch_record_cnt);
+    switch_record_table = xmalloc(sizeof(struct switch_record) * switch_record_cnt);
     multi_homed_bitmap = bit_alloc(node_record_count);
     switch_ptr = switch_record_table;
     for (i = 0; i < switch_record_cnt; i++, switch_ptr++) {
@@ -286,38 +277,31 @@ static void _validate_switches(void) {
         prior_ptr = switch_record_table;
         for (j = 0; j < i; j++, prior_ptr++) {
             if (xstrcmp(switch_ptr->name, prior_ptr->name) == 0) {
-                fatal("Switch (%s) has already been defined",
-                      prior_ptr->name);
+                fatal("Switch (%s) has already been defined", prior_ptr->name);
             }
         }
         switch_ptr->link_speed = ptr->link_speed;
         if (ptr->nodes) {
             switch_ptr->level = 0;    /* leaf switch */
             switch_ptr->nodes = xstrdup(ptr->nodes);
-            if (_node_name2bitmap(ptr->nodes,
-                                  &switch_ptr->node_bitmap,
-                                  &invalid_hl)) {
+            if (_node_name2bitmap(ptr->nodes, &switch_ptr->node_bitmap, &invalid_hl)) {
                 fatal("Invalid node name (%s) in switch "
-                      "config (%s)",
-                      ptr->nodes, ptr->switch_name);
+                      "config (%s)", ptr->nodes, ptr->switch_name);
             }
             if (switches_bitmap) {
                 tmp_bitmap = bit_copy(switch_ptr->node_bitmap);
                 bit_and(tmp_bitmap, switches_bitmap);
                 bit_or(multi_homed_bitmap, tmp_bitmap);
                 FREE_NULL_BITMAP(tmp_bitmap);
-                bit_or(switches_bitmap,
-                       switch_ptr->node_bitmap);
+                bit_or(switches_bitmap, switch_ptr->node_bitmap);
             } else {
-                switches_bitmap = bit_copy(switch_ptr->
-                        node_bitmap);
+                switches_bitmap = bit_copy(switch_ptr->node_bitmap);
             }
         } else if (ptr->switches) {
             switch_ptr->level = -1;    /* determine later */
             switch_ptr->switches = xstrdup(ptr->switches);
         } else {
-            fatal("Switch configuration (%s) lacks children",
-                  ptr->switch_name);
+            fatal("Switch configuration (%s) lacks children", ptr->switch_name);
         }
     }
 
@@ -329,39 +313,28 @@ static void _validate_switches(void) {
                 continue;
             hl = hostlist_create(switch_ptr->switches);
             if (!hl) {
-                fatal("Invalid switches: %s",
-                      switch_ptr->switches);
+                fatal("Invalid switches: %s", switch_ptr->switches);
             }
             while ((child = hostlist_pop(hl))) {
                 j = _get_switch_inx(child);
                 if ((j < 0) || (j == i)) {
                     fatal("Switch configuration %s has "
-                          "invalid child (%s)",
-                          switch_ptr->name, child);
+                          "invalid child (%s)", switch_ptr->name, child);
                 }
                 if (switch_record_table[j].level == -1) {
                     /* Children not resolved */
                     resolved = false;
                     switch_ptr->level = -1;
-                    FREE_NULL_BITMAP(switch_ptr->
-                            node_bitmap);
+                    FREE_NULL_BITMAP(switch_ptr->node_bitmap);
                     free(child);
                     break;
                 }
                 if (switch_ptr->level == -1) {
-                    switch_ptr->level = 1 +
-                                        switch_record_table[j].level;
-                    switch_ptr->node_bitmap =
-                            bit_copy(switch_record_table[j].
-                                    node_bitmap);
+                    switch_ptr->level = 1 + switch_record_table[j].level;
+                    switch_ptr->node_bitmap = bit_copy(switch_record_table[j].node_bitmap);
                 } else {
-                    switch_ptr->level =
-                            MAX(switch_ptr->level,
-                                (switch_record_table[j].
-                                        level + 1));
-                    bit_or(switch_ptr->node_bitmap,
-                           switch_record_table[j].
-                                   node_bitmap);
+                    switch_ptr->level = MAX(switch_ptr->level, (switch_record_table[j].level + 1));
+                    bit_or(switch_ptr->node_bitmap, switch_record_table[j].node_bitmap);
                 }
                 free(child);
             }
@@ -385,8 +358,7 @@ static void _validate_switches(void) {
         i = bit_set_count(switches_bitmap);
         if (i > 0) {
             child = bitmap2node_name(switches_bitmap);
-            error("WARNING: switches lack access to %d nodes: %s",
-                  i, child);
+            error("WARNING: switches lack access to %d nodes: %s", i, child);
             xfree(child);
         }
         FREE_NULL_BITMAP(switches_bitmap);
@@ -395,8 +367,7 @@ static void _validate_switches(void) {
 
     if (invalid_hl) {
         buf = hostlist_ranged_string_xmalloc(invalid_hl);
-        error("WARNING: Invalid hostnames in switch configuration: %s",
-              buf);
+        error("WARNING: Invalid hostnames in switch configuration: %s", buf);
         xfree(buf);
         hostlist_destroy(invalid_hl);
     }
@@ -406,8 +377,7 @@ static void _validate_switches(void) {
     i = bit_set_count(multi_homed_bitmap);
     if (i > 0) {
         child = bitmap2node_name(multi_homed_bitmap);
-        error("WARNING: Multiple leaf switches contain nodes: %s",
-              child);
+        error("WARNING: Multiple leaf switches contain nodes: %s", child);
         xfree(child);
     }
     FREE_NULL_BITMAP(multi_homed_bitmap);
@@ -418,8 +388,7 @@ static void _validate_switches(void) {
         if (switch_record_table[i].level != 0) {
             _find_child_switches(i);
         }
-        if (node_record_count ==
-            bit_set_count(switch_record_table[i].node_bitmap)) {
+        if (node_record_count == bit_set_count(switch_record_table[i].node_bitmap)) {
             have_root = true;
         }
     }
@@ -439,12 +408,10 @@ static void _log_switches(void) {
     switch_ptr = switch_record_table;
     for (i = 0; i < switch_record_cnt; i++, switch_ptr++) {
         if (!switch_ptr->nodes) {
-            switch_ptr->nodes = bitmap2node_name(switch_ptr->
-                    node_bitmap);
+            switch_ptr->nodes = bitmap2node_name(switch_ptr->node_bitmap);
         }
-        debug("Switch level:%d name:%s nodes:%s switches:%s",
-              switch_ptr->level, switch_ptr->name,
-              switch_ptr->nodes, switch_ptr->switches);
+        debug("Switch level:%d name:%s nodes:%s switches:%s", switch_ptr->level, switch_ptr->name, switch_ptr->nodes,
+              switch_ptr->switches);
     }
 }
 
@@ -482,10 +449,8 @@ static void _free_switch_record_table(void) {
 
 /* Return count of switch configuration entries read */
 extern int _read_topo_file(slurm_conf_switches_t **ptr_array[]) {
-    static s_p_options_t switch_options[] = {
-            {"SwitchName", S_P_ARRAY, _parse_switches, _destroy_switches},
-            {NULL}
-    };
+    static s_p_options_t switch_options[] = {{"SwitchName", S_P_ARRAY, _parse_switches, _destroy_switches},
+                                             {NULL}};
     int count;
     slurm_conf_switches_t **ptr;
 
@@ -494,11 +459,9 @@ extern int _read_topo_file(slurm_conf_switches_t **ptr_array[]) {
         topo_conf = get_extra_conf_path("topology.conf");
 
     conf_hashtbl = s_p_hashtbl_create(switch_options);
-    if (s_p_parse_file(conf_hashtbl, NULL, topo_conf, false) ==
-        SLURM_ERROR) {
+    if (s_p_parse_file(conf_hashtbl, NULL, topo_conf, false) == SLURM_ERROR) {
         s_p_hashtbl_destroy(conf_hashtbl);
-        fatal("something wrong with opening/reading %s: %m",
-              topo_conf);
+        fatal("something wrong with opening/reading %s: %m", topo_conf);
     }
 
     if (s_p_get_array((void ***) &ptr, &count, "SwitchName", conf_hashtbl))
@@ -510,17 +473,14 @@ extern int _read_topo_file(slurm_conf_switches_t **ptr_array[]) {
     return count;
 }
 
-static int _parse_switches(void **dest, slurm_parser_enum_t type,
-                           const char *key, const char *value,
-                           const char *line, char **leftover) {
+static int _parse_switches(void **dest, slurm_parser_enum_t type, const char *key, const char *value, const char *line,
+                           char **leftover) {
     s_p_hashtbl_t *tbl;
     slurm_conf_switches_t *s;
-    static s_p_options_t _switch_options[] = {
-            {"LinkSpeed", S_P_UINT32},
-            {"Nodes",     S_P_STRING},
-            {"Switches",  S_P_STRING},
-            {NULL}
-    };
+    static s_p_options_t _switch_options[] = {{"LinkSpeed", S_P_UINT32},
+                                              {"Nodes",     S_P_STRING},
+                                              {"Switches",  S_P_STRING},
+                                              {NULL}};
 
     tbl = s_p_hashtbl_create(_switch_options);
     s_p_parse_line(tbl, *leftover, leftover);
@@ -534,14 +494,12 @@ static int _parse_switches(void **dest, slurm_parser_enum_t type,
     s_p_hashtbl_destroy(tbl);
 
     if (s->nodes && s->switches) {
-        error("switch %s has both child switches and nodes",
-              s->switch_name);
+        error("switch %s has both child switches and nodes", s->switch_name);
         _destroy_switches(s);
         return -1;
     }
     if (!s->nodes && !s->switches) {
-        error("switch %s has neither child switches nor nodes",
-              s->switch_name);
+        error("switch %s has neither child switches nor nodes", s->switch_name);
         _destroy_switches(s);
         return -1;
     }
@@ -569,8 +527,7 @@ static void _destroy_switches(void *ptr) {
  * NOTE: call FREE_NULL_BITMAP(bitmap) and hostlist_destroy(invalid_hostlist)
  *       to free memory when variables are no longer required
  */
-static int _node_name2bitmap(char *node_names, bitstr_t **bitmap,
-                             hostlist_t *invalid_hostlist) {
+static int _node_name2bitmap(char *node_names, bitstr_t **bitmap, hostlist_t *invalid_hostlist) {
     char *this_node_name;
     bitstr_t *my_bitmap;
     hostlist_t host_list;
@@ -585,8 +542,7 @@ static int _node_name2bitmap(char *node_names, bitstr_t **bitmap,
 
     if ((host_list = hostlist_create(node_names)) == NULL) {
         /* likely a badly formatted hostlist */
-        error("_node_name2bitmap: hostlist_create(%s) error",
-              node_names);
+        error("_node_name2bitmap: hostlist_create(%s) error", node_names);
         return EINVAL;
     }
 
@@ -594,17 +550,13 @@ static int _node_name2bitmap(char *node_names, bitstr_t **bitmap,
         struct node_record *node_ptr;
         node_ptr = find_node_record(this_node_name);
         if (node_ptr) {
-            bit_set(my_bitmap,
-                    (bitoff_t)(node_ptr - node_record_table_ptr));
+            bit_set(my_bitmap, (bitoff_t)(node_ptr - node_record_table_ptr));
         } else {
-            debug2("_node_name2bitmap: invalid node specified %s",
-                   this_node_name);
+            debug2("_node_name2bitmap: invalid node specified %s", this_node_name);
             if (*invalid_hostlist) {
-                hostlist_push_host(*invalid_hostlist,
-                                   this_node_name);
+                hostlist_push_host(*invalid_hostlist, this_node_name);
             } else {
-                *invalid_hostlist =
-                        hostlist_create(this_node_name);
+                *invalid_hostlist = hostlist_create(this_node_name);
             }
         }
         free(this_node_name);

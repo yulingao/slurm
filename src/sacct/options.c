@@ -178,8 +178,7 @@ static int _addto_id_char_list(List char_list, char *names, bool gid) {
                     name = _convert_to_id(name, gid);
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -257,14 +256,12 @@ static int _addto_reason_char_list(List char_list, char *names) {
                     memcpy(name, names + start, (i - start));
                     c = job_reason_num(name);
                     if (c == NO_VAL)
-                        fatal("unrecognized job reason value %s",
-                              name);
+                        fatal("unrecognized job reason value %s", name);
                     xfree(name);
                     name = xstrdup_printf("%u", c);
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -291,8 +288,7 @@ static int _addto_reason_char_list(List char_list, char *names) {
             memcpy(name, names + start, (i - start));
             c = job_reason_num(name);
             if (c == NO_VAL)
-                fatal("unrecognized job reason value '%s'",
-                      name);
+                fatal("unrecognized job reason value '%s'", name);
             xfree(name);
             name = xstrdup_printf("%u", c);
 
@@ -381,8 +377,7 @@ static int _addto_state_char_list(List char_list, char *names) {
                     name = xstrdup_printf("%d", c);
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -409,8 +404,7 @@ static int _addto_state_char_list(List char_list, char *names) {
             memcpy(name, names + start, (i - start));
             c = job_state_num(name);
             if (c == NO_VAL)
-                fatal("unrecognized job state value '%s'",
-                      name);
+                fatal("unrecognized job state value '%s'", name);
             if (!_supported_state(c))
                 fatal("job state %s is not supported / accounted", name);
             xfree(name);
@@ -649,8 +643,7 @@ static void _remove_duplicate_fed_jobs(List jobs) {
 
     for (i = 0; i < JOB_HASH_SIZE; i++) {
         hash_tbl_size[i] = 100;
-        hash_job[i] = xmalloc(sizeof(slurmdb_job_rec_t *) *
-                              hash_tbl_size[i]);
+        hash_job[i] = xmalloc(sizeof(slurmdb_job_rec_t *) * hash_tbl_size[i]);
     }
 
     /* Put newest jobs at the front so that the later jobs can be removed
@@ -662,9 +655,7 @@ static void _remove_duplicate_fed_jobs(List jobs) {
         found = false;
 
         hash_inx = job->jobid % JOB_HASH_SIZE;
-        for (j = 0; (j < hash_tbl_size[hash_inx] &&
-                     hash_job[hash_inx][j]);
-             j++) {
+        for (j = 0; (j < hash_tbl_size[hash_inx] && hash_job[hash_inx][j]); j++) {
             if (job->jobid == hash_job[hash_inx][j]->jobid) {
                 found = true;
                 break;
@@ -676,15 +667,12 @@ static void _remove_duplicate_fed_jobs(List jobs) {
              * the state as cancelled. Since jobids won't roll in a
              * day -- unless the system is amazing -- just remove
              * jobs that are older than a day. */
-            if (hash_job[hash_inx][j]->submit > (job->submit +
-                                                 86400))
+            if (hash_job[hash_inx][j]->submit > (job->submit + 86400))
                 list_delete_item(itr);
         } else {
             if (j >= hash_tbl_size[hash_inx]) {
                 hash_tbl_size[hash_inx] *= 2;
-                xrealloc(hash_job[hash_inx],
-                         sizeof(slurmdb_job_rec_t *) *
-                         hash_tbl_size[hash_inx]);
+                xrealloc(hash_job[hash_inx], sizeof(slurmdb_job_rec_t *) * hash_tbl_size[hash_inx]);
             }
             hash_job[hash_inx][j] = job;
         }
@@ -752,14 +740,10 @@ extern int get_data(void) {
                 continue;
             job->tot_cpu_sec += step->tot_cpu_sec;
             job->tot_cpu_usec += step->tot_cpu_usec;
-            job->user_cpu_sec +=
-                    step->user_cpu_sec;
-            job->user_cpu_usec +=
-                    step->user_cpu_usec;
-            job->sys_cpu_sec +=
-                    step->sys_cpu_sec;
-            job->sys_cpu_usec +=
-                    step->sys_cpu_usec;
+            job->user_cpu_sec += step->user_cpu_sec;
+            job->user_cpu_usec += step->user_cpu_usec;
+            job->sys_cpu_sec += step->sys_cpu_sec;
+            job->sys_cpu_usec += step->sys_cpu_usec;
 
             /* get the max for all the sacct_t struct */
             aggregate_stats(&job->stats, &step->stats);
@@ -767,12 +751,10 @@ extern int get_data(void) {
 
         /* Now figure out the average of the total of averages */
         tmp_usage = job->stats.tres_usage_in_ave;
-        job->stats.tres_usage_in_ave =
-                slurmdb_ave_tres_usage(tmp_usage, cnt);
+        job->stats.tres_usage_in_ave = slurmdb_ave_tres_usage(tmp_usage, cnt);
         xfree(tmp_usage);
         tmp_usage = job->stats.tres_usage_out_ave;
-        job->stats.tres_usage_out_ave =
-                slurmdb_ave_tres_usage(tmp_usage, cnt);
+        job->stats.tres_usage_out_ave = slurmdb_ave_tres_usage(tmp_usage, cnt);
         xfree(tmp_usage);
 
         list_iterator_destroy(itr_step);
@@ -799,58 +781,57 @@ extern void parse_command_line(int argc, char **argv) {
     int verbosity; /* count of -v options */
     bool set;
 
-    static struct option long_options[] = {
-            {"allusers",      no_argument,       0, 'a'},
-            {"accounts",      required_argument, 0, 'A'},
-            {"allocations",   no_argument,       0, 'X'},
-            {"brief",         no_argument,       0, 'b'},
-            {"completion",    no_argument,       0, 'c'},
-            {"constraints",   required_argument, 0, 'C'},
-            {"delimiter",     required_argument, 0, OPT_LONG_DELIMITER},
-            {"duplicates",    no_argument,       0, 'D'},
-            {"federation",    no_argument,       0, OPT_LONG_FEDR},
-            {"helpformat",    no_argument,       0, 'e'},
-            {"help-fields",   no_argument,       0, 'e'},
-            {"endtime",       required_argument, 0, 'E'},
-            {"file",          required_argument, 0, 'f'},
-            {"flags",         required_argument, 0, 'F'},
-            {"gid",           required_argument, 0, 'g'},
-            {"group",         required_argument, 0, 'g'},
-            {"help",          no_argument,       0, 'h'},
-            {"local",         no_argument,       0, OPT_LONG_LOCAL},
-            {"name",          required_argument, 0, OPT_LONG_NAME},
-            {"nnodes",        required_argument, 0, 'i'},
-            {"ncpus",         required_argument, 0, 'I'},
-            {"jobs",          required_argument, 0, 'j'},
-            {"timelimit-min", required_argument, 0, 'k'},
-            {"timelimit-max", required_argument, 0, 'K'},
-            {"long",          no_argument,       0, 'l'},
-            {"allclusters",   no_argument,       0, 'L'},
-            {"cluster",       required_argument, 0, 'M'},
-            {"clusters",      required_argument, 0, 'M'},
-            {"nodelist",      required_argument, 0, 'N'},
-            {"noconvert",     no_argument,       0, OPT_LONG_NOCONVERT},
-            {"units",         required_argument, 0, OPT_LONG_UNITS},
-            {"noheader",      no_argument,       0, 'n'},
-            {"fields",        required_argument, 0, 'o'},
-            {"format",        required_argument, 0, 'o'},
-            {"parsable",      no_argument,       0, 'p'},
-            {"parsable2",     no_argument,       0, 'P'},
-            {"qos",           required_argument, 0, 'q'},
-            {"partition",     required_argument, 0, 'r'},
-            {"reason",        required_argument, 0, 'R'},
-            {"state",         required_argument, 0, 's'},
-            {"starttime",     required_argument, 0, 'S'},
-            {"truncate",      no_argument,       0, 'T'},
-            {"uid",           required_argument, 0, 'u'},
-            {"usage",         no_argument,       0, 'U'},
-            {"user",          required_argument, 0, 'u'},
-            {"verbose",       no_argument,       0, 'v'},
-            {"version",       no_argument,       0, 'V'},
-            {"wckeys",        required_argument, 0, 'W'},
-            {"whole-hetjob",  optional_argument, 0, OPT_LONG_WHETJOB},
-            {"associations",  required_argument, 0, 'x'},
-            {0, 0,                               0, 0}};
+    static struct option long_options[] = {{"allusers",      no_argument,       0, 'a'},
+                                           {"accounts",      required_argument, 0, 'A'},
+                                           {"allocations",   no_argument,       0, 'X'},
+                                           {"brief",         no_argument,       0, 'b'},
+                                           {"completion",    no_argument,       0, 'c'},
+                                           {"constraints",   required_argument, 0, 'C'},
+                                           {"delimiter",     required_argument, 0, OPT_LONG_DELIMITER},
+                                           {"duplicates",    no_argument,       0, 'D'},
+                                           {"federation",    no_argument,       0, OPT_LONG_FEDR},
+                                           {"helpformat",    no_argument,       0, 'e'},
+                                           {"help-fields",   no_argument,       0, 'e'},
+                                           {"endtime",       required_argument, 0, 'E'},
+                                           {"file",          required_argument, 0, 'f'},
+                                           {"flags",         required_argument, 0, 'F'},
+                                           {"gid",           required_argument, 0, 'g'},
+                                           {"group",         required_argument, 0, 'g'},
+                                           {"help",          no_argument,       0, 'h'},
+                                           {"local",         no_argument,       0, OPT_LONG_LOCAL},
+                                           {"name",          required_argument, 0, OPT_LONG_NAME},
+                                           {"nnodes",        required_argument, 0, 'i'},
+                                           {"ncpus",         required_argument, 0, 'I'},
+                                           {"jobs",          required_argument, 0, 'j'},
+                                           {"timelimit-min", required_argument, 0, 'k'},
+                                           {"timelimit-max", required_argument, 0, 'K'},
+                                           {"long",          no_argument,       0, 'l'},
+                                           {"allclusters",   no_argument,       0, 'L'},
+                                           {"cluster",       required_argument, 0, 'M'},
+                                           {"clusters",      required_argument, 0, 'M'},
+                                           {"nodelist",      required_argument, 0, 'N'},
+                                           {"noconvert",     no_argument,       0, OPT_LONG_NOCONVERT},
+                                           {"units",         required_argument, 0, OPT_LONG_UNITS},
+                                           {"noheader",      no_argument,       0, 'n'},
+                                           {"fields",        required_argument, 0, 'o'},
+                                           {"format",        required_argument, 0, 'o'},
+                                           {"parsable",      no_argument,       0, 'p'},
+                                           {"parsable2",     no_argument,       0, 'P'},
+                                           {"qos",           required_argument, 0, 'q'},
+                                           {"partition",     required_argument, 0, 'r'},
+                                           {"reason",        required_argument, 0, 'R'},
+                                           {"state",         required_argument, 0, 's'},
+                                           {"starttime",     required_argument, 0, 'S'},
+                                           {"truncate",      no_argument,       0, 'T'},
+                                           {"uid",           required_argument, 0, 'u'},
+                                           {"usage",         no_argument,       0, 'U'},
+                                           {"user",          required_argument, 0, 'u'},
+                                           {"verbose",       no_argument,       0, 'v'},
+                                           {"version",       no_argument,       0, 'V'},
+                                           {"wckeys",        required_argument, 0, 'W'},
+                                           {"whole-hetjob",  optional_argument, 0, OPT_LONG_WHETJOB},
+                                           {"associations",  required_argument, 0, 'x'},
+                                           {0, 0,                               0, 0}};
 
     params.opt_uid = getuid();
     params.opt_gid = getgid();
@@ -859,8 +840,7 @@ extern void parse_command_line(int argc, char **argv) {
     log_init("sacct", opts, SYSLOG_FACILITY_DAEMON, NULL);
     opterr = 1; /* Let getopt report problems to the user */
 
-    if (slurmctld_conf.fed_params &&
-        strstr(slurmctld_conf.fed_params, "fed_display"))
+    if (slurmctld_conf.fed_params && strstr(slurmctld_conf.fed_params, "fed_display"))
         params.opt_federation = true;
 
     if (getenv("SACCT_FEDERATION"))
@@ -869,9 +849,8 @@ extern void parse_command_line(int argc, char **argv) {
         params.opt_local = true;
 
     while (1) { /* now cycle through the command line */
-        c = getopt_long(argc, argv,
-                        "aA:bcC:DeE:f:F:g:hi:I:j:k:K:lLM:nN:o:pPq:r:s:S:Ttu:UvVW:x:X",
-                        long_options, &optionIndex);
+        c = getopt_long(argc, argv, "aA:bcC:DeE:f:F:g:hi:I:j:k:K:lLM:nN:o:pPq:r:s:S:Ttu:UvVW:x:X", long_options,
+                        &optionIndex);
         if (c == -1)
             break;
         switch (c) {
@@ -880,8 +859,7 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'A':
                 if (!job_cond->acct_list)
-                    job_cond->acct_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->acct_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(job_cond->acct_list, optarg);
                 break;
             case 'b':
@@ -895,22 +873,18 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'C':
                 if (!job_cond->constraint_list)
-                    job_cond->constraint_list =
-                            list_create(slurm_destroy_char);
-                slurm_addto_char_list(job_cond->constraint_list,
-                                      optarg);
+                    job_cond->constraint_list = list_create(slurm_destroy_char);
+                slurm_addto_char_list(job_cond->constraint_list, optarg);
                 break;
             case 'M':
-                if (!xstrcasecmp(optarg, "all") ||
-                    !xstrcasecmp(optarg, "-1")) { /* vestigial */
+                if (!xstrcasecmp(optarg, "all") || !xstrcasecmp(optarg, "-1")) { /* vestigial */
                     all_clusters = true;
                     break;
                 }
                 all_clusters = false;
                 params.opt_local = true;
                 if (!job_cond->cluster_list)
-                    job_cond->cluster_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->cluster_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(job_cond->cluster_list, optarg);
                 break;
             case 'D':
@@ -935,45 +909,33 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'g':
                 if (!job_cond->groupid_list)
-                    job_cond->groupid_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->groupid_list = list_create(slurm_destroy_char);
                 _addto_id_char_list(job_cond->groupid_list, optarg, 1);
                 break;
             case 'h':
                 params.opt_help = 1;
                 break;
             case 'i':
-                set = get_resource_arg_range(
-                        optarg,
-                        "requested node range",
-                        (int *) &job_cond->nodes_min,
-                        (int *) &job_cond->nodes_max,
-                        true);
+                set = get_resource_arg_range(optarg, "requested node range", (int *) &job_cond->nodes_min,
+                                             (int *) &job_cond->nodes_max, true);
 
                 if (set == false) {
-                    error("invalid node range -i '%s'",
-                          optarg);
+                    error("invalid node range -i '%s'", optarg);
                     exit(1);
                 }
                 break;
             case 'I':
-                set = get_resource_arg_range(
-                        optarg,
-                        "requested cpu range",
-                        (int *) &job_cond->cpus_min,
-                        (int *) &job_cond->cpus_max,
-                        true);
+                set = get_resource_arg_range(optarg, "requested cpu range", (int *) &job_cond->cpus_min,
+                                             (int *) &job_cond->cpus_max, true);
 
                 if (set == false) {
-                    error("invalid cpu range -i '%s'",
-                          optarg);
+                    error("invalid cpu range -i '%s'", optarg);
                     exit(1);
                 }
                 break;
             case 'j':
                 if (!job_cond->step_list)
-                    job_cond->step_list = list_create(
-                            slurmdb_destroy_selected_step);
+                    job_cond->step_list = list_create(slurmdb_destroy_selected_step);
                 slurm_addto_step_list(job_cond->step_list, optarg);
                 if (!list_count(job_cond->step_list))
                     FREE_NULL_LIST(job_cond->step_list);
@@ -1017,66 +979,54 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'N':
                 if (job_cond->used_nodes) {
-                    error("Aleady asked for nodes '%s'",
-                          job_cond->used_nodes);
+                    error("Aleady asked for nodes '%s'", job_cond->used_nodes);
                     break;
                 }
                 job_cond->used_nodes = xstrdup(optarg);
                 break;
             case OPT_LONG_NAME:
                 if (!job_cond->jobname_list)
-                    job_cond->jobname_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->jobname_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(job_cond->jobname_list, optarg);
                 break;
             case 'o':
                 xstrfmtcat(params.opt_field_list, "%s,", optarg);
                 break;
             case 'p':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_ENDING;
                 break;
             case 'P':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_NO_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_NO_ENDING;
                 break;
             case 'q':
                 if (!g_qos_list) {
                     slurmdb_qos_cond_t qos_cond;
-                    memset(&qos_cond, 0,
-                           sizeof(slurmdb_qos_cond_t));
+                    memset(&qos_cond, 0, sizeof(slurmdb_qos_cond_t));
                     qos_cond.with_deleted = 1;
-                    g_qos_list = slurmdb_qos_get(
-                            acct_db_conn, &qos_cond);
+                    g_qos_list = slurmdb_qos_get(acct_db_conn, &qos_cond);
                 }
 
                 if (!job_cond->qos_list)
-                    job_cond->qos_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->qos_list = list_create(slurm_destroy_char);
 
-                if (!slurmdb_addto_qos_char_list(job_cond->qos_list,
-                                                 g_qos_list, optarg, 0))
+                if (!slurmdb_addto_qos_char_list(job_cond->qos_list, g_qos_list, optarg, 0))
                     fatal("problem processing qos list");
                 break;
             case 'r':
                 if (!job_cond->partition_list)
-                    job_cond->partition_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->partition_list = list_create(slurm_destroy_char);
 
-                slurm_addto_char_list(job_cond->partition_list,
-                                      optarg);
+                slurm_addto_char_list(job_cond->partition_list, optarg);
                 break;
             case 'R':
                 if (!job_cond->reason_list)
-                    job_cond->reason_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->reason_list = list_create(slurm_destroy_char);
 
                 _addto_reason_char_list(job_cond->reason_list, optarg);
                 break;
             case 's':
                 if (!job_cond->state_list)
-                    job_cond->state_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->state_list = list_create(slurm_destroy_char);
 
                 _addto_state_char_list(job_cond->state_list, optarg);
                 break;
@@ -1098,8 +1048,7 @@ extern void parse_command_line(int argc, char **argv) {
                 }
                 all_users = false;
                 if (!job_cond->userid_list)
-                    job_cond->userid_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->userid_list = list_create(slurm_destroy_char);
                 _addto_id_char_list(job_cond->userid_list, optarg, 0);
                 break;
             case 'v':
@@ -1109,21 +1058,17 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case 'W':
                 if (!job_cond->wckey_list)
-                    job_cond->wckey_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->wckey_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(job_cond->wckey_list, optarg);
                 break;
             case OPT_LONG_WHETJOB:
-                if (!optarg || !xstrcasecmp(optarg, "yes") ||
-                    !xstrcasecmp(optarg, "y"))
+                if (!optarg || !xstrcasecmp(optarg, "yes") || !xstrcasecmp(optarg, "y"))
                     job_cond->flags |= JOBCOND_FLAG_WHOLE_HETJOB;
-                else if (!xstrcasecmp(optarg, "no") ||
-                         !xstrcasecmp(optarg, "n"))
+                else if (!xstrcasecmp(optarg, "no") || !xstrcasecmp(optarg, "n"))
                     job_cond->flags |= JOBCOND_FLAG_NO_WHOLE_HETJOB;
                 else if (optarg) {
                     error("Invalid --whole-hetjob value \"%s\"."
-                          " Valid values: [yes|no].",
-                          optarg);
+                          " Valid values: [yes|no].", optarg);
                     exit(1);
                 }
                 break;
@@ -1132,8 +1077,7 @@ extern void parse_command_line(int argc, char **argv) {
                 exit(0);
             case 'x':
                 if (!job_cond->associd_list)
-                    job_cond->associd_list =
-                            list_create(slurm_destroy_char);
+                    job_cond->associd_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(job_cond->associd_list, optarg);
                 break;
             case 't':
@@ -1158,15 +1102,11 @@ extern void parse_command_line(int argc, char **argv) {
 
     slurmdb_job_cond_def_start_end(job_cond);
 
-    if (job_cond->usage_end &&
-        (job_cond->usage_start > job_cond->usage_end)) {
+    if (job_cond->usage_end && (job_cond->usage_start > job_cond->usage_end)) {
         char start_str[32], end_str[32];
-        slurm_make_time_str(&job_cond->usage_start, start_str,
-                            sizeof(start_str));
-        slurm_make_time_str(&job_cond->usage_end, end_str,
-                            sizeof(end_str));
-        error("Start time (%s) requested is after end time (%s).",
-              start_str, end_str);
+        slurm_make_time_str(&job_cond->usage_start, start_str, sizeof(start_str));
+        slurm_make_time_str(&job_cond->usage_end, end_str, sizeof(end_str));
+        error("Start time (%s) requested is after end time (%s).", start_str, end_str);
         exit(1);
     }
 
@@ -1176,15 +1116,12 @@ extern void parse_command_line(int argc, char **argv) {
 
         if (job_cond->state_list && list_count(job_cond->state_list)) {
             char *state;
-            ListIterator itr = list_iterator_create(
-                    job_cond->state_list);
+            ListIterator itr = list_iterator_create(job_cond->state_list);
 
             while ((state = list_next(itr))) {
                 if (verbosity_states)
                     xstrcat(verbosity_states, ",");
-                xstrfmtcat(verbosity_states, "%s",
-                           job_state_string_complete(
-                                   atol(state)));
+                xstrfmtcat(verbosity_states, "%s", job_state_string_complete(atol(state)));
             }
             list_iterator_destroy(itr);
         } else
@@ -1198,11 +1135,9 @@ extern void parse_command_line(int argc, char **argv) {
         slurm_ctime2_r(&job_cond->usage_end, end_char);
 
         if (xstrcmp(start_char, end_char))
-            info("Jobs %s in the time window from %s to %s",
-                 verbosity_states, start_char, end_char);
+            info("Jobs %s in the time window from %s to %s", verbosity_states, start_char, end_char);
         else
-            info("Jobs %s at the time instant %s",
-                 verbosity_states, start_char);
+            info("Jobs %s at the time instant %s", verbosity_states, start_char);
         xfree(verbosity_states);
     }
 
@@ -1212,12 +1147,8 @@ extern void parse_command_line(int argc, char **argv) {
           "\topt_field_list=%s\n"
           "\topt_help=%d\n"
           "\topt_no_steps=%d\n"
-          "\topt_whole_hetjob=%s",
-          params.opt_completion,
-          job_cond->flags & JOBCOND_FLAG_DUP,
-          params.opt_field_list,
-          params.opt_help,
-          job_cond->flags & JOBCOND_FLAG_NO_STEP,
+          "\topt_whole_hetjob=%s", params.opt_completion, job_cond->flags & JOBCOND_FLAG_DUP, params.opt_field_list,
+          params.opt_help, job_cond->flags & JOBCOND_FLAG_NO_STEP,
           job_cond->flags & JOBCOND_FLAG_WHOLE_HETJOB ? "yes" : (job_cond->flags & JOBCOND_FLAG_NO_WHOLE_HETJOB ? "no"
                                                                                                                 : 0));
 
@@ -1231,15 +1162,13 @@ extern void parse_command_line(int argc, char **argv) {
         }
         xfree(acct_type);
     } else {
-        if (slurm_acct_storage_init(params.opt_filein) !=
-            SLURM_SUCCESS) {
+        if (slurm_acct_storage_init(params.opt_filein) != SLURM_SUCCESS) {
             fprintf(stderr, "Slurm unable to initialize storage plugin\n");
             exit(1);
         }
         acct_type = slurm_get_accounting_storage_type();
         if ((xstrcmp(acct_type, "accounting_storage/none") == 0) && (stat(params.opt_filein, &stat_buf) != 0)) {
-            fprintf(stderr,
-                    "Slurm accounting storage is disabled\n");
+            fprintf(stderr, "Slurm accounting storage is disabled\n");
             exit(1);
         }
         xfree(acct_type);
@@ -1251,8 +1180,7 @@ extern void parse_command_line(int argc, char **argv) {
     }
 
     /* specific clusters requested? */
-    if (params.opt_federation && !all_clusters && !job_cond->cluster_list &&
-        !params.opt_local) {
+    if (params.opt_federation && !all_clusters && !job_cond->cluster_list && !params.opt_local) {
         /* Test if in federated cluster and if so, get information from
          * all clusters in that federation */
         slurmdb_federation_rec_t *fed = NULL;
@@ -1266,9 +1194,7 @@ extern void parse_command_line(int argc, char **argv) {
         slurmdb_init_federation_cond(&fed_cond, 0);
         fed_cond.cluster_list = cluster_list;
 
-        if ((fed_list = slurmdb_federations_get(
-                acct_db_conn, &fed_cond)) &&
-            list_count(fed_list) == 1) {
+        if ((fed_list = slurmdb_federations_get(acct_db_conn, &fed_cond)) && list_count(fed_list) == 1) {
             fed = list_peek(fed_list);
             job_cond->cluster_list = _build_cluster_list(fed);
             /* Leave cluster_name to identify remote only jobs */
@@ -1291,8 +1217,7 @@ extern void parse_command_line(int argc, char **argv) {
         list_iterator_destroy(itr);
     } else if (!job_cond->cluster_list || !list_count(job_cond->cluster_list)) {
         if (!job_cond->cluster_list)
-            job_cond->cluster_list =
-                    list_create(slurm_destroy_char);
+            job_cond->cluster_list = list_create(slurm_destroy_char);
         if ((start = slurm_get_cluster_name())) {
             list_append(job_cond->cluster_list, start);
             debug2("Clusters requested:\t%s", start);
@@ -1310,8 +1235,7 @@ extern void parse_command_line(int argc, char **argv) {
         all_users = true;
 
     if (all_users) {
-        if (job_cond->userid_list &&
-            list_count(job_cond->userid_list)) {
+        if (job_cond->userid_list && list_count(job_cond->userid_list)) {
             FREE_NULL_LIST(job_cond->userid_list);
         }
         debug2("Userids requested:\tall");
@@ -1360,8 +1284,7 @@ extern void parse_command_line(int argc, char **argv) {
         while ((selected_step = list_next(itr))) {
             char id[FORMAT_STRING_SIZE];
 
-            debug2("\t: %s", slurmdb_get_selected_step_id(
-                    id, sizeof(id), selected_step));
+            debug2("\t: %s", slurmdb_get_selected_step_id(id, sizeof(id), selected_step));
         }
         list_iterator_destroy(itr);
     }
@@ -1371,8 +1294,7 @@ extern void parse_command_line(int argc, char **argv) {
         debug2("States requested:");
         itr = list_iterator_create(job_cond->state_list);
         while ((start = list_next(itr))) {
-            debug2("\t: %s",
-                   job_state_string(atoi(start)));
+            debug2("\t: %s", job_state_string(atoi(start)));
         }
         list_iterator_destroy(itr);
     }
@@ -1391,8 +1313,7 @@ extern void parse_command_line(int argc, char **argv) {
         sprintf(time_str, "%s", tmp1);
         if (job_cond->timelimit_max) {
             int len = strlen(tmp1);
-            mins2time_str(job_cond->timelimit_max,
-                          tmp2, sizeof(tmp2));
+            mins2time_str(job_cond->timelimit_max, tmp2, sizeof(tmp2));
             sprintf(time_str + len, " - %s", tmp2);
         }
         debug2("Timelimit requested\t: %s", time_str);
@@ -1509,8 +1430,7 @@ extern void do_help(void) {
             _usage();
             break;
         default:
-            debug2("sacct bug: params.opt_help=%d",
-                   params.opt_help);
+            debug2("sacct bug: params.opt_help=%d", params.opt_help);
     }
 }
 
@@ -1542,9 +1462,7 @@ extern void do_list(void) {
 
     itr = list_iterator_create(jobs);
     while ((job = list_next(itr))) {
-        if ((params.cluster_name) &&
-            _test_local_job(job->jobid) &&
-            xstrcmp(params.cluster_name, job->cluster))
+        if ((params.cluster_name) && _test_local_job(job->jobid) && xstrcmp(params.cluster_name, job->cluster))
             continue;
 
         if (job->show_full)

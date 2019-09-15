@@ -63,13 +63,11 @@ extern void power_g_job_start(struct job_record *job_ptr);
  * GENERIC DATA MOVEMENT FUNCTIONS
 \*****************************************************************************/
 /* Pack a power management data structure */
-extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer,
-                                 uint16_t protocol_version);
+extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer, uint16_t protocol_version);
 
 /* Unpack a power management data structure
  * Use power_mgmt_data_free() to free the returned structure */
-extern int power_mgmt_data_unpack(power_mgmt_data_t **power, Buf buffer,
-                                  uint16_t protocol_version);
+extern int power_mgmt_data_unpack(power_mgmt_data_t **power, Buf buffer, uint16_t protocol_version);
 
 /* Free a power management data structure */
 extern void power_mgmt_data_free(power_mgmt_data_t *power);

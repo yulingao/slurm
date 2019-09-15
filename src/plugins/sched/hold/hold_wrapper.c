@@ -66,8 +66,7 @@ int slurm_sched_p_reconfig(void) {
     return SLURM_SUCCESS;
 }
 
-uint32_t slurm_sched_p_initial_priority(uint32_t last_prio,
-                                        struct job_record *job_ptr) {
+uint32_t slurm_sched_p_initial_priority(uint32_t last_prio, struct job_record *job_ptr) {
     struct stat buf;
 
     if (stat("/etc/slurm.hold", &buf) == 0)

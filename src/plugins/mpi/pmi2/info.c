@@ -81,8 +81,7 @@ static char **node_attr = NULL;
 
 static char *ifconfig(void);
 
-extern int
-enqueue_nag_req(int fd, int rank, char *key) {
+extern int enqueue_nag_req(int fd, int rank, char *key) {
     nag_req_t *req;
 
     req = xmalloc(sizeof(nag_req_t));
@@ -96,8 +95,7 @@ enqueue_nag_req(int fd, int rank, char *key) {
     return SLURM_SUCCESS;
 }
 
-extern int
-node_attr_put(char *key, char *val) {
+extern int node_attr_put(char *key, char *val) {
     nag_req_t *req = NULL, **pprev = NULL;
     client_resp_t *resp = NULL;
     int rc = SLURM_SUCCESS;
@@ -120,31 +118,28 @@ node_attr_put(char *key, char *val) {
             pprev = &req->next;
             req = *pprev;
         } else {
-            debug("mpi/pmi2: found pending request from rank %d",
-                  req->rank);
+            debug("mpi/pmi2: found pending request from rank %d", req->rank);
 
             /* send response msg */
             if (!resp) {
                 resp = client_resp_new();
-                client_resp_append(resp,
-                                   CMD_KEY
-                                           "="
-                                           GETNODEATTRRESP_CMD
-                                           ";"
-                                           RC_KEY
-                                           "=0;"
-                                           FOUND_KEY
-                                           "="
-                                           TRUE_VAL
-                                           ";"
-                                           VALUE_KEY
-                                           "=%s;", val);
+                client_resp_append(resp, CMD_KEY
+                        "="
+                        GETNODEATTRRESP_CMD
+                        ";"
+                        RC_KEY
+                        "=0;"
+                        FOUND_KEY
+                        "="
+                        TRUE_VAL
+                        ";"
+                        VALUE_KEY
+                        "=%s;", val);
             }
             rc = client_resp_send(resp, req->fd);
             if (rc != SLURM_SUCCESS) {
                 error("mpi/pmi2: failed to send '"
-                      GETNODEATTRRESP_CMD "' to task %d",
-                      req->rank);
+                      GETNODEATTRRESP_CMD "' to task %d", req->rank);
             }
             /* remove the request */
             *pprev = req->next;
@@ -160,8 +155,7 @@ node_attr_put(char *key, char *val) {
 }
 
 /* returned value not dup-ed */
-extern char *
-node_attr_get(char *key) {
+extern char *node_attr_get(char *key) {
     int i;
     char *val = NULL;
 
@@ -180,8 +174,7 @@ node_attr_get(char *key) {
 
 /* job_attr_get_netinfo()
  */
-static char *
-job_attr_get_netinfo(char *key, char *attr) {
+static char *job_attr_get_netinfo(char *key, char *attr) {
     char *netinfo;
 
     /* get network information of node in netinfo, xmalloc'ed
@@ -197,8 +190,7 @@ job_attr_get_netinfo(char *key, char *attr) {
 
 /* job_attr_get()
  */
-extern char *
-job_attr_get(char *key) {
+extern char *job_attr_get(char *key) {
     static char attr[PMI2_MAX_VALLEN];
 
     if (!xstrcmp(key, JOB_ATTR_PROC_MAP)) {
@@ -234,8 +226,7 @@ job_attr_get(char *key) {
  *
  * Return information about network interfaces.
  */
-static char *
-ifconfig(void) {
+static char *ifconfig(void) {
     struct ifaddrs *ifaddr;
     struct ifaddrs *ifa;
     int s;
@@ -270,34 +261,25 @@ ifconfig(void) {
         if (ifa->ifa_flags & IFF_LOOPBACK)
             continue;
 #endif
-        if (ifa->ifa_addr->sa_family != AF_INET
-            && ifa->ifa_addr->sa_family != AF_INET6)
+        if (ifa->ifa_addr->sa_family != AF_INET && ifa->ifa_addr->sa_family != AF_INET6)
             continue;
 
         if (ifa->ifa_addr->sa_family == AF_INET) {
-            s = getnameinfo(ifa->ifa_addr,
-                            sizeof(struct sockaddr_in),
-                            addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0) {
-                error("%s: AF_INET getnameinfo() failed: %s",
-                      __func__, gai_strerror(s));
+                error("%s: AF_INET getnameinfo() failed: %s", __func__, gai_strerror(s));
                 continue;
             }
-            n = n + sprintf(buf + n, ",(%s,%s,%s)",
-                            ifa->ifa_name, "IP_V4", addr);
+            n = n + sprintf(buf + n, ",(%s,%s,%s)", ifa->ifa_name, "IP_V4", addr);
             continue;
         }
         if (ifa->ifa_addr->sa_family == AF_INET6) {
-            s = getnameinfo(ifa->ifa_addr,
-                            sizeof(struct sockaddr_in6),
-                            addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+            s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in6), addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
             if (s != 0) {
-                error("%s: AF_INET6 getnameinfo() failed: %s",
-                      __func__, gai_strerror(s));
+                error("%s: AF_INET6 getnameinfo() failed: %s", __func__, gai_strerror(s));
                 continue;
             }
-            n = n + sprintf(buf + n, ",(%s,%s,%s)",
-                            ifa->ifa_name, "IP_V6", addr);
+            n = n + sprintf(buf + n, ",(%s,%s,%s)", ifa->ifa_name, "IP_V6", addr);
         }
     }
     sprintf(buf + n, ")");

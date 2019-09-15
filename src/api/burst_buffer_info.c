@@ -131,8 +131,7 @@ static void _get_size_str(char *buf, size_t buf_size, uint64_t num) {
  * OUT status_resp - status response, memory must be released using xfree()
  * RET 0 or a slurm error code
  */
-extern int slurm_load_burst_buffer_stat(int argc, char **argv,
-                                        char **status_resp) {
+extern int slurm_load_burst_buffer_stat(int argc, char **argv, char **status_resp) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -146,8 +145,7 @@ extern int slurm_load_burst_buffer_stat(int argc, char **argv,
     req_msg.msg_type = REQUEST_BURST_BUFFER_STATUS;
     req_msg.data = &status_req_msg;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -179,8 +177,7 @@ extern int slurm_load_burst_buffer_stat(int argc, char **argv,
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_burst_buffer_info_msg
  */
-extern int slurm_load_burst_buffer_info(burst_buffer_info_msg_t **
-burst_buffer_info_msg_pptr) {
+extern int slurm_load_burst_buffer_info(burst_buffer_info_msg_t **burst_buffer_info_msg_pptr) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -190,14 +187,12 @@ burst_buffer_info_msg_pptr) {
     req_msg.msg_type = REQUEST_BURST_BUFFER_INFO;
     req_msg.data = NULL;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
         case RESPONSE_BURST_BUFFER_INFO:
-            *burst_buffer_info_msg_pptr = (burst_buffer_info_msg_t *)
-                    resp_msg.data;
+            *burst_buffer_info_msg_pptr = (burst_buffer_info_msg_t *) resp_msg.data;
             break;
         case RESPONSE_SLURM_RC:
             rc = ((return_code_msg_t *) resp_msg.data)->return_code;
@@ -222,9 +217,8 @@ burst_buffer_info_msg_pptr) {
  * IN one_liner - print as a single line if true
  * IN verbose - higher values to log additional details
  */
-extern void slurm_print_burst_buffer_info_msg(FILE *out,
-                                              burst_buffer_info_msg_t *info_ptr, int one_liner,
-                                              int verbose) {
+extern void
+slurm_print_burst_buffer_info_msg(FILE *out, burst_buffer_info_msg_t *info_ptr, int one_liner, int verbose) {
     int i;
     burst_buffer_info_t *burst_buffer_ptr;
 
@@ -233,27 +227,20 @@ extern void slurm_print_burst_buffer_info_msg(FILE *out,
         return;
     }
 
-    for (i = 0, burst_buffer_ptr = info_ptr->burst_buffer_array;
-         i < info_ptr->record_count; i++, burst_buffer_ptr++) {
-        slurm_print_burst_buffer_record(out, burst_buffer_ptr,
-                                        one_liner, verbose);
+    for (i = 0, burst_buffer_ptr = info_ptr->burst_buffer_array; i < info_ptr->record_count; i++, burst_buffer_ptr++) {
+        slurm_print_burst_buffer_record(out, burst_buffer_ptr, one_liner, verbose);
     }
 }
 
-static void _print_burst_buffer_resv(FILE *out,
-                                     burst_buffer_resv_t *burst_buffer_ptr,
-                                     int one_liner, bool verbose) {
+static void _print_burst_buffer_resv(FILE *out, burst_buffer_resv_t *burst_buffer_ptr, int one_liner, bool verbose) {
     char sz_buf[32], time_buf[64];
     char *out_buf = NULL, *user_name;
 
     /****** Line 1 ******/
-    if (burst_buffer_ptr->job_id &&
-        (burst_buffer_ptr->array_task_id == NO_VAL)) {
+    if (burst_buffer_ptr->job_id && (burst_buffer_ptr->array_task_id == NO_VAL)) {
         xstrfmtcat(out_buf, "    JobID=%u ", burst_buffer_ptr->job_id);
     } else if (burst_buffer_ptr->job_id) {
-        xstrfmtcat(out_buf, "    JobID=%u_%u(%u) ",
-                   burst_buffer_ptr->array_job_id,
-                   burst_buffer_ptr->array_task_id,
+        xstrfmtcat(out_buf, "    JobID=%u_%u(%u) ", burst_buffer_ptr->array_job_id, burst_buffer_ptr->array_task_id,
                    burst_buffer_ptr->job_id);
     } else {
         xstrfmtcat(out_buf, "    Name=%s ", burst_buffer_ptr->name);
@@ -261,8 +248,7 @@ static void _print_burst_buffer_resv(FILE *out,
 
     _get_size_str(sz_buf, sizeof(sz_buf), burst_buffer_ptr->size);
     if (burst_buffer_ptr->create_time) {
-        slurm_make_time_str(&burst_buffer_ptr->create_time, time_buf,
-                            sizeof(time_buf));
+        slurm_make_time_str(&burst_buffer_ptr->create_time, time_buf, sizeof(time_buf));
     } else {
         time_t now = time(NULL);
         slurm_make_time_str(&now, time_buf, sizeof(time_buf));
@@ -271,16 +257,12 @@ static void _print_burst_buffer_resv(FILE *out,
     user_name = uid_to_string(burst_buffer_ptr->user_id);
     if (verbose) {
         xstrfmtcat(out_buf, "Account=%s CreateTime=%s Partition=%s Pool=%s QOS=%s Size=%s State=%s UserID=%s(%u)",
-                   burst_buffer_ptr->account, time_buf,
-                   burst_buffer_ptr->partition, burst_buffer_ptr->pool,
-                   burst_buffer_ptr->qos, sz_buf,
-                   bb_state_string(burst_buffer_ptr->state),
-                   user_name, burst_buffer_ptr->user_id);
+                   burst_buffer_ptr->account, time_buf, burst_buffer_ptr->partition, burst_buffer_ptr->pool,
+                   burst_buffer_ptr->qos, sz_buf, bb_state_string(burst_buffer_ptr->state), user_name,
+                   burst_buffer_ptr->user_id);
     } else {
-        xstrfmtcat(out_buf, "CreateTime=%s Pool=%s Size=%s State=%s UserID=%s(%u)",
-                   time_buf, burst_buffer_ptr->pool, sz_buf,
-                   bb_state_string(burst_buffer_ptr->state),
-                   user_name, burst_buffer_ptr->user_id);
+        xstrfmtcat(out_buf, "CreateTime=%s Pool=%s Size=%s State=%s UserID=%s(%u)", time_buf, burst_buffer_ptr->pool,
+                   sz_buf, bb_state_string(burst_buffer_ptr->state), user_name, burst_buffer_ptr->user_id);
     }
     xfree(user_name);
 
@@ -289,16 +271,13 @@ static void _print_burst_buffer_resv(FILE *out,
     xfree(out_buf);
 }
 
-static void _print_burst_buffer_use(FILE *out,
-                                    burst_buffer_use_t *usage_ptr,
-                                    int one_liner) {
+static void _print_burst_buffer_use(FILE *out, burst_buffer_use_t *usage_ptr, int one_liner) {
     char sz_buf[32];
     char *out_buf = NULL, *user_name;
 
     user_name = uid_to_string(usage_ptr->user_id);
     _get_size_str(sz_buf, sizeof(sz_buf), usage_ptr->used);
-    xstrfmtcat(out_buf, "    UserID=%s(%u) Used=%s",
-               user_name, usage_ptr->user_id, sz_buf);
+    xstrfmtcat(out_buf, "    UserID=%s(%u) Used=%s", user_name, usage_ptr->user_id, sz_buf);
     xfree(user_name);
 
     xstrcat(out_buf, "\n");
@@ -317,9 +296,8 @@ static void _print_burst_buffer_use(FILE *out,
  * RET out - char * containing formatted output (must be freed after call)
  *	   NULL is returned on failure.
  */
-extern void slurm_print_burst_buffer_record(FILE *out,
-                                            burst_buffer_info_t *burst_buffer_ptr, int one_liner,
-                                            int verbose) {
+extern void
+slurm_print_burst_buffer_record(FILE *out, burst_buffer_info_t *burst_buffer_ptr, int one_liner, int verbose) {
     char f_sz_buf[32], g_sz_buf[32], t_sz_buf[32], u_sz_buf[32];
     char *out_buf = NULL;
     char *line_end = (one_liner) ? " " : "\n  ";
@@ -329,111 +307,88 @@ extern void slurm_print_burst_buffer_record(FILE *out,
     int i;
 
     /****** Line ******/
-    free_space = burst_buffer_ptr->total_space -
-                 burst_buffer_ptr->unfree_space;
+    free_space = burst_buffer_ptr->total_space - burst_buffer_ptr->unfree_space;
     _get_size_str(f_sz_buf, sizeof(f_sz_buf), free_space);
-    _get_size_str(g_sz_buf, sizeof(g_sz_buf),
-                  burst_buffer_ptr->granularity);
-    _get_size_str(t_sz_buf, sizeof(t_sz_buf),
-                  burst_buffer_ptr->total_space);
-    _get_size_str(u_sz_buf, sizeof(u_sz_buf),
-                  burst_buffer_ptr->used_space);
+    _get_size_str(g_sz_buf, sizeof(g_sz_buf), burst_buffer_ptr->granularity);
+    _get_size_str(t_sz_buf, sizeof(t_sz_buf), burst_buffer_ptr->total_space);
+    _get_size_str(u_sz_buf, sizeof(u_sz_buf), burst_buffer_ptr->used_space);
     xstrfmtcat(out_buf, "Name=%s DefaultPool=%s Granularity=%s TotalSpace=%s FreeSpace=%s UsedSpace=%s",
-               burst_buffer_ptr->name, burst_buffer_ptr->default_pool,
-               g_sz_buf, t_sz_buf, f_sz_buf, u_sz_buf);
+               burst_buffer_ptr->name, burst_buffer_ptr->default_pool, g_sz_buf, t_sz_buf, f_sz_buf, u_sz_buf);
 
     /****** Line (optional) ******/
     /* Alternate pool information */
     for (i = 0; i < burst_buffer_ptr->pool_cnt; i++) {
         xstrcat(out_buf, line_end);
-        free_space = burst_buffer_ptr->pool_ptr[i].total_space -
-                     burst_buffer_ptr->pool_ptr[i].unfree_space;
+        free_space = burst_buffer_ptr->pool_ptr[i].total_space - burst_buffer_ptr->pool_ptr[i].unfree_space;
         _get_size_str(f_sz_buf, sizeof(f_sz_buf), free_space);
-        _get_size_str(g_sz_buf, sizeof(g_sz_buf),
-                      burst_buffer_ptr->pool_ptr[i].granularity);
-        _get_size_str(t_sz_buf, sizeof(t_sz_buf),
-                      burst_buffer_ptr->pool_ptr[i].total_space);
-        _get_size_str(u_sz_buf, sizeof(u_sz_buf),
-                      burst_buffer_ptr->pool_ptr[i].used_space);
-        xstrfmtcat(out_buf, "AltPoolName[%d]=%s Granularity=%s TotalSpace=%s FreeSpace=%s UsedSpace=%s",
-                   i, burst_buffer_ptr->pool_ptr[i].name,
-                   g_sz_buf, t_sz_buf, f_sz_buf, u_sz_buf);
+        _get_size_str(g_sz_buf, sizeof(g_sz_buf), burst_buffer_ptr->pool_ptr[i].granularity);
+        _get_size_str(t_sz_buf, sizeof(t_sz_buf), burst_buffer_ptr->pool_ptr[i].total_space);
+        _get_size_str(u_sz_buf, sizeof(u_sz_buf), burst_buffer_ptr->pool_ptr[i].used_space);
+        xstrfmtcat(out_buf, "AltPoolName[%d]=%s Granularity=%s TotalSpace=%s FreeSpace=%s UsedSpace=%s", i,
+                   burst_buffer_ptr->pool_ptr[i].name, g_sz_buf, t_sz_buf, f_sz_buf, u_sz_buf);
     }
 
     /****** Line ******/
     xstrcat(out_buf, line_end);
-    xstrfmtcat(out_buf, "Flags=%s",
-               slurm_bb_flags2str(burst_buffer_ptr->flags));
+    xstrfmtcat(out_buf, "Flags=%s", slurm_bb_flags2str(burst_buffer_ptr->flags));
 
     /****** Line ******/
     xstrcat(out_buf, line_end);
     xstrfmtcat(out_buf, "StageInTimeout=%u StageOutTimeout=%u ValidateTimeout=%u OtherTimeout=%u",
-               burst_buffer_ptr->stage_in_timeout,
-               burst_buffer_ptr->stage_out_timeout,
-               burst_buffer_ptr->validate_timeout,
-               burst_buffer_ptr->other_timeout);
+               burst_buffer_ptr->stage_in_timeout, burst_buffer_ptr->stage_out_timeout,
+               burst_buffer_ptr->validate_timeout, burst_buffer_ptr->other_timeout);
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->allow_users) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "AllowUsers=%s",
-                   burst_buffer_ptr->allow_users);
+        xstrfmtcat(out_buf, "AllowUsers=%s", burst_buffer_ptr->allow_users);
     } else if (burst_buffer_ptr->deny_users) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "DenyUsers=%s",
-                   burst_buffer_ptr->deny_users);
+        xstrfmtcat(out_buf, "DenyUsers=%s", burst_buffer_ptr->deny_users);
     }
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->create_buffer) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "CreateBuffer=%s",
-                   burst_buffer_ptr->create_buffer);
+        xstrfmtcat(out_buf, "CreateBuffer=%s", burst_buffer_ptr->create_buffer);
     }
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->destroy_buffer) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "DestroyBuffer=%s",
-                   burst_buffer_ptr->destroy_buffer);
+        xstrfmtcat(out_buf, "DestroyBuffer=%s", burst_buffer_ptr->destroy_buffer);
     }
 
     /****** Line ******/
     xstrcat(out_buf, line_end);
-    xstrfmtcat(out_buf, "GetSysState=%s",
-               burst_buffer_ptr->get_sys_state);
+    xstrfmtcat(out_buf, "GetSysState=%s", burst_buffer_ptr->get_sys_state);
 
     /****** Line ******/
     xstrcat(out_buf, line_end);
-    xstrfmtcat(out_buf, "GetSysStatus=%s",
-               burst_buffer_ptr->get_sys_status);
+    xstrfmtcat(out_buf, "GetSysStatus=%s", burst_buffer_ptr->get_sys_status);
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->start_stage_in) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "StartStageIn=%s",
-                   burst_buffer_ptr->start_stage_in);
+        xstrfmtcat(out_buf, "StartStageIn=%s", burst_buffer_ptr->start_stage_in);
     }
 
     /****** Line ******/
     if (burst_buffer_ptr->start_stage_out) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "StartStageIn=%s",
-                   burst_buffer_ptr->start_stage_out);
+        xstrfmtcat(out_buf, "StartStageIn=%s", burst_buffer_ptr->start_stage_out);
     }
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->stop_stage_in) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "StopStageIn=%s",
-                   burst_buffer_ptr->stop_stage_in);
+        xstrfmtcat(out_buf, "StopStageIn=%s", burst_buffer_ptr->stop_stage_in);
     }
 
     /****** Line (optional) ******/
     if (burst_buffer_ptr->stop_stage_out) {
         xstrcat(out_buf, line_end);
-        xstrfmtcat(out_buf, "StopStageIn=%s",
-                   burst_buffer_ptr->stop_stage_out);
+        xstrfmtcat(out_buf, "StopStageIn=%s", burst_buffer_ptr->stop_stage_out);
     }
 
     xstrcat(out_buf, "\n");

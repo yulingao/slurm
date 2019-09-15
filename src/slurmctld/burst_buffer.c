@@ -63,26 +63,21 @@ typedef struct slurm_bb_ops {
 
     char *(*get_status)(uint32_t argc, char **argv);
 
-    int (*state_pack)(uid_t uid, Buf buffer,
-                      uint16_t protocol_version);
+    int (*state_pack)(uid_t uid, Buf buffer, uint16_t protocol_version);
 
     int (*reconfig)(void);
 
-    int (*job_validate)(struct job_descriptor *job_desc,
-                        uid_t submit_uid);
+    int (*job_validate)(struct job_descriptor *job_desc, uid_t submit_uid);
 
-    int (*job_validate2)(struct job_record *job_ptr,
-                         char **err_msg);
+    int (*job_validate2)(struct job_record *job_ptr, char **err_msg);
 
-    void (*job_set_tres_cnt)(struct job_record *job_ptr,
-                             uint64_t *tres_cnt, bool locked);
+    void (*job_set_tres_cnt)(struct job_record *job_ptr, uint64_t *tres_cnt, bool locked);
 
     time_t (*job_get_est_start)(struct job_record *job_ptr);
 
     int (*job_try_stage_in)(List job_queue);
 
-    int (*job_test_stage_in)(struct job_record *job_ptr,
-                             bool test_only);
+    int (*job_test_stage_in)(struct job_record *job_ptr, bool test_only);
 
     int (*job_begin)(struct job_record *job_ptr);
 
@@ -102,26 +97,12 @@ typedef struct slurm_bb_ops {
 /*
  * Must be synchronized with slurm_bb_ops_t above.
  */
-static const char *syms[] = {
-        "bb_p_get_system_size",
-        "bb_p_load_state",
-        "bb_p_get_status",
-        "bb_p_state_pack",
-        "bb_p_reconfig",
-        "bb_p_job_validate",
-        "bb_p_job_validate2",
-        "bb_p_job_set_tres_cnt",
-        "bb_p_job_get_est_start",
-        "bb_p_job_try_stage_in",
-        "bb_p_job_test_stage_in",
-        "bb_p_job_begin",
-        "bb_p_job_revoke_alloc",
-        "bb_p_job_start_stage_out",
-        "bb_p_job_test_post_run",
-        "bb_p_job_test_stage_out",
-        "bb_p_job_cancel",
-        "bb_p_xlate_bb_2_tres_str"
-};
+static const char *syms[] = {"bb_p_get_system_size", "bb_p_load_state", "bb_p_get_status", "bb_p_state_pack",
+                             "bb_p_reconfig", "bb_p_job_validate", "bb_p_job_validate2", "bb_p_job_set_tres_cnt",
+                             "bb_p_job_get_est_start", "bb_p_job_try_stage_in", "bb_p_job_test_stage_in",
+                             "bb_p_job_begin", "bb_p_job_revoke_alloc", "bb_p_job_start_stage_out",
+                             "bb_p_job_test_post_run", "bb_p_job_test_stage_out", "bb_p_job_cancel",
+                             "bb_p_xlate_bb_2_tres_str"};
 
 static int g_context_cnt = -1;
 static slurm_bb_ops_t *ops = NULL;
@@ -156,17 +137,14 @@ extern int bb_g_init(void) {
     names = bb_plugin_list;
     while ((type = strtok_r(names, ",", &last))) {
         xrecalloc(ops, g_context_cnt + 1, sizeof(slurm_bb_ops_t));
-        xrecalloc(g_context, g_context_cnt + 1,
-                  sizeof(plugin_context_t * ));
+        xrecalloc(g_context, g_context_cnt + 1, sizeof(plugin_context_t * ));
         if (xstrncmp(type, "burst_buffer/", 13) == 0)
             type += 13; /* backward compatibility */
         type = xstrdup_printf("burst_buffer/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;
@@ -371,8 +349,7 @@ extern uint64_t bb_g_get_system_size(char *name) {
  * submit_uid IN - ID of the user submitting the job.
  * Returns a Slurm errno.
  */
-extern int bb_g_job_validate(struct job_descriptor *job_desc,
-                             uid_t submit_uid) {
+extern int bb_g_job_validate(struct job_descriptor *job_desc, uid_t submit_uid) {
     DEF_TIMERS;
     int i, rc, rc2;
 
@@ -415,8 +392,7 @@ extern int bb_g_job_validate2(struct job_record *job_ptr, char **err_msg) {
 
 /* Return true if pack job separator in the script */
 static bool _pack_check(char *tok) {
-    if (strncmp(tok + 1, "SLURM", 5) &&
-        strncmp(tok + 1, "SBATCH", 6))
+    if (strncmp(tok + 1, "SLURM", 5) && strncmp(tok + 1, "SBATCH", 6))
         return false;
     if (!strstr(tok + 6, "packjob"))
         return false;
@@ -466,9 +442,7 @@ extern char *bb_g_build_pack_script(char *script, uint32_t pack_job_offset) {
     if (pack_job_offset == 0) {
         while (tok) {
             char *sep = "";
-            if ((tok[0] == '#') &&
-                (((tok[1] == 'B') && (tok[2] == 'B')) ||
-                 ((tok[1] == 'D') && (tok[2] == 'W')))) {
+            if ((tok[0] == '#') && (((tok[1] == 'B') && (tok[2] == 'B')) || ((tok[1] == 'D') && (tok[2] == 'W')))) {
                 sep = "#EXCLUDED ";
                 tok++;
             }
@@ -491,9 +465,7 @@ extern char *bb_g_build_pack_script(char *script, uint32_t pack_job_offset) {
  * IN/OUT tres_cnt - fill in this already allocated array with tres_cnts
  * IN locked - if the assoc_mgr tres read locked is locked or not
  */
-extern void bb_g_job_set_tres_cnt(struct job_record *job_ptr,
-                                  uint64_t *tres_cnt,
-                                  bool locked) {
+extern void bb_g_job_set_tres_cnt(struct job_record *job_ptr, uint64_t *tres_cnt, bool locked) {
     DEF_TIMERS;
     int i;
 
@@ -564,11 +536,9 @@ extern int bb_g_job_try_stage_in(void) {
     while ((job_ptr = (struct job_record *) list_next(job_iterator))) {
         if (!IS_JOB_PENDING(job_ptr))
             continue;
-        if ((job_ptr->burst_buffer == NULL) ||
-            (job_ptr->burst_buffer[0] == '\0'))
+        if ((job_ptr->burst_buffer == NULL) || (job_ptr->burst_buffer[0] == '\0'))
             continue;
-        if ((job_ptr->start_time == 0) ||
-            (job_ptr->start_time > now + 10 * 60 * 60))    /* ten hours */
+        if ((job_ptr->start_time == 0) || (job_ptr->start_time > now + 10 * 60 * 60))    /* ten hours */
             continue;
         list_push(job_queue, job_ptr);
     }
@@ -702,8 +672,7 @@ extern int bb_g_job_test_post_run(struct job_record *job_ptr) {
     if (bb_g_init() != SLURM_SUCCESS)
         rc = -1;
 
-    if ((job_ptr->burst_buffer == NULL) ||
-        (job_ptr->burst_buffer[0] == '\0'))
+    if ((job_ptr->burst_buffer == NULL) || (job_ptr->burst_buffer[0] == '\0'))
         return rc;    /* No burst buffers to stage out */
 
     slurm_mutex_lock(&g_context_lock);
@@ -732,8 +701,7 @@ extern int bb_g_job_test_stage_out(struct job_record *job_ptr) {
     if (bb_g_init() != SLURM_SUCCESS)
         rc = -1;
 
-    if ((job_ptr->burst_buffer == NULL) ||
-        (job_ptr->burst_buffer[0] == '\0'))
+    if ((job_ptr->burst_buffer == NULL) || (job_ptr->burst_buffer[0] == '\0'))
         return rc;    /* No burst buffers to stage out */
 
     slurm_mutex_lock(&g_context_lock);

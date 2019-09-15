@@ -54,9 +54,7 @@ enum {
 };
 
 enum {
-    GROUPED_ACCT,
-    GROUPED_WCKEY,
-    GROUPED_ACCT_AND_WCKEY,
+    GROUPED_ACCT, GROUPED_WCKEY, GROUPED_ACCT_AND_WCKEY,
 };
 
 static List print_fields_list = NULL; /* types are of print_field_t */
@@ -193,8 +191,7 @@ static int _addto_uid_char_list(List char_list, char *names) {
                     name = _string_to_uid(name);
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -237,9 +234,8 @@ static int _addto_uid_char_list(List char_list, char *names) {
     return count;
 }
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_job_cond_t *job_cond,
-                     List format_list, List grouping_list) {
+static int
+_set_cond(int *start, int argc, char **argv, slurmdb_job_cond_t *job_cond, List format_list, List grouping_list) {
     int i;
     int set = 0;
     int end = 0;
@@ -259,76 +255,55 @@ static int _set_cond(int *start, int argc, char **argv,
         else
             command_len = end - 1;
 
-        if (!end && !xstrncasecmp(argv[i], "all_clusters",
-                                  MAX(command_len, 1))) {
+        if (!end && !xstrncasecmp(argv[i], "all_clusters", MAX(command_len, 1))) {
             local_cluster_flag = 1;
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "AcctAsParent",
-                                         MAX(command_len, 2))) {
+        } else if (!end && !xstrncasecmp(argv[i], "AcctAsParent", MAX(command_len, 2))) {
             acct_as_parent = true;
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "PrintJobCount",
-                                         MAX(command_len, 2))) {
+        } else if (!end && !xstrncasecmp(argv[i], "PrintJobCount", MAX(command_len, 2))) {
             print_job_count = 1;
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "FlatView",
-                                         MAX(command_len, 2))) {
+        } else if (!end && !xstrncasecmp(argv[i], "FlatView", MAX(command_len, 2))) {
             flat_view = true;
             continue;
-        } else if (!end
-                   || !xstrncasecmp(argv[i], "Clusters",
-                                    MAX(command_len, 1))) {
-            slurm_addto_char_list(job_cond->cluster_list,
-                                  argv[i] + end);
+        } else if (!end || !xstrncasecmp(argv[i], "Clusters", MAX(command_len, 1))) {
+            slurm_addto_char_list(job_cond->cluster_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Accounts",
-                                 MAX(command_len, 2))
-                   || !xstrncasecmp(argv[i], "Acct",
-                                    MAX(command_len, 4))) {
+        } else if (!xstrncasecmp(argv[i], "Accounts", MAX(command_len, 2)) ||
+                   !xstrncasecmp(argv[i], "Acct", MAX(command_len, 4))) {
             if (!job_cond->acct_list)
-                job_cond->acct_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(job_cond->acct_list,
-                                  argv[i] + end);
+                job_cond->acct_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(job_cond->acct_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Associations",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Associations", MAX(command_len, 2))) {
             if (!job_cond->associd_list)
-                job_cond->associd_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(job_cond->associd_list,
-                                  argv[i] + end);
+                job_cond->associd_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(job_cond->associd_list, argv[i] + end);
             set = 1;
         } else if (!xstrncasecmp(argv[i], "End", MAX(command_len, 1))) {
             job_cond->usage_end = parse_time(argv[i] + end, 1);
             job_cond->usage_end = sanity_check_endtime(job_cond->usage_end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 2))) {
             if (format_list)
                 slurm_addto_char_list(format_list, argv[i] + end);
         } else if (!xstrncasecmp(argv[i], "Gid", MAX(command_len, 2))) {
             if (!job_cond->groupid_list)
-                job_cond->groupid_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(job_cond->groupid_list,
-                                  argv[i] + end);
+                job_cond->groupid_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(job_cond->groupid_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "grouping",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "grouping", MAX(command_len, 2))) {
             if (!xstrncasecmp(argv[i] + end, "individual", 1)) {
                 individual_grouping = 1;
             } else if (grouping_list)
-                slurm_addto_char_list(grouping_list,
-                                      argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "Jobs",
-                                 MAX(command_len, 1))) {
+                slurm_addto_char_list(grouping_list, argv[i] + end);
+        } else if (!xstrncasecmp(argv[i], "Jobs", MAX(command_len, 1))) {
             char *end_char = NULL, *start_char = argv[i] + end;
             slurmdb_selected_step_t *selected_step = NULL;
             char *dot = NULL;
             if (!job_cond->step_list)
-                job_cond->step_list =
-                        list_create(slurm_destroy_char);
+                job_cond->step_list = list_create(slurm_destroy_char);
 
             while ((end_char = strstr(start_char, ","))) {
                 *end_char = 0;
@@ -336,8 +311,7 @@ static int _set_cond(int *start, int argc, char **argv,
                     start_char++;  /* discard whitespace */
                 if (start_char[0] == '\0')
                     continue;
-                selected_step = xmalloc(
-                        sizeof(slurmdb_selected_step_t));
+                selected_step = xmalloc(sizeof(slurmdb_selected_step_t));
                 list_append(job_cond->step_list, selected_step);
 
                 dot = strstr(start_char, ".");
@@ -355,44 +329,32 @@ static int _set_cond(int *start, int argc, char **argv,
             }
 
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Nodes",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Nodes", MAX(command_len, 1))) {
             if (job_cond->used_nodes) {
                 error("You already specified nodes '%s' "
-                      " combine your request into 1 nodes=.",
-                      job_cond->used_nodes);
+                      " combine your request into 1 nodes=.", job_cond->used_nodes);
                 exit_code = 1;
                 break;
             }
             job_cond->used_nodes = xstrdup(argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Partitions",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Partitions", MAX(command_len, 2))) {
             if (!job_cond->partition_list)
-                job_cond->partition_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(job_cond->partition_list,
-                                  argv[i] + end);
+                job_cond->partition_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(job_cond->partition_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Start",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Start", MAX(command_len, 1))) {
             job_cond->usage_start = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Users",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Users", MAX(command_len, 1))) {
             if (!job_cond->userid_list)
-                job_cond->userid_list =
-                        list_create(slurm_destroy_char);
-            _addto_uid_char_list(job_cond->userid_list,
-                                 argv[i] + end);
+                job_cond->userid_list = list_create(slurm_destroy_char);
+            _addto_uid_char_list(job_cond->userid_list, argv[i] + end);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Wckeys",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Wckeys", MAX(command_len, 2))) {
             if (!job_cond->wckey_list)
-                job_cond->wckey_list =
-                        list_create(slurm_destroy_char);
-            slurm_addto_char_list(job_cond->wckey_list,
-                                  argv[i] + end);
+                job_cond->wckey_list = list_create(slurm_destroy_char);
+            slurm_addto_char_list(job_cond->wckey_list, argv[i] + end);
             set = 1;
         } else {
             exit_code = 1;
@@ -430,8 +392,7 @@ static int _setup_print_fields_list(List format_list) {
 
     if (!format_list || !list_count(format_list)) {
         exit_code = 1;
-        fprintf(stderr,
-                " We need a format list to set up the print.\n");
+        fprintf(stderr, " We need a format list to set up the print.\n");
         return SLURM_ERROR;
     }
 
@@ -452,54 +413,45 @@ static int _setup_print_fields_list(List format_list) {
         command_len = strlen(object);
 
         field = xmalloc(sizeof(print_field_t));
-        if (!xstrncasecmp("Account", object, MAX(command_len, 1))
-            || !xstrncasecmp("Acct", object, MAX(command_len, 4))) {
+        if (!xstrncasecmp("Account", object, MAX(command_len, 1)) ||
+            !xstrncasecmp("Acct", object, MAX(command_len, 4))) {
             field->type = PRINT_JOB_ACCOUNT;
             field->name = xstrdup("Account");
             field->len = 9;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Cluster", object,
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp("Cluster", object, MAX(command_len, 2))) {
             field->type = PRINT_JOB_CLUSTER;
             field->name = xstrdup("Cluster");
             field->len = 9;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Duration", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Duration", object, MAX(command_len, 1))) {
             field->type = PRINT_JOB_DUR;
             field->name = xstrdup("Duration");
             field->len = 12;
             field->print_routine = print_fields_time;
-        } else if (!xstrncasecmp("JobCount", object,
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp("JobCount", object, MAX(command_len, 2))) {
             field->type = PRINT_JOB_COUNT;
             field->name = xstrdup("Job Count");
             field->len = 9;
             field->print_routine = print_fields_uint;
-        } else if (!xstrncasecmp("NodeCount", object,
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp("NodeCount", object, MAX(command_len, 2))) {
             field->type = PRINT_JOB_NODES;
             field->name = xstrdup("Node Count");
             field->len = 9;
             field->print_routine = print_fields_uint;
-        } else if (!xstrncasecmp("TresCount", object,
-                                 MAX(command_len, 5)) ||
-                   !xstrncasecmp("CpuCount", object,
-                                 MAX(command_len, 2)) ||
-                   !xstrncasecmp("count", object,
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp("TresCount", object, MAX(command_len, 5)) ||
+                   !xstrncasecmp("CpuCount", object, MAX(command_len, 2)) ||
+                   !xstrncasecmp("count", object, MAX(command_len, 2))) {
             field->type = PRINT_JOB_TRES_COUNT;
             field->name = xstrdup("TRES Count");
             field->len = 10;
             field->print_routine = print_fields_uint;
-        } else if (!xstrncasecmp("User", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("User", object, MAX(command_len, 1))) {
             field->type = PRINT_JOB_USER;
             field->name = xstrdup("User");
             field->len = 9;
             field->print_routine = print_fields_str;
-        } else if (!xstrncasecmp("Wckey", object,
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp("Wckey", object, MAX(command_len, 1))) {
             field->type = PRINT_JOB_WCKEY;
             field->name = xstrdup("Wckey");
             field->len = 9;
@@ -537,8 +489,7 @@ static int _setup_grouping_print_fields_list(List grouping_list) {
 
     if (!grouping_list || !list_count(grouping_list)) {
         exit_code = 1;
-        fprintf(stderr,
-                " We need a grouping list to set up the print.\n");
+        fprintf(stderr, " We need a grouping list to set up the print.\n");
         return SLURM_ERROR;
     }
 
@@ -556,11 +507,9 @@ static int _setup_grouping_print_fields_list(List grouping_list) {
         if (individual_grouping)
             field->name = xstrdup_printf("%u %s", size, tres_type);
         else
-            field->name = xstrdup_printf("%u-%u %s", last_size,
-                                         size - 1, tres_type);
-        if (time_format == SLURMDB_REPORT_TIME_SECS_PER
-            || time_format == SLURMDB_REPORT_TIME_MINS_PER
-            || time_format == SLURMDB_REPORT_TIME_HOURS_PER)
+            field->name = xstrdup_printf("%u-%u %s", last_size, size - 1, tres_type);
+        if (time_format == SLURMDB_REPORT_TIME_SECS_PER || time_format == SLURMDB_REPORT_TIME_MINS_PER ||
+            time_format == SLURMDB_REPORT_TIME_HOURS_PER)
             field->len = 20;
         else
             field->len = 13;
@@ -588,9 +537,8 @@ static int _setup_grouping_print_fields_list(List grouping_list) {
             field->type = PRINT_JOB_SIZE;
 
         field->name = xstrdup_printf(">= %u %s", last_size, tres_type);
-        if (time_format == SLURMDB_REPORT_TIME_SECS_PER
-            || time_format == SLURMDB_REPORT_TIME_MINS_PER
-            || time_format == SLURMDB_REPORT_TIME_HOURS_PER)
+        if (time_format == SLURMDB_REPORT_TIME_SECS_PER || time_format == SLURMDB_REPORT_TIME_MINS_PER ||
+            time_format == SLURMDB_REPORT_TIME_HOURS_PER)
             field->len = 20;
         else
             field->len = 13;
@@ -626,8 +574,7 @@ static int _match_job_group(void *x, void *key) {
 
     orig_job_group = (slurmdb_report_job_grouping_t *) key;
     dup_job_group = (slurmdb_report_job_grouping_t *) x;
-    if ((orig_job_group->min_size == dup_job_group->min_size) &&
-        (orig_job_group->max_size == dup_job_group->max_size))
+    if ((orig_job_group->min_size == dup_job_group->min_size) && (orig_job_group->max_size == dup_job_group->max_size))
         return 1;
     return 0;
 }
@@ -644,14 +591,11 @@ static void _combine_job_groups(List first_job_list, List new_job_list) {
 
     iter = list_iterator_create(first_job_list);
     while ((orig_job_group = list_next(iter))) {
-        dup_job_group = list_find_first(new_job_list,
-                                        _match_job_group,
-                                        orig_job_group);
+        dup_job_group = list_find_first(new_job_list, _match_job_group, orig_job_group);
         if (!dup_job_group)
             continue;
         orig_job_group->count += dup_job_group->count;
-        combine_tres_list(orig_job_group->tres_list,
-                          dup_job_group->tres_list);
+        combine_tres_list(orig_job_group->tres_list, dup_job_group->tres_list);
         FREE_NULL_LIST(dup_job_group->tres_list);
     }
     list_iterator_destroy(iter);
@@ -694,16 +638,12 @@ static void _combine_acct_groups(List first_acct_list, List new_acct_list) {
 
     iter = list_iterator_create(first_acct_list);
     while ((orig_report_acct = list_next(iter))) {
-        dup_report_acct = list_find_first(new_acct_list,
-                                          _match_acct_name,
-                                          orig_report_acct);
+        dup_report_acct = list_find_first(new_acct_list, _match_acct_name, orig_report_acct);
         if (!dup_report_acct)
             continue;
         orig_report_acct->count += dup_report_acct->count;
-        _combine_job_groups(orig_report_acct->groups,
-                            dup_report_acct->groups);
-        combine_tres_list(orig_report_acct->tres_list,
-                          dup_report_acct->tres_list);
+        _combine_job_groups(orig_report_acct->groups, dup_report_acct->groups);
+        combine_tres_list(orig_report_acct->tres_list, dup_report_acct->tres_list);
         FREE_NULL_LIST(dup_report_acct->tres_list);
     }
     list_iterator_destroy(iter);
@@ -736,8 +676,7 @@ static void _merge_cluster_groups(List slurmdb_report_cluster_grouping_list) {
             first_group->acct_list = group->acct_list;
             group->acct_list = NULL;
         } else {
-            _combine_acct_groups(first_group->acct_list,
-                                 group->acct_list);
+            _combine_acct_groups(first_group->acct_list, group->acct_list);
         }
         list_delete_item(iter);
     }
@@ -780,10 +719,10 @@ static int _run_report(int type, int argc, char **argv) {
 
     switch (type) {
         case GROUPED_ACCT:
-            if (!(slurmdb_report_cluster_grouping_list =
-                          slurmdb_report_job_sizes_grouped_by_account(
-                                  db_conn, job_cond, grouping_list, flat_view,
-                                  acct_as_parent))) {
+            if (!(slurmdb_report_cluster_grouping_list = slurmdb_report_job_sizes_grouped_by_account(db_conn, job_cond,
+                                                                                                     grouping_list,
+                                                                                                     flat_view,
+                                                                                                     acct_as_parent))) {
                 exit_code = 1;
                 goto end_it;
             }
@@ -791,9 +730,8 @@ static int _run_report(int type, int argc, char **argv) {
                 slurm_addto_char_list(format_list, "Cl,a");
             break;
         case GROUPED_WCKEY:
-            if (!(slurmdb_report_cluster_grouping_list =
-                          slurmdb_report_job_sizes_grouped_by_wckey(
-                                  db_conn, job_cond, grouping_list))) {
+            if (!(slurmdb_report_cluster_grouping_list = slurmdb_report_job_sizes_grouped_by_wckey(db_conn, job_cond,
+                                                                                                   grouping_list))) {
                 exit_code = 1;
                 goto end_it;
             }
@@ -802,10 +740,11 @@ static int _run_report(int type, int argc, char **argv) {
             object_str = "by Wckey ";
             break;
         case GROUPED_ACCT_AND_WCKEY:
-            if (!(slurmdb_report_cluster_grouping_list =
-                          slurmdb_report_job_sizes_grouped_by_account_then_wckey(
-                                  db_conn, job_cond, grouping_list, flat_view,
-                                  acct_as_parent))) {
+            if (!(slurmdb_report_cluster_grouping_list = slurmdb_report_job_sizes_grouped_by_account_then_wckey(db_conn,
+                                                                                                                job_cond,
+                                                                                                                grouping_list,
+                                                                                                                flat_view,
+                                                                                                                acct_as_parent))) {
                 exit_code = 1;
                 goto end_it;
             }
@@ -829,9 +768,8 @@ static int _run_report(int type, int argc, char **argv) {
     }
     list_iterator_destroy(itr2);
     if (tres_cnt > 1) {
-        fprintf(stderr,
-                " Job report only supports a single --tres type.\n"
-                " Generate a separate report for each TRES type.\n");
+        fprintf(stderr, " Job report only supports a single --tres type.\n"
+                        " Generate a separate report for each TRES type.\n");
         exit_code = 1;
         goto end_it;
     }
@@ -852,8 +790,7 @@ static int _run_report(int type, int argc, char **argv) {
         slurm_make_time_str(&my_end, end_char, sizeof(end_char));
         printf("----------------------------------------"
                "----------------------------------------\n");
-        printf("Job Sizes %s%s - %s (%d secs)\n",
-               object_str, start_char, end_char,
+        printf("Job Sizes %s%s - %s (%d secs)\n", object_str, start_char, end_char,
                (int) (job_cond->usage_end - job_cond->usage_start));
         if (tres_str)
             printf("TRES type is %s\n", tres_str);
@@ -882,51 +819,36 @@ static int _run_report(int type, int argc, char **argv) {
 
     itr = list_iterator_create(print_fields_list);
     itr2 = list_iterator_create(grouping_print_fields_list);
-    list_sort(slurmdb_report_cluster_grouping_list,
-              (ListCmpF) _sort_cluster_grouping_dec);
-    cluster_itr = list_iterator_create(
-            slurmdb_report_cluster_grouping_list);
+    list_sort(slurmdb_report_cluster_grouping_list, (ListCmpF) _sort_cluster_grouping_dec);
+    cluster_itr = list_iterator_create(slurmdb_report_cluster_grouping_list);
     while ((cluster_group = list_next(cluster_itr))) {
         slurmdb_tres_rec_t *tres_rec;
         uint64_t cluster_tres_alloc_secs = 0;
 
         if (cluster_group->tres_list &&
-            (tres_rec = list_find_first(
-                    cluster_group->tres_list,
-                    slurmdb_find_tres_in_list,
-                    &tres_id)))
+            (tres_rec = list_find_first(cluster_group->tres_list, slurmdb_find_tres_in_list, &tres_id)))
             cluster_tres_alloc_secs = tres_rec->alloc_secs;
 
-        list_sort(cluster_group->acct_list,
-                  (ListCmpF) _sort_acct_grouping_dec);
+        list_sort(cluster_group->acct_list, (ListCmpF) _sort_acct_grouping_dec);
         acct_itr = list_iterator_create(cluster_group->acct_list);
         while ((acct_group = list_next(acct_itr))) {
             uint64_t acct_tres_alloc_secs = 0;
 
             if (acct_group->tres_list &&
-                (tres_rec = list_find_first(
-                        acct_group->tres_list,
-                        slurmdb_find_tres_in_list,
-                        &tres_id)))
+                (tres_rec = list_find_first(acct_group->tres_list, slurmdb_find_tres_in_list, &tres_id)))
                 acct_tres_alloc_secs = tres_rec->alloc_secs;
 
             while ((field = list_next(itr))) {
                 switch (field->type) {
                     case PRINT_JOB_CLUSTER:
-                        field->print_routine(
-                                field,
-                                cluster_group->cluster, 0);
+                        field->print_routine(field, cluster_group->cluster, 0);
                         break;
                     case PRINT_JOB_WCKEY:
                     case PRINT_JOB_ACCOUNT:
-                        field->print_routine(field,
-                                             acct_group->acct,
-                                             0);
+                        field->print_routine(field, acct_group->acct, 0);
                         break;
                     default:
-                        field->print_routine(field,
-                                             NULL,
-                                             0);
+                        field->print_routine(field, NULL, 0);
                         break;
                 }
             }
@@ -936,32 +858,19 @@ static int _run_report(int type, int argc, char **argv) {
                 uint64_t job_cpu_alloc_secs = 0;
 
                 if (job_group->tres_list &&
-                    (tres_rec = list_find_first(
-                            job_group->tres_list,
-                            slurmdb_find_tres_in_list,
-                            &tres_id)))
-                    job_cpu_alloc_secs =
-                            tres_rec->alloc_secs;
+                    (tres_rec = list_find_first(job_group->tres_list, slurmdb_find_tres_in_list, &tres_id)))
+                    job_cpu_alloc_secs = tres_rec->alloc_secs;
 
                 field = list_next(itr2);
                 switch (field->type) {
                     case PRINT_JOB_SIZE:
-                        field->print_routine(
-                                field,
-                                job_cpu_alloc_secs,
-                                acct_tres_alloc_secs,
-                                0);
+                        field->print_routine(field, job_cpu_alloc_secs, acct_tres_alloc_secs, 0);
                         break;
                     case PRINT_JOB_COUNT:
-                        field->print_routine(
-                                field,
-                                job_group->count,
-                                0);
+                        field->print_routine(field, job_group->count, 0);
                         break;
                     default:
-                        field->print_routine(field,
-                                             NULL,
-                                             0);
+                        field->print_routine(field, NULL, 0);
                         break;
                 }
             }
@@ -977,8 +886,7 @@ static int _run_report(int type, int argc, char **argv) {
                 count1 = acct_group->count;
                 count2 = cluster_group->count;
             }
-            total_field.print_routine(&total_field,
-                                      count1, count2, 1);
+            total_field.print_routine(&total_field, count1, count2, 1);
             time_format = temp_format;
             printf("\n");
         }

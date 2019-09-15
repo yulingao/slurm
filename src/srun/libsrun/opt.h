@@ -98,8 +98,7 @@ extern int initialize_and_process_args(int argc, char **argv, int *argc_off);
  * exported to the Slurm Prolog and Epilog programs */
 extern char *spank_get_job_env(const char *name);
 
-extern int spank_set_job_env(const char *name, const char *value,
-                             int overwrite);
+extern int spank_set_job_env(const char *name, const char *value, int overwrite);
 
 extern int spank_unset_job_env(const char *name);
 

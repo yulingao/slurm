@@ -60,10 +60,8 @@ int s_p_handle_long(long *data, const char *key, const char *value) {
     long num;
     errno = 0;
     num = strtol(value, &endptr, 0);
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if (xstrcasecmp(value, "UNLIMITED") == 0
-            || xstrcasecmp(value, "INFINITE") == 0) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if (xstrcasecmp(value, "UNLIMITED") == 0 || xstrcasecmp(value, "INFINITE") == 0) {
             num = (long) INFINITE;
         } else {
             error("\"%s\" is not a valid number", value);
@@ -83,26 +81,21 @@ int s_p_handle_uint16(uint16_t *data, const char *key, const char *value) {
 
     errno = 0;
     num = strtoul(value, &endptr, 0);
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if (xstrcasecmp(value, "UNLIMITED") == 0
-            || xstrcasecmp(value, "INFINITE") == 0) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if (xstrcasecmp(value, "UNLIMITED") == 0 || xstrcasecmp(value, "INFINITE") == 0) {
             num = INFINITE16;
         } else {
-            error("%s value \"%s\" is not a valid number",
-                  key, value);
+            error("%s value \"%s\" is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {
         error("%s value (%s) is out of range", key, value);
         return SLURM_ERROR;
     } else if (value[0] == '-') {
-        error("%s value (%s) is less than zero", key,
-              value);
+        error("%s value (%s) is less than zero", key, value);
         return SLURM_ERROR;
     } else if (num > 0xffff) {
-        error("%s value (%s) is greater than 65535", key,
-              value);
+        error("%s value (%s) is greater than 65535", key, value);
         return SLURM_ERROR;
     }
     *data = (uint16_t) num;
@@ -119,26 +112,21 @@ int s_p_handle_uint32(uint32_t *data, const char *key, const char *value) {
         num *= 1024;
         endptr++;
     }
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if ((xstrcasecmp(value, "UNLIMITED") == 0) ||
-            (xstrcasecmp(value, "INFINITE") == 0)) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if ((xstrcasecmp(value, "UNLIMITED") == 0) || (xstrcasecmp(value, "INFINITE") == 0)) {
             num = INFINITE;
         } else {
-            error("%s value (%s) is not a valid number",
-                  key, value);
+            error("%s value (%s) is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {
         error("%s value (%s) is out of range", key, value);
         return SLURM_ERROR;
     } else if (value[0] == '-') {
-        error("%s value (%s) is less than zero", key,
-              value);
+        error("%s value (%s) is less than zero", key, value);
         return SLURM_ERROR;
     } else if (num > 0xffffffff) {
-        error("%s value (%s) is greater than 4294967295",
-              key, value);
+        error("%s value (%s) is greater than 4294967295", key, value);
         return SLURM_ERROR;
     }
     *data = (uint32_t) num;
@@ -155,26 +143,21 @@ int s_p_handle_uint64(uint64_t *data, const char *key, const char *value) {
         num *= 1024;
         endptr++;
     }
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if ((xstrcasecmp(value, "UNLIMITED") == 0) ||
-            (xstrcasecmp(value, "INFINITE") == 0)) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if ((xstrcasecmp(value, "UNLIMITED") == 0) || (xstrcasecmp(value, "INFINITE") == 0)) {
             num = INFINITE64;
         } else {
-            error("%s value (%s) is not a valid number",
-                  key, value);
+            error("%s value (%s) is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {
         error("%s value (%s) is out of range", key, value);
         return SLURM_ERROR;
     } else if (value[0] == '-') {
-        error("%s value (%s) is less than zero", key,
-              value);
+        error("%s value (%s) is less than zero", key, value);
         return SLURM_ERROR;
     } else if (num > 0xffffffffffffffff) {
-        error("%s value (%s) is greater than 4294967295",
-              key, value);
+        error("%s value (%s) is greater than 4294967295", key, value);
         return SLURM_ERROR;
     }
     *data = (uint64_t) num;
@@ -184,19 +167,14 @@ int s_p_handle_uint64(uint64_t *data, const char *key, const char *value) {
 int s_p_handle_boolean(bool *data, const char *key, const char *value) {
     bool flag;
 
-    if (!xstrcasecmp(value, "yes")
-        || !xstrcasecmp(value, "up")
-        || !xstrcasecmp(value, "true")
-        || !xstrcasecmp(value, "1")) {
+    if (!xstrcasecmp(value, "yes") || !xstrcasecmp(value, "up") || !xstrcasecmp(value, "true") ||
+        !xstrcasecmp(value, "1")) {
         flag = true;
-    } else if (!xstrcasecmp(value, "no")
-               || !xstrcasecmp(value, "down")
-               || !xstrcasecmp(value, "false")
-               || !xstrcasecmp(value, "0")) {
+    } else if (!xstrcasecmp(value, "no") || !xstrcasecmp(value, "down") || !xstrcasecmp(value, "false") ||
+               !xstrcasecmp(value, "0")) {
         flag = false;
     } else {
-        error("\"%s\" is not a valid option for \"%s\"",
-              value, key);
+        error("\"%s\" is not a valid option for \"%s\"", value, key);
         return SLURM_ERROR;
     }
 
@@ -210,14 +188,11 @@ int s_p_handle_float(float *data, const char *key, const char *value) {
 
     errno = 0;
     num = strtof(value, &endptr);
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if ((xstrcasecmp(value, "UNLIMITED") == 0) ||
-            (xstrcasecmp(value, "INFINITE") == 0)) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if ((xstrcasecmp(value, "UNLIMITED") == 0) || (xstrcasecmp(value, "INFINITE") == 0)) {
             num = INFINITY;
         } else {
-            error("%s value (%s) is not a valid number",
-                  key, value);
+            error("%s value (%s) is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {
@@ -234,14 +209,11 @@ int s_p_handle_double(double *data, const char *key, const char *value) {
 
     errno = 0;
     num = strtod(value, &endptr);
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if ((xstrcasecmp(value, "UNLIMITED") == 0) ||
-            (xstrcasecmp(value, "INFINITE") == 0)) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if ((xstrcasecmp(value, "UNLIMITED") == 0) || (xstrcasecmp(value, "INFINITE") == 0)) {
             num = HUGE_VAL;
         } else {
-            error("%s value (%s) is not a valid number",
-                  key, value);
+            error("%s value (%s) is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {
@@ -252,21 +224,17 @@ int s_p_handle_double(double *data, const char *key, const char *value) {
     return SLURM_SUCCESS;
 }
 
-int s_p_handle_long_double(long double *data, const char *key,
-                           const char *value) {
+int s_p_handle_long_double(long double *data, const char *key, const char *value) {
     char *endptr;
     long double num;
 
     errno = 0;
     num = strtold(value, &endptr);
-    if ((num == 0 && errno == EINVAL)
-        || (*endptr != '\0')) {
-        if ((xstrcasecmp(value, "UNLIMITED") == 0) ||
-            (xstrcasecmp(value, "INFINITE") == 0)) {
+    if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
+        if ((xstrcasecmp(value, "UNLIMITED") == 0) || (xstrcasecmp(value, "INFINITE") == 0)) {
             num = HUGE_VALL;
         } else {
-            error("%s value (%s) is not a valid number",
-                  key, value);
+            error("%s value (%s) is not a valid number", key, value);
             return SLURM_ERROR;
         }
     } else if (errno == ERANGE) {

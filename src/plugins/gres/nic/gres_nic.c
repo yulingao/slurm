@@ -89,10 +89,9 @@ static char gres_name[] = "nic";
 
 static List gres_devices = NULL;
 
-static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
-                     bitstr_t *usable_gres,
-                     bool *already_seen, int *local_inx,
-                     bool reset, bool is_job) {
+static void
+_set_env(char ***env_ptr, void *gres_ptr, int node_inx, bitstr_t *usable_gres, bool *already_seen, int *local_inx,
+         bool reset, bool is_job) {
     char *global_list = NULL, *local_list = NULL, *slurm_env_var = NULL;
 
     if (is_job)
@@ -102,13 +101,11 @@ static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
 
     if (*already_seen) {
         global_list = xstrdup(getenvp(*env_ptr, slurm_env_var));
-        local_list = xstrdup(getenvp(*env_ptr,
-                                     "OMPI_MCA_btl_openib_if_include"));
+        local_list = xstrdup(getenvp(*env_ptr, "OMPI_MCA_btl_openib_if_include"));
     }
 
-    common_gres_set_env(gres_devices, env_ptr, gres_ptr, node_inx,
-                        usable_gres, "mlx4_", local_inx, NULL,
-                        &local_list, &global_list, reset, is_job, NULL);
+    common_gres_set_env(gres_devices, env_ptr, gres_ptr, node_inx, usable_gres, "mlx4_", local_inx, NULL, &local_list,
+                        &global_list, reset, is_job, NULL);
 
     if (global_list) {
         env_array_overwrite(env_ptr, slurm_env_var, global_list);
@@ -116,8 +113,7 @@ static void _set_env(char ***env_ptr, void *gres_ptr, int node_inx,
     }
 
     if (local_list) {
-        env_array_overwrite(
-                env_ptr, "OMPI_MCA_btl_openib_if_include", local_list);
+        env_array_overwrite(env_ptr, "OMPI_MCA_btl_openib_if_include", local_list);
         xfree(local_list);
         *already_seen = true;
     }
@@ -171,8 +167,7 @@ extern void job_set_env(char ***job_env_ptr, void *gres_ptr, int node_inx) {
     int local_inx = 0;
     bool already_seen = false;
 
-    _set_env(job_env_ptr, gres_ptr, node_inx, NULL,
-             &already_seen, &local_inx, false, true);
+    _set_env(job_env_ptr, gres_ptr, node_inx, NULL, &already_seen, &local_inx, false, true);
 }
 
 /*
@@ -183,21 +178,18 @@ extern void step_set_env(char ***step_env_ptr, void *gres_ptr) {
     static int local_inx = 0;
     static bool already_seen = false;
 
-    _set_env(step_env_ptr, gres_ptr, 0, NULL,
-             &already_seen, &local_inx, false, false);
+    _set_env(step_env_ptr, gres_ptr, 0, NULL, &already_seen, &local_inx, false, false);
 }
 
 /*
  * Reset environment variables as appropriate for a job (i.e. this one task)
  * based upon the job step's GRES state and assigned CPUs.
  */
-extern void step_reset_env(char ***step_env_ptr, void *gres_ptr,
-                           bitstr_t *usable_gres) {
+extern void step_reset_env(char ***step_env_ptr, void *gres_ptr, bitstr_t *usable_gres) {
     static int local_inx = 0;
     static bool already_seen = false;
 
-    _set_env(step_env_ptr, gres_ptr, 0, usable_gres,
-             &already_seen, &local_inx, true, false);
+    _set_env(step_env_ptr, gres_ptr, 0, usable_gres, &already_seen, &local_inx, true, false);
 }
 
 /* Send GRES information to slurmstepd on the specified file descriptor*/
@@ -220,8 +212,7 @@ extern void recv_stepd(int fd) {
  *            DO NOT FREE: This is a pointer into the job's data structure
  * RET - SLURM_SUCCESS or error code
  */
-extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx,
-                    enum gres_job_data_type data_type, void *data) {
+extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx, enum gres_job_data_type data_type, void *data) {
     return EINVAL;
 }
 
@@ -236,8 +227,8 @@ extern int job_info(gres_job_state_t *job_gres_data, uint32_t node_inx,
  *            DO NOT FREE: This is a pointer into the step's data structure
  * RET - SLURM_SUCCESS or error code
  */
-extern int step_info(gres_step_state_t *step_gres_data, uint32_t node_inx,
-                     enum gres_step_data_type data_type, void *data) {
+extern int
+step_info(gres_step_state_t *step_gres_data, uint32_t node_inx, enum gres_step_data_type data_type, void *data) {
     return EINVAL;
 }
 
@@ -269,7 +260,6 @@ extern gres_epilog_info_t *epilog_build_env(gres_job_state_t *gres_job_ptr) {
  * Set environment variables as appropriate for a job's prolog or epilog based
  * GRES allocated to the job.
  */
-extern void epilog_set_env(char ***epilog_env_ptr,
-                           gres_epilog_info_t *epilog_info, int node_inx) {
+extern void epilog_set_env(char ***epilog_env_ptr, gres_epilog_info_t *epilog_info, int node_inx) {
     return;
 }

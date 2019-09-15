@@ -96,8 +96,7 @@ static void _get_config(void) {
     /*                                    01234567890123456789012 */
     if ((opt = xstrcasestr(sched_params, "jobs_per_user_per_hour=")))
         jobs_per_user_per_hour = atoi(opt + 23);
-    info("%s: jobs_per_user_per_hour=%d",
-         plugin_type, jobs_per_user_per_hour);
+    info("%s: jobs_per_user_per_hour=%d", plugin_type, jobs_per_user_per_hour);
     xfree(sched_params);
 }
 
@@ -128,9 +127,7 @@ static void _reset_counters(void) {
             thru_put_array[i].job_count *= (delta_t - 1);
             thru_put_array[i].job_count /= delta_t;
         }
-        debug2("count for user %u reset from %u to %u",
-               thru_put_array[i].uid, orig_count,
-               thru_put_array[i].job_count);
+        debug2("count for user %u reset from %u to %u", thru_put_array[i].uid, orig_count, thru_put_array[i].job_count);
     }
 }
 
@@ -143,8 +140,7 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
-                      char **err_msg) {
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
     int i;
 
     if (!last_reset)
@@ -165,14 +161,12 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
         return ESLURM_ACCOUNTING_POLICY;
     }
     thru_put_size++;
-    thru_put_array = xrealloc(thru_put_array,
-                              (sizeof(thru_put_t) * thru_put_size));
+    thru_put_array = xrealloc(thru_put_array, (sizeof(thru_put_t) * thru_put_size));
     thru_put_array[thru_put_size - 1].uid = job_desc->user_id;
     thru_put_array[thru_put_size - 1].job_count = 1;
     return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc,
-                      struct job_record *job_ptr, uint32_t submit_uid) {
+extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
     return SLURM_SUCCESS;
 }

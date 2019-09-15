@@ -122,8 +122,7 @@ const char *entity_get_type(const entity_t *entity);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR if no element found
  */
-int entity_get_data(const entity_t *entity, const char *key,
-                    void *value, size_t size);
+int entity_get_data(const entity_t *entity, const char *key, void *value, size_t size);
 
 /*
  * entity_get_data_ref - get the address of the pointer to the data associated
@@ -150,8 +149,7 @@ void *entity_get_data_ref(const entity_t *entity, const char *key);
  *
  * Return SLURM_SUCCESS or SLURM_ERROR if no element found
  */
-int entity_set_data(const entity_t *entity, const char *key,
-                    void *value, size_t size);
+int entity_set_data(const entity_t *entity, const char *key, void *value, size_t size);
 
 /*
  * entity_set_data_ref - associate a particular key of an entity with the
@@ -167,8 +165,7 @@ int entity_set_data(const entity_t *entity, const char *key,
  *
  * Return SLURM_SUCCESS or SLURM_ERROR in case of error
  */
-int entity_set_data_ref(const entity_t *entity, const char *key, void *value,
-                        void (*_free)(void *));
+int entity_set_data_ref(const entity_t *entity, const char *key, void *value, void (*_free)(void *));
 
 /*
  * entity_delete_data - delete the data associated with a particular key
@@ -246,9 +243,7 @@ int entity_clear_nodes(entity_t *entity);
  *       and the third one will be the arg passed to the function.
  * IN arg - the arg to pass to the callback function for every node.
  */
-void entity_nodes_walk(entity_t *entity,
-                       void (*callback)(layout_t *, entity_node_t *, void *),
-                       void *arg);
+void entity_nodes_walk(entity_t *entity, void (*callback)(layout_t *, entity_node_t *, void *), void *arg);
 
 /*
  * entity_hashable_identify - defines a hashable identifying function to

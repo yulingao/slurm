@@ -84,8 +84,8 @@
 strong_alias(callerid_get_own_netinfo, slurm_callerid_get_own_netinfo
 );
 
-static int _match_inode(callerid_conn_t *conn_result, ino_t *inode_search,
-                        callerid_conn_t *conn_row, ino_t inode_row, int af) {
+static int
+_match_inode(callerid_conn_t *conn_result, ino_t *inode_search, callerid_conn_t *conn_row, ino_t inode_row, int af) {
     if (*inode_search == inode_row) {
         memcpy(&conn_result->ip_dst, &conn_row->ip_dst, 16);
         memcpy(&conn_result->ip_src, &conn_row->ip_src, 16);
@@ -98,17 +98,13 @@ static int _match_inode(callerid_conn_t *conn_result, ino_t *inode_search,
     return SLURM_ERROR;
 }
 
-static int _match_conn(callerid_conn_t *conn_search, ino_t *inode_result,
-                       callerid_conn_t *conn_row, ino_t inode_row, int af) {
+static int
+_match_conn(callerid_conn_t *conn_search, ino_t *inode_result, callerid_conn_t *conn_row, ino_t inode_row, int af) {
     int addrbytes = af == AF_INET ? 4 : 16;
 
-    if (conn_search->port_dst != conn_row->port_dst ||
-        conn_search->port_src != conn_row->port_src ||
-        memcmp((void *) &conn_search->ip_dst, (void *) &conn_row->ip_dst,
-               addrbytes) != 0 ||
-        memcmp((void *) &conn_search->ip_src, (void *) &conn_row->ip_src,
-               addrbytes) != 0
-            )
+    if (conn_search->port_dst != conn_row->port_dst || conn_search->port_src != conn_row->port_src ||
+        memcmp((void *) &conn_search->ip_dst, (void *) &conn_row->ip_dst, addrbytes) != 0 ||
+        memcmp((void *) &conn_search->ip_src, (void *) &conn_row->ip_src, addrbytes) != 0)
         return SLURM_ERROR;
 
     debug3("_match_conn matched inode %lu", (long unsigned int) inode_row);
@@ -122,13 +118,8 @@ static int _match_conn(callerid_conn_t *conn_search, ino_t *inode_result,
  * This should be safe but may potentially miss an entry due to the entry
  * moving up in the file as it's read.
  */
-static int _find_match_in_tcp_file(
-        callerid_conn_t *conn,
-        ino_t *inode,
-        int af,
-        const char *path,
-        int (*match_func)(callerid_conn_t *,
-                          ino_t *, callerid_conn_t *, ino_t, int)) {
+static int _find_match_in_tcp_file(callerid_conn_t *conn, ino_t *inode, int af, const char *path,
+                                   int (*match_func)(callerid_conn_t *, ino_t *, callerid_conn_t *, ino_t, int)) {
     int rc = SLURM_ERROR;
     FILE *fp;
     char ip_dst_str[INET6_ADDRSTRLEN + 1]; /* +1 for scanf to add \0 */
@@ -150,10 +141,8 @@ static int _find_match_in_tcp_file(
         return rc;
 
     while (fgets(line, 1024, fp) != NULL) {
-        matches = sscanf(line,
-                         "%*s %[0-9A-Z]:%x %[0-9A-Z]:%x %*s %*s %*s %*s %*s %*s %"PRIu64"",
-                         ip_dst_str, &conn_row.port_dst, ip_src_str,
-                         &conn_row.port_src, &inode_row);
+        matches = sscanf(line, "%*s %[0-9A-Z]:%x %[0-9A-Z]:%x %*s %*s %*s %*s %*s %*s %"PRIu64"", ip_dst_str,
+                         &conn_row.port_dst, ip_src_str, &conn_row.port_src, &inode_row);
 
         if (matches == EOF)
             break;
@@ -163,17 +152,13 @@ static int _find_match_in_tcp_file(
             continue;
 
         /* Convert to usable forms */
-        inet_nsap_addr(ip_dst_str, (unsigned char *) &conn_row.ip_dst,
-                       addrbytes);
-        inet_nsap_addr(ip_src_str, (unsigned char *) &conn_row.ip_src,
-                       addrbytes);
+        inet_nsap_addr(ip_dst_str, (unsigned char *) &conn_row.ip_dst, addrbytes);
+        inet_nsap_addr(ip_src_str, (unsigned char *) &conn_row.ip_src, addrbytes);
 
         /* Convert to network byte order. */
         for (i = 0; i < (addrbytes >> 2); i++) {
-            conn_row.ip_dst.s6_addr32[i]
-                    = htonl(conn_row.ip_dst.s6_addr32[i]);
-            conn_row.ip_src.s6_addr32[i]
-                    = htonl(conn_row.ip_src.s6_addr32[i]);
+            conn_row.ip_dst.s6_addr32[i] = htonl(conn_row.ip_dst.s6_addr32[i]);
+            conn_row.ip_src.s6_addr32[i] = htonl(conn_row.ip_src.s6_addr32[i]);
         }
 
         /* Check if we matched */
@@ -182,13 +167,10 @@ static int _find_match_in_tcp_file(
             char ip_src_str[INET6_ADDRSTRLEN];
             char ip_dst_str[INET6_ADDRSTRLEN];
 
-            inet_ntop(af, &conn->ip_src, ip_src_str,
-                      INET6_ADDRSTRLEN);
-            inet_ntop(af, &conn->ip_dst, ip_dst_str,
-                      INET6_ADDRSTRLEN);
-            debug("network_callerid matched %s:%lu => %s:%lu with inode %lu",
-                  ip_src_str, (long unsigned int) conn->port_src,
-                  ip_dst_str, (long unsigned int) conn->port_dst,
+            inet_ntop(af, &conn->ip_src, ip_src_str, INET6_ADDRSTRLEN);
+            inet_ntop(af, &conn->ip_dst, ip_dst_str, INET6_ADDRSTRLEN);
+            debug("network_callerid matched %s:%lu => %s:%lu with inode %lu", ip_src_str,
+                  (long unsigned int) conn->port_src, ip_dst_str, (long unsigned int) conn->port_dst,
                   (long unsigned int) inode);
             break;
         }
@@ -231,8 +213,7 @@ static int _find_inode_in_fddir(pid_t pid, ino_t inode) {
         if (stat(fdpath, &statbuf) != 0)
             continue;
         if (statbuf.st_ino == inode) {
-            debug3("_find_inode_in_fddir: found %lu at %s",
-                   (long unsigned int) inode, fdpath);
+            debug3("_find_inode_in_fddir: found %lu at %s", (long unsigned int) inode, fdpath);
             rc = SLURM_SUCCESS;
             break;
         }
@@ -246,13 +227,11 @@ static int _find_inode_in_fddir(pid_t pid, ino_t inode) {
 extern int callerid_find_inode_by_conn(callerid_conn_t conn, ino_t *inode) {
     int rc;
 
-    rc = _find_match_in_tcp_file(&conn, inode, AF_INET, PATH_PROCNET_TCP,
-                                 _match_conn);
+    rc = _find_match_in_tcp_file(&conn, inode, AF_INET, PATH_PROCNET_TCP, _match_conn);
     if (rc == SLURM_SUCCESS)
         return SLURM_SUCCESS;
 
-    rc = _find_match_in_tcp_file(&conn, inode, AF_INET6, PATH_PROCNET_TCP6,
-                                 _match_conn);
+    rc = _find_match_in_tcp_file(&conn, inode, AF_INET6, PATH_PROCNET_TCP6, _match_conn);
     if (rc == SLURM_SUCCESS)
         return SLURM_SUCCESS;
 
@@ -265,13 +244,11 @@ extern int callerid_find_inode_by_conn(callerid_conn_t conn, ino_t *inode) {
 extern int callerid_find_conn_by_inode(callerid_conn_t *conn, ino_t inode) {
     int rc;
 
-    rc = _find_match_in_tcp_file(conn, &inode, AF_INET, PATH_PROCNET_TCP,
-                                 _match_inode);
+    rc = _find_match_in_tcp_file(conn, &inode, AF_INET, PATH_PROCNET_TCP, _match_inode);
     if (rc == SLURM_SUCCESS)
         return SLURM_SUCCESS;
 
-    rc = _find_match_in_tcp_file(conn, &inode, AF_INET6, PATH_PROCNET_TCP6,
-                                 _match_inode);
+    rc = _find_match_in_tcp_file(conn, &inode, AF_INET6, PATH_PROCNET_TCP6, _match_inode);
     if (rc == SLURM_SUCCESS)
         return SLURM_SUCCESS;
 
@@ -297,8 +274,7 @@ extern int find_pid_by_inode(pid_t *pid_result, ino_t inode) {
 
     if ((dirp = opendir(dirpath)) == NULL) {
         /* Houston, we have a problem: /proc is inaccessible */
-        error("find_pid_by_inode: unable to open %s: %m",
-              dirpath);
+        error("find_pid_by_inode: unable to open %s: %m", dirpath);
         return SLURM_ERROR;
     }
 
@@ -337,8 +313,7 @@ extern int callerid_get_own_netinfo(callerid_conn_t *conn) {
     struct stat statbuf;
 
     if ((dirp = opendir(dirpath)) == NULL) {
-        error("callerid_get_own_netinfo: opendir failed for %s: %m",
-              dirpath);
+        error("callerid_get_own_netinfo: opendir failed for %s: %m", dirpath);
         return rc;
     }
 
@@ -359,8 +334,7 @@ extern int callerid_get_own_netinfo(callerid_conn_t *conn) {
 
         /* We are only interested in sockets */
         if (S_ISSOCK(statbuf.st_mode)) {
-            debug3("callerid_get_own_netinfo: checking socket %s",
-                   fdpath);
+            debug3("callerid_get_own_netinfo: checking socket %s", fdpath);
             rc = callerid_find_conn_by_inode(conn, statbuf.st_ino);
             if (rc == SLURM_SUCCESS) {
                 break;

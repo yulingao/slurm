@@ -78,8 +78,7 @@ static uint32_t *array_mcs_parameter = NULL;
 static uint32_t nb_mcs_groups = 0;
 static char *mcs_params_specific = NULL;
 
-static int _get_user_groups(uint32_t user_id, uint32_t group_id,
-                            gid_t *groups, int max_groups, int *ngroups);
+static int _get_user_groups(uint32_t user_id, uint32_t group_id, gid_t *groups, int max_groups, int *ngroups);
 
 static int _check_and_load_params();
 
@@ -96,8 +95,7 @@ extern int init(void) {
     mcs_params_specific = slurm_mcs_get_params_specific();
 
     if (_check_and_load_params() != 0) {
-        info("mcs: plugin warning : no group in %s",
-             mcs_params_specific);
+        info("mcs: plugin warning : no group in %s", mcs_params_specific);
         xfree(mcs_params_specific);
         /* no need to check others options : default values used */
         return SLURM_SUCCESS;
@@ -120,8 +118,7 @@ extern int fini(void) {
  * Get a list of groups associated with a specific user_id
  * Return 0 on success, -1 on failure
  */
-static int _get_user_groups(uint32_t user_id, uint32_t group_id,
-                            gid_t *groups, int max_groups, int *ngroups) {
+static int _get_user_groups(uint32_t user_id, uint32_t group_id, gid_t *groups, int max_groups, int *ngroups) {
     int rc = SLURM_ERROR;
     char *user_name;
 
@@ -177,17 +174,14 @@ static int _check_and_load_params(void) {
         /* no | in param : just one group */
         if (mcs_params_specific != NULL) {
             if (gid_from_string(mcs_params_specific, &gid) != 0) {
-                info("mcs: Only one invalid group : %s. ondemand, ondemandselect set",
-                     mcs_params_specific);
+                info("mcs: Only one invalid group : %s. ondemand, ondemandselect set", mcs_params_specific);
                 nb_mcs_groups = 0;
-                array_mcs_parameter = xmalloc(nb_mcs_groups *
-                                              sizeof(uint32_t));
+                array_mcs_parameter = xmalloc(nb_mcs_groups * sizeof(uint32_t));
                 slurm_mcs_reset_params();
                 return SLURM_ERROR;
             } else {
                 nb_mcs_groups = 1;
-                array_mcs_parameter = xmalloc(nb_mcs_groups *
-                                              sizeof(uint32_t));
+                array_mcs_parameter = xmalloc(nb_mcs_groups * sizeof(uint32_t));
                 array_mcs_parameter[0] = gid;
                 return SLURM_SUCCESS;
             }
@@ -195,8 +189,7 @@ static int _check_and_load_params(void) {
             /* no group */
             info("mcs: no group in MCSParameters. ondemand, ondemandselect set");
             nb_mcs_groups = 0;
-            array_mcs_parameter = xmalloc(nb_mcs_groups *
-                                          sizeof(uint32_t));
+            array_mcs_parameter = xmalloc(nb_mcs_groups * sizeof(uint32_t));
             slurm_mcs_reset_params();
             return SLURM_ERROR;
         }
@@ -213,8 +206,7 @@ static int _check_and_load_params(void) {
         if (i == (nb_mcs_groups - 1)) {
             /* last group, test : */
             if (strstr(groups_names, ":")) {
-                groups_names = strtok_r(groups_names, ":",
-                                        &name_ptr2);
+                groups_names = strtok_r(groups_names, ":", &name_ptr2);
             }
         }
         if (gid_from_string(groups_names, &gid) != 0) {
@@ -260,8 +252,7 @@ static int _find_mcs_label(gid_t *groups, int ngroups, char **result) {
                 if ((gr = getgrgid(groups[j]))) {
                     *result = gr->gr_name;
                 } else {
-                    error("%s: getgrgid(%u): %m",
-                          __func__, (uint32_t) groups[j]);
+                    error("%s: getgrgid(%u): %m", __func__, (uint32_t) groups[j]);
                     rc = SLURM_ERROR;
                 }
                 return rc;
@@ -289,8 +280,7 @@ static int _check_mcs_label(struct job_record *job_ptr, char *label) {
         return rc;
 
     /* test if this group is owned by the user */
-    rc = _get_user_groups(job_ptr->user_id, job_ptr->group_id,
-                          groups, MAX_GROUPS, &ngroups);
+    rc = _get_user_groups(job_ptr->user_id, job_ptr->group_id, groups, MAX_GROUPS, &ngroups);
     if (rc)     /* Failed to get groups */
         return rc;
 
@@ -330,12 +320,10 @@ extern int mcs_p_set_mcs_label(struct job_record *job_ptr, char *label) {
     int rc;
 
     if (label == NULL) {
-        if ((slurm_mcs_get_enforced() == 0) && job_ptr->details &&
-            (job_ptr->details->whole_node != WHOLE_NODE_MCS))
+        if ((slurm_mcs_get_enforced() == 0) && job_ptr->details && (job_ptr->details->whole_node != WHOLE_NODE_MCS))
             return SLURM_SUCCESS;
 
-        rc = _get_user_groups(job_ptr->user_id, job_ptr->group_id,
-                              groups, MAX_GROUPS, &ngroups);
+        rc = _get_user_groups(job_ptr->user_id, job_ptr->group_id, groups, MAX_GROUPS, &ngroups);
         if (rc) {    /* Failed to get groups */
             if (slurm_mcs_get_enforced() == 0)
                 return SLURM_SUCCESS;
@@ -380,8 +368,7 @@ extern int mcs_p_check_mcs_label(uint32_t user_id, char *mcs_label) {
         /* test if this group is owned by the user */
         slurm_user_gid = gid_from_uid(user_id);
         group_id = (uint32_t) slurm_user_gid;
-        rc = _get_user_groups(user_id, group_id, groups, MAX_GROUPS,
-                              &ngroups);
+        rc = _get_user_groups(user_id, group_id, groups, MAX_GROUPS, &ngroups);
         if (rc)    /* Failed to get groups */
             return rc;
 

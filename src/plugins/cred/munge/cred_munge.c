@@ -89,10 +89,7 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  *  Error codes local to this plugin:
  */
 enum local_error_code {
-    ESIG_BUF_DATA_MISMATCH = 5000,
-    ESIG_BUF_SIZE_MISMATCH,
-    ESIG_BAD_USERID,
-    ESIG_CRED_REPLAYED,
+    ESIG_BUF_DATA_MISMATCH = 5000, ESIG_BUF_SIZE_MISMATCH, ESIG_BAD_USERID, ESIG_CRED_REPLAYED,
 };
 
 static uid_t slurm_user = 0;
@@ -160,12 +157,10 @@ static void *_munge_ctx_setup(bool creator) {
          * layer of extra security, as non-privileged users cannot
          * get at the contents of job credentials.
          */
-        err = munge_ctx_set(ctx, MUNGE_OPT_UID_RESTRICTION,
-                            slurm_get_slurmd_user_id());
+        err = munge_ctx_set(ctx, MUNGE_OPT_UID_RESTRICTION, slurm_get_slurmd_user_id());
 
         if (err != EMUNGE_SUCCESS) {
-            error("Unable to set uid restriction on munge credentials: %s",
-                  munge_ctx_strerror(ctx));
+            error("Unable to set uid restriction on munge credentials: %s", munge_ctx_strerror(ctx));
             munge_ctx_destroy(ctx);
             return NULL;
         }
@@ -196,8 +191,7 @@ extern const char *cred_p_str_error(int errnum) {
 }
 
 /* NOTE: Caller must xfree the signature returned by sig_pp */
-extern int cred_p_sign(void *key, char *buffer, int buf_size,
-                       char **sig_pp, uint32_t *sig_size_p) {
+extern int cred_p_sign(void *key, char *buffer, int buf_size, char **sig_pp, uint32_t *sig_size_p) {
     int retry = RETRY_COUNT, auth_ttl;
     char *cred;
     munge_err_t err;
@@ -211,8 +205,7 @@ extern int cred_p_sign(void *key, char *buffer, int buf_size,
     err = munge_encode(&cred, ctx, buffer, buf_size);
     if (err != EMUNGE_SUCCESS) {
         if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge encode failed: %s (retrying ...)",
-                  munge_ctx_strerror(ctx));
+            debug("Munge encode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
             usleep(RETRY_USEC);    /* Likely munged too busy */
             goto again;
         }
@@ -227,8 +220,7 @@ extern int cred_p_sign(void *key, char *buffer, int buf_size,
     return 0;
 }
 
-extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size,
-                              char *signature, uint32_t sig_size) {
+extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size, char *signature, uint32_t sig_size) {
     int retry = RETRY_COUNT;
     uid_t uid;
     gid_t gid;
@@ -239,13 +231,11 @@ extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size,
     munge_ctx_t ctx = (munge_ctx_t) key;
 
     again:
-    err = munge_decode(signature, ctx, &buf_out, &buf_out_size,
-                       &uid, &gid);
+    err = munge_decode(signature, ctx, &buf_out, &buf_out_size, &uid, &gid);
 
     if (err != EMUNGE_SUCCESS) {
         if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge decode failed: %s (retrying ...)",
-                  munge_ctx_strerror(ctx));
+            debug("Munge decode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
             usleep(RETRY_USEC);    /* Likely munged too busy */
             goto again;
         }
@@ -269,8 +259,7 @@ extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size,
     }
 
     if ((uid != slurm_user) && (uid != 0)) {
-        error("%s: Unexpected uid (%u) != Slurm uid (%u)",
-              plugin_type, uid, slurm_user);
+        error("%s: Unexpected uid (%u) != Slurm uid (%u)", plugin_type, uid, slurm_user);
         rc = ESIG_BAD_USERID;
     } else if (buf_size != buf_out_size)
         rc = ESIG_BUF_SIZE_MISMATCH;

@@ -44,9 +44,7 @@
 #include "src/common/slurm_accounting_storage.h"
 #include "src/common/xstring.h"
 
-extern List slurmdb_report_user_top_usage(void *db_conn,
-                                          slurmdb_user_cond_t *user_cond,
-                                          bool group_accounts) {
+extern List slurmdb_report_user_top_usage(void *db_conn, slurmdb_user_cond_t *user_cond, bool group_accounts) {
     List cluster_list = NULL;
     ListIterator itr = NULL;
     ListIterator itr2 = NULL;
@@ -63,8 +61,7 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
     slurmdb_report_user_rec_t *slurmdb_report_user = NULL;
     slurmdb_report_cluster_rec_t *slurmdb_report_cluster = NULL;
     uid_t my_uid = getuid();
-    bool delete_user_cond = 0, delete_assoc_cond = 0,
-            delete_cluster_list = 0;
+    bool delete_user_cond = 0, delete_assoc_cond = 0, delete_cluster_list = 0;
     time_t start_time, end_time;
 
     if (!user_cond) {
@@ -74,14 +71,12 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
 
     if (!user_cond->assoc_cond) {
         delete_assoc_cond = 1;
-        user_cond->assoc_cond =
-                xmalloc(sizeof(slurmdb_assoc_cond_t));
+        user_cond->assoc_cond = xmalloc(sizeof(slurmdb_assoc_cond_t));
     }
 
     if (!user_cond->assoc_cond->cluster_list) {
         delete_cluster_list = 1;
-        user_cond->assoc_cond->cluster_list =
-                list_create(slurm_destroy_char);
+        user_cond->assoc_cond->cluster_list = list_create(slurm_destroy_char);
     }
 
     user_cond->with_deleted = 1;
@@ -117,8 +112,7 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
     cluster_cond.usage_start = user_cond->assoc_cond->usage_start;
     cluster_cond.cluster_list = user_cond->assoc_cond->cluster_list;
 
-    usage_cluster_list = acct_storage_g_get_clusters(
-            db_conn, my_uid, &cluster_cond);
+    usage_cluster_list = acct_storage_g_get_clusters(db_conn, my_uid, &cluster_cond);
     if (!usage_cluster_list) {
         exit_code = 1;
         fprintf(stderr, " Problem with cluster query.\n");
@@ -131,16 +125,14 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
     while ((cluster = list_next(itr))) {
         /* check to see if this cluster is around during the
            time we are looking at */
-        if (!cluster->accounting_list
-            || !list_count(cluster->accounting_list))
+        if (!cluster->accounting_list || !list_count(cluster->accounting_list))
             continue;
 
         slurmdb_report_cluster = slurmdb_cluster_rec_2_report(cluster);
 
         list_append(cluster_list, slurmdb_report_cluster);
 
-        slurmdb_report_cluster->user_list =
-                list_create(slurmdb_destroy_report_user_rec);
+        slurmdb_report_cluster->user_list = list_create(slurmdb_destroy_report_user_rec);
     }
     list_iterator_destroy(itr);
     FREE_NULL_LIST(usage_cluster_list);
@@ -161,54 +153,32 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
         itr2 = list_iterator_create(user->assoc_list);
         while ((assoc = list_next(itr2))) {
 
-            if (!assoc->accounting_list
-                || !list_count(assoc->accounting_list))
+            if (!assoc->accounting_list || !list_count(assoc->accounting_list))
                 continue;
 
-            while ((slurmdb_report_cluster =
-                            list_next(cluster_itr))) {
-                if (!xstrcmp(slurmdb_report_cluster->name,
-                             assoc->cluster)) {
+            while ((slurmdb_report_cluster = list_next(cluster_itr))) {
+                if (!xstrcmp(slurmdb_report_cluster->name, assoc->cluster)) {
                     ListIterator user_itr = NULL;
                     if (!group_accounts) {
                         slurmdb_report_user = NULL;
                         goto new_user;
                     }
-                    user_itr = list_iterator_create(
-                            slurmdb_report_cluster->
-                                    user_list);
-                    while ((slurmdb_report_user
-                                    = list_next(user_itr))) {
-                        if (slurmdb_report_user->uid
-                            != NO_VAL) {
-                            if (slurmdb_report_user->
-                                    uid
-                                == user->uid)
+                    user_itr = list_iterator_create(slurmdb_report_cluster->user_list);
+                    while ((slurmdb_report_user = list_next(user_itr))) {
+                        if (slurmdb_report_user->uid != NO_VAL) {
+                            if (slurmdb_report_user->uid == user->uid)
                                 break;
-                        } else if (slurmdb_report_user->
-                                name
-                                   && !xstrcasecmp(
-                                slurmdb_report_user->
-                                        name,
-                                user->name))
+                        } else if (slurmdb_report_user->name && !xstrcasecmp(slurmdb_report_user->name, user->name))
                             break;
                     }
                     list_iterator_destroy(user_itr);
                     new_user:
                     if (!slurmdb_report_user) {
-                        slurmdb_report_user = xmalloc(
-                                sizeof
-                                (slurmdb_report_user_rec_t));
-                        slurmdb_report_user->name =
-                                xstrdup(assoc->user);
-                        slurmdb_report_user->uid =
-                                user->uid;
-                        slurmdb_report_user->acct_list =
-                                list_create
-                                        (slurm_destroy_char);
-                        list_append(slurmdb_report_cluster->
-                                            user_list,
-                                    slurmdb_report_user);
+                        slurmdb_report_user = xmalloc(sizeof(slurmdb_report_user_rec_t));
+                        slurmdb_report_user->name = xstrdup(assoc->user);
+                        slurmdb_report_user->uid = user->uid;
+                        slurmdb_report_user->acct_list = list_create(slurm_destroy_char);
+                        list_append(slurmdb_report_cluster->user_list, slurmdb_report_user);
                     }
                     break;
                 }
@@ -217,26 +187,20 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
                 error("This cluster '%s' hasn't "
                       "registered yet, but we have jobs "
                       "that ran?", assoc->cluster);
-                slurmdb_report_cluster =
-                        xmalloc(sizeof(slurmdb_report_cluster_rec_t));
+                slurmdb_report_cluster = xmalloc(sizeof(slurmdb_report_cluster_rec_t));
                 list_append(cluster_list, slurmdb_report_cluster);
 
                 slurmdb_report_cluster->name = xstrdup(assoc->cluster);
-                slurmdb_report_cluster->user_list =
-                        list_create(slurmdb_destroy_report_user_rec);
-                slurmdb_report_user =
-                        xmalloc(sizeof(slurmdb_report_user_rec_t));
+                slurmdb_report_cluster->user_list = list_create(slurmdb_destroy_report_user_rec);
+                slurmdb_report_user = xmalloc(sizeof(slurmdb_report_user_rec_t));
                 slurmdb_report_user->name = xstrdup(assoc->user);
                 slurmdb_report_user->uid = user->uid;
-                slurmdb_report_user->acct_list =
-                        list_create(slurm_destroy_char);
-                list_append(slurmdb_report_cluster->user_list,
-                            slurmdb_report_user);
+                slurmdb_report_user->acct_list = list_create(slurm_destroy_char);
+                list_append(slurmdb_report_cluster->user_list, slurmdb_report_user);
             }
             list_iterator_reset(cluster_itr);
 
-            itr3 = list_iterator_create(
-                    slurmdb_report_user->acct_list);
+            itr3 = list_iterator_create(slurmdb_report_user->acct_list);
             while ((object = list_next(itr3))) {
                 if (!xstrcmp(object, assoc->acct))
                     break;
@@ -244,11 +208,8 @@ extern List slurmdb_report_user_top_usage(void *db_conn,
             list_iterator_destroy(itr3);
 
             if (!object)
-                list_append(slurmdb_report_user->acct_list,
-                            xstrdup(assoc->acct));
-            slurmdb_transfer_acct_list_2_tres(
-                    assoc->accounting_list,
-                    &slurmdb_report_user->tres_list);
+                list_append(slurmdb_report_user->acct_list, xstrdup(assoc->acct));
+            slurmdb_transfer_acct_list_2_tres(assoc->accounting_list, &slurmdb_report_user->tres_list);
         }
         list_iterator_destroy(itr2);
     }

@@ -1361,8 +1361,7 @@ extern List slurm_copy_char_list(List char_list);
 
 extern int slurm_addto_char_list(List char_list, char *names);
 
-extern int slurm_addto_char_list_with_case(List char_list, char *names,
-                                           bool lower_case_normalization);
+extern int slurm_addto_char_list_with_case(List char_list, char *names, bool lower_case_normalization);
 
 extern int slurm_addto_mode_char_list(List char_list, char *names, int mode);
 
@@ -1391,11 +1390,9 @@ extern void slurm_free_job_alloc_info_msg(job_alloc_info_msg_t *msg);
 
 extern void slurm_free_job_info_request_msg(job_info_request_msg_t *msg);
 
-extern void slurm_free_job_step_info_request_msg(
-        job_step_info_request_msg_t *msg);
+extern void slurm_free_job_step_info_request_msg(job_step_info_request_msg_t *msg);
 
-extern void slurm_free_front_end_info_request_msg(
-        front_end_info_request_msg_t *msg);
+extern void slurm_free_front_end_info_request_msg(front_end_info_request_msg_t *msg);
 
 extern void slurm_free_node_info_request_msg(node_info_request_msg_t *msg);
 
@@ -1425,11 +1422,9 @@ extern void slurm_free_shares_response_msg(shares_response_msg_t *msg);
 
 extern void slurm_destroy_priority_factors_object(void *object);
 
-extern void slurm_copy_priority_factors_object(priority_factors_object_t *dest,
-                                               priority_factors_object_t *src);
+extern void slurm_copy_priority_factors_object(priority_factors_object_t *dest, priority_factors_object_t *src);
 
-extern void slurm_free_priority_factors_request_msg(
-        priority_factors_request_msg_t *msg);
+extern void slurm_free_priority_factors_request_msg(priority_factors_request_msg_t *msg);
 
 extern void slurm_free_forward_data_msg(forward_data_msg_t *msg);
 
@@ -1452,12 +1447,9 @@ extern void slurm_free_job_desc_msg(job_desc_msg_t *msg);
 
 extern void slurm_free_event_log_msg(slurm_event_log_msg_t *msg);
 
-extern void
-slurm_free_node_registration_status_msg(slurm_node_registration_status_msg_t *
-msg);
+extern void slurm_free_node_registration_status_msg(slurm_node_registration_status_msg_t *msg);
 
-extern void slurm_free_node_reg_resp_msg(
-        slurm_node_reg_resp_msg_t *msg);
+extern void slurm_free_node_reg_resp_msg(slurm_node_reg_resp_msg_t *msg);
 
 extern void slurm_free_job_info(job_info_t *job);
 
@@ -1493,41 +1485,31 @@ extern void slurm_free_resv_name_msg(reservation_name_msg_t *msg);
 
 extern void slurm_free_resv_info_request_msg(resv_info_request_msg_t *msg);
 
-extern void slurm_free_job_step_create_request_msg(
-        job_step_create_request_msg_t *msg);
+extern void slurm_free_job_step_create_request_msg(job_step_create_request_msg_t *msg);
 
-extern void slurm_free_job_step_create_response_msg(
-        job_step_create_response_msg_t *msg);
+extern void slurm_free_job_step_create_response_msg(job_step_create_response_msg_t *msg);
 
-extern void slurm_free_complete_job_allocation_msg(
-        complete_job_allocation_msg_t *msg);
+extern void slurm_free_complete_job_allocation_msg(complete_job_allocation_msg_t *msg);
 
 extern void slurm_free_prolog_launch_msg(prolog_launch_msg_t *msg);
 
-extern void slurm_free_complete_batch_script_msg(
-        complete_batch_script_msg_t *msg);
+extern void slurm_free_complete_batch_script_msg(complete_batch_script_msg_t *msg);
 
-extern void slurm_free_complete_prolog_msg(
-        complete_prolog_msg_t *msg);
+extern void slurm_free_complete_prolog_msg(complete_prolog_msg_t *msg);
 
-extern void slurm_free_launch_tasks_request_msg(
-        launch_tasks_request_msg_t *msg);
+extern void slurm_free_launch_tasks_request_msg(launch_tasks_request_msg_t *msg);
 
-extern void slurm_free_launch_tasks_response_msg(
-        launch_tasks_response_msg_t *msg);
+extern void slurm_free_launch_tasks_response_msg(launch_tasks_response_msg_t *msg);
 
-extern void slurm_free_task_user_managed_io_stream_msg(
-        task_user_managed_io_msg_t *msg);
+extern void slurm_free_task_user_managed_io_stream_msg(task_user_managed_io_msg_t *msg);
 
 extern void slurm_free_task_exit_msg(task_exit_msg_t *msg);
 
 extern void slurm_free_signal_tasks_msg(signal_tasks_msg_t *msg);
 
-extern void slurm_free_reattach_tasks_request_msg(
-        reattach_tasks_request_msg_t *msg);
+extern void slurm_free_reattach_tasks_request_msg(reattach_tasks_request_msg_t *msg);
 
-extern void slurm_free_reattach_tasks_response_msg(
-        reattach_tasks_response_msg_t *msg);
+extern void slurm_free_reattach_tasks_response_msg(reattach_tasks_response_msg_t *msg);
 
 extern void slurm_free_kill_job_msg(kill_job_msg_t *msg);
 
@@ -1569,24 +1551,19 @@ extern void slurm_free_top_job_msg(top_job_msg_t *msg);
 
 extern void slurm_free_update_step_msg(step_update_request_msg_t *msg);
 
-extern void slurm_free_resource_allocation_response_msg_members(
-        resource_allocation_response_msg_t *msg);
+extern void slurm_free_resource_allocation_response_msg_members(resource_allocation_response_msg_t *msg);
 
-extern void slurm_free_resource_allocation_response_msg(
-        resource_allocation_response_msg_t *msg);
+extern void slurm_free_resource_allocation_response_msg(resource_allocation_response_msg_t *msg);
 
-extern void slurm_free_job_step_create_response_msg(
-        job_step_create_response_msg_t *msg);
+extern void slurm_free_job_step_create_response_msg(job_step_create_response_msg_t *msg);
 
-extern void slurm_free_submit_response_response_msg(
-        submit_response_msg_t *msg);
+extern void slurm_free_submit_response_response_msg(submit_response_msg_t *msg);
 
 extern void slurm_free_ctl_conf(slurm_ctl_conf_info_msg_t *config_ptr);
 
 extern void slurm_free_job_info_msg(job_info_msg_t *job_buffer_ptr);
 
-extern void slurm_free_job_step_info_response_msg(
-        job_step_info_response_msg_t *msg);
+extern void slurm_free_job_step_info_response_msg(job_step_info_response_msg_t *msg);
 
 extern void slurm_free_job_step_info_members(job_step_info_t *msg);
 
@@ -1628,11 +1605,9 @@ extern void slurm_free_job_step_stat(void *object);
 
 extern void slurm_free_job_step_pids(void *object);
 
-extern void slurm_free_acct_gather_node_resp_msg(
-        acct_gather_node_resp_msg_t *msg);
+extern void slurm_free_acct_gather_node_resp_msg(acct_gather_node_resp_msg_t *msg);
 
-extern void slurm_free_acct_gather_energy_req_msg(
-        acct_gather_energy_req_msg_t *msg);
+extern void slurm_free_acct_gather_energy_req_msg(acct_gather_energy_req_msg_t *msg);
 
 extern void slurm_free_job_notify_msg(job_notify_msg_t *msg);
 
@@ -1656,8 +1631,7 @@ extern void slurm_free_network_callerid_msg(network_callerid_msg_t *mesg);
 
 extern void slurm_free_network_callerid_resp(network_callerid_resp_t *resp);
 
-extern void slurm_free_set_fs_dampening_factor_msg(
-        set_fs_dampening_factor_msg_t *msg);
+extern void slurm_free_set_fs_dampening_factor_msg(set_fs_dampening_factor_msg_t *msg);
 
 extern void slurm_free_control_status_msg(control_status_msg_t *msg);
 
@@ -1710,8 +1684,7 @@ extern char *power_flags_str(uint16_t power_flags);
 
 extern void private_data_string(uint16_t private_data, char *str, int str_len);
 
-extern void accounting_enforce_string(uint16_t enforce,
-                                      char *str, int str_len);
+extern void accounting_enforce_string(uint16_t enforce, char *str, int str_len);
 
 /* Translate a Slurm nodelist to a char * of numbers
  * nid000[36-37] -> 36-37
@@ -1723,8 +1696,7 @@ extern char *cray_nodelist2nids(hostlist_t hl_in, char *nodelist);
 
 /* Validate SPANK specified job environment does not contain any invalid
  * names. Log failures using info() */
-extern bool valid_spank_job_env(char **spank_job_env,
-                                uint32_t spank_job_env_size, uid_t uid);
+extern bool valid_spank_job_env(char **spank_job_env, uint32_t spank_job_env_size, uid_t uid);
 
 extern char *trigger_res_type(uint16_t res_type);
 
@@ -1750,8 +1722,7 @@ extern char *parse_part_enforce_type_2str(uint16_t type);
 extern bool cluster_in_federation(void *ptr, char *cluster_name);
 
 /* Find where cluster_name nodes start in the node_array */
-extern int get_cluster_node_offset(char *cluster_name,
-                                   node_info_msg_t *node_info_ptr);
+extern int get_cluster_node_offset(char *cluster_name, node_info_msg_t *node_info_ptr);
 
 /*
 打印给定的char*。
@@ -1765,8 +1736,7 @@ extern int get_cluster_node_offset(char *cluster_name,
  * Each \n will result in a new line.
  * If inx is != -1 it is prepended to the string.
  */
-extern void print_multi_line_string(char *user_msg, int inx,
-                                    log_level_t loglevel);
+extern void print_multi_line_string(char *user_msg, int inx, log_level_t loglevel);
 
 /* Given a protocol opcode return its string
  * description mapping the slurm_msg_type_t

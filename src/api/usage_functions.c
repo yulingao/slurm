@@ -53,13 +53,11 @@
  * IN:  end time stamp for records <=
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_usage_get(void *db_conn, void *in, int type,
-                             time_t start, time_t end) {
+extern int slurmdb_usage_get(void *db_conn, void *in, int type, time_t start, time_t end) {
     if (db_api_uid == -1)
         db_api_uid = getuid();
 
-    return acct_storage_g_get_usage(db_conn, db_api_uid,
-                                    in, type, start, end);
+    return acct_storage_g_get_usage(db_conn, db_api_uid, in, type, start, end);
 }
 
 /*
@@ -70,9 +68,7 @@ extern int slurmdb_usage_get(void *db_conn, void *in, int type,
  * IN/OUT: rollup_stats data structure in which to save rollup statistics
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_usage_roll(void *db_conn, time_t sent_start,
-                              time_t sent_end, uint16_t archive_data,
+extern int slurmdb_usage_roll(void *db_conn, time_t sent_start, time_t sent_end, uint16_t archive_data,
                               rollup_stats_t *rollup_stats) {
-    return acct_storage_g_roll_usage(db_conn, sent_start,
-                                     sent_end, archive_data, rollup_stats);
+    return acct_storage_g_roll_usage(db_conn, sent_start, sent_end, archive_data, rollup_stats);
 }

@@ -145,8 +145,7 @@ extern void sort_job_list(List job_list) {
                 list_sort(job_list, _sort_by_job_prio);
                 break;
             default:
-                error("Invalid sort specification: %c",
-                      params.sort[i]);
+                error("Invalid sort specification: %c", params.sort[i]);
                 exit(1);
         }
     }
@@ -156,9 +155,8 @@ extern void sort_job_list(List job_list) {
 /*****************************************************************************
  * Local utility functions
  *****************************************************************************/
-static inline void _get_job_prio_from_void(priority_factors_object_t **j1,
-                                           priority_factors_object_t **j2,
-                                           void *v1, void *v2) {
+static inline void
+_get_job_prio_from_void(priority_factors_object_t **j1, priority_factors_object_t **j2, void *v1, void *v2) {
     *j1 = *(priority_factors_object_t **) v1;
     *j2 = *(priority_factors_object_t **) v2;
 }

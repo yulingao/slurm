@@ -62,8 +62,7 @@ void job_options_destroy(job_options_t opts);
 /*
  *  Append option of type `type' and its argument to job options
  */
-int job_options_append(job_options_t opts, int type, const char *opt,
-                       const char *optarg);
+int job_options_append(job_options_t opts, int type, const char *opt, const char *optarg);
 
 /*
  *  Pack all accumulated options into Buffer "buf"

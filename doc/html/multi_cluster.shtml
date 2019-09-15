@@ -3,11 +3,11 @@
 <h1>Multi-Cluster Operation</h1>
 
 <p>A cluster is comprised of all the nodes managed by a single slurmctld
-daemon.  Slurm offers the ability to target commands to other
-clusters instead of, or in addition to, the local cluster on which the
-command is invoked.  When this behavior is enabled, users can submit
-jobs to one or many clusters and receive status from those remote
-clusters.</p>
+    daemon. Slurm offers the ability to target commands to other
+    clusters instead of, or in addition to, the local cluster on which the
+    command is invoked. When this behavior is enabled, users can submit
+    jobs to one or many clusters and receive status from those remote
+    clusters.</p>
 
 <p>For example:</p>
 
@@ -28,35 +28,35 @@ JOBID PARTITION   NAME   USER  ST   TIME NODES BP_LIST(REASON)
 </PRE>
 
 <p>Most of the Slurm client commands offer the "-M, --clusters="
-option which provides the ability to communicate to and from a comma
-separated list of clusters.</p>
+    option which provides the ability to communicate to and from a comma
+    separated list of clusters.</p>
 
 <p>When <b>sbatch</b>, <b>salloc</b> or <b>srun</b> is invoked with a cluster
-list, Slurm will immediately submit the job to the cluster that offers the
-earliest start time subject its queue of pending and running jobs.  Slurm will
-make no subsequent effort to migrate the job to a different cluster (from the
-list) whose resources become available when running jobs finish before their
-scheduled end times.</p>
+    list, Slurm will immediately submit the job to the cluster that offers the
+    earliest start time subject its queue of pending and running jobs. Slurm will
+    make no subsequent effort to migrate the job to a different cluster (from the
+    list) whose resources become available when running jobs finish before their
+    scheduled end times.</p>
 
 <p><b>NOTE:</b> In order for <b>salloc</b> or <b>srun</b> to work with the "-M,
---clusters" option in a multi-cluster environment, the compute nodes must be
-accessible to and from the submission host.</p>
+    --clusters" option in a multi-cluster environment, the compute nodes must be
+    accessible to and from the submission host.</p>
 
 <h2>Multi-Cluster Configuration</h2>
 <p>The multi-cluster functionality requires the use of the slurmDBD.
-The AccountingStorageType in the slurm.conf file must be set to the
-accounting_storage/slurmdbd plugin and the MUNGE or authentication
-keys must be installed to allow each cluster to communicate with the
-slurmDBD.  Note that MUNGE can be configured to use different keys for
-communications within a cluster and across clusters if desired.
-See <a href="accounting.html">accounting</a> for details.</p>
+    The AccountingStorageType in the slurm.conf file must be set to the
+    accounting_storage/slurmdbd plugin and the MUNGE or authentication
+    keys must be installed to allow each cluster to communicate with the
+    slurmDBD. Note that MUNGE can be configured to use different keys for
+    communications within a cluster and across clusters if desired.
+    See <a href="accounting.html">accounting</a> for details.</p>
 
 <p>Once configured, Slurm commands specifying the "-M, --clusters="
-option will become active for all of the clusters listed by the
-<b>"sacctmgr show clusters"</b> command.</p>
+    option will become active for all of the clusters listed by the
+    <b>"sacctmgr show clusters"</b> command.</p>
 
 <p>
-See also the <a href="federation.html">Slurm Federated Scheduling Guide<a/>.
+    See also the <a href="federation.html">Slurm Federated Scheduling Guide<a/>.
 </p>
 
 <p style="text-align:center;">Last modified 16 April 2019</p>

@@ -61,8 +61,7 @@ extern int check_header_version(header_t *header);
  * IN msg_type - type of message to be send
  * IN flags - message flags to be send
  */
-extern void
-init_header(header_t *header, slurm_msg_t *msg, uint16_t flags);
+extern void init_header(header_t *header, slurm_msg_t *msg, uint16_t flags);
 
 
 /*
@@ -70,12 +69,10 @@ init_header(header_t *header, slurm_msg_t *msg, uint16_t flags);
  * OUT header - the message header to update
  * IN msg_length - length of message to be send
  */
-extern void
-update_header(header_t *header, uint32_t msg_length);
+extern void update_header(header_t *header, uint32_t msg_length);
 
 
 /* log the supplied slurm task launch message as debug3() level */
-extern void slurm_print_launch_task_msg(launch_tasks_request_msg_t *msg,
-                                        char *name);
+extern void slurm_print_launch_task_msg(launch_tasks_request_msg_t *msg, char *name);
 
 #endif /* !_SLURM_PROTOCOL_UTIL_H */

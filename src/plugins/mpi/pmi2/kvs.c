@@ -75,8 +75,7 @@ static int no_dup_keys = 0;
 #define VAL_INDEX(i) (i * 2 + 1)
 #define HASH(key) ( _hash(key) % hash_size)
 
-inline static uint32_t
-_hash(char *key) {
+inline static uint32_t _hash(char *key) {
     int len, i;
     uint32_t hash = 0;
     uint8_t shift;
@@ -89,8 +88,7 @@ _hash(char *key) {
     return hash;
 }
 
-extern int
-temp_kvs_init(void) {
+extern int temp_kvs_init(void) {
     uint16_t cmd;
     uint32_t nodeid, num_children, size;
     Buf buf = NULL;
@@ -136,8 +134,7 @@ temp_kvs_init(void) {
     return SLURM_SUCCESS;
 }
 
-extern int
-temp_kvs_add(char *key, char *val) {
+extern int temp_kvs_add(char *key, char *val) {
     Buf buf;
     uint32_t size;
 
@@ -159,8 +156,7 @@ temp_kvs_add(char *key, char *val) {
     return SLURM_SUCCESS;
 }
 
-extern int
-temp_kvs_merge(Buf buf) {
+extern int temp_kvs_merge(Buf buf) {
     char *data;
     uint32_t offset, size;
 
@@ -181,8 +177,7 @@ temp_kvs_merge(Buf buf) {
     return SLURM_SUCCESS;
 }
 
-extern int
-temp_kvs_send(void) {
+extern int temp_kvs_send(void) {
     int rc = SLURM_ERROR, retry = 0;
     unsigned int delay = 1;
     char *nodelist = NULL;
@@ -201,10 +196,7 @@ temp_kvs_send(void) {
 
         if (nodelist)
             /* srun or non-first-level stepds */
-            rc = slurm_forward_data(&nodelist,
-                                    tree_sock_addr,
-                                    temp_kvs_cnt,
-                                    temp_kvs_buf);
+            rc = slurm_forward_data(&nodelist, tree_sock_addr, temp_kvs_cnt, temp_kvs_buf);
         else        /* first level stepds */
             rc = tree_msg_to_srun(temp_kvs_cnt, temp_kvs_buf);
 
@@ -226,8 +218,7 @@ temp_kvs_send(void) {
 
 /**************************************************************/
 
-extern int
-kvs_init(void) {
+extern int kvs_init(void) {
     debug3("mpi/pmi2: in kvs_init");
 
     hash_size = ((job_info.ntasks + TASKS_PER_BUCKET - 1) / TASKS_PER_BUCKET);
@@ -243,8 +234,7 @@ kvs_init(void) {
 /*
  * returned value is not dup-ed
  */
-extern char *
-kvs_get(char *key) {
+extern char *kvs_get(char *key) {
     kvs_bucket_t *bucket;
     char *val = NULL;
     int i;
@@ -266,8 +256,7 @@ kvs_get(char *key) {
     return val;
 }
 
-extern int
-kvs_put(char *key, char *val) {
+extern int kvs_put(char *key, char *val) {
     kvs_bucket_t *bucket;
     int i;
 
@@ -300,8 +289,7 @@ kvs_put(char *key, char *val) {
     return SLURM_SUCCESS;
 }
 
-extern int
-kvs_clear(void) {
+extern int kvs_clear(void) {
     kvs_bucket_t *bucket;
     int i, j;
 

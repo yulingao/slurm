@@ -72,28 +72,21 @@ static bool _tree_listen_readable(eio_obj_t *obj);
 
 static int _tree_listen_read(eio_obj_t *obj, List objs);
 
-static struct io_operations tree_listen_ops = {
-        .readable    = &_tree_listen_readable,
-        .handle_read = &_tree_listen_read,
-};
+static struct io_operations tree_listen_ops = {.readable    = &_tree_listen_readable, .handle_read = &_tree_listen_read,};
 
 static bool _task_readable(eio_obj_t *obj);
 
 static int _task_read(eio_obj_t *obj, List objs);
 /* static bool _task_writable(eio_obj_t *obj); */
 /* static int  _task_write(eio_obj_t *obj, List objs); */
-static struct io_operations task_ops = {
-        .readable    =  &_task_readable,
-        .handle_read =  &_task_read,
-};
+static struct io_operations task_ops = {.readable    =  &_task_readable, .handle_read =  &_task_read,};
 
 
 static int _handle_pmi1_init(int fd, int lrank);
 
 /*********************************************************************/
 
-static int
-_handle_task_request(int fd, int lrank) {
+static int _handle_task_request(int fd, int lrank) {
     int rc = SLURM_SUCCESS;
 
     debug3("mpi/pmi2: in _handle_task_request, lrank=%d", lrank);
@@ -111,8 +104,7 @@ _handle_task_request(int fd, int lrank) {
     return rc;
 }
 
-static int
-_handle_tree_request(int fd) {
+static int _handle_tree_request(int fd) {
     uint32_t temp;
     int rc = SLURM_SUCCESS;
 
@@ -129,8 +121,7 @@ _handle_tree_request(int fd) {
 
 /*********************************************************************/
 
-static bool
-_is_fd_ready(int fd) {
+static bool _is_fd_ready(int fd) {
     struct pollfd pfd[1];
     int rc;
 
@@ -142,8 +133,7 @@ _is_fd_ready(int fd) {
     return ((rc == 1) && (pfd[0].revents & POLLIN));
 }
 
-static bool
-_tree_listen_readable(eio_obj_t *obj) {
+static bool _tree_listen_readable(eio_obj_t *obj) {
     debug2("mpi/pmi2: _tree_listen_readable");
     if (obj->shutdown == true) {
         if (obj->fd != -1) {
@@ -156,8 +146,7 @@ _tree_listen_readable(eio_obj_t *obj) {
     return true;
 }
 
-static int
-_tree_listen_read(eio_obj_t *obj, List objs) {
+static int _tree_listen_read(eio_obj_t *obj, List objs) {
     int sd;
     struct sockaddr addr;
     struct sockaddr_in *sin;
@@ -178,8 +167,7 @@ _tree_listen_read(eio_obj_t *obj, List objs) {
                 continue;
             if (errno == EAGAIN)    /* No more connections */
                 return 0;
-            if ((errno == ECONNABORTED) ||
-                (errno == EWOULDBLOCK)) {
+            if ((errno == ECONNABORTED) || (errno == EWOULDBLOCK)) {
                 return 0;
             }
             error("mpi/pmi2: unable to accept new connection: %m");
@@ -189,8 +177,7 @@ _tree_listen_read(eio_obj_t *obj, List objs) {
         if (!in_stepd()) {
             sin = (struct sockaddr_in *) &addr;
             inet_ntop(AF_INET, &sin->sin_addr, buf, INET_ADDRSTRLEN);
-            debug3("mpi/pmi2: accepted tree connection: ip=%s sd=%d",
-                   buf, sd);
+            debug3("mpi/pmi2: accepted tree connection: ip=%s sd=%d", buf, sd);
         }
 
         /* read command from socket and handle it */
@@ -202,8 +189,7 @@ _tree_listen_read(eio_obj_t *obj, List objs) {
 
 /*********************************************************************/
 
-static bool
-_task_readable(eio_obj_t *obj) {
+static bool _task_readable(eio_obj_t *obj) {
     int lrank;
 
     debug2("mpi/pmi2: _task_readable");
@@ -225,8 +211,7 @@ _task_readable(eio_obj_t *obj) {
     return true;
 }
 
-static int
-_task_read(eio_obj_t *obj, List objs) {
+static int _task_read(eio_obj_t *obj, List objs) {
     int rc, lrank;
 
     lrank = (int) (long) (obj->arg);
@@ -238,8 +223,7 @@ _task_read(eio_obj_t *obj, List objs) {
 /*********************************************************************/
 
 /* the PMI1 init */
-static int
-_handle_pmi1_init(int fd, int lrank) {
+static int _handle_pmi1_init(int fd, int lrank) {
     char buf[64];
     int version, subversion;
     int n, rc = 0;
@@ -253,8 +237,7 @@ _handle_pmi1_init(int fd, int lrank) {
     }
     buf[n] = '\0';
 
-    n = sscanf(buf, "cmd=init pmi_version=%d pmi_subversion=%d\n",
-               &version, &subversion);
+    n = sscanf(buf, "cmd=init pmi_version=%d pmi_subversion=%d\n", &version, &subversion);
     if (n != 2) {
         error("mpi/pmi2: invalid PMI1 init command: `%s'", buf);
         rc = 1;
@@ -289,23 +272,20 @@ _handle_pmi1_init(int fd, int lrank) {
 /*
  * main loop of agent thread
  */
-static void *
-_agent(void *unused) {
+static void *_agent(void *unused) {
     eio_obj_t *tree_listen_obj, *task_obj;
     int i;
 
     pmi2_handle = eio_handle_create(0);
 
     //fd_set_nonblocking(tree_sock);
-    tree_listen_obj = eio_obj_create(tree_sock, &tree_listen_ops,
-                                     (void *) (-1));
+    tree_listen_obj = eio_obj_create(tree_sock, &tree_listen_ops, (void *) (-1));
     eio_new_initial_obj(pmi2_handle, tree_listen_obj);
 
     /* for stepd, add the sockets to tasks */
     if (in_stepd()) {
         for (i = 0; i < job_info.ltasks; i++) {
-            task_obj = eio_obj_create(STEPD_PMI_SOCK(i), &task_ops,
-                                      (void *) (long) (i));
+            task_obj = eio_obj_create(STEPD_PMI_SOCK(i), &task_ops, (void *) (long) (i));
             eio_new_initial_obj(pmi2_handle, task_obj);
         }
         initialized = xmalloc(job_info.ltasks * sizeof(int));
@@ -328,8 +308,7 @@ _agent(void *unused) {
 /*
  * start the PMI2 agent thread
  */
-extern int
-pmi2_start_agent(void) {
+extern int pmi2_start_agent(void) {
     static bool first = true;
 
     slurm_mutex_lock(&agent_mutex);
@@ -353,8 +332,7 @@ pmi2_start_agent(void) {
 /*
  * stop the PMI2 agent thread
  */
-extern int
-pmi2_stop_agent(void) {
+extern int pmi2_stop_agent(void) {
     slurm_mutex_lock(&agent_mutex);
 
     if (_agent_tid) {
@@ -369,7 +347,6 @@ pmi2_stop_agent(void) {
     return SLURM_SUCCESS;
 }
 
-extern void
-task_finalize(int lrank) {
+extern void task_finalize(int lrank) {
     finalized[lrank] = 1;
 }

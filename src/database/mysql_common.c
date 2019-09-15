@@ -77,9 +77,7 @@ static int _clear_results(MYSQL *db_conn) {
 
         /* more results? -1 = no, >0 = error, 0 = yes (keep looping) */
         if ((rc = mysql_next_result(db_conn)) > 0)
-            error("Could not execute statement %d %s",
-                  mysql_errno(db_conn),
-                  mysql_error(db_conn));
+            error("Could not execute statement %d %s", mysql_errno(db_conn), mysql_error(db_conn));
     } while (rc == 0);
 
     if (rc > 0) {
@@ -141,8 +139,7 @@ static int _mysql_query_internal(MYSQL *db_conn, char *query) {
         errno = mysql_errno(db_conn);
         if (errno == ER_NO_SUCH_TABLE) {
             debug4("This could happen often and is expected.\n"
-                   "mysql_query failed: %d %s\n%s",
-                   errno, err_str, query);
+                   "mysql_query failed: %d %s\n%s", errno, err_str, query);
             errno = 0;
             goto end_it;
         }
@@ -177,8 +174,8 @@ static int _mysql_query_internal(MYSQL *db_conn, char *query) {
 }
 
 /* NOTE: Ensure that mysql_conn->lock is NOT set on function entry */
-static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
-                                     storage_field_t *fields, char *ending) {
+static int
+_mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name, storage_field_t *fields, char *ending) {
     char *query = NULL;
     char *correct_query = NULL;
     MYSQL_RES *result = NULL;
@@ -200,8 +197,7 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
     DEF_TIMERS;
 
     /* figure out the unique keys in the table */
-    query = xstrdup_printf("show index from %s where non_unique=0",
-                           table_name);
+    query = xstrdup_printf("show index from %s where non_unique=0", table_name);
     if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         return SLURM_ERROR;
@@ -217,8 +213,7 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
     mysql_free_result(result);
 
     /* figure out the non-unique keys in the table */
-    query = xstrdup_printf("show index from %s where non_unique=1",
-                           table_name);
+    query = xstrdup_printf("show index from %s where non_unique=1", table_name);
     if (!(result = mysql_db_query_ret(mysql_conn, query, 0))) {
         xfree(query);
         xfree(old_index);
@@ -294,12 +289,8 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
         list_iterator_reset(itr);
         while ((col = list_next(itr))) {
             if (!xstrcmp(col, fields[i].name)) {
-                xstrfmtcat(query, " modify `%s` %s,",
-                           fields[i].name,
-                           fields[i].options);
-                xstrfmtcat(correct_query, " modify `%s` %s,",
-                           fields[i].name,
-                           fields[i].options);
+                xstrfmtcat(query, " modify `%s` %s,", fields[i].name, fields[i].options);
+                xstrfmtcat(correct_query, " modify `%s` %s,", fields[i].name, fields[i].options);
                 list_delete_item(itr);
                 found = 1;
                 break;
@@ -307,28 +298,14 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
         }
         if (!found) {
             if (i) {
-                info("adding column %s after %s in table %s",
-                     fields[i].name,
-                     fields[i - 1].name,
-                     table_name);
-                xstrfmtcat(query, " add `%s` %s after %s,",
-                           fields[i].name,
-                           fields[i].options,
-                           fields[i - 1].name);
-                xstrfmtcat(correct_query, " modify `%s` %s,",
-                           fields[i].name,
-                           fields[i].options);
+                info("adding column %s after %s in table %s", fields[i].name, fields[i - 1].name, table_name);
+                xstrfmtcat(query, " add `%s` %s after %s,", fields[i].name, fields[i].options, fields[i - 1].name);
+                xstrfmtcat(correct_query, " modify `%s` %s,", fields[i].name, fields[i].options);
             } else {
                 info("adding column %s at the beginning "
-                     "of table %s",
-                     fields[i].name,
-                     table_name);
-                xstrfmtcat(query, " add `%s` %s first,",
-                           fields[i].name,
-                           fields[i].options);
-                xstrfmtcat(correct_query, " modify `%s` %s,",
-                           fields[i].name,
-                           fields[i].options);
+                     "of table %s", fields[i].name, table_name);
+                xstrfmtcat(query, " add `%s` %s first,", fields[i].name, fields[i].options);
+                xstrfmtcat(correct_query, " modify `%s` %s,", fields[i].name, fields[i].options);
             }
             adding = 1;
         }
@@ -389,12 +366,8 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
              * indexname is terminated by '(' ')' ' ' or ','
              */
             if (name_marker) {
-                if (!udex_name && (temp[end] == '(' ||
-                                   temp[end] == ')' ||
-                                   temp[end] == ' ' ||
-                                   temp[end] == ','))
-                    udex_name = xstrndup(name_marker,
-                                         temp + end - name_marker);
+                if (!udex_name && (temp[end] == '(' || temp[end] == ')' || temp[end] == ' ' || temp[end] == ','))
+                    udex_name = xstrndup(name_marker, temp + end - name_marker);
             } else if (temp[end] != '(' && temp[end] != ' ') {
                 name_marker = temp + end;
             }
@@ -456,14 +429,11 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
             }
             list_iterator_reset(itr);
             if (db_key) {
-                xstrfmtcat(query,
-                           " drop key %s,", db_key->name);
+                xstrfmtcat(query, " drop key %s,", db_key->name);
                 _destroy_db_key(db_key);
             } else
-                info("adding %s to table %s",
-                     new_key, table_name);
-            xstrfmtcat(correct_query,
-                       " drop key %s,", new_key_name);
+                info("adding %s to table %s", new_key, table_name);
+            xstrfmtcat(correct_query, " drop key %s,", new_key_name);
 
             xstrfmtcat(query, " add %s,", new_key);
             xstrfmtcat(correct_query, " add %s,", new_key);
@@ -491,8 +461,7 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
     if (!adding) {
         char *quoted = slurm_add_slash_to_quotes(query);
         char *query2 = xstrdup_printf("select table_name from "
-                                      "%s where definition='%s'",
-                                      table_defs_table, quoted);
+                                      "%s where definition='%s'", table_defs_table, quoted);
         MYSQL_RES *result = NULL;
         MYSQL_ROW row;
 
@@ -507,10 +476,8 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
         if (run_update) {
             run_update = 2;
             query2 = xstrdup_printf("select table_name from "
-                                    "%s where table_name='%s'",
-                                    table_defs_table, table_name);
-            if ((result = mysql_db_query_ret(
-                    mysql_conn, query2, 0))) {
+                                    "%s where table_name='%s'", table_defs_table, table_name);
+            if ((result = mysql_db_query_ret(mysql_conn, query2, 0))) {
                 if ((row = mysql_fetch_row(result)))
                     run_update = 1;
                 mysql_free_result(result);
@@ -538,9 +505,7 @@ static int _mysql_make_table_current(mysql_conn_t *mysql_conn, char *table_name,
                                 "mod_time, table_name, definition) "
                                 "values (%ld, %ld, '%s', '%s') "
                                 "on duplicate key update "
-                                "definition='%s', mod_time=%ld;",
-                                table_defs_table, now, now,
-                                table_name, quoted,
+                                "definition='%s', mod_time=%ld;", table_defs_table, now, now, table_name, quoted,
                                 quoted, now);
         xfree(quoted);
         if (mysql_db_query(mysql_conn, query2)) {
@@ -572,30 +537,20 @@ static int _create_db(char *db_name, mysql_db_info_t *db_info) {
             fatal("mysql_init failed: %s", mysql_error(mysql_db));
 
         db_host = db_info->host;
-        db_ptr = mysql_real_connect(mysql_db,
-                                    db_host, db_info->user,
-                                    db_info->pass, NULL,
-                                    db_info->port, NULL, 0);
+        db_ptr = mysql_real_connect(mysql_db, db_host, db_info->user, db_info->pass, NULL, db_info->port, NULL, 0);
 
         if (!db_ptr && db_info->backup) {
             info("Connection failed to host = %s "
-                 "user = %s port = %u",
-                 db_host, db_info->user,
-                 db_info->port);
+                 "user = %s port = %u", db_host, db_info->user, db_info->port);
             db_host = db_info->backup;
-            db_ptr = mysql_real_connect(mysql_db, db_host,
-                                        db_info->user,
-                                        db_info->pass, NULL,
-                                        db_info->port, NULL, 0);
+            db_ptr = mysql_real_connect(mysql_db, db_host, db_info->user, db_info->pass, NULL, db_info->port, NULL, 0);
         }
 
         if (db_ptr) {
             char *create_line = NULL;
             xstrfmtcat(create_line, "create database %s", db_name);
             if (mysql_query(mysql_db, create_line)) {
-                fatal("mysql_query failed: %d %s\n%s",
-                      mysql_errno(mysql_db),
-                      mysql_error(mysql_db), create_line);
+                fatal("mysql_query failed: %d %s\n%s", mysql_errno(mysql_db), mysql_error(mysql_db), create_line);
             }
             xfree(create_line);
             if (mysql_thread_safe())
@@ -603,12 +558,8 @@ static int _create_db(char *db_name, mysql_db_info_t *db_info) {
             mysql_close(mysql_db);
         } else {
             info("Connection failed to host = %s "
-                 "user = %s port = %u",
-                 db_host, db_info->user,
-                 db_info->port);
-            error("mysql_real_connect failed: %d %s",
-                  mysql_errno(mysql_db),
-                  mysql_error(mysql_db));
+                 "user = %s port = %u", db_host, db_info->user, db_info->port);
+            error("mysql_real_connect failed: %d %s", mysql_errno(mysql_db), mysql_error(mysql_db));
             rc = SLURM_ERROR;
         }
         if (rc == SLURM_ERROR)
@@ -617,8 +568,7 @@ static int _create_db(char *db_name, mysql_db_info_t *db_info) {
     return rc;
 }
 
-extern mysql_conn_t *create_mysql_conn(int conn_num, bool rollback,
-                                       char *cluster_name) {
+extern mysql_conn_t *create_mysql_conn(int conn_num, bool rollback, char *cluster_name) {
     mysql_conn_t *mysql_conn = xmalloc(sizeof(mysql_conn_t));
 
     mysql_conn->rollback = rollback;
@@ -686,8 +636,7 @@ extern int destroy_mysql_db_info(mysql_db_info_t *db_info) {
     return SLURM_SUCCESS;
 }
 
-extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
-                                      mysql_db_info_t *db_info) {
+extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name, mysql_db_info_t *db_info) {
     int rc = SLURM_SUCCESS;
     bool storage_init = false;
     char *db_host = db_info->host;
@@ -701,8 +650,7 @@ extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
 
     if (!(mysql_conn->db_conn = mysql_init(mysql_conn->db_conn))) {
         slurm_mutex_unlock(&mysql_conn->lock);
-        fatal("mysql_init failed: %s",
-              mysql_error(mysql_conn->db_conn));
+        fatal("mysql_init failed: %s", mysql_error(mysql_conn->db_conn));
     }
 
     /* If this ever changes you will need to alter
@@ -715,21 +663,16 @@ extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
     mysql_options(mysql_conn->db_conn, MYSQL_OPT_RECONNECT,
               &reconnect);
 #endif
-    mysql_options(mysql_conn->db_conn, MYSQL_OPT_CONNECT_TIMEOUT,
-                  (char *) &my_timeout);
+    mysql_options(mysql_conn->db_conn, MYSQL_OPT_CONNECT_TIMEOUT, (char *) &my_timeout);
     while (!storage_init) {
-        debug2("Attempting to connect to %s:%d", db_host,
-               db_info->port);
-        if (!mysql_real_connect(mysql_conn->db_conn, db_host,
-                                db_info->user, db_info->pass,
-                                db_name, db_info->port, NULL,
-                                CLIENT_MULTI_STATEMENTS)) {
+        debug2("Attempting to connect to %s:%d", db_host, db_info->port);
+        if (!mysql_real_connect(mysql_conn->db_conn, db_host, db_info->user, db_info->pass, db_name, db_info->port,
+                                NULL, CLIENT_MULTI_STATEMENTS)) {
             const char *err_str = NULL;
             int err = mysql_errno(mysql_conn->db_conn);
 
             if (err == ER_BAD_DB_ERROR) {
-                debug("Database %s not created.  Creating",
-                      db_name);
+                debug("Database %s not created.  Creating", db_name);
                 rc = _create_db(db_name, db_info);
                 continue;
             }
@@ -737,14 +680,12 @@ extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
             err_str = mysql_error(mysql_conn->db_conn);
 
             if ((db_host == db_info->host) && db_info->backup) {
-                debug2("mysql_real_connect failed: %d %s",
-                       err, err_str);
+                debug2("mysql_real_connect failed: %d %s", err, err_str);
                 db_host = db_info->backup;
                 continue;
             }
 
-            error("mysql_real_connect failed: %d %s",
-                  err, err_str);
+            error("mysql_real_connect failed: %d %s", err, err_str);
             rc = ESLURM_DB_CONNECTION;
             mysql_close(mysql_conn->db_conn);
             mysql_conn->db_conn = NULL;
@@ -754,9 +695,8 @@ extern int mysql_db_get_db_connection(mysql_conn_t *mysql_conn, char *db_name,
         storage_init = true;
         if (mysql_conn->rollback)
             mysql_autocommit(mysql_conn->db_conn, 0);
-        rc = _mysql_query_internal(mysql_conn->db_conn,
-                                   "SET session sql_mode='ANSI_QUOTES,"
-                                   "NO_ENGINE_SUBSTITUTION';");
+        rc = _mysql_query_internal(mysql_conn->db_conn, "SET session sql_mode='ANSI_QUOTES,"
+                                                        "NO_ENGINE_SUBSTITUTION';");
     }
     slurm_mutex_unlock(&mysql_conn->lock);
     errno = rc;
@@ -848,9 +788,7 @@ extern int mysql_db_commit(mysql_conn_t *mysql_conn) {
     /* clear out the old results so we don't get a 2014 error */
     _clear_results(mysql_conn->db_conn);
     if (mysql_commit(mysql_conn->db_conn)) {
-        error("mysql_commit failed: %d %s",
-              mysql_errno(mysql_conn->db_conn),
-              mysql_error(mysql_conn->db_conn));
+        error("mysql_commit failed: %d %s", mysql_errno(mysql_conn->db_conn), mysql_error(mysql_conn->db_conn));
         errno = mysql_errno(mysql_conn->db_conn);
         rc = SLURM_ERROR;
     }
@@ -868,9 +806,7 @@ extern int mysql_db_rollback(mysql_conn_t *mysql_conn) {
     /* clear out the old results so we don't get a 2014 error */
     _clear_results(mysql_conn->db_conn);
     if (mysql_rollback(mysql_conn->db_conn)) {
-        error("mysql_commit failed: %d %s",
-              mysql_errno(mysql_conn->db_conn),
-              mysql_error(mysql_conn->db_conn));
+        error("mysql_commit failed: %d %s", mysql_errno(mysql_conn->db_conn), mysql_error(mysql_conn->db_conn));
         errno = mysql_errno(mysql_conn->db_conn);
         rc = SLURM_ERROR;
     } else {
@@ -885,8 +821,7 @@ extern int mysql_db_rollback(mysql_conn_t *mysql_conn) {
 
 }
 
-extern MYSQL_RES *mysql_db_query_ret(mysql_conn_t *mysql_conn,
-                                     char *query, bool last) {
+extern MYSQL_RES *mysql_db_query_ret(mysql_conn_t *mysql_conn, char *query, bool last) {
     MYSQL_RES *result = NULL;
 
     slurm_mutex_lock(&mysql_conn->lock);
@@ -904,8 +839,7 @@ extern MYSQL_RES *mysql_db_query_ret(mysql_conn_t *mysql_conn,
         errno = 0;
         if (!result && mysql_field_count(mysql_conn->db_conn)) {
             /* should have returned data */
-            error("We should have gotten a result: '%m' '%s'",
-                  mysql_error(mysql_conn->db_conn));
+            error("We should have gotten a result: '%m' '%s'", mysql_error(mysql_conn->db_conn));
         }
     }
 
@@ -918,8 +852,7 @@ extern int mysql_db_query_check_after(mysql_conn_t *mysql_conn, char *query) {
     int rc = SLURM_SUCCESS;
 
     slurm_mutex_lock(&mysql_conn->lock);
-    if ((rc = _mysql_query_internal(
-            mysql_conn->db_conn, query)) != SLURM_ERROR)
+    if ((rc = _mysql_query_internal(mysql_conn->db_conn, query)) != SLURM_ERROR)
         rc = _clear_results(mysql_conn->db_conn);
     slurm_mutex_unlock(&mysql_conn->lock);
     return rc;
@@ -933,8 +866,7 @@ extern uint64_t mysql_db_insert_ret_id(mysql_conn_t *mysql_conn, char *query) {
         new_id = mysql_insert_id(mysql_conn->db_conn);
         if (!new_id) {
             /* should have new id */
-            error("We should have gotten a new id: %s",
-                  mysql_error(mysql_conn->db_conn));
+            error("We should have gotten a new id: %s", mysql_error(mysql_conn->db_conn));
         }
     }
     slurm_mutex_unlock(&mysql_conn->lock);
@@ -942,8 +874,7 @@ extern uint64_t mysql_db_insert_ret_id(mysql_conn_t *mysql_conn, char *query) {
 
 }
 
-extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name,
-                                 storage_field_t *fields, char *ending) {
+extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name, storage_field_t *fields, char *ending) {
     char *query = NULL;
     int i = 0, rc;
     storage_field_t *first_field = fields;
@@ -963,16 +894,14 @@ extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name,
                            "mod_time int unsigned default 0 not null, "
                            "table_name text not null, "
                            "definition text not null, "
-                           "primary key (table_name(50))) engine='innodb'",
-                           table_defs_table);
+                           "primary key (table_name(50))) engine='innodb'", table_defs_table);
     if (mysql_db_query(mysql_conn, query) == SLURM_ERROR) {
         xfree(query);
         return SLURM_ERROR;
     }
     xfree(query);
 
-    query = xstrdup_printf("create table if not exists %s (`%s` %s",
-                           table_name, fields->name, fields->options);
+    query = xstrdup_printf("create table if not exists %s (`%s` %s", table_name, fields->name, fields->options);
     i = 1;
     fields++;
 
@@ -992,7 +921,6 @@ extern int mysql_db_create_table(mysql_conn_t *mysql_conn, char *table_name,
     }
     xfree(query);
 
-    rc = _mysql_make_table_current(
-            mysql_conn, table_name, first_field, ending);
+    rc = _mysql_make_table_current(mysql_conn, table_name, first_field, ending);
     return rc;
 }

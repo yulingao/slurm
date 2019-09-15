@@ -45,8 +45,7 @@ typedef struct slurm_ops {
 
     List (*get_system_gpu_list)(node_config_load_t *node_conf);
 
-    void (*step_hardware_init)(bitstr_t *usable_gpus,
-                               char *tres_freq);
+    void (*step_hardware_init)(bitstr_t *usable_gpus, char *tres_freq);
 
     void (*step_hardware_fini)(void);
 
@@ -57,13 +56,8 @@ typedef struct slurm_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_ops_t.
  */
-static const char *syms[] = {
-        "gpu_p_reconfig",
-        "gpu_p_get_system_gpu_list",
-        "gpu_p_step_hardware_init",
-        "gpu_p_step_hardware_fini",
-        "gpu_p_test_cpu_conv",
-};
+static const char *syms[] = {"gpu_p_reconfig", "gpu_p_get_system_gpu_list", "gpu_p_step_hardware_init",
+                             "gpu_p_step_hardware_fini", "gpu_p_test_cpu_conv",};
 
 /* Local variables */
 static slurm_ops_t ops;
@@ -115,8 +109,7 @@ extern int gpu_plugin_init(void) {
 
     type = _get_gpu_type();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);

@@ -210,8 +210,7 @@ static log_level_t _highest_level(log_level_t a, log_level_t b, log_level_t c) {
 
 /* Write the current local time into the provided buffer. Returns the
  * number of characters written into the buffer. */
-static size_t _make_timestamp(char *timestamp_buf, size_t max,
-                              const char *timestamp_fmt) {
+static size_t _make_timestamp(char *timestamp_buf, size_t max, const char *timestamp_fmt) {
     time_t timestamp_t = time(NULL);
     struct tm timestamp_tm;
     if (!slurm_localtime_r(&timestamp_t, &timestamp_tm)) {
@@ -287,8 +286,7 @@ static int _fd_writeable(int fd) {
      * gone, but getting 0 back from a nonblocking read means just that.
      */
     if ((ufds.revents & POLLHUP) || fstat(fd, &stat_buf) ||
-        ((S_ISSOCK(stat_buf.st_mode) &&
-          (rc = recv(fd, &temp, 1, MSG_DONTWAIT) <= 0) &&
+        ((S_ISSOCK(stat_buf.st_mode) && (rc = recv(fd, &temp, 1, MSG_DONTWAIT) <= 0) &&
           ((rc == 0) || ((errno != EAGAIN) && (errno != EWOULDBLOCK))))))
         return -1;
     else if ((ufds.revents & POLLNVAL) || (ufds.revents & POLLERR) || !(ufds.revents & POLLOUT))
@@ -305,8 +303,7 @@ static int _fd_writeable(int fd) {
  * logfile =
  *        logfile name if logfile level > LOG_QUIET
  */
-static int
-_log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
+static int _log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
     int rc = 0;
 
     if (!log) {
@@ -369,9 +366,7 @@ _log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
 
         if ((fd < 0) || !fp) {
             char *errmsg = slurm_strerror(errno);
-            fprintf(stderr,
-                    "%s: %s: Unable to open logfile `%s': %s\n",
-                    prog, __func__, logfile, errmsg);
+            fprintf(stderr, "%s: %s: Unable to open logfile `%s': %s\n", prog, __func__, logfile, errmsg);
             if (fd >= 0)
                 close(fd);
             rc = errno;
@@ -387,9 +382,7 @@ _log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
     if (log->logfp && (fileno(log->logfp) < 0))
         log->logfp = NULL;
 
-    highest_log_level = _highest_level(log->opt.syslog_level,
-                                       log->opt.logfile_level,
-                                       log->opt.stderr_level);
+    highest_log_level = _highest_level(log->opt.syslog_level, log->opt.logfile_level, log->opt.stderr_level);
 
     log->initialized = 1;
     out:
@@ -403,9 +396,7 @@ _log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
  * fac  = log facility for syslog (unused if syslog level == LOG_QUIET)
  * logfile = logfile name if logfile level > LOG_QUIET
  */
-static int
-_sched_log_init(char *prog, log_options_t opt, log_facility_t fac,
-                char *logfile) {
+static int _sched_log_init(char *prog, log_options_t opt, log_facility_t fac, char *logfile) {
     int rc = 0;
 
     if (!sched_log) {
@@ -459,9 +450,7 @@ _sched_log_init(char *prog, log_options_t opt, log_facility_t fac,
 
         if ((fd < 0) || !fp) {
             char *errmsg = slurm_strerror(errno);
-            fprintf(stderr,
-                    "%s: %s: Unable to open logfile `%s': %s\n",
-                    prog, __func__, logfile, errmsg);
+            fprintf(stderr, "%s: %s: Unable to open logfile `%s': %s\n", prog, __func__, logfile, errmsg);
             if (fd >= 0)
                 close(fd);
             rc = errno;
@@ -477,8 +466,7 @@ _sched_log_init(char *prog, log_options_t opt, log_facility_t fac,
     if (sched_log->logfp && (fileno(sched_log->logfp) < 0))
         sched_log->logfp = NULL;
 
-    highest_sched_log_level = _highest_level(sched_log->opt.syslog_level,
-                                             sched_log->opt.logfile_level,
+    highest_sched_log_level = _highest_level(sched_log->opt.syslog_level, sched_log->opt.logfile_level,
                                              sched_log->opt.stderr_level);
 
     /*
@@ -661,13 +649,11 @@ FILE *log_fp(void) {
 /* Log fatal error without message buffering */
 void log_fatal(const char *file, int line, const char *msg, const char *err_str) {
     if (log && log->logfp) {
-        fprintf(log->logfp, "ERROR: [%s:%d] %s: %s\n",
-                file, line, msg, err_str);
+        fprintf(log->logfp, "ERROR: [%s:%d] %s: %s\n", file, line, msg, err_str);
         fflush(log->logfp);
     }
     if (!log || log->opt.stderr_level) {
-        fprintf(stderr, "ERROR: [%s:%d] %s: %s\n",
-                file, line, msg, err_str);
+        fprintf(stderr, "ERROR: [%s:%d] %s: %s\n", file, line, msg, err_str);
         fflush(stderr);
     }
 }
@@ -675,12 +661,10 @@ void log_fatal(const char *file, int line, const char *msg, const char *err_str)
 /* Log out of memory without message buffering */
 void log_oom(const char *file, int line, const char *func) {
     if (log && log->logfp) {
-        fprintf(log->logfp, "%s:%d: %s: malloc failed\n",
-                file, line, func);
+        fprintf(log->logfp, "%s:%d: %s: malloc failed\n", file, line, func);
     }
     if (!log || log->opt.stderr_level) {
-        fprintf(stderr, "%s:%d: %s: malloc failed\n",
-                file, line, func);
+        fprintf(stderr, "%s:%d: %s: malloc failed\n", file, line, func);
     }
 }
 
@@ -691,8 +675,7 @@ void log_set_timefmt(unsigned fmtflag) {
         log->fmt = fmtflag;
         slurm_mutex_unlock(&log_lock);
     } else {
-        fprintf(stderr, "%s:%d: %s Slurm log not initialized\n",
-                __FILE__, __LINE__, __func__);
+        fprintf(stderr, "%s:%d: %s Slurm log not initialized\n", __FILE__, __LINE__, __func__);
     }
 }
 
@@ -700,8 +683,7 @@ void log_set_timefmt(unsigned fmtflag) {
  * Write in the input buffer the current time and milliseconds
  * the process id and the current thread id.
  */
-static void
-set_idbuf(char *idbuf) {
+static void set_idbuf(char *idbuf) {
     struct timeval now;
     char thread_name[NAMELEN];
     int max_len = 12; /* handles current longest thread name */
@@ -720,9 +702,8 @@ set_idbuf(char *idbuf) {
     thread_name[0] = '\0';
 #endif
 
-    sprintf(idbuf, "%.15s.%-6d %5d %-*s %p", slurm_ctime(&now.tv_sec) + 4,
-            (int) now.tv_usec, (int) getpid(), max_len, thread_name,
-            (void *) pthread_self());
+    sprintf(idbuf, "%.15s.%-6d %5d %-*s %p", slurm_ctime(&now.tv_sec) + 4, (int) now.tv_usec, (int) getpid(), max_len,
+            thread_name, (void *) pthread_self());
 }
 
 /*
@@ -744,18 +725,14 @@ static char *_jobid2fmt(struct job_record *job_ptr, char *buf, int buf_size) {
         return "%.0sJobId=CORRUPT";
 
     if (job_ptr->pack_job_id) {
-        snprintf(buf, buf_size, "%%.0sJobId=%u+%u(%u)",
-                 job_ptr->pack_job_id, job_ptr->pack_job_offset,
+        snprintf(buf, buf_size, "%%.0sJobId=%u+%u(%u)", job_ptr->pack_job_id, job_ptr->pack_job_offset,
                  job_ptr->job_id);
     } else if (job_ptr->array_recs && (job_ptr->array_task_id == NO_VAL)) {
-        snprintf(buf, buf_size, "%%.0sJobId=%u_*",
-                 job_ptr->array_job_id);
+        snprintf(buf, buf_size, "%%.0sJobId=%u_*", job_ptr->array_job_id);
     } else if (job_ptr->array_task_id == NO_VAL) {
         snprintf(buf, buf_size, "%%.0sJobId=%u", job_ptr->job_id);
     } else {
-        snprintf(buf, buf_size, "%%.0sJobId=%u_%u(%u)",
-                 job_ptr->array_job_id, job_ptr->array_task_id,
-                 job_ptr->job_id);
+        snprintf(buf, buf_size, "%%.0sJobId=%u_%u(%u)", job_ptr->array_job_id, job_ptr->array_task_id, job_ptr->job_id);
     }
 
     return buf;
@@ -857,8 +834,7 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                     break;
             }
             cnt++;
-        } while (!is_our_format &&
-                 (p = (char *) strchr(p + 1, '%')));
+        } while (!is_our_format && (p = (char *) strchr(p + 1, '%')));
 
         if (is_our_format) {
             char *substitute = NULL;
@@ -894,10 +870,7 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                             if (ptr) {
                                 job_ptr = ptr;
                                 xstrcat(intermediate_fmt,
-                                        _jobid2fmt(
-                                                job_ptr,
-                                                substitute_on_stack,
-                                                sizeof(substitute_on_stack)));
+                                        _jobid2fmt(job_ptr, substitute_on_stack, sizeof(substitute_on_stack)));
                             }
                             va_end(ap_copy);
                             break;
@@ -915,19 +888,12 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                                 ptr = va_arg(ap_copy, void *);
                             if (ptr) {
                                 step_ptr = ptr;
-                                if (step_ptr &&
-                                    (step_ptr->magic == STEP_MAGIC))
+                                if (step_ptr && (step_ptr->magic == STEP_MAGIC))
                                     job_ptr = step_ptr->job_ptr;
                                 xstrcat(intermediate_fmt,
-                                        _jobid2fmt(
-                                                job_ptr,
-                                                substitute_on_stack,
-                                                sizeof(substitute_on_stack)));
+                                        _jobid2fmt(job_ptr, substitute_on_stack, sizeof(substitute_on_stack)));
                                 xstrcat(intermediate_fmt,
-                                        _stepid2fmt(
-                                                step_ptr,
-                                                substitute_on_stack,
-                                                sizeof(substitute_on_stack)));
+                                        _stepid2fmt(step_ptr, substitute_on_stack, sizeof(substitute_on_stack)));
                             }
                             va_end(ap_copy);
                             break;
@@ -942,12 +908,10 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                     should_xfree = 0;
                     break;
                 case 't': /* "%t" => locally preferred date/time*/
-                    xstrftimecat(substitute,
-                                 "%x %X");
+                    xstrftimecat(substitute, "%x %X");
                     break;
                 case 'T': /* "%T" => "dd, Mon yyyy hh:mm:ss off" */
-                    xstrftimecat(substitute,
-                                 "%a, %d %b %Y %H:%M:%S %z");
+                    xstrftimecat(substitute, "%a, %d %b %Y %H:%M:%S %z");
                     break;
                 case 'M':
                     if (!log) {
@@ -978,9 +942,7 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                                      sizeof(substitute_on_stack),
                                      "%d", clock());
 #else
-                            snprintf(substitute_on_stack,
-                                     sizeof(substitute_on_stack),
-                                     "%ld", clock());
+                            snprintf(substitute_on_stack, sizeof(substitute_on_stack), "%ld", clock());
 #endif
                             substitute = substitute_on_stack;
                             should_xfree = 0;
@@ -1034,8 +996,7 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
         va_list ap_copy;
 
         va_copy(ap_copy, ap);
-        actual_len = vsnprintf(tmp, sizeof(tmp),
-                               intermediate_fmt, ap_copy);
+        actual_len = vsnprintf(tmp, sizeof(tmp), intermediate_fmt, ap_copy);
         va_end(ap_copy);
 
         if (actual_len >= 0) {
@@ -1049,8 +1010,7 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
                 out_string = xmalloc(actual_len + 1);
                 if (out_string) {
                     va_copy(ap_copy, ap);
-                    vsnprintf(out_string, actual_len + 1,
-                              intermediate_fmt, ap_copy);
+                    vsnprintf(out_string, actual_len + 1, intermediate_fmt, ap_copy);
                     va_end(ap_copy);
                 }
             }
@@ -1066,15 +1026,11 @@ static char *vxstrfmt(const char *fmt, va_list ap) {
              */
             do {
                 growable_tmp_size += LINEBUFSIZE;
-                growable_tmp = xrealloc(growable_tmp,
-                                        growable_tmp_size);
+                growable_tmp = xrealloc(growable_tmp, growable_tmp_size);
                 if (!growable_tmp)
                     break;
                 va_copy(ap_copy, ap);
-                actual_len = vsnprintf(growable_tmp,
-                                       growable_tmp_size,
-                                       intermediate_fmt,
-                                       ap_copy);
+                actual_len = vsnprintf(growable_tmp, growable_tmp_size, intermediate_fmt, ap_copy);
                 va_end(ap_copy);
             } while (actual_len < 0);
             out_string = growable_tmp;
@@ -1107,8 +1063,7 @@ static void xlogfmtcat(char **dst, const char *fmt, ...) {
     xfree(buf);
 }
 
-static void
-_log_printf(log_t *log, cbuf_t cb, FILE *stream, const char *fmt, ...) {
+static void _log_printf(log_t *log, cbuf_t cb, FILE *stream, const char *fmt, ...) {
     va_list ap;
     int fd = -1;
 
@@ -1157,12 +1112,10 @@ static void _log_msg(log_level_t level, bool sched, const char *fmt, va_list arg
         _log_init(NULL, opts, 0, NULL);
     }
 
-    if (SCHED_LOG_INITIALIZED && sched &&
-        (highest_sched_log_level > LOG_LEVEL_QUIET)) {
+    if (SCHED_LOG_INITIALIZED && sched && (highest_sched_log_level > LOG_LEVEL_QUIET)) {
         buf = vxstrfmt(fmt, args);
         xlogfmtcat(&msgbuf, "[%M] %s%s%s", sched_log->fpfx, pfx, buf);
-        _log_printf(sched_log, sched_log->fbuf, sched_log->logfp,
-                    "sched: %s\n", msgbuf);
+        _log_printf(sched_log, sched_log->fbuf, sched_log->logfp, "sched: %s\n", msgbuf);
         fflush(sched_log->logfp);
         xfree(msgbuf);
     }
@@ -1235,11 +1188,9 @@ static void _log_msg(log_level_t level, bool sched, const char *fmt, va_list arg
         if (log->fmt == LOG_FMT_THREAD_ID) {
             char tmp[64];
             set_idbuf(tmp);
-            _log_printf(log, log->buf, stderr, "%s: %s%s\n",
-                        tmp, pfx, buf);
+            _log_printf(log, log->buf, stderr, "%s: %s%s\n", tmp, pfx, buf);
         } else {
-            _log_printf(log, log->buf, stderr, "%s: %s%s\n",
-                        log->argv0, pfx, buf);
+            _log_printf(log, log->buf, stderr, "%s: %s%s\n", log->argv0, pfx, buf);
         }
         fflush(stderr);
     }
@@ -1280,8 +1231,7 @@ bool log_has_data() {
     return rc;
 }
 
-static void
-_log_flush(log_t *log) {
+static void _log_flush(log_t *log) {
     if (!log->opt.buffered)
         return;
 

@@ -74,22 +74,20 @@ uint32_t read_timeout = 0;
 uint32_t write_timeout = 0;
 munge_ctx_t ctx = NULL;
 
-static s_p_options_t nonstop_options[] = {
-        {"BackupAddr",        S_P_STRING},
-        {"ControlAddr",       S_P_STRING},
-        {"Debug",             S_P_UINT16},
-        {"HotSpareCount",     S_P_STRING},
-        {"MaxSpareNodeCount", S_P_UINT32},
-        {"Port",              S_P_UINT16},
-        {"TimeLimitDelay",    S_P_UINT16},
-        {"TimeLimitDrop",     S_P_UINT16},
-        {"TimeLimitExtend",   S_P_UINT16},
-        {"UserDrainAllow",    S_P_STRING},
-        {"UserDrainDeny",     S_P_STRING},
-        {"ReadTimeout",       S_P_UINT32},
-        {"WriteTimeout",      S_P_UINT32},
-        {NULL}
-};
+static s_p_options_t nonstop_options[] = {{"BackupAddr",        S_P_STRING},
+                                          {"ControlAddr",       S_P_STRING},
+                                          {"Debug",             S_P_UINT16},
+                                          {"HotSpareCount",     S_P_STRING},
+                                          {"MaxSpareNodeCount", S_P_UINT32},
+                                          {"Port",              S_P_UINT16},
+                                          {"TimeLimitDelay",    S_P_UINT16},
+                                          {"TimeLimitDrop",     S_P_UINT16},
+                                          {"TimeLimitExtend",   S_P_UINT16},
+                                          {"UserDrainAllow",    S_P_STRING},
+                                          {"UserDrainDeny",     S_P_STRING},
+                                          {"ReadTimeout",       S_P_UINT32},
+                                          {"WriteTimeout",      S_P_UINT32},
+                                          {NULL}};
 
 static void _print_config(void) {
     char *tmp_str = NULL;
@@ -103,9 +101,7 @@ static void _print_config(void) {
         for (i = 0; i < hot_spare_info_cnt; i++) {
             if (i)
                 xstrcat(tmp_str, ",");
-            xstrfmtcat(tmp_str, "%s:%u",
-                       hot_spare_info[i].partition,
-                       hot_spare_info[i].node_cnt);
+            xstrfmtcat(tmp_str, "%s:%u", hot_spare_info[i].partition, hot_spare_info[i].node_cnt);
         }
         info("HotSpareCount=%s", tmp_str);
         xfree(tmp_str);
@@ -148,8 +144,7 @@ static spare_node_resv_t *_xlate_hot_spares(char *spare_str, int *spare_cnt) {
     spare_node_resv_t *spare_ptr = NULL;
     struct part_record *part_ptr = NULL;
     /* Locks: Read partition */
-    slurmctld_lock_t part_read_lock =
-            {NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
+    slurmctld_lock_t part_read_lock = {NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
 
     *spare_cnt = 0;
     if ((spare_str == NULL) || (spare_str[0] == '\0'))
@@ -168,8 +163,7 @@ static spare_node_resv_t *_xlate_hot_spares(char *spare_str, int *spare_cnt) {
             part_ptr = find_part_record(part);
             if ((*spare_cnt > 0) && (spare_ptr == NULL)) {
                 /* Avoid CLANG error */
-                fatal("%s: spare array is NULL with size=%d",
-                      __func__, *spare_cnt);
+                fatal("%s: spare array is NULL with size=%d", __func__, *spare_cnt);
                 return spare_ptr;
             }
             for (i = 0; i < *spare_cnt; i++) {
@@ -180,8 +174,7 @@ static spare_node_resv_t *_xlate_hot_spares(char *spare_str, int *spare_cnt) {
             }
         }
         if ((sep == NULL) || (node_cnt < 0)) {
-            error("nonstop.conf: Ignoring invalid HotSpare (%s)",
-                  tok);
+            error("nonstop.conf: Ignoring invalid HotSpare (%s)", tok);
         } else if (dup) {
             info("nonstop.conf: Ignoring HotSpare (%s): "
                  "Duplicate partition record", tok);
@@ -192,8 +185,7 @@ static spare_node_resv_t *_xlate_hot_spares(char *spare_str, int *spare_cnt) {
             error("nonstop.conf: Ignoring invalid HotSpare (%s):"
                   "Partition not found", tok);
         } else {
-            xrealloc(spare_ptr, (sizeof(spare_node_resv_t) *
-                                 (*spare_cnt + 1)));
+            xrealloc(spare_ptr, (sizeof(spare_node_resv_t) * (*spare_cnt + 1)));
             spare_ptr[*spare_cnt].node_cnt = node_cnt;
             spare_ptr[*spare_cnt].partition = part;
             part = NULL;    /* Nothing left to free */
@@ -240,19 +232,16 @@ static uid_t *_xlate_users(char *user_str, int *user_cnt) {
 }
 
 static void _validate_config(void) {
-    hot_spare_info = _xlate_hot_spares(hot_spare_count_str,
-                                       &hot_spare_info_cnt);
+    hot_spare_info = _xlate_hot_spares(hot_spare_count_str, &hot_spare_info_cnt);
 
-    user_drain_deny = _xlate_users(user_drain_deny_str,
-                                   &user_drain_deny_cnt);
+    user_drain_deny = _xlate_users(user_drain_deny_str, &user_drain_deny_cnt);
     if (user_drain_deny) {
         if (!user_drain_allow_str)
             user_drain_allow_str = xstrdup("ALL");
         if (xstrcasecmp(user_drain_allow_str, "ALL"))
             fatal("nonstop.conf: Bad UserDrainAllow/Deny values");
     }
-    user_drain_allow = _xlate_users(user_drain_allow_str,
-                                    &user_drain_allow_cnt);
+    user_drain_allow = _xlate_users(user_drain_allow_str, &user_drain_allow_cnt);
 
     if ((ctx = munge_ctx_create()) == NULL)
         fatal("nonstop.conf: munge_ctx_create failed");
@@ -330,8 +319,7 @@ extern void create_hot_spare_resv(void) {
     ListIterator part_iterator;
     struct part_record *part_ptr;
     /* Locks: Read partition */
-    slurmctld_lock_t part_read_lock =
-            {NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
+    slurmctld_lock_t part_read_lock = {NO_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
     reservation_name_msg_t delete_resv_msg;
     resv_desc_msg_t resv_msg;
     time_t now = time(NULL);
@@ -340,8 +328,7 @@ extern void create_hot_spare_resv(void) {
     lock_slurmctld(part_read_lock);
     part_iterator = list_iterator_create(part_list);
     while ((part_ptr = (struct part_record *) list_next(part_iterator))) {
-        snprintf(resv_name, sizeof(resv_name), "HOT_SPARE_%s",
-                 part_ptr->name);
+        snprintf(resv_name, sizeof(resv_name), "HOT_SPARE_%s", part_ptr->name);
         for (i = 0; i < hot_spare_info_cnt; i++) {
             if (hot_spare_info[i].part_ptr != part_ptr)
                 continue;
@@ -350,20 +337,17 @@ extern void create_hot_spare_resv(void) {
             node_cnt[1] = 0;
             resv_msg.duration = 356 * 24 * 60 * 60;
             resv_msg.end_time = (time_t) NO_VAL;
-            resv_msg.flags = RESERVE_FLAG_MAINT |
-                             RESERVE_FLAG_IGN_JOBS;
+            resv_msg.flags = RESERVE_FLAG_MAINT | RESERVE_FLAG_IGN_JOBS;
             resv_msg.name = resv_name;
             resv_msg.node_cnt = node_cnt;
             resv_msg.partition = xstrdup(part_ptr->name);
             resv_msg.start_time = now;
             resv_msg.users = xstrdup("root");
             if (find_resv_name(resv_name)) {
-                info("Updating vestigial reservation %s",
-                     resv_name);
+                info("Updating vestigial reservation %s", resv_name);
                 (void) update_resv(&resv_msg);
             } else {
-                info("Creating vestigial reservation %s",
-                     resv_name);
+                info("Creating vestigial reservation %s", resv_name);
                 (void) create_resv(&resv_msg);
             }
             xfree(resv_msg.partition);
@@ -407,9 +391,7 @@ extern void nonstop_read_config_list(List data) {
         for (i = 0; i < hot_spare_info_cnt; i++) {
             if (i)
                 xstrcat(tmp_str, ",");
-            xstrfmtcat(tmp_str, "%s:%u",
-                       hot_spare_info[i].partition,
-                       hot_spare_info[i].node_cnt);
+            xstrfmtcat(tmp_str, "%s:%u", hot_spare_info[i].partition, hot_spare_info[i].node_cnt);
         }
         key_pair->value = xstrdup(tmp_str);
         xfree(tmp_str);

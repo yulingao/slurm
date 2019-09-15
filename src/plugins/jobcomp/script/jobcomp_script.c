@@ -198,13 +198,11 @@ static struct jobcomp_info *_jobcomp_info_create(struct job_record *job) {
     j->gid = job->group_id;
     j->group_name = gid_to_string((gid_t) job->group_id);
     j->name = xstrdup(job->name);
-    if (job->assoc_ptr && job->assoc_ptr->cluster &&
-        job->assoc_ptr->cluster[0])
+    if (job->assoc_ptr && job->assoc_ptr->cluster && job->assoc_ptr->cluster[0])
         j->cluster = xstrdup(job->assoc_ptr->cluster);
     else
         j->cluster = NULL;
-    if (job->details && (job->details->orig_dependency &&
-                         job->details->orig_dependency[0]))
+    if (job->details && (job->details->orig_dependency && job->details->orig_dependency[0]))
         j->orig_dependency = xstrdup(job->details->orig_dependency);
     else
         j->orig_dependency = NULL;
@@ -299,8 +297,7 @@ static void _jobcomp_info_destroy(void *arg) {
 /*
  * Check if the script exists and if we can execute it.
  */
-static int
-_check_script_permissions(char *path) {
+static int _check_script_permissions(char *path) {
     struct stat st;
 
     if (stat(path, &st) < 0) {
@@ -354,12 +351,10 @@ static int _env_append(char ***envp, const char *name, const char *val) {
     return (0);
 }
 
-static int _env_append_fmt(char ***envp, const char *name,
-                           const char *fmt, ...)
+static int _env_append_fmt(char ***envp, const char *name, const char *fmt, ...)
 __attribute__ ((format (printf, 3, 4)));
 
-static int _env_append_fmt(char ***envp, const char *name,
-                           const char *fmt, ...) {
+static int _env_append_fmt(char ***envp, const char *name, const char *fmt, ...) {
     char val[1024];
     va_list ap;
 
@@ -427,8 +422,7 @@ static char **_create_environment(struct jobcomp_info *job) {
     _env_append(&env, "RESERVATION", job->reservation);
     _env_append(&env, "USERNAME", job->user_name);
     _env_append(&env, "GROUPNAME", job->group_name);
-    _env_append(&env, "STATEREASONPREV",
-                job_reason_string(job->state_reason_prev));
+    _env_append(&env, "STATEREASONPREV", job_reason_string(job->state_reason_prev));
     if (job->std_in)
         _env_append(&env, "STDIN", job->std_in);
     if (job->std_out)
@@ -524,8 +518,7 @@ static int _jobcomp_exec_child(char *script, struct jobcomp_info *job) {
         error("jobcomp/script: waitpid: %m");
 
     if (WEXITSTATUS(status))
-        error("jobcomp/script: script %s exited with status %d",
-              script, WEXITSTATUS(status));
+        error("jobcomp/script: script %s exited with status %d", script, WEXITSTATUS(status));
 
     return (0);
 }

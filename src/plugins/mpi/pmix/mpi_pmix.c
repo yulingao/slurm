@@ -138,8 +138,7 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern int p_mpi_hook_slurmstepd_prefork(
-        const stepd_step_rec_t *job, char ***env) {
+extern int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
     int ret;
     pmixp_debug_hang(0);
     PMIXP_DEBUG("start");
@@ -163,8 +162,7 @@ extern int p_mpi_hook_slurmstepd_prefork(
     return ret;
 }
 
-extern int p_mpi_hook_slurmstepd_task(
-        const mpi_plugin_task_info_t *job, char ***env) {
+extern int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
     char **tmp_env = NULL;
     pmixp_debug_hang(0);
 
@@ -178,9 +176,7 @@ extern int p_mpi_hook_slurmstepd_task(
             if (NULL != value) {
                 *value = '\0';
                 value++;
-                env_array_overwrite(env,
-                                    (const char *) tmp_env[i],
-                                    value);
+                env_array_overwrite(env, (const char *) tmp_env[i], value);
             }
             free(tmp_env[i]);
         }
@@ -190,8 +186,7 @@ extern int p_mpi_hook_slurmstepd_task(
     return SLURM_SUCCESS;
 }
 
-extern mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(
-        const mpi_plugin_client_info_t *job, char ***env) {
+extern mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
     static pthread_mutex_t setup_mutex = PTHREAD_MUTEX_INITIALIZER;
     static pthread_cond_t setup_cond = PTHREAD_COND_INITIALIZER;
     static char *mapping = NULL;

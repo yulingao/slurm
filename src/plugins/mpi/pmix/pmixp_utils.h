@@ -46,14 +46,11 @@ void pmixp_free_buf(void *x);
 
 int pmixp_usock_create_srv(char *path);
 
-size_t pmixp_read_buf(int fd, void *buf, size_t count, int *shutdown,
-                      bool blocking);
+size_t pmixp_read_buf(int fd, void *buf, size_t count, int *shutdown, bool blocking);
 
-size_t pmixp_write_buf(int fd, void *buf, size_t count, int *shutdown,
-                       bool blocking);
+size_t pmixp_write_buf(int fd, void *buf, size_t count, int *shutdown, bool blocking);
 
-size_t pmixp_writev_buf(int sd, struct iovec *iov, size_t iovcnt,
-                        size_t offset, int *shutdown);
+size_t pmixp_writev_buf(int sd, struct iovec *iov, size_t iovcnt, size_t offset, int *shutdown);
 
 int pmixp_fd_set_nodelay(int fd);
 
@@ -63,12 +60,11 @@ bool pmixp_fd_write_ready(int fd, int *shutdown);
 
 int pmixp_srun_send(slurm_addr_t *addr, uint32_t len, char *data);
 
-int pmixp_stepd_send(const char *nodelist, const char *address,
-                     const char *data, uint32_t len, unsigned int start_delay,
-                     unsigned int retry_cnt, int silent);
+int
+pmixp_stepd_send(const char *nodelist, const char *address, const char *data, uint32_t len, unsigned int start_delay,
+                 unsigned int retry_cnt, int silent);
 
-int pmixp_p2p_send(const char *nodename, const char *address, const char *data,
-                   uint32_t len, unsigned int start_delay,
+int pmixp_p2p_send(const char *nodename, const char *address, const char *data, uint32_t len, unsigned int start_delay,
                    unsigned int retry_cnt, int silent);
 
 int pmixp_rmdir_recursively(char *path);
@@ -123,9 +119,7 @@ static inline size_t pmixp_list_count(pmixp_list_t *l) {
     return l->count;
 }
 
-static inline void pmixp_list_init_pre(pmixp_list_t *l,
-                                       pmixp_list_elem_t *h,
-                                       pmixp_list_elem_t *t) {
+static inline void pmixp_list_init_pre(pmixp_list_t *l, pmixp_list_elem_t *h, pmixp_list_elem_t *t) {
     xassert(l && h && t);
     l->head = h;
     l->tail = t;
@@ -141,9 +135,7 @@ static inline void pmixp_list_init_pre(pmixp_list_t *l,
     l->count = 0;
 }
 
-static inline void pmixp_list_fini_pre(pmixp_list_t *l,
-                                       pmixp_list_elem_t **h,
-                                       pmixp_list_elem_t **t) {
+static inline void pmixp_list_fini_pre(pmixp_list_t *l, pmixp_list_elem_t **h, pmixp_list_elem_t **t) {
     /* list supposed to be empty */
     xassert(l->head && l->tail);
     xassert(l->head->next == l->tail);
@@ -266,8 +258,7 @@ static inline pmixp_list_elem_t *pmixp_list_pop(pmixp_list_t *l) {
     return ret;
 }
 
-static inline pmixp_list_elem_t *pmixp_list_rem(
-        pmixp_list_t *l, pmixp_list_elem_t *elem) {
+static inline pmixp_list_elem_t *pmixp_list_rem(pmixp_list_t *l, pmixp_list_elem_t *elem) {
     pmixp_list_elem_t *next;
 
 #if PMIXP_LIST_DEBUG
@@ -308,8 +299,7 @@ static inline pmixp_list_elem_t *pmixp_list_end(pmixp_list_t *l) {
     return l->tail;
 }
 
-static inline pmixp_list_elem_t *pmixp_list_next(
-        pmixp_list_t *l, pmixp_list_elem_t *cur) {
+static inline pmixp_list_elem_t *pmixp_list_next(pmixp_list_t *l, pmixp_list_elem_t *cur) {
 #if PMIXP_LIST_DEBUG
     xassert(l->head && l->tail);
     xassert(!l->head->data && !l->tail->data);
@@ -320,8 +310,7 @@ static inline pmixp_list_elem_t *pmixp_list_next(
     return cur->next;
 }
 
-static inline pmixp_list_elem_t *__pmixp_rlist_get_free(
-        pmixp_list_t *l, size_t pre_alloc) {
+static inline pmixp_list_elem_t *__pmixp_rlist_get_free(pmixp_list_t *l, size_t pre_alloc) {
     if (pmixp_list_empty(l)) {
         /* add l->pre_alloc elements to the source list */
         int i;
@@ -332,8 +321,7 @@ static inline pmixp_list_elem_t *__pmixp_rlist_get_free(
     return pmixp_list_deq(l);
 }
 
-static inline void pmixp_rlist_init(
-        pmixp_rlist_t *l, pmixp_list_t *elem_src, size_t pre_alloc) {
+static inline void pmixp_rlist_init(pmixp_rlist_t *l, pmixp_list_t *elem_src, size_t pre_alloc) {
     pmixp_list_elem_t *h, *t;
     xassert(l && elem_src && pre_alloc);
     l->src_list = elem_src;
@@ -419,16 +407,14 @@ static inline pmixp_list_elem_t *pmixp_rlist_end(pmixp_rlist_t *l) {
     return pmixp_list_end(&l->list);
 }
 
-static inline pmixp_list_elem_t *pmixp_rlist_next(
-        pmixp_rlist_t *l, pmixp_list_elem_t *cur) {
+static inline pmixp_list_elem_t *pmixp_rlist_next(pmixp_rlist_t *l, pmixp_list_elem_t *cur) {
 #if PMIXP_LIST_DEBUG
     xassert(l && cur);
 #endif
     return pmixp_list_next(&l->list, cur);
 }
 
-static inline pmixp_list_elem_t *pmixp_rlist_rem(
-        pmixp_rlist_t *l, pmixp_list_elem_t *elem) {
+static inline pmixp_list_elem_t *pmixp_rlist_rem(pmixp_rlist_t *l, pmixp_list_elem_t *elem) {
     pmixp_list_elem_t *ret = NULL;
 #if PMIXP_LIST_DEBUG
     xassert(l && elem);

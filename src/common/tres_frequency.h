@@ -76,8 +76,7 @@ extern void tres_freq_cpuset_validate(stepd_step_rec_t *job);
  * Validate the cpus and select the frequency to set
  * Called from task cgroup code
  */
-extern void tres_freq_cgroup_validate(stepd_step_rec_t *job,
-                                      char *step_alloc_cores);
+extern void tres_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores);
 
 #if 0
 //FIXME: Not applicable

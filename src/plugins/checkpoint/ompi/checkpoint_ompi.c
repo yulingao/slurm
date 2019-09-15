@@ -109,10 +109,8 @@ extern int fini(void) {
  * The remainder of this file implements the standard Slurm checkpoint API.
  */
 
-extern int slurm_ckpt_op(uint32_t job_id, uint32_t step_id,
-                         struct step_record *step_ptr, uint16_t op,
-                         uint16_t data, char *image_dir, time_t *event_time,
-                         uint32_t *error_code, char **error_msg) {
+extern int slurm_ckpt_op(uint32_t job_id, uint32_t step_id, struct step_record *step_ptr, uint16_t op, uint16_t data,
+                         char *image_dir, time_t *event_time, uint32_t *error_code, char **error_msg) {
     int rc = SLURM_SUCCESS;
     struct check_job_info *check_ptr;
 
@@ -175,8 +173,7 @@ extern int slurm_ckpt_op(uint32_t job_id, uint32_t step_id,
     return rc;
 }
 
-extern int slurm_ckpt_comp(struct step_record *step_ptr, time_t event_time,
-                           uint32_t error_code, char *error_msg) {
+extern int slurm_ckpt_comp(struct step_record *step_ptr, time_t event_time, uint32_t error_code, char *error_msg) {
 /* FIXME: How do we tell when checkpoint completes?
  * Add another RPC from srun to slurmctld?
  * Where is this called from? */
@@ -193,9 +190,8 @@ extern int slurm_ckpt_comp(struct step_record *step_ptr, time_t event_time,
         return ESLURM_ALREADY_DONE;
 
     if (error_code > check_ptr->error_code) {
-        info("slurm_ckpt_comp for step %u.%u error %u: %s",
-             step_ptr->job_ptr->job_id, step_ptr->step_id,
-             error_code, error_msg);
+        info("slurm_ckpt_comp for step %u.%u error %u: %s", step_ptr->job_ptr->job_id, step_ptr->step_id, error_code,
+             error_msg);
         check_ptr->error_code = error_code;
         xfree(check_ptr->error_msg);
         check_ptr->error_msg = xstrdup(error_msg);
@@ -204,9 +200,8 @@ extern int slurm_ckpt_comp(struct step_record *step_ptr, time_t event_time,
 
     now = time(NULL);
     delay = difftime(now, check_ptr->time_stamp);
-    info("slurm_ckpt_comp for step %u.%u in %ld secs: %s",
-         step_ptr->job_ptr->job_id, step_ptr->step_id,
-         delay, error_msg);
+    info("slurm_ckpt_comp for step %u.%u in %ld secs: %s", step_ptr->job_ptr->job_id, step_ptr->step_id, delay,
+         error_msg);
     check_ptr->error_code = error_code;
     xfree(check_ptr->error_msg);
     check_ptr->error_msg = xstrdup(error_msg);
@@ -226,10 +221,8 @@ extern int slurm_ckpt_free_job(check_jobinfo_t jobinfo) {
     return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_pack_job(check_jobinfo_t jobinfo, Buf buffer,
-                               uint16_t protocol_version) {
-    struct check_job_info *check_ptr =
-            (struct check_job_info *) jobinfo;
+extern int slurm_ckpt_pack_job(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version) {
+    struct check_job_info *check_ptr = (struct check_job_info *) jobinfo;
 
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         uint32_t x;
@@ -260,11 +253,9 @@ extern int slurm_ckpt_pack_job(check_jobinfo_t jobinfo, Buf buffer,
     return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_unpack_job(check_jobinfo_t jobinfo, Buf buffer,
-                                 uint16_t protocol_version) {
+extern int slurm_ckpt_unpack_job(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version) {
     uint32_t uint32_tmp;
-    struct check_job_info *check_ptr =
-            (struct check_job_info *) jobinfo;
+    struct check_job_info *check_ptr = (struct check_job_info *) jobinfo;
 
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         uint16_t id;
@@ -281,8 +272,7 @@ extern int slurm_ckpt_unpack_job(check_jobinfo_t jobinfo, Buf buffer,
             safe_unpack16(&check_ptr->reply_cnt, buffer);
             safe_unpack16(&check_ptr->wait_time, buffer);
             safe_unpack32(&check_ptr->error_code, buffer);
-            safe_unpackstr_xmalloc(&check_ptr->error_msg,
-                                   &uint32_tmp, buffer);
+            safe_unpackstr_xmalloc(&check_ptr->error_msg, &uint32_tmp, buffer);
             safe_unpack_time(&check_ptr->time_stamp, buffer);
         }
     }
@@ -329,14 +319,12 @@ static int _ckpt_step(struct step_record *step_ptr, uint16_t wait, int vacate) {
     srun_exec(step_ptr, argv);
     check_ptr->time_stamp = time(NULL);
     check_ptr->wait_time = wait;
-    info("checkpoint requested for job %u.%u",
-         job_ptr->job_id, step_ptr->step_id);
+    info("checkpoint requested for job %u.%u", job_ptr->job_id, step_ptr->step_id);
     return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_task_comp(struct step_record *step_ptr,
-                                uint32_t task_id, time_t event_time,
-                                uint32_t error_code, char *error_msg) {
+extern int slurm_ckpt_task_comp(struct step_record *step_ptr, uint32_t task_id, time_t event_time, uint32_t error_code,
+                                char *error_msg) {
     return SLURM_SUCCESS;
 }
 

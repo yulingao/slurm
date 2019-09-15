@@ -106,16 +106,13 @@ struct eio_handle_components {
 
 /* Function prototypes */
 
-static int _poll_internal(struct pollfd *pfds, unsigned int nfds,
-                          time_t shutdown_time);
+static int _poll_internal(struct pollfd *pfds, unsigned int nfds, time_t shutdown_time);
 
 static unsigned int _poll_setup_pollfds(struct pollfd *, eio_obj_t **, List);
 
-static void _poll_dispatch(struct pollfd *, unsigned int, eio_obj_t **,
-                           List objList);
+static void _poll_dispatch(struct pollfd *, unsigned int, eio_obj_t **, List objList);
 
-static void _poll_handle_event(short revents, eio_obj_t *obj,
-                               List objList);
+static void _poll_handle_event(short revents, eio_obj_t *obj, List objList);
 
 eio_handle_t *eio_handle_create(uint16_t shutdown_wait) {
     eio_handle_t *eio = xmalloc(sizeof(*eio));
@@ -187,20 +184,14 @@ int eio_message_socket_accept(eio_obj_t *obj, List objs) {
     xassert(obj->ops->handle_msg);
 
     bzero(&addr, sizeof(struct sockaddr_in));      /* Prevent CLANG error */
-    while ((fd = accept(obj->fd, (struct sockaddr *) &addr,
-                        (socklen_t *) &len)) < 0) {
+    while ((fd = accept(obj->fd, (struct sockaddr *) &addr, (socklen_t *) &len)) < 0) {
         if (errno == EINTR)
             continue;
-        if ((errno == EAGAIN) ||
-            (errno == ECONNABORTED) ||
-            (errno == EWOULDBLOCK)) {
+        if ((errno == EAGAIN) || (errno == ECONNABORTED) || (errno == EWOULDBLOCK)) {
             return SLURM_SUCCESS;
         }
         error("Error on msg accept socket: %m");
-        if ((errno == EMFILE) ||
-            (errno == ENFILE) ||
-            (errno == ENOBUFS) ||
-            (errno == ENOMEM)) {
+        if ((errno == EMFILE) || (errno == ENFILE) || (errno == ENOBUFS) || (errno == ENOMEM)) {
             return SLURM_SUCCESS;
         }
         obj->shutdown = true;
@@ -217,8 +208,7 @@ int eio_message_socket_accept(eio_obj_t *obj, List objs) {
      */
     uc = (unsigned char *) &addr.sin_addr.s_addr;
     port = addr.sin_port;
-    debug2("%s: got message connection from %u.%u.%u.%u:%hu %d",
-           __func__, uc[0], uc[1], uc[2], uc[3], ntohs(port), fd);
+    debug2("%s: got message connection from %u.%u.%u.%u:%hu %d", __func__, uc[0], uc[1], uc[2], uc[3], ntohs(port), fd);
     fflush(stdout);
 
     msg = xmalloc(sizeof(slurm_msg_t));
@@ -227,8 +217,7 @@ int eio_message_socket_accept(eio_obj_t *obj, List objs) {
     if (slurm_receive_msg(fd, msg, obj->ops->timeout) != 0) {
         if (errno == EINTR)
             goto again;
-        error("%s: slurm_receive_msg[%u.%u.%u.%u]: %m",
-              __func__, uc[0], uc[1], uc[2], uc[3]);
+        error("%s: slurm_receive_msg[%u.%u.%u.%u]: %m", __func__, uc[0], uc[1], uc[2], uc[3]);
         goto cleanup;
     }
 
@@ -314,8 +303,7 @@ int eio_handle_mainloop(eio_handle_t *eio) {
         if (!pollfds)  /* Fix for CLANG false positive */
             goto done;
 
-        debug4("eio: handling events for %d objects",
-               list_count(eio->obj_list));
+        debug4("eio: handling events for %d objects", list_count(eio->obj_list));
         nfds = _poll_setup_pollfds(pollfds, map, eio->obj_list);
         if (nfds <= 0)
             goto done;
@@ -345,10 +333,8 @@ int eio_handle_mainloop(eio_handle_t *eio) {
         slurm_mutex_lock(&eio->shutdown_mutex);
         shutdown_time = eio->shutdown_time;
         slurm_mutex_unlock(&eio->shutdown_mutex);
-        if (shutdown_time &&
-            (difftime(time(NULL), shutdown_time) >= eio->shutdown_wait)) {
-            error("%s: Abandoning IO %d secs after job shutdown initiated",
-                  __func__, eio->shutdown_wait);
+        if (shutdown_time && (difftime(time(NULL), shutdown_time) >= eio->shutdown_wait)) {
+            error("%s: Abandoning IO %d secs after job shutdown initiated", __func__, eio->shutdown_wait);
             break;
         }
     }
@@ -361,8 +347,7 @@ int eio_handle_mainloop(eio_handle_t *eio) {
     return retval;
 }
 
-static int _poll_internal(struct pollfd *pfds, unsigned int nfds,
-                          time_t shutdown_time) {
+static int _poll_internal(struct pollfd *pfds, unsigned int nfds, time_t shutdown_time) {
     int n, timeout;
 
     if (shutdown_time)
@@ -392,8 +377,7 @@ static bool _is_readable(eio_obj_t *obj) {
     return (obj->ops->readable && (*obj->ops->readable)(obj));
 }
 
-static unsigned int _poll_setup_pollfds(struct pollfd *pfds, eio_obj_t *map[],
-                                        List l) {
+static unsigned int _poll_setup_pollfds(struct pollfd *pfds, eio_obj_t *map[], List l) {
     ListIterator i = list_iterator_create(l);
     eio_obj_t *obj = NULL;
     unsigned int nfds = 0;
@@ -409,8 +393,7 @@ static unsigned int _poll_setup_pollfds(struct pollfd *pfds, eio_obj_t *map[],
         readable = _is_readable(obj);
         if (writable && readable) {
             pfds[nfds].fd = obj->fd;
-            pfds[nfds].events = POLLOUT | POLLIN |
-                                POLLHUP | POLLRDHUP;
+            pfds[nfds].events = POLLOUT | POLLIN | POLLHUP | POLLRDHUP;
             map[nfds] = obj;
             nfds++;
         } else if (readable) {
@@ -429,8 +412,7 @@ static unsigned int _poll_setup_pollfds(struct pollfd *pfds, eio_obj_t *map[],
     return nfds;
 }
 
-static void _poll_dispatch(struct pollfd *pfds, unsigned int nfds,
-                           eio_obj_t *map[], List objList) {
+static void _poll_dispatch(struct pollfd *pfds, unsigned int nfds, eio_obj_t *map[], List objList) {
     int i;
 
     for (i = 0; i < nfds; i++) {
@@ -451,9 +433,7 @@ static void _poll_handle_event(short revents, eio_obj_t *obj, List objList) {
         } else if (obj->ops->handle_write) {
             (*obj->ops->handle_write)(obj, objList);
         } else {
-            debug("No handler for %s on fd %d",
-                  revents & POLLERR ? "POLLERR" : "POLLNVAL",
-                  obj->fd);
+            debug("No handler for %s on fd %d", revents & POLLERR ? "POLLERR" : "POLLNVAL", obj->fd);
             obj->shutdown = true;
         }
         return;

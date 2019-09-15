@@ -91,8 +91,7 @@ int main(int argc, char **argv) {
 
     while (1) /* 打印作业 */
     {
-        if ((!params.no_header) &&
-            (params.iterate || params.verbose || params.long_list))
+        if ((!params.no_header) && (params.iterate || params.verbose || params.long_list))
             _print_date();
 
         if (!params.clusters) /* 不是集群模式 */
@@ -149,8 +148,7 @@ static int _get_info(bool clear_old, bool log_cluster_name) {
 }
 
 /* get_window_width - return the size of the window STDOUT goes to */
-static int
-_get_window_width(void) {
+static int _get_window_width(void) {
     int width = 80;
 
 #ifdef TIOCGSIZE
@@ -196,19 +194,13 @@ static int _print_job(bool clear_old, bool log_cluster_name) {
         if (clear_old)
             old_job_ptr->last_update = 0;
         if (params.job_id) {
-            error_code = slurm_load_job(
-                    &new_job_ptr, params.job_id,
-                    show_flags);
+            error_code = slurm_load_job(&new_job_ptr, params.job_id, show_flags);
         } else if (params.user_id) {
-            error_code = slurm_load_job_user(&new_job_ptr,
-                                             params.user_id,
-                                             show_flags);
+            error_code = slurm_load_job_user(&new_job_ptr, params.user_id, show_flags);
         } else {
             if (params.clusters)
                 show_flags |= SHOW_LOCAL;
-            error_code = slurm_load_jobs(
-                    old_job_ptr->last_update,
-                    &new_job_ptr, show_flags);
+            error_code = slurm_load_jobs(old_job_ptr->last_update, &new_job_ptr, show_flags);
         }
         if (error_code == SLURM_SUCCESS)
             slurm_free_job_info_msg(old_job_ptr);
@@ -217,14 +209,11 @@ static int _print_job(bool clear_old, bool log_cluster_name) {
             new_job_ptr = old_job_ptr;
         }
     } else if (params.job_id) {
-        error_code = slurm_load_job(&new_job_ptr, params.job_id,
-                                    show_flags);
+        error_code = slurm_load_job(&new_job_ptr, params.job_id, show_flags);
     } else if (params.user_id) {
-        error_code = slurm_load_job_user(&new_job_ptr, params.user_id,
-                                         show_flags);
+        error_code = slurm_load_job_user(&new_job_ptr, params.user_id, show_flags);
     } else {
-        error_code = slurm_load_jobs((time_t) NULL, &new_job_ptr,
-                                     show_flags);
+        error_code = slurm_load_jobs((time_t) NULL, &new_job_ptr, show_flags);
     }
 
     if (error_code) {
@@ -236,24 +225,20 @@ static int _print_job(bool clear_old, bool log_cluster_name) {
         old_job_ptr->last_update = (time_t) 0;
 
     if (params.verbose) {
-        printf("last_update_time=%ld records=%u\n",
-               (long) new_job_ptr->last_update,
-               new_job_ptr->record_count);
+        printf("last_update_time=%ld records=%u\n", (long) new_job_ptr->last_update, new_job_ptr->record_count);
     }
 
     if (!params.format && !params.format_long) {
         if (log_cluster_name)
             xstrcat(params.format_long, "cluster:10 ,");
         if (params.long_list) {
-            xstrcat(params.format_long,
-                    "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
-                    "state:.9 ,timeused:.11 ,timelimit:.10 ,"
-                    "numnodes:.7 ,reasonlist:0");
+            xstrcat(params.format_long, "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
+                                        "state:.9 ,timeused:.11 ,timelimit:.10 ,"
+                                        "numnodes:.7 ,reasonlist:0");
         } else {
-            xstrcat(params.format_long,
-                    "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
-                    "statecompact:.3 ,timeused:.11 ,"
-                    "numnodes:.7 ,reasonlist:0");
+            xstrcat(params.format_long, "jobarrayid:.18 ,partition:.10 ,username:.9 ,"
+                                        "statecompact:.3 ,timeused:.11 ,"
+                                        "numnodes:.7 ,reasonlist:0");
         }
     }
 
@@ -264,16 +249,14 @@ static int _print_job(bool clear_old, bool log_cluster_name) {
             parse_long_format(params.format_long);
     }
 
-    print_jobs_array(new_job_ptr->job_array, new_job_ptr->record_count,
-                     params.format_list);
+    print_jobs_array(new_job_ptr->job_array, new_job_ptr->record_count, params.format_list);
     return SLURM_SUCCESS;
 }
 
 /* _print_job_step
 -打印指定作业步骤的信息
  - print the specified job step's information */
-static int
-_print_job_steps(bool clear_old) {
+static int _print_job_steps(bool clear_old) {
     int error_code;
     static job_step_info_response_msg_t *old_step_ptr = NULL;
     static job_step_info_response_msg_t *new_step_ptr;
@@ -290,8 +273,7 @@ _print_job_steps(bool clear_old) {
         /* Use a last_update time of 0 so that we can get an updated
          * run_time for jobs rather than just its start_time */
         /* 使用last_update时间为0，这样我们就可以获得作业的更新run_time而不仅仅是start_time */
-        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL,
-                                         &new_step_ptr, show_flags);
+        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL, &new_step_ptr, show_flags);
         if (error_code == SLURM_SUCCESS)
             slurm_free_job_step_info_response_msg(old_step_ptr);
         else if (slurm_get_errno() == SLURM_NO_CHANGE_IN_DATA) /* 没有数据改变 */
@@ -300,8 +282,7 @@ _print_job_steps(bool clear_old) {
             new_step_ptr = old_step_ptr;
         }
     } else {
-        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL,
-                                         &new_step_ptr, show_flags);
+        error_code = slurm_get_job_steps((time_t) 0, NO_VAL, NO_VAL, &new_step_ptr, show_flags);
     }
     if (error_code) {
         slurm_perror("slurm_get_job_steps error");
@@ -311,9 +292,7 @@ _print_job_steps(bool clear_old) {
 
     if (params.verbose) /* 如果是verbose模式 */
     {
-        printf("last_update_time=%ld records=%u\n",
-               (long) new_step_ptr->last_update,
-               new_step_ptr->job_step_count);
+        printf("last_update_time=%ld records=%u\n", (long) new_step_ptr->last_update, new_step_ptr->job_step_count);
     }
 
     if (!params.format && !params.format_long)
@@ -327,9 +306,7 @@ _print_job_steps(bool clear_old) {
     }
 
     /* 打印信息 */
-    print_steps_array(new_step_ptr->job_steps,
-                      new_step_ptr->job_step_count,
-                      params.format_list);
+    print_steps_array(new_step_ptr->job_steps, new_step_ptr->job_step_count, params.format_list);
     return SLURM_SUCCESS;
 }
 

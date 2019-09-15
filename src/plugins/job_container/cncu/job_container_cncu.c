@@ -102,8 +102,7 @@ static int _save_state(char *dir_name) {
     (void) unlink(file_name);
     state_fd = creat(file_name, 0600);
     if (state_fd < 0) {
-        error("Can't save state, error creating file %s %m",
-              file_name);
+        error("Can't save state, error creating file %s %m", file_name);
         ret = SLURM_ERROR;
     } else {
         char *buf = (char *) job_id_array;
@@ -145,8 +144,7 @@ static int _restore_state(char *dir_name) {
         data_allocated = JOB_BUF_SIZE;
         data = xmalloc(data_allocated);
         while (1) {
-            data_read = read(state_fd, data + data_offset,
-                             JOB_BUF_SIZE);
+            data_read = read(state_fd, data + data_offset, JOB_BUF_SIZE);
             if ((data_read < 0) && (errno == EINTR))
                 continue;
             if (data_read < 0) {
@@ -161,8 +159,7 @@ static int _restore_state(char *dir_name) {
         }
         close(state_fd);
     } else {
-        error("No %s file for %s state recovery",
-              file_name, plugin_type);
+        error("No %s file for %s state recovery", file_name, plugin_type);
         xfree(file_name);
         return SLURM_SUCCESS;
     }
@@ -242,10 +239,7 @@ extern int container_p_restore(char *dir_name, bool recover) {
         if (job_id_array[i] == 0)
             continue;
         if (debug_flags & DEBUG_FLAG_JOB_CONT)
-            info("%s: %s job(%u)",
-                 plugin_type,
-                 recover ? "recovered" : "purging",
-                 job_id_array[i]);
+            info("%s: %s job(%u)", plugin_type, recover ? "recovered" : "purging", job_id_array[i]);
         if (!recover)
             job_id_array[i] = 0;
     }
@@ -278,8 +272,7 @@ extern int container_p_create(uint32_t job_id) {
         if (empty == -1) {
             empty = job_id_count;
             job_id_count += 4;
-            job_id_array = xrealloc(job_id_array,
-                                    sizeof(uint32_t) * job_id_count);
+            job_id_array = xrealloc(job_id_array, sizeof(uint32_t) * job_id_count);
         }
         job_id_array[empty] = job_id;
         _save_state(state_dir);
@@ -329,8 +322,7 @@ extern int container_p_add_cont(uint32_t job_id, uint64_t cont_id) {
     if (debug_flags & DEBUG_FLAG_JOB_CONT) {
         info("%s: adding cont(%u.%"
         PRIu64
-        ")",
-                plugin_type, job_id, cont_id);
+        ")", plugin_type, job_id, cont_id);
     }
 
 #ifdef HAVE_NATIVE_CRAY
@@ -387,8 +379,7 @@ extern int container_p_join(uint32_t job_id, uid_t uid) {
     START_TIMER;
 
     if (debug_flags & DEBUG_FLAG_JOB_CONT) {
-        info("%s: adding pid(%u.%u)",
-             plugin_type, job_id, (uint32_t) pid);
+        info("%s: adding pid(%u.%u)", plugin_type, job_id, (uint32_t) pid);
     }
     memset(&job, 0, sizeof(stepd_step_rec_t));
     job.jmgr_pid = pid;

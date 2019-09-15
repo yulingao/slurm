@@ -44,17 +44,14 @@
 
 typedef enum {
     PMIXP_DIRECT_NONE, /* shouldn't be used in this state */
-    PMIXP_DIRECT_INIT,
-    PMIXP_DIRECT_EP_SENT,
-    PMIXP_DIRECT_CONNECTED
+    PMIXP_DIRECT_INIT, PMIXP_DIRECT_EP_SENT, PMIXP_DIRECT_CONNECTED
 } pmixp_dconn_state_t;
 
 typedef enum {
     /* This direct connection implementation needs software-level
      * progress engine (select/poll/epoll)
      */
-            PMIXP_DCONN_PROGRESS_SW,
-    /* This direct connection implementation has hardware-level
+            PMIXP_DCONN_PROGRESS_SW, /* This direct connection implementation has hardware-level
      * progress engine
      */
             PMIXP_DCONN_PROGRESS_HW
@@ -65,8 +62,7 @@ typedef enum {
      * both sides to be involved in the connection
      * establishment
      */
-            PMIXP_DCONN_CONN_TYPE_TWOSIDE,
-    /* This direct connection implementation implements
+            PMIXP_DCONN_CONN_TYPE_TWOSIDE, /* This direct connection implementation implements
      * one-sided connection semantics
      */
             PMIXP_DCONN_CONN_TYPE_ONESIDE
@@ -84,13 +80,11 @@ typedef struct {
     void *priv;
 } pmixp_dconn_t;
 
-typedef void *(*pmixp_dconn_p2p_init_t)(int nodeid,
-                                        pmixp_p2p_data_t direct_hdr);
+typedef void *(*pmixp_dconn_p2p_init_t)(int nodeid, pmixp_p2p_data_t direct_hdr);
 
 typedef void (*pmixp_dconn_p2p_fini_t)(void *_priv);
 
-typedef int (*pmixp_dconn_p2p_connect_t)(void *_priv, void *ep_data,
-                                         size_t ep_len, void *init_msg);
+typedef int (*pmixp_dconn_p2p_connect_t)(void *_priv, void *ep_data, size_t ep_len, void *init_msg);
 
 typedef int (*pmixp_dconn_p2p_send_nb_t)(void *_priv, void *msg);
 
@@ -117,8 +111,7 @@ int pmixp_dconn_init(int node_cnt, pmixp_p2p_data_t direct_hdr);
 
 void pmixp_dconn_fini();
 
-int pmixp_dconn_connect_do(pmixp_dconn_t *dconn, void *ep_data,
-                           size_t ep_len, void *init_msg);
+int pmixp_dconn_connect_do(pmixp_dconn_t *dconn, void *ep_data, size_t ep_len, void *init_msg);
 
 pmixp_dconn_progress_type_t pmixp_dconn_progress_type();
 
@@ -160,8 +153,7 @@ static inline pmixp_dconn_state_t pmixp_dconn_state(pmixp_dconn_t *dconn) {
 static inline void pmixp_dconn_req_sent(pmixp_dconn_t *dconn) {
     if (PMIXP_DIRECT_INIT != dconn->state) {
         PMIXP_ERROR("State machine violation, when transition "
-                    "to PORT_SENT from %d",
-                    (int) dconn->state);
+                    "to PORT_SENT from %d", (int) dconn->state);
         xassert(PMIXP_DIRECT_INIT == dconn->state);
         abort();
     }
@@ -178,8 +170,7 @@ static inline void pmixp_dconn_regio(eio_handle_t *h) {
 
 /* Returns locked direct connection descriptor */
 
-static inline bool pmixp_dconn_require_connect(
-        pmixp_dconn_t *dconn, bool *send_init) {
+static inline bool pmixp_dconn_require_connect(pmixp_dconn_t *dconn, bool *send_init) {
     *send_init = false;
     switch (pmixp_dconn_state(dconn)) {
         case PMIXP_DIRECT_INIT:
@@ -205,8 +196,7 @@ static inline bool pmixp_dconn_require_connect(
                 default:
                     /* shouldn't happen */
                 PMIXP_ERROR("Unexpected direct connection "
-                            "semantics type: %d",
-                            pmixp_dconn_connect_type());
+                            "semantics type: %d", pmixp_dconn_connect_type());
                     xassert(0 && pmixp_dconn_connect_type());
                     abort();
             }
@@ -224,8 +214,7 @@ static inline bool pmixp_dconn_require_connect(
     return false;
 }
 
-static inline int pmixp_dconn_connect(
-        pmixp_dconn_t *dconn, void *ep_data, int ep_len, void *init_msg) {
+static inline int pmixp_dconn_connect(pmixp_dconn_t *dconn, void *ep_data, int ep_len, void *init_msg) {
     int rc;
     /* establish the connection */
     rc = pmixp_dconn_connect_do(dconn, ep_data, ep_len, init_msg);
@@ -239,16 +228,13 @@ static inline int pmixp_dconn_connect(
         char *nodename = pmixp_info_job_host(dconn->nodeid);
         xassert(nodename);
         if (NULL == nodename) {
-            PMIXP_ERROR("Bad nodeid = %d in the incoming message",
-                        dconn->nodeid);
+            PMIXP_ERROR("Bad nodeid = %d in the incoming message", dconn->nodeid);
             abort();
         }
-        PMIXP_ERROR("Cannot establish direct connection to %s (%d)",
-                    nodename, dconn->nodeid);
+        PMIXP_ERROR("Cannot establish direct connection to %s (%d)", nodename, dconn->nodeid);
         xfree(nodename);
         pmixp_debug_hang(0); /* enable hang to debug this! */
-        slurm_kill_job_step(pmixp_info_jobid(),
-                            pmixp_info_stepid(), SIGKILL);
+        slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
     }
     return rc;
 }
@@ -267,10 +253,8 @@ static inline pmixp_io_engine_t *pmixp_dconn_engine(pmixp_dconn_t *dconn) {
 static inline pmixp_dconn_t *pmixp_dconn_accept(int nodeid, int fd) {
     if (PMIXP_DCONN_PROGRESS_SW != pmixp_dconn_progress_type()) {
         PMIXP_ERROR("Accept is not supported by direct connection "
-                    "of type %d",
-                    (int) pmixp_dconn_progress_type());
-        xassert(PMIXP_DCONN_PROGRESS_SW ==
-                pmixp_dconn_progress_type());
+                    "of type %d", (int) pmixp_dconn_progress_type());
+        xassert(PMIXP_DCONN_PROGRESS_SW == pmixp_dconn_progress_type());
         return NULL;
     }
     pmixp_dconn_t *dconn = pmixp_dconn_lock(nodeid);
@@ -287,8 +271,7 @@ static inline pmixp_dconn_t *pmixp_dconn_accept(int nodeid, int fd) {
         dconn->state = PMIXP_DIRECT_CONNECTED;
     } else {
         /* shouldn't happen */
-        PMIXP_ERROR("Unexpected direct connection state: %d",
-                    (int) pmixp_dconn_state(dconn));
+        PMIXP_ERROR("Unexpected direct connection state: %d", (int) pmixp_dconn_state(dconn));
         xassert(PMIXP_DIRECT_EP_SENT == pmixp_dconn_state(dconn));
         pmixp_dconn_unlock(dconn);
         return NULL;

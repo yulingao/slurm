@@ -70,7 +70,6 @@ int slurm_sched_g_reconfig(void);
 /*
  * Supply the initial priority for a newly-submitted job.
  */
-uint32_t slurm_sched_g_initial_priority(uint32_t max_prio,
-                                        struct job_record *job_ptr);
+uint32_t slurm_sched_g_initial_priority(uint32_t max_prio, struct job_record *job_ptr);
 
 #endif /*__SLURM_CONTROLLER_SCHED_PLUGIN_API_H__*/

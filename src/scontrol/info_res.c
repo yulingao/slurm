@@ -39,15 +39,12 @@
 #include "scontrol.h"
 
 /* Load current reservation table information into *res_buffer_pptr */
-extern int
-scontrol_load_reservations(reserve_info_msg_t **res_buffer_pptr) {
+extern int scontrol_load_reservations(reserve_info_msg_t **res_buffer_pptr) {
     int error_code;
     reserve_info_msg_t *res_info_ptr = NULL;
 
     if (old_res_info_ptr) {
-        error_code = slurm_load_reservations(
-                old_res_info_ptr->last_update,
-                &res_info_ptr);
+        error_code = slurm_load_reservations(old_res_info_ptr->last_update, &res_info_ptr);
         if (error_code == SLURM_SUCCESS) {
             slurm_free_reservation_info_msg(old_res_info_ptr);
 
@@ -60,8 +57,7 @@ scontrol_load_reservations(reserve_info_msg_t **res_buffer_pptr) {
             }
         }
     } else {
-        error_code = slurm_load_reservations((time_t) NULL,
-                                             &res_info_ptr);
+        error_code = slurm_load_reservations((time_t) NULL, &res_info_ptr);
     }
 
     if (error_code == SLURM_SUCCESS) {
@@ -76,8 +72,7 @@ scontrol_load_reservations(reserve_info_msg_t **res_buffer_pptr) {
  * scontrol_print_res - print the specified reservation's information
  * IN reservation_name - NULL to print information about all reservations
  */
-extern void
-scontrol_print_res(char *reservation_name) {
+extern void scontrol_print_res(char *reservation_name) {
     int error_code, i, print_cnt = 0;
     reserve_info_msg_t *res_info_ptr = NULL;
     reserve_info_t *res_ptr = NULL;
@@ -92,20 +87,16 @@ scontrol_print_res(char *reservation_name) {
 
     if (quiet_flag == -1) {
         char time_str[32];
-        slurm_make_time_str((time_t *) &res_info_ptr->last_update,
-                            time_str, sizeof(time_str));
-        printf("last_update_time=%s, records=%d\n",
-               time_str, res_info_ptr->record_count);
+        slurm_make_time_str((time_t *) &res_info_ptr->last_update, time_str, sizeof(time_str));
+        printf("last_update_time=%s, records=%d\n", time_str, res_info_ptr->record_count);
     }
 
     res_ptr = res_info_ptr->reservation_array;
     for (i = 0; i < res_info_ptr->record_count; i++) {
-        if (reservation_name &&
-            xstrcmp(reservation_name, res_ptr[i].name) != 0)
+        if (reservation_name && xstrcmp(reservation_name, res_ptr[i].name) != 0)
             continue;
         print_cnt++;
-        slurm_print_reservation_info(stdout, &res_ptr[i],
-                                     one_liner);
+        slurm_print_reservation_info(stdout, &res_ptr[i], one_liner);
         if (reservation_name)
             break;
     }
@@ -114,8 +105,7 @@ scontrol_print_res(char *reservation_name) {
         if (reservation_name) {
             exit_code = 1;
             if (quiet_flag != 1)
-                printf("Reservation %s not found\n",
-                       reservation_name);
+                printf("Reservation %s not found\n", reservation_name);
         } else if (quiet_flag != 1)
             printf("No reservations in the system\n");
     }

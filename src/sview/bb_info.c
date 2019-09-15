@@ -43,8 +43,7 @@ typedef struct {
 } sview_bb_info_t;
 
 enum {
-    EDIT_REMOVE = 1,
-    EDIT_EDIT
+    EDIT_REMOVE = 1, EDIT_EDIT
 };
 
 /* These need to be in alpha order (except POS and CNT) */
@@ -76,44 +75,26 @@ enum {
  * s/b a const probably*/
 static char *_initial_page_opts = "Name/JobID,Pool,Size,State,StateTime,UserID";
 
-static display_data_t display_data_bb[] = {
-        {G_TYPE_INT,    SORTID_POS,         NULL,         false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_PLUGIN,      "Plugin",     false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_NAME,        "Name/JobID", false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_COLOR,       NULL,         true,  EDIT_COLOR,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_INT,    SORTID_COLOR_INX,   NULL,         false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_ACCOUNT,     "Account",    false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_CREATE_TIME, "CreateTime", false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_PARTITION,   "Partition",  false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_POOL,        "Pool",       false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_QOS,         "QOS",        false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_SIZE,        "Size",       false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_STATE,       "State",      false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_INT,    SORTID_UPDATED,     NULL,         false, EDIT_NONE, refresh_bb,
-                                                                                        create_model_bb, admin_edit_bb},
-        {G_TYPE_STRING, SORTID_USERID,      "UserID",     false, EDIT_NONE,
-                                                                            refresh_bb, create_model_bb, admin_edit_bb},
-        {G_TYPE_NONE,   -1,                 NULL,         false, EDIT_NONE}
-};
+static display_data_t display_data_bb[] = {{G_TYPE_INT,    SORTID_POS,         NULL,         false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_PLUGIN,      "Plugin",     false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_NAME,        "Name/JobID", false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_COLOR,       NULL,         true,  EDIT_COLOR, refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_INT,    SORTID_COLOR_INX,   NULL,         false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_ACCOUNT,     "Account",    false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_CREATE_TIME, "CreateTime", false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_PARTITION,   "Partition",  false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_POOL,        "Pool",       false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_QOS,         "QOS",        false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_SIZE,        "Size",       false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_STATE,       "State",      false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_INT,    SORTID_UPDATED,     NULL,         false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_STRING, SORTID_USERID,      "UserID",     false, EDIT_NONE,  refresh_bb, create_model_bb, admin_edit_bb},
+                                           {G_TYPE_NONE,   -1,                 NULL,         false, EDIT_NONE}};
 
 /*Burst buffer options list*/
-static display_data_t options_data_bb[] = {
-        {G_TYPE_INT,    SORTID_POS, NULL,        false, EDIT_NONE},
-        {G_TYPE_STRING, INFO_PAGE,  "Full Info", true,  BB_PAGE},
-        {G_TYPE_NONE,   -1,         NULL,        false, EDIT_NONE}
-};
+static display_data_t options_data_bb[] = {{G_TYPE_INT,    SORTID_POS, NULL,        false, EDIT_NONE},
+                                           {G_TYPE_STRING, INFO_PAGE,  "Full Info", true,  BB_PAGE},
+                                           {G_TYPE_NONE,   -1,         NULL,        false, EDIT_NONE}};
 
 static display_data_t *local_display_data = NULL;
 //Variable for Admin edit if needed
@@ -188,8 +169,7 @@ static void _bb_info_list_del(void *object) {
 /* } */
 
 /* Function creates the record menu when you double click on a record */
-static void _layout_bb_record(GtkTreeView *treeview,
-                              sview_bb_info_t *sview_bb_info, int update) {
+static void _layout_bb_record(GtkTreeView *treeview, sview_bb_info_t *sview_bb_info, int update) {
     GtkTreeIter iter;
     char time_buf[20], tmp_user_id[60], tmp_size[20];
     char bb_name_id[32];
@@ -202,78 +182,45 @@ static void _layout_bb_record(GtkTreeView *treeview,
     if (bb_ptr->name) {
         strlcpy(bb_name_id, bb_ptr->name, sizeof(bb_name_id));
     } else if (bb_ptr->array_task_id == NO_VAL) {
-        convert_num_unit(bb_ptr->job_id, bb_name_id, sizeof(bb_name_id),
-                         UNIT_NONE, NO_VAL,
+        convert_num_unit(bb_ptr->job_id, bb_name_id, sizeof(bb_name_id), UNIT_NONE, NO_VAL,
                          working_sview_config.convert_flags);
     } else {
-        snprintf(bb_name_id, sizeof(bb_name_id),
-                 "%u_%u(%u)",
-                 bb_ptr->array_job_id,
-                 bb_ptr->array_task_id,
+        snprintf(bb_name_id, sizeof(bb_name_id), "%u_%u(%u)", bb_ptr->array_job_id, bb_ptr->array_task_id,
                  bb_ptr->job_id);
     }
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_NAME),
-                               bb_name_id);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_NAME), bb_name_id);
 
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_PLUGIN),
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_PLUGIN),
                                sview_bb_info->plugin);
 
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_ACCOUNT),
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_ACCOUNT),
                                bb_ptr->account);
 
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_PARTITION),
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_PARTITION),
                                bb_ptr->partition);
 
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_POOL),
-                               bb_ptr->pool);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_POOL), bb_ptr->pool);
 
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_QOS),
-                               bb_ptr->qos);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_QOS), bb_ptr->qos);
 
     tmp_state = bb_state_string(bb_ptr->state);
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_STATE),
-                               tmp_state);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_STATE), tmp_state);
 
     _get_size_str(tmp_size, sizeof(tmp_size), bb_ptr->size);
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_SIZE),
-                               tmp_size);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_SIZE), tmp_size);
 
     if (bb_ptr->create_time) {
-        slurm_make_time_str((time_t * ) & bb_ptr->create_time, time_buf,
-                            sizeof(time_buf));
+        slurm_make_time_str((time_t * ) & bb_ptr->create_time, time_buf, sizeof(time_buf));
     } else {
         time_t now = time(NULL);
         slurm_make_time_str(&now, time_buf, sizeof(time_buf));
     }
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_CREATE_TIME),
-                               time_buf);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_CREATE_TIME), time_buf);
 
     tmp_user_name = uid_to_string(bb_ptr->user_id);
-    snprintf(tmp_user_id, sizeof(tmp_user_id), "%s(%u)", tmp_user_name,
-             bb_ptr->user_id);
+    snprintf(tmp_user_id, sizeof(tmp_user_id), "%s(%u)", tmp_user_name, bb_ptr->user_id);
     xfree(tmp_user_name);
-    add_display_treestore_line(update, treestore, &iter,
-                               find_col_name(display_data_bb,
-                                             SORTID_USERID),
-                               tmp_user_id);
+    add_display_treestore_line(update, treestore, &iter, find_col_name(display_data_bb, SORTID_USERID), tmp_user_id);
 }
 
 /* Reformat a numeric value with an appropriate suffix.
@@ -320,8 +267,7 @@ static void _get_size_str(char *buf, size_t buf_size, uint64_t num) {
 
 
 /* updates the burst buffer record on sview */
-static void _update_bb_record(sview_bb_info_t *sview_bb_info_ptr,
-                              GtkTreeStore *treestore) {
+static void _update_bb_record(sview_bb_info_t *sview_bb_info_ptr, GtkTreeStore *treestore) {
     char tmp_create_time[40];
     char tmp_size[20], tmp_user_id[60], bb_name_id[32];
     char *tmp_state, *tmp_user_name;
@@ -330,24 +276,18 @@ static void _update_bb_record(sview_bb_info_t *sview_bb_info_ptr,
     if (bb_ptr->name) {
         strlcpy(bb_name_id, bb_ptr->name, sizeof(bb_name_id));
     } else if (bb_ptr->array_task_id == NO_VAL) {
-        convert_num_unit(bb_ptr->job_id, bb_name_id, sizeof(bb_name_id),
-                         UNIT_NONE, NO_VAL,
+        convert_num_unit(bb_ptr->job_id, bb_name_id, sizeof(bb_name_id), UNIT_NONE, NO_VAL,
                          working_sview_config.convert_flags);
     } else {
-        snprintf(bb_name_id, sizeof(bb_name_id),
-                 "%u_%u(%u)",
-                 bb_ptr->array_job_id,
-                 bb_ptr->array_task_id,
+        snprintf(bb_name_id, sizeof(bb_name_id), "%u_%u(%u)", bb_ptr->array_job_id, bb_ptr->array_task_id,
                  bb_ptr->job_id);
     }
 
     if (bb_ptr->create_time) {
-        slurm_make_time_str((time_t * ) & bb_ptr->create_time,
-                            tmp_create_time, sizeof(tmp_create_time));
+        slurm_make_time_str((time_t * ) & bb_ptr->create_time, tmp_create_time, sizeof(tmp_create_time));
     } else {
         time_t now = time(NULL);
-        slurm_make_time_str(&now, tmp_create_time,
-                            sizeof(tmp_create_time));
+        slurm_make_time_str(&now, tmp_create_time, sizeof(tmp_create_time));
     }
 
     _get_size_str(tmp_size, sizeof(tmp_size), bb_ptr->size);
@@ -355,37 +295,24 @@ static void _update_bb_record(sview_bb_info_t *sview_bb_info_ptr,
     tmp_state = bb_state_string(bb_ptr->state);
 
     tmp_user_name = uid_to_string(bb_ptr->user_id);
-    snprintf(tmp_user_id, sizeof(tmp_user_id), "%s(%u)", tmp_user_name,
-             bb_ptr->user_id);
+    snprintf(tmp_user_id, sizeof(tmp_user_id), "%s(%u)", tmp_user_name, bb_ptr->user_id);
     xfree(tmp_user_name);
 
     /* Combining these records provides a slight performance improvement */
-    gtk_tree_store_set(treestore, &sview_bb_info_ptr->iter_ptr,
-                       SORTID_COLOR,
-                       sview_colors[sview_bb_info_ptr->color_inx],
-                       SORTID_COLOR_INX, sview_bb_info_ptr->color_inx,
-                       SORTID_PLUGIN, sview_bb_info_ptr->plugin,
-                       SORTID_ACCOUNT, bb_ptr->account,
-                       SORTID_CREATE_TIME, tmp_create_time,
-                       SORTID_NAME, bb_name_id,
-                       SORTID_PARTITION, bb_ptr->partition,
-                       SORTID_POOL, bb_ptr->pool,
-                       SORTID_QOS, bb_ptr->qos,
-                       SORTID_SIZE, tmp_size,
-                       SORTID_STATE, tmp_state,
-                       SORTID_UPDATED, 1,
-                       SORTID_USERID, tmp_user_id,
-                       -1);
+    gtk_tree_store_set(treestore, &sview_bb_info_ptr->iter_ptr, SORTID_COLOR,
+                       sview_colors[sview_bb_info_ptr->color_inx], SORTID_COLOR_INX, sview_bb_info_ptr->color_inx,
+                       SORTID_PLUGIN, sview_bb_info_ptr->plugin, SORTID_ACCOUNT, bb_ptr->account, SORTID_CREATE_TIME,
+                       tmp_create_time, SORTID_NAME, bb_name_id, SORTID_PARTITION, bb_ptr->partition, SORTID_POOL,
+                       bb_ptr->pool, SORTID_QOS, bb_ptr->qos, SORTID_SIZE, tmp_size, SORTID_STATE, tmp_state,
+                       SORTID_UPDATED, 1, SORTID_USERID, tmp_user_id, -1);
 
     return;
 }
 
 /* Append the give Burst Record to the list */
-static void _append_bb_record(sview_bb_info_t *sview_bb_info_ptr,
-                              GtkTreeStore *treestore) {
+static void _append_bb_record(sview_bb_info_t *sview_bb_info_ptr, GtkTreeStore *treestore) {
     gtk_tree_store_append(treestore, &sview_bb_info_ptr->iter_ptr, NULL);
-    gtk_tree_store_set(treestore, &sview_bb_info_ptr->iter_ptr,
-                       SORTID_POS, sview_bb_info_ptr->pos, -1);
+    gtk_tree_store_set(treestore, &sview_bb_info_ptr->iter_ptr, SORTID_POS, sview_bb_info_ptr->pos, -1);
     _update_bb_record(sview_bb_info_ptr, treestore);
 }
 
@@ -406,8 +333,7 @@ static void _update_info_bb(List info_list, GtkTreeView *tree_view) {
             sview_bb_info->iter_set = false;
 
         if (sview_bb_info->iter_set) {
-            gtk_tree_model_get(model, &sview_bb_info->iter_ptr,
-                               SORTID_NAME, &name, -1);
+            gtk_tree_model_get(model, &sview_bb_info->iter_ptr, SORTID_NAME, &name, -1);
             if (xstrcmp(name, sview_bb_info->bb_name)) {
                 /* Bad pointer */
                 sview_bb_info->iter_set = false;
@@ -416,11 +342,9 @@ static void _update_info_bb(List info_list, GtkTreeView *tree_view) {
             g_free(name);
         }
         if (sview_bb_info->iter_set) {
-            _update_bb_record(sview_bb_info,
-                              GTK_TREE_STORE(model));
+            _update_bb_record(sview_bb_info, GTK_TREE_STORE(model));
         } else {
-            _append_bb_record(sview_bb_info,
-                              GTK_TREE_STORE(model));
+            _append_bb_record(sview_bb_info, GTK_TREE_STORE(model));
             sview_bb_info->iter_set = true;
         }
     }
@@ -450,27 +374,19 @@ static List _create_bb_info_list(burst_buffer_info_msg_t *bb_info_ptr) {
         last_list = info_list;
     info_list = list_create(_bb_info_list_del);
 
-    for (i = 0, bb_ptr = bb_info_ptr->burst_buffer_array;
-         i < bb_info_ptr->record_count; i++, bb_ptr++) {
+    for (i = 0, bb_ptr = bb_info_ptr->burst_buffer_array; i < bb_info_ptr->record_count; i++, bb_ptr++) {
 
-        for (j = 0, bb_resv_ptr = bb_ptr->burst_buffer_resv_ptr;
-             j < bb_ptr->buffer_count; j++, bb_resv_ptr++) {
+        for (j = 0, bb_resv_ptr = bb_ptr->burst_buffer_resv_ptr; j < bb_ptr->buffer_count; j++, bb_resv_ptr++) {
 
             /* Find any existing record for this burst buffer */
             if (last_list) {
                 last_list_itr = list_iterator_create(last_list);
-                while ((sview_bb_info_ptr =
-                                list_next(last_list_itr))) {
-                    if (bb_resv_ptr->job_id &&
-                        (bb_resv_ptr->job_id !=
-                         sview_bb_info_ptr->bb_ptr->job_id))
+                while ((sview_bb_info_ptr = list_next(last_list_itr))) {
+                    if (bb_resv_ptr->job_id && (bb_resv_ptr->job_id != sview_bb_info_ptr->bb_ptr->job_id))
                         continue;
-                    if (bb_resv_ptr->name &&
-                        xstrcmp(sview_bb_info_ptr->bb_name,
-                                bb_resv_ptr->name))
+                    if (bb_resv_ptr->name && xstrcmp(sview_bb_info_ptr->bb_name, bb_resv_ptr->name))
                         continue;
-                    if (xstrcmp(sview_bb_info_ptr->plugin,
-                                bb_ptr->name))
+                    if (xstrcmp(sview_bb_info_ptr->plugin, bb_ptr->name))
                         continue;
                     list_remove(last_list_itr);
                     _bb_info_free(sview_bb_info_ptr);
@@ -482,26 +398,17 @@ static List _create_bb_info_list(burst_buffer_info_msg_t *bb_info_ptr) {
             }
 
             if (bb_resv_ptr->name) {
-                strlcpy(bb_name_id, bb_resv_ptr->name,
-                        sizeof(bb_name_id));
+                strlcpy(bb_name_id, bb_resv_ptr->name, sizeof(bb_name_id));
             } else if (bb_resv_ptr->array_task_id == NO_VAL) {
-                convert_num_unit(bb_resv_ptr->job_id,
-                                 bb_name_id,
-                                 sizeof(bb_name_id),
-                                 UNIT_NONE, NO_VAL,
-                                 working_sview_config.
-                                         convert_flags);
+                convert_num_unit(bb_resv_ptr->job_id, bb_name_id, sizeof(bb_name_id), UNIT_NONE, NO_VAL,
+                                 working_sview_config.convert_flags);
             } else {
-                snprintf(bb_name_id, sizeof(bb_name_id),
-                         "%u_%u(%u)",
-                         bb_resv_ptr->array_job_id,
-                         bb_resv_ptr->array_task_id,
-                         bb_resv_ptr->job_id);
+                snprintf(bb_name_id, sizeof(bb_name_id), "%u_%u(%u)", bb_resv_ptr->array_job_id,
+                         bb_resv_ptr->array_task_id, bb_resv_ptr->job_id);
             }
 
             if (!sview_bb_info_ptr) {    /* Need new record */
-                sview_bb_info_ptr =
-                        xmalloc(sizeof(sview_bb_info_t));
+                sview_bb_info_ptr = xmalloc(sizeof(sview_bb_info_t));
             }
             sview_bb_info_ptr->bb_ptr = bb_resv_ptr;
             sview_bb_info_ptr->bb_name = xstrdup(bb_name_id);
@@ -534,10 +441,8 @@ static void _display_info_bb(List info_list, popup_info_t *popup_win) {
     }
 
     if (!spec_info->display_widget) {
-        treeview = create_treeview_2cols_attach_to_table(
-                popup_win->table);
-        spec_info->display_widget =
-                gtk_widget_ref(GTK_WIDGET(treeview));
+        treeview = create_treeview_2cols_attach_to_table(popup_win->table);
+        spec_info->display_widget = gtk_widget_ref(GTK_WIDGET(treeview));
     } else {
         treeview = GTK_TREE_VIEW(spec_info->display_widget);
         update = 1;
@@ -550,16 +455,10 @@ static void _display_info_bb(List info_list, popup_info_t *popup_win) {
         if (bb_ptr->name) {
             strlcpy(bb_name_id, bb_ptr->name, sizeof(bb_name_id));
         } else if (bb_ptr->array_task_id == NO_VAL) {
-            convert_num_unit(bb_ptr->job_id,
-                             bb_name_id,
-                             sizeof(bb_name_id),
-                             UNIT_NONE, NO_VAL,
+            convert_num_unit(bb_ptr->job_id, bb_name_id, sizeof(bb_name_id), UNIT_NONE, NO_VAL,
                              working_sview_config.convert_flags);
         } else {
-            snprintf(bb_name_id, sizeof(bb_name_id),
-                     "%u_%u(%u)",
-                     bb_ptr->array_job_id,
-                     bb_ptr->array_task_id,
+            snprintf(bb_name_id, sizeof(bb_name_id), "%u_%u(%u)", bb_ptr->array_job_id, bb_ptr->array_task_id,
                      bb_ptr->job_id);
         }
 
@@ -602,8 +501,7 @@ extern int get_new_info_bb(burst_buffer_info_msg_t **info_ptr, int force) {
     static time_t last;
     static bool changed = 0;
 
-    if (g_bb_info_ptr && !force
-        && ((now - last) < working_sview_config.refresh_delay)) {
+    if (g_bb_info_ptr && !force && ((now - last) < working_sview_config.refresh_delay)) {
         if (*info_ptr != g_bb_info_ptr)
             error_code = SLURM_SUCCESS;
         *info_ptr = g_bb_info_ptr;
@@ -646,10 +544,7 @@ extern GtkListStore *create_model_bb(int type) {
 }
 
 /* If Burst buffer wants to be edited it goes here */
-extern void admin_edit_bb(GtkCellRendererText *cell,
-                          const char *path_string,
-                          const char *new_text,
-                          gpointer data) {
+extern void admin_edit_bb(GtkCellRendererText *cell, const char *path_string, const char *new_text, gpointer data) {
     /* NOP */
 }
 
@@ -666,8 +561,7 @@ extern void get_info_bb(GtkTable *table, display_data_t *display_data) {
     static bool set_opts = false;
 
     if (!set_opts) {
-        set_page_opts(BB_PAGE, display_data_bb,
-                      SORTID_CNT, _initial_page_opts);
+        set_page_opts(BB_PAGE, display_data_bb, SORTID_CNT, _initial_page_opts);
     }
     set_opts = true;
 
@@ -712,8 +606,7 @@ extern void get_info_bb(GtkTable *table, display_data_t *display_data) {
         if (display_widget)
             gtk_widget_destroy(display_widget);
         view = ERROR_VIEW;
-        sprintf(error_char, "slurm_load_reservations: %s",
-                slurm_strerror(slurm_get_errno()));
+        sprintf(error_char, "slurm_load_reservations: %s", slurm_strerror(slurm_get_errno()));
         label = gtk_label_new(error_char);
         gtk_table_attach_defaults(table, label, 0, 1, 0, 1);
         gtk_widget_show(label);
@@ -729,38 +622,28 @@ extern void get_info_bb(GtkTable *table, display_data_t *display_data) {
     }
 
     /* set up the grid */
-    if (display_widget && GTK_IS_TREE_VIEW(display_widget)
-        && gtk_tree_selection_count_selected_rows(
-            gtk_tree_view_get_selection(
-                    GTK_TREE_VIEW(display_widget)))) {
+    if (display_widget && GTK_IS_TREE_VIEW(display_widget) &&
+        gtk_tree_selection_count_selected_rows(gtk_tree_view_get_selection(GTK_TREE_VIEW(display_widget)))) {
         GtkTreeViewColumn *focus_column = NULL;
         /* highlight the correct nodes from the last selection */
-        gtk_tree_view_get_cursor(GTK_TREE_VIEW(display_widget),
-                                 &path, &focus_column);
+        gtk_tree_view_get_cursor(GTK_TREE_VIEW(display_widget), &path, &focus_column);
     }
 
-    change_grid_color(grid_button_list, -1, -1,
-                      MAKE_WHITE, true, 0);
+    change_grid_color(grid_button_list, -1, -1, MAKE_WHITE, true, 0);
 
     if (view == ERROR_VIEW && display_widget) {
         gtk_widget_destroy(display_widget);
         display_widget = NULL;
     }
     if (!display_widget) {
-        tree_view = create_treeview(local_display_data,
-                                    &grid_button_list);
-        gtk_tree_selection_set_mode(
-                gtk_tree_view_get_selection(tree_view),
-                GTK_SELECTION_MULTIPLE);
+        tree_view = create_treeview(local_display_data, &grid_button_list);
+        gtk_tree_selection_set_mode(gtk_tree_view_get_selection(tree_view), GTK_SELECTION_MULTIPLE);
         display_widget = gtk_widget_ref(GTK_WIDGET(tree_view));
-        gtk_table_attach_defaults(table,
-                                  GTK_WIDGET(tree_view),
-                                  0, 1, 0, 1);
+        gtk_table_attach_defaults(table, GTK_WIDGET(tree_view), 0, 1, 0, 1);
         /* since this function sets the model of the tree_view
            to the treestore we don't really care about
            the return value */
-        create_treestore(tree_view, display_data_bb,
-                         SORTID_CNT, SORTID_NAME, SORTID_COLOR);
+        create_treestore(tree_view, display_data_bb, SORTID_CNT, SORTID_NAME, SORTID_COLOR);
 
     }
 
@@ -800,9 +683,7 @@ extern void specific_info_bb(popup_info_t *popup_win) {
         goto display_it;
     }
 
-    if ((bb_error_code =
-                 get_new_info_bb(&bb_info_ptr, popup_win->force_refresh))
-        == SLURM_NO_CHANGE_IN_DATA) {
+    if ((bb_error_code = get_new_info_bb(&bb_info_ptr, popup_win->force_refresh)) == SLURM_NO_CHANGE_IN_DATA) {
         if (!spec_info->display_widget || spec_info->view == ERROR_VIEW)
             goto display_it;
     } else if (bb_error_code != SLURM_SUCCESS) {
@@ -811,12 +692,9 @@ extern void specific_info_bb(popup_info_t *popup_win) {
         spec_info->view = ERROR_VIEW;
         if (spec_info->display_widget)
             gtk_widget_destroy(spec_info->display_widget);
-        sprintf(error_char, "get_new_info_bb: %s",
-                slurm_strerror(slurm_get_errno()));
+        sprintf(error_char, "get_new_info_bb: %s", slurm_strerror(slurm_get_errno()));
         label = gtk_label_new(error_char);
-        gtk_table_attach_defaults(popup_win->table,
-                                  label,
-                                  0, 1, 0, 1);
+        gtk_table_attach_defaults(popup_win->table, label, 0, 1, 0, 1);
         gtk_widget_show(label);
         spec_info->display_widget = gtk_widget_ref(label);
         goto end_it;
@@ -833,23 +711,16 @@ extern void specific_info_bb(popup_info_t *popup_win) {
         spec_info->display_widget = NULL;
     }
     if (spec_info->type != INFO_PAGE && !spec_info->display_widget) {
-        tree_view = create_treeview(local_display_data,
-                                    &popup_win->grid_button_list);
-        gtk_tree_selection_set_mode(
-                gtk_tree_view_get_selection(tree_view),
-                GTK_SELECTION_MULTIPLE);
-        spec_info->display_widget =
-                gtk_widget_ref(GTK_WIDGET(tree_view));
-        gtk_table_attach_defaults(popup_win->table,
-                                  GTK_WIDGET(tree_view),
-                                  0, 1, 0, 1);
+        tree_view = create_treeview(local_display_data, &popup_win->grid_button_list);
+        gtk_tree_selection_set_mode(gtk_tree_view_get_selection(tree_view), GTK_SELECTION_MULTIPLE);
+        spec_info->display_widget = gtk_widget_ref(GTK_WIDGET(tree_view));
+        gtk_table_attach_defaults(popup_win->table, GTK_WIDGET(tree_view), 0, 1, 0, 1);
         /*
          * since this function sets the model of the tree_view
          * to the treestore we don't really care about
          * the return value
          */
-        create_treestore(tree_view, popup_win->display_data,
-                         SORTID_CNT, SORTID_NAME, SORTID_COLOR);
+        create_treestore(tree_view, popup_win->display_data, SORTID_CNT, SORTID_NAME, SORTID_COLOR);
     }
 
     setup_popup_grid_list(popup_win);
@@ -891,8 +762,7 @@ extern void specific_info_bb(popup_info_t *popup_win) {
     list_iterator_destroy(itr);
     post_setup_popup_grid_list(popup_win);
 
-    _update_info_bb(send_bb_list,
-                    GTK_TREE_VIEW(spec_info->display_widget));
+    _update_info_bb(send_bb_list, GTK_TREE_VIEW(spec_info->display_widget));
     FREE_NULL_LIST(send_bb_list);
     end_it:
     popup_win->toggled = 0;
@@ -932,8 +802,7 @@ extern void set_menus_bb(void *arg, void *arg2, GtkTreePath *path, int type) {
             break;
         }
         case POPUP_CLICKED:
-            make_fields_menu(popup_win, menu,
-                             popup_win->display_data, SORTID_CNT);
+            make_fields_menu(popup_win, menu, popup_win->display_data, SORTID_CNT);
             break;
         default:
             g_error("UNKNOWN type %d given to set_fields\n", type);
@@ -1000,8 +869,7 @@ extern void popup_all_bb(GtkTreeModel *model, GtkTreeIter *iter, int id) {
             g_print("Burst Buffer got unknown type %d\n", id);
     }
     if (!sview_thread_new((gpointer) popup_thr, popup_win, false, &error)) {
-        g_printerr("Failed to create burst buffer popup thread: %s\n",
-                   error->message);
+        g_printerr("Failed to create burst buffer popup thread: %s\n", error->message);
         return;
     }
 }
@@ -1013,9 +881,8 @@ extern void popup_all_bb(GtkTreeModel *model, GtkTreeIter *iter, int id) {
 /* NOP */
 /* } */
 
-extern void select_admin_bb(GtkTreeModel *model, GtkTreeIter *iter,
-                            display_data_t *display_data,
-                            GtkTreeView *treeview) {
+extern void
+select_admin_bb(GtkTreeModel *model, GtkTreeIter *iter, display_data_t *display_data, GtkTreeView *treeview) {
 /* NOP */
 /* Function for admin edit */
 }

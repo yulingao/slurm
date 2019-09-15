@@ -154,8 +154,7 @@ extern int bb_p_state_pack(uid_t uid, Buf buffer, uint16_t protocol_version) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_validate(struct job_descriptor *job_desc,
-                             uid_t submit_uid) {
+extern int bb_p_job_validate(struct job_descriptor *job_desc, uid_t submit_uid) {
     return SLURM_SUCCESS;
 }
 
@@ -176,9 +175,7 @@ extern int bb_p_job_validate2(struct job_record *job_ptr, char **err_msg) {
  * IN/OUT tres_cnt - fill in this already allocated array with tres_cnts
  * IN locked - if the assoc_mgr tres read locked is locked or not
  */
-extern void bb_p_job_set_tres_cnt(struct job_record *job_ptr,
-                                  uint64_t *tres_cnt,
-                                  bool locked) {
+extern void bb_p_job_set_tres_cnt(struct job_record *job_ptr, uint64_t *tres_cnt, bool locked) {
 }
 
 /*

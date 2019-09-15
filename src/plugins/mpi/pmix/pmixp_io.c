@@ -49,8 +49,7 @@
 
 static inline void _rcvd_clear_counters(pmixp_io_engine_t *eng);
 
-static void
-_verify_transceiver(pmixp_p2p_data_t header) {
+static void _verify_transceiver(pmixp_p2p_data_t header) {
     /* sanity checks */
     if (!header.payload_size_cb) {
         PMIXP_ERROR("No payload size callback provided");
@@ -92,8 +91,7 @@ _verify_transceiver(pmixp_p2p_data_t header) {
     abort();
 }
 
-void pmixp_io_init(pmixp_io_engine_t *eng,
-                   pmixp_p2p_data_t header) {
+void pmixp_io_init(pmixp_io_engine_t *eng, pmixp_p2p_data_t header) {
     memset(eng, 0, sizeof(*eng));
     /* Initialize general options */
 #ifndef NDEBUG
@@ -126,8 +124,7 @@ void pmixp_io_init(pmixp_io_engine_t *eng,
     eng->complete_queue = list_create(NULL);
 }
 
-static inline void
-_pmixp_io_drop_messages(pmixp_io_engine_t *eng) {
+static inline void _pmixp_io_drop_messages(pmixp_io_engine_t *eng) {
     xassert(NULL != eng);
     xassert(PMIXP_MSGSTATE_MAGIC == eng->magic);
 
@@ -146,13 +143,11 @@ _pmixp_io_drop_messages(pmixp_io_engine_t *eng) {
 
         /* drop all outstanding messages */
         while ((msg = list_dequeue(eng->send_queue))) {
-            eng->h.send_complete(msg, PMIXP_P2P_REGULAR,
-                                 SLURM_SUCCESS);
+            eng->h.send_complete(msg, PMIXP_P2P_REGULAR, SLURM_SUCCESS);
         }
 
         if (NULL != eng->send_current) {
-            eng->h.send_complete(eng->send_current,
-                                 PMIXP_P2P_REGULAR, SLURM_SUCCESS);
+            eng->h.send_complete(eng->send_current, PMIXP_P2P_REGULAR, SLURM_SUCCESS);
             eng->send_current = NULL;
         }
         eng->send_msg_ptr = NULL;
@@ -165,8 +160,7 @@ int pmixp_io_detach(pmixp_io_engine_t *eng) {
     /* Initialize general options */
     xassert(NULL != eng);
     xassert(PMIXP_MSGSTATE_MAGIC == eng->magic);
-    xassert(PMIXP_IO_OPERATING == eng->io_state ||
-            PMIXP_IO_CONN_CLOSED == eng->io_state);
+    xassert(PMIXP_IO_OPERATING == eng->io_state || PMIXP_IO_CONN_CLOSED == eng->io_state);
     _pmixp_io_drop_messages(eng);
     ret = eng->sd;
     eng->sd = -1;
@@ -208,8 +202,7 @@ void pmixp_io_finalize(pmixp_io_engine_t *eng, int err) {
             break;
         case PMIXP_IO_NONE: PMIXP_ERROR("Attempt to finalize non-initialized I/O engine");
             break;
-        default: PMIXP_ERROR("I/O engine was damaged, unknown state: %d",
-                             (int) eng->io_state);
+        default: PMIXP_ERROR("I/O engine was damaged, unknown state: %d", (int) eng->io_state);
             break;
     }
 
@@ -263,8 +256,7 @@ static inline bool _rcvd_have_padding(pmixp_io_engine_t *eng) {
     xassert(NULL != eng->rcvd_hdr_net);
     xassert(pmixp_io_operating(eng));
     xassert(eng->h.recv_on);
-    return eng->h.recv_padding &&
-           (eng->rcvd_pad_recvd < eng->h.recv_padding);
+    return eng->h.recv_padding && (eng->rcvd_pad_recvd < eng->h.recv_padding);
 }
 
 static inline bool _rcvd_need_header(pmixp_io_engine_t *eng) {
@@ -306,9 +298,7 @@ void pmixp_io_rcvd_progress(pmixp_io_engine_t *eng) {
         char buf[eng->h.recv_padding];
         size = eng->h.recv_padding;
         remain = size - eng->rcvd_pad_recvd;
-        eng->rcvd_pad_recvd +=
-                pmixp_read_buf(fd, buf, remain,
-                               &shutdown, false);
+        eng->rcvd_pad_recvd += pmixp_read_buf(fd, buf, remain, &shutdown, false);
         if (shutdown) {
             eng->io_state = PMIXP_IO_CONN_CLOSED;
             return;
@@ -326,9 +316,7 @@ void pmixp_io_rcvd_progress(pmixp_io_engine_t *eng) {
         size = eng->h.rhdr_net_size;
         remain = size - eng->rcvd_hdr_offs;
         offs = eng->rcvd_hdr_net + eng->rcvd_hdr_offs;
-        eng->rcvd_hdr_offs +=
-                pmixp_read_buf(fd, offs, remain,
-                               &shutdown, false);
+        eng->rcvd_hdr_offs += pmixp_read_buf(fd, offs, remain, &shutdown, false);
         if (shutdown) {
             eng->io_state = PMIXP_IO_CONN_CLOSED;
             return;
@@ -359,10 +347,7 @@ void pmixp_io_rcvd_progress(pmixp_io_engine_t *eng) {
     }
     size = eng->rcvd_pay_size;
     remain = size - eng->rcvd_pay_offs;
-    eng->rcvd_pay_offs +=
-            pmixp_read_buf(fd,
-                           eng->rcvd_payload + eng->rcvd_pay_offs,
-                           remain, &shutdown, false);
+    eng->rcvd_pay_offs += pmixp_read_buf(fd, eng->rcvd_payload + eng->rcvd_pay_offs, remain, &shutdown, false);
     if (shutdown) {
         eng->io_state = PMIXP_IO_CONN_CLOSED;
         return;
@@ -437,8 +422,7 @@ static inline int _send_msg_ok(pmixp_io_engine_t *eng) {
     xassert(pmixp_io_enqueue_ok(eng));
     xassert(eng->h.send_on);
 
-    return (eng->send_current != NULL)
-           && (eng->send_offs == eng->send_msg_size);
+    return (eng->send_current != NULL) && (eng->send_offs == eng->send_msg_size);
 }
 
 static bool _send_pending(pmixp_io_engine_t *eng) {
@@ -501,8 +485,7 @@ static void _send_progress(pmixp_io_engine_t *eng) {
         iov[iovcnt].iov_len = eng->send_msg_size;
         iovcnt++;
 
-        written = pmixp_writev_buf(fd, iov, iovcnt,
-                                   eng->send_offs, &shutdown);
+        written = pmixp_writev_buf(fd, iov, iovcnt, eng->send_offs, &shutdown);
         if (shutdown) {
             pmixp_io_finalize(eng, shutdown);
             break;

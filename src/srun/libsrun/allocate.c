@@ -131,15 +131,13 @@ static void _signal_while_allocating(int signo) {
      */
     local_signal = xmalloc(sizeof(int));
     *local_signal = signo;
-    slurm_thread_create_detached(NULL, _safe_signal_while_allocating,
-                                 local_signal);
+    slurm_thread_create_detached(NULL, _safe_signal_while_allocating, local_signal);
 }
 
 /* This typically signifies the job was cancelled by scancel */
 static void _job_complete_handler(srun_job_complete_msg_t *msg) {
     if (pending_job_id && (pending_job_id != msg->job_id)) {
-        error("Ignoring job_complete for job %u because our job ID is %u",
-              msg->job_id, pending_job_id);
+        error("Ignoring job_complete for job %u because our job ID is %u", msg->job_id, pending_job_id);
         return;
     }
 
@@ -162,8 +160,7 @@ static void _timeout_handler(srun_timeout_msg_t *msg) {
 
     if (msg->timeout != last_timeout) {
         last_timeout = msg->timeout;
-        verbose("job time limit to be reached at %s",
-                slurm_ctime2(&msg->timeout));
+        verbose("job time limit to be reached at %s", slurm_ctime2(&msg->timeout));
     }
 }
 
@@ -202,14 +199,11 @@ static bool _retry(void) {
         debug("Syscall interrupted while allocating resources, "
               "retrying.");
         return true;
-    } else if (opt.immediate &&
-               ((errno == ETIMEDOUT) || (errno == ESLURM_NODES_BUSY))) {
-        error("Unable to allocate resources: %s",
-              slurm_strerror(ESLURM_NODES_BUSY));
+    } else if (opt.immediate && ((errno == ETIMEDOUT) || (errno == ESLURM_NODES_BUSY))) {
+        error("Unable to allocate resources: %s", slurm_strerror(ESLURM_NODES_BUSY));
         error_exit = immediate_exit;
         return false;
-    } else if ((errno == SLURM_PROTOCOL_AUTHENTICATION_ERROR) ||
-               (errno == SLURM_UNEXPECTED_MSG_ERROR) ||
+    } else if ((errno == SLURM_PROTOCOL_AUTHENTICATION_ERROR) || (errno == SLURM_UNEXPECTED_MSG_ERROR) ||
                (errno == SLURM_PROTOCOL_INSANE_MSG_LENGTH)) {
         static int external_msg_count = 0;
         error("Srun communication socket apparently being written to "
@@ -247,11 +241,9 @@ static int _wait_nodes_ready(resource_allocation_response_msg_t *alloc) {
         if (i) {
             cur_sleep = POLL_SLEEP * i;
             if (i == 1) {
-                verbose("Waiting for nodes to boot (delay looping %d times @ %f secs x index)",
-                        max_delay, POLL_SLEEP);
+                verbose("Waiting for nodes to boot (delay looping %d times @ %f secs x index)", max_delay, POLL_SLEEP);
             } else {
-                debug("Waited %f sec and still waiting: next sleep for %f sec",
-                      cur_delay, cur_sleep);
+                debug("Waited %f sec and still waiting: next sleep for %f sec", cur_delay, cur_sleep);
             }
             usleep(USEC_IN_SEC * cur_sleep);
             cur_delay += cur_sleep;
@@ -287,8 +279,7 @@ static int _wait_nodes_ready(resource_allocation_response_msg_t *alloc) {
         }
     } else if (!destroy_job) {
         if (job_killed) {
-            error("Job allocation %u has been revoked",
-                  alloc->job_id);
+            error("Job allocation %u has been revoked", alloc->job_id);
             destroy_job = true;
         } else
             error("Nodes %s are still not ready", alloc->node_list);
@@ -308,8 +299,7 @@ static int _allocate_test(slurm_opt_t *opt_local) {
         return SLURM_ERROR;
 
     if (opt_local->clusters &&
-        (slurmdb_get_first_avail_cluster(j, opt_local->clusters,
-                                         &working_cluster_rec) != SLURM_SUCCESS)) {
+        (slurmdb_get_first_avail_cluster(j, opt_local->clusters, &working_cluster_rec) != SLURM_SUCCESS)) {
         print_db_notok(opt_local->clusters, 0);
         return SLURM_ERROR;
     }
@@ -350,8 +340,7 @@ extern int allocate_test(void) {
  * Returns a pointer to a resource_allocation_response_msg which must
  * be freed with slurm_free_resource_allocation_response_msg()
  */
-extern resource_allocation_response_msg_t *
-allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
+extern resource_allocation_response_msg_t *allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
     srun_opt_t *srun_opt = opt_local->srun_opt;
     resource_allocation_response_msg_t *resp = NULL;
     job_desc_msg_t *j;
@@ -367,8 +356,7 @@ allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
         return NULL;
 
     if (opt_local->clusters &&
-        (slurmdb_get_first_avail_cluster(j, opt_local->clusters,
-                                         &working_cluster_rec) != SLURM_SUCCESS)) {
+        (slurmdb_get_first_avail_cluster(j, opt_local->clusters, &working_cluster_rec) != SLURM_SUCCESS)) {
         print_db_notok(opt_local->clusters, 0);
         return NULL;
     }
@@ -394,9 +382,7 @@ allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
     }
 
     while (!resp) {
-        resp = slurm_allocate_resources_blocking(j,
-                                                 opt_local->immediate,
-                                                 _set_pending_job_id);
+        resp = slurm_allocate_resources_blocking(j, opt_local->immediate, _set_pending_job_id);
         if (destroy_job) {
             /* cancelled by signal */
             break;
@@ -406,8 +392,7 @@ allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
     }
 
     if (resp)
-        print_multi_line_string(resp->job_submit_user_msg,
-                                -1, LOG_LEVEL_INFO);
+        print_multi_line_string(resp->job_submit_user_msg, -1, LOG_LEVEL_INFO);
 
     if (resp && !destroy_job) {
         /*
@@ -425,8 +410,7 @@ allocate_nodes(bool handle_signals, slurm_opt_t *opt_local) {
         opt_local->mem_per_cpu = -1;
         if (resp->pn_min_memory != NO_VAL64) {
             if (resp->pn_min_memory & MEM_PER_CPU) {
-                opt_local->mem_per_cpu = (resp->pn_min_memory &
-                                          (~MEM_PER_CPU));
+                opt_local->mem_per_cpu = (resp->pn_min_memory & (~MEM_PER_CPU));
             } else {
                 opt_local->pn_min_memory = resp->pn_min_memory;
             }
@@ -509,8 +493,7 @@ List allocate_pack_nodes(bool handle_signals) {
     }
 
     if (first_opt && first_opt->clusters &&
-        (slurmdb_get_first_pack_cluster(job_req_list, first_opt->clusters,
-                                        &working_cluster_rec) != SLURM_SUCCESS)) {
+        (slurmdb_get_first_pack_cluster(job_req_list, first_opt->clusters, &working_cluster_rec) != SLURM_SUCCESS)) {
         print_db_notok(first_opt->clusters, 0);
         return NULL;
     }
@@ -523,8 +506,7 @@ List allocate_pack_nodes(bool handle_signals) {
     callbacks.node_fail = _node_fail_handler;
 
     /* create message thread to handle pings and such from slurmctld */
-    msg_thr = slurm_allocation_msg_thr_create(&first_job->other_port,
-                                              &callbacks);
+    msg_thr = slurm_allocation_msg_thr_create(&first_job->other_port, &callbacks);
 
     /* NOTE: Do not process signals in separate pthread. The signal will
      * cause slurm_allocate_resources_blocking() to exit immediately. */
@@ -535,8 +517,7 @@ List allocate_pack_nodes(bool handle_signals) {
     }
 
     while (first_opt && !job_resp_list) {
-        job_resp_list = slurm_allocate_pack_job_blocking(job_req_list,
-                                                         first_opt->immediate, _set_pending_job_id);
+        job_resp_list = slurm_allocate_pack_job_blocking(job_req_list, first_opt->immediate, _set_pending_job_id);
         if (destroy_job) {
             /* cancelled by signal */
             break;
@@ -553,8 +534,7 @@ List allocate_pack_nodes(bool handle_signals) {
         opt_iter = list_iterator_create(opt_list);
         resp_iter = list_iterator_create(job_resp_list);
         while ((opt_local = list_next(opt_iter))) {
-            resp = (resource_allocation_response_msg_t *)
-                    list_next(resp_iter);
+            resp = (resource_allocation_response_msg_t *) list_next(resp_iter);
             if (!resp)
                 break;
 
@@ -565,8 +545,7 @@ List allocate_pack_nodes(bool handle_signals) {
                 i = list_count(opt_list);
                 k = list_count(job_resp_list);
                 if (i != k) {
-                    error("%s: request count != response count (%d != %d)",
-                          __func__, i, k);
+                    error("%s: request count != response count (%d != %d)", __func__, i, k);
                     goto relinquish;
                 }
             }
@@ -578,11 +557,9 @@ List allocate_pack_nodes(bool handle_signals) {
              * in the step creation.
              */
             if (opt_local->pn_min_memory != NO_VAL64)
-                opt_local->pn_min_memory =
-                        (resp->pn_min_memory & (~MEM_PER_CPU));
+                opt_local->pn_min_memory = (resp->pn_min_memory & (~MEM_PER_CPU));
             else if (opt_local->mem_per_cpu > -1)
-                opt_local->mem_per_cpu =
-                        (resp->pn_min_memory & (~MEM_PER_CPU));
+                opt_local->mem_per_cpu = (resp->pn_min_memory & (~MEM_PER_CPU));
 
             opt_local->min_nodes = resp->node_cnt;
             opt_local->max_nodes = resp->node_cnt;
@@ -641,10 +618,8 @@ extern List existing_allocation(void) {
         if (errno == ESLURM_ALREADY_DONE)
             error("Slurm job %u has expired", old_job_id);
         else
-            error("Unable to confirm allocation for job %u: %m",
-                  old_job_id);
-        info("Check SLURM_JOB_ID environment variable. Expired or invalid job %u",
-             old_job_id);
+            error("Unable to confirm allocation for job %u: %m", old_job_id);
+        info("Check SLURM_JOB_ID environment variable. Expired or invalid job %u", old_job_id);
         exit(error_exit);
     }
 
@@ -735,9 +710,7 @@ static job_desc_msg_t *_job_desc_msg_create_from_opts(slurm_opt_t *opt_local) {
         hostlist_destroy(hl);
     }
 
-    if (((opt_local->distribution & SLURM_DIST_STATE_BASE) ==
-         SLURM_DIST_ARBITRARY) &&
-        !j->req_nodes) {
+    if (((opt_local->distribution & SLURM_DIST_STATE_BASE) == SLURM_DIST_ARBITRARY) && !j->req_nodes) {
         error("With Arbitrary distribution you need to "
               "specify a nodelist or hostfile with the -w option");
         return NULL;
@@ -896,8 +869,7 @@ static job_desc_msg_t *_job_desc_msg_create_from_opts(slurm_opt_t *opt_local) {
         xstrfmtcat(opt.tres_bind, "gpu:%s", opt.gpu_bind);
     if (tres_bind_verify_cmdline(opt.tres_bind)) {
         if (tres_bind_err_log) { /* Log once */
-            error("Invalid --tres-bind argument: %s. Ignored",
-                  opt.tres_bind);
+            error("Invalid --tres-bind argument: %s. Ignored", opt.tres_bind);
             tres_bind_err_log = false;
         }
         xfree(opt.tres_bind);
@@ -906,8 +878,7 @@ static job_desc_msg_t *_job_desc_msg_create_from_opts(slurm_opt_t *opt_local) {
     xfmt_tres_freq(&opt.tres_freq, "gpu", opt.gpu_freq);
     if (tres_freq_verify_cmdline(opt.tres_freq)) {
         if (tres_freq_err_log) { /* Log once */
-            error("Invalid --tres-freq argument: %s. Ignored",
-                  opt.tres_freq);
+            error("Invalid --tres-freq argument: %s. Ignored", opt.tres_freq);
             tres_freq_err_log = false;
         }
         xfree(opt.tres_freq);
@@ -945,9 +916,6 @@ opt_local -用于创建作业步骤的选项
 
 如果作业步骤创建失败，返回-1，否则返回0
  */
-extern int create_job_step(srun_job_t *job, bool use_all_cpus,
-                           slurm_opt_t *opt_local) {
-    return launch_g_create_job_step(job, use_all_cpus,
-                                    _signal_while_allocating,
-                                    &destroy_job, opt_local);
+extern int create_job_step(srun_job_t *job, bool use_all_cpus, slurm_opt_t *opt_local) {
+    return launch_g_create_job_step(job, use_all_cpus, _signal_while_allocating, &destroy_job, opt_local);
 }

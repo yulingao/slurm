@@ -46,7 +46,7 @@
 #define _GNU_SOURCE
 
 #if HAVE_HWLOC
-#  include <hwloc.h>
+#include <hwloc.h>
 #endif
 
 #include <dirent.h>
@@ -120,13 +120,14 @@
 #include "src/slurmd/slurmd/slurmd.h"
 
 #ifndef MAXHOSTNAMELEN
-#  define MAXHOSTNAMELEN	64
+#define MAXHOSTNAMELEN 64
 #endif
 
-#define MAX_THREADS        256
+#define MAX_THREADS 256
 
 #define _free_and_set(__dst, __src) \
-    xfree(__dst); __dst = __src
+    xfree(__dst);                   \
+    __dst = __src
 
 /* global, copied to STDERR_FILENO in tasks before the exec */
 int devnull = -1;
@@ -147,7 +148,8 @@ static pthread_cond_t active_cond = PTHREAD_COND_INITIALIZER;
 
 static pthread_mutex_t fork_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-typedef struct connection {
+typedef struct connection
+{
     int fd;
     slurm_addr_t *cli_addr;
 } conn_t;
@@ -156,14 +158,14 @@ typedef struct connection {
  * Global data for resource specialization
  */
 #define MAX_CPUSTR 256
-static bitstr_t *res_core_bitmap;    /* reserved abstract cores bitmap */
-static bitstr_t *res_cpu_bitmap;    /* reserved abstract CPUs bitmap */
+static bitstr_t *res_core_bitmap;     /* reserved abstract cores bitmap */
+static bitstr_t *res_cpu_bitmap;      /* reserved abstract CPUs bitmap */
 static char *res_abs_cores = NULL;    /* reserved abstract cores list */
-static int32_t res_abs_core_size = 0;    /* Length of res_abs_cores variable */
+static int32_t res_abs_core_size = 0; /* Length of res_abs_cores variable */
 static char res_abs_cpus[MAX_CPUSTR]; /* reserved abstract CPUs list */
-static char *res_mac_cpus = NULL;    /* reserved machine CPUs list */
-static int ncores;            /* number of cores on this node */
-static int ncpus;            /* number of CPUs on this node */
+static char *res_mac_cpus = NULL;     /* reserved machine CPUs list */
+static int ncores;                    /* number of cores on this node */
+static int ncpus;                     /* number of CPUs on this node */
 
 /*
  * static shutdown and reconfigure flags:
@@ -171,8 +173,8 @@ static int ncpus;            /* number of CPUs on this node */
 static sig_atomic_t _shutdown = 0;
 static sig_atomic_t _reconfig = 0;
 static sig_atomic_t _update_log = 0;
-static pthread_t msg_pthread = (pthread_t) 0;
-static time_t sent_reg_time = (time_t) 0;
+static pthread_t msg_pthread = (pthread_t)0;
+static time_t sent_reg_time = (time_t)0;
 
 static void _atfork_final(void);
 
@@ -289,8 +291,8 @@ static void _wait_for_all_threads(int secs);
  *    controller use).
 \**************************************************************************/
 
-int
-main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int i, pidfd;
     int blocked_signals[] = {SIGPIPE, 0};
     int cc;
@@ -314,12 +316,16 @@ main(int argc, char **argv) {
     /*
      * Drop supplementary groups.
      */
-    if (geteuid() == 0) {
-        if (setgroups(0, NULL) != 0) {
+    if (geteuid() == 0)
+    {
+        if (setgroups(0, NULL) != 0)
+        {
             fatal("Failed to drop supplementary groups, "
                   "setgroups: %m");
         }
-    } else {
+    }
+    else
+    {
         debug("Not running as root. Can't drop supplementary groups");
     }
 
@@ -332,7 +338,8 @@ main(int argc, char **argv) {
     conf->argv = &argv;
     conf->argc = &argc;
 
-    if (_slurmd_init() < 0) {
+    if (_slurmd_init() < 0)
+    {
         error("slurmd initialization failed");
         fflush(NULL);
         exit(1);
@@ -340,13 +347,15 @@ main(int argc, char **argv) {
 
     slurmd_uid = slurm_get_slurmd_user_id();
     curr_uid = getuid();
-    if (curr_uid != slurmd_uid) {
+    if (curr_uid != slurmd_uid)
+    {
         char *slurmd_user = uid_to_string_or_null(slurmd_uid);
         char *curr_user = uid_to_string_or_null(curr_uid);
 
         fatal("You are running slurmd as something other than user %s(%u). "
               "If you want to run as this user add SlurmdUser=%s to the slurm.conf file.",
-              slurmd_user, slurmd_uid, curr_user);
+              slurmd_user, slurmd_uid,
+              curr_user);
     }
     init_setproctitle(argc, argv);
 
@@ -361,7 +370,8 @@ main(int argc, char **argv) {
     /*
      * Become a daemon if desired.
      */
-    if (conf->daemonize) {
+    if (conf->daemonize)
+    {
         if (xdaemon())
             error("Couldn't daemonize slurmd: %m");
     }
@@ -369,7 +379,8 @@ main(int argc, char **argv) {
     info("slurmd version %s started", SLURM_VERSION_STRING);
     debug3("finished daemonize");
 
-    if ((oom_value = getenv("SLURMD_OOM_ADJ"))) {
+    if ((oom_value = getenv("SLURMD_OOM_ADJ")))
+    {
         i = atoi(oom_value);
         debug("Setting slurmd oom_adj to %d", i);
         set_oom_adj(i);
@@ -377,7 +388,8 @@ main(int argc, char **argv) {
 
     _kill_old_slurmd();
 
-    if (conf->mlock_pages) {
+    if (conf->mlock_pages)
+    {
         /*
          * Call mlockall() if available to ensure slurmd
          *  doesn't get swapped out
@@ -386,10 +398,9 @@ main(int argc, char **argv) {
         if (mlockall(MCL_FUTURE | MCL_CURRENT) < 0)
             error("failed to mlock() slurmd pages: %m");
 #else
-        error ("mlockall() system call does not appear to be available");
+        error("mlockall() system call does not appear to be available");
 #endif /* _POSIX_MEMLOCK */
     }
-
 
     /*
      * Restore any saved revoked credential information
@@ -428,9 +439,7 @@ main(int argc, char **argv) {
 
     run_script_health_check();
 
-    msg_aggr_sender_init(conf->hostname, conf->port,
-                         conf->msg_aggr_window_time,
-                         conf->msg_aggr_window_msgs);
+    msg_aggr_sender_init(conf->hostname, conf->port, conf->msg_aggr_window_time, conf->msg_aggr_window_msgs);
 
     slurm_thread_create_detached(NULL, _registration_engine, NULL);
 
@@ -440,15 +449,15 @@ main(int argc, char **argv) {
      * Close fd here, otherwise we'll deadlock since create_pidfile()
      * flocks the pidfile.
      */
-    if (pidfd >= 0)            /* valid pidfd, non-error */
-        (void) close(pidfd);    /* Ignore errors */
+    if (pidfd >= 0)         /* valid pidfd, non-error */
+        (void)close(pidfd); /* Ignore errors */
     if (unlink(conf->pidfile) < 0)
         error("Unable to remove pidfile `%s': %m", conf->pidfile);
 
     _wait_for_all_threads(120);
     _slurmd_fini();
     _destroy_conf();
-    slurm_cred_fini();    /* must be after _destroy_conf() */
+    slurm_cred_fini(); /* must be after _destroy_conf() */
     group_cache_purge();
     file_bcast_purge();
 
@@ -462,16 +471,18 @@ main(int argc, char **argv) {
  * slurmctld. If slurmctld restarts, it will request another registration
  * message.
  */
-static void *
-_registration_engine(void *arg) {
+static void *_registration_engine(void *arg)
+{
     _increment_thd_count();
 
-    while (!_shutdown) {
-        if ((sent_reg_time == (time_t) 0) &&
-            (send_registration_msg(SLURM_SUCCESS, true) !=
-             SLURM_SUCCESS)) {
+    while (!_shutdown)
+    {
+        if ((sent_reg_time == (time_t)0) && (send_registration_msg(SLURM_SUCCESS, true) != SLURM_SUCCESS))
+        {
             debug("Unable to register with slurm controller, retrying");
-        } else if (_shutdown || sent_reg_time) {
+        }
+        else if (_shutdown || sent_reg_time)
+        {
             break;
         }
         sleep(1);
@@ -481,15 +492,17 @@ _registration_engine(void *arg) {
     return NULL;
 }
 
-static void
-_msg_engine(void) {
+static void _msg_engine(void)
+{
     slurm_addr_t *cli;
     int sock;
 
     msg_pthread = pthread_self();
-    slurmd_req(NULL);    /* initialize timer */
-    while (!_shutdown) {
-        if (_reconfig) {
+    slurmd_req(NULL); /* initialize timer */
+    while (!_shutdown)
+    {
+        if (_reconfig)
+        {
             int rpc_wait = MAX(5, slurm_get_msg_timeout() / 2);
             verbose("got reconfigure request");
             /* Wait for RPCs to finish */
@@ -501,7 +514,8 @@ _msg_engine(void) {
         if (_update_log)
             _update_logging();
         cli = xmalloc(sizeof(slurm_addr_t));
-        if ((sock = slurm_accept_msg_conn(conf->lfd, cli)) >= 0) {
+        if ((sock = slurm_accept_msg_conn(conf->lfd, cli)) >= 0)
+        {
             _handle_connection(sock, cli);
             continue;
         }
@@ -518,8 +532,8 @@ _msg_engine(void) {
     return;
 }
 
-static void
-_decrement_thd_count(void) {
+static void _decrement_thd_count(void)
+{
     slurm_mutex_lock(&active_mutex);
     if (active_threads > 0)
         active_threads--;
@@ -527,15 +541,16 @@ _decrement_thd_count(void) {
     slurm_mutex_unlock(&active_mutex);
 }
 
-static void
-_increment_thd_count(void) {
+static void _increment_thd_count(void)
+{
     bool logged = false;
 
     slurm_mutex_lock(&active_mutex);
-    while (active_threads >= MAX_THREADS) {
-        if (!logged) {
-            info("active_threads == MAX_THREADS(%d)",
-                 MAX_THREADS);
+    while (active_threads >= MAX_THREADS)
+    {
+        if (!logged)
+        {
+            info("active_threads == MAX_THREADS(%d)", MAX_THREADS);
             logged = true;
         }
         slurm_cond_wait(&active_cond, &active_mutex);
@@ -545,8 +560,8 @@ _increment_thd_count(void) {
 }
 
 /* secs IN - wait up to this number of seconds for all threads to complete */
-static void
-_wait_for_all_threads(int secs) {
+static void _wait_for_all_threads(int secs)
+{
     struct timespec ts;
     int rc;
 
@@ -555,12 +570,13 @@ _wait_for_all_threads(int secs) {
     ts.tv_sec += secs;
 
     slurm_mutex_lock(&active_mutex);
-    while (active_threads > 0) {
+    while (active_threads > 0)
+    {
         verbose("waiting on %d active threads", active_threads);
         rc = pthread_cond_timedwait(&active_cond, &active_mutex, &ts);
-        if (rc == ETIMEDOUT) {
-            error("Timeout waiting for completion of %d threads",
-                  active_threads);
+        if (rc == ETIMEDOUT)
+        {
+            error("Timeout waiting for completion of %d threads", active_threads);
             slurm_cond_signal(&active_cond);
             slurm_mutex_unlock(&active_mutex);
             return;
@@ -571,7 +587,8 @@ _wait_for_all_threads(int secs) {
     verbose("all threads complete");
 }
 
-static void _handle_connection(int fd, slurm_addr_t *cli) {
+static void _handle_connection(int fd, slurm_addr_t *cli)
+{
     conn_t *arg = xmalloc(sizeof(conn_t));
 
     arg->fd = fd;
@@ -583,16 +600,16 @@ static void _handle_connection(int fd, slurm_addr_t *cli) {
     slurm_thread_create_detached(NULL, _service_connection, arg);
 }
 
-static void *
-_service_connection(void *arg) {
-    conn_t *con = (conn_t *) arg;
+static void *_service_connection(void *arg)
+{
+    conn_t *con = (conn_t *)arg;
     slurm_msg_t *msg = xmalloc(sizeof(slurm_msg_t));
     int rc = SLURM_SUCCESS;
 
     debug3("in the service_connection");
     slurm_msg_t_init(msg);
-    if ((rc = slurm_receive_msg_and_forward(con->fd, con->cli_addr, msg, 0))
-        != SLURM_SUCCESS) {
+    if ((rc = slurm_receive_msg_and_forward(con->fd, con->cli_addr, msg, 0)) != SLURM_SUCCESS)
+    {
         error("service_connection: slurm_receive_msg: %m");
         /*
          * if this fails we need to make sure the nodes we forward
@@ -607,7 +624,7 @@ _service_connection(void *arg) {
     if (msg->msg_type != MESSAGE_COMPOSITE)
         slurmd_req(msg);
 
-    cleanup:
+cleanup:
     if ((msg->conn_fd >= 0) && close(msg->conn_fd) < 0)
         error("close(%d): %m", con->fd);
 
@@ -619,28 +636,30 @@ _service_connection(void *arg) {
     return NULL;
 }
 
-static void _handle_node_reg_resp(slurm_msg_t *resp_msg) {
+static void _handle_node_reg_resp(slurm_msg_t *resp_msg)
+{
     int rc;
     slurm_node_reg_resp_msg_t *resp = NULL;
 
-    switch (resp_msg->msg_type) {
-        case RESPONSE_NODE_REGISTRATION:
-            resp = (slurm_node_reg_resp_msg_t *) resp_msg->data;
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg->data)->return_code;
-            slurm_free_return_code_msg(resp_msg->data);
-            if (rc)
-                slurm_seterrno(rc);
-            resp = NULL;
-            break;
-        default:
-            slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
+    switch (resp_msg->msg_type)
+    {
+    case RESPONSE_NODE_REGISTRATION:
+        resp = (slurm_node_reg_resp_msg_t *)resp_msg->data;
+        break;
+    case RESPONSE_SLURM_RC:
+        rc = ((return_code_msg_t *)resp_msg->data)->return_code;
+        slurm_free_return_code_msg(resp_msg->data);
+        if (rc)
+            slurm_seterrno(rc);
+        resp = NULL;
+        break;
+    default:
+        slurm_seterrno(SLURM_UNEXPECTED_MSG_ERROR);
+        break;
     }
 
-
-    if (resp) {
+    if (resp)
+    {
         /*
          * We don't care about the assoc/qos locks
          * assoc_mgr_post_tres_list is requesting as those lists
@@ -657,8 +676,7 @@ static void _handle_node_reg_resp(slurm_msg_t *resp_msg) {
 
         assoc_mgr_lock(&locks);
         assoc_mgr_post_tres_list(resp->tres_list);
-        debug("%s: slurmctld sent back %u TRES.",
-              __func__, g_tres_count);
+        debug("%s: slurmctld sent back %u TRES.", __func__, g_tres_count);
         assoc_mgr_unlock(&locks);
 
         /*
@@ -673,11 +691,10 @@ static void _handle_node_reg_resp(slurm_msg_t *resp_msg) {
     }
 }
 
-extern int
-send_registration_msg(uint32_t status, bool startup) {
+extern int send_registration_msg(uint32_t status, bool startup)
+{
     int ret_val = SLURM_SUCCESS;
-    slurm_node_registration_status_msg_t *msg =
-            xmalloc(sizeof(slurm_node_registration_status_msg_t));
+    slurm_node_registration_status_msg_t *msg = xmalloc(sizeof(slurm_node_registration_status_msg_t));
 
     if (startup)
         msg->flags |= SLURMD_REG_FLAG_STARTUP;
@@ -687,7 +704,8 @@ send_registration_msg(uint32_t status, bool startup) {
     _fill_registration_msg(msg);
     msg->status = status;
 
-    if (conf->msg_aggr_window_msgs > 1) {
+    if (conf->msg_aggr_window_msgs > 1)
+    {
         slurm_msg_t *req = xmalloc_nz(sizeof(slurm_msg_t));
 
         slurm_msg_t_init(req);
@@ -695,7 +713,9 @@ send_registration_msg(uint32_t status, bool startup) {
         req->data = msg;
 
         msg_aggr_add_msg(req, 1, _handle_node_reg_resp);
-    } else {
+    }
+    else
+    {
         slurm_msg_t req;
         slurm_msg_t resp_msg;
 
@@ -705,36 +725,37 @@ send_registration_msg(uint32_t status, bool startup) {
         req.msg_type = MESSAGE_NODE_REGISTRATION_STATUS;
         req.data = msg;
 
-        ret_val = slurm_send_recv_controller_msg(&req, &resp_msg,
-                                                 working_cluster_rec);
+        ret_val = slurm_send_recv_controller_msg(&req, &resp_msg, working_cluster_rec);
         slurm_free_node_registration_status_msg(msg);
 
-        if (ret_val < 0) {
+        if (ret_val < 0)
+        {
             error("Unable to register: %m");
             ret_val = SLURM_ERROR;
             goto fail;
         }
 
         _handle_node_reg_resp(&resp_msg);
-        if (resp_msg.msg_type != RESPONSE_SLURM_RC) {
+        if (resp_msg.msg_type != RESPONSE_SLURM_RC)
+        {
             /* RESPONSE_SLURM_RC freed by _handle_node_reg_resp() */
             slurm_free_msg_data(resp_msg.msg_type, resp_msg.data);
         }
-        if (errno) {
+        if (errno)
+        {
             ret_val = errno;
             errno = 0;
         }
-
     }
 
     if (ret_val == SLURM_SUCCESS)
         sent_reg_time = time(NULL);
-    fail:
+fail:
     return ret_val;
 }
 
-static void
-_fill_registration_msg(slurm_node_registration_status_msg_t *msg) {
+static void _fill_registration_msg(slurm_node_registration_status_msg_t *msg)
+{
     List steps;
     ListIterator i;
     step_loc_t *stepd;
@@ -777,41 +798,39 @@ _fill_registration_msg(slurm_node_registration_status_msg_t *msg) {
 
     node_features_g_node_state(&msg->features_avail, &msg->features_active);
 
-    if (first_msg) {
+    if (first_msg)
+    {
         first_msg = false;
         info("CPUs=%u Boards=%u Sockets=%u Cores=%u Threads=%u "
-             "Memory=%"
-        PRIu64
-        " TmpDisk=%u Uptime=%u CPUSpecList=%s "
-        "FeaturesAvail=%s FeaturesActive=%s",
-                msg->cpus, msg->boards, msg->sockets, msg->cores,
-                msg->threads, msg->real_memory, msg->tmp_disk,
-                msg->up_time, msg->cpu_spec_list, msg->features_avail,
-                msg->features_active);
-    } else {
+             "Memory=%" PRIu64
+             " TmpDisk=%u Uptime=%u CPUSpecList=%s "
+             "FeaturesAvail=%s FeaturesActive=%s",
+             msg->cpus, msg->boards, msg->sockets, msg->cores, msg->threads, msg->real_memory, msg->tmp_disk, msg->up_time, msg->cpu_spec_list, msg->features_avail, msg->features_active);
+    }
+    else
+    {
         debug3("CPUs=%u Boards=%u Sockets=%u Cores=%u Threads=%u "
-               "Memory=%"
-        PRIu64
-        " TmpDisk=%u Uptime=%u CPUSpecList=%s "
-        "FeaturesAvail=%s FeaturesActive=%s",
-                msg->cpus, msg->boards, msg->sockets, msg->cores,
-                msg->threads, msg->real_memory, msg->tmp_disk,
-                msg->up_time, msg->cpu_spec_list, msg->features_avail,
-                msg->features_active);
+               "Memory=%" PRIu64
+               " TmpDisk=%u Uptime=%u CPUSpecList=%s "
+               "FeaturesAvail=%s FeaturesActive=%s",
+               msg->cpus, msg->boards, msg->sockets, msg->cores, msg->threads, msg->real_memory, msg->tmp_disk, msg->up_time, msg->cpu_spec_list, msg->features_avail, msg->features_active);
     }
     uname(&buf);
     if ((arch = getenv("SLURM_ARCH")))
         msg->arch = xstrdup(arch);
     else
         msg->arch = xstrdup(buf.machine);
-    if ((os = getenv("SLURM_OS"))) {
+    if ((os = getenv("SLURM_OS")))
+    {
         msg->os = xstrdup(os);
-    } else {
-        xstrfmtcat(msg->os, "%s %s %s",
-                   buf.sysname, buf.release, buf.version);
+    }
+    else
+    {
+        xstrfmtcat(msg->os, "%s %s %s", buf.sysname, buf.release, buf.version);
     }
 
-    if (msg->flags & SLURMD_REG_FLAG_STARTUP) {
+    if (msg->flags & SLURMD_REG_FLAG_STARTUP)
+    {
         if (switch_g_alloc_node_info(&msg->switch_nodeinfo))
             error("switch_g_alloc_node_info: %m");
         if (switch_g_build_node_info(msg->switch_nodeinfo))
@@ -826,32 +845,32 @@ _fill_registration_msg(slurm_node_registration_status_msg_t *msg) {
 
     i = list_iterator_create(steps);
     n = 0;
-    while ((stepd = list_next(i))) {
+    while ((stepd = list_next(i)))
+    {
         int fd;
-        fd = stepd_connect(stepd->directory, stepd->nodename,
-                           stepd->jobid, stepd->stepid,
-                           &stepd->protocol_version);
-        if (fd == -1) {
+        fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
+        if (fd == -1)
+        {
             --(msg->job_count);
             continue;
         }
 
-        if (stepd_state(fd, stepd->protocol_version)
-            == SLURMSTEPD_NOT_RUNNING) {
-            debug("stale domain socket for stepd %u.%u ",
-                  stepd->jobid, stepd->stepid);
+        if (stepd_state(fd, stepd->protocol_version) == SLURMSTEPD_NOT_RUNNING)
+        {
+            debug("stale domain socket for stepd %u.%u ", stepd->jobid, stepd->stepid);
             --(msg->job_count);
             close(fd);
             continue;
         }
 
         close(fd);
-        if (stepd->stepid == NO_VAL) {
-            debug("%s: found apparently running job %u",
-                  __func__, stepd->jobid);
-        } else {
-            debug("%s: found apparently running step %u.%u",
-                  __func__, stepd->jobid, stepd->stepid);
+        if (stepd->stepid == NO_VAL)
+        {
+            debug("%s: found apparently running job %u", __func__, stepd->jobid);
+        }
+        else
+        {
+            debug("%s: found apparently running step %u.%u", __func__, stepd->jobid, stepd->stepid);
         }
         msg->job_id[n] = stepd->jobid;
         msg->step_id[n] = stepd->stepid;
@@ -873,9 +892,10 @@ _fill_registration_msg(slurm_node_registration_status_msg_t *msg) {
  * Replace first "%h" in path string with actual hostname.
  * Replace first "%n" in path string with NodeName.
  */
-static void
-_massage_pathname(char **path) {
-    if (path && *path) {
+static void _massage_pathname(char **path)
+{
+    if (path && *path)
+    {
         if (conf->hostname)
             xstrsubstitute(*path, "%h", conf->hostname);
         if (conf->node_name)
@@ -887,8 +907,8 @@ _massage_pathname(char **path) {
  * Read the slurm configuration file (slurm.conf) and substitute some
  * values into the slurmd configuration in preference of the defaults.
  */
-static void
-_read_config(void) {
+static void _read_config(void)
+{
     char *path_pubkey = NULL;
     slurm_ctl_conf_t *cf = NULL;
     int cc;
@@ -918,12 +938,10 @@ _read_config(void) {
         conf->logfile = xstrdup(cf->slurmd_logfile);
 
 #ifndef HAVE_FRONT_END
-    if (!xstrcmp(cf->select_type, "select/cons_res") ||
-        !xstrcmp(cf->select_type, "select/cons_tres"))
+    if (!xstrcmp(cf->select_type, "select/cons_res") || !xstrcmp(cf->select_type, "select/cons_tres"))
         cr_flag = true;
     if (!xstrcmp(cf->select_type, "select/cray_aries") &&
-        ((cf->select_type_param & CR_OTHER_CONS_RES) ||
-         (cf->select_type_param & CR_OTHER_CONS_TRES)))
+        ((cf->select_type_param & CR_OTHER_CONS_RES) || (cf->select_type_param & CR_OTHER_CONS_TRES)))
         cr_flag = true;
 
     if (cf->preempt_mode & PREEMPT_MODE_GANG)
@@ -950,22 +968,17 @@ _read_config(void) {
     _massage_pathname(&conf->logfile);
 
     /* set node_addr if relevant */
-    if ((conf->node_addr == NULL) &&
-        (conf->node_addr = slurm_conf_get_nodeaddr(conf->hostname)) &&
-        (xstrcmp(conf->node_addr, conf->hostname) == 0)) {
-        xfree(conf->node_addr);    /* Sets to NULL */
+    if ((conf->node_addr == NULL) && (conf->node_addr = slurm_conf_get_nodeaddr(conf->hostname)) &&
+        (xstrcmp(conf->node_addr, conf->hostname) == 0))
+    {
+        xfree(conf->node_addr); /* Sets to NULL */
     }
 
     conf->port = slurm_conf_get_port(conf->node_name);
-    slurm_conf_get_cpus_bsct(conf->node_name,
-                             &conf->conf_cpus, &conf->conf_boards,
-                             &conf->conf_sockets, &conf->conf_cores,
-                             &conf->conf_threads);
+    slurm_conf_get_cpus_bsct(conf->node_name, &conf->conf_cpus, &conf->conf_boards, &conf->conf_sockets,
+                             &conf->conf_cores, &conf->conf_threads);
 
-    slurm_conf_get_res_spec_info(conf->node_name,
-                                 &conf->cpu_spec_list,
-                                 &conf->core_spec_cnt,
-                                 &conf->mem_spec_limit);
+    slurm_conf_get_res_spec_info(conf->node_name, &conf->cpu_spec_list, &conf->core_spec_cnt, &conf->mem_spec_limit);
 
     /* store hardware properties in slurmd_config */
     xfree(conf->block_map);
@@ -989,13 +1002,8 @@ _read_config(void) {
      * it will work properly.  This is the earliest we can unset def_config.
      */
     conf->def_config = false;
-    xcpuinfo_hwloc_topo_get(&conf->actual_cpus,
-                            &conf->actual_boards,
-                            &conf->actual_sockets,
-                            &conf->actual_cores,
-                            &conf->actual_threads,
-                            &conf->block_map_size,
-                            &conf->block_map, &conf->block_map_inv);
+    xcpuinfo_hwloc_topo_get(&conf->actual_cpus, &conf->actual_boards, &conf->actual_sockets, &conf->actual_cores,
+                            &conf->actual_threads, &conf->block_map_size, &conf->block_map, &conf->block_map_inv);
 #ifdef HAVE_FRONT_END
     /*
      * When running with multiple frontends, the slurmd S:C:T values are not
@@ -1003,10 +1011,10 @@ _read_config(void) {
      * and validate_nodes_via_front_end (uses slurm.conf values).
      * Report actual hardware configuration, irrespective of FastSchedule.
      */
-    conf->cpus    = conf->actual_cpus;
-    conf->boards  = conf->actual_boards;
+    conf->cpus = conf->actual_cpus;
+    conf->boards = conf->actual_boards;
     conf->sockets = conf->actual_sockets;
-    conf->cores   = conf->actual_cores;
+    conf->cores = conf->actual_cores;
     conf->threads = conf->actual_threads;
 #else
     /* If the actual resources on a node differ than what is in
@@ -1016,18 +1024,18 @@ _read_config(void) {
      * for scheduling before these nodes check in.
      */
     if (((cf->fast_schedule == 0) && !cr_flag && !gang_flag) ||
-        ((cf->fast_schedule == 1) &&
-         (conf->actual_cpus < conf->conf_cpus))) {
+        ((cf->fast_schedule == 1) && (conf->actual_cpus < conf->conf_cpus)))
+    {
         conf->cpus = conf->actual_cpus;
         conf->boards = conf->actual_boards;
         conf->sockets = conf->actual_sockets;
         conf->cores = conf->actual_cores;
         conf->threads = conf->actual_threads;
-    } else if ((cf->fast_schedule == 1) && (cr_flag || gang_flag) &&
-               (conf->actual_sockets != conf->conf_sockets) &&
-               (conf->actual_cores != conf->conf_cores) &&
-               ((conf->actual_sockets * conf->actual_cores) ==
-                (conf->conf_sockets * conf->conf_cores))) {
+    }
+    else if ((cf->fast_schedule == 1) && (cr_flag || gang_flag) && (conf->actual_sockets != conf->conf_sockets) &&
+             (conf->actual_cores != conf->conf_cores) &&
+             ((conf->actual_sockets * conf->actual_cores) == (conf->conf_sockets * conf->conf_cores)))
+    {
         /* Socket and core count can be changed when KNL node reboots
          * in a different NUMA configuration */
         info("Node reconfigured socket/core boundaries "
@@ -1039,7 +1047,9 @@ _read_config(void) {
         conf->sockets = conf->actual_sockets;
         conf->cores = conf->actual_cores;
         conf->threads = conf->conf_threads;
-    } else {
+    }
+    else
+    {
         conf->cpus = conf->conf_cpus;
         conf->boards = conf->conf_boards;
         conf->sockets = conf->conf_sockets;
@@ -1047,21 +1057,21 @@ _read_config(void) {
         conf->threads = conf->conf_threads;
     }
 
-    if ((conf->cpus != conf->actual_cpus) ||
-        (conf->sockets != conf->actual_sockets) ||
-        (conf->cores != conf->actual_cores) ||
-        (conf->threads != conf->actual_threads)) {
-        if (cf->fast_schedule) {
+    if ((conf->cpus != conf->actual_cpus) || (conf->sockets != conf->actual_sockets) ||
+        (conf->cores != conf->actual_cores) || (conf->threads != conf->actual_threads))
+    {
+        if (cf->fast_schedule)
+        {
             error("Node configuration differs from hardware: "
                   "Procs=%u:%u(hw) Boards=%u:%u(hw) "
                   "SocketsPerBoard=%u:%u(hw) CoresPerSocket=%u:%u(hw) "
                   "ThreadsPerCore=%u:%u(hw)",
-                  conf->cpus, conf->actual_cpus,
-                  conf->boards, conf->actual_boards,
-                  conf->sockets, conf->actual_sockets,
-                  conf->cores, conf->actual_cores,
-                  conf->threads, conf->actual_threads);
-        } else if ((cf->fast_schedule == 0) && (cr_flag || gang_flag)) {
+                  conf->cpus, conf->actual_cpus, conf->boards, conf->actual_boards,
+                  conf->sockets, conf->actual_sockets, conf->cores, conf->actual_cores, conf->threads,
+                  conf->actual_threads);
+        }
+        else if ((cf->fast_schedule == 0) && (cr_flag || gang_flag))
+        {
             error("You are using cons_res or gang scheduling with "
                   "Fastschedule=0 and node configuration differs "
                   "from hardware.  The node configuration used "
@@ -1071,11 +1081,9 @@ _read_config(void) {
                   "   CPUs=%u:%u(hw) Boards=%u:%u(hw) "
                   "SocketsPerBoard=%u:%u(hw) CoresPerSocket=%u:%u(hw) "
                   "ThreadsPerCore=%u:%u(hw)",
-                  conf->cpus, conf->actual_cpus,
-                  conf->boards, conf->actual_boards,
-                  conf->sockets, conf->actual_sockets,
-                  conf->cores, conf->actual_cores,
-                  conf->threads, conf->actual_threads);
+                  conf->cpus, conf->actual_cpus, conf->boards, conf->actual_boards,
+                  conf->sockets, conf->actual_sockets, conf->cores, conf->actual_cores, conf->threads,
+                  conf->actual_threads);
         }
     }
 #endif
@@ -1089,8 +1097,7 @@ _read_config(void) {
     _free_and_set(conf->epilog, xstrdup(cf->epilog));
     _free_and_set(conf->prolog, xstrdup(cf->prolog));
     _free_and_set(conf->tmpfs, xstrdup(cf->tmp_fs));
-    _free_and_set(conf->health_check_program,
-                  xstrdup(cf->health_check_program));
+    _free_and_set(conf->health_check_program, xstrdup(cf->health_check_program));
     _free_and_set(conf->pidfile, xstrdup(cf->slurmd_pidfile));
     _massage_pathname(&conf->pidfile);
     _free_and_set(conf->plugstack, xstrdup(cf->plugstack));
@@ -1104,31 +1111,22 @@ _read_config(void) {
     conf->syslog_debug = cf->slurmd_syslog_debug;
     conf->propagate_prio = cf->propagate_prio_process;
 
-    _free_and_set(conf->job_acct_gather_freq,
-                  xstrdup(cf->job_acct_gather_freq));
+    _free_and_set(conf->job_acct_gather_freq, xstrdup(cf->job_acct_gather_freq));
 
     conf->acct_freq_task = NO_VAL16;
-    cc = acct_gather_parse_freq(PROFILE_TASK,
-                                conf->job_acct_gather_freq);
+    cc = acct_gather_parse_freq(PROFILE_TASK, conf->job_acct_gather_freq);
     if (cc != -1)
         conf->acct_freq_task = cc;
 
-    _free_and_set(conf->acct_gather_energy_type,
-                  xstrdup(cf->acct_gather_energy_type));
-    _free_and_set(conf->acct_gather_filesystem_type,
-                  xstrdup(cf->acct_gather_filesystem_type));
-    _free_and_set(conf->acct_gather_interconnect_type,
-                  xstrdup(cf->acct_gather_interconnect_type));
-    _free_and_set(conf->acct_gather_profile_type,
-                  xstrdup(cf->acct_gather_profile_type));
-    _free_and_set(conf->job_acct_gather_type,
-                  xstrdup(cf->job_acct_gather_type));
-    _free_and_set(conf->msg_aggr_params,
-                  xstrdup(cf->msg_aggr_params));
+    _free_and_set(conf->acct_gather_energy_type, xstrdup(cf->acct_gather_energy_type));
+    _free_and_set(conf->acct_gather_filesystem_type, xstrdup(cf->acct_gather_filesystem_type));
+    _free_and_set(conf->acct_gather_interconnect_type, xstrdup(cf->acct_gather_interconnect_type));
+    _free_and_set(conf->acct_gather_profile_type, xstrdup(cf->acct_gather_profile_type));
+    _free_and_set(conf->job_acct_gather_type, xstrdup(cf->job_acct_gather_type));
+    _free_and_set(conf->msg_aggr_params, xstrdup(cf->msg_aggr_params));
     _set_msg_aggr_params();
 
-    if ((conf->node_name == NULL) ||
-        (conf->node_name[0] == '\0'))
+    if ((conf->node_name == NULL) || (conf->node_name[0] == '\0'))
         fatal("Node name lookup failure");
 
     if (cf->control_addr == NULL)
@@ -1154,7 +1152,8 @@ _read_config(void) {
  * Build a slurmd configuration buffer _once_ for sending to slurmstepd
  * This must happen after all configuration is available, including topology
  */
-static void _build_conf_buf(void) {
+static void _build_conf_buf(void)
+{
     slurm_mutex_lock(&conf->config_mutex);
     FREE_NULL_BUFFER(conf->buf);
     conf->buf = init_buf(0);
@@ -1162,8 +1161,8 @@ static void _build_conf_buf(void) {
     slurm_mutex_unlock(&conf->config_mutex);
 }
 
-static void
-_reconfigure(void) {
+static void _reconfigure(void)
+{
     uint32_t cpu_cnt;
     struct node_record *node_rec;
     List gres_list = NULL;
@@ -1182,8 +1181,7 @@ _reconfigure(void) {
     route_g_reconfigure();
     cpu_freq_reconfig();
 
-    msg_aggr_sender_reconfig(conf->msg_aggr_window_time,
-                             conf->msg_aggr_window_msgs);
+    msg_aggr_sender_reconfig(conf->msg_aggr_window_time, conf->msg_aggr_window_msgs);
 
     /*
      * In case the administrator changed the cpu frequency set capabilities
@@ -1209,7 +1207,7 @@ _reconfigure(void) {
     group_cache_purge();
 
     gres_plugin_reconfig();
-    (void) switch_g_reconfig();
+    (void)switch_g_reconfig();
     container_g_reconfig();
     cpu_cnt = MAX(conf->conf_cpus, conf->block_map_size);
 
@@ -1217,13 +1215,11 @@ _reconfigure(void) {
     build_all_nodeline_info(true, 0);
     build_all_frontend_info(true);
     node_rec = find_node_record2(conf->node_name);
-    if (node_rec && node_rec->config_ptr) {
-        (void) gres_plugin_init_node_config(conf->node_name,
-                                            node_rec->config_ptr->gres,
-                                            &gres_list);
+    if (node_rec && node_rec->config_ptr)
+    {
+        (void)gres_plugin_init_node_config(conf->node_name, node_rec->config_ptr->gres, &gres_list);
     }
-    (void) gres_plugin_node_config_load(cpu_cnt, conf->node_name, gres_list,
-                                        NULL, (void *) &xcpuinfo_mac_to_abs);
+    (void)gres_plugin_node_config_load(cpu_cnt, conf->node_name, gres_list, NULL, (void *)&xcpuinfo_mac_to_abs);
     FREE_NULL_LIST(gres_list);
 
     send_registration_msg(SLURM_SUCCESS, false);
@@ -1238,8 +1234,8 @@ _reconfigure(void) {
      */
 }
 
-static void
-_print_conf(void) {
+static void _print_conf(void)
+{
     slurm_ctl_conf_t *cf;
     char *str = NULL, time_str[32];
     int i;
@@ -1254,44 +1250,27 @@ _print_conf(void) {
     debug3("ClusterName = %s", conf->cluster_name);
     debug3("Confile     = `%s'", conf->conffile);
     debug3("Debug       = %d", cf->slurmd_debug);
-    debug3("CPUs        = %-2u (CF: %2u, HW: %2u)",
-           conf->cpus,
-           conf->conf_cpus,
-           conf->actual_cpus);
-    debug3("Boards      = %-2u (CF: %2u, HW: %2u)",
-           conf->boards,
-           conf->conf_boards,
-           conf->actual_boards);
-    debug3("Sockets     = %-2u (CF: %2u, HW: %2u)",
-           conf->sockets,
-           conf->conf_sockets,
-           conf->actual_sockets);
-    debug3("Cores       = %-2u (CF: %2u, HW: %2u)",
-           conf->cores,
-           conf->conf_cores,
-           conf->actual_cores);
-    debug3("Threads     = %-2u (CF: %2u, HW: %2u)",
-           conf->threads,
-           conf->conf_threads,
-           conf->actual_threads);
+    debug3("CPUs        = %-2u (CF: %2u, HW: %2u)", conf->cpus, conf->conf_cpus, conf->actual_cpus);
+    debug3("Boards      = %-2u (CF: %2u, HW: %2u)", conf->boards, conf->conf_boards, conf->actual_boards);
+    debug3("Sockets     = %-2u (CF: %2u, HW: %2u)", conf->sockets, conf->conf_sockets, conf->actual_sockets);
+    debug3("Cores       = %-2u (CF: %2u, HW: %2u)", conf->cores, conf->conf_cores, conf->actual_cores);
+    debug3("Threads     = %-2u (CF: %2u, HW: %2u)", conf->threads, conf->conf_threads, conf->actual_threads);
 
-    secs2time_str((time_t) conf->up_time, time_str, sizeof(time_str));
+    secs2time_str((time_t)conf->up_time, time_str, sizeof(time_str));
     debug3("UpTime      = %u = %s", conf->up_time, time_str);
 
     for (i = 0; i < conf->block_map_size; i++)
-        xstrfmtcat(str, "%s%u", (str ? "," : ""),
-                   conf->block_map[i]);
+        xstrfmtcat(str, "%s%u", (str ? "," : ""), conf->block_map[i]);
     debug3("Block Map   = %s", str);
     xfree(str);
     for (i = 0; i < conf->block_map_size; i++)
-        xstrfmtcat(str, "%s%u", (str ? "," : ""),
-                   conf->block_map_inv[i]);
+        xstrfmtcat(str, "%s%u", (str ? "," : ""), conf->block_map_inv[i]);
     debug3("Inverse Map = %s", str);
     xfree(str);
 
-    debug3("RealMemory  = %"
-    PRIu64
-    "", conf->real_memory_size);
+    debug3("RealMemory  = %" PRIu64
+           "",
+           conf->real_memory_size);
     debug3("TmpDisk     = %u", conf->tmp_disk_space);
     debug3("Epilog      = `%s'", conf->epilog);
     debug3("Logfile     = `%s'", cf->slurmd_logfile);
@@ -1316,12 +1295,13 @@ _print_conf(void) {
 
 /* Initialize slurmd configuration table.
  * Everything is already NULL/zero filled when called */
-static void
-_init_conf(void) {
+static void _init_conf(void)
+{
     char host[MAXHOSTNAMELEN];
     log_options_t lopts = LOG_OPTS_INITIALIZER;
 
-    if (gethostname_short(host, MAXHOSTNAMELEN) < 0) {
+    if (gethostname_short(host, MAXHOSTNAMELEN) < 0)
+    {
         error("Unable to get my hostname: %m");
         exit(1);
     }
@@ -1343,9 +1323,10 @@ _init_conf(void) {
     return;
 }
 
-static void
-_destroy_conf(void) {
-    if (conf) {
+static void _destroy_conf(void)
+{
+    if (conf)
+    {
         xfree(conf->acct_gather_energy_type);
         xfree(conf->acct_gather_filesystem_type);
         xfree(conf->acct_gather_interconnect_type);
@@ -1360,7 +1341,8 @@ _destroy_conf(void) {
         xfree(conf->epilog);
         xfree(conf->health_check_program);
         xfree(conf->hostname);
-        if (conf->hwloc_xml) {
+        if (conf->hwloc_xml)
+        {
             /*
              * When a slurmd is taking over the place of the next
              * slurmd it will have already made this file.  So don't
@@ -1399,8 +1381,8 @@ _destroy_conf(void) {
     return;
 }
 
-static void
-_print_config(void) {
+static void _print_config(void)
+{
     int days, hours, mins, secs;
     char name[128];
 
@@ -1410,22 +1392,17 @@ _print_config(void) {
     gethostname_short(name, sizeof(name));
     printf("NodeName=%s ", name);
 
-    xcpuinfo_hwloc_topo_get(&conf->actual_cpus,
-                            &conf->actual_boards,
-                            &conf->actual_sockets,
-                            &conf->actual_cores,
-                            &conf->actual_threads,
-                            &conf->block_map_size,
-                            &conf->block_map, &conf->block_map_inv);
+    xcpuinfo_hwloc_topo_get(&conf->actual_cpus, &conf->actual_boards, &conf->actual_sockets, &conf->actual_cores,
+                            &conf->actual_threads, &conf->block_map_size, &conf->block_map, &conf->block_map_inv);
     printf("CPUs=%u Boards=%u SocketsPerBoard=%u CoresPerSocket=%u "
            "ThreadsPerCore=%u ",
-           conf->actual_cpus, conf->actual_boards, conf->actual_sockets,
-           conf->actual_cores, conf->actual_threads);
+           conf->actual_cpus, conf->actual_boards, conf->actual_sockets, conf->actual_cores,
+           conf->actual_threads);
 
     get_memory(&conf->real_memory_size);
-    printf("RealMemory=%"
-    PRIu64
-    "\n", conf->real_memory_size);
+    printf("RealMemory=%" PRIu64
+           "\n",
+           conf->real_memory_size);
 
     get_up_time(&conf->up_time);
     secs = conf->up_time % 60;
@@ -1435,80 +1412,81 @@ _print_config(void) {
     printf("UpTime=%u-%2.2u:%2.2u:%2.2u\n", days, hours, mins, secs);
 }
 
-static void
-_process_cmdline(int ac, char **av) {
+static void _process_cmdline(int ac, char **av)
+{
     static char *opt_string = "bcCd:Df:GhL:Mn:N:vV";
     int c;
     char *tmp_char;
     bool print_gres = false;
 
-    static struct option long_options[] = {
-            {"version", no_argument, 0, 'V'},
-            {NULL,      0,           0, 0}
-    };
+    static struct option long_options[] = {{"version", no_argument, 0, 'V'},
+                                           {NULL, 0, 0, 0}};
 
     conf->prog = xbasename(av[0]);
 
-    while ((c = getopt_long(ac, av, opt_string, long_options, NULL)) > 0) {
-        switch (c) {
-            case 'b':
-                conf->boot_time = 1;
-                break;
-            case 'c':
-                conf->cleanstart = 1;
-                break;
-            case 'C':
-                _print_config();
-                exit(0);
-                break;
-            case 'd':
-                xfree(conf->stepd_loc);
-                conf->stepd_loc = xstrdup(optarg);
-                break;
-            case 'D':
-                conf->daemonize = 0;
-                break;
-            case 'f':
-                xfree(conf->conffile);
-                conf->conffile = xstrdup(optarg);
-                break;
-            case 'G':
-                print_gres = true;
-                break;
-            case 'h':
-                _usage();
-                exit(0);
-                break;
-            case 'L':
-                xfree(conf->logfile);
-                conf->logfile = xstrdup(optarg);
-                break;
-            case 'M':
-                conf->mlock_pages = 1;
-                break;
-            case 'n':
-                conf->nice = strtol(optarg, &tmp_char, 10);
-                if (tmp_char[0] != '\0') {
-                    error("Invalid option for -n option (nice value), ignored");
-                    conf->nice = 0;
-                }
-                break;
-            case 'N':
-                xfree(conf->node_name);
-                conf->node_name = xstrdup(optarg);
-                break;
-            case 'v':
-                conf->debug_level++;
-                conf->debug_level_set = 1;
-                break;
-            case 'V':
-                print_slurm_version();
-                exit(0);
-                break;
-            default:
-                _usage();
-                exit(1);
-                break;
+    while ((c = getopt_long(ac, av, opt_string, long_options, NULL)) > 0)
+    {
+        switch (c)
+        {
+        case 'b':
+            conf->boot_time = 1;
+            break;
+        case 'c':
+            conf->cleanstart = 1;
+            break;
+        case 'C':
+            _print_config();
+            exit(0);
+            break;
+        case 'd':
+            xfree(conf->stepd_loc);
+            conf->stepd_loc = xstrdup(optarg);
+            break;
+        case 'D':
+            conf->daemonize = 0;
+            break;
+        case 'f':
+            xfree(conf->conffile);
+            conf->conffile = xstrdup(optarg);
+            break;
+        case 'G':
+            print_gres = true;
+            break;
+        case 'h':
+            _usage();
+            exit(0);
+            break;
+        case 'L':
+            xfree(conf->logfile);
+            conf->logfile = xstrdup(optarg);
+            break;
+        case 'M':
+            conf->mlock_pages = 1;
+            break;
+        case 'n':
+            conf->nice = strtol(optarg, &tmp_char, 10);
+            if (tmp_char[0] != '\0')
+            {
+                error("Invalid option for -n option (nice value), ignored");
+                conf->nice = 0;
+            }
+            break;
+        case 'N':
+            xfree(conf->node_name);
+            conf->node_name = xstrdup(optarg);
+            break;
+        case 'v':
+            conf->debug_level++;
+            conf->debug_level_set = 1;
+            break;
+        case 'V':
+            print_slurm_version();
+            exit(0);
+            break;
+        default:
+            _usage();
+            exit(1);
+            break;
         }
     }
 
@@ -1519,7 +1497,8 @@ _process_cmdline(int ac, char **av) {
     if (!conf->stepd_loc)
         conf->stepd_loc = slurm_get_stepd_loc();
 
-    if (print_gres) {
+    if (print_gres)
+    {
         log_options_t *o = &conf->log_opts;
         o->logfile_level = LOG_LEVEL_QUIET;
         o->stderr_level = LOG_LEVEL_INFO;
@@ -1528,30 +1507,26 @@ _process_cmdline(int ac, char **av) {
         log_alter(conf->log_opts, SYSLOG_FACILITY_USER, NULL);
 
         slurm_set_debug_flags(DEBUG_FLAG_GRES);
-        (void) gres_plugin_init();
-        (void) gres_plugin_node_config_load(
-                1024,    /* Do not need real CPU count */
-                conf->node_name, NULL, NULL,
-                (void *) &xcpuinfo_mac_to_abs);
+        (void)gres_plugin_init();
+        (void)gres_plugin_node_config_load(1024, /* Do not need real CPU count */
+                                           conf->node_name, NULL, NULL, (void *)&xcpuinfo_mac_to_abs);
         exit(0);
     }
 }
 
-
-static void
-_create_msg_socket(void) {
+static void _create_msg_socket(void)
+{
     char *node_addr;
 
-    int ld = slurm_init_msg_engine_addrname_port(conf->node_addr,
-                                                 conf->port);
+    int ld = slurm_init_msg_engine_addrname_port(conf->node_addr, conf->port);
     if (conf->node_addr == NULL)
         node_addr = "*";
     else
         node_addr = conf->node_addr;
 
-    if (ld < 0) {
-        error("Unable to bind listen port (%s:%d): %m",
-              node_addr, conf->port);
+    if (ld < 0)
+    {
+        error("Unable to bind listen port (%s:%d): %m", node_addr, conf->port);
         exit(1);
     }
 
@@ -1559,14 +1534,13 @@ _create_msg_socket(void) {
 
     conf->lfd = ld;
 
-    debug3("successfully opened slurm listen port %s:%d",
-           node_addr, conf->port);
+    debug3("successfully opened slurm listen port %s:%d", node_addr, conf->port);
 
     return;
 }
 
-static void
-_stepd_cleanup_batch_dirs(const char *directory, const char *nodename) {
+static void _stepd_cleanup_batch_dirs(const char *directory, const char *nodename)
+{
     DIR *dp;
     struct dirent *ent;
     struct stat stat_buf;
@@ -1574,29 +1548,33 @@ _stepd_cleanup_batch_dirs(const char *directory, const char *nodename) {
     /*
      * Make sure that "directory" exists and is a directory.
      */
-    if (stat(directory, &stat_buf) < 0) {
+    if (stat(directory, &stat_buf) < 0)
+    {
         error("SlurmdSpoolDir stat error %s: %m", directory);
         return;
-    } else if (!S_ISDIR(stat_buf.st_mode)) {
+    }
+    else if (!S_ISDIR(stat_buf.st_mode))
+    {
         error("SlurmdSpoolDir is not a directory %s", directory);
         return;
     }
 
-    if ((dp = opendir(directory)) == NULL) {
+    if ((dp = opendir(directory)) == NULL)
+    {
         error("SlurmdSpoolDir open error %s: %m", directory);
         return;
     }
 
-    while ((ent = readdir(dp)) != NULL) {
-        if (!xstrncmp(ent->d_name, "job", 3) &&
-            (ent->d_name[3] >= '0') && (ent->d_name[3] <= '9')) {
+    while ((ent = readdir(dp)) != NULL)
+    {
+        if (!xstrncmp(ent->d_name, "job", 3) && (ent->d_name[3] >= '0') && (ent->d_name[3] <= '9'))
+        {
             char *dir_path = NULL, *file_path = NULL;
             xstrfmtcat(dir_path, "%s/%s", directory, ent->d_name);
             xstrfmtcat(file_path, "%s/slurm_script", dir_path);
-            info("%s: Purging vestigial job script %s",
-                 __func__, file_path);
-            (void) unlink(file_path);
-            (void) rmdir(dir_path);
+            info("%s: Purging vestigial job script %s", __func__, file_path);
+            (void)unlink(file_path);
+            (void)rmdir(dir_path);
             xfree(dir_path);
             xfree(file_path);
         }
@@ -1604,8 +1582,8 @@ _stepd_cleanup_batch_dirs(const char *directory, const char *nodename) {
     closedir(dp);
 }
 
-static int
-_slurmd_init(void) {
+static int _slurmd_init(void)
+{
     struct rlimit rlim;
     struct stat stat_buf;
     uint32_t cpu_cnt;
@@ -1652,7 +1630,8 @@ _slurmd_init(void) {
     /*
      * Create slurmd spool directory if necessary.
      */
-    if (_set_slurmd_spooldir() < 0) {
+    if (_set_slurmd_spooldir() < 0)
+    {
         error("Unable to initialize slurmd spooldir");
         return SLURM_ERROR;
     }
@@ -1664,13 +1643,11 @@ _slurmd_init(void) {
     fini_job_cnt = cpu_cnt = MAX(conf->conf_cpus, conf->block_map_size);
     fini_job_id = xmalloc(sizeof(uint32_t) * fini_job_cnt);
     node_rec = find_node_record2(conf->node_name);
-    if (node_rec && node_rec->config_ptr) {
-        (void) gres_plugin_init_node_config(conf->node_name,
-                                            node_rec->config_ptr->gres,
-                                            &gres_list);
+    if (node_rec && node_rec->config_ptr)
+    {
+        (void)gres_plugin_init_node_config(conf->node_name, node_rec->config_ptr->gres, &gres_list);
     }
-    rc = gres_plugin_node_config_load(cpu_cnt, conf->node_name, gres_list,
-                                      NULL, (void *) &xcpuinfo_mac_to_abs);
+    rc = gres_plugin_node_config_load(cpu_cnt, conf->node_name, gres_list, NULL, (void *)&xcpuinfo_mac_to_abs);
     FREE_NULL_LIST(gres_list);
     if (rc != SLURM_SUCCESS)
         return SLURM_ERROR;
@@ -1708,16 +1685,18 @@ _slurmd_init(void) {
     if (spank_slurmd_init() < 0)
         return SLURM_ERROR;
 
-    if (getrlimit(RLIMIT_CPU, &rlim) == 0) {
+    if (getrlimit(RLIMIT_CPU, &rlim) == 0)
+    {
         rlim.rlim_cur = rlim.rlim_max;
         setrlimit(RLIMIT_CPU, &rlim);
-        if (rlim.rlim_max != RLIM_INFINITY) {
-            error("Slurmd process CPU time limit is %d seconds",
-                  (int) rlim.rlim_max);
+        if (rlim.rlim_max != RLIM_INFINITY)
+        {
+            error("Slurmd process CPU time limit is %d seconds", (int)rlim.rlim_max);
         }
     }
 
-    if (getrlimit(RLIMIT_CORE, &rlim) == 0) {
+    if (getrlimit(RLIMIT_CORE, &rlim) == 0)
+    {
         rlim.rlim_cur = rlim.rlim_max;
         setrlimit(RLIMIT_CORE, &rlim);
     }
@@ -1730,7 +1709,8 @@ _slurmd_init(void) {
     if (!(conf->vctx = slurm_cred_verifier_ctx_create(conf->pubkey)))
         return SLURM_ERROR;
 
-    if (conf->cleanstart) {
+    if (conf->cleanstart)
+    {
         /*
          * Need to kill any running slurmd's here
          */
@@ -1740,10 +1720,12 @@ _slurmd_init(void) {
         _stepd_cleanup_batch_dirs(conf->spooldir, conf->node_name);
     }
 
-    if (conf->daemonize) {
+    if (conf->daemonize)
+    {
         bool success = false;
 
-        if (conf->logfile && (conf->logfile[0] == '/')) {
+        if (conf->logfile && (conf->logfile[0] == '/'))
+        {
             char *slash_ptr, *work_dir;
             work_dir = xstrdup(conf->logfile);
             slash_ptr = strrchr(work_dir, '/');
@@ -1751,33 +1733,39 @@ _slurmd_init(void) {
                 work_dir[1] = '\0';
             else
                 slash_ptr[0] = '\0';
-            if ((access(work_dir, W_OK) != 0) ||
-                (chdir(work_dir) < 0)) {
+            if ((access(work_dir, W_OK) != 0) || (chdir(work_dir) < 0))
+            {
                 error("Unable to chdir to %s", work_dir);
-            } else
+            }
+            else
                 success = true;
             xfree(work_dir);
         }
 
-        if (!success) {
-            if ((access(conf->spooldir, W_OK) != 0) ||
-                (chdir(conf->spooldir) < 0)) {
+        if (!success)
+        {
+            if ((access(conf->spooldir, W_OK) != 0) || (chdir(conf->spooldir) < 0))
+            {
                 error("Unable to chdir to %s", conf->spooldir);
-            } else
+            }
+            else
                 success = true;
         }
 
-        if (!success) {
-            if ((access("/var/tmp", W_OK) != 0) ||
-                (chdir("/var/tmp") < 0)) {
+        if (!success)
+        {
+            if ((access("/var/tmp", W_OK) != 0) || (chdir("/var/tmp") < 0))
+            {
                 error("chdir(/var/tmp): %m");
                 return SLURM_ERROR;
-            } else
+            }
+            else
                 info("chdir to /var/tmp");
         }
     }
 
-    if ((devnull = open("/dev/null", O_RDWR | O_CLOEXEC)) < 0) {
+    if ((devnull = open("/dev/null", O_RDWR | O_CLOEXEC)) < 0)
+    {
         error("Unable to open /dev/null: %m");
         return SLURM_ERROR;
     }
@@ -1791,14 +1779,15 @@ _slurmd_init(void) {
     return SLURM_SUCCESS;
 }
 
-static int
-_restore_cred_state(slurm_cred_ctx_t ctx) {
+static int _restore_cred_state(slurm_cred_ctx_t ctx)
+{
     char *file_name = NULL, *data = NULL;
     uint32_t data_offset = 0;
     int cred_fd, data_allocated, data_read = 0;
     Buf buffer = NULL;
 
-    if ((mkdir(conf->spooldir, 0755) < 0) && (errno != EEXIST)) {
+    if ((mkdir(conf->spooldir, 0755) < 0) && (errno != EEXIST))
+    {
         fatal("mkdir(%s): %m", conf->spooldir);
         return SLURM_ERROR;
     }
@@ -1811,7 +1800,8 @@ _restore_cred_state(slurm_cred_ctx_t ctx) {
 
     data_allocated = 1024;
     data = xmalloc(data_allocated);
-    while ((data_read = read(cred_fd, data + data_offset, 1024)) == 1024) {
+    while ((data_read = read(cred_fd, data + data_offset, 1024)) == 1024)
+    {
         data_offset += data_read;
         data_allocated += 1024;
         xrealloc(data, data_allocated);
@@ -1822,15 +1812,15 @@ _restore_cred_state(slurm_cred_ctx_t ctx) {
 
     slurm_cred_ctx_unpack(ctx, buffer);
 
-    cleanup:
+cleanup:
     xfree(file_name);
     if (buffer)
         free_buf(buffer);
     return SLURM_SUCCESS;
 }
 
-static int
-_slurmd_fini(void) {
+static int _slurmd_fini(void)
+{
     assoc_mgr_fini(false);
     node_features_g_fini();
     core_spec_g_fini();
@@ -1846,7 +1836,7 @@ _slurmd_fini(void) {
     node_fini2();
     gres_plugin_fini();
     slurm_topo_fini();
-    slurmd_req(NULL);    /* purge memory allocated by slurmd_req() */
+    slurmd_req(NULL); /* purge memory allocated by slurmd_req() */
     fini_setproctitle();
     slurm_select_fini();
     spank_slurmd_exit();
@@ -1870,7 +1860,8 @@ _slurmd_fini(void) {
  * IN list - list of credentials
  * RET int - zero or error code
  */
-int save_cred_state(slurm_cred_ctx_t ctx) {
+int save_cred_state(slurm_cred_ctx_t ctx)
+{
     char *old_file, *new_file, *reg_file;
     int cred_fd = -1, error_code = SLURM_SUCCESS, rc;
     Buf buffer = NULL;
@@ -1884,7 +1875,8 @@ int save_cred_state(slurm_cred_ctx_t ctx) {
     xstrcat(new_file, "/cred_state.new");
 
     slurm_mutex_lock(&state_mutex);
-    if ((cred_fd = creat(new_file, 0600)) < 0) {
+    if ((cred_fd = creat(new_file, 0600)) < 0)
+    {
         error("creat(%s): %m", new_file);
         if (errno == ENOSPC)
             _drain_node("SlurmdSpoolDir is full");
@@ -1894,25 +1886,24 @@ int save_cred_state(slurm_cred_ctx_t ctx) {
     buffer = init_buf(1024);
     slurm_cred_ctx_pack(ctx, buffer);
     rc = write(cred_fd, get_buf_data(buffer), get_buf_offset(buffer));
-    if (rc != get_buf_offset(buffer)) {
+    if (rc != get_buf_offset(buffer))
+    {
         error("write %s error %m", new_file);
-        (void) unlink(new_file);
+        (void)unlink(new_file);
         if ((rc < 0) && (errno == ENOSPC))
             _drain_node("SlurmdSpoolDir is full");
         error_code = errno;
         goto cleanup;
     }
-    (void) unlink(old_file);
+    (void)unlink(old_file);
     if (link(reg_file, old_file))
-        debug4("unable to create link for %s -> %s: %m",
-               reg_file, old_file);
-    (void) unlink(reg_file);
+        debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
+    (void)unlink(reg_file);
     if (link(new_file, reg_file))
-        debug4("unable to create link for %s -> %s: %m",
-               new_file, reg_file);
-    (void) unlink(new_file);
+        debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
+    (void)unlink(new_file);
 
-    cleanup:
+cleanup:
     slurm_mutex_unlock(&state_mutex);
     xfree(old_file);
     xfree(reg_file);
@@ -1924,7 +1915,8 @@ int save_cred_state(slurm_cred_ctx_t ctx) {
     return error_code;
 }
 
-static int _drain_node(char *reason) {
+static int _drain_node(char *reason)
+{
     slurm_msg_t req_msg;
     update_node_msg_t update_node_msg;
 
@@ -1944,8 +1936,10 @@ static int _drain_node(char *reason) {
     return SLURM_SUCCESS;
 }
 
-extern void slurmd_shutdown(int signum) {
-    if (signum == SIGTERM || signum == SIGINT) {
+extern void slurmd_shutdown(int signum)
+{
+    if (signum == SIGTERM || signum == SIGINT)
+    {
         _shutdown = 1;
         if (msg_pthread && (pthread_self() != msg_pthread))
             pthread_kill(msg_pthread, SIGTERM);
@@ -1953,23 +1947,24 @@ extern void slurmd_shutdown(int signum) {
     }
 }
 
-static void
-_hup_handler(int signum) {
-    if (signum == SIGHUP) {
+static void _hup_handler(int signum)
+{
+    if (signum == SIGHUP)
+    {
         _reconfig = 1;
     }
 }
 
-static void
-_usr_handler(int signum) {
-    if (signum == SIGUSR2) {
+static void _usr_handler(int signum)
+{
+    if (signum == SIGUSR2)
+    {
         _update_log = 1;
     }
 }
 
-
-static void
-_usage(void) {
+static void _usage(void)
+{
     fprintf(stderr, "\
 Usage: %s [OPTIONS]\n\
    -b          Report node reboot now.\n\
@@ -1985,19 +1980,23 @@ Usage: %s [OPTIONS]\n\
    -n value    Run the daemon at the specified nice value.\n\
    -N node     Run the daemon for specified nodename.\n\
    -v          Verbose mode. Multiple -v's increase verbosity.\n\
-   -V          Print version information and exit.\n", conf->prog);
+   -V          Print version information and exit.\n",
+            conf->prog);
     return;
 }
 
 /*
+创建假脱机目录并且进入该目录
  * create spool directory as needed and "cd" to it
  */
-static int
-_set_slurmd_spooldir(void) {
+static int _set_slurmd_spooldir(void)
+{
     debug3("initializing slurmd spool directory");
 
-    if (mkdir(conf->spooldir, 0755) < 0) {
-        if (errno != EEXIST) {
+    if (mkdir(conf->spooldir, 0755) < 0)
+    {
+        if (errno != EEXIST)
+        {
             fatal("mkdir(%s): %m", conf->spooldir);
             return SLURM_ERROR;
         }
@@ -2006,7 +2005,8 @@ _set_slurmd_spooldir(void) {
     /*
      * Ensure spool directory permissions are correct.
      */
-    if (chmod(conf->spooldir, 0755) < 0) {
+    if (chmod(conf->spooldir, 0755) < 0)
+    {
         error("chmod(%s, 0755): %m", conf->spooldir);
         return SLURM_ERROR;
     }
@@ -2019,27 +2019,29 @@ _set_slurmd_spooldir(void) {
  * Returns file descriptor for the existing pidfile so that the
  * current slurmd can wait on termination of the old.
  */
-static void
-_kill_old_slurmd(void) {
+static void _kill_old_slurmd(void)
+{
     int fd;
     pid_t oldpid = read_pidfile(conf->pidfile, &fd);
-    if (oldpid != (pid_t) 0) {
-        info("killing old slurmd[%lu]", (unsigned long) oldpid);
+    if (oldpid != (pid_t)0)
+    {
+        info("killing old slurmd[%lu]", (unsigned long)oldpid);
         kill(oldpid, SIGTERM);
 
         /*
          * Wait for previous daemon to terminate
          */
-        if (fd_get_readw_lock(fd) < 0) {
-            fatal("error getting readw lock on file %s: %m",
-                  conf->pidfile);
+        if (fd_get_readw_lock(fd) < 0)
+        {
+            fatal("error getting readw lock on file %s: %m", conf->pidfile);
         }
-        (void) close(fd); /* Ignore errors */
+        (void)close(fd); /* Ignore errors */
     }
 }
 
 /* Reset slurmd logging based upon configuration parameters */
-static void _update_logging(void) {
+static void _update_logging(void)
+{
     List steps;
     ListIterator i;
     step_loc_t *stepd;
@@ -2062,13 +2064,19 @@ static void _update_logging(void) {
     else
         o->stderr_level = conf->debug_level;
 
-    if (conf->syslog_debug != LOG_LEVEL_END) {
+    if (conf->syslog_debug != LOG_LEVEL_END)
+    {
         o->syslog_level = conf->syslog_debug;
-    } else if (!conf->daemonize) {
+    }
+    else if (!conf->daemonize)
+    {
         o->syslog_level = LOG_LEVEL_QUIET;
-    } else if ((conf->debug_level > LOG_LEVEL_QUIET) && !conf->logfile) {
+    }
+    else if ((conf->debug_level > LOG_LEVEL_QUIET) && !conf->logfile)
+    {
         o->syslog_level = conf->debug_level;
-    } else
+    }
+    else
         o->syslog_level = LOG_LEVEL_FATAL;
 
     log_alter(conf->log_opts, SYSLOG_FACILITY_DAEMON, conf->logfile);
@@ -2083,7 +2091,8 @@ static void _update_logging(void) {
     debug("Log file re-opened");
 
 #if defined(MULTIPLE_SLURMD)
-    if (conf->logfile == NULL) {
+    if (conf->logfile == NULL)
+    {
         char buf[64];
 
         snprintf(buf, sizeof(buf), "slurmd-%s", conf->node_name);
@@ -2097,18 +2106,15 @@ static void _update_logging(void) {
 
     steps = stepd_available(conf->spooldir, conf->node_name);
     i = list_iterator_create(steps);
-    while ((stepd = list_next(i))) {
+    while ((stepd = list_next(i)))
+    {
         int fd;
-        fd = stepd_connect(stepd->directory, stepd->nodename,
-                           stepd->jobid, stepd->stepid,
-                           &stepd->protocol_version);
+        fd = stepd_connect(stepd->directory, stepd->nodename, stepd->jobid, stepd->stepid, &stepd->protocol_version);
         if (fd == -1)
             continue;
 
-        if (stepd_reconfig(fd, stepd->protocol_version)
-            != SLURM_SUCCESS)
-            debug("Reconfig jobid=%u.%u failed: %m",
-                  stepd->jobid, stepd->stepid);
+        if (stepd_reconfig(fd, stepd->protocol_version) != SLURM_SUCCESS)
+            debug("Reconfig jobid=%u.%u failed: %m", stepd->jobid, stepd->stepid);
         close(fd);
     }
     list_iterator_destroy(i);
@@ -2116,11 +2122,12 @@ static void _update_logging(void) {
 }
 
 /* Reset slurmd nice value */
-static void _update_nice(void) {
+static void _update_nice(void)
+{
     int cur_nice;
     id_t pid;
 
-    if (conf->nice == 0)    /* No change */
+    if (conf->nice == 0) /* No change */
         return;
 
     pid = getpid();
@@ -2134,36 +2141,43 @@ static void _update_nice(void) {
 /*
  *  Lock the fork mutex to protect fork-critical regions
  */
-static void _atfork_prepare(void) {
+static void _atfork_prepare(void)
+{
     slurm_mutex_lock(&fork_mutex);
 }
 
 /*
  *  Unlock  fork mutex to allow fork-critical functions to continue
  */
-static void _atfork_final(void) {
+static void _atfork_final(void)
+{
     slurm_mutex_unlock(&fork_mutex);
 }
 
-static void _install_fork_handlers(void) {
+static void _install_fork_handlers(void)
+{
     int err;
 
     err = pthread_atfork(&_atfork_prepare, &_atfork_final, &_atfork_final);
-    if (err) error("pthread_atfork: %m");
+    if (err)
+        error("pthread_atfork: %m");
 
     return;
 }
 
 /*
+设置slurmd节点的拓扑地址和地址模式
  * set topology address and address pattern of slurmd node
  */
-static int _set_topo_info(void) {
+static int _set_topo_info(void)
+{
     int rc;
     char *addr = NULL, *pattern = NULL;
 
     slurm_mutex_lock(&conf->config_mutex);
     rc = slurm_topo_get_node_addr(conf->node_name, &addr, &pattern);
-    if (rc == SLURM_SUCCESS) {
+    if (rc == SLURM_SUCCESS)
+    {
         xfree(conf->node_topo_addr);
         xfree(conf->node_topo_pattern);
         conf->node_topo_addr = addr;
@@ -2174,7 +2188,8 @@ static int _set_topo_info(void) {
     return rc;
 }
 
-static uint64_t _get_int(const char *my_str) {
+static uint64_t _get_int(const char *my_str)
+{
     char *end = NULL;
     uint64_t value;
 
@@ -2186,53 +2201,55 @@ static uint64_t _get_int(const char *my_str) {
     return value;
 }
 
-static uint64_t _parse_msg_aggr_params(int type, char *params) {
+static uint64_t _parse_msg_aggr_params(int type, char *params)
+{
     uint64_t value = NO_VAL;
     char *sub_str = NULL;
 
     if (!params)
         return NO_VAL;
 
-    switch (type) {
-        case WINDOW_TIME:
-            if ((sub_str = xstrcasestr(params, "WindowTime=")))
-                value = _get_int(sub_str + 11);
-            break;
-        case WINDOW_MSGS:
-            if ((sub_str = xstrcasestr(params, "WindowMsgs=")))
-                value = _get_int(sub_str + 11);
-            break;
-        default:
-            fatal("invalid message aggregation parameters: %s", params);
+    switch (type)
+    {
+    case WINDOW_TIME:
+        if ((sub_str = xstrcasestr(params, "WindowTime=")))
+            value = _get_int(sub_str + 11);
+        break;
+    case WINDOW_MSGS:
+        if ((sub_str = xstrcasestr(params, "WindowMsgs=")))
+            value = _get_int(sub_str + 11);
+        break;
+    default:
+        fatal("invalid message aggregation parameters: %s", params);
     }
     return value;
 }
 
-static void _set_msg_aggr_params(void) {
-    conf->msg_aggr_window_time = _parse_msg_aggr_params(WINDOW_TIME,
-                                                        conf->msg_aggr_params);
-    conf->msg_aggr_window_msgs = _parse_msg_aggr_params(WINDOW_MSGS,
-                                                        conf->msg_aggr_params);
+static void _set_msg_aggr_params(void)
+{
+    conf->msg_aggr_window_time = _parse_msg_aggr_params(WINDOW_TIME, conf->msg_aggr_params);
+    conf->msg_aggr_window_msgs = _parse_msg_aggr_params(WINDOW_MSGS, conf->msg_aggr_params);
 
     if (conf->msg_aggr_window_time == NO_VAL)
         conf->msg_aggr_window_time = DEFAULT_MSG_AGGR_WINDOW_TIME;
     if (conf->msg_aggr_window_msgs == NO_VAL)
         conf->msg_aggr_window_msgs = DEFAULT_MSG_AGGR_WINDOW_MSGS;
-    if (conf->msg_aggr_window_msgs > 1) {
-        info("Message aggregation enabled: WindowMsgs=%"
-        PRIu64
-        ", WindowTime=%"
-        PRIu64,
-                conf->msg_aggr_window_msgs, conf->msg_aggr_window_time);
-    } else
+    if (conf->msg_aggr_window_msgs > 1)
+    {
+        info("Message aggregation enabled: WindowMsgs=%" PRIu64
+             ", WindowTime=%" PRIu64,
+             conf->msg_aggr_window_msgs, conf->msg_aggr_window_time);
+    }
+    else
         info("Message aggregation disabled");
 }
 
 /*
  * Initialize resource specialization
  */
-static int _resource_spec_init(void) {
-    fini_system_cgroup();    /* Prevent memory leak */
+static int _resource_spec_init(void)
+{
+    fini_system_cgroup(); /* Prevent memory leak */
     if (_core_spec_init() != SLURM_SUCCESS)
         error("Resource spec: core specialization disabled");
     if (_memory_spec_init() != SLURM_SUCCESS)
@@ -2241,7 +2258,8 @@ static int _resource_spec_init(void) {
 }
 
 /* Return true if CoreSpecPlugin=core_spec/cray */
-static bool _is_core_spec_cray(void) {
+static bool _is_core_spec_cray(void)
+{
     bool use_core_spec_cray = false;
     char *core_spec_plugin = slurm_get_core_spec_plugin();
     if (core_spec_plugin && strstr(core_spec_plugin, "cray"))
@@ -2253,7 +2271,8 @@ static bool _is_core_spec_cray(void) {
 /*
  * If configured, initialize core specialization
  */
-static int _core_spec_init(void) {
+static int _core_spec_init(void)
+{
 #if defined(__APPLE__)
     error("%s: not supported on macOS", __func__);
     return SLURM_SUCCESS;
@@ -2265,12 +2284,14 @@ static int _core_spec_init(void) {
     bitstr_t *res_mac_bitmap;
     cpu_set_t mask;
 
-    if ((conf->core_spec_cnt == 0) && (conf->cpu_spec_list == NULL)) {
+    if ((conf->core_spec_cnt == 0) && (conf->cpu_spec_list == NULL))
+    {
         debug("Resource spec: No specialized cores configured by "
               "default on this node");
         return SLURM_SUCCESS;
     }
-    if (_is_core_spec_cray()) {	/* No need to use cgroups */
+    if (_is_core_spec_cray())
+    { /* No need to use cgroups */
         debug("Using core_spec/cray to manage specialized cores");
         return SLURM_SUCCESS;
     }
@@ -2280,29 +2301,36 @@ static int _core_spec_init(void) {
     res_abs_core_size = ncores * 4;
     res_abs_cores = xmalloc(res_abs_core_size);
     res_core_bitmap = bit_alloc(ncores);
-    res_cpu_bitmap  = bit_alloc(ncpus);
+    res_cpu_bitmap = bit_alloc(ncpus);
     res_abs_cpus[0] = '\0';
 
-    if (conf->cpu_spec_list != NULL) {
+    if (conf->cpu_spec_list != NULL)
+    {
         /* CPUSpecList designated in slurm.conf */
         debug2("Resource spec: configured CPU specialization list: %s",
-            conf->cpu_spec_list);
-        if (_validate_and_convert_cpu_list() != SLURM_SUCCESS) {
+               conf->cpu_spec_list);
+        if (_validate_and_convert_cpu_list() != SLURM_SUCCESS)
+        {
             error("Resource spec: unable to process CPUSpecList");
             _resource_spec_fini();
             return SLURM_ERROR;
         }
-    } else {
+    }
+    else
+    {
         /* CoreSpecCount designated in slurm.conf */
         debug2("Resource spec: configured core specialization "
-               "count: %u", conf->core_spec_cnt);
-        if (conf->core_spec_cnt >= ncores) {
+               "count: %u",
+               conf->core_spec_cnt);
+        if (conf->core_spec_cnt >= ncores)
+        {
             error("Resource spec: CoreSpecCount too large");
             _resource_spec_fini();
             return SLURM_ERROR;
         }
         _select_spec_cores();
-        if (_convert_spec_cores() != SLURM_SUCCESS) {
+        if (_convert_spec_cores() != SLURM_SUCCESS)
+        {
             error("Resource spec: unable to convert "
                   "selected cores to machine CPU IDs");
             _resource_spec_fini();
@@ -2314,57 +2342,69 @@ static int _core_spec_init(void) {
     task_params = slurm_get_task_plugin_param();
     slurmd_off_spec = (task_params & SLURMD_OFF_SPEC);
 
-    if (check_corespec_cgroup_job_confinement()) {
-        if (init_system_cpuset_cgroup() != SLURM_SUCCESS) {
+    if (check_corespec_cgroup_job_confinement())
+    {
+        if (init_system_cpuset_cgroup() != SLURM_SUCCESS)
+        {
             error("Resource spec: unable to initialize system "
                   "cpuset cgroup");
             _resource_spec_fini();
             return SLURM_ERROR;
         }
-        if (slurmd_off_spec) {
+        if (slurmd_off_spec)
+        {
             char other_mac_cpus[1024];
             res_mac_bitmap = bit_alloc(ncpus);
             bit_unfmt(res_mac_bitmap, res_mac_cpus);
             bit_not(res_mac_bitmap);
             bit_fmt(other_mac_cpus, sizeof(other_mac_cpus),
-                res_mac_bitmap);
+                    res_mac_bitmap);
             bit_free(res_mac_bitmap);
             rval = set_system_cgroup_cpus(other_mac_cpus);
-        } else {
+        }
+        else
+        {
             rval = set_system_cgroup_cpus(res_mac_cpus);
         }
-        if (rval != SLURM_SUCCESS) {
+        if (rval != SLURM_SUCCESS)
+        {
             error("Resource spec: unable to set reserved CPU IDs in "
                   "system cpuset cgroup");
             _resource_spec_fini();
             return SLURM_ERROR;
         }
-        if (attach_system_cpuset_pid(pid) != SLURM_SUCCESS) {
+        if (attach_system_cpuset_pid(pid) != SLURM_SUCCESS)
+        {
             error("Resource spec: unable to attach slurmd to "
                   "system cpuset cgroup");
             _resource_spec_fini();
             return SLURM_ERROR;
         }
-    } else {
+    }
+    else
+    {
         res_mac_bitmap = bit_alloc(ncpus);
         bit_unfmt(res_mac_bitmap, res_mac_cpus);
         CPU_ZERO(&mask);
-        for (i = 0; i < ncpus; i++) {
+        for (i = 0; i < ncpus; i++)
+        {
             bool cpu_in_spec = bit_test(res_mac_bitmap, i);
-            if (slurmd_off_spec != cpu_in_spec) {
+            if (slurmd_off_spec != cpu_in_spec)
+            {
                 CPU_SET(i, &mask);
-}
+            }
         }
         bit_free(res_mac_bitmap);
 
 #ifdef __FreeBSD__
         rval = cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID,
-                      pid, sizeof(cpu_set_t), &mask);
+                                  pid, sizeof(cpu_set_t), &mask);
 #else
         rval = sched_setaffinity(pid, sizeof(cpu_set_t), &mask);
 #endif
 
-        if (rval != 0) {
+        if (rval != 0)
+        {
             error("Resource spec: unable to establish slurmd CPU "
                   "affinity: %m");
             _resource_spec_fini();
@@ -2383,21 +2423,25 @@ static int _core_spec_init(void) {
 /*
  * If configured, initialize system memory limit
  */
-static int _memory_spec_init(void) {
+static int _memory_spec_init(void)
+{
     pid_t pid;
 
-    if (conf->mem_spec_limit == 0) {
+    if (conf->mem_spec_limit == 0)
+    {
         debug("Resource spec: Reserved system memory limit not "
               "configured for this node");
         return SLURM_SUCCESS;
     }
-    if (!xcgroup_mem_cgroup_job_confinement()) {
-        if (slurm_get_select_type_param() & CR_MEMORY) {
+    if (!xcgroup_mem_cgroup_job_confinement())
+    {
+        if (slurm_get_select_type_param() & CR_MEMORY)
+        {
             error("Resource spec: Limited MemSpecLimit support. "
                   "Slurmd daemon not memory constrained. "
-                  "Reserved %"
-            PRIu64
-            " MB", conf->mem_spec_limit);
+                  "Reserved %" PRIu64
+                  " MB",
+                  conf->mem_spec_limit);
             return SLURM_SUCCESS;
         }
         error("Resource spec: cgroup job confinement not configured. "
@@ -2405,32 +2449,34 @@ static int _memory_spec_init(void) {
               "ConstrainRAMSpace=yes in cgroup.conf");
         return SLURM_ERROR;
     }
-    if (init_system_memory_cgroup() != SLURM_SUCCESS) {
+    if (init_system_memory_cgroup() != SLURM_SUCCESS)
+    {
         error("Resource spec: unable to initialize system "
               "memory cgroup");
         return SLURM_ERROR;
     }
-    if (set_system_cgroup_mem_limit(conf->mem_spec_limit)
-        != SLURM_SUCCESS) {
+    if (set_system_cgroup_mem_limit(conf->mem_spec_limit) != SLURM_SUCCESS)
+    {
         error("Resource spec: unable to set memory limit in "
               "system memory cgroup");
         return SLURM_ERROR;
     }
-    if (disable_system_cgroup_mem_oom()) {
+    if (disable_system_cgroup_mem_oom())
+    {
         error("Resource spec: unable to disable OOM Killer in "
               "system memory cgroup");
         return SLURM_ERROR;
     }
     pid = getpid();
-    if (attach_system_memory_pid(pid) != SLURM_SUCCESS) {
+    if (attach_system_memory_pid(pid) != SLURM_SUCCESS)
+    {
         error("Resource spec: unable to attach slurmd to "
               "system memory cgroup");
         return SLURM_ERROR;
     }
-    info("Resource spec: system cgroup memory limit set to %"
-    PRIu64
-    " MB",
-            conf->mem_spec_limit);
+    info("Resource spec: system cgroup memory limit set to %" PRIu64
+         " MB",
+         conf->mem_spec_limit);
     return SLURM_SUCCESS;
 }
 
@@ -2445,7 +2491,8 @@ static int _memory_spec_init(void) {
  * 	res_core_bitmap		= bitmap of selected cores
  * 	res_cpu_bitmap		= bitmap of selected CPUs
  */
-static void _select_spec_cores(void) {
+static void _select_spec_cores(void)
+{
     int spec_cores, res_core, res_sock, res_off, core_off, thread_off;
     int from_core, to_core, incr_core, from_sock, to_sock, incr_sock;
     char *sched_params = slurm_get_sched_params();
@@ -2457,14 +2504,17 @@ static void _select_spec_cores(void) {
         spec_cores_first = false;
     xfree(sched_params);
 
-    if (spec_cores_first) {
+    if (spec_cores_first)
+    {
         from_core = 0;
         to_core = conf->cores;
         incr_core = 1;
         from_sock = 0;
         to_sock = conf->sockets;
         incr_sock = 1;
-    } else {
+    }
+    else
+    {
         from_core = conf->cores - 1;
         to_core = -1;
         incr_core = -1;
@@ -2473,15 +2523,13 @@ static void _select_spec_cores(void) {
         incr_sock = -1;
     }
     spec_cores = conf->core_spec_cnt;
-    for (res_core = from_core;
-         (spec_cores && (res_core != to_core)); res_core += incr_core) {
-        for (res_sock = from_sock;
-             (spec_cores && (res_sock != to_sock));
-             res_sock += incr_sock) {
-            core_off = ((res_sock * conf->cores) + res_core) *
-                       conf->threads;
-            for (thread_off = 0; thread_off < conf->threads;
-                 thread_off++) {
+    for (res_core = from_core; (spec_cores && (res_core != to_core)); res_core += incr_core)
+    {
+        for (res_sock = from_sock; (spec_cores && (res_sock != to_sock)); res_sock += incr_sock)
+        {
+            core_off = ((res_sock * conf->cores) + res_core) * conf->threads;
+            for (thread_off = 0; thread_off < conf->threads; thread_off++)
+            {
                 bit_set(res_cpu_bitmap, core_off + thread_off);
             }
             res_off = (res_sock * conf->cores) + res_core;
@@ -2502,7 +2550,8 @@ static void _select_spec_cores(void) {
  * 	res_abs_cpus		= list of abstract CPU IDs
  * 	res_mac_cpus		= list of machine CPU IDs
  */
-static int _convert_spec_cores(void) {
+static int _convert_spec_cores(void)
+{
     bit_fmt(res_abs_cores, res_abs_core_size, res_core_bitmap);
     bit_fmt(res_abs_cpus, sizeof(res_abs_cpus), res_cpu_bitmap);
     if (xcpuinfo_abs_to_mac(res_abs_cores, &res_mac_cpus) != SLURM_SUCCESS)
@@ -2524,39 +2573,43 @@ static int _convert_spec_cores(void) {
  *	res_abs_cpus		= converted list of abstract CPU IDs
  *	res_mac_cpus		= converted list of machine CPU IDs
  */
-static int _validate_and_convert_cpu_list(void) {
+static int _validate_and_convert_cpu_list(void)
+{
     int core_off, thread_inx, thread_off;
 
     /* create CPU bitmap from input CPU list */
-    if (bit_unfmt(res_cpu_bitmap, conf->cpu_spec_list) != 0) {
+    if (bit_unfmt(res_cpu_bitmap, conf->cpu_spec_list) != 0)
+    {
         return SLURM_ERROR;
     }
     /* create core bitmap and list from CPU bitmap */
-    for (thread_off = 0; thread_off < ncpus; thread_off++) {
+    for (thread_off = 0; thread_off < ncpus; thread_off++)
+    {
         if (bit_test(res_cpu_bitmap, thread_off) == 1)
             bit_set(res_core_bitmap, thread_off / (conf->threads));
     }
     bit_fmt(res_abs_cores, res_abs_core_size, res_core_bitmap);
     /* create output abstract CPU list from core bitmap */
-    for (core_off = 0; core_off < ncores; core_off++) {
-        if (bit_test(res_core_bitmap, core_off) == 1) {
-            for (thread_off = 0; thread_off < conf->threads;
-                 thread_off++) {
-                thread_inx = (core_off * (int) conf->threads) +
-                             thread_off;
+    for (core_off = 0; core_off < ncores; core_off++)
+    {
+        if (bit_test(res_core_bitmap, core_off) == 1)
+        {
+            for (thread_off = 0; thread_off < conf->threads; thread_off++)
+            {
+                thread_inx = (core_off * (int)conf->threads) + thread_off;
                 bit_set(res_cpu_bitmap, thread_inx);
             }
         }
     }
     bit_fmt(res_abs_cpus, sizeof(res_abs_cpus), res_cpu_bitmap);
     /* create output machine CPU list from core list */
-    if (xcpuinfo_abs_to_mac(res_abs_cores, &res_mac_cpus)
-        != XCPUINFO_SUCCESS)
+    if (xcpuinfo_abs_to_mac(res_abs_cores, &res_mac_cpus) != XCPUINFO_SUCCESS)
         return SLURM_ERROR;
     return SLURM_SUCCESS;
 }
 
-static void _resource_spec_fini(void) {
+static void _resource_spec_fini(void)
+{
     xfree(res_abs_cores);
     xfree(res_mac_cpus);
     FREE_NULL_BITMAP(res_core_bitmap);
@@ -2569,13 +2622,14 @@ static void _resource_spec_fini(void) {
  * Returns the run result. If the health check program
  * is not defined, returns success immediately.
  */
-extern int run_script_health_check(void) {
+extern int run_script_health_check(void)
+{
     int rc = SLURM_SUCCESS;
 
-    if (conf->health_check_program && (conf->health_check_interval != 0)) {
+    if (conf->health_check_program && (conf->health_check_interval != 0))
+    {
         char *env[1] = {NULL};
-        rc = run_script("health_check", conf->health_check_program,
-                        0, 60, env, 0);
+        rc = run_script("health_check", conf->health_check_program, 0, 60, env, 0);
     }
 
     return rc;

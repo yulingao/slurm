@@ -170,14 +170,11 @@ static int _create_directories(void) {
         if (mkdir(hdf5_conf.dir, 0755) < 0)
             fatal("mkdir(%s): %m", hdf5_conf.dir);
     } else if (rc < 0)
-        fatal("Unable to stat acct_gather_profile_dir: %s: %m",
-              hdf5_conf.dir);
+        fatal("Unable to stat acct_gather_profile_dir: %s: %m", hdf5_conf.dir);
     else if (!S_ISDIR(st.st_mode))
-        fatal("acct_gather_profile_dir: %s: Not a directory!",
-              hdf5_conf.dir);
+        fatal("acct_gather_profile_dir: %s: Not a directory!", hdf5_conf.dir);
     else if (access(hdf5_conf.dir, R_OK | W_OK | X_OK) < 0)
-        fatal("Incorrect permissions on acct_gather_profile_dir: %s",
-              hdf5_conf.dir);
+        fatal("Incorrect permissions on acct_gather_profile_dir: %s", hdf5_conf.dir);
     if (chmod(hdf5_conf.dir, 0755) == -1)
         error("%s: chmod(%s): %m", __func__, hdf5_conf.dir);
 
@@ -188,8 +185,7 @@ static int _create_directories(void) {
     }
     if (chmod(user_dir, 0700) == -1)
         error("%s: chmod(%s): %m", __func__, user_dir);
-    if (chown(user_dir, (uid_t) g_job->uid,
-              (gid_t) g_job->gid) < 0)
+    if (chown(user_dir, (uid_t) g_job->uid, (gid_t) g_job->gid) < 0)
         error("chown(%s): %m", user_dir);
 
     xfree(user_dir);
@@ -220,8 +216,7 @@ extern int init(void) {
     debug_flags = slurm_get_debug_flags();
 
     /* Move HDF5 trace printing to log file instead of stderr */
-    H5Eset_auto(H5E_DEFAULT, (herr_t (*)(hid_t, void *)) H5Eprint,
-                log_fp());
+    H5Eset_auto(H5E_DEFAULT, (herr_t (*)(hid_t, void *)) H5Eprint, log_fp());
 
     return SLURM_SUCCESS;
 }
@@ -233,12 +228,10 @@ extern int fini(void) {
     return SLURM_SUCCESS;
 }
 
-extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options,
-                                               int *full_options_cnt) {
-    s_p_options_t options[] = {
-            {"ProfileHDF5Dir",     S_P_STRING},
-            {"ProfileHDF5Default", S_P_STRING},
-            {NULL}};
+extern void acct_gather_profile_p_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
+    s_p_options_t options[] = {{"ProfileHDF5Dir",     S_P_STRING},
+                               {"ProfileHDF5Default", S_P_STRING},
+                               {NULL}};
 
     transfer_s_p_options(full_options, options, full_options_cnt);
     return;
@@ -268,8 +261,7 @@ extern void acct_gather_profile_p_conf_set(s_p_hashtbl_t *tbl) {
     debug("%s loaded", plugin_name);
 }
 
-extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
-                                      void *data) {
+extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type, void *data) {
     uint32_t *uint32 = (uint32_t *) data;
     char **tmp_char = (char **) data;
 
@@ -284,8 +276,7 @@ extern void acct_gather_profile_p_get(enum acct_gather_profile_info info_type,
             *uint32 = g_profile_running;
             break;
         default:
-            debug2("acct_gather_profile_p_get info_type %d invalid",
-                   info_type);
+            debug2("acct_gather_profile_p_get info_type %d invalid", info_type);
     }
 }
 
@@ -319,32 +310,23 @@ extern int acct_gather_profile_p_node_step_start(stepd_step_rec_t *job) {
      * then 4294967294.
      */
     if (g_job->stepid == NO_VAL) {
-        profile_file_name = xstrdup_printf("%s/%s/%u_%s_%s.h5",
-                                           hdf5_conf.dir,
-                                           g_job->user_name,
-                                           g_job->jobid,
-                                           "batch",
+        profile_file_name = xstrdup_printf("%s/%s/%u_%s_%s.h5", hdf5_conf.dir, g_job->user_name, g_job->jobid, "batch",
                                            g_job->node_name);
     } else {
-        profile_file_name = xstrdup_printf(
-                "%s/%s/%u_%u_%s.h5",
-                hdf5_conf.dir, g_job->user_name,
-                g_job->jobid, g_job->stepid, g_job->node_name);
+        profile_file_name = xstrdup_printf("%s/%s/%u_%u_%s.h5", hdf5_conf.dir, g_job->user_name, g_job->jobid,
+                                           g_job->stepid, g_job->node_name);
     }
 
     if (debug_flags & DEBUG_FLAG_PROFILE) {
         profile_str = acct_gather_profile_to_string(g_profile_running);
-        info("PROFILE: node_step_start, opt=%s file=%s",
-             profile_str, profile_file_name);
+        info("PROFILE: node_step_start, opt=%s file=%s", profile_str, profile_file_name);
     }
 
     /*
      * Create a new file using the default properties
      */
-    file_id = H5Fcreate(profile_file_name, H5F_ACC_TRUNC, H5P_DEFAULT,
-                        H5P_DEFAULT);
-    if (chown(profile_file_name, (uid_t) g_job->uid,
-              (gid_t) g_job->gid) < 0)
+    file_id = H5Fcreate(profile_file_name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (chown(profile_file_name, (uid_t) g_job->uid, (gid_t) g_job->gid) < 0)
         error("chown(%s): %m", profile_file_name);
     if (chmod(profile_file_name, 0600) < 0)
         error("chmod(%s): %m", profile_file_name);
@@ -371,8 +353,7 @@ extern int acct_gather_profile_p_node_step_start(stepd_step_rec_t *job) {
     put_int_attribute(gid_node, ATTR_CPUPERTASK, g_job->cpus_per_task);
 
     step_start_time = time(NULL);
-    put_string_attribute(gid_node, ATTR_STARTTIME,
-                         slurm_ctime2(&step_start_time));
+    put_string_attribute(gid_node, ATTR_STARTTIME, slurm_ctime2(&step_start_time));
 
     return rc;
 }
@@ -472,9 +453,8 @@ extern int64_t acct_gather_profile_p_create_group(const char *name) {
     return gid_group;
 }
 
-extern int acct_gather_profile_p_create_dataset(
-        const char *name, int64_t parent,
-        acct_gather_profile_dataset_t *dataset) {
+extern int
+acct_gather_profile_p_create_dataset(const char *name, int64_t parent, acct_gather_profile_dataset_t *dataset) {
     size_t type_size;
     size_t offset, field_size;
     hid_t dtype_id;
@@ -505,17 +485,14 @@ extern int acct_gather_profile_p_create_dataset(
 
     /* create the datatype for the dataset */
     if ((dtype_id = H5Tcreate(H5T_COMPOUND, type_size)) < 0) {
-        debug3("PROFILE: failed to create datatype for table %s",
-               name);
+        debug3("PROFILE: failed to create datatype for table %s", name);
         return SLURM_ERROR;
     }
 
     /* insert fields */
-    if (H5Tinsert(dtype_id, "ElapsedTime", 0,
-                  H5T_NATIVE_UINT64) < 0)
+    if (H5Tinsert(dtype_id, "ElapsedTime", 0, H5T_NATIVE_UINT64) < 0)
         return SLURM_ERROR;
-    if (H5Tinsert(dtype_id, "EpochTime", sizeof(uint64_t),
-                  H5T_NATIVE_UINT64) < 0)
+    if (H5Tinsert(dtype_id, "EpochTime", sizeof(uint64_t), H5T_NATIVE_UINT64) < 0)
         return SLURM_ERROR;
 
     dataset_loc = dataset;
@@ -532,12 +509,10 @@ extern int acct_gather_profile_p_create_dataset(
                 field_size = sizeof(double);
                 break;
             default:
-                error("%s: unknown field type:%d",
-                      __func__, dataset_loc->type);
+                error("%s: unknown field type:%d", __func__, dataset_loc->type);
                 continue;
         }
-        if (H5Tinsert(dtype_id, dataset_loc->name,
-                      offset, field_id) < 0)
+        if (H5Tinsert(dtype_id, dataset_loc->name, offset, field_id) < 0)
             return SLURM_ERROR;
         offset += field_size;
         dataset_loc++;
@@ -546,8 +521,7 @@ extern int acct_gather_profile_p_create_dataset(
     /* create the table */
     if (parent < 0)
         parent = gid_node; /* default parent is the node group */
-    table_id = H5PTcreate_fl(parent, name, dtype_id, HDF5_CHUNK_SIZE,
-                             HDF5_COMPRESS);
+    table_id = H5PTcreate_fl(parent, name, dtype_id, HDF5_CHUNK_SIZE, HDF5_COMPRESS);
     if (table_id < 0) {
         error("PROFILE: Impossible to create the table %s", name);
         H5Tclose(dtype_id);
@@ -571,8 +545,7 @@ extern int acct_gather_profile_p_create_dataset(
     return tables_cur_len - 1;
 }
 
-extern int acct_gather_profile_p_add_sample_data(int table_id, void *data,
-                                                 time_t sample_time) {
+extern int acct_gather_profile_p_add_sample_data(int table_id, void *data, time_t sample_time) {
     table_t *ds = &tables[table_id];
     uint8_t send_data[ds->type_size];
     int header_size = 0;
@@ -584,8 +557,7 @@ extern int acct_gather_profile_p_add_sample_data(int table_id, void *data,
     }
 
     if (table_id < 0 || table_id >= tables_cur_len) {
-        error("PROFILE: trying to add samples to an invalid table %d",
-              table_id);
+        error("PROFILE: trying to add samples to an invalid table %d", table_id);
         return SLURM_ERROR;
     }
 
@@ -637,6 +609,5 @@ extern void acct_gather_profile_p_conf_values(List *data) {
 extern bool acct_gather_profile_p_is_active(uint32_t type) {
     if (g_profile_running <= ACCT_GATHER_PROFILE_NONE)
         return false;
-    return (type == ACCT_GATHER_PROFILE_NOT_SET)
-           || (g_profile_running & type);
+    return (type == ACCT_GATHER_PROFILE_NOT_SET) || (g_profile_running & type);
 }

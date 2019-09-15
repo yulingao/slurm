@@ -61,18 +61,13 @@ typedef struct cli_filter_ops {
 
     int (*pre_submit)(slurm_opt_t *opt, int offset);
 
-    void (*post_submit)(int offset, uint32_t jobid,
-                        uint32_t stepid);
+    void (*post_submit)(int offset, uint32_t jobid, uint32_t stepid);
 } cli_filter_ops_t;
 
 /*
  * Must be synchronized with cli_filter_ops_t above.
  */
-static const char *syms[] = {
-        "setup_defaults",
-        "pre_submit",
-        "post_submit"
-};
+static const char *syms[] = {"setup_defaults", "pre_submit", "post_submit"};
 
 static int g_context_cnt = -1;
 static cli_filter_ops_t *ops = NULL;
@@ -107,18 +102,15 @@ extern int cli_filter_plugin_init(void) {
     names = clifilter_plugin_list;
     while ((type = strtok_r(names, ",", &last))) {
         xrecalloc(ops, g_context_cnt + 1, sizeof(cli_filter_ops_t));
-        xrecalloc(g_context, g_context_cnt + 1,
-                  sizeof(plugin_context_t * ));
+        xrecalloc(g_context, g_context_cnt + 1, sizeof(plugin_context_t * ));
         /* Permit both prefix and no-prefix for plugin names. */
         if (xstrncmp(type, "cli_filter/", 11) == 0)
             type += 11;
         type = xstrdup_printf("cli_filter/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;
@@ -205,8 +197,7 @@ extern int cli_filter_plugin_pre_submit(slurm_opt_t *opt, int offset) {
     return rc;
 }
 
-extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid,
-                                          uint32_t stepid) {
+extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid, uint32_t stepid) {
     DEF_TIMERS;
     int i, rc;
 

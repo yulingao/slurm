@@ -63,49 +63,23 @@
  * the select/other lib. (We tried to make it so we only had to
  * define it once, but it didn't seem to work.)
  */
-const char *node_select_syms[] = {
-        "plugin_id",
-        "select_p_state_save",
-        "select_p_state_restore",
-        "select_p_job_init",
-        "select_p_node_ranking",
-        "select_p_node_init",
-        "select_p_block_init",
-        "select_p_job_test",
-        "select_p_job_begin",
-        "select_p_job_ready",
-        "select_p_job_expand",
-        "select_p_job_resized",
-        "select_p_job_signal",
-        "select_p_job_mem_confirm",
-        "select_p_job_fini",
-        "select_p_job_suspend",
-        "select_p_job_resume",
-        "select_p_step_pick_nodes",
-        "select_p_step_start",
-        "select_p_step_finish",
-        "select_p_select_nodeinfo_pack",
-        "select_p_select_nodeinfo_unpack",
-        "select_p_select_nodeinfo_alloc",
-        "select_p_select_nodeinfo_free",
-        "select_p_select_nodeinfo_set_all",
-        "select_p_select_nodeinfo_set",
-        "select_p_select_nodeinfo_get",
-        "select_p_select_jobinfo_alloc",
-        "select_p_select_jobinfo_free",
-        "select_p_select_jobinfo_set",
-        "select_p_select_jobinfo_get",
-        "select_p_select_jobinfo_copy",
-        "select_p_select_jobinfo_pack",
-        "select_p_select_jobinfo_unpack",
-        "select_p_select_jobinfo_sprint",
-        "select_p_select_jobinfo_xstrdup",
-        "select_p_get_info_from_plugin",
-        "select_p_update_node_config",
-        "select_p_update_node_state",
-        "select_p_reconfigure",
-        "select_p_resv_test",
-};
+const char *node_select_syms[] = {"plugin_id", "select_p_state_save", "select_p_state_restore", "select_p_job_init",
+                                  "select_p_node_ranking", "select_p_node_init", "select_p_block_init",
+                                  "select_p_job_test", "select_p_job_begin", "select_p_job_ready",
+                                  "select_p_job_expand", "select_p_job_resized", "select_p_job_signal",
+                                  "select_p_job_mem_confirm", "select_p_job_fini", "select_p_job_suspend",
+                                  "select_p_job_resume", "select_p_step_pick_nodes", "select_p_step_start",
+                                  "select_p_step_finish", "select_p_select_nodeinfo_pack",
+                                  "select_p_select_nodeinfo_unpack", "select_p_select_nodeinfo_alloc",
+                                  "select_p_select_nodeinfo_free", "select_p_select_nodeinfo_set_all",
+                                  "select_p_select_nodeinfo_set", "select_p_select_nodeinfo_get",
+                                  "select_p_select_jobinfo_alloc", "select_p_select_jobinfo_free",
+                                  "select_p_select_jobinfo_set", "select_p_select_jobinfo_get",
+                                  "select_p_select_jobinfo_copy", "select_p_select_jobinfo_pack",
+                                  "select_p_select_jobinfo_unpack", "select_p_select_jobinfo_sprint",
+                                  "select_p_select_jobinfo_xstrdup", "select_p_get_info_from_plugin",
+                                  "select_p_update_node_config", "select_p_update_node_state", "select_p_reconfigure",
+                                  "select_p_resv_test",};
 
 static int select_context_cnt = -1;
 static int select_context_default = -1;
@@ -145,11 +119,9 @@ static int _load_plugins(void *x, void *arg) {
     char *plugin_name = (char *) x;
     _plugin_args_t *pargs = (_plugin_args_t *) arg;
 
-    select_context[select_context_cnt] =
-            plugin_context_create(pargs->plugin_type, plugin_name,
-                                  (void **) &ops[select_context_cnt],
-                                  node_select_syms,
-                                  sizeof(node_select_syms));
+    select_context[select_context_cnt] = plugin_context_create(pargs->plugin_type, plugin_name,
+                                                               (void **) &ops[select_context_cnt], node_select_syms,
+                                                               sizeof(node_select_syms));
 
     if (select_context[select_context_cnt]) {
         /* set the default */
@@ -236,8 +208,7 @@ extern int slurm_select_init(bool only_default) {
     }
     if (plugin_names && (plugin_cnt = list_count(plugin_names))) {
         ops = xcalloc(plugin_cnt, sizeof(slurm_select_ops_t));
-        select_context = xcalloc(plugin_cnt,
-                                 sizeof(plugin_context_t * ));
+        select_context = xcalloc(plugin_cnt, sizeof(plugin_context_t * ));
         list_for_each(plugin_names, _load_plugins, &plugin_args);
     }
 
@@ -247,19 +218,13 @@ extern int slurm_select_init(bool only_default) {
     /* Ensure that plugin_id is valid and unique */
     for (i = 0; i < select_context_cnt; i++) {
         for (j = i + 1; j < select_context_cnt; j++) {
-            if (*(ops[i].plugin_id) !=
-                *(ops[j].plugin_id))
+            if (*(ops[i].plugin_id) != *(ops[j].plugin_id))
                 continue;
             fatal("SelectPlugins: Duplicate plugin_id %u for "
-                  "%s and %s",
-                  *(ops[i].plugin_id),
-                  select_context[i]->type,
-                  select_context[j]->type);
+                  "%s and %s", *(ops[i].plugin_id), select_context[i]->type, select_context[j]->type);
         }
         if (*(ops[i].plugin_id) < 100) {
-            fatal("SelectPlugins: Invalid plugin_id %u (<100) %s",
-                  *(ops[i].plugin_id),
-                  select_context[i]->type);
+            fatal("SelectPlugins: Invalid plugin_id %u (<100) %s", *(ops[i].plugin_id), select_context[i]->type);
         }
     }
     init_run = true;
@@ -271,10 +236,7 @@ extern int slurm_select_init(bool only_default) {
             if (cr_type & (CR_CPU | CR_CORE | CR_SOCKET)) {
                 fatal("Invalid SelectTypeParameters for "
                       "%s: %s (%u), it can't contain "
-                      "CR_(CPU|CORE|SOCKET).",
-                      select_type,
-                      select_type_param_string(cr_type),
-                      cr_type);
+                      "CR_(CPU|CORE|SOCKET).", select_type, select_type_param_string(cr_type), cr_type);
             }
         }
     }
@@ -325,8 +287,7 @@ extern int select_get_plugin_id_pos(uint32_t plugin_id) {
          * generated automatically.
          */
         if (!cray_other_cons_res &&
-            ((plugin_id == SELECT_PLUGIN_CRAY_CONS_RES) ||
-             (plugin_id == SELECT_PLUGIN_CRAY_CONS_TRES) ||
+            ((plugin_id == SELECT_PLUGIN_CRAY_CONS_RES) || (plugin_id == SELECT_PLUGIN_CRAY_CONS_TRES) ||
              (plugin_id == SELECT_PLUGIN_CRAY_LINEAR))) {
             char *type = "select", *name = "select/cray_aries";
             uint16_t save_params = slurm_get_select_type_param();
@@ -354,8 +315,7 @@ extern int select_get_plugin_id_pos(uint32_t plugin_id) {
 
             for (cray_offset = 0; cray_offset < 2; cray_offset++) {
                 for (i = 0; i < select_context_cnt; i++) {
-                    if (*(ops[i].plugin_id) ==
-                        cray_plugin_id[cray_offset])
+                    if (*(ops[i].plugin_id) == cray_plugin_id[cray_offset])
                         break;
                 }
                 if (i < select_context_cnt)
@@ -367,11 +327,8 @@ extern int select_get_plugin_id_pos(uint32_t plugin_id) {
             slurm_mutex_lock(&select_context_lock);
             slurm_set_select_type_param(params[cray_offset]);
             plugin_context_destroy(select_context[i]);
-            select_context[i] =
-                    plugin_context_create(type, name,
-                                          (void **) &ops[i],
-                                          node_select_syms,
-                                          sizeof(node_select_syms));
+            select_context[i] = plugin_context_create(type, name, (void **) &ops[i], node_select_syms,
+                                                      sizeof(node_select_syms));
             slurm_set_select_type_param(save_params);
             slurm_mutex_unlock(&select_context_lock);
             goto again;
@@ -512,20 +469,14 @@ extern int select_g_block_init(List block_list) {
  * IN exc_core_bitmap - cores used in reservations and not usable
  * RET zero on success, EINVAL otherwise
  */
-extern int select_g_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-                             uint32_t min_nodes, uint32_t max_nodes,
-                             uint32_t req_nodes, uint16_t mode,
-                             List preemptee_candidates,
-                             List *preemptee_job_list,
+extern int select_g_job_test(struct job_record *job_ptr, bitstr_t *bitmap, uint32_t min_nodes, uint32_t max_nodes,
+                             uint32_t req_nodes, uint16_t mode, List preemptee_candidates, List *preemptee_job_list,
                              bitstr_t *exc_core_bitmap) {
     if (slurm_select_init(0) < 0)
         return SLURM_ERROR;
 
-    return (*(ops[select_context_default].job_test))(job_ptr, bitmap,
-                                                     min_nodes, max_nodes,
-                                                     req_nodes, mode,
-                                                     preemptee_candidates, preemptee_job_list,
-                                                     exc_core_bitmap);
+    return (*(ops[select_context_default].job_test))(job_ptr, bitmap, min_nodes, max_nodes, req_nodes, mode,
+                                                     preemptee_candidates, preemptee_job_list, exc_core_bitmap);
 }
 
 /*
@@ -559,8 +510,7 @@ extern int select_g_job_ready(struct job_record *job_ptr) {
  *	"to_job_ptr". Also see other_job_resized().
  * RET: 0 or an error code
  */
-extern int select_g_job_expand(struct job_record *from_job_ptr,
-                               struct job_record *to_job_ptr) {
+extern int select_g_job_expand(struct job_record *from_job_ptr, struct job_record *to_job_ptr) {
     if (slurm_select_init(0) < 0)
         return -1;
 
@@ -572,8 +522,7 @@ extern int select_g_job_expand(struct job_record *from_job_ptr,
  *	Only support jobs shrinking now.
  * RET: 0 or an error code
  */
-extern int select_g_job_resized(struct job_record *job_ptr,
-                                struct node_record *node_ptr) {
+extern int select_g_job_resized(struct job_record *job_ptr, struct node_record *node_ptr) {
     if (slurm_select_init(0) < 0)
         return -1;
 
@@ -660,10 +609,9 @@ extern int select_g_job_resume(struct job_record *job_ptr, bool indf_susp) {
  *                  (not always set).
  * RET map of slurm nodes to be used for step, NULL on failure
  */
-extern bitstr_t *select_g_step_pick_nodes(struct job_record *job_ptr,
-                                          dynamic_plugin_data_t *step_jobinfo,
-                                          uint32_t node_count,
-                                          bitstr_t **avail_nodes) {
+extern bitstr_t *
+select_g_step_pick_nodes(struct job_record *job_ptr, dynamic_plugin_data_t *step_jobinfo, uint32_t node_count,
+                         bitstr_t **avail_nodes) {
     if (slurm_select_init(0) < 0)
         return NULL;
 
@@ -696,9 +644,7 @@ extern int select_g_step_finish(struct step_record *step_ptr, bool killing_step)
     return (*(ops[select_context_default].step_finish))(step_ptr, killing_step);
 }
 
-extern int select_g_select_nodeinfo_pack(dynamic_plugin_data_t *nodeinfo,
-                                         Buf buffer,
-                                         uint16_t protocol_version) {
+extern int select_g_select_nodeinfo_pack(dynamic_plugin_data_t *nodeinfo, Buf buffer, uint16_t protocol_version) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -712,19 +658,15 @@ extern int select_g_select_nodeinfo_pack(dynamic_plugin_data_t *nodeinfo,
         plugin_id = select_context_default;
 
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        pack32(*(ops[plugin_id].plugin_id),
-               buffer);
+        pack32(*(ops[plugin_id].plugin_id), buffer);
     } else {
-        error("%s: protocol_version %hu not supported", __func__,
-              protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
     }
 
     return (*(ops[plugin_id].nodeinfo_pack))(data, buffer, protocol_version);
 }
 
-extern int select_g_select_nodeinfo_unpack(dynamic_plugin_data_t **nodeinfo,
-                                           Buf buffer,
-                                           uint16_t protocol_version) {
+extern int select_g_select_nodeinfo_unpack(dynamic_plugin_data_t **nodeinfo, Buf buffer, uint16_t protocol_version) {
     dynamic_plugin_data_t *nodeinfo_ptr = NULL;
 
     if (slurm_select_init(0) < 0)
@@ -738,16 +680,14 @@ extern int select_g_select_nodeinfo_unpack(dynamic_plugin_data_t **nodeinfo,
         uint32_t plugin_id;
         safe_unpack32(&plugin_id, buffer);
         if ((i = select_get_plugin_id_pos(plugin_id)) == SLURM_ERROR) {
-            error("%s: select plugin %s not found", __func__,
-                  _plugin_id2name(plugin_id));
+            error("%s: select plugin %s not found", __func__, _plugin_id2name(plugin_id));
             goto unpack_error;
         } else {
             nodeinfo_ptr->plugin_id = i;
         }
     } else {
         nodeinfo_ptr->plugin_id = select_context_default;
-        error("%s: protocol_version %hu not supported", __func__,
-              protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
         goto unpack_error;
     }
 
@@ -759,8 +699,7 @@ extern int select_g_select_nodeinfo_unpack(dynamic_plugin_data_t **nodeinfo,
      * Free nodeinfo_ptr if it is different from local cluster as it is not
      * relevant to this cluster.
      */
-    if ((nodeinfo_ptr->plugin_id != select_context_default) &&
-        _running_in_slurmctld()) {
+    if ((nodeinfo_ptr->plugin_id != select_context_default) && _running_in_slurmctld()) {
         select_g_select_nodeinfo_free(nodeinfo_ptr);
         *nodeinfo = select_g_select_nodeinfo_alloc();
     }
@@ -817,10 +756,9 @@ extern int select_g_select_nodeinfo_set(struct job_record *job_ptr) {
     return (*(ops[select_context_default].nodeinfo_set))(job_ptr);
 }
 
-extern int select_g_select_nodeinfo_get(dynamic_plugin_data_t *nodeinfo,
-                                        enum select_nodedata_type dinfo,
-                                        enum node_states state,
-                                        void *data) {
+extern int
+select_g_select_nodeinfo_get(dynamic_plugin_data_t *nodeinfo, enum select_nodedata_type dinfo, enum node_states state,
+                             void *data) {
     void *nodedata = NULL;
     uint32_t plugin_id;
 
@@ -868,9 +806,7 @@ extern int select_g_select_jobinfo_free(dynamic_plugin_data_t *jobinfo) {
     return rc;
 }
 
-extern int select_g_select_jobinfo_set(dynamic_plugin_data_t *jobinfo,
-                                       enum select_jobdata_type data_type,
-                                       void *data) {
+extern int select_g_select_jobinfo_set(dynamic_plugin_data_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     void *jobdata = NULL;
     uint32_t plugin_id;
 
@@ -891,9 +827,7 @@ extern int select_g_select_jobinfo_set(dynamic_plugin_data_t *jobinfo,
  * IN data_type - type of data to enter into job credential
  * IN/OUT data - the data to enter into job credential
  */
-extern int select_g_select_jobinfo_get(dynamic_plugin_data_t *jobinfo,
-                                       enum select_jobdata_type data_type,
-                                       void *data) {
+extern int select_g_select_jobinfo_get(dynamic_plugin_data_t *jobinfo, enum select_jobdata_type data_type, void *data) {
     void *jobdata = NULL;
     uint32_t plugin_id;
 
@@ -914,8 +848,7 @@ extern int select_g_select_jobinfo_get(dynamic_plugin_data_t *jobinfo,
  * RET        - the copy or NULL on failure
  * NOTE: returned value must be freed using select_g_free_jobinfo
  */
-extern dynamic_plugin_data_t *select_g_select_jobinfo_copy(
-        dynamic_plugin_data_t *jobinfo) {
+extern dynamic_plugin_data_t *select_g_select_jobinfo_copy(dynamic_plugin_data_t *jobinfo) {
     dynamic_plugin_data_t *jobinfo_ptr = NULL;
     if (slurm_select_init(0) < 0)
         return NULL;
@@ -935,9 +868,7 @@ extern dynamic_plugin_data_t *select_g_select_jobinfo_copy(
  * OUT buffer  - buffer with select credential appended
  * RET         - slurm error code
  */
-extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo,
-                                        Buf buffer,
-                                        uint16_t protocol_version) {
+extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo, Buf buffer, uint16_t protocol_version) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -953,8 +884,7 @@ extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo,
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         pack32(*(ops[plugin_id].plugin_id), buffer);
     } else {
-        error("%s: protocol_version %hu not supported", __func__,
-              protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
     }
 
     return (*(ops[plugin_id].jobinfo_pack))(data, buffer, protocol_version);
@@ -966,9 +896,7 @@ extern int select_g_select_jobinfo_pack(dynamic_plugin_data_t *jobinfo,
  * RET         - slurm error code
  * NOTE: returned value must be freed using select_g_free_jobinfo
  */
-extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
-                                          Buf buffer,
-                                          uint16_t protocol_version) {
+extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo, Buf buffer, uint16_t protocol_version) {
     dynamic_plugin_data_t *jobinfo_ptr = NULL;
 
     if (slurm_select_init(0) < 0)
@@ -982,15 +910,13 @@ extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
         uint32_t plugin_id;
         safe_unpack32(&plugin_id, buffer);
         if ((i = select_get_plugin_id_pos(plugin_id)) == SLURM_ERROR) {
-            error("%s: select plugin %s not found", __func__,
-                  _plugin_id2name(plugin_id));
+            error("%s: select plugin %s not found", __func__, _plugin_id2name(plugin_id));
             goto unpack_error;
         } else
             jobinfo_ptr->plugin_id = i;
     } else {
         jobinfo_ptr->plugin_id = select_context_default;
-        error("%s: protocol_version %hu not supported", __func__,
-              protocol_version);
+        error("%s: protocol_version %hu not supported", __func__, protocol_version);
         goto unpack_error;
     }
 
@@ -1002,8 +928,7 @@ extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
      * Free jobinfo_ptr if it is different from local cluster as it is not
      * relevant to this cluster.
      */
-    if ((jobinfo_ptr->plugin_id != select_context_default) &&
-        _running_in_slurmctld()) {
+    if ((jobinfo_ptr->plugin_id != select_context_default) && _running_in_slurmctld()) {
         select_g_select_jobinfo_free(jobinfo_ptr);
         *jobinfo = select_g_select_jobinfo_alloc();
     }
@@ -1024,8 +949,7 @@ extern int select_g_select_jobinfo_unpack(dynamic_plugin_data_t **jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - the string, same as buf
  */
-extern char *select_g_select_jobinfo_sprint(dynamic_plugin_data_t *jobinfo,
-                                            char *buf, size_t size, int mode) {
+extern char *select_g_select_jobinfo_sprint(dynamic_plugin_data_t *jobinfo, char *buf, size_t size, int mode) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -1045,8 +969,7 @@ extern char *select_g_select_jobinfo_sprint(dynamic_plugin_data_t *jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - char * containing string of request
  */
-extern char *select_g_select_jobinfo_xstrdup(
-        dynamic_plugin_data_t *jobinfo, int mode) {
+extern char *select_g_select_jobinfo_xstrdup(dynamic_plugin_data_t *jobinfo, int mode) {
     void *data = NULL;
     uint32_t plugin_id;
 
@@ -1068,9 +991,7 @@ extern char *select_g_select_jobinfo_xstrdup(
  *                (see enum select_plugindata_info)
  * IN/OUT data  - the data to get from node record
  */
-extern int select_g_get_info_from_plugin(enum select_plugindata_info dinfo,
-                                         struct job_record *job_ptr,
-                                         void *data) {
+extern int select_g_get_info_from_plugin(enum select_plugindata_info dinfo, struct job_record *job_ptr, void *data) {
     if (slurm_select_init(0) < 0)
         return SLURM_ERROR;
 
@@ -1128,10 +1049,8 @@ extern int select_g_reconfigure(void) {
  *	(flush bitstr then apply only used cores)
  * RET - nodes selected for use by the reservation
  */
-extern bitstr_t *select_g_resv_test(resv_desc_msg_t *resv_desc_ptr,
-                                    uint32_t node_cnt,
-                                    bitstr_t *avail_bitmap,
-                                    bitstr_t **core_bitmap) {
+extern bitstr_t *
+select_g_resv_test(resv_desc_msg_t *resv_desc_ptr, uint32_t node_cnt, bitstr_t *avail_bitmap, bitstr_t **core_bitmap) {
     if (slurm_select_init(0) < 0)
         return NULL;
 

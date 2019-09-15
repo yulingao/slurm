@@ -78,8 +78,7 @@ const char plugin_type[] = "job_submit/all_partitions";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 /* Set a job's default partition to all partitions in the cluster */
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
-                      char **err_msg) {
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
     /* Locks: Read partition */
     ListIterator part_iterator;
     struct part_record *part_ptr;
@@ -101,7 +100,6 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
     return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc,
-                      struct job_record *job_ptr, uint32_t submit_uid) {
+extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
     return SLURM_SUCCESS;
 }

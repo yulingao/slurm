@@ -52,15 +52,11 @@
 #define _DEBUG 0
 
 typedef struct slurm_mpi_ops {
-    int (*slurmstepd_prefork)(const stepd_step_rec_t *job,
-                              char ***env);
+    int (*slurmstepd_prefork)(const stepd_step_rec_t *job, char ***env);
 
-    int (*slurmstepd_init)(const mpi_plugin_task_info_t *job,
-                           char ***env);
+    int (*slurmstepd_init)(const mpi_plugin_task_info_t *job, char ***env);
 
-    mpi_plugin_client_state_t *
-    (*client_prelaunch)(const mpi_plugin_client_info_t *job,
-                        char ***env);
+    mpi_plugin_client_state_t *(*client_prelaunch)(const mpi_plugin_client_info_t *job, char ***env);
 
     int (*client_fini)(mpi_plugin_client_state_t *);
 } slurm_mpi_ops_t;
@@ -69,12 +65,8 @@ typedef struct slurm_mpi_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_mpi_ops_t.
  */
-static const char *syms[] = {
-        "p_mpi_hook_slurmstepd_prefork",
-        "p_mpi_hook_slurmstepd_task",
-        "p_mpi_hook_client_prelaunch",
-        "p_mpi_hook_client_fini"
-};
+static const char *syms[] = {"p_mpi_hook_slurmstepd_prefork", "p_mpi_hook_slurmstepd_task",
+                             "p_mpi_hook_client_prelaunch", "p_mpi_hook_client_fini"};
 
 static slurm_mpi_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -195,8 +187,7 @@ int _mpi_init(char *mpi_type) {
 
     type = xstrdup_printf("mpi/%s", mpi_type);
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -271,8 +262,7 @@ int mpi_hook_client_init(char *mpi_type) {
     return SLURM_SUCCESS;
 }
 
-mpi_plugin_client_state_t *
-mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
+mpi_plugin_client_state_t *mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
     mpi_plugin_client_state_t *rc;
 #if _DEBUG
     info("IN %s", __func__);

@@ -95,21 +95,19 @@ int main(int argc, char **argv) {
     int option_index;
     uint16_t persist_conn_flags = 0;
 
-    static struct option long_options[] = {
-            {"help",         0, 0, 'h'},
-            {"usage",        0, 0, 'h'},
-            {"immediate",    0, 0, 'i'},
-            {"noheader",     0, 0, 'n'},
-            {"oneliner",     0, 0, 'o'},
-            {"parsable",     0, 0, 'p'},
-            {"parsable2",    0, 0, 'P'},
-            {"quiet",        0, 0, 'Q'},
-            {"readonly",     0, 0, 'r'},
-            {"associations", 0, 0, 's'},
-            {"verbose",      0, 0, 'v'},
-            {"version",      0, 0, 'V'},
-            {NULL,           0, 0, 0}
-    };
+    static struct option long_options[] = {{"help",         0, 0, 'h'},
+                                           {"usage",        0, 0, 'h'},
+                                           {"immediate",    0, 0, 'i'},
+                                           {"noheader",     0, 0, 'n'},
+                                           {"oneliner",     0, 0, 'o'},
+                                           {"parsable",     0, 0, 'p'},
+                                           {"parsable2",    0, 0, 'P'},
+                                           {"quiet",        0, 0, 'Q'},
+                                           {"readonly",     0, 0, 'r'},
+                                           {"associations", 0, 0, 's'},
+                                           {"verbose",      0, 0, 'v'},
+                                           {"version",      0, 0, 'V'},
+                                           {NULL,           0, 0, 0}};
 
     command_name = argv[0];
     rollback_flag = 1;
@@ -122,8 +120,7 @@ int main(int argc, char **argv) {
     slurm_conf_init(NULL);
     log_init("sacctmgr", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
-    while ((opt_char = getopt_long(argc, argv, "hionpPQrsvV",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "hionpPQrsvV", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) '?':
                 fprintf(stderr, "Try \"sacctmgr --help\" "
@@ -144,12 +141,10 @@ int main(int argc, char **argv) {
                 print_fields_have_header = 0;
                 break;
             case (int) 'p':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_ENDING;
                 break;
             case (int) 'P':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_NO_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_NO_ENDING;
                 break;
             case (int) 'Q':
                 quiet_flag = 1;
@@ -170,8 +165,7 @@ int main(int argc, char **argv) {
                 break;
             default:
                 exit_code = 1;
-                fprintf(stderr, "getopt error, returned %c\n",
-                        opt_char);
+                fprintf(stderr, "getopt error, returned %c\n", opt_char);
                 exit(exit_code);
         }
     }
@@ -195,13 +189,11 @@ int main(int argc, char **argv) {
 
     /* Check to see if we are running a supported accounting plugin */
     temp = slurm_get_accounting_storage_type();
-    if (xstrcasecmp(temp, "accounting_storage/slurmdbd")
-        && xstrcasecmp(temp, "accounting_storage/mysql")) {
+    if (xstrcasecmp(temp, "accounting_storage/slurmdbd") && xstrcasecmp(temp, "accounting_storage/mysql")) {
         fprintf(stderr, "You are not running a supported "
                         "accounting_storage plugin\n(%s).\n"
                         "Only 'accounting_storage/slurmdbd' "
-                        "and 'accounting_storage/mysql' are supported.\n",
-                temp);
+                        "and 'accounting_storage/mysql' are supported.\n", temp);
         xfree(temp);
         exit(1);
     }
@@ -212,10 +204,8 @@ int main(int argc, char **argv) {
 
     if (errno != SLURM_SUCCESS) {
         int tmp_errno = errno;
-        if ((input_field_count == 2) &&
-            (!xstrncasecmp(argv[2], "Configuration", strlen(argv[1]))) &&
-            ((!xstrncasecmp(argv[1], "list", strlen(argv[0]))) ||
-             (!xstrncasecmp(argv[1], "show", strlen(argv[0]))))) {
+        if ((input_field_count == 2) && (!xstrncasecmp(argv[2], "Configuration", strlen(argv[1]))) &&
+            ((!xstrncasecmp(argv[1], "list", strlen(argv[0]))) || (!xstrncasecmp(argv[1], "show", strlen(argv[0]))))) {
             if (tmp_errno == ESLURM_DB_CONNECTION) {
                 tmp_errno = 0;
                 sacctmgr_list_config(true);
@@ -237,8 +227,7 @@ int main(int argc, char **argv) {
     else
         error_code = _get_command(&input_field_count, input_fields);
     while (error_code == SLURM_SUCCESS) {
-        error_code = _process_command(input_field_count,
-                                      input_fields);
+        error_code = _process_command(input_field_count, input_fields);
         if (error_code || exit_flag)
             break;
         error_code = _get_command(&input_field_count, input_fields);
@@ -348,9 +337,7 @@ static int _get_command(int *argc, char **argv) {
             continue;
         if (((*argc) + 1) > MAX_INPUT_FIELDS) {    /* bogus input line */
             exit_code = 1;
-            fprintf(stderr,
-                    "%s: can not process over %d words\n",
-                    command_name, input_words);
+            fprintf(stderr, "%s: can not process over %d words\n", command_name, input_words);
             return E2BIG;
         }
         argv[(*argc)++] = &in_line[i];
@@ -381,10 +368,8 @@ static void _print_version(void) {
     print_slurm_version();
     if (quiet_flag == -1) {
         long version = slurm_api_version();
-        printf("slurm_api_version: %ld, %ld.%ld.%ld\n", version,
-               SLURM_VERSION_MAJOR(version),
-               SLURM_VERSION_MINOR(version),
-               SLURM_VERSION_MICRO(version));
+        printf("slurm_api_version: %ld, %ld.%ld.%ld\n", version, SLURM_VERSION_MAJOR(version),
+               SLURM_VERSION_MINOR(version), SLURM_VERSION_MICRO(version));
     }
 }
 
@@ -406,35 +391,28 @@ static int _process_command(int argc, char **argv) {
 
     command_len = strlen(argv[0]);
 
-    if (xstrncasecmp(argv[0], "associations",
-                     MAX(command_len, 3)) == 0) {
+    if (xstrncasecmp(argv[0], "associations", MAX(command_len, 3)) == 0) {
         with_assoc_flag = 1;
     } else if (xstrncasecmp(argv[0], "dump", MAX(command_len, 3)) == 0) {
         sacctmgr_dump_cluster((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "help", MAX(command_len, 2)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for keyword:%s\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for keyword:%s\n", argv[0]);
         }
         _usage();
     } else if (xstrncasecmp(argv[0], "load", MAX(command_len, 2)) == 0) {
         load_sacctmgr_cfg_file((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "oneliner",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "oneliner", MAX(command_len, 1)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for keyword:%s\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for keyword:%s\n", argv[0]);
         }
         one_liner = 1;
     } else if (xstrncasecmp(argv[0], "quiet", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr, "too many arguments for keyword:%s\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for keyword:%s\n", argv[0]);
         }
         quiet_flag = 1;
     } else if ((xstrncasecmp(argv[0], "exit", MAX(command_len, 4)) == 0) ||
@@ -442,55 +420,41 @@ static int _process_command(int argc, char **argv) {
                (xstrncasecmp(argv[0], "quit", MAX(command_len, 4)) == 0)) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for keyword:%s\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for keyword:%s\n", argv[0]);
         }
         exit_flag = 1;
     } else if ((xstrncasecmp(argv[0], "add", MAX(command_len, 3)) == 0) ||
-               (xstrncasecmp(argv[0], "create",
-                             MAX(command_len, 3)) == 0)) {
+               (xstrncasecmp(argv[0], "create", MAX(command_len, 3)) == 0)) {
         _add_it((argc - 1), &argv[1]);
-    } else if ((xstrncasecmp(argv[0], "archive",
-                             MAX(command_len, 3)) == 0)) {
+    } else if ((xstrncasecmp(argv[0], "archive", MAX(command_len, 3)) == 0)) {
         _archive_it((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "clear", MAX(command_len, 3)) == 0) {
         _clear_it((argc - 1), &argv[1]);
     } else if ((xstrncasecmp(argv[0], "show", MAX(command_len, 3)) == 0) ||
                (xstrncasecmp(argv[0], "list", MAX(command_len, 3)) == 0)) {
         _show_it((argc - 1), &argv[1]);
-    } else if (!xstrncasecmp(argv[0], "modify", MAX(command_len, 1))
-               || !xstrncasecmp(argv[0], "update", MAX(command_len, 1))) {
+    } else if (!xstrncasecmp(argv[0], "modify", MAX(command_len, 1)) ||
+               !xstrncasecmp(argv[0], "update", MAX(command_len, 1))) {
         _modify_it((argc - 1), &argv[1]);
-    } else if ((xstrncasecmp(argv[0], "delete",
-                             MAX(command_len, 3)) == 0) ||
-               (xstrncasecmp(argv[0], "remove",
-                             MAX(command_len, 3)) == 0)) {
+    } else if ((xstrncasecmp(argv[0], "delete", MAX(command_len, 3)) == 0) ||
+               (xstrncasecmp(argv[0], "remove", MAX(command_len, 3)) == 0)) {
         _delete_it((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "verbose", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
         quiet_flag = -1;
-    } else if (xstrncasecmp(argv[0], "readonly",
-                            MAX(command_len, 4)) == 0) {
+    } else if (xstrncasecmp(argv[0], "readonly", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
         readonly_flag = 1;
-    } else if (xstrncasecmp(argv[0], "reconfigure",
-                            MAX(command_len, 4)) == 0) {
+    } else if (xstrncasecmp(argv[0], "reconfigure", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
 
         slurmdb_reconfig(db_conn);
@@ -500,9 +464,7 @@ static int _process_command(int argc, char **argv) {
         uint16_t archive_data = 0;
         if (argc > 4) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
 
         if (argc > 1)
@@ -511,9 +473,7 @@ static int _process_command(int argc, char **argv) {
             my_end = parse_time(argv[2], 1);
         if (argc > 3)
             archive_data = atoi(argv[3]);
-        if (slurmdb_usage_roll(db_conn, my_start,
-                               my_end, archive_data, NULL)
-            == SLURM_SUCCESS) {
+        if (slurmdb_usage_roll(db_conn, my_start, my_end, archive_data, NULL) == SLURM_SUCCESS) {
             if (commit_check("Would you like to commit rollup?")) {
                 slurmdb_connection_commit(db_conn, 1);
             } else {
@@ -521,27 +481,21 @@ static int _process_command(int argc, char **argv) {
                 slurmdb_connection_commit(db_conn, 0);
             }
         }
-    } else if (xstrncasecmp(argv[0], "shutdown",
-                            MAX(command_len, 4)) == 0) {
+    } else if (xstrncasecmp(argv[0], "shutdown", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
 
         rc = slurmdb_shutdown(db_conn);
         if (rc != SLURM_SUCCESS) {
-            fprintf(stderr, " Problem shutting down server: %s\n",
-                    slurm_strerror(rc));
+            fprintf(stderr, " Problem shutting down server: %s\n", slurm_strerror(rc));
             exit_code = 1;
         }
     } else if (xstrncasecmp(argv[0], "version", MAX(command_len, 4)) == 0) {
         if (argc > 1) {
             exit_code = 1;
-            fprintf(stderr,
-                    "too many arguments for %s keyword\n",
-                    argv[0]);
+            fprintf(stderr, "too many arguments for %s keyword\n", argv[0]);
         }
         _print_version();
     } else {
@@ -575,8 +529,7 @@ static void _add_it(int argc, char **argv) {
     slurmdb_connection_commit(db_conn, 0);
 
     /* First identify the entity to add */
-    if (!xstrncasecmp(argv[0], "Account", MAX(command_len, 1))
-        || !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
+    if (!xstrncasecmp(argv[0], "Account", MAX(command_len, 1)) || !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
         error_code = sacctmgr_add_account((argc - 1), &argv[1]);
     } else if (!xstrncasecmp(argv[0], "Cluster", MAX(command_len, 2))) {
         error_code = sacctmgr_add_cluster((argc - 1), &argv[1]);
@@ -695,26 +648,20 @@ static void _show_it(int argc, char **argv) {
     slurmdb_connection_commit(db_conn, 0);
 
     /* First identify the entity to list */
-    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 2)) == 0
-        || !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
+    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 2)) == 0 ||
+        !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
         error_code = sacctmgr_list_account((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Associations",
-                            MAX(command_len, 2)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Associations", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_list_assoc((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Clusters",
-                            MAX(command_len, 2)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Clusters", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_list_cluster((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Configuration",
-                            MAX(command_len, 2)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Configuration", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_list_config(true);
-    } else if (xstrncasecmp(argv[0], "Events",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Events", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_list_event((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Federation",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Federation", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_list_federation((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Problems",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Problems", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_list_problem((argc - 1), &argv[1]);
     } else if (!xstrncasecmp(argv[0], "RunawayJobs", MAX(command_len, 2)) ||
                !xstrncasecmp(argv[0], "OrphanJobs", MAX(command_len, 1)) ||
@@ -729,8 +676,8 @@ static void _show_it(int argc, char **argv) {
         error_code = sacctmgr_list_reservation((argc - 1), &argv[1]);
     } else if (!xstrncasecmp(argv[0], "Stats", MAX(command_len, 1))) {
         error_code = sacctmgr_list_stats((argc - 1), &argv[1]);
-    } else if (!xstrncasecmp(argv[0], "Transactions", MAX(command_len, 1))
-               || !xstrncasecmp(argv[0], "Txn", MAX(command_len, 1))) {
+    } else if (!xstrncasecmp(argv[0], "Transactions", MAX(command_len, 1)) ||
+               !xstrncasecmp(argv[0], "Txn", MAX(command_len, 1))) {
         error_code = sacctmgr_list_txn((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "Users", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_list_user((argc - 1), &argv[1]);
@@ -779,14 +726,12 @@ static void _modify_it(int argc, char **argv) {
     slurmdb_connection_commit(db_conn, 0);
 
     /* First identify the entity to modify */
-    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 1)) == 0
-        || !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
+    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 1)) == 0 ||
+        !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
         error_code = sacctmgr_modify_account((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Clusters",
-                            MAX(command_len, 5)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Clusters", MAX(command_len, 5)) == 0) {
         error_code = sacctmgr_modify_cluster((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Federation",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Federation", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_modify_federation((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "Job", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_modify_job((argc - 1), &argv[1]);
@@ -833,17 +778,14 @@ static void _delete_it(int argc, char **argv) {
     slurmdb_connection_commit(db_conn, 0);
 
     /* First identify the entity to delete */
-    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 1)) == 0
-        || !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
+    if (xstrncasecmp(argv[0], "Accounts", MAX(command_len, 1)) == 0 ||
+        !xstrncasecmp(argv[0], "Acct", MAX(command_len, 4))) {
         error_code = sacctmgr_delete_account((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Clusters",
-                            MAX(command_len, 2)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Clusters", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_delete_cluster((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Coordinators",
-                            MAX(command_len, 2)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Coordinators", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_delete_coord((argc - 1), &argv[1]);
-    } else if (xstrncasecmp(argv[0], "Federations",
-                            MAX(command_len, 1)) == 0) {
+    } else if (xstrncasecmp(argv[0], "Federations", MAX(command_len, 1)) == 0) {
         error_code = sacctmgr_delete_federation((argc - 1), &argv[1]);
     } else if (xstrncasecmp(argv[0], "QOS", MAX(command_len, 2)) == 0) {
         error_code = sacctmgr_delete_qos((argc - 1), &argv[1]);

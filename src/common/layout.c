@@ -39,8 +39,7 @@
 #include "src/common/xstring.h"
 #include "src/common/xmalloc.h"
 
-void layout_init(layout_t *layout, const char *name, const char *type,
-                 uint32_t priority, int struct_type) {
+void layout_init(layout_t *layout, const char *name, const char *type, uint32_t priority, int struct_type) {
     layout->name = xstrdup(name);
     layout->type = xstrdup(type);
     layout->priority = priority;
@@ -97,8 +96,7 @@ const char *layout_hashable_identify(void *item) {
     return l->name;
 }
 
-void layout_hashable_identify_by_type(void *item, const char **key,
-                                      uint32_t *key_len) {
+void layout_hashable_identify_by_type(void *item, const char **key, uint32_t *key_len) {
     layout_t *l = (layout_t *) item;
     *key = l->type;
     *key_len = strlen(l->type);

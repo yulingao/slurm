@@ -143,8 +143,7 @@ extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid) {
     return true;
 }
 
-extern int
-proctrack_p_wait(uint64_t cont_id) {
+extern int proctrack_p_wait(uint64_t cont_id) {
     pid_t pgid = (pid_t) cont_id;
     int delay = 1;
 
@@ -161,8 +160,7 @@ proctrack_p_wait(uint64_t cont_id) {
             delay *= 2;
         } else {
             error("%s: Unable to destroy container %"PRIu64" "
-                  "in pgid plugin, giving up after %d sec",
-                  __func__, cont_id, delay);
+                  "in pgid plugin, giving up after %d sec", __func__, cont_id, delay);
             break;
         }
     }
@@ -170,8 +168,7 @@ proctrack_p_wait(uint64_t cont_id) {
     return SLURM_SUCCESS;
 }
 
-extern int
-proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
+extern int proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
     DIR *dir;
     struct dirent *de;
     char path[PATH_MAX], *endptr, *num, *rbuf;
@@ -195,8 +192,7 @@ proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
             continue;
         ret_l = strtol(num, &endptr, 10);
         if ((ret_l == LONG_MIN) || (ret_l == LONG_MAX)) {
-            error("couldn't do a strtol on str %s(%ld): %m",
-                  num, ret_l);
+            error("couldn't do a strtol on str %s(%ld): %m", num, ret_l);
             continue;
         }
         sprintf(path, "/proc/%s/stat", num);
@@ -209,16 +205,14 @@ proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
             continue;
         }
         close(fd);
-        if (sscanf(rbuf, "%ld %s %c %ld %ld",
-                   &pid, cmd, &state, &ppid, &pgid) != 5) {
+        if (sscanf(rbuf, "%ld %s %c %ld %ld", &pid, cmd, &state, &ppid, &pgid) != 5) {
             continue;
         }
         if (pgid != (long) cont_id)
             continue;
         if (state == 'Z') {
             debug3("Defunct process skipped: command=%s state=%c "
-                   "pid=%ld ppid=%ld pgid=%ld",
-                   cmd, state, pid, ppid, pgid);
+                   "pid=%ld ppid=%ld pgid=%ld", cmd, state, pid, ppid, pgid);
             continue;    /* Defunct, don't try to kill */
         }
         xrealloc(pid_array, sizeof(pid_t) * (pid_count + 1));

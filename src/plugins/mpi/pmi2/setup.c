@@ -83,21 +83,18 @@ pmi2_tree_info_t tree_info;
 
 static char *fmt_tree_sock_addr = NULL;
 
-extern bool
-in_stepd(void) {
+extern bool in_stepd(void) {
     return run_in_stepd;
 }
 
-static void
-_remove_tree_sock(void) {
+static void _remove_tree_sock(void) {
     if (fmt_tree_sock_addr) {
         unlink(fmt_tree_sock_addr);
         xfree(fmt_tree_sock_addr);
     }
 }
 
-static int
-_setup_stepd_job_info(const stepd_step_rec_t *job, char ***env) {
+static int _setup_stepd_job_info(const stepd_step_rec_t *job, char ***env) {
     char *p;
     int i;
 
@@ -112,8 +109,7 @@ _setup_stepd_job_info(const stepd_step_rec_t *job, char ***env) {
         job_info.ltasks = job->node_tasks;
         job_info.gtids = xmalloc(job_info.ltasks * sizeof(uint32_t));
         for (i = 0; i < job_info.ltasks; i++) {
-            job_info.gtids[i] = job->task[i]->gtid +
-                                job->pack_task_offset;
+            job_info.gtids[i] = job->task[i]->gtid + job->pack_task_offset;
         }
     } else {
         job_info.jobid = job->jobid;
@@ -150,8 +146,7 @@ _setup_stepd_job_info(const stepd_step_rec_t *job, char ***env) {
         job_info.pmi_jobid = xstrdup(p);
         unsetenvp(*env, PMI2_PMI_JOBID_ENV);
     } else {
-        xstrfmtcat(job_info.pmi_jobid, "%u.%u", job_info.jobid,
-                   job_info.stepid);
+        xstrfmtcat(job_info.pmi_jobid, "%u.%u", job_info.jobid, job_info.stepid);
     }
     p = getenvp(*env, PMI2_STEP_NODES_ENV);
     if (!p) {
@@ -192,8 +187,7 @@ _setup_stepd_job_info(const stepd_step_rec_t *job, char ***env) {
     return SLURM_SUCCESS;
 }
 
-static int
-_setup_stepd_tree_info(char ***env) {
+static int _setup_stepd_tree_info(char ***env) {
     hostlist_t hl;
     char *srun_host;
     uint16_t port;
@@ -228,10 +222,8 @@ _setup_stepd_tree_info(char ***env) {
      * In tree position calculation, root of the tree is srun with id 0.
      * Stepd's id will be its nodeid plus 1.
      */
-    reverse_tree_info(job_info.nodeid + 1, job_info.nnodes + 1,
-                      tree_width, &tree_info.parent_id,
-                      &tree_info.num_children, &tree_info.depth,
-                      &tree_info.max_depth);
+    reverse_tree_info(job_info.nodeid + 1, job_info.nnodes + 1, tree_width, &tree_info.parent_id,
+                      &tree_info.num_children, &tree_info.depth, &tree_info.max_depth);
     tree_info.parent_id--;           /* restore real nodeid */
     if (tree_info.parent_id < 0) {    /* parent is srun */
         tree_info.parent_node = NULL;
@@ -262,8 +254,7 @@ _setup_stepd_tree_info(char ***env) {
     unsetenvp(*env, PMI2_SRUN_PORT_ENV);
 
     /* init kvs seq to 0. TODO: reduce array size */
-    tree_info.children_kvs_seq = xmalloc(sizeof(uint32_t) *
-                                         job_info.nnodes);
+    tree_info.children_kvs_seq = xmalloc(sizeof(uint32_t) * job_info.nnodes);
 
     return SLURM_SUCCESS;
 }
@@ -271,8 +262,7 @@ _setup_stepd_tree_info(char ***env) {
 /*
  * setup sockets for slurmstepd
  */
-static int
-_setup_stepd_sockets(const stepd_step_rec_t *job, char ***env) {
+static int _setup_stepd_sockets(const stepd_step_rec_t *job, char ***env) {
     struct sockaddr_un sa;
     int i;
     char *spool;
@@ -291,8 +281,7 @@ _setup_stepd_sockets(const stepd_step_rec_t *job, char ***env) {
      * happens on the slurmd side
      */
     spool = slurm_get_slurmd_spooldir(NULL);
-    snprintf(tree_sock_addr, sizeof(tree_sock_addr), PMI2_SOCK_ADDR_FMT,
-             spool, job_info.jobid, job_info.stepid);
+    snprintf(tree_sock_addr, sizeof(tree_sock_addr), PMI2_SOCK_ADDR_FMT, spool, job_info.jobid, job_info.stepid);
     /*
      * Make sure we adjust for the spool dir coming in on the address to
      * point to the right spot.
@@ -301,16 +290,13 @@ _setup_stepd_sockets(const stepd_step_rec_t *job, char ***env) {
      */
     xstrsubstitute(spool, "%n", job->node_name);
     xstrsubstitute(spool, "%h", job->node_name);
-    xstrfmtcat(fmt_tree_sock_addr, PMI2_SOCK_ADDR_FMT, spool,
-               job_info.jobid, job_info.stepid);
+    xstrfmtcat(fmt_tree_sock_addr, PMI2_SOCK_ADDR_FMT, spool, job_info.jobid, job_info.stepid);
     /*
      * If socket name would be truncated, emit error and exit
      */
     if (strlen(fmt_tree_sock_addr) >= sizeof(sa.sun_path)) {
-        error("%s: Unix socket path '%s' is too long. (%ld > %ld)",
-              __func__, fmt_tree_sock_addr,
-              (long int) (strlen(fmt_tree_sock_addr) + 1),
-              (long int) sizeof(sa.sun_path));
+        error("%s: Unix socket path '%s' is too long. (%ld > %ld)", __func__, fmt_tree_sock_addr,
+              (long int) (strlen(fmt_tree_sock_addr) + 1), (long int) sizeof(sa.sun_path));
         xfree(spool);
         xfree(fmt_tree_sock_addr);
         return SLURM_ERROR;
@@ -342,8 +328,7 @@ _setup_stepd_sockets(const stepd_step_rec_t *job, char ***env) {
     return SLURM_SUCCESS;
 }
 
-static int
-_setup_stepd_kvs(char ***env) {
+static int _setup_stepd_kvs(char ***env) {
     int rc = SLURM_SUCCESS, i = 0, pp_cnt = 0;
     char *p, env_key[32], *ppkey, *ppval;
 
@@ -385,8 +370,7 @@ _setup_stepd_kvs(char ***env) {
     return SLURM_SUCCESS;
 }
 
-extern int
-pmi2_setup_stepd(const stepd_step_rec_t *job, char ***env) {
+extern int pmi2_setup_stepd(const stepd_step_rec_t *job, char ***env) {
     int rc;
 
     run_in_stepd = true;
@@ -420,16 +404,14 @@ pmi2_setup_stepd(const stepd_step_rec_t *job, char ***env) {
     return SLURM_SUCCESS;
 }
 
-extern void
-pmi2_cleanup_stepd(void) {
+extern void pmi2_cleanup_stepd(void) {
     close(tree_sock);
     _remove_tree_sock();
 }
 /**************************************************************/
 
 /* returned string should be xfree-ed by caller */
-static char *
-_get_proc_mapping(const mpi_plugin_client_info_t *job) {
+static char *_get_proc_mapping(const mpi_plugin_client_info_t *job) {
     uint32_t node_cnt, task_cnt, task_mapped, node_task_cnt, **tids;
     uint32_t task_dist, block;
     uint16_t *tasks, *rounds;
@@ -454,9 +436,7 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
             /* find start_id */
             while (start_id < node_cnt) {
                 while (start_id < node_cnt &&
-                       (rounds[start_id] >= tasks[start_id] ||
-                        (task_mapped !=
-                         tids[start_id][rounds[start_id]]))) {
+                       (rounds[start_id] >= tasks[start_id] || (task_mapped != tids[start_id][rounds[start_id]]))) {
                     start_id++;
                 }
                 if (start_id >= node_cnt)
@@ -465,15 +445,12 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
                 /* find end_id */
                 end_id = start_id;
                 while (end_id < node_cnt &&
-                       (rounds[end_id] < tasks[end_id] &&
-                        (task_mapped ==
-                         tids[end_id][rounds[end_id]]))) {
+                       (rounds[end_id] < tasks[end_id] && (task_mapped == tids[end_id][rounds[end_id]]))) {
                     rounds[end_id]++;
                     task_mapped++;
                     end_id++;
                 }
-                xstrfmtcat(mapping, ",(%u,%u,1)", start_id,
-                           end_id - start_id);
+                xstrfmtcat(mapping, ",(%u,%u,1)", start_id, end_id - start_id);
                 start_id = end_id;
             }
         }
@@ -499,9 +476,7 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
             /* find start_id */
             while (start_id < node_cnt) {
                 while (start_id < node_cnt &&
-                       (rounds[start_id] >= tasks[start_id] ||
-                        (task_mapped !=
-                         tids[start_id][rounds[start_id]]))) {
+                       (rounds[start_id] >= tasks[start_id] || (task_mapped != tids[start_id][rounds[start_id]]))) {
                     start_id++;
                 }
                 if (start_id >= node_cnt)
@@ -509,24 +484,16 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
                 /* find start block. block may be less
                  * than plane size */
                 block = 0;
-                while (rounds[start_id] < tasks[start_id] &&
-                       (task_mapped ==
-                        tids[start_id][rounds[start_id]])) {
+                while (rounds[start_id] < tasks[start_id] && (task_mapped == tids[start_id][rounds[start_id]])) {
                     block++;
                     rounds[start_id]++;
                     task_mapped++;
                 }
                 /* find end_id */
                 end_id = start_id + 1;
-                while (end_id < node_cnt &&
-                       (rounds[end_id] + block - 1 <
-                        tasks[end_id])) {
-                    for (i = 0;
-                         i < tasks[end_id] - rounds[end_id];
-                         i++) {
-                        if (task_mapped + i !=
-                            tids[end_id][rounds[end_id]
-                                         + i]) {
+                while (end_id < node_cnt && (rounds[end_id] + block - 1 < tasks[end_id])) {
+                    for (i = 0; i < tasks[end_id] - rounds[end_id]; i++) {
+                        if (task_mapped + i != tids[end_id][rounds[end_id] + i]) {
                             break;
                         }
                     }
@@ -536,8 +503,7 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
                     task_mapped += block;
                     end_id++;
                 }
-                xstrfmtcat(mapping, ",(%u,%u,%u)", start_id,
-                           end_id - start_id, block);
+                xstrfmtcat(mapping, ",(%u,%u,%u)", start_id, end_id - start_id, block);
                 start_id = end_id;
             }
         }
@@ -551,21 +517,18 @@ _get_proc_mapping(const mpi_plugin_client_info_t *job) {
         for (i = start_id + 1; i < node_cnt; i++) {
             if (node_task_cnt == tasks[i])
                 continue;
-            xstrfmtcat(mapping, ",(%u,%u,%u)", start_id,
-                       i - start_id, node_task_cnt);
+            xstrfmtcat(mapping, ",(%u,%u,%u)", start_id, i - start_id, node_task_cnt);
             start_id = i;
             node_task_cnt = tasks[i];
         }
-        xstrfmtcat(mapping, ",(%u,%u,%u))", start_id, i - start_id,
-                   node_task_cnt);
+        xstrfmtcat(mapping, ",(%u,%u,%u))", start_id, i - start_id, node_task_cnt);
     }
 
     debug("mpi/pmi2: processor mapping: %s", mapping);
     return mapping;
 }
 
-static int
-_setup_srun_job_info(const mpi_plugin_client_info_t *job) {
+static int _setup_srun_job_info(const mpi_plugin_client_info_t *job) {
     char *p;
     void *handle = NULL, *sym = NULL;
 
@@ -612,8 +575,7 @@ _setup_srun_job_info(const mpi_plugin_client_info_t *job) {
     if (p) {        /* spawned */
         job_info.pmi_jobid = xstrdup(p);
     } else {
-        xstrfmtcat(job_info.pmi_jobid, "%u.%u", job_info.jobid,
-                   job_info.stepid);
+        xstrfmtcat(job_info.pmi_jobid, "%u.%u", job_info.jobid, job_info.stepid);
     }
     job_info.job_env = env_array_copy((const char **) environ);
 
@@ -644,8 +606,7 @@ _setup_srun_job_info(const mpi_plugin_client_info_t *job) {
     return SLURM_SUCCESS;
 }
 
-static int
-_setup_srun_tree_info(void) {
+static int _setup_srun_tree_info(void) {
     char *p;
     uint16_t p_port;
     char *spool;
@@ -673,21 +634,17 @@ _setup_srun_tree_info(void) {
      * the node name here
      */
     spool = slurm_get_slurmd_spooldir(NULL);
-    snprintf(tree_sock_addr, 128, PMI2_SOCK_ADDR_FMT,
-             spool, job_info.jobid, job_info.stepid);
+    snprintf(tree_sock_addr, 128, PMI2_SOCK_ADDR_FMT, spool, job_info.jobid, job_info.stepid);
     xfree(spool);
 
     /* init kvs seq to 0. TODO: reduce array size */
-    tree_info.children_kvs_seq = xmalloc(sizeof(uint32_t) *
-                                         job_info.nnodes);
+    tree_info.children_kvs_seq = xmalloc(sizeof(uint32_t) * job_info.nnodes);
 
     return SLURM_SUCCESS;
 }
 
-static int
-_setup_srun_socket(const mpi_plugin_client_info_t *job) {
-    if (net_stream_listen(&tree_sock,
-                          &tree_info.pmi_port) < 0) {
+static int _setup_srun_socket(const mpi_plugin_client_info_t *job) {
+    if (net_stream_listen(&tree_sock, &tree_info.pmi_port) < 0) {
         error("mpi/pmi2: Failed to create tree socket");
         return SLURM_ERROR;
     }
@@ -696,8 +653,7 @@ _setup_srun_socket(const mpi_plugin_client_info_t *job) {
     return SLURM_SUCCESS;
 }
 
-static int
-_setup_srun_kvs(void) {
+static int _setup_srun_kvs(void) {
     int rc;
 
     kvs_seq = 1;
@@ -705,20 +661,15 @@ _setup_srun_kvs(void) {
     return rc;
 }
 
-static int
-_setup_srun_environ(const mpi_plugin_client_info_t *job, char ***env) {
+static int _setup_srun_environ(const mpi_plugin_client_info_t *job, char ***env) {
     /* ifhn will be set in SLURM_SRUN_COMM_HOST by slurmd */
-    env_array_overwrite_fmt(env, PMI2_SRUN_PORT_ENV, "%hu",
-                            tree_info.pmi_port);
-    env_array_overwrite_fmt(env, PMI2_STEP_NODES_ENV, "%s",
-                            job_info.step_nodelist);
-    env_array_overwrite_fmt(env, PMI2_PROC_MAPPING_ENV, "%s",
-                            job_info.proc_mapping);
+    env_array_overwrite_fmt(env, PMI2_SRUN_PORT_ENV, "%hu", tree_info.pmi_port);
+    env_array_overwrite_fmt(env, PMI2_STEP_NODES_ENV, "%s", job_info.step_nodelist);
+    env_array_overwrite_fmt(env, PMI2_PROC_MAPPING_ENV, "%s", job_info.proc_mapping);
     return SLURM_SUCCESS;
 }
 
-inline static int
-_tasks_launched(void) {
+inline static int _tasks_launched(void) {
     int i, all_launched = 1;
     if (job_info.MPIR_proctable == NULL)
         return 1;
@@ -732,8 +683,7 @@ _tasks_launched(void) {
     return all_launched;
 }
 
-static void *
-_task_launch_detection(void *unused) {
+static void *_task_launch_detection(void *unused) {
     spawn_resp_t *resp;
     time_t start;
     int rc = 0;
@@ -764,8 +714,7 @@ _task_launch_detection(void *unused) {
     return NULL;
 }
 
-extern int
-pmi2_setup_srun(const mpi_plugin_client_info_t *job, char ***env) {
+extern int pmi2_setup_srun(const mpi_plugin_client_info_t *job, char ***env) {
     static pthread_mutex_t setup_mutex = PTHREAD_MUTEX_INITIALIZER;
     static pthread_cond_t setup_cond = PTHREAD_COND_INITIALIZER;
     static int global_rc = NO_VAL16;
@@ -783,9 +732,7 @@ pmi2_setup_srun(const mpi_plugin_client_info_t *job, char ***env) {
         if (rc == SLURM_SUCCESS)
             rc = _setup_srun_environ(job, env);
         if ((rc == SLURM_SUCCESS) && job_info.spawn_seq) {
-            slurm_thread_create_detached(NULL,
-                                         _task_launch_detection,
-                                         NULL);
+            slurm_thread_create_detached(NULL, _task_launch_detection, NULL);
         }
         slurm_mutex_lock(&setup_mutex);
         global_rc = rc;

@@ -72,23 +72,14 @@ static void _pty_restore(void);
 
 static void print_layout_info(slurm_step_layout_t *layout);
 
-static slurm_cred_t *_generate_fake_cred(uint32_t jobid, uint32_t stepid,
-                                         uid_t uid, char *nodelist,
-                                         uint32_t node_cnt);
+static slurm_cred_t *_generate_fake_cred(uint32_t jobid, uint32_t stepid, uid_t uid, char *nodelist, uint32_t node_cnt);
 
-static uint32_t _nodeid_from_layout(slurm_step_layout_t *layout,
-                                    uint32_t taskid);
+static uint32_t _nodeid_from_layout(slurm_step_layout_t *layout, uint32_t taskid);
 
 static void _set_exit_code(void);
 
-static int _attach_to_tasks(uint32_t jobid,
-                            uint32_t stepid,
-                            slurm_step_layout_t *layout,
-                            slurm_cred_t *fake_cred,
-                            uint16_t num_resp_ports,
-                            uint16_t *resp_ports,
-                            int num_io_ports,
-                            uint16_t *io_ports,
+static int _attach_to_tasks(uint32_t jobid, uint32_t stepid, slurm_step_layout_t *layout, slurm_cred_t *fake_cred,
+                            uint16_t num_resp_ports, uint16_t *resp_ports, int num_io_ports, uint16_t *io_ports,
                             bitstr_t *tasks_started);
 
 int global_rc = 0;
@@ -115,11 +106,7 @@ static void _msg_thr_destroy(message_thread_state_t *mts);
 
 static void _handle_msg(void *arg, slurm_msg_t *msg);
 
-static struct io_operations message_socket_ops = {
-        .readable = &eio_message_socket_readable,
-        .handle_read = &eio_message_socket_accept,
-        .handle_msg = &_handle_msg
-};
+static struct io_operations message_socket_ops = {.readable = &eio_message_socket_readable, .handle_read = &eio_message_socket_accept, .handle_msg = &_handle_msg};
 
 static struct termios termdefaults;
 
@@ -171,21 +158,17 @@ int sattach(int argc, char **argv) {
 
     _mpir_init(layout->task_cnt);
     if (opt.input_filter_set) {
-        opt.fds.input.nodeid =
-                _nodeid_from_layout(layout, opt.fds.input.taskid);
+        opt.fds.input.nodeid = _nodeid_from_layout(layout, opt.fds.input.taskid);
     }
 
     if (layout->front_end)
         hosts = layout->front_end;
     else
         hosts = layout->node_list;
-    fake_cred = _generate_fake_cred(opt.jobid, opt.stepid,
-                                    opt.uid, hosts, layout->node_cnt);
+    fake_cred = _generate_fake_cred(opt.jobid, opt.stepid, opt.uid, hosts, layout->node_cnt);
     mts = _msg_thr_create(layout->node_cnt, layout->task_cnt);
 
-    io = client_io_handler_create(opt.fds, layout->task_cnt,
-                                  layout->node_cnt, fake_cred,
-                                  opt.labelio, NO_VAL, NO_VAL);
+    io = client_io_handler_create(opt.fds, layout->task_cnt, layout->node_cnt, fake_cred, opt.labelio, NO_VAL, NO_VAL);
     client_io_handler_start(io);
 
     if (opt.pty) {
@@ -203,10 +186,8 @@ int sattach(int argc, char **argv) {
         xsignal_block(pty_sigarray);
     }
 
-    _attach_to_tasks(opt.jobid, opt.stepid, layout, fake_cred,
-                     mts->num_resp_port, mts->resp_port,
-                     io->num_listen, io->listenport,
-                     mts->tasks_started);
+    _attach_to_tasks(opt.jobid, opt.stepid, layout, fake_cred, mts->num_resp_port, mts->resp_port, io->num_listen,
+                     io->listenport, mts->tasks_started);
 
     MPIR_debug_state = MPIR_DEBUG_SPAWNED;
     MPIR_Breakpoint();
@@ -242,15 +223,13 @@ static void _set_exit_code(void) {
     }
 }
 
-static uint32_t
-_nodeid_from_layout(slurm_step_layout_t *layout, uint32_t taskid) {
+static uint32_t _nodeid_from_layout(slurm_step_layout_t *layout, uint32_t taskid) {
     uint32_t i, nodeid;
 
     for (nodeid = 0; nodeid < layout->node_cnt; nodeid++) {
         for (i = 0; i < layout->tasks[nodeid]; i++) {
             if (layout->tids[nodeid][i] == taskid) {
-                debug3("task %d is on node %d",
-                       taskid, nodeid);
+                debug3("task %d is on node %d", taskid, nodeid);
                 return nodeid;
             }
         }
@@ -264,13 +243,11 @@ static void print_layout_info(slurm_step_layout_t *layout) {
     int i, j;
 
     printf("Job step layout:\n");
-    printf("\t%d tasks, %d nodes (%s)\n\n",
-           layout->task_cnt, layout->node_cnt, layout->node_list);
+    printf("\t%d tasks, %d nodes (%s)\n\n", layout->task_cnt, layout->node_cnt, layout->node_list);
     nl = hostlist_create(layout->node_list);
     for (i = 0; i < layout->node_cnt; i++) {
         char *name = hostlist_nth(nl, i);
-        printf("\tNode %d (%s), %d task(s): ",
-               i, name, layout->tasks[i]);
+        printf("\tNode %d (%s), %d task(s): ", i, name, layout->tasks[i]);
         for (j = 0; j < layout->tasks[i]; j++) {
             printf("%d ", layout->tids[i][j]);
         }
@@ -282,9 +259,8 @@ static void print_layout_info(slurm_step_layout_t *layout) {
 
 
 /* return a faked job credential */
-static slurm_cred_t *_generate_fake_cred(uint32_t jobid, uint32_t stepid,
-                                         uid_t uid, char *nodelist,
-                                         uint32_t node_cnt) {
+static slurm_cred_t *
+_generate_fake_cred(uint32_t jobid, uint32_t stepid, uid_t uid, char *nodelist, uint32_t node_cnt) {
     slurm_cred_arg_t arg;
     slurm_cred_t *cred;
 
@@ -320,8 +296,7 @@ static slurm_cred_t *_generate_fake_cred(uint32_t jobid, uint32_t stepid,
     return cred;
 }
 
-void _handle_response_msg(slurm_msg_type_t msg_type, void *msg,
-                          bitstr_t *tasks_started) {
+void _handle_response_msg(slurm_msg_type_t msg_type, void *msg, bitstr_t *tasks_started) {
     reattach_tasks_response_msg_t *resp;
     MPIR_PROCDESC *table;
     int i;
@@ -341,17 +316,14 @@ void _handle_response_msg(slurm_msg_type_t msg_type, void *msg,
                 /* FIXME - node_name is not necessarily
                    a valid hostname */
                 table->host_name = xstrdup(resp->node_name);
-                table->executable_name =
-                        xstrdup(resp->executable_names[i]);
+                table->executable_name = xstrdup(resp->executable_names[i]);
                 table->pid = (int) resp->local_pids[i];
-                debug("\tTask id %u has pid %u, executable name: %s",
-                      resp->gtids[i], resp->local_pids[i],
+                debug("\tTask id %u has pid %u, executable name: %s", resp->gtids[i], resp->local_pids[i],
                       resp->executable_names[i]);
             }
             break;
         default:
-            error("Unrecognized response to REQUEST_REATTACH_TASKS: %d",
-                  msg_type);
+            error("Unrecognized response to REQUEST_REATTACH_TASKS: %d", msg_type);
             break;
     }
 }
@@ -363,15 +335,11 @@ void _handle_response_msg_list(List other_nodes_resp, bitstr_t *tasks_started) {
 
     itr = list_iterator_create(other_nodes_resp);
     while ((ret_data_info = list_next(itr))) {
-        msg_rc = slurm_get_return_code(ret_data_info->type,
-                                       ret_data_info->data);
-        debug("Attach returned msg_rc=%d err=%d type=%d",
-              msg_rc, ret_data_info->err, ret_data_info->type);
+        msg_rc = slurm_get_return_code(ret_data_info->type, ret_data_info->data);
+        debug("Attach returned msg_rc=%d err=%d type=%d", msg_rc, ret_data_info->err, ret_data_info->type);
         if (msg_rc != SLURM_SUCCESS)
             errno = ret_data_info->err;
-        _handle_response_msg(ret_data_info->type,
-                             ret_data_info->data,
-                             tasks_started);
+        _handle_response_msg(ret_data_info->type, ret_data_info->data, tasks_started);
     }
     list_iterator_destroy(itr);
 }
@@ -381,14 +349,8 @@ void _handle_response_msg_list(List other_nodes_resp, bitstr_t *tasks_started) {
  * A bit is set in tasks_started for each task for which we receive a
  * reattach response message stating that the task is still running.
  */
-static int _attach_to_tasks(uint32_t jobid,
-                            uint32_t stepid,
-                            slurm_step_layout_t *layout,
-                            slurm_cred_t *fake_cred,
-                            uint16_t num_resp_ports,
-                            uint16_t *resp_ports,
-                            int num_io_ports,
-                            uint16_t *io_ports,
+static int _attach_to_tasks(uint32_t jobid, uint32_t stepid, slurm_step_layout_t *layout, slurm_cred_t *fake_cred,
+                            uint16_t num_resp_ports, uint16_t *resp_ports, int num_io_ports, uint16_t *io_ports,
                             bitstr_t *tasks_started) {
     slurm_msg_t msg;
     List nodes_resp = NULL;
@@ -439,8 +401,7 @@ static void *_msg_thr_internal(void *arg) {
     return NULL;
 }
 
-static inline int
-_estimate_nports(int nclients, int cli_per_port) {
+static inline int _estimate_nports(int nclients, int cli_per_port) {
     div_t d;
     d = div(nclients, cli_per_port);
     return d.rem > 0 ? d.quot + 1 : d.quot;
@@ -486,8 +447,7 @@ static message_thread_state_t *_msg_thr_create(int num_nodes, int num_tasks) {
 static void _msg_thr_wait(message_thread_state_t *mts) {
     /* Wait for all known running tasks to complete */
     slurm_mutex_lock(&mts->lock);
-    while (bit_set_count(mts->tasks_exited)
-           < bit_set_count(mts->tasks_started)) {
+    while (bit_set_count(mts->tasks_exited) < bit_set_count(mts->tasks_started)) {
         slurm_cond_wait(&mts->cond, &mts->lock);
     }
     slurm_mutex_unlock(&mts->lock);
@@ -503,8 +463,7 @@ static void _msg_thr_destroy(message_thread_state_t *mts) {
     FREE_NULL_BITMAP(mts->tasks_exited);
 }
 
-static void
-_launch_handler(message_thread_state_t *mts, slurm_msg_t *resp) {
+static void _launch_handler(message_thread_state_t *mts, slurm_msg_t *resp) {
     launch_tasks_response_msg_t *msg = resp->data;
     int i;
 
@@ -519,15 +478,13 @@ _launch_handler(message_thread_state_t *mts, slurm_msg_t *resp) {
 
 }
 
-static void
-_exit_handler(message_thread_state_t *mts, slurm_msg_t *exit_msg) {
+static void _exit_handler(message_thread_state_t *mts, slurm_msg_t *exit_msg) {
     task_exit_msg_t *msg = (task_exit_msg_t *) exit_msg->data;
     int i;
     int rc;
 
     if ((msg->job_id != opt.jobid) || (msg->step_id != opt.stepid)) {
-        debug("Received MESSAGE_TASK_EXIT from wrong job: %u.%u",
-              msg->job_id, msg->step_id);
+        debug("Received MESSAGE_TASK_EXIT from wrong job: %u.%u", msg->job_id, msg->step_id);
         return;
     }
 
@@ -538,22 +495,18 @@ _exit_handler(message_thread_state_t *mts, slurm_msg_t *exit_msg) {
         bit_set(mts->tasks_exited, msg->task_id_list[i]);
     }
 
-    verbose("%d tasks finished (rc=%u)",
-            msg->num_tasks, msg->return_code);
+    verbose("%d tasks finished (rc=%u)", msg->num_tasks, msg->return_code);
     if (WIFEXITED(msg->return_code)) {
         rc = WEXITSTATUS(msg->return_code);
         if (rc != 0) {
             for (i = 0; i < msg->num_tasks; i++) {
-                error("task %u exited with exit code %d",
-                      msg->task_id_list[i], rc);
+                error("task %u exited with exit code %d", msg->task_id_list[i], rc);
             }
             global_rc = MAX(rc, global_rc);
         }
     } else if (WIFSIGNALED(msg->return_code)) {
         for (i = 0; i < msg->num_tasks; i++) {
-            verbose("task %u killed by signal %d",
-                    msg->task_id_list[i],
-                    WTERMSIG(msg->return_code));
+            verbose("task %u killed by signal %d", msg->task_id_list[i], WTERMSIG(msg->return_code));
         }
     }
 
@@ -561,8 +514,7 @@ _exit_handler(message_thread_state_t *mts, slurm_msg_t *exit_msg) {
     slurm_mutex_unlock(&mts->lock);
 }
 
-static void
-_handle_msg(void *arg, slurm_msg_t *msg) {
+static void _handle_msg(void *arg, slurm_msg_t *msg) {
     static uid_t slurm_uid;
     static bool slurm_uid_set = false;
     message_thread_state_t *mts = (message_thread_state_t *) arg;
@@ -577,8 +529,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
     }
 
     if ((req_uid != slurm_uid) && (req_uid != 0) && (req_uid != uid)) {
-        error("Security violation, slurm message from uid %u",
-              (unsigned int) req_uid);
+        error("Security violation, slurm message from uid %u", (unsigned int) req_uid);
         return;
     }
 
@@ -596,8 +547,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
             /* FIXME - does nothing yet */
             break;
         default:
-            error("received spurious message type: %d",
-                  msg->msg_type);
+            error("received spurious message type: %d", msg->msg_type);
             break;
     }
     return;
@@ -607,8 +557,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
  * Functions for manipulating the MPIR_* global variables which
  * are accessed by parallel debuggers which trace sattach.
  **********************************************************************/
-static void
-_mpir_init(int num_tasks) {
+static void _mpir_init(int num_tasks) {
     MPIR_proctable_size = num_tasks;
     MPIR_proctable = xmalloc(sizeof(MPIR_PROCDESC) * num_tasks);
     if (MPIR_proctable == NULL) {
@@ -617,8 +566,7 @@ _mpir_init(int num_tasks) {
     }
 }
 
-static void
-_mpir_cleanup() {
+static void _mpir_cleanup() {
     int i;
 
     for (i = 0; i < MPIR_proctable_size; i++) {
@@ -628,14 +576,12 @@ _mpir_cleanup() {
     xfree(MPIR_proctable);
 }
 
-static void
-_mpir_dump_proctable() {
+static void _mpir_dump_proctable() {
     MPIR_PROCDESC *tv;
     int i;
 
     for (i = 0; i < MPIR_proctable_size; i++) {
         tv = &MPIR_proctable[i];
-        info("task:%d, host:%s, pid:%d, executable:%s",
-             i, tv->host_name, tv->pid, tv->executable_name);
+        info("task:%d, host:%s, pid:%d, executable:%s", i, tv->host_name, tv->pid, tv->executable_name);
     }
 }

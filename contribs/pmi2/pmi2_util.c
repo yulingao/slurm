@@ -31,7 +31,7 @@ struct PMI2U_keyval_pairs {
     char key[MAXKEYLEN];
     char value[MAXVALLEN];
 };
-static struct PMI2U_keyval_pairs PMI2U_keyval_tab[64] = { { { 0 }, { 0 } } };
+static struct PMI2U_keyval_pairs PMI2U_keyval_tab[64] = {{{0}, {0}}};
 static int PMI2U_keyval_tab_idx = 0;
 
 /* This is used to prepend printed output.  Set the initial value to
@@ -41,11 +41,13 @@ static char PMI2U_print_id[PMI2_IDSIZE] = "unset";
 void PMI2U_Set_rank(int PMI_rank) {
     snprintf(PMI2U_print_id, PMI2_IDSIZE, "cli_%d", PMI_rank);
 }
+
 void PMI2U_SetServer(void) {
     strncpy(PMI2U_print_id, "server", PMI2_IDSIZE);
 }
 
 #define MAX_READLINE 1024
+
 /*
  * Return the next newline-terminated string of maximum length maxlen.
  * This is a buffered version, and reads from fd as necessary.  A
@@ -108,7 +110,7 @@ int PMI2U_writeline(int fd, char *buf) {
     int size = strlen(buf), n;
 
     if (buf[size - 1] != '\n') /* error:  no newline at end */
-        PMI2U_printf("write_line: message string doesn't end in newline: :%s:", buf);
+            PMI2U_printf("write_line: message string doesn't end in newline: :%s:", buf);
     else {
         PMI2U_printf("PMI sending: %s", buf);
 
@@ -121,7 +123,7 @@ int PMI2U_writeline(int fd, char *buf) {
             return (-1);
         }
         if (n < size)
-            PMI2U_printf("write_line failed to write entire message");
+                PMI2U_printf("write_line failed to write entire message");
     }
     return 0;
 }
@@ -144,8 +146,7 @@ int PMI2U_parse_keyvals(char *st) {
             p++;
         /* got non-blank */
         if (*p == '=') {
-            PMI2U_printf("PMI2U_parse_keyvals:  unexpected = at character %ld in %s",
-			 (long int) (p - st), st);
+            PMI2U_printf("PMI2U_parse_keyvals:  unexpected = at character %ld in %s", (long int) (p - st), st);
             return (-1);
         }
         if (*p == '\n' || *p == '\0')
@@ -155,22 +156,20 @@ int PMI2U_parse_keyvals(char *st) {
         while (*p != ' ' && *p != '=' && *p != '\n' && *p != '\0')
             p++;
         if (*p == ' ' || *p == '\n' || *p == '\0') {
-            PMI2U_printf("PMI2U_parse_keyvals: unexpected key delimiter at character %ld in %s",
-			 (long int) (p - st), st);
+            PMI2U_printf("PMI2U_parse_keyvals: unexpected key delimiter at character %ld in %s", (long int) (p - st),
+                         st);
             return (-1);
         }
         /* Null terminate the key */
         *p = 0;
         /* store key */
-        strncpy(PMI2U_keyval_tab[PMI2U_keyval_tab_idx].key, keystart,
-                MAXKEYLEN);
-        PMI2U_keyval_tab[PMI2U_keyval_tab_idx].key[MAXKEYLEN-1] = '\0';
+        strncpy(PMI2U_keyval_tab[PMI2U_keyval_tab_idx].key, keystart, MAXKEYLEN);
+        PMI2U_keyval_tab[PMI2U_keyval_tab_idx].key[MAXKEYLEN - 1] = '\0';
         valstart = ++p; /* start of value */
         while (*p != ' ' && *p != '\n' && *p != '\0')
             p++;
         /* store value */
-        strncpy(PMI2U_keyval_tab[PMI2U_keyval_tab_idx].value, valstart,
-                MAXVALLEN);
+        strncpy(PMI2U_keyval_tab[PMI2U_keyval_tab_idx].value, valstart, MAXVALLEN);
         offset = p - valstart;
         /* When compiled with -fPIC, the pgcc compiler generates incorrect
          code if "p - valstart" is used instead of using the
@@ -187,21 +186,21 @@ int PMI2U_parse_keyvals(char *st) {
 void PMI2U_dump_keyvals(void) {
     int i;
     for (i = 0; i < PMI2U_keyval_tab_idx; i++)
-        PMI2U_printf("  %s=%s", PMI2U_keyval_tab[i].key, PMI2U_keyval_tab[i].value);
+            PMI2U_printf("  %s=%s", PMI2U_keyval_tab[i].key, PMI2U_keyval_tab[i].value);
 }
 
 char *PMI2U_getval(const char *keystr, char *valstr, int vallen) {
-	int i;
+    int i;
 
     for (i = 0; i < PMI2U_keyval_tab_idx; i++) {
         if (strcmp(keystr, PMI2U_keyval_tab[i].key) == 0) {
-	        MPIU_Strncpy(valstr, PMI2U_keyval_tab[i].value, vallen);
-            PMI2U_keyval_tab[i].value[vallen-1] = '\0';
+            MPIU_Strncpy(valstr, PMI2U_keyval_tab[i].value, vallen);
+            PMI2U_keyval_tab[i].value[vallen - 1] = '\0';
             return valstr;
         }
     }
     valstr[0] = '\0';
-    return NULL ;
+    return NULL;
 }
 
 void PMI2U_chgval(const char *keystr, char *valstr) {
@@ -243,33 +242,30 @@ void PMI2U_chgval(const char *keystr, char *valstr) {
   Module:
   Utility
   @*/
-int
-MPIU_Strncpy(char *dest, const char *src, size_t n)
-{
-	char *d_ptr = dest;
+int MPIU_Strncpy(char *dest, const char *src, size_t n) {
+    char *d_ptr = dest;
     const char *s_ptr = src;
     register int i;
 
     if (n == 0) return 0;
 
-    i = (int)n;
+    i = (int) n;
     while (*s_ptr && i-- > 0) {
-	*d_ptr++ = *s_ptr++;
+        *d_ptr++ = *s_ptr++;
     }
 
     if (i > 0) {
-	    *d_ptr = 0;
-	    return 0;
-    }
-    else {
-	    /* Force a null at the end of the string (gives better safety
-	       in case the user fails to check the error code)
-	    */
-	    dest[n-1] = 0;
-	    /* We may want to force an error message here, at least in the
-	       debugging version
-	    */
-	    /* printf( "failure in copying %s with length %d\n", src, n ); */
-	    return 1;
+        *d_ptr = 0;
+        return 0;
+    } else {
+        /* Force a null at the end of the string (gives better safety
+           in case the user fails to check the error code)
+        */
+        dest[n - 1] = 0;
+        /* We may want to force an error message here, at least in the
+           debugging version
+        */
+        /* printf( "failure in copying %s with length %d\n", src, n ); */
+        return 1;
     }
 }

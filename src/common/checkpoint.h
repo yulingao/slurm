@@ -63,11 +63,7 @@ enum check_opts {
  * plugin used to encode and decode job information.
  */
 enum checkpoint_plugin {
-    CHECK_NONE,
-    CHECK_AIX,
-    CHECK_BLCR,
-    CHECK_OMPI,
-    CHECK_POE
+    CHECK_NONE, CHECK_AIX, CHECK_BLCR, CHECK_OMPI, CHECK_POE
 };
 
 /* opaque data structures - no peeking! */
@@ -84,22 +80,17 @@ extern int checkpoint_init(char *checkpoint_type);
 extern int checkpoint_fini(void);
 
 /* perform many checkpoint operation on job/step */
-extern int checkpoint_op(uint32_t job_id, uint32_t step_id,
-                         void *step_ptr, uint16_t op,
-                         uint16_t data, char *image_dir, time_t *event_time,
-                         uint32_t *error_code, char **error_msg);
+extern int checkpoint_op(uint32_t job_id, uint32_t step_id, void *step_ptr, uint16_t op, uint16_t data, char *image_dir,
+                         time_t *event_time, uint32_t *error_code, char **error_msg);
 
 /* note checkpoint completion */
-extern int checkpoint_comp(void *step_ptr, time_t event_time,
-                           uint32_t error_code, char *error_msg);
+extern int checkpoint_comp(void *step_ptr, time_t event_time, uint32_t error_code, char *error_msg);
 
-extern int checkpoint_task_comp(void *step_ptr, uint32_t task_id,
-                                time_t event_time, uint32_t error_code,
-                                char *error_msg);
+extern int
+checkpoint_task_comp(void *step_ptr, uint32_t task_id, time_t event_time, uint32_t error_code, char *error_msg);
 
 /* gather checkpoint error info */
-extern int checkpoint_error(void *step_ptr,
-                            uint16_t *ckpt_errno, char **ckpt_strerror);
+extern int checkpoint_error(void *step_ptr, uint16_t *ckpt_errno, char **ckpt_strerror);
 
 /* allocate and initialize a job step's checkpoint context */
 extern int checkpoint_alloc_jobinfo(check_jobinfo_t *jobinfo);
@@ -108,11 +99,9 @@ extern int checkpoint_alloc_jobinfo(check_jobinfo_t *jobinfo);
 extern int checkpoint_free_jobinfo(check_jobinfo_t jobinfo);
 
 /* un/pack a job step's checkpoint context */
-extern int checkpoint_pack_jobinfo(check_jobinfo_t jobinfo, Buf buffer,
-                                   uint16_t protocol_version);
+extern int checkpoint_pack_jobinfo(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version);
 
-extern int checkpoint_unpack_jobinfo(check_jobinfo_t jobinfo, Buf buffer,
-                                     uint16_t protocol_version);
+extern int checkpoint_unpack_jobinfo(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version);
 
 /* copy a job's checkpoint context */
 extern check_jobinfo_t checkpoint_copy_jobinfo(check_jobinfo_t jobinfo);
@@ -127,8 +116,7 @@ extern int checkpoint_signal_tasks(void *slurmd_job, char *image_dir);
 extern int checkpoint_restart_task(void *slurmd_job, char *image_dir, int gtid);
 
 /* send checkpoint request to specified job/step */
-extern int checkpoint_tasks(uint32_t job_id, uint32_t step_id,
-                            time_t begin_time, char *image_dir,
-                            uint16_t wait, char *nodelist);
+extern int
+checkpoint_tasks(uint32_t job_id, uint32_t step_id, time_t begin_time, char *image_dir, uint16_t wait, char *nodelist);
 
 #endif /*_HAVE_SLURM_CHECKPOINT_H__*/

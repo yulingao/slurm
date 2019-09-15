@@ -56,8 +56,7 @@
 #  define xmalloc_assert(expr)  ((void) (0))
 #else
 
-static void malloc_assert_failed(char *, const char *, int,
-                                 const char *, const char *);
+static void malloc_assert_failed(char *, const char *, int, const char *, const char *);
 
 #  define xmalloc_assert(expr)  do {                                          \
           (expr) ? ((void)(0)) :                                              \
@@ -74,8 +73,7 @@ static void malloc_assert_failed(char *, const char *, int,
  *   clear (IN) initialize to zero
  *   RETURN	pointer to allocate heap space
  */
-void *slurm_xcalloc(size_t count, size_t size, bool clear, bool try,
-                    const char *file, int line, const char *func) {
+void *slurm_xcalloc(size_t count, size_t size, bool clear, bool try, const char *file, int line, const char *func) {
     size_t total_size;
     size_t count_size;
     size_t *p;
@@ -129,9 +127,8 @@ void *slurm_xcalloc(size_t count, size_t size, bool clear, bool try,
  *   newsize (IN)	requested size
  *   clear (IN)		initialize to zero
  */
-extern void *slurm_xrecalloc(void **item, size_t count, size_t size,
-                             bool clear, bool try, const char *file,
-                             int line, const char *func) {
+extern void *slurm_xrecalloc(void **item, size_t count, size_t size, bool clear, bool try, const char *file, int line,
+                             const char *func) {
     size_t total_size;
     size_t count_size;
     size_t *p;
@@ -223,10 +220,8 @@ void slurm_xfree(void **item, const char *file, int line, const char *func) {
 
 #ifndef NDEBUG
 
-static void malloc_assert_failed(char *expr, const char *file,
-                                 int line, const char *caller, const char *func) {
-    error("%s() Error: from %s:%d: %s(): Assertion (%s) failed",
-          func, file, line, caller, expr);
+static void malloc_assert_failed(char *expr, const char *file, int line, const char *caller, const char *func) {
+    error("%s() Error: from %s:%d: %s(): Assertion (%s) failed", func, file, line, caller, expr);
     abort();
 }
 

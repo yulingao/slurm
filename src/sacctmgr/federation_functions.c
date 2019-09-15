@@ -37,9 +37,7 @@
 
 #include "src/sacctmgr/sacctmgr.h"
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_federation_cond_t *federation_cond,
-                     List format_list) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_federation_cond_t *federation_cond, List format_list) {
     int i;
     int a_set = 0;
     int end = 0;
@@ -59,45 +57,30 @@ static int _set_cond(int *start, int argc, char **argv,
         if (!xstrncasecmp(argv[i], "Set", MAX(command_len, 3))) {
             i--;
             break;
-        } else if (!end && !xstrncasecmp(argv[i], "where",
-                                         MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "where", MAX(command_len, 5))) {
             continue;
-        } else if (!end &&
-                   !xstrncasecmp(argv[i], "WithDeleted",
-                                 MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "WithDeleted", MAX(command_len, 5))) {
             federation_cond->with_deleted = 1;
-        } else if (!end && !xstrncasecmp(argv[i], "Tree",
-                                         MAX(command_len, 4))) {
+        } else if (!end && !xstrncasecmp(argv[i], "Tree", MAX(command_len, 4))) {
             tree_display = 1;
-        } else if (!end || !xstrncasecmp(argv[i], "Names",
-                                         MAX(command_len, 1))
-                   || !xstrncasecmp(argv[i], "Federations",
-                                    MAX(command_len, 3))) {
+        } else if (!end || !xstrncasecmp(argv[i], "Names", MAX(command_len, 1)) ||
+                   !xstrncasecmp(argv[i], "Federations", MAX(command_len, 3))) {
             if (!federation_cond->federation_list)
-                federation_cond->federation_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(
-                    federation_cond->federation_list,
-                    argv[i] + end))
+                federation_cond->federation_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(federation_cond->federation_list, argv[i] + end))
                 a_set = 1;
-        } else if (!end || !xstrncasecmp(argv[i], "Clusters",
-                                         MAX(command_len, 3))) {
+        } else if (!end || !xstrncasecmp(argv[i], "Clusters", MAX(command_len, 3))) {
             if (!federation_cond->cluster_list)
-                federation_cond->cluster_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(
-                    federation_cond->cluster_list,
-                    argv[i] + end))
+                federation_cond->cluster_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(federation_cond->cluster_list, argv[i] + end))
                 a_set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 2))) {
             if (format_list)
                 slurm_addto_char_list(format_list, argv[i] + end);
         } else {
             exit_code = 1;
             fprintf(stderr, " Unknown condition: %s\n"
-                            " Use keyword 'set' to modify value\n",
-                    argv[i]);
+                            " Use keyword 'set' to modify value\n", argv[i]);
             break;
         }
     }
@@ -106,8 +89,7 @@ static int _set_cond(int *start, int argc, char **argv,
     return a_set;
 }
 
-static int _set_rec(int *start, int argc, char **argv,
-                    List name_list, slurmdb_federation_rec_t *fed) {
+static int _set_rec(int *start, int argc, char **argv, List name_list, slurmdb_federation_rec_t *fed) {
     int i;
     int set = 0;
     int end = 0;
@@ -129,45 +111,36 @@ static int _set_rec(int *start, int argc, char **argv,
         if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))) {
             i--;
             break;
-        } else if (!end && !xstrncasecmp(argv[i], "set",
-                                         MAX(command_len, 3))) {
+        } else if (!end && !xstrncasecmp(argv[i], "set", MAX(command_len, 3))) {
             continue;
-        } else if (!end
-                   || !xstrncasecmp(argv[i], "Name",
-                                    MAX(command_len, 1))) {
+        } else if (!end || !xstrncasecmp(argv[i], "Name", MAX(command_len, 1))) {
             if (name_list)
                 slurm_addto_char_list(name_list, argv[i] + end);
         } else if (!fed) {
             continue;
-        } else if (!xstrncasecmp(argv[i], "Clusters",
-                                 MAX(command_len, 2))) {
+        } else if (!xstrncasecmp(argv[i], "Clusters", MAX(command_len, 2))) {
             char *name = NULL;
             ListIterator itr;
 
-            if (*(argv[i] + end) == '\0' &&
-                (option == '+' || option == '-')) {
+            if (*(argv[i] + end) == '\0' && (option == '+' || option == '-')) {
                 printf(" You didn't specify any clusters to"
-                       " %s\n",
-                       (option == '-') ? "remove" : "add");
+                       " %s\n", (option == '-') ? "remove" : "add");
                 exit_code = 1;
                 break;
             }
 
             List cluster_names = list_create(slurm_destroy_char);
-            if (slurm_addto_mode_char_list(cluster_names,
-                                           argv[i] + end, option) < 0) {
+            if (slurm_addto_mode_char_list(cluster_names, argv[i] + end, option) < 0) {
                 FREE_NULL_LIST(cluster_names);
                 exit_code = 1;
                 break;
             }
             itr = list_iterator_create(cluster_names);
-            fed->cluster_list =
-                    list_create(slurmdb_destroy_cluster_rec);
+            fed->cluster_list = list_create(slurmdb_destroy_cluster_rec);
             while ((name = list_next(itr))) {
                 if (name[0] == '\0')
                     continue;
-                slurmdb_cluster_rec_t *cluster =
-                        xmalloc(sizeof(slurmdb_cluster_rec_t));
+                slurmdb_cluster_rec_t *cluster = xmalloc(sizeof(slurmdb_cluster_rec_t));
                 slurmdb_init_cluster_rec(cluster, 0);
                 cluster->name = xstrdup(name);
                 list_append(fed->cluster_list, cluster);
@@ -175,23 +148,16 @@ static int _set_rec(int *start, int argc, char **argv,
             list_iterator_destroy(itr);
             FREE_NULL_LIST(cluster_names);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Flags",
-                                 MAX(command_len, 2))) {
-            fed->flags = str_2_federation_flags(argv[i] + end,
-                                                option);
+        } else if (!xstrncasecmp(argv[i], "Flags", MAX(command_len, 2))) {
+            fed->flags = str_2_federation_flags(argv[i] + end, option);
             if (fed->flags == FEDERATION_FLAG_NOTSET) {
                 char *tmp_char = NULL;
                 fed->flags = INFINITE;
-                fed->flags &= (~FEDERATION_FLAG_NOTSET &
-                               ~FEDERATION_FLAG_ADD &
-                               ~FEDERATION_FLAG_REMOVE);
-                tmp_char =
-                        slurmdb_federation_flags_str(
-                                fed->flags);
+                fed->flags &= (~FEDERATION_FLAG_NOTSET & ~FEDERATION_FLAG_ADD & ~FEDERATION_FLAG_REMOVE);
+                tmp_char = slurmdb_federation_flags_str(fed->flags);
                 printf(" Unknown federation flag used in:\n"
                        " '%s'\n"
-                       " Valid federation flags are\n  '%s'\n",
-                       argv[i] + end, tmp_char);
+                       " Valid federation flags are\n  '%s'\n", argv[i] + end, tmp_char);
                 xfree(tmp_char);
                 exit_code = 1;
             } else
@@ -199,8 +165,7 @@ static int _set_rec(int *start, int argc, char **argv,
         } else {
             exit_code = 1;
             printf(" Unknown option: %s\n"
-                   " Use keyword 'where' to modify condition\n",
-                   argv[i]);
+                   " Use keyword 'where' to modify condition\n", argv[i]);
         }
     }
 
@@ -226,9 +191,8 @@ static int _verify_federations(List name_list, bool report_existing) {
 
     temp_list = slurmdb_federations_get(db_conn, &fed_cond);
     if (!temp_list) {
-        fprintf(stderr,
-                " Problem getting federations from database.  "
-                "Contact your admin.\n");
+        fprintf(stderr, " Problem getting federations from database.  "
+                        "Contact your admin.\n");
         return SLURM_ERROR;
     }
 
@@ -280,8 +244,7 @@ extern int verify_federations_exist(List name_list) {
  *                   is set to NULL and a cluster is assigned to federation then
  *                   existing_fed will be set to TRUE.
  */
-extern int verify_fed_clusters(List cluster_list, const char *fed_name,
-                               bool *existing_fed) {
+extern int verify_fed_clusters(List cluster_list, const char *fed_name, bool *existing_fed) {
     char *missing_str = NULL;
     char *existing_str = NULL;
     List temp_list = NULL;
@@ -306,9 +269,8 @@ extern int verify_fed_clusters(List cluster_list, const char *fed_name,
     temp_list = slurmdb_clusters_get(db_conn, &cluster_cond);
     FREE_NULL_LIST(cluster_cond.cluster_list);
     if (!temp_list) {
-        fprintf(stderr,
-                " Problem getting clusters from database.  "
-                "Contact your admin.\n");
+        fprintf(stderr, " Problem getting clusters from database.  "
+                        "Contact your admin.\n");
         list_iterator_destroy(itr_c);
         return SLURM_ERROR;
     }
@@ -334,24 +296,19 @@ extern int verify_fed_clusters(List cluster_list, const char *fed_name,
         if (!db_rec) {
             xstrfmtcat(missing_str, " The cluster %s doesn't exist."
                                     " Please add first.\n", tmp_name);
-        } else if (*cluster_rec->name != '-' &&
-                   db_rec->fed.name && *db_rec->fed.name) {
+        } else if (*cluster_rec->name != '-' && db_rec->fed.name && *db_rec->fed.name) {
 
             if (fed_name && !xstrcmp(fed_name, db_rec->fed.name)) {
                 fprintf(stderr, " The cluster %s is already "
-                                "assigned to federation %s\n",
-                        db_rec->name, db_rec->fed.name);
+                                "assigned to federation %s\n", db_rec->name, db_rec->fed.name);
                 list_delete_item(itr_c);
             } else {
                 xstrfmtcat(existing_str, " The cluster %s is "
-                                         "assigned to federation %s\n",
-                           db_rec->name, db_rec->fed.name);
+                                         "assigned to federation %s\n", db_rec->name, db_rec->fed.name);
             }
-        } else if (*cluster_rec->name == '-' &&
-                   fed_name && xstrcmp(fed_name, db_rec->fed.name)) {
+        } else if (*cluster_rec->name == '-' && fed_name && xstrcmp(fed_name, db_rec->fed.name)) {
             fprintf(stderr, " The cluster %s isn't assigned to "
-                            "federation %s\n",
-                    db_rec->name, fed_name);
+                            "federation %s\n", db_rec->name, fed_name);
             list_delete_item(itr_c);
         }
     }
@@ -375,8 +332,7 @@ extern int verify_fed_clusters(List cluster_list, const char *fed_name,
 extern int sacctmgr_add_federation(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
     int i = 0, limit_set = 0;
-    slurmdb_federation_rec_t *start_fed =
-            xmalloc(sizeof(slurmdb_federation_rec_t));
+    slurmdb_federation_rec_t *start_fed = xmalloc(sizeof(slurmdb_federation_rec_t));
     List name_list = list_create(slurm_destroy_char);
     List federation_list;
     ListIterator itr = NULL;
@@ -386,8 +342,7 @@ extern int sacctmgr_add_federation(int argc, char **argv) {
 
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         limit_set += _set_rec(&i, argc, argv, name_list, start_fed);
     }
@@ -406,17 +361,14 @@ extern int sacctmgr_add_federation(int argc, char **argv) {
         return SLURM_ERROR;
     }
 
-    if ((list_count(name_list) > 1) &&
-        start_fed && start_fed->cluster_list &&
-        list_count(start_fed->cluster_list)) {
+    if ((list_count(name_list) > 1) && start_fed && start_fed->cluster_list && list_count(start_fed->cluster_list)) {
         slurmdb_destroy_federation_rec(start_fed);
         FREE_NULL_LIST(name_list);
         fprintf(stderr, " Can't assign clusters to multiple "
                         "federations.\n");
         return SLURM_ERROR;
     }
-    if (start_fed && start_fed->cluster_list &&
-        list_count(start_fed->cluster_list)) {
+    if (start_fed && start_fed->cluster_list && list_count(start_fed->cluster_list)) {
         bool existing_feds = false;
 
         if (list_count(name_list) > 1) {
@@ -429,8 +381,7 @@ extern int sacctmgr_add_federation(int argc, char **argv) {
 
         /* ensure that clusters exist in db */
         /* and if the clusters are already assigned to another fed. */
-        if (verify_fed_clusters(start_fed->cluster_list, NULL,
-                                &existing_feds)) {
+        if (verify_fed_clusters(start_fed->cluster_list, NULL, &existing_feds)) {
             FREE_NULL_LIST(name_list);
             slurmdb_destroy_federation_rec(start_fed);
             return SLURM_ERROR;
@@ -488,8 +439,7 @@ extern int sacctmgr_add_federation(int argc, char **argv) {
         }
     } else {
         exit_code = 1;
-        fprintf(stderr, " Problem adding federation(s): %s\n",
-                slurm_strerror(rc));
+        fprintf(stderr, " Problem adding federation(s): %s\n", slurm_strerror(rc));
         rc = SLURM_ERROR;
     }
 
@@ -501,8 +451,7 @@ extern int sacctmgr_add_federation(int argc, char **argv) {
 
 extern int sacctmgr_list_federation(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
-    slurmdb_federation_cond_t *federation_cond =
-            xmalloc(sizeof(slurmdb_federation_cond_t));
+    slurmdb_federation_cond_t *federation_cond = xmalloc(sizeof(slurmdb_federation_cond_t));
     List federation_list;
     int i = 0;
     ListIterator itr = NULL;
@@ -521,8 +470,7 @@ extern int sacctmgr_list_federation(int argc, char **argv) {
     federation_cond->federation_list = list_create(slurm_destroy_char);
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         _set_cond(&i, argc, argv, federation_cond, format_list);
     }
@@ -534,9 +482,8 @@ extern int sacctmgr_list_federation(int argc, char **argv) {
     }
 
     if (!list_count(format_list)) {
-        slurm_addto_char_list(format_list,
-                              "Federation,Cluster,ID%2,"
-                              "Features,FedState");
+        slurm_addto_char_list(format_list, "Federation,Cluster,ID%2,"
+                                           "Features,FedState");
     }
 
     print_fields_list = sacctmgr_process_format_list(format_list);
@@ -582,8 +529,7 @@ extern int sacctmgr_list_federation(int argc, char **argv) {
         char *tmp_str = NULL;
         uint32_t tmp_uint32 = 0;
         slurmdb_cluster_rec_t *tmp_cluster = NULL;
-        ListIterator itr3 =
-                list_iterator_create(fed->cluster_list);
+        ListIterator itr3 = list_iterator_create(fed->cluster_list);
 
         if (!tree_display && print_clusters)
             tmp_cluster = list_next(itr3);
@@ -597,21 +543,15 @@ extern int sacctmgr_list_federation(int argc, char **argv) {
                             tmp_str = NULL;
                         else
                             tmp_str = fed->name;
-                        field->print_routine(
-                                field, tmp_str,
-                                (curr_inx == field_count));
+                        field->print_routine(field, tmp_str, (curr_inx == field_count));
                         break;
                     case PRINT_FLAGS:
                         if (tree_display && tmp_cluster)
                             tmp_str = NULL;
                         else {
-                            tmp_str =
-                                    slurmdb_federation_flags_str(
-                                            fed->flags);
+                            tmp_str = slurmdb_federation_flags_str(fed->flags);
                         }
-                        field->print_routine(
-                                field, tmp_str,
-                                (curr_inx == field_count));
+                        field->print_routine(field, tmp_str, (curr_inx == field_count));
 
                         if (tmp_str)
                             xfree(tmp_str);
@@ -623,56 +563,39 @@ extern int sacctmgr_list_federation(int argc, char **argv) {
                             tmp_str = NULL;
                         else
                             tmp_str = tmp_cluster->name;
-                        field->print_routine(
-                                field, tmp_str,
-                                (curr_inx == field_count));
+                        field->print_routine(field, tmp_str, (curr_inx == field_count));
                         break;
                     case PRINT_FEATURES: {
                         List tmp_list = NULL;
                         if (tmp_cluster)
-                            tmp_list = tmp_cluster->
-                                    fed.feature_list;
-                        field->print_routine(
-                                field, tmp_list,
-                                (curr_inx == field_count));
+                            tmp_list = tmp_cluster->fed.feature_list;
+                        field->print_routine(field, tmp_list, (curr_inx == field_count));
                         break;
                     }
                     case PRINT_FEDSTATE:
                         if (!tmp_cluster)
                             tmp_str = NULL;
                         else {
-                            tmp_str =
-                                    slurmdb_cluster_fed_states_str(
-                                            tmp_cluster->fed.state);
+                            tmp_str = slurmdb_cluster_fed_states_str(tmp_cluster->fed.state);
                         }
-                        field->print_routine(
-                                field, tmp_str,
-                                (curr_inx == field_count));
+                        field->print_routine(field, tmp_str, (curr_inx == field_count));
                         break;
                     case PRINT_FEDSTATERAW:
                         if (!tmp_cluster)
                             tmp_uint32 = NO_VAL;
                         else
-                            tmp_uint32 =
-                                    tmp_cluster->fed.state;
-                        field->print_routine(
-                                field, tmp_uint32,
-                                (curr_inx == field_count));
+                            tmp_uint32 = tmp_cluster->fed.state;
+                        field->print_routine(field, tmp_uint32, (curr_inx == field_count));
                         break;
                     case PRINT_ID:
                         if (!tmp_cluster)
                             tmp_uint32 = NO_VAL;
                         else
-                            tmp_uint32 =
-                                    tmp_cluster->fed.id;
-                        field->print_routine(
-                                field, tmp_uint32,
-                                (curr_inx == field_count));
+                            tmp_uint32 = tmp_cluster->fed.id;
+                        field->print_routine(field, tmp_uint32, (curr_inx == field_count));
                         break;
                     default:
-                        field->print_routine(
-                                field, NULL,
-                                (curr_inx == field_count));
+                        field->print_routine(field, NULL, (curr_inx == field_count));
                         break;
                 }
                 curr_inx++;
@@ -738,8 +661,7 @@ static int _add_clusters_to_remove(List cluster_list, const char *federation) {
         if (found_cluster)
             continue;
 
-        slurmdb_cluster_rec_t *cluster =
-                xmalloc(sizeof(slurmdb_cluster_rec_t));
+        slurmdb_cluster_rec_t *cluster = xmalloc(sizeof(slurmdb_cluster_rec_t));
         slurmdb_init_cluster_rec(cluster, 0);
         cluster->name = xstrdup_printf("-%s", db_cluster->name);
         list_append(cluster_list, cluster);
@@ -762,8 +684,7 @@ static int _change_assigns_to_adds(List cluster_list) {
     slurmdb_cluster_rec_t *cluster = NULL;
 
     while ((cluster = list_next(itr))) {
-        if (cluster->name && *cluster->name &&
-            (*cluster->name != '-' && *cluster->name != '+')) {
+        if (cluster->name && *cluster->name && (*cluster->name != '-' && *cluster->name != '+')) {
             char *tmp_name = xstrdup_printf("+%s", cluster->name);
             xfree(cluster->name);
             cluster->name = tmp_name;
@@ -778,10 +699,8 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
     int i = 0;
     int cond_set = 0, prev_set = 0, rec_set = 0, set = 0;
     List ret_list = NULL;
-    slurmdb_federation_cond_t *federation_cond =
-            xmalloc(sizeof(slurmdb_federation_cond_t));
-    slurmdb_federation_rec_t *federation =
-            xmalloc(sizeof(slurmdb_federation_rec_t));
+    slurmdb_federation_cond_t *federation_cond = xmalloc(sizeof(slurmdb_federation_cond_t));
+    slurmdb_federation_rec_t *federation = xmalloc(sizeof(slurmdb_federation_rec_t));
 
     slurmdb_init_federation_cond(federation_cond, 0);
     slurmdb_init_federation_rec(federation, 0);
@@ -790,16 +709,14 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
         int command_len = strlen(argv[i]);
         if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))) {
             i++;
-            prev_set = _set_cond(&i, argc, argv,
-                                 federation_cond, NULL);
+            prev_set = _set_cond(&i, argc, argv, federation_cond, NULL);
             cond_set |= prev_set;
         } else if (!xstrncasecmp(argv[i], "Set", MAX(command_len, 3))) {
             i++;
             prev_set = _set_rec(&i, argc, argv, NULL, federation);
             rec_set |= prev_set;
         } else {
-            prev_set = _set_cond(&i, argc, argv,
-                                 federation_cond, NULL);
+            prev_set = _set_cond(&i, argc, argv, federation_cond, NULL);
             cond_set |= prev_set;
         }
     }
@@ -820,8 +737,7 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
             rc = SLURM_SUCCESS;
             goto end_it;
         }
-    } else if (verify_federations_exist(
-            federation_cond->federation_list)) {
+    } else if (verify_federations_exist(federation_cond->federation_list)) {
         rc = SLURM_ERROR;
         goto end_it;
     }
@@ -832,8 +748,7 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
         slurmdb_cluster_rec_t *tmp_c = NULL;
         List cluster_list = federation->cluster_list;
 
-        if (!federation_cond->federation_list ||
-            (list_count(federation_cond->federation_list) != 1)) {
+        if (!federation_cond->federation_list || (list_count(federation_cond->federation_list) != 1)) {
             fprintf(stderr, " Can't assign clusters to multiple federations.\n");
             rc = SLURM_ERROR;
             goto end_it;
@@ -844,13 +759,10 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
          * clusters to specific set. */
         mod_fed = list_peek(federation_cond->federation_list);
         if ((!list_count(cluster_list) ||
-             ((tmp_c = list_peek(cluster_list)) &&
-              *tmp_c->name != '-' && *tmp_c->name != '+')) &&
-            ((rc = _add_clusters_to_remove(cluster_list, mod_fed)) ||
-             (rc = _change_assigns_to_adds(cluster_list)))) {
+             ((tmp_c = list_peek(cluster_list)) && *tmp_c->name != '-' && *tmp_c->name != '+')) &&
+            ((rc = _add_clusters_to_remove(cluster_list, mod_fed)) || (rc = _change_assigns_to_adds(cluster_list)))) {
             goto end_it;
-        } else if ((rc = verify_fed_clusters(cluster_list, mod_fed,
-                                             &existing_feds))) {
+        } else if ((rc = verify_fed_clusters(cluster_list, mod_fed, &existing_feds))) {
             goto end_it;
         } else if (!list_count(cluster_list)) {
             printf("Nothing to change\n");
@@ -869,9 +781,7 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
     sacctmgr_print_federation(federation);
 
     notice_thread_init();
-    ret_list = slurmdb_federations_modify(db_conn,
-                                          federation_cond,
-                                          federation);
+    ret_list = slurmdb_federations_modify(db_conn, federation_cond, federation);
 
     if (ret_list && list_count(ret_list)) {
         char *object = NULL;
@@ -887,8 +797,7 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
         rc = SLURM_ERROR;
     } else {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         rc = SLURM_ERROR;
     }
 
@@ -913,8 +822,7 @@ extern int sacctmgr_modify_federation(int argc, char **argv) {
 
 extern int sacctmgr_delete_federation(int argc, char **argv) {
     int rc = SLURM_SUCCESS;
-    slurmdb_federation_cond_t *fed_cond =
-            xmalloc(sizeof(slurmdb_federation_cond_t));
+    slurmdb_federation_cond_t *fed_cond = xmalloc(sizeof(slurmdb_federation_cond_t));
     int i = 0;
     List ret_list = NULL;
     int cond_set = 0, prev_set;
@@ -924,8 +832,7 @@ extern int sacctmgr_delete_federation(int argc, char **argv) {
 
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         prev_set = _set_cond(&i, argc, argv, fed_cond, NULL);
         cond_set |= prev_set;
@@ -936,17 +843,15 @@ extern int sacctmgr_delete_federation(int argc, char **argv) {
         return SLURM_ERROR;
     } else if (!cond_set) {
         exit_code = 1;
-        fprintf(stderr,
-                " No conditions given to remove, not executing.\n");
+        fprintf(stderr, " No conditions given to remove, not executing.\n");
         slurmdb_destroy_federation_cond(fed_cond);
         return SLURM_ERROR;
     }
 
     if (!list_count(fed_cond->federation_list)) {
         exit_code = 1;
-        fprintf(stderr,
-                "problem with delete request.  "
-                "Nothing given to delete.\n");
+        fprintf(stderr, "problem with delete request.  "
+                        "Nothing given to delete.\n");
         slurmdb_destroy_federation_cond(fed_cond);
         return SLURM_SUCCESS;
     }
@@ -977,8 +882,7 @@ extern int sacctmgr_delete_federation(int argc, char **argv) {
         rc = SLURM_ERROR;
     } else {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         rc = SLURM_ERROR;
     }
 

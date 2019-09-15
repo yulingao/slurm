@@ -42,18 +42,15 @@
 #include "src/common/xstring.h"
 
 typedef struct slurm_priority_ops {
-    uint32_t (*set)(uint32_t last_prio,
-                    struct job_record *job_ptr);
+    uint32_t (*set)(uint32_t last_prio, struct job_record *job_ptr);
 
     void (*reconfig)(bool assoc_clear);
 
     void (*set_assoc_usage)(slurmdb_assoc_rec_t *assoc);
 
-    double (*calc_fs_factor)(long double usage_efctv,
-                             long double shares_norm);
+    double (*calc_fs_factor)(long double usage_efctv, long double shares_norm);
 
-    List (*get_priority_factors)
-            (priority_factors_request_msg_t *req_msg, uid_t uid);
+    List (*get_priority_factors)(priority_factors_request_msg_t *req_msg, uid_t uid);
 
     void (*job_end)(struct job_record *job_ptr);
 } slurm_priority_ops_t;
@@ -61,14 +58,9 @@ typedef struct slurm_priority_ops {
 /*
  * Must be synchronized with slurm_priority_ops_t above.
  */
-static const char *syms[] = {
-        "priority_p_set",
-        "priority_p_reconfig",
-        "priority_p_set_assoc_usage",
-        "priority_p_calc_fs_factor",
-        "priority_p_get_priority_factors_list",
-        "priority_p_job_end",
-};
+static const char *syms[] = {"priority_p_set", "priority_p_reconfig", "priority_p_set_assoc_usage",
+                             "priority_p_calc_fs_factor", "priority_p_get_priority_factors_list",
+                             "priority_p_job_end",};
 
 static slurm_priority_ops_t ops;
 static plugin_context_t *g_priority_context = NULL;
@@ -105,8 +97,7 @@ extern int slurm_priority_init(void) {
 
     type = slurm_get_priority_type();
 
-    g_priority_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_priority_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_priority_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -157,17 +148,14 @@ extern void priority_g_set_assoc_usage(slurmdb_assoc_rec_t *assoc) {
     return;
 }
 
-extern double priority_g_calc_fs_factor(long double usage_efctv,
-                                        long double shares_norm) {
+extern double priority_g_calc_fs_factor(long double usage_efctv, long double shares_norm) {
     if (slurm_priority_init() < 0)
         return 0.0;
 
-    return (*(ops.calc_fs_factor))
-            (usage_efctv, shares_norm);
+    return (*(ops.calc_fs_factor))(usage_efctv, shares_norm);
 }
 
-extern List priority_g_get_priority_factors_list(
-        priority_factors_request_msg_t *req_msg, uid_t uid) {
+extern List priority_g_get_priority_factors_list(priority_factors_request_msg_t *req_msg, uid_t uid) {
     if (slurm_priority_init() < 0)
         return NULL;
 

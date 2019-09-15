@@ -46,8 +46,7 @@
 #include "src/common/macros.h"
 #include "src/common/xmalloc.h"
 
-struct hostent *get_host_by_name(const char *name,
-                                 void *buf, int buflen, int *h_err);
+struct hostent *get_host_by_name(const char *name, void *buf, int buflen, int *h_err);
 
 /*
  *  A portable thread-safe alternative to be used in place of gethostbyname().
@@ -57,8 +56,7 @@ struct hostent *get_host_by_name(const char *name,
  *    (h_err) variable reference (if not NULL) to indicate the h_error.
  */
 
-struct hostent *get_host_by_addr(const char *addr, int len, int type,
-                                 void *buf, int buflen, int *h_err);
+struct hostent *get_host_by_addr(const char *addr, int len, int type, void *buf, int buflen, int *h_err);
 
 /*
  *  A portable thread-safe alternative to be used in place of gethostbyaddr().

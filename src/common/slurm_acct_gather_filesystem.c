@@ -59,8 +59,7 @@
 typedef struct slurm_acct_gather_filesystem_ops {
     int (*node_update)(void);
 
-    void (*conf_options)(s_p_options_t **full_options,
-                         int *full_options_cnt);
+    void (*conf_options)(s_p_options_t **full_options, int *full_options_cnt);
 
     void (*conf_set)(s_p_hashtbl_t *tbl);
 
@@ -72,13 +71,9 @@ typedef struct slurm_acct_gather_filesystem_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_acct_gather_filesystem_ops_t.
  */
-static const char *syms[] = {
-        "acct_gather_filesystem_p_node_update",
-        "acct_gather_filesystem_p_conf_options",
-        "acct_gather_filesystem_p_conf_set",
-        "acct_gather_filesystem_p_conf_values",
-        "acct_gather_filesystem_p_get_data",
-};
+static const char *syms[] = {"acct_gather_filesystem_p_node_update", "acct_gather_filesystem_p_conf_options",
+                             "acct_gather_filesystem_p_conf_set", "acct_gather_filesystem_p_conf_values",
+                             "acct_gather_filesystem_p_get_data",};
 
 static slurm_acct_gather_filesystem_ops_t ops;
 static plugin_context_t *g_context = NULL;
@@ -87,8 +82,7 @@ static bool init_run = false;
 static bool acct_shutdown = true;
 static int freq = 0;
 static pthread_t watch_node_thread_id = 0;
-static acct_gather_profile_timer_t *profile_timer =
-        &acct_gather_profile_timer[PROFILE_FILESYSTEM];
+static acct_gather_profile_timer_t *profile_timer = &acct_gather_profile_timer[PROFILE_FILESYSTEM];
 
 static void *_watch_node(void *arg) {
 #if HAVE_SYS_PRCTL_H
@@ -104,8 +98,7 @@ static void *_watch_node(void *arg) {
         slurm_mutex_unlock(&g_context_lock);
 
         slurm_mutex_lock(&profile_timer->notify_mutex);
-        slurm_cond_wait(&profile_timer->notify,
-                        &profile_timer->notify_mutex);
+        slurm_cond_wait(&profile_timer->notify, &profile_timer->notify_mutex);
         slurm_mutex_unlock(&profile_timer->notify_mutex);
     }
     return NULL;
@@ -126,8 +119,7 @@ extern int acct_gather_filesystem_init(void) {
 
     type = slurm_get_acct_gather_filesystem_type();
 
-    g_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -214,8 +206,7 @@ extern int acct_gather_filesystem_startpoll(uint32_t frequency) {
 }
 
 
-extern int acct_gather_filesystem_g_conf_options(s_p_options_t **full_options,
-                                                 int *full_options_cnt) {
+extern int acct_gather_filesystem_g_conf_options(s_p_options_t **full_options, int *full_options_cnt) {
     if (acct_gather_filesystem_init() < 0)
         return SLURM_ERROR;
     (*(ops.conf_options))(full_options, full_options_cnt);

@@ -59,20 +59,14 @@
 #define MIN_NODE_FIELD_SIZE 9
 #define MIN_PART_FIELD_SIZE 9
 
-static int _build_min_max_16_string(char *buffer, int buf_size,
-                                    uint16_t min, uint16_t max, bool range);
+static int _build_min_max_16_string(char *buffer, int buf_size, uint16_t min, uint16_t max, bool range);
 
-static int _build_min_max_32_string(char *buffer, int buf_size,
-                                    uint32_t min, uint32_t max,
-                                    bool range, bool use_suffix);
+static int
+_build_min_max_32_string(char *buffer, int buf_size, uint32_t min, uint32_t max, bool range, bool use_suffix);
 
-static int _build_cpu_load_min_max_32(char *buffer, int buf_size,
-                                      uint32_t min, uint32_t max,
-                                      bool range);
+static int _build_cpu_load_min_max_32(char *buffer, int buf_size, uint32_t min, uint32_t max, bool range);
 
-static int _build_free_mem_min_max_64(char *buffer, int buf_size,
-                                      uint64_t min, uint64_t max,
-                                      bool range);
+static int _build_free_mem_min_max_64(char *buffer, int buf_size, uint64_t min, uint64_t max, bool range);
 
 static void _print_reservation(reserve_info_t *resv_ptr, int width);
 
@@ -122,9 +116,7 @@ int print_sinfo_entry(sinfo_data_t *sinfo_data) {
     sinfo_format_t *current;
 
     while ((current = list_next(i))) {
-        if (current->function(sinfo_data, current->width,
-                              current->right_justify, current->suffix)
-            != SLURM_SUCCESS)
+        if (current->function(sinfo_data, current->width, current->right_justify, current->suffix) != SLURM_SUCCESS)
             return SLURM_ERROR;
     }
     list_iterator_destroy(i);
@@ -142,11 +134,8 @@ void print_sinfo_reservation(reserve_info_msg_t *resv_ptr) {
     if (!params.no_header) {
         for (i = 0; i < resv_ptr->record_count; i++)
             width = MAX(width, _resv_name_width(&reserve_ptr[i]));
-        snprintf(format, sizeof(format),
-                 "%%-%ds  %%8s  %%19s  %%19s  %%11s  %%s\n", width);
-        printf(format,
-               "RESV_NAME", "STATE", "START_TIME", "END_TIME",
-               "DURATION", "NODELIST");
+        snprintf(format, sizeof(format), "%%-%ds  %%8s  %%19s  %%19s  %%11s  %%s\n", width);
+        printf(format, "RESV_NAME", "STATE", "START_TIME", "END_TIME", "DURATION", "NODELIST");
     }
     for (i = 0; i < resv_ptr->record_count; i++)
         _print_reservation(&reserve_ptr[i], width);
@@ -174,10 +163,8 @@ static void _print_reservation(reserve_info_t *resv_ptr, int width) {
 
     if ((resv_ptr->start_time <= now) && (resv_ptr->end_time >= now))
         state = "ACTIVE";
-    snprintf(format, sizeof(format),
-             "%%-%ds  %%8s  %%19s  %%19s  %%11s  %%s\n", width);
-    printf(format,
-           resv_ptr->name, state, tmp1, tmp2, tmp3, resv_ptr->node_list);
+    snprintf(format, sizeof(format), "%%-%ds  %%8s  %%19s  %%19s  %%11s  %%s\n", width);
+    printf(format, resv_ptr->name, state, tmp1, tmp2, tmp3, resv_ptr->node_list);
 
     return;
 }
@@ -222,57 +209,41 @@ static int _print_secs(long time, int width, bool right, bool cut_output) {
     days = time / 86400;
 
     if (days)
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld-%2.2ld:%2.2ld:%2.2ld",
-                 days, hours, minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld-%2.2ld:%2.2ld:%2.2ld", days, hours, minutes, seconds);
     else if (hours)
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld:%2.2ld:%2.2ld",
-                 hours, minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld:%2.2ld:%2.2ld", hours, minutes, seconds);
     else
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld:%2.2ld",
-                 minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld:%2.2ld", minutes, seconds);
 
     _print_str(str, width, right, cut_output);
     return SLURM_SUCCESS;
 }
 
-static int
-_build_min_max_16_string(char *buffer, int buf_size, uint16_t min, uint16_t max,
-                         bool range) {
+static int _build_min_max_16_string(char *buffer, int buf_size, uint16_t min, uint16_t max, bool range) {
     char tmp_min[8];
     char tmp_max[8];
-    convert_num_unit((float) min, tmp_min, sizeof(tmp_min), UNIT_NONE,
-                     NO_VAL, params.convert_flags);
-    convert_num_unit((float) max, tmp_max, sizeof(tmp_max), UNIT_NONE,
-                     NO_VAL, params.convert_flags);
+    convert_num_unit((float) min, tmp_min, sizeof(tmp_min), UNIT_NONE, NO_VAL, params.convert_flags);
+    convert_num_unit((float) max, tmp_max, sizeof(tmp_max), UNIT_NONE, NO_VAL, params.convert_flags);
 
     if (max == min)
         return snprintf(buffer, buf_size, "%s", tmp_max);
     else if (range) {
         if (max == INFINITE16)
-            return snprintf(buffer, buf_size, "%s-infinite",
-                            tmp_min);
+            return snprintf(buffer, buf_size, "%s-infinite", tmp_min);
         else
-            return snprintf(buffer, buf_size, "%s-%s",
-                            tmp_min, tmp_max);
+            return snprintf(buffer, buf_size, "%s-%s", tmp_min, tmp_max);
     } else
         return snprintf(buffer, buf_size, "%s+", tmp_min);
 }
 
 static int
-_build_min_max_32_string(char *buffer, int buf_size,
-                         uint32_t min, uint32_t max,
-                         bool range, bool use_suffix) {
+_build_min_max_32_string(char *buffer, int buf_size, uint32_t min, uint32_t max, bool range, bool use_suffix) {
     char tmp_min[8];
     char tmp_max[8];
 
     if (use_suffix) {
-        convert_num_unit((float) min, tmp_min, sizeof(tmp_min),
-                         UNIT_NONE, NO_VAL, params.convert_flags);
-        convert_num_unit((float) max, tmp_max, sizeof(tmp_max),
-                         UNIT_NONE, NO_VAL, params.convert_flags);
+        convert_num_unit((float) min, tmp_min, sizeof(tmp_min), UNIT_NONE, NO_VAL, params.convert_flags);
+        convert_num_unit((float) max, tmp_max, sizeof(tmp_max), UNIT_NONE, NO_VAL, params.convert_flags);
     } else {
         snprintf(tmp_min, sizeof(tmp_min), "%u", min);
         snprintf(tmp_max, sizeof(tmp_max), "%u", max);
@@ -282,21 +253,16 @@ _build_min_max_32_string(char *buffer, int buf_size,
         return snprintf(buffer, buf_size, "%s", tmp_max);
     else if (range) {
         if (max == INFINITE)
-            return snprintf(buffer, buf_size, "%s-infinite",
-                            tmp_min);
+            return snprintf(buffer, buf_size, "%s-infinite", tmp_min);
         else
-            return snprintf(buffer, buf_size, "%s-%s",
-                            tmp_min, tmp_max);
+            return snprintf(buffer, buf_size, "%s-%s", tmp_min, tmp_max);
     } else
         return snprintf(buffer, buf_size, "%s+", tmp_min);
 
 
 }
 
-static int
-_build_cpu_load_min_max_32(char *buffer, int buf_size,
-                           uint32_t min, uint32_t max,
-                           bool range) {
+static int _build_cpu_load_min_max_32(char *buffer, int buf_size, uint32_t min, uint32_t max, bool range) {
 
     char tmp_min[8];
     char tmp_max[8];
@@ -321,10 +287,7 @@ _build_cpu_load_min_max_32(char *buffer, int buf_size,
         return snprintf(buffer, buf_size, "%s+", tmp_min);
 }
 
-static int
-_build_free_mem_min_max_64(char *buffer, int buf_size,
-                           uint64_t min, uint64_t max,
-                           bool range) {
+static int _build_free_mem_min_max_64(char *buffer, int buf_size, uint64_t min, uint64_t max, bool range) {
 
     char tmp_min[16];
     char tmp_max[16];
@@ -353,11 +316,9 @@ _build_free_mem_min_max_64(char *buffer, int buf_size,
         return snprintf(buffer, buf_size, "%s+", tmp_min);
 }
 
-int
-format_add_function(List list, int width, bool right, char *suffix,
-                    int (*function)(sinfo_data_t *, int, bool, char *)) {
-    sinfo_format_t *tmp =
-            (sinfo_format_t *) xmalloc(sizeof(sinfo_format_t));
+int format_add_function(List list, int width, bool right, char *suffix,
+                        int (*function)(sinfo_data_t *, int, bool, char *)) {
+    sinfo_format_t *tmp = (sinfo_format_t *) xmalloc(sizeof(sinfo_format_t));
     tmp->function = function;
     tmp->width = width;
     tmp->right_justify = right;
@@ -367,11 +328,9 @@ format_add_function(List list, int width, bool right, char *suffix,
     return SLURM_SUCCESS;
 }
 
-int
-format_prepend_function(List list, int width, bool right, char *suffix,
-                        int (*function)(sinfo_data_t *, int, bool, char *)) {
-    sinfo_format_t *tmp =
-            (sinfo_format_t *) xmalloc(sizeof(sinfo_format_t));
+int format_prepend_function(List list, int width, bool right, char *suffix,
+                            int (*function)(sinfo_data_t *, int, bool, char *)) {
+    sinfo_format_t *tmp = (sinfo_format_t *) xmalloc(sizeof(sinfo_format_t));
     tmp->function = function;
     tmp->width = width;
     tmp->right_justify = right;
@@ -433,8 +392,7 @@ static char *_str_tolower(char *upper_str) {
  * Sinfo Print Functions
  *****************************************************************************/
 
-int _print_avail(sinfo_data_t *sinfo_data, int width,
-                 bool right_justify, char *suffix) {
+int _print_avail(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
@@ -456,14 +414,10 @@ int _print_avail(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_cpus(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_cpus(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_32_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_cpus,
-                                 sinfo_data->max_cpus,
-                                 false, true);
+        _build_min_max_32_string(id, FORMAT_STRING_SIZE, sinfo_data->min_cpus, sinfo_data->max_cpus, false, true);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("CPUS", width, right_justify, true);
@@ -474,12 +428,10 @@ int _print_cpus(sinfo_data_t *sinfo_data, int width,
 }
 
 /* Cpus, allocated/idle/other/total */
-int _print_cpus_aiot(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_cpus_aiot(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        snprintf(id, FORMAT_STRING_SIZE, "%u/%u/%u/%u",
-                 sinfo_data->cpus_alloc, sinfo_data->cpus_idle,
+        snprintf(id, FORMAT_STRING_SIZE, "%u/%u/%u/%u", sinfo_data->cpus_alloc, sinfo_data->cpus_idle,
                  sinfo_data->cpus_other, sinfo_data->cpus_total);
         _print_str(id, width, right_justify, true);
     } else
@@ -489,22 +441,15 @@ int _print_cpus_aiot(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_sct(sinfo_data_t *sinfo_data, int width,
-               bool right_justify, char *suffix) {
+int _print_sct(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char sockets[FORMAT_STRING_SIZE];
     char cores[FORMAT_STRING_SIZE];
     char threads[FORMAT_STRING_SIZE];
     char sct[(FORMAT_STRING_SIZE + 1) * 3];
     if (sinfo_data) {
-        _build_min_max_16_string(sockets, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_sockets,
-                                 sinfo_data->max_sockets, false);
-        _build_min_max_16_string(cores, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_cores,
-                                 sinfo_data->max_cores, false);
-        _build_min_max_16_string(threads, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_threads,
-                                 sinfo_data->max_threads, false);
+        _build_min_max_16_string(sockets, FORMAT_STRING_SIZE, sinfo_data->min_sockets, sinfo_data->max_sockets, false);
+        _build_min_max_16_string(cores, FORMAT_STRING_SIZE, sinfo_data->min_cores, sinfo_data->max_cores, false);
+        _build_min_max_16_string(threads, FORMAT_STRING_SIZE, sinfo_data->min_threads, sinfo_data->max_threads, false);
         sct[0] = '\0';
         strcat(sct, sockets);
         strcat(sct, ":");
@@ -521,13 +466,10 @@ int _print_sct(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_sockets(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix) {
+int _print_sockets(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_sockets,
-                                 sinfo_data->max_sockets, false);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->min_sockets, sinfo_data->max_sockets, false);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("SOCKETS", width, right_justify, true);
@@ -538,13 +480,10 @@ int _print_sockets(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_cores(sinfo_data_t *sinfo_data, int width,
-                 bool right_justify, char *suffix) {
+int _print_cores(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_cores,
-                                 sinfo_data->max_cores, false);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->min_cores, sinfo_data->max_cores, false);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("CORES", width, right_justify, true);
@@ -555,13 +494,10 @@ int _print_cores(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_threads(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix) {
+int _print_threads(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_threads,
-                                 sinfo_data->max_threads, false);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->min_threads, sinfo_data->max_threads, false);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("THREADS", width, right_justify, true);
@@ -572,14 +508,10 @@ int _print_threads(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_disk(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_disk(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_32_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_disk,
-                                 sinfo_data->max_disk,
-                                 false, false);
+        _build_min_max_32_string(id, FORMAT_STRING_SIZE, sinfo_data->min_disk, sinfo_data->max_disk, false, false);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("TMP_DISK", width, right_justify, true);
@@ -589,8 +521,7 @@ int _print_disk(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_features(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix) {
+int _print_features(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data)
         _print_str(sinfo_data->features, width, right_justify, true);
     else
@@ -601,8 +532,7 @@ int _print_features(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_features_act(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix) {
+int _print_features_act(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data)
         _print_str(sinfo_data->features_act, width, right_justify, true);
     else
@@ -613,8 +543,7 @@ int _print_features_act(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_gres(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_gres(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data)
         _print_str(sinfo_data->gres, width, right_justify, true);
     else
@@ -625,8 +554,7 @@ int _print_gres(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_gres_used(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_gres_used(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data)
         _print_str(sinfo_data->gres_used, width, right_justify, true);
     else
@@ -637,14 +565,12 @@ int _print_gres_used(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_groups(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix) {
+int _print_groups(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
         else if (sinfo_data->part_info->allow_groups)
-            _print_str(sinfo_data->part_info->allow_groups,
-                       width, right_justify, true);
+            _print_str(sinfo_data->part_info->allow_groups, width, right_justify, true);
         else
             _print_str("all", width, right_justify, true);
     } else
@@ -655,14 +581,12 @@ int _print_groups(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_alloc_nodes(sinfo_data_t *sinfo_data, int width,
-                       bool right_justify, char *suffix) {
+int _print_alloc_nodes(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
         else if (sinfo_data->part_info->allow_alloc_nodes)
-            _print_str(sinfo_data->part_info->allow_alloc_nodes,
-                       width, right_justify, true);
+            _print_str(sinfo_data->part_info->allow_alloc_nodes, width, right_justify, true);
         else
             _print_str("all", width, right_justify, true);
     } else
@@ -673,14 +597,10 @@ int _print_alloc_nodes(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_memory(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix) {
+int _print_memory(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_32_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_mem,
-                                 sinfo_data->max_mem,
-                                 false, false);
+        _build_min_max_32_string(id, FORMAT_STRING_SIZE, sinfo_data->min_mem, sinfo_data->max_mem, false, false);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("MEMORY", width, right_justify, true);
@@ -690,12 +610,10 @@ int _print_memory(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_node_address(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix) {
+int _print_node_address(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         char *tmp = NULL;
-        tmp = hostlist_ranged_string_xmalloc(
-                sinfo_data->node_addr);
+        tmp = hostlist_ranged_string_xmalloc(sinfo_data->node_addr);
         _print_str(tmp, width, right_justify, true);
         xfree(tmp);
     } else {
@@ -708,15 +626,13 @@ int _print_node_address(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_node_list(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_node_list(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (params.node_field_flag)
         width = params.node_field_size;
 
     if (sinfo_data) {
         char *tmp = NULL;
-        tmp = hostlist_ranged_string_xmalloc(
-                sinfo_data->nodes);
+        tmp = hostlist_ranged_string_xmalloc(sinfo_data->nodes);
         _print_str(tmp, width, right_justify, true);
         xfree(tmp);
     } else {
@@ -729,15 +645,13 @@ int _print_node_list(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_node_hostnames(sinfo_data_t *sinfo_data, int width,
-                          bool right_justify, char *suffix) {
+int _print_node_hostnames(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (params.node_field_flag)
         width = params.node_field_size;
 
     if (sinfo_data) {
         char *tmp = NULL;
-        tmp = hostlist_ranged_string_xmalloc(
-                sinfo_data->hostnames);
+        tmp = hostlist_ranged_string_xmalloc(sinfo_data->hostnames);
         _print_str(tmp, width, right_justify, true);
         xfree(tmp);
     } else {
@@ -750,12 +664,10 @@ int _print_node_hostnames(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_nodes_t(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix) {
+int _print_nodes_t(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        snprintf(id, FORMAT_STRING_SIZE, "%d",
-                 sinfo_data->nodes_total);
+        snprintf(id, FORMAT_STRING_SIZE, "%d", sinfo_data->nodes_total);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("NODES", width, right_justify, true);
@@ -765,12 +677,10 @@ int _print_nodes_t(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_nodes_ai(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix) {
+int _print_nodes_ai(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        snprintf(id, FORMAT_STRING_SIZE, "%d/%d",
-                 sinfo_data->nodes_alloc, sinfo_data->nodes_idle);
+        snprintf(id, FORMAT_STRING_SIZE, "%d/%d", sinfo_data->nodes_alloc, sinfo_data->nodes_idle);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("NODES(A/I)", width, right_justify, true);
@@ -780,12 +690,10 @@ int _print_nodes_ai(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_nodes_aiot(sinfo_data_t *sinfo_data, int width,
-                      bool right_justify, char *suffix) {
+int _print_nodes_aiot(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        snprintf(id, FORMAT_STRING_SIZE, "%u/%u/%u/%u",
-                 sinfo_data->nodes_alloc, sinfo_data->nodes_idle,
+        snprintf(id, FORMAT_STRING_SIZE, "%u/%u/%u/%u", sinfo_data->nodes_alloc, sinfo_data->nodes_idle,
                  sinfo_data->nodes_other, sinfo_data->nodes_total);
         _print_str(id, width, right_justify, true);
     } else
@@ -796,8 +704,7 @@ int _print_nodes_aiot(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_partition(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_partition(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (params.part_field_flag)
         width = params.part_field_size;
     if (sinfo_data) {
@@ -823,16 +730,14 @@ int _print_partition(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_partition_name(sinfo_data_t *sinfo_data, int width,
-                          bool right_justify, char *suffix) {
+int _print_partition_name(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (params.part_field_flag)
         width = params.part_field_size;
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
         else {
-            _print_str(sinfo_data->part_info->name, width,
-                       right_justify, true);
+            _print_str(sinfo_data->part_info->name, width, right_justify, true);
         }
     } else
         _print_str("PARTITION", width, right_justify, true);
@@ -842,13 +747,10 @@ int _print_partition_name(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_port(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_port(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->port,
-                                 sinfo_data->port, false);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->port, sinfo_data->port, false);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("PORT", width, right_justify, true);
@@ -859,21 +761,18 @@ int _print_port(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_prefix(sinfo_data_t *job, int width, bool right_justify,
-                  char *suffix) {
+int _print_prefix(sinfo_data_t *job, int width, bool right_justify, char *suffix) {
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_preempt_mode(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix) {
+int _print_preempt_mode(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         uint16_t preempt_mode = sinfo_data->part_info->preempt_mode;
         if (preempt_mode == NO_VAL16)
             preempt_mode = slurm_get_preempt_mode();
-        _print_str(preempt_mode_string(preempt_mode),
-                   width, right_justify, true);
+        _print_str(preempt_mode_string(preempt_mode), width, right_justify, true);
     } else
         _print_str("PREEMPT_MODE", width, right_justify, true);
 
@@ -882,15 +781,12 @@ int _print_preempt_mode(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_priority_job_factor(sinfo_data_t *sinfo_data, int width,
-                               bool right_justify, char *suffix) {
+int _print_priority_job_factor(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->part_info->priority_job_factor,
-                                 sinfo_data->part_info->priority_job_factor,
-                                 true);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->part_info->priority_job_factor,
+                                 sinfo_data->part_info->priority_job_factor, true);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("PRIO_JOB_FACTOR", width, right_justify, true);
@@ -900,15 +796,12 @@ int _print_priority_job_factor(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_priority_tier(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix) {
+int _print_priority_tier(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (sinfo_data) {
-        _build_min_max_16_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->part_info->priority_tier,
-                                 sinfo_data->part_info->priority_tier,
-                                 true);
+        _build_min_max_16_string(id, FORMAT_STRING_SIZE, sinfo_data->part_info->priority_tier,
+                                 sinfo_data->part_info->priority_tier, true);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("PRIO_TIER", width, right_justify, true);
@@ -918,8 +811,7 @@ int _print_priority_tier(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_reason(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix) {
+int _print_reason(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         char *reason = sinfo_data->reason ? sinfo_data->reason : "none";
         if (xstrncmp(reason, "(null)", 6) == 0)
@@ -933,8 +825,7 @@ int _print_reason(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_root(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_root(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
@@ -950,8 +841,7 @@ int _print_root(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_oversubscribe(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix) {
+int _print_oversubscribe(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (sinfo_data) {
@@ -974,20 +864,16 @@ int _print_oversubscribe(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_size(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_size(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
         else {
-            if ((sinfo_data->part_info->min_nodes < 1) &&
-                (sinfo_data->part_info->max_nodes > 0))
+            if ((sinfo_data->part_info->min_nodes < 1) && (sinfo_data->part_info->max_nodes > 0))
                 sinfo_data->part_info->min_nodes = 1;
-            _build_min_max_32_string(id, FORMAT_STRING_SIZE,
-                                     sinfo_data->part_info->min_nodes,
-                                     sinfo_data->part_info->max_nodes,
-                                     true, true);
+            _build_min_max_32_string(id, FORMAT_STRING_SIZE, sinfo_data->part_info->min_nodes,
+                                     sinfo_data->part_info->max_nodes, true, true);
             _print_str(id, width, right_justify, true);
         }
     } else
@@ -998,8 +884,7 @@ int _print_size(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_state_compact(sinfo_data_t *sinfo_data, int width,
-                         bool right_justify, char *suffix) {
+int _print_state_compact(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char *upper_state, *lower_state;
     uint32_t my_state;
 
@@ -1019,8 +904,7 @@ int _print_state_compact(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_state_long(sinfo_data_t *sinfo_data, int width,
-                      bool right_justify, char *suffix) {
+int _print_state_long(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char *upper_state, *lower_state;
     uint32_t my_state;
 
@@ -1041,16 +925,14 @@ int _print_state_long(sinfo_data_t *sinfo_data, int width,
 }
 
 
-int _print_time(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_time(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->part_info == NULL)
             _print_str("n/a", width, right_justify, true);
         else if (sinfo_data->part_info->max_time == INFINITE)
             _print_str("infinite", width, right_justify, true);
         else
-            _print_secs((sinfo_data->part_info->max_time * 60L),
-                        width, right_justify, true);
+            _print_secs((sinfo_data->part_info->max_time * 60L), width, right_justify, true);
     } else
         _print_str("TIMELIMIT", width, right_justify, true);
 
@@ -1059,12 +941,10 @@ int _print_time(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_timestamp(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_timestamp(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data && sinfo_data->reason_time) {
         char time_str[32];
-        slurm_make_time_str(&sinfo_data->reason_time,
-                            time_str, sizeof(time_str));
+        slurm_make_time_str(&sinfo_data->reason_time, time_str, sizeof(time_str));
         _print_str(time_str, width, right_justify, true);
     } else if (sinfo_data)
         _print_str("Unknown", width, right_justify, true);
@@ -1076,8 +956,7 @@ int _print_timestamp(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_user(sinfo_data_t *sinfo_data, int width,
-                bool right_justify, char *suffix) {
+int _print_user(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data && (sinfo_data->reason_uid != NO_VAL)) {
         char user[FORMAT_STRING_SIZE];
         struct passwd *pw = NULL;
@@ -1085,8 +964,7 @@ int _print_user(sinfo_data_t *sinfo_data, int width,
         if ((pw = getpwuid(sinfo_data->reason_uid)))
             snprintf(user, sizeof(user), "%s", pw->pw_name);
         else
-            snprintf(user, sizeof(user), "Unk(%u)",
-                     sinfo_data->reason_uid);
+            snprintf(user, sizeof(user), "Unk(%u)", sinfo_data->reason_uid);
         _print_str(user, width, right_justify, true);
     } else if (sinfo_data)
         _print_str("Unknown", width, right_justify, true);
@@ -1098,18 +976,15 @@ int _print_user(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_user_long(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_user_long(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data && (sinfo_data->reason_uid != NO_VAL)) {
         char user[FORMAT_STRING_SIZE];
         struct passwd *pw = NULL;
 
         if ((pw = getpwuid(sinfo_data->reason_uid)))
-            snprintf(user, sizeof(user), "%s(%u)", pw->pw_name,
-                     sinfo_data->reason_uid);
+            snprintf(user, sizeof(user), "%s(%u)", pw->pw_name, sinfo_data->reason_uid);
         else
-            snprintf(user, sizeof(user), "Unk(%u)",
-                     sinfo_data->reason_uid);
+            snprintf(user, sizeof(user), "Unk(%u)", sinfo_data->reason_uid);
         _print_str(user, width, right_justify, true);
     } else if (sinfo_data)
         _print_str("Unknown", width, right_justify, true);
@@ -1121,17 +996,14 @@ int _print_user_long(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_default_time(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix) {
+int _print_default_time(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
-        if ((sinfo_data->part_info == NULL) ||
-            (sinfo_data->part_info->default_time == NO_VAL))
+        if ((sinfo_data->part_info == NULL) || (sinfo_data->part_info->default_time == NO_VAL))
             _print_str("n/a", width, right_justify, true);
         else if (sinfo_data->part_info->default_time == INFINITE)
             _print_str("infinite", width, right_justify, true);
         else
-            _print_secs((sinfo_data->part_info->default_time * 60L),
-                        width, right_justify, true);
+            _print_secs((sinfo_data->part_info->default_time * 60L), width, right_justify, true);
     } else
         _print_str("DEFAULTTIME", width, right_justify, true);
 
@@ -1140,14 +1012,10 @@ int _print_default_time(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_weight(sinfo_data_t *sinfo_data, int width,
-                  bool right_justify, char *suffix) {
+int _print_weight(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
     if (sinfo_data) {
-        _build_min_max_32_string(id, FORMAT_STRING_SIZE,
-                                 sinfo_data->min_weight,
-                                 sinfo_data->max_weight,
-                                 false, false);
+        _build_min_max_32_string(id, FORMAT_STRING_SIZE, sinfo_data->min_weight, sinfo_data->max_weight, false, false);
         _print_str(id, width, right_justify, true);
     } else
         _print_str("WEIGHT", width, right_justify, true);
@@ -1157,22 +1025,17 @@ int _print_weight(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_com_invalid(sinfo_data_t *sinfo_data, int width,
-                       bool right_justify, char *suffix) {
+int _print_com_invalid(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_cpu_load(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix) {
+int _print_cpu_load(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (sinfo_data) {
-        _build_cpu_load_min_max_32(id, FORMAT_STRING_SIZE,
-                                   sinfo_data->min_cpu_load,
-                                   sinfo_data->max_cpu_load,
-                                   true);
+        _build_cpu_load_min_max_32(id, FORMAT_STRING_SIZE, sinfo_data->min_cpu_load, sinfo_data->max_cpu_load, true);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("CPU_LOAD", width, right_justify, true);
@@ -1183,15 +1046,11 @@ int _print_cpu_load(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_free_mem(sinfo_data_t *sinfo_data, int width,
-                    bool right_justify, char *suffix) {
+int _print_free_mem(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (sinfo_data) {
-        _build_free_mem_min_max_64(id, FORMAT_STRING_SIZE,
-                                   sinfo_data->min_free_mem,
-                                   sinfo_data->max_free_mem,
-                                   true);
+        _build_free_mem_min_max_64(id, FORMAT_STRING_SIZE, sinfo_data->min_free_mem, sinfo_data->max_free_mem, true);
         _print_str(id, width, right_justify, true);
     } else {
         _print_str("FREE_MEM", width, right_justify, true);
@@ -1202,8 +1061,7 @@ int _print_free_mem(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_max_cpus_per_node(sinfo_data_t *sinfo_data, int width,
-                             bool right_justify, char *suffix) {
+int _print_max_cpus_per_node(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char tmp_line[32];
     if (sinfo_data) {
         if (sinfo_data->part_info->max_cpus_per_node == INFINITE)
@@ -1220,14 +1078,12 @@ int _print_max_cpus_per_node(sinfo_data_t *sinfo_data, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_version(sinfo_data_t *sinfo_data, int width,
-                   bool right_justify, char *suffix) {
+int _print_version(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->version == NULL) {
             _print_str("N/A", width, right_justify, true);
         } else {
-            _print_str(sinfo_data->version, width,
-                       right_justify, true);
+            _print_str(sinfo_data->version, width, right_justify, true);
         }
     } else {
         _print_str("VERSION", width, right_justify, true);
@@ -1239,8 +1095,7 @@ int _print_version(sinfo_data_t *sinfo_data, int width,
 
 }
 
-int _print_alloc_mem(sinfo_data_t *sinfo_data, int width,
-                     bool right_justify, char *suffix) {
+int _print_alloc_mem(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     char tmp_line[32];
     if (sinfo_data) {
         sprintf(tmp_line, "%"
@@ -1257,14 +1112,12 @@ int _print_alloc_mem(sinfo_data_t *sinfo_data, int width,
 }
 
 
-int _print_cluster_name(sinfo_data_t *sinfo_data, int width,
-                        bool right_justify, char *suffix) {
+int _print_cluster_name(sinfo_data_t *sinfo_data, int width, bool right_justify, char *suffix) {
     if (sinfo_data) {
         if (sinfo_data->cluster_name == NULL) {
             _print_str("N/A", width, right_justify, true);
         } else {
-            _print_str(sinfo_data->cluster_name, width,
-                       right_justify, true);
+            _print_str(sinfo_data->cluster_name, width, right_justify, true);
         }
     } else {
         _print_str("CLUSTER", width, right_justify, true);

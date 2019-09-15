@@ -88,55 +88,52 @@ extern void parse_command_line(int argc, char **argv) {
     int option_index;
     uid_t some_uid;
     long tmp_l;
-    static struct option long_options[] = {
-            {"primary_slurmctld_failure",           no_argument,       0, 'a'},
-            {"primary_slurmctld_resumed_operation", no_argument,       0, 'A'},
-            {"primary_slurmctld_resumed_control",   no_argument,       0, 'b'},
-            {"backup_slurmctld_failure",            no_argument,       0, 'B'},
-            {"backup_slurmctld_resumed_operation",  no_argument,       0, 'c'},
-            {"backup_slurmctld_assumed_control",    no_argument,       0, 'C'},
-            {"down",                                no_argument,       0, 'd'},
-            {"drained",                             no_argument,       0, 'D'},
-            {"primary_slurmctld_acct_buffer_full",  no_argument,       0, 'e'},
-            {"fini",                                no_argument,       0, 'f'},
-            {"fail",                                no_argument,       0, 'F'},
-            {"primary_slurmdbd_failure",            no_argument,       0, 'g'},
-            {"primary_slurmdbd_resumed_operation",  no_argument,       0, 'G'},
-            {"primary_database_failure",            no_argument,       0, 'h'},
-            {"primary_database_resumed_operation",  no_argument,       0, 'H'},
-            {"id",                                  required_argument, 0, 'i'},
-            {"idle",                                no_argument,       0, 'I'},
-            {"jobid",                               required_argument, 0, 'j'},
-            {"cluster",                             required_argument, 0, 'M'},
-            {"clusters",                            required_argument, 0, 'M'},
-            {"node",                                optional_argument, 0, 'n'},
-            {"noheader",                            no_argument,       0, 'N'},
-            {"offset",                              required_argument, 0, 'o'},
-            {"program",                             required_argument, 0, 'p'},
-            {"quiet",                               no_argument,       0, 'Q'},
-            {"reconfig",                            no_argument,       0, 'r'},
-            {"time",                                no_argument,       0, 't'},
-            {"up",                                  no_argument,       0, 'u'},
-            {"verbose",                             no_argument,       0, 'v'},
-            {"version",                             no_argument,       0, 'V'},
-            {"burst_buffer",                        no_argument,       0, OPT_LONG_BURST_BUFFER},
-            {"clear",                               no_argument,       0, OPT_LONG_CLEAR},
-            {"flags",                               required_argument, 0, OPT_LONG_FLAGS},
-            {"front_end",                           no_argument,       0, OPT_LONG_FRONT_END},
-            {"get",                                 no_argument,       0, OPT_LONG_GET},
-            {"help",                                no_argument,       0, OPT_LONG_HELP},
-            {"set",                                 no_argument,       0, OPT_LONG_SET},
-            {"usage",                               no_argument,       0, OPT_LONG_USAGE},
-            {"user",                                required_argument, 0, OPT_LONG_USER},
-            {NULL, 0,                                                  0, 0}
-    };
+    static struct option long_options[] = {{"primary_slurmctld_failure",           no_argument,       0, 'a'},
+                                           {"primary_slurmctld_resumed_operation", no_argument,       0, 'A'},
+                                           {"primary_slurmctld_resumed_control",   no_argument,       0, 'b'},
+                                           {"backup_slurmctld_failure",            no_argument,       0, 'B'},
+                                           {"backup_slurmctld_resumed_operation",  no_argument,       0, 'c'},
+                                           {"backup_slurmctld_assumed_control",    no_argument,       0, 'C'},
+                                           {"down",                                no_argument,       0, 'd'},
+                                           {"drained",                             no_argument,       0, 'D'},
+                                           {"primary_slurmctld_acct_buffer_full",  no_argument,       0, 'e'},
+                                           {"fini",                                no_argument,       0, 'f'},
+                                           {"fail",                                no_argument,       0, 'F'},
+                                           {"primary_slurmdbd_failure",            no_argument,       0, 'g'},
+                                           {"primary_slurmdbd_resumed_operation",  no_argument,       0, 'G'},
+                                           {"primary_database_failure",            no_argument,       0, 'h'},
+                                           {"primary_database_resumed_operation",  no_argument,       0, 'H'},
+                                           {"id",                                  required_argument, 0, 'i'},
+                                           {"idle",                                no_argument,       0, 'I'},
+                                           {"jobid",                               required_argument, 0, 'j'},
+                                           {"cluster",                             required_argument, 0, 'M'},
+                                           {"clusters",                            required_argument, 0, 'M'},
+                                           {"node",                                optional_argument, 0, 'n'},
+                                           {"noheader",                            no_argument,       0, 'N'},
+                                           {"offset",                              required_argument, 0, 'o'},
+                                           {"program",                             required_argument, 0, 'p'},
+                                           {"quiet",                               no_argument,       0, 'Q'},
+                                           {"reconfig",                            no_argument,       0, 'r'},
+                                           {"time",                                no_argument,       0, 't'},
+                                           {"up",                                  no_argument,       0, 'u'},
+                                           {"verbose",                             no_argument,       0, 'v'},
+                                           {"version",                             no_argument,       0, 'V'},
+                                           {"burst_buffer",                        no_argument,       0, OPT_LONG_BURST_BUFFER},
+                                           {"clear",                               no_argument,       0, OPT_LONG_CLEAR},
+                                           {"flags",                               required_argument, 0, OPT_LONG_FLAGS},
+                                           {"front_end",                           no_argument,       0, OPT_LONG_FRONT_END},
+                                           {"get",                                 no_argument,       0, OPT_LONG_GET},
+                                           {"help",                                no_argument,       0, OPT_LONG_HELP},
+                                           {"set",                                 no_argument,       0, OPT_LONG_SET},
+                                           {"usage",                               no_argument,       0, OPT_LONG_USAGE},
+                                           {"user",                                required_argument, 0, OPT_LONG_USER},
+                                           {NULL, 0,                                                  0, 0}};
 
     _init_options();
 
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv,
-                                   "aAbBcCdDeFfgGhHi:Ij:M:n::No:p:QrtuvV",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "aAbBcCdDeFfgGhHi:Ij:M:n::No:p:QrtuvV", long_options, &option_index)) !=
+           -1) {
         switch (opt_char) {
             case (int) '?':
                 fprintf(stderr, "Try \"strigger --help\" for "
@@ -208,8 +205,7 @@ extern void parse_command_line(int argc, char **argv) {
                 break;
             case (int) 'M':
                 FREE_NULL_LIST(params.clusters);
-                if (!(params.clusters =
-                              slurmdb_get_info_cluster(optarg))) {
+                if (!(params.clusters = slurmdb_get_info_cluster(optarg))) {
                     print_db_notok(optarg, 0);
                     exit(1);
                 }
@@ -366,28 +362,17 @@ static void _print_options(void) {
     else
         verbose("user_id      = %u", params.user_id);
     verbose("verbose      = %d", params.verbose);
-    verbose("primary_slurmctld_failure            = %s",
-            params.pri_ctld_fail ? "true" : "false");
-    verbose("primary_slurmctld_resumed_operation  = %s",
-            params.pri_ctld_res_op ? "true" : "false");
-    verbose("primary_slurmctld_resumed_control    = %s",
-            params.pri_ctld_res_ctrl ? "true" : "false");
-    verbose("primary_slurmctld_acct_buffer_full   = %s",
-            params.pri_ctld_acct_buffer_full ? "true" : "false");
-    verbose("backup_slurmctld_failure             = %s",
-            params.bu_ctld_fail ? "true" : "false");
-    verbose("backup_slurmctld_resumed_operation   = %s",
-            params.bu_ctld_res_op ? "true" : "false");
-    verbose("backup_slurmctld_as_ctrl             = %s",
-            params.bu_ctld_as_ctrl ? "true" : "false");
-    verbose("primary_slurmdbd_failure             = %s",
-            params.pri_dbd_fail ? "true" : "false");
-    verbose("primary_slurmdbd_resumed_operation   = %s",
-            params.pri_dbd_res_op ? "true" : "false");
-    verbose("primary_database_failure             = %s",
-            params.pri_db_fail ? "true" : "false");
-    verbose("primary_database_resumed_operation   = %s",
-            params.pri_db_res_op ? "true" : "false");
+    verbose("primary_slurmctld_failure            = %s", params.pri_ctld_fail ? "true" : "false");
+    verbose("primary_slurmctld_resumed_operation  = %s", params.pri_ctld_res_op ? "true" : "false");
+    verbose("primary_slurmctld_resumed_control    = %s", params.pri_ctld_res_ctrl ? "true" : "false");
+    verbose("primary_slurmctld_acct_buffer_full   = %s", params.pri_ctld_acct_buffer_full ? "true" : "false");
+    verbose("backup_slurmctld_failure             = %s", params.bu_ctld_fail ? "true" : "false");
+    verbose("backup_slurmctld_resumed_operation   = %s", params.bu_ctld_res_op ? "true" : "false");
+    verbose("backup_slurmctld_as_ctrl             = %s", params.bu_ctld_as_ctrl ? "true" : "false");
+    verbose("primary_slurmdbd_failure             = %s", params.pri_dbd_fail ? "true" : "false");
+    verbose("primary_slurmdbd_resumed_operation   = %s", params.pri_dbd_res_op ? "true" : "false");
+    verbose("primary_database_failure             = %s", params.pri_db_fail ? "true" : "false");
+    verbose("primary_database_resumed_operation   = %s", params.pri_db_res_op ? "true" : "false");
     verbose("-----------------------------");
 }
 
@@ -398,23 +383,17 @@ static void _validate_options(void) {
         exit(1);
     }
 
-    if (params.mode_clear && (params.user_id == NO_VAL) &&
-        (params.trigger_id == 0) && (params.job_id == 0)) {
+    if (params.mode_clear && (params.user_id == NO_VAL) && (params.trigger_id == 0) && (params.job_id == 0)) {
         error("You must specify a --id, --jobid, or --user to clear");
         exit(1);
     }
 
     if (params.mode_set &&
-        ((params.node_down + params.node_drained + params.node_fail +
-          params.node_idle + params.node_up + params.reconfig +
-          params.job_fini + params.time_limit +
-          params.burst_buffer +
-          params.pri_ctld_fail + params.pri_ctld_res_op +
-          params.pri_ctld_res_ctrl + params.pri_ctld_acct_buffer_full +
-          params.bu_ctld_fail + params.bu_ctld_res_op +
-          params.bu_ctld_as_ctrl + params.pri_dbd_fail +
-          params.pri_dbd_res_op + params.pri_db_fail +
-          params.pri_db_res_op) == 0)) {
+        ((params.node_down + params.node_drained + params.node_fail + params.node_idle + params.node_up +
+          params.reconfig + params.job_fini + params.time_limit + params.burst_buffer + params.pri_ctld_fail +
+          params.pri_ctld_res_op + params.pri_ctld_res_ctrl + params.pri_ctld_acct_buffer_full + params.bu_ctld_fail +
+          params.bu_ctld_res_op + params.bu_ctld_as_ctrl + params.pri_dbd_fail + params.pri_dbd_res_op +
+          params.pri_db_fail + params.pri_db_res_op) == 0)) {
         error("You must specify a trigger (--down, --up, "
               "--reconfig, --time, --fini, --burst_buffer,\n"
               "--primary_slurmctld_failure,\n"
@@ -436,8 +415,7 @@ static void _validate_options(void) {
         exit(1);
     }
 
-    if (((params.job_fini + params.time_limit) != 0)
-        && (params.job_id == 0)) {
+    if (((params.job_fini + params.time_limit) != 0) && (params.job_id == 0)) {
         error("You must specify a --jobid value");
         exit(1);
     }

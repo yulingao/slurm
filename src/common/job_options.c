@@ -58,8 +58,7 @@ struct job_options {
 };
 
 
-static struct job_option_info *
-job_option_info_create(int type, const char *opt, const char *optarg) {
+static struct job_option_info *job_option_info_create(int type, const char *opt, const char *optarg) {
     struct job_option_info *ji = xmalloc(sizeof(*ji));
 
     ji->type = type;
@@ -133,8 +132,7 @@ void job_options_destroy(job_options_t opts) {
 /*
  *  Append option of type `type' and its argument to job options
  */
-int job_options_append(job_options_t opts, int type, const char *opt,
-                       const char *optarg) {
+int job_options_append(job_options_t opts, int type, const char *opt, const char *optarg) {
     xassert(opts != NULL);
     xassert(opts->magic == JOB_OPTIONS_MAGIC);
     xassert(opts->options != NULL);

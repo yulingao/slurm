@@ -69,8 +69,7 @@
 #if !defined(HAVE_HWLOC)
 static char *_cpuinfo_path = "/proc/cpuinfo";
 
-static int _compute_block_map(uint16_t numproc,
-                              uint16_t **block_map, uint16_t **block_map_inv);
+static int _compute_block_map(uint16_t numproc, uint16_t **block_map, uint16_t **block_map_inv);
 
 static int _chk_cpuinfo_str(char *buffer, char *keyword, char **valptr);
 
@@ -80,8 +79,7 @@ static int _chk_cpuinfo_uint32(char *buffer, char *keyword, uint32_t *val);
 
 static int _ranges_conv(char *lrange, char **prange, int mode);
 
-static int _range_to_map(char *range, uint16_t *map, uint16_t map_size,
-                         int add_threads);
+static int _range_to_map(char *range, uint16_t *map, uint16_t map_size, int add_threads);
 
 static int _map_to_range(uint16_t *map, uint16_t map_size, char **prange);
 
@@ -97,8 +95,7 @@ extern slurmd_conf_t *conf;
  * Output: procs - filled in with CPU count, "1" if error
  *         return code - 0 if no error, otherwise errno
  */
-extern int
-get_procs(uint16_t *procs) {
+extern int get_procs(uint16_t *procs) {
 #ifdef _SC_NPROCESSORS_ONLN
     int my_proc_tally;
 
@@ -515,11 +512,9 @@ typedef struct cpuinfo {
 static cpuinfo_t *cpuinfo = NULL; /* array of CPU information for get_cpuinfo */
 /* Note: file static for qsort/_compare_cpus*/
 
-extern int xcpuinfo_hwloc_topo_get(
-        uint16_t *p_cpus, uint16_t *p_boards,
-        uint16_t *p_sockets, uint16_t *p_cores, uint16_t *p_threads,
-        uint16_t *p_block_map_size,
-        uint16_t **p_block_map, uint16_t **p_block_map_inv) {
+extern int xcpuinfo_hwloc_topo_get(uint16_t *p_cpus, uint16_t *p_boards, uint16_t *p_sockets, uint16_t *p_cores,
+                                   uint16_t *p_threads, uint16_t *p_block_map_size, uint16_t **p_block_map,
+                                   uint16_t **p_block_map_inv) {
     int retval;
 
     uint16_t numproc;
@@ -555,8 +550,7 @@ extern int xcpuinfo_hwloc_topo_get(
 
     cpu_info_file = fopen(_cpuinfo_path, "r");
     if (cpu_info_file == NULL) {
-        error("%s: error %d opening %s",
-              __func__, errno, _cpuinfo_path);
+        error("%s: error %d opening %s", __func__, errno, _cpuinfo_path);
         return errno;
     }
 
@@ -574,8 +568,7 @@ extern int xcpuinfo_hwloc_topo_get(
             curcpu = numcpu;
             numcpu++;
             if (curcpu >= numproc) {
-                info("processor limit reached (%u >= %d)",
-                     curcpu, numproc);
+                info("processor limit reached (%u >= %d)", curcpu, numproc);
                 continue;
             }
             cpuinfo[curcpu].seen = 1;
@@ -585,8 +578,7 @@ extern int xcpuinfo_hwloc_topo_get(
         } else if (_chk_cpuinfo_uint32(buffer, "physical id", &val)) {
             /* see if the ID has already been seen */
             for (i = 0; i < numproc; i++) {
-                if ((cpuinfo[i].physid == val)
-                    && (cpuinfo[i].physcnt))
+                if ((cpuinfo[i].physid == val) && (cpuinfo[i].physcnt))
                     break;
             }
 
@@ -606,8 +598,7 @@ extern int xcpuinfo_hwloc_topo_get(
         } else if (_chk_cpuinfo_uint32(buffer, "core id", &val)) {
             /* see if the ID has already been seen */
             for (i = 0; i < numproc; i++) {
-                if ((cpuinfo[i].coreid == val)
-                    && (cpuinfo[i].corecnt))
+                if ((cpuinfo[i].coreid == val) && (cpuinfo[i].corecnt))
                     break;
             }
 
@@ -627,8 +618,7 @@ extern int xcpuinfo_hwloc_topo_get(
         } else if (_chk_cpuinfo_uint32(buffer, "siblings", &val)) {
             /* Note: this value is a count, not an index */
             if (val > numproc) {    /* out of bounds, ignore */
-                debug("siblings is %u (> %d), ignored",
-                      val, numproc);
+                debug("siblings is %u (> %d), ignored", val, numproc);
                 continue;
             }
             if (curcpu < numproc)
@@ -638,8 +628,7 @@ extern int xcpuinfo_hwloc_topo_get(
         } else if (_chk_cpuinfo_uint32(buffer, "cpu cores", &val)) {
             /* Note: this value is a count, not an index */
             if (val > numproc) {    /* out of bounds, ignore */
-                debug("cores is %u (> %d), ignored",
-                      val, numproc);
+                debug("cores is %u (> %d), ignored", val, numproc);
                 continue;
             }
             if (curcpu < numproc)
@@ -729,16 +718,14 @@ extern int xcpuinfo_hwloc_topo_get(
 #endif
 
     *p_block_map_size = numcpu;
-    retval = _compute_block_map(*p_block_map_size, p_block_map,
-                                p_block_map_inv);
+    retval = _compute_block_map(*p_block_map_size, p_block_map, p_block_map_inv);
 
     xfree(cpuinfo);        /* done with raw cpuinfo data */
 
     return retval;
 }
 
-extern int xcpuinfo_hwloc_topo_load(
-        void *topology_in, char *topo_file, bool full) {
+extern int xcpuinfo_hwloc_topo_load(void *topology_in, char *topo_file, bool full) {
     return SLURM_SUCCESS;
 }
 
@@ -862,8 +849,7 @@ static int _compare_cpus(const void *a1, const void *b1) {
     return cmp;
 }
 
-static int _compute_block_map(uint16_t numproc,
-                              uint16_t **block_map, uint16_t **block_map_inv) {
+static int _compute_block_map(uint16_t numproc, uint16_t **block_map, uint16_t **block_map_inv) {
     uint16_t i;
     /* Compute abstract->machine block mapping (and inverse) */
     if (block_map) {
@@ -950,13 +936,12 @@ int _ranges_conv(char *lrange, char **prange, int mode);
 /* xcpuinfo_abs_to_mac("0,2,4,6",&mach); */
 /* xcpuinfo_mac_to_abs(mach,&abs); */
 
-int
-xcpuinfo_init(void) {
+int xcpuinfo_init(void) {
     if (initialized)
         return XCPUINFO_SUCCESS;
 
-    if (xcpuinfo_hwloc_topo_get(&procs, &boards, &sockets, &cores, &threads,
-                                &block_map_size, &block_map, &block_map_inv))
+    if (xcpuinfo_hwloc_topo_get(&procs, &boards, &sockets, &cores, &threads, &block_map_size, &block_map,
+                                &block_map_inv))
         return XCPUINFO_ERROR;
 
     initialized = true;
@@ -964,8 +949,7 @@ xcpuinfo_init(void) {
     return XCPUINFO_SUCCESS;
 }
 
-int
-xcpuinfo_fini(void) {
+int xcpuinfo_fini(void) {
     if (!initialized)
         return XCPUINFO_SUCCESS;
 
@@ -990,8 +974,7 @@ xcpuinfo_fini(void) {
     return XCPUINFO_SUCCESS;
 }
 
-int
-xcpuinfo_abs_to_mac(char *lrange, char **prange) {
+int xcpuinfo_abs_to_mac(char *lrange, char **prange) {
     static int total_cores = -1, total_cpus = -1;
     bitstr_t *absmap = NULL;
     bitstr_t *macmap = NULL;
@@ -1049,35 +1032,29 @@ xcpuinfo_abs_to_mac(char *lrange, char **prange) {
     return rc;
 }
 
-int
-xcpuinfo_mac_to_abs(char *lrange, char **prange) {
+int xcpuinfo_mac_to_abs(char *lrange, char **prange) {
     return _ranges_conv(lrange, prange, 1);
 }
 
-int
-xcpuinfo_abs_to_map(char *lrange, uint16_t **map, uint16_t *map_size) {
+int xcpuinfo_abs_to_map(char *lrange, uint16_t **map, uint16_t *map_size) {
     *map_size = block_map_size;
     *map = (uint16_t *) xmalloc(block_map_size * sizeof(uint16_t));
     /* abstract range does not already include the hyperthreads */
     return _range_to_map(lrange, *map, *map_size, 1);
 }
 
-int
-xcpuinfo_map_to_mac(uint16_t *map, uint16_t map_size, char **range) {
+int xcpuinfo_map_to_mac(uint16_t *map, uint16_t map_size, char **range) {
     return _map_to_range(map, map_size, range);
 }
 
-int
-xcpuinfo_mac_to_map(char *lrange, uint16_t **map, uint16_t *map_size) {
+int xcpuinfo_mac_to_map(char *lrange, uint16_t **map, uint16_t *map_size) {
     *map_size = block_map_size;
     *map = (uint16_t *) xmalloc(block_map_size * sizeof(uint16_t));
     /* machine range already includes the hyperthreads */
     return _range_to_map(lrange, *map, *map_size, 0);
 }
 
-int
-xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size,
-                          uint16_t **bmap, uint16_t *bmap_size) {
+int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size) {
     /* int i; */
 
     /* abstract to machine conversion using block map */
@@ -1090,9 +1067,7 @@ xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size,
     return XCPUINFO_SUCCESS;
 }
 
-int
-xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size,
-                          uint16_t **bmap, uint16_t *bmap_size) {
+int xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size) {
     int i;
 
     /* machine to abstract conversion using inverted block map */
@@ -1116,8 +1091,7 @@ xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size,
  * as a core range, and it will be mapped to an array of uint16_t
  * that will include all the hyperthreads associated to the cores.
  */
-static int
-_range_to_map(char *range, uint16_t *map, uint16_t map_size, int add_threads) {
+static int _range_to_map(char *range, uint16_t *map, uint16_t map_size, int add_threads) {
     int bad_nb = 0;
     int num_fl = 0;
     int con_fl = 0;
@@ -1190,8 +1164,7 @@ _range_to_map(char *range, uint16_t *map, uint16_t map_size, int add_threads) {
  * allocate and build a range of ids using an input map
  * having printable element set to 1
  */
-static int
-_map_to_range(uint16_t *map, uint16_t map_size, char **prange) {
+static int _map_to_range(uint16_t *map, uint16_t map_size, char **prange) {
     size_t len;
     int num_fl = 0;
     int con_fl = 0;
@@ -1248,8 +1221,7 @@ _map_to_range(uint16_t *map, uint16_t map_size, char **prange) {
  * a modus operandi being 0 or 1 for abstract to machine
  * or machine to abstract representation of cores
  */
-static int
-_ranges_conv(char *lrange, char **prange, int mode) {
+static int _ranges_conv(char *lrange, char **prange, int mode) {
     int fstatus;
     int i;
     uint16_t *amap;

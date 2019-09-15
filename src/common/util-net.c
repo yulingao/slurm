@@ -69,14 +69,12 @@ static int copy_hostent(const struct hostent *src, char *dst, int len);
 
 #ifndef NDEBUG
 
-static int validate_hostent_copy(
-        const struct hostent *src, const struct hostent *dst);
+static int validate_hostent_copy(const struct hostent *src, const struct hostent *dst);
 
 #endif /* !NDEBUG */
 
 
-struct hostent *get_host_by_name(const char *name,
-                                 void *buf, int buflen, int *h_err) {
+struct hostent *get_host_by_name(const char *name, void *buf, int buflen, int *h_err) {
 /*  gethostbyname() is not thread-safe, and there is no frelling standard
  *    for gethostbyname_r() -- the arg list varies from system to system!
  */
@@ -107,8 +105,7 @@ struct hostent *get_host_by_name(const char *name,
 }
 
 
-struct hostent *get_host_by_addr(const char *addr, int len, int type,
-                                 void *buf, int buflen, int *h_err) {
+struct hostent *get_host_by_addr(const char *addr, int len, int type, void *buf, int buflen, int *h_err) {
 /*  gethostbyaddr() is not thread-safe, and there is no frelling standard
  *    for gethostbyaddr_r() -- the arg list varies from system to system!
  */
@@ -224,8 +221,7 @@ static int copy_hostent(const struct hostent *src, char *buf, int len) {
 
 #ifndef NDEBUG
 
-static int validate_hostent_copy(
-        const struct hostent *src, const struct hostent *dst) {
+static int validate_hostent_copy(const struct hostent *src, const struct hostent *dst) {
 /*  Validates the src hostent struct has been successfully copied into dst.
  *  Returns 0 if the copy is good; o/w, returns -1.
  */
@@ -259,8 +255,7 @@ static int validate_hostent_copy(
  *
  * Test if the given path is a full or relative one.
  */
-extern
-bool is_full_path(const char *path) {
+extern bool is_full_path(const char *path) {
     if (path[0] == '/')
         return true;
 
@@ -288,8 +283,7 @@ extern char *make_full_path(const char *rpath) {
     return cwd2;
 }
 
-struct addrinfo *
-get_addr_info(const char *hostname) {
+struct addrinfo *get_addr_info(const char *hostname) {
     struct addrinfo *result = NULL;
     struct addrinfo hints;
     int err;
@@ -303,34 +297,29 @@ get_addr_info(const char *hostname) {
 
     err = getaddrinfo(hostname, NULL, &hints, &result);
     if (err == EAI_SYSTEM) {
-        error("%s: getaddrinfo() failed: %s: %m", __func__,
-              gai_strerror(err));
+        error("%s: getaddrinfo() failed: %s: %m", __func__, gai_strerror(err));
         return NULL;
     } else if (err != 0) {
-        error("%s: getaddrinfo() failed: %s", __func__,
-              gai_strerror(err));
+        error("%s: getaddrinfo() failed: %s", __func__, gai_strerror(err));
         return NULL;
     }
 
     return result;
 }
 
-int
-get_name_info(struct sockaddr *sa, socklen_t len, char *host) {
+int get_name_info(struct sockaddr *sa, socklen_t len, char *host) {
     int err;
 
     err = getnameinfo(sa, len, host, NI_MAXHOST, NULL, 0, 0);
     if (err != 0) {
-        error("%s: getaddrinfo() failed: %s", __func__,
-              gai_strerror(err));
+        error("%s: getaddrinfo() failed: %s", __func__, gai_strerror(err));
         return -1;
     }
 
     return 0;
 }
 
-void
-free_addr_info(struct addrinfo *info) {
+void free_addr_info(struct addrinfo *info) {
     if (info == NULL)
         return;
 

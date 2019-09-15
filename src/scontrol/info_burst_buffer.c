@@ -75,8 +75,7 @@ extern void scontrol_print_burst_buffer(void) {
         verbosity = 1;
     burst_buffer_ptr = burst_buffer_info_ptr->burst_buffer_array;
     for (i = 0; i < burst_buffer_info_ptr->record_count; i++) {
-        slurm_print_burst_buffer_record(stdout, &burst_buffer_ptr[i],
-                                        one_liner, verbosity);
+        slurm_print_burst_buffer_record(stdout, &burst_buffer_ptr[i], one_liner, verbosity);
     }
 
     slurm_free_burst_buffer_info_msg(burst_buffer_info_ptr);

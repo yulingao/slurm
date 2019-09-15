@@ -71,9 +71,7 @@ extern int build_feature_list(struct job_record *job_ptr);
 extern List build_job_queue(bool clear_start, bool backfill);
 
 /* Given a scheduled job, return a pointer to it batch_job_launch_msg_t data */
-extern batch_job_launch_msg_t *build_launch_job_msg(
-        struct job_record *job_ptr,
-        uint16_t protocol_version);
+extern batch_job_launch_msg_t *build_launch_job_msg(struct job_record *job_ptr, uint16_t protocol_version);
 
 /* Determine if job's deadline specification is still valid, kill job if not
  * job_ptr IN - Job to test
@@ -111,8 +109,7 @@ extern bool job_is_completing(bitstr_t *eff_cg_bitmap);
  * (in job_desc_msg->req_nodes), build response message and return
  * SLURM_SUCCESS on success. Otherwise return an error code. Caller
  * must free response message */
-extern int job_start_data(job_desc_msg_t *job_desc_msg,
-                          will_run_response_msg_t **resp);
+extern int job_start_data(job_desc_msg_t *job_desc_msg, will_run_response_msg_t **resp);
 
 /*
  * launch_job - send an RPC to a slurmd to initiate a batch job
@@ -127,9 +124,8 @@ extern void launch_job(struct job_record *job_ptr);
  * IN job_ptr - pointer to job record
  * RET 0 or error code
  */
-extern int make_batch_job_cred(batch_job_launch_msg_t *launch_msg_ptr,
-                               struct job_record *job_ptr,
-                               uint16_t protocol_version);
+extern int
+make_batch_job_cred(batch_job_launch_msg_t *launch_msg_ptr, struct job_record *job_ptr, uint16_t protocol_version);
 
 /*
  * Determine which nodes must be rebooted for a job
@@ -144,8 +140,7 @@ extern bitstr_t *node_features_reboot(struct job_record *job_ptr);
  * IN node_bitmap - nodes to be allocated
  * RET - true if reboot required
  */
-extern bool node_features_reboot_test(struct job_record *job_ptr,
-                                      bitstr_t *node_bitmap);
+extern bool node_features_reboot_test(struct job_record *job_ptr, bitstr_t *node_bitmap);
 
 /* Print a job's dependency information based upon job_ptr->depend_list */
 extern void print_job_dependency(struct job_record *job_ptr);

@@ -74,7 +74,6 @@ extern bool preemption_enabled(void) {
 }
 
 /* Return true if the preemptor can preempt the preemptee, otherwise false */
-extern bool job_preempt_check(job_queue_rec_t *preemptor,
-                              job_queue_rec_t *preemptee) {
+extern bool job_preempt_check(job_queue_rec_t *preemptor, job_queue_rec_t *preemptee) {
     return false;
 }

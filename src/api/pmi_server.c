@@ -89,8 +89,7 @@ struct kvs_comm **_kvs_comm_dup(void);
 
 static void _kvs_xmit_tasks(void);
 
-static void _merge_named_kvs(struct kvs_comm *kvs_orig,
-                             struct kvs_comm *kvs_new);
+static void _merge_named_kvs(struct kvs_comm *kvs_orig, struct kvs_comm *kvs_new);
 
 static void _move_kvs(struct kvs_comm *kvs_new);
 
@@ -111,8 +110,7 @@ static void _kvs_xmit_tasks(void) {
 #endif
 
     /* Target KVS_TIME should be about ave processing time */
-    debug("kvs_put processing time min=%d, max=%d ave=%d (usec)",
-          min_time_kvs_put, max_time_kvs_put,
+    debug("kvs_put processing time min=%d, max=%d ave=%d (usec)", min_time_kvs_put, max_time_kvs_put,
           (tot_time_kvs_put / barrier_cnt));
     min_time_kvs_put = 1000000;
     max_time_kvs_put = 0;
@@ -147,14 +145,10 @@ static void *_msg_thread(void *x) {
 
     slurm_msg_t_init(&msg_send);
 
-    debug2("KVS_Barrier msg to %s:%hu",
-           msg_arg_ptr->bar_ptr->hostname,
-           msg_arg_ptr->bar_ptr->port);
+    debug2("KVS_Barrier msg to %s:%hu", msg_arg_ptr->bar_ptr->hostname, msg_arg_ptr->bar_ptr->port);
     msg_send.msg_type = PMI_KVS_GET_RESP;
     msg_send.data = (void *) msg_arg_ptr->kvs_ptr;
-    slurm_set_addr(&msg_send.address,
-                   msg_arg_ptr->bar_ptr->port,
-                   msg_arg_ptr->bar_ptr->hostname);
+    slurm_set_addr(&msg_send.address, msg_arg_ptr->bar_ptr->port, msg_arg_ptr->bar_ptr->hostname);
 
     /*
      * Multiple jobs and highly parallel jobs using PMI sometimes result in
@@ -163,12 +157,10 @@ static void *_msg_thread(void *x) {
      */
     timeout = slurm_get_msg_timeout() * MSEC_IN_SEC * 10;
     if (slurm_send_recv_rc_msg_only_one(&msg_send, &rc, timeout) < 0) {
-        error("slurm_send_recv_rc_msg_only_one to %s:%hu : %m",
-              msg_arg_ptr->bar_ptr->hostname,
+        error("slurm_send_recv_rc_msg_only_one to %s:%hu : %m", msg_arg_ptr->bar_ptr->hostname,
               msg_arg_ptr->bar_ptr->port);
     } else if (rc != SLURM_SUCCESS) {
-        error("KVS_Barrier confirm from %s, rc=%d",
-              msg_arg_ptr->bar_ptr->hostname, rc);
+        error("KVS_Barrier confirm from %s, rc=%d", msg_arg_ptr->bar_ptr->hostname, rc);
     } else {
         /* successfully transmitted KVS keypairs */
     }
@@ -217,14 +209,11 @@ static void *_agent(void *x) {
             if (args->barrier_xmit_ptr[j].port == 0)
                 continue;    /* already sent message */
             if ((fanout_off_host == NULL) &&
-                strcmp(args->barrier_xmit_ptr[i].hostname,
-                       args->barrier_xmit_ptr[j].hostname))
+                strcmp(args->barrier_xmit_ptr[i].hostname, args->barrier_xmit_ptr[j].hostname))
                 continue;    /* another host */
             kvs_host_list[host_cnt].task_id = 0; /* not avail */
-            kvs_host_list[host_cnt].port =
-                    args->barrier_xmit_ptr[j].port;
-            kvs_host_list[host_cnt].hostname =
-                    args->barrier_xmit_ptr[j].hostname;
+            kvs_host_list[host_cnt].port = args->barrier_xmit_ptr[j].port;
+            kvs_host_list[host_cnt].hostname = args->barrier_xmit_ptr[j].hostname;
             args->barrier_xmit_ptr[j].port = 0;/* don't reissue */
             host_cnt++;
             if (host_cnt >= pmi_fanout)
@@ -256,13 +245,11 @@ static void *_agent(void *x) {
              * one pthread. */
             _msg_thread((void *) msg_args);
         } else {
-            slurm_thread_create_detached(NULL, _msg_thread,
-                                         msg_args);
+            slurm_thread_create_detached(NULL, _msg_thread, msg_args);
         }
     }
 
-    verbose("Sent KVS info to %d nodes, up to %d tasks per node",
-            msg_sent, (max_forward + 1));
+    verbose("Sent KVS info to %d nodes, up to %d tasks per node", msg_sent, (max_forward + 1));
 
     /* wait for completion of all outgoing message */
     slurm_mutex_lock(&agent_mutex);
@@ -305,23 +292,17 @@ struct kvs_comm **_kvs_comm_dup(void) {
         rc_kvs[i] = xmalloc(sizeof(struct kvs_comm));
         rc_kvs[i]->kvs_name = xstrdup(kvs_comm_ptr[i]->kvs_name);
         rc_kvs[i]->kvs_cnt = kvs_comm_ptr[i]->kvs_cnt;
-        rc_kvs[i]->kvs_keys =
-                xmalloc(sizeof(char *) * rc_kvs[i]->kvs_cnt);
-        rc_kvs[i]->kvs_values =
-                xmalloc(sizeof(char *) * rc_kvs[i]->kvs_cnt);
+        rc_kvs[i]->kvs_keys = xmalloc(sizeof(char *) * rc_kvs[i]->kvs_cnt);
+        rc_kvs[i]->kvs_values = xmalloc(sizeof(char *) * rc_kvs[i]->kvs_cnt);
         if (kvs_comm_ptr[i]->kvs_key_sent == NULL) {
-            kvs_comm_ptr[i]->kvs_key_sent =
-                    xmalloc(sizeof(uint16_t) *
-                            kvs_comm_ptr[i]->kvs_cnt);
+            kvs_comm_ptr[i]->kvs_key_sent = xmalloc(sizeof(uint16_t) * kvs_comm_ptr[i]->kvs_cnt);
         }
         cnt = 0;
         for (j = 0; j < rc_kvs[i]->kvs_cnt; j++) {
             if (kvs_comm_ptr[i]->kvs_key_sent[j])
                 continue;
-            rc_kvs[i]->kvs_keys[cnt] =
-                    xstrdup(kvs_comm_ptr[i]->kvs_keys[j]);
-            rc_kvs[i]->kvs_values[cnt] =
-                    xstrdup(kvs_comm_ptr[i]->kvs_values[j]);
+            rc_kvs[i]->kvs_keys[cnt] = xstrdup(kvs_comm_ptr[i]->kvs_keys[j]);
+            rc_kvs[i]->kvs_values[cnt] = xstrdup(kvs_comm_ptr[i]->kvs_values[j]);
             cnt++;
             kvs_comm_ptr[i]->kvs_key_sent[j] = 1;
         }
@@ -342,8 +323,7 @@ static struct kvs_comm *_find_kvs_by_name(char *name) {
     return NULL;
 }
 
-static void _merge_named_kvs(struct kvs_comm *kvs_orig,
-                             struct kvs_comm *kvs_new) {
+static void _merge_named_kvs(struct kvs_comm *kvs_orig, struct kvs_comm *kvs_new) {
     int i, j;
 
     for (i = 0; i < kvs_new->kvs_cnt; i++) {
@@ -364,25 +344,20 @@ static void _merge_named_kvs(struct kvs_comm *kvs_orig,
         no_dup:
         /* append it */
         kvs_orig->kvs_cnt++;
-        xrealloc(kvs_orig->kvs_keys,
-                 (sizeof(char *) * kvs_orig->kvs_cnt));
-        xrealloc(kvs_orig->kvs_values,
-                 (sizeof(char *) * kvs_orig->kvs_cnt));
+        xrealloc(kvs_orig->kvs_keys, (sizeof(char *) * kvs_orig->kvs_cnt));
+        xrealloc(kvs_orig->kvs_values, (sizeof(char *) * kvs_orig->kvs_cnt));
         kvs_orig->kvs_keys[kvs_orig->kvs_cnt - 1] = kvs_new->kvs_keys[i];
-        kvs_orig->kvs_values[kvs_orig->kvs_cnt - 1] =
-                kvs_new->kvs_values[i];
+        kvs_orig->kvs_values[kvs_orig->kvs_cnt - 1] = kvs_new->kvs_values[i];
         kvs_new->kvs_keys[i] = NULL;
         kvs_new->kvs_values[i] = NULL;
     }
     if (kvs_orig->kvs_key_sent) {
-        xrealloc(kvs_orig->kvs_key_sent,
-                 (sizeof(uint16_t) * kvs_orig->kvs_cnt));
+        xrealloc(kvs_orig->kvs_key_sent, (sizeof(uint16_t) * kvs_orig->kvs_cnt));
     }
 }
 
 static void _move_kvs(struct kvs_comm *kvs_new) {
-    kvs_comm_ptr = xrealloc(kvs_comm_ptr, (sizeof(struct kvs_comm *) *
-                                           (kvs_comm_cnt + 1)));
+    kvs_comm_ptr = xrealloc(kvs_comm_ptr, (sizeof(struct kvs_comm *) * (kvs_comm_cnt + 1)));
     kvs_comm_ptr[kvs_comm_cnt] = kvs_new;
     kvs_comm_cnt++;
 }
@@ -427,11 +402,9 @@ extern int pmi_kvs_put(kvs_comm_set_t *kvs_set_ptr) {
     START_TIMER;
     slurm_mutex_lock(&kvs_mutex);
     for (i = 0; i < kvs_set_ptr->kvs_comm_recs; i++) {
-        kvs_ptr = _find_kvs_by_name(kvs_set_ptr->
-                kvs_comm_ptr[i]->kvs_name);
+        kvs_ptr = _find_kvs_by_name(kvs_set_ptr->kvs_comm_ptr[i]->kvs_name);
         if (kvs_ptr) {
-            _merge_named_kvs(kvs_ptr,
-                             kvs_set_ptr->kvs_comm_ptr[i]);
+            _merge_named_kvs(kvs_ptr, kvs_set_ptr->kvs_comm_ptr[i]);
         } else {
             _move_kvs(kvs_set_ptr->kvs_comm_ptr[i]);
             kvs_set_ptr->kvs_comm_ptr[i] = NULL;
@@ -477,22 +450,19 @@ extern int pmi_kvs_get(kvs_get_msg_t *kvs_get_ptr) {
         barrier_cnt = kvs_get_ptr->size;
         barrier_ptr = xmalloc(sizeof(struct barrier_resp) * barrier_cnt);
     } else if (barrier_cnt != kvs_get_ptr->size) {
-        error("PMK_KVS_Barrier task count inconsistent (%u != %u)",
-              barrier_cnt, kvs_get_ptr->size);
+        error("PMK_KVS_Barrier task count inconsistent (%u != %u)", barrier_cnt, kvs_get_ptr->size);
         rc = SLURM_ERROR;
         goto fini;
     }
     if (kvs_get_ptr->task_id >= barrier_cnt) {
-        error("PMK_KVS_Barrier task count(%u) >= size(%u)",
-              kvs_get_ptr->task_id, barrier_cnt);
+        error("PMK_KVS_Barrier task count(%u) >= size(%u)", kvs_get_ptr->task_id, barrier_cnt);
         rc = SLURM_ERROR;
         goto fini;
     }
     if (barrier_ptr[kvs_get_ptr->task_id].port == 0)
         barrier_resp_cnt++;
     else
-        error("PMK_KVS_Barrier duplicate request from task %u",
-              kvs_get_ptr->task_id);
+        error("PMK_KVS_Barrier duplicate request from task %u", kvs_get_ptr->task_id);
     barrier_ptr[kvs_get_ptr->task_id].port = kvs_get_ptr->port;
     barrier_ptr[kvs_get_ptr->task_id].hostname = kvs_get_ptr->hostname;
     kvs_get_ptr->hostname = NULL; /* just moved the pointer */

@@ -113,8 +113,7 @@ extern int license_job_return(struct job_record *job_ptr);
  * IN reboot    - true if node reboot required to start job
  * RET: SLURM_SUCCESS, EAGAIN (not available now), SLURM_ERROR (never runnable)
  */
-extern int license_job_test(struct job_record *job_ptr, time_t when,
-                            bool reboot);
+extern int license_job_test(struct job_record *job_ptr, time_t when, bool reboot);
 
 /*
  * license_validate - Test if the required licenses are valid
@@ -128,9 +127,8 @@ extern int license_job_test(struct job_record *job_ptr, time_t when,
  *             are configured (though not necessarily available now)
  * RET license_list, must be destroyed by caller
  */
-extern List license_validate(char *licenses, bool validate_configured,
-                             bool validate_existing,
-                             uint64_t *tres_req_cnt, bool *valid);
+extern List
+license_validate(char *licenses, bool validate_configured, bool validate_existing, uint64_t *tres_req_cnt, bool *valid);
 
 /*
  * license_list_overlap - test if there is any overlap in licenses
@@ -155,11 +153,7 @@ extern char *license_list_to_string(List license_list);
  * Get the licenses and the usage counters in the io buffer
  * to be sent out to the library
  */
-extern void
-get_all_license_info(char **buffer_ptr,
-                     int *buffer_size,
-                     uid_t uid,
-                     uint16_t protocol_version);
+extern void get_all_license_info(char **buffer_ptr, int *buffer_size, uid_t uid, uint16_t protocol_version);
 
 /*
  * get_total_license_cnt - give me the total count of a given license name.
@@ -177,8 +171,6 @@ extern char *licenses_2_tres_str(List license_list);
  * fills in tres_cnt of the license_list.
  * locked if assoc_mgr tres read lock is locked or not.
  */
-extern void license_set_job_tres_cnt(List license_list,
-                                     uint64_t *tres_cnt,
-                                     bool locked);
+extern void license_set_job_tres_cnt(List license_list, uint64_t *tres_cnt, bool locked);
 
 #endif /* !_LICENSES_H */

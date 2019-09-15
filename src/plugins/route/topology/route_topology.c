@@ -152,9 +152,7 @@ static bool _run_in_slurmctld(void) {
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_p_split_hostlist(hostlist_t hl,
-                                  hostlist_t **sp_hl,
-                                  int *count, uint16_t tree_width) {
+extern int route_p_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width) {
     int i, j, k, hl_ndx, msg_count, sw_count, lst_count;
     char *buf;
     bitstr_t *nodes_bitmap = NULL;        /* nodes in message list */
@@ -200,9 +198,7 @@ extern int route_p_split_hostlist(hostlist_t hl,
     for (i = 0; i <= switch_levels; i++) {
         for (j = 0; j < switch_record_cnt; j++) {
             if (switch_record_table[j].level == i) {
-                if (bit_super_set(nodes_bitmap,
-                                  switch_record_table[j].
-                                          node_bitmap)) {
+                if (bit_super_set(nodes_bitmap, switch_record_table[j].node_bitmap)) {
                     /* All nodes in message list are in
                      * this switch */
                     break;
@@ -222,21 +218,18 @@ extern int route_p_split_hostlist(hostlist_t hl,
          * Revert to default behavior*/
         if (debug_flags & DEBUG_FLAG_ROUTE) {
             buf = hostlist_ranged_string_xmalloc(hl);
-            debug("ROUTE: didn't find switch containing nodes=%s",
-                  buf);
+            debug("ROUTE: didn't find switch containing nodes=%s", buf);
             xfree(buf);
         }
         FREE_NULL_BITMAP(nodes_bitmap);
         xfree(*sp_hl);
-        return route_split_hostlist_treewidth(
-                hl, sp_hl, count, tree_width);
+        return route_split_hostlist_treewidth(hl, sp_hl, count, tree_width);
     }
     if (switch_record_table[j].level == 0) {
         /* This is a leaf switch. Construct list based on TreeWidth */
         FREE_NULL_BITMAP(nodes_bitmap);
         xfree(*sp_hl);
-        return route_split_hostlist_treewidth(
-                hl, sp_hl, count, tree_width);
+        return route_split_hostlist_treewidth(hl, sp_hl, count, tree_width);
     }
     /* loop through children, construction a hostlist for each child switch
      * with nodes in the message list */
@@ -256,8 +249,7 @@ extern int route_p_split_hostlist(hostlist_t hl,
         FREE_NULL_BITMAP(fwd_bitmap);
         if (debug_flags & DEBUG_FLAG_ROUTE) {
             buf = hostlist_ranged_string_xmalloc((*sp_hl)[hl_ndx]);
-            debug("ROUTE: ... sublist[%d] switch=%s :: %s",
-                  i, switch_record_table[i].name, buf);
+            debug("ROUTE: ... sublist[%d] switch=%s :: %s", i, switch_record_table[i].name, buf);
             xfree(buf);
         }
         hl_ndx++;

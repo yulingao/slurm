@@ -110,8 +110,7 @@
  * Output: node_name - filled in with node name
  *         return code - 0 if no error, otherwise errno
  */
-extern int
-get_mach_name(char *node_name) {
+extern int get_mach_name(char *node_name) {
     int error_code;
 
     error_code = gethostname_short(node_name, MAX_SLURM_NAME);
@@ -141,8 +140,7 @@ extern int get_memory(uint64_t *real_memory) {
         error("get_memory: error running sysconf(_SC_PHYS_PAGES)");
         return EINVAL;
     }
-    *real_memory = (uint64_t) ((float) pages * (sysconf(_SC_PAGE_SIZE) /
-                                                1048576.0)); /* Megabytes of memory */
+    *real_memory = (uint64_t) ((float) pages * (sysconf(_SC_PAGE_SIZE) / 1048576.0)); /* Megabytes of memory */
 #  else  /* !_SC_PHYS_PAGES */
 #    if HAVE_SYSCTLBYNAME
     int mem;
@@ -171,8 +169,7 @@ extern int get_memory(uint64_t *real_memory) {
  * Output: tmp_disk - filled in with disk space size in MB, zero if error
  *         return code - 0 if no error, otherwise errno
  */
-extern int
-get_tmp_disk(uint32_t *tmp_disk, char *tmp_fs) {
+extern int get_tmp_disk(uint32_t *tmp_disk, char *tmp_fs) {
     int error_code = 0;
 
 #if defined(HAVE_STATVFS)

@@ -81,8 +81,7 @@ int main(int argc, char **argv) {
     if (working_cluster_rec) {
         slurm_ctl_conf_info_msg_t *slurm_ctl_conf_ptr;
 
-        error_code = slurm_load_ctl_conf((time_t) NULL,
-                                         &slurm_ctl_conf_ptr);
+        error_code = slurm_load_ctl_conf((time_t) NULL, &slurm_ctl_conf_ptr);
         if (error_code) {
             slurm_perror("slurm_load_ctl_conf error");
             exit(error_code);
@@ -111,8 +110,7 @@ int main(int argc, char **argv) {
     if (xstrcasecmp(prio_type, "priority/basic") == 0) {
         fprintf(stderr, "You are not running a supported "
                         "priority plugin\n(%s).\n"
-                        "Only 'priority/multifactor' is supported.\n",
-                prio_type);
+                        "Only 'priority/multifactor' is supported.\n", prio_type);
         exit(1);
     }
     xfree(prio_type);
@@ -123,9 +121,7 @@ int main(int argc, char **argv) {
         show_flags |= SHOW_LOCAL;
     if (params.sibling)
         show_flags |= SHOW_FEDERATION | SHOW_SIBLING;
-    error_code = slurm_load_job_prio(&resp_msg, params.job_list,
-                                     params.parts, params.user_list,
-                                     show_flags);
+    error_code = slurm_load_job_prio(&resp_msg, params.job_list, params.parts, params.user_list, show_flags);
     if (error_code) {
         slurm_perror("Couldn't get priority factors from controller");
         exit(error_code);
@@ -188,12 +184,11 @@ int main(int argc, char **argv) {
     /* create the format list from the format */
     parse_format(params.format);
 
-    if (params.jobs && (!resp_msg || !resp_msg->priority_factors_list ||
-                        !list_count(resp_msg->priority_factors_list))) {
+    if (params.jobs &&
+        (!resp_msg || !resp_msg->priority_factors_list || !list_count(resp_msg->priority_factors_list))) {
         printf("Unable to find jobs matching user/id(s) specified\n");
     } else if (resp_msg) {
-        print_jobs_array(resp_msg->priority_factors_list,
-                         params.format_list);
+        print_jobs_array(resp_msg->priority_factors_list, params.format_list);
     }
 
 #ifdef MEMORY_LEAK_DEBUG

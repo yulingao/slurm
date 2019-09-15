@@ -99,9 +99,7 @@ extern int other_block_init(List part_list);
  * IN job_ptr   - pointer to the job that's related to this query(may be NULL)
  * IN/OUT data  - the data to get from node record
  */
-extern int other_get_info_from_plugin(enum select_plugindata_info dinfo,
-                                      struct job_record *job_ptr,
-                                      void *data);
+extern int other_get_info_from_plugin(enum select_plugindata_info dinfo, struct job_record *job_ptr, void *data);
 
 /*
  * Updated a node configuration. This happens when a node registers with
@@ -140,11 +138,9 @@ extern int other_update_node_state(struct node_record *node_ptr);
  * IN exc_core_bitmap - bitmap of cores being reserved.
  * RET zero on success, EINVAL otherwise
  */
-extern int other_job_test(struct job_record *job_ptr, bitstr_t *bitmap,
-                          uint32_t min_nodes, uint32_t max_nodes,
-                          uint32_t req_nodes, uint16_t mode,
-                          List preemptee_candidates, List *preemptee_job_list,
-                          bitstr_t *exc_core_bitmap);
+extern int
+other_job_test(struct job_record *job_ptr, bitstr_t *bitmap, uint32_t min_nodes, uint32_t max_nodes, uint32_t req_nodes,
+               uint16_t mode, List preemptee_candidates, List *preemptee_job_list, bitstr_t *exc_core_bitmap);
 
 /*
  * Note initiation of job is about to begin. Called immediately
@@ -166,16 +162,14 @@ extern int other_job_ready(struct job_record *job_ptr);
  *	"to_job_ptr". Also see other_job_resized().
  * RET: 0 or an error code
  */
-extern int other_job_expand(struct job_record *from_job_ptr,
-                            struct job_record *to_job_ptr);
+extern int other_job_expand(struct job_record *from_job_ptr, struct job_record *to_job_ptr);
 
 /*
  * Modify internal data structures for a job that has decreased job size.
  *	Only support jobs shrinking. Also see other_job_expand();
  * RET: 0 or an error code
  */
-extern int other_job_resized(struct job_record *job_ptr,
-                             struct node_record *node_ptr);
+extern int other_job_resized(struct job_record *job_ptr, struct node_record *node_ptr);
 
 /*
  * Pass job-step signal to other plugin.
@@ -225,9 +219,7 @@ extern int other_job_resume(struct job_record *job_ptr, bool indf_susp);
  * OUT avail_nodes - bitmap of available nodes according to the plugin.
  * RET map of slurm nodes to be used for step, NULL on failure
  */
-extern bitstr_t *other_step_pick_nodes(struct job_record *job_ptr,
-                                       select_jobinfo_t *jobinfo,
-                                       uint32_t node_count,
+extern bitstr_t *other_step_pick_nodes(struct job_record *job_ptr, select_jobinfo_t *jobinfo, uint32_t node_count,
                                        bitstr_t **avail_nodes);
 
 extern int other_step_start(struct step_record *step_ptr);
@@ -257,9 +249,7 @@ extern int other_select_jobinfo_free(select_jobinfo_t *jobinfo);
  * IN data_type - type of data to enter into job credential
  * IN data - the data to enter into job credential
  */
-extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
-                                    enum select_jobdata_type data_type,
-                                    void *data);
+extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data);
 
 /* get data from a select job credential
  * IN jobinfo  - updated select job credential
@@ -267,17 +257,14 @@ extern int other_select_jobinfo_set(select_jobinfo_t *jobinfo,
  * OUT data - the data to get from job credential, caller must xfree
  *	data for data_type == SELECT_JOBDATA_PART_ID
  */
-extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo,
-                                    enum select_jobdata_type data_type,
-                                    void *data);
+extern int other_select_jobinfo_get(select_jobinfo_t *jobinfo, enum select_jobdata_type data_type, void *data);
 
 /* copy a select job credential
  * IN jobinfo - the select job credential to be copied
  * RET        - the copy or NULL on failure
  * NOTE: returned value must be freed using other_select_jobinfo_free
  */
-extern select_jobinfo_t *other_select_jobinfo_copy(
-        select_jobinfo_t *jobinfo);
+extern select_jobinfo_t *other_select_jobinfo_copy(select_jobinfo_t *jobinfo);
 
 /* pack a select job credential into a buffer in machine independent form
  * IN jobinfo  - the select job credential to be saved
@@ -285,9 +272,7 @@ extern select_jobinfo_t *other_select_jobinfo_copy(
  * IN protocol_version - slurm protocol version of client
  * RET         - slurm error code
  */
-extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
-                                     Buf buffer,
-                                     uint16_t protocol_version);
+extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo, Buf buffer, uint16_t protocol_version);
 
 /* unpack a select job credential from a buffer
  * OUT jobinfo - the select job credential read
@@ -296,9 +281,7 @@ extern int other_select_jobinfo_pack(select_jobinfo_t *jobinfo,
  * RET         - slurm error code
  * NOTE: returned value must be freed using other_select_jobinfo_free
  */
-extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
-                                       Buf buffer,
-                                       uint16_t protocol_version);
+extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo, Buf buffer, uint16_t protocol_version);
 
 /* write select job info to a string
  * IN jobinfo - a select job credential
@@ -307,8 +290,7 @@ extern int other_select_jobinfo_unpack(select_jobinfo_t **jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - the string, same as buf
  */
-extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
-                                         char *buf, size_t size, int mode);
+extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo, char *buf, size_t size, int mode);
 
 /* write select job info to a string
  * IN jobinfo - a select job credential
@@ -316,20 +298,15 @@ extern char *other_select_jobinfo_sprint(select_jobinfo_t *jobinfo,
  * IN mode    - print mode, see enum select_print_mode
  * RET        - the string, same as buf
  */
-extern char *other_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo,
-                                          int mode);
+extern char *other_select_jobinfo_xstrdup(select_jobinfo_t *jobinfo, int mode);
 
 /*******************************************************\
  * NODE-SPECIFIC SELECT CREDENTIAL MANAGEMENT FUNCIONS *
 \*******************************************************/
 
-extern int other_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo,
-                                      Buf buffer,
-                                      uint16_t protocol_version);
+extern int other_select_nodeinfo_pack(select_nodeinfo_t *nodeinfo, Buf buffer, uint16_t protocol_version);
 
-extern int other_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo,
-                                        Buf buffer,
-                                        uint16_t protocol_version);
+extern int other_select_nodeinfo_unpack(select_nodeinfo_t **nodeinfo, Buf buffer, uint16_t protocol_version);
 
 extern select_nodeinfo_t *other_select_nodeinfo_alloc(void);
 
@@ -339,10 +316,9 @@ extern int other_select_nodeinfo_set_all(void);
 
 extern int other_select_nodeinfo_set(struct job_record *job_ptr);
 
-extern int other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
-                                     enum select_nodedata_type dinfo,
-                                     enum node_states state,
-                                     void *data);
+extern int
+other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo, enum select_nodedata_type dinfo, enum node_states state,
+                          void *data);
 
 
 /******************************************************\
@@ -352,9 +328,7 @@ extern int other_select_nodeinfo_get(select_nodeinfo_t *nodeinfo,
 /* Note reconfiguration or change in partition configuration */
 extern int other_reconfigure(void);
 
-extern bitstr_t *other_resv_test(resv_desc_msg_t *resv_desc_ptr,
-                                 uint32_t node_cnt,
-                                 bitstr_t *avail_bitmap,
-                                 bitstr_t **core_bitmap);
+extern bitstr_t *
+other_resv_test(resv_desc_msg_t *resv_desc_ptr, uint32_t node_cnt, bitstr_t *avail_bitmap, bitstr_t **core_bitmap);
 
 #endif /* _CRAY_OTHER_SELECT_H */

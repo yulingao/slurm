@@ -28,18 +28,17 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int main (int argc, char *argv[])
-{
-	char *buffer;
+int main(int argc, char *argv[]) {
+    char *buffer;
 
-	/* Print the pid so the test1.34 script
-	 * can rm the core file core.getpid()
-	 * fflush() otherwise stdout loss in
-	 * the core dump.
-	 */
-	printf("%d\n", getpid());
-	fflush(stdout);
-	buffer = (char *) 0;
-	buffer[1] = 'a';
-	return 0;
+    /* Print the pid so the test1.34 script
+     * can rm the core file core.getpid()
+     * fflush() otherwise stdout loss in
+     * the core dump.
+     */
+    printf("%d\n", getpid());
+    fflush(stdout);
+    buffer = (char *) 0;
+    buffer[1] = 'a';
+    return 0;
 }

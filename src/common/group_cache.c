@@ -129,14 +129,12 @@ static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gid
     entry = list_find_first(gids_cache_list, _find_entry, needle);
 
     if (entry && (entry->expiration > needle->now)) {
-        debug2("%s: found valid entry for %s",
-               __func__, entry->username);
+        debug2("%s: found valid entry for %s", __func__, entry->username);
         goto out;
     }
 
     if (entry) {
-        debug2("%s: found old entry for %s, looking up again",
-               __func__, entry->username);
+        debug2("%s: found old entry for %s, looking up again", __func__, entry->username);
         /*
          * The timestamp is too old, need to replace the values.
          * Reuse the same gids_cache_t entry, just reset the
@@ -156,8 +154,7 @@ static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gid
         entry->gids = xmalloc(sizeof(gid_t) * entry->ngids);
         list_prepend(gids_cache_list, entry);
 
-        debug2("%s: no entry found for %s",
-               __func__, entry->username);
+        debug2("%s: no entry found for %s", __func__, entry->username);
     }
 
     entry->expiration = needle->now + slurmctld_conf.group_time;
@@ -169,15 +166,13 @@ static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gid
      * macOS has (int *) for the third argument instead
      * of (gid_t *) like FreeBSD, NetBSD, and Linux.
      */
-    while (getgrouplist(entry->username, entry->gid,
-                        (int *) entry->gids, &entry->ngids) == -1) {
+    while (getgrouplist(entry->username, entry->gid, (int *) entry->gids, &entry->ngids) == -1) {
 #else
         while (getgrouplist(entry->username, entry->gid,
                     entry->gids, &entry->ngids) == -1) {
 #endif
         /* group list larger than array, resize array to fit */
-        entry->gids = xrealloc(entry->gids,
-                               entry->ngids * sizeof(gid_t));
+        entry->gids = xrealloc(entry->gids, entry->ngids * sizeof(gid_t));
     }
 
     out:
@@ -187,8 +182,7 @@ static int _group_cache_lookup_internal(gids_cache_needle_t *needle, gid_t **gid
 
     slurm_mutex_unlock(&gids_mutex);
 
-    END_TIMER3("group_cache_lookup() took",
-               3000000);
+    END_TIMER3("group_cache_lookup() took", 3000000);
 
     return ngids;
 }

@@ -41,9 +41,7 @@
 #include "src/sacctmgr/sacctmgr.h"
 #include "src/common/slurmdbd_defs.h"
 
-static int _set_cond(int *start, int argc, char **argv,
-                     slurmdb_txn_cond_t *txn_cond,
-                     List format_list) {
+static int _set_cond(int *start, int argc, char **argv, slurmdb_txn_cond_t *txn_cond, List format_list) {
     int i, end = 0;
     int set = 0;
     int command_len = 0;
@@ -59,94 +57,68 @@ static int _set_cond(int *start, int argc, char **argv,
             }
         }
 
-        if (!end && !xstrncasecmp(argv[i], "where",
-                                  MAX(command_len, 5))) {
+        if (!end && !xstrncasecmp(argv[i], "where", MAX(command_len, 5))) {
             continue;
-        } else if (!end && !xstrncasecmp(argv[i], "withassocinfo",
-                                         MAX(command_len, 5))) {
+        } else if (!end && !xstrncasecmp(argv[i], "withassocinfo", MAX(command_len, 5))) {
             txn_cond->with_assoc_info = 1;
             set = 1;
-        } else if (!end
-                   || (!xstrncasecmp(argv[i], "Ids",
-                                     MAX(command_len, 1)))
-                   || (!xstrncasecmp(argv[i], "Txn",
-                                     MAX(command_len, 1)))) {
+        } else if (!end || (!xstrncasecmp(argv[i], "Ids", MAX(command_len, 1))) ||
+                   (!xstrncasecmp(argv[i], "Txn", MAX(command_len, 1)))) {
             ListIterator itr = NULL;
             char *temp = NULL;
             uint32_t id = 0;
 
             if (!txn_cond->id_list)
-                txn_cond->id_list =
-                        list_create(slurm_destroy_char);
+                txn_cond->id_list = list_create(slurm_destroy_char);
 
-            if (slurm_addto_char_list(txn_cond->id_list,
-                                      argv[i] + end))
+            if (slurm_addto_char_list(txn_cond->id_list, argv[i] + end))
                 set = 1;
 
             /* check to make sure user gave ints here */
             itr = list_iterator_create(txn_cond->id_list);
             while ((temp = list_next(itr))) {
-                if (get_uint(temp, &id, "Transaction ID")
-                    != SLURM_SUCCESS) {
+                if (get_uint(temp, &id, "Transaction ID") != SLURM_SUCCESS) {
                     exit_code = 1;
                     list_delete_item(itr);
                 }
             }
             list_iterator_destroy(itr);
-        } else if (!xstrncasecmp(argv[i], "Accounts",
-                                 MAX(command_len, 3))) {
+        } else if (!xstrncasecmp(argv[i], "Accounts", MAX(command_len, 3))) {
             if (!txn_cond->acct_list)
-                txn_cond->acct_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(txn_cond->acct_list,
-                                      argv[i] + end))
+                txn_cond->acct_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(txn_cond->acct_list, argv[i] + end))
                 set = 1;
-        } else if (!xstrncasecmp(argv[i], "Action",
-                                 MAX(command_len, 4))) {
+        } else if (!xstrncasecmp(argv[i], "Action", MAX(command_len, 4))) {
             if (!txn_cond->action_list)
-                txn_cond->action_list =
-                        list_create(slurm_destroy_char);
+                txn_cond->action_list = list_create(slurm_destroy_char);
 
-            if (addto_action_char_list(txn_cond->action_list,
-                                       argv[i] + end))
+            if (addto_action_char_list(txn_cond->action_list, argv[i] + end))
                 set = 1;
             else
                 exit_code = 1;
-        } else if (!xstrncasecmp(argv[i], "Actors",
-                                 MAX(command_len, 4))) {
+        } else if (!xstrncasecmp(argv[i], "Actors", MAX(command_len, 4))) {
             if (!txn_cond->actor_list)
-                txn_cond->actor_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(txn_cond->actor_list,
-                                      argv[i] + end))
+                txn_cond->actor_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(txn_cond->actor_list, argv[i] + end))
                 set = 1;
-        } else if (!xstrncasecmp(argv[i], "Clusters",
-                                 MAX(command_len, 3))) {
+        } else if (!xstrncasecmp(argv[i], "Clusters", MAX(command_len, 3))) {
             if (!txn_cond->cluster_list)
-                txn_cond->cluster_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list(txn_cond->cluster_list,
-                                      argv[i] + end))
+                txn_cond->cluster_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list(txn_cond->cluster_list, argv[i] + end))
                 set = 1;
         } else if (!xstrncasecmp(argv[i], "End", MAX(command_len, 1))) {
             txn_cond->time_end = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Format",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Format", MAX(command_len, 1))) {
             if (format_list)
                 slurm_addto_char_list(format_list, argv[i] + end);
-        } else if (!xstrncasecmp(argv[i], "Start",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Start", MAX(command_len, 1))) {
             txn_cond->time_start = parse_time(argv[i] + end, 1);
             set = 1;
-        } else if (!xstrncasecmp(argv[i], "Users",
-                                 MAX(command_len, 1))) {
+        } else if (!xstrncasecmp(argv[i], "Users", MAX(command_len, 1))) {
             if (!txn_cond->user_list)
-                txn_cond->user_list =
-                        list_create(slurm_destroy_char);
-            if (slurm_addto_char_list_with_case(txn_cond->user_list,
-                                                argv[i] + end,
-                                                user_case_norm))
+                txn_cond->user_list = list_create(slurm_destroy_char);
+            if (slurm_addto_char_list_with_case(txn_cond->user_list, argv[i] + end, user_case_norm))
                 set = 1;
         } else {
             exit_code = 1;
@@ -176,8 +148,7 @@ extern int sacctmgr_list_txn(int argc, char **argv) {
 
     for (i = 0; i < argc; i++) {
         int command_len = strlen(argv[i]);
-        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5))
-            || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
+        if (!xstrncasecmp(argv[i], "Where", MAX(command_len, 5)) || !xstrncasecmp(argv[i], "Set", MAX(command_len, 3)))
             i++;
         _set_cond(&i, argc, argv, txn_cond, format_list);
     }
@@ -189,11 +160,9 @@ extern int sacctmgr_list_txn(int argc, char **argv) {
     }
 
     if (!list_count(format_list)) {
-        slurm_addto_char_list(format_list,
-                              "Time,Action,Actor,Where,Info");
+        slurm_addto_char_list(format_list, "Time,Action,Actor,Where,Info");
         if (txn_cond->with_assoc_info)
-            slurm_addto_char_list(format_list,
-                                  "User,Account,Cluster");
+            slurm_addto_char_list(format_list, "User,Account,Cluster");
     }
 
     print_fields_list = sacctmgr_process_format_list(format_list);
@@ -209,8 +178,7 @@ extern int sacctmgr_list_txn(int argc, char **argv) {
 
     if (!txn_list) {
         exit_code = 1;
-        fprintf(stderr, " Error with request: %s\n",
-                slurm_strerror(errno));
+        fprintf(stderr, " Error with request: %s\n", slurm_strerror(errno));
         FREE_NULL_LIST(print_fields_list);
         return SLURM_ERROR;
     }
@@ -225,58 +193,37 @@ extern int sacctmgr_list_txn(int argc, char **argv) {
         while ((field = list_next(itr2))) {
             switch (field->type) {
                 case PRINT_ACCT:
-                    field->print_routine(field, txn->accts,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->accts, (curr_inx == field_count));
                     break;
                 case PRINT_ACTIONRAW:
-                    field->print_routine(
-                            field,
-                            txn->action,
-                            (curr_inx == field_count));
+                    field->print_routine(field, txn->action, (curr_inx == field_count));
                     break;
                 case PRINT_ACTION:
-                    field->print_routine(
-                            field,
-                            slurmdbd_msg_type_2_str(txn->action,
-                                                    0),
-                            (curr_inx == field_count));
+                    field->print_routine(field, slurmdbd_msg_type_2_str(txn->action, 0), (curr_inx == field_count));
                     break;
                 case PRINT_ACTOR:
-                    field->print_routine(field,
-                                         txn->actor_name,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->actor_name, (curr_inx == field_count));
                     break;
                 case PRINT_CLUSTER:
-                    field->print_routine(field, txn->clusters,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->clusters, (curr_inx == field_count));
                     break;
                 case PRINT_ID:
-                    field->print_routine(field,
-                                         txn->id,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->id, (curr_inx == field_count));
                     break;
                 case PRINT_INFO:
-                    field->print_routine(field,
-                                         txn->set_info,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->set_info, (curr_inx == field_count));
                     break;
                 case PRINT_TS:
-                    field->print_routine(field,
-                                         txn->timestamp,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->timestamp, (curr_inx == field_count));
                     break;
                 case PRINT_USER:
-                    field->print_routine(field, txn->users,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->users, (curr_inx == field_count));
                     break;
                 case PRINT_WHERE:
-                    field->print_routine(field,
-                                         txn->where_query,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, txn->where_query, (curr_inx == field_count));
                     break;
                 default:
-                    field->print_routine(field, NULL,
-                                         (curr_inx == field_count));
+                    field->print_routine(field, NULL, (curr_inx == field_count));
                     break;
             }
             curr_inx++;

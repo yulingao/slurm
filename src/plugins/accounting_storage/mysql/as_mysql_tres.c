@@ -39,13 +39,11 @@
 #include "as_mysql_usage.h"
 #include "src/common/xstring.h"
 
-extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
-                             uint32_t uid, List tres_list_in) {
+extern int as_mysql_add_tres(mysql_conn_t *mysql_conn, uint32_t uid, List tres_list_in) {
     ListIterator itr = NULL;
     int rc = SLURM_SUCCESS;
     slurmdb_tres_rec_t *object = NULL;
-    char *cols = NULL, *extra = NULL, *vals = NULL, *query = NULL,
-            *tmp_extra = NULL;
+    char *cols = NULL, *extra = NULL, *vals = NULL, *query = NULL, *tmp_extra = NULL;
     time_t now = time(NULL);
     char *user_name = NULL;
     int affect_rows = 0;
@@ -68,16 +66,13 @@ extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
             error("We need a tres type.");
             rc = SLURM_ERROR;
             continue;
-        } else if ((!xstrcasecmp(object->type, "gres") ||
-                    !xstrcasecmp(object->type, "bb") ||
-                    !xstrcasecmp(object->type, "license") ||
-                    !xstrcasecmp(object->type, "fs") ||
+        } else if ((!xstrcasecmp(object->type, "gres") || !xstrcasecmp(object->type, "bb") ||
+                    !xstrcasecmp(object->type, "license") || !xstrcasecmp(object->type, "fs") ||
                     !xstrcasecmp(object->type, "ic"))) {
             if (!object->name) {
                 error("%s type tres "
                       "need to have a name, "
-                      "(i.e. Gres/GPU).  You gave none",
-                      object->type);
+                      "(i.e. Gres/GPU).  You gave none", object->type);
                 rc = SLURM_ERROR;
                 continue;
             }
@@ -93,20 +88,15 @@ extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
             xstrfmtcat(extra, ", name='%s'", object->name);
         }
 
-        xstrfmtcat(query,
-                   "insert into %s (%s) values (%s) "
-                   "on duplicate key update deleted=0;",
-                   tres_table, cols, vals);
+        xstrfmtcat(query, "insert into %s (%s) values (%s) "
+                          "on duplicate key update deleted=0;", tres_table, cols, vals);
 
         if (debug_flags & DEBUG_FLAG_DB_TRES)
             DB_DEBUG(mysql_conn->conn, "query\n%s", query);
-        object->id = (uint32_t) mysql_db_insert_ret_id(
-                mysql_conn, query);
+        object->id = (uint32_t) mysql_db_insert_ret_id(mysql_conn, query);
         xfree(query);
         if (!object->id) {
-            error("Couldn't add tres %s%s%s", object->type,
-                  object->name ? "/" : "",
-                  object->name ? object->name : "");
+            error("Couldn't add tres %s%s%s", object->type, object->name ? "/" : "", object->name ? object->name : "");
             xfree(cols);
             xfree(extra);
             xfree(vals);
@@ -125,13 +115,10 @@ extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
 
         tmp_extra = slurm_add_slash_to_quotes(extra);
 
-        xstrfmtcat(query,
-                   "insert into %s "
-                   "(timestamp, action, name, actor, info, cluster) "
-                   "values (%ld, %u, 'id=%d', '%s', '%s', '%s');",
-                   txn_table,
-                   now, DBD_ADD_TRES, object->id, user_name,
-                   tmp_extra, mysql_conn->cluster_name);
+        xstrfmtcat(query, "insert into %s "
+                          "(timestamp, action, name, actor, info, cluster) "
+                          "values (%ld, %u, 'id=%d', '%s', '%s', '%s');", txn_table, now, DBD_ADD_TRES, object->id,
+                   user_name, tmp_extra, mysql_conn->cluster_name);
 
         xfree(tmp_extra);
         xfree(cols);
@@ -143,9 +130,7 @@ extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
         if (rc != SLURM_SUCCESS) {
             error("Couldn't add txn");
         } else {
-            if (addto_update_list(mysql_conn->update_list,
-                                  SLURMDB_ADD_TRES,
-                                  object) == SLURM_SUCCESS)
+            if (addto_update_list(mysql_conn->update_list, SLURMDB_ADD_TRES, object) == SLURM_SUCCESS)
                 list_remove(itr);
         }
 
@@ -162,8 +147,7 @@ extern int as_mysql_add_tres(mysql_conn_t *mysql_conn,
     return rc;
 }
 
-extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
-                              slurmdb_tres_cond_t *tres_cond) {
+extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid, slurmdb_tres_cond_t *tres_cond) {
     char *query = NULL;
     char *extra = NULL;
     char *tmp = NULL;
@@ -176,16 +160,9 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
     MYSQL_ROW row;
 
     /* if this changes you will need to edit the corresponding enum */
-    char *tres_req_inx[] = {
-            "id",
-            "type",
-            "name"
-    };
+    char *tres_req_inx[] = {"id", "type", "name"};
     enum {
-        SLURMDB_REQ_ID,
-        SLURMDB_REQ_TYPE,
-        SLURMDB_REQ_NAME,
-        SLURMDB_REQ_COUNT
+        SLURMDB_REQ_ID, SLURMDB_REQ_TYPE, SLURMDB_REQ_NAME, SLURMDB_REQ_COUNT
     };
 
     if (check_connection(mysql_conn) != SLURM_SUCCESS)
@@ -201,8 +178,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
     else
         xstrcat(extra, "where deleted=0");
 
-    if (tres_cond->id_list
-        && list_count(tres_cond->id_list)) {
+    if (tres_cond->id_list && list_count(tres_cond->id_list)) {
         set = 0;
         xstrcat(extra, " && (");
         itr = list_iterator_create(tres_cond->id_list);
@@ -216,8 +192,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
         xstrcat(extra, ")");
     }
 
-    if (tres_cond->type_list
-        && list_count(tres_cond->type_list)) {
+    if (tres_cond->type_list && list_count(tres_cond->type_list)) {
         set = 0;
         xstrcat(extra, " && (");
         itr = list_iterator_create(tres_cond->type_list);
@@ -235,8 +210,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
                 char *name = slash;
                 *slash = '\0';
                 name++;
-                xstrfmtcat(extra, "(type='%s' && name='%s')",
-                           object, name);
+                xstrfmtcat(extra, "(type='%s' && name='%s')", object, name);
             }
             set = 1;
         }
@@ -244,8 +218,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
         xstrcat(extra, ")");
     }
 
-    if (tres_cond->name_list
-        && list_count(tres_cond->name_list)) {
+    if (tres_cond->name_list && list_count(tres_cond->name_list)) {
         set = 0;
         xstrcat(extra, " && (");
         itr = list_iterator_create(tres_cond->name_list);
@@ -267,8 +240,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
         xstrfmtcat(tmp, ", %s", tres_req_inx[i]);
     }
 
-    query = xstrdup_printf("select %s from %s %s order by id",
-                           tmp, tres_table, extra);
+    query = xstrdup_printf("select %s from %s %s order by id", tmp, tres_table, extra);
     xfree(tmp);
     xfree(extra);
 
@@ -283,8 +255,7 @@ extern List as_mysql_get_tres(mysql_conn_t *mysql_conn, uid_t uid,
     my_tres_list = list_create(slurmdb_destroy_tres_rec);
 
     while ((row = mysql_fetch_row(result))) {
-        slurmdb_tres_rec_t *tres =
-                xmalloc(sizeof(slurmdb_tres_rec_t));
+        slurmdb_tres_rec_t *tres = xmalloc(sizeof(slurmdb_tres_rec_t));
         list_append(my_tres_list, tres);
 
         tres->id = slurm_atoul(row[SLURMDB_REQ_ID]);

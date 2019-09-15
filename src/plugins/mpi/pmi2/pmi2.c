@@ -97,29 +97,26 @@ static struct {
     char *cmd;
 
     int (*handler)(int fd, int lrank, client_req_t *req);
-} pmi2_cmd_handlers[] = {
-        {FULLINIT_CMD,      _handle_fullinit},
-        {FINALIZE_CMD,      _handle_finalize},
-        {ABORT_CMD,         _handle_abort},
-        {JOBGETID_CMD,      _handle_job_getid},
-        {JOBCONNECT_CMD,    _handle_job_connect},
-        {JOBDISCONNECT_CMD, _handle_job_disconnect},
-        {RING_CMD,          _handle_ring},
-        {KVSPUT_CMD,        _handle_kvs_put},
-        {KVSFENCE_CMD,      _handle_kvs_fence},
-        {KVSGET_CMD,        _handle_kvs_get},
-        {GETNODEATTR_CMD,   _handle_info_getnodeattr},
-        {PUTNODEATTR_CMD,   _handle_info_putnodeattr},
-        {GETJOBATTR_CMD,    _handle_info_getjobattr},
-        {NAMEPUBLISH_CMD,   _handle_name_publish},
-        {NAMEUNPUBLISH_CMD, _handle_name_unpublish},
-        {NAMELOOKUP_CMD,    _handle_name_lookup},
-        {SPAWN_CMD,         _handle_spawn},
-        {NULL, NULL},
-};
+} pmi2_cmd_handlers[] = {{FULLINIT_CMD,      _handle_fullinit},
+                         {FINALIZE_CMD,      _handle_finalize},
+                         {ABORT_CMD,         _handle_abort},
+                         {JOBGETID_CMD,      _handle_job_getid},
+                         {JOBCONNECT_CMD,    _handle_job_connect},
+                         {JOBDISCONNECT_CMD, _handle_job_disconnect},
+                         {RING_CMD,          _handle_ring},
+                         {KVSPUT_CMD,        _handle_kvs_put},
+                         {KVSFENCE_CMD,      _handle_kvs_fence},
+                         {KVSGET_CMD,        _handle_kvs_get},
+                         {GETNODEATTR_CMD,   _handle_info_getnodeattr},
+                         {PUTNODEATTR_CMD,   _handle_info_putnodeattr},
+                         {GETJOBATTR_CMD,    _handle_info_getjobattr},
+                         {NAMEPUBLISH_CMD,   _handle_name_publish},
+                         {NAMEUNPUBLISH_CMD, _handle_name_unpublish},
+                         {NAMELOOKUP_CMD,    _handle_name_lookup},
+                         {SPAWN_CMD,         _handle_spawn},
+                         {NULL, NULL},};
 
-static int
-_handle_fullinit(int fd, int lrank, client_req_t *req) {
+static int _handle_fullinit(int fd, int lrank, client_req_t *req) {
     int pmi_jobid, pmi_rank;
     bool threaded;
     int found, rc = PMI2_SUCCESS;
@@ -175,15 +172,11 @@ _handle_fullinit(int fd, int lrank, client_req_t *req) {
             FALSE_VAL
             ";"
             PMIVERBOSE_KEY
-            "=%s;",
-                       rc,
-                       PMI20_VERSION, PMI20_SUBVERSION,
-                       job_info.gtids[lrank], job_info.ntasks,
+            "=%s;", rc, PMI20_VERSION, PMI20_SUBVERSION, job_info.gtids[lrank], job_info.ntasks,
                        (job_info.pmi_debugged ? TRUE_VAL : FALSE_VAL));
     if (job_info.spawner_jobid) {
         client_resp_append(resp, SPAWNERJOBID_KEY
-                "=%s;",
-                           job_info.spawner_jobid);
+                "=%s;", job_info.spawner_jobid);
     }
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
@@ -192,8 +185,7 @@ _handle_fullinit(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_finalize(int fd, int lrank, client_req_t *req) {
+static int _handle_finalize(int fd, int lrank, client_req_t *req) {
     client_resp_t *resp;
     int rc = 0;
 
@@ -213,8 +205,7 @@ _handle_finalize(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_abort(int fd, int lrank, client_req_t *req) {
+static int _handle_abort(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     bool is_world = false;
 
@@ -228,8 +219,7 @@ _handle_abort(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_job_getid(int fd, int lrank, client_req_t *req) {
+static int _handle_job_getid(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     client_resp_t *resp;
 
@@ -249,22 +239,19 @@ _handle_job_getid(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_job_connect(int fd, int lrank, client_req_t *req) {
+static int _handle_job_connect(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     error("mpi/pmi2: job connect not implemented for now");
     return rc;
 }
 
-static int
-_handle_job_disconnect(int fd, int lrank, client_req_t *req) {
+static int _handle_job_disconnect(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     error("mpi/pmi2: job disconnect not implemented for now");
     return rc;
 }
 
-static int
-_handle_ring(int fd, int lrank, client_req_t *req) {
+static int _handle_ring(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     int count = 0;
     char *left = NULL;
@@ -294,8 +281,7 @@ _handle_ring(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_kvs_put(int fd, int lrank, client_req_t *req) {
+static int _handle_kvs_put(int fd, int lrank, client_req_t *req) {
     int rc = SLURM_SUCCESS;
     client_resp_t *resp;
     char *key = NULL, *val = NULL;
@@ -324,12 +310,10 @@ _handle_kvs_put(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_kvs_fence(int fd, int lrank, client_req_t *req) {
+static int _handle_kvs_fence(int fd, int lrank, client_req_t *req) {
     int rc = 0;
 
-    debug3("mpi/pmi2: in _handle_kvs_fence, from task %d",
-           job_info.gtids[lrank]);
+    debug3("mpi/pmi2: in _handle_kvs_fence, from task %d", job_info.gtids[lrank]);
     if (tasks_to_wait == 0 && children_to_wait == 0) {
         tasks_to_wait = job_info.ltasks;
         children_to_wait = tree_info.num_children;
@@ -340,14 +324,10 @@ _handle_kvs_fence(int fd, int lrank, client_req_t *req) {
     if (tasks_to_wait == 0 && children_to_wait == 0) {
         rc = temp_kvs_send();
         if (rc != SLURM_SUCCESS) {
-            error("mpi/pmi2: failed to send temp kvs to %s",
-                  tree_info.parent_node ?: "srun");
-            send_kvs_fence_resp_to_clients(
-                    rc,
-                    "mpi/pmi2: failed to send temp kvs");
+            error("mpi/pmi2: failed to send temp kvs to %s", tree_info.parent_node ?: "srun");
+            send_kvs_fence_resp_to_clients(rc, "mpi/pmi2: failed to send temp kvs");
             /* cancel the step to avoid tasks hang */
-            slurm_kill_job_step(job_info.jobid, job_info.stepid,
-                                SIGKILL);
+            slurm_kill_job_step(job_info.jobid, job_info.stepid, SIGKILL);
         } else {
             waiting_kvs_resp = 1;
         }
@@ -358,8 +338,7 @@ _handle_kvs_fence(int fd, int lrank, client_req_t *req) {
 }
 
 
-static int
-_handle_kvs_get(int fd, int lrank, client_req_t *req) {
+static int _handle_kvs_get(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *key = NULL, *val;
@@ -405,8 +384,7 @@ _handle_kvs_get(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_info_getnodeattr(int fd, int lrank, client_req_t *req) {
+static int _handle_info_getnodeattr(int fd, int lrank, client_req_t *req) {
     int rc = 0;
     client_resp_t *resp;
     char *key = NULL, *val;
@@ -451,8 +429,7 @@ _handle_info_getnodeattr(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_info_putnodeattr(int fd, int lrank, client_req_t *req) {
+static int _handle_info_putnodeattr(int fd, int lrank, client_req_t *req) {
     char *key, *val;
     client_resp_t *resp;
     int rc = 0;
@@ -469,13 +446,12 @@ _handle_info_putnodeattr(int fd, int lrank, client_req_t *req) {
     xfree(val);
 
     resp = client_resp_new();
-    client_resp_append(resp,
-                       CMD_KEY
-                               "="
-                               PUTNODEATTRRESP_CMD
-                               ";"
-                               RC_KEY
-                               "=%d;", rc);
+    client_resp_append(resp, CMD_KEY
+            "="
+            PUTNODEATTRRESP_CMD
+            ";"
+            RC_KEY
+            "=%d;", rc);
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
 
@@ -483,8 +459,7 @@ _handle_info_putnodeattr(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_info_getjobattr(int fd, int lrank, client_req_t *req) {
+static int _handle_info_getjobattr(int fd, int lrank, client_req_t *req) {
     char *key = NULL, *val;
     client_resp_t *resp;
     int rc;
@@ -504,14 +479,12 @@ _handle_info_getjobattr(int fd, int lrank, client_req_t *req) {
             RC_KEY
             "=0;");
     if (val != NULL) {
-        client_resp_append(resp,
-                           FOUND_KEY
-                                   "="
-                                   TRUE_VAL
-                                   ";"
-                                   VALUE_KEY
-                                   "=%s;",
-                           val);
+        client_resp_append(resp, FOUND_KEY
+                "="
+                TRUE_VAL
+                ";"
+                VALUE_KEY
+                "=%s;", val);
     } else {
         client_resp_append(resp, FOUND_KEY
                 "="
@@ -526,8 +499,7 @@ _handle_info_getjobattr(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_name_publish(int fd, int lrank, client_req_t *req) {
+static int _handle_name_publish(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *name = NULL, *port = NULL;
@@ -556,8 +528,7 @@ _handle_name_publish(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_name_unpublish(int fd, int lrank, client_req_t *req) {
+static int _handle_name_unpublish(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *name = NULL;
@@ -584,8 +555,7 @@ _handle_name_unpublish(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_name_lookup(int fd, int lrank, client_req_t *req) {
+static int _handle_name_lookup(int fd, int lrank, client_req_t *req) {
     int rc;
     client_resp_t *resp;
     char *name = NULL, *port = NULL;
@@ -609,8 +579,7 @@ _handle_name_lookup(int fd, int lrank, client_req_t *req) {
         client_resp_append(resp, RC_KEY
                 "=0;"
                 VALUE_KEY
-                "=%s;",
-                           port);
+                "=%s;", port);
     }
     rc = client_resp_send(resp, fd);
     client_resp_free(resp);
@@ -622,8 +591,7 @@ _handle_name_lookup(int fd, int lrank, client_req_t *req) {
     return rc;
 }
 
-static int
-_handle_spawn(int fd, int lrank, client_req_t *req) {
+static int _handle_spawn(int fd, int lrank, client_req_t *req) {
     int rc;
     spawn_req_t *spawn_req = NULL;
     spawn_resp_t *spawn_resp = NULL;
@@ -642,8 +610,7 @@ _handle_spawn(int fd, int lrank, client_req_t *req) {
                 RC_KEY
                 "=%d;"
                 ERRMSG_KEY
-                "=invalid command;",
-                           PMI2_ERR_INVALID_ARGS);
+                "=invalid command;", PMI2_ERR_INVALID_ARGS);
         client_resp_send(task_resp, fd);
         client_resp_free(task_resp);
         return SLURM_ERROR;
@@ -661,8 +628,7 @@ _handle_spawn(int fd, int lrank, client_req_t *req) {
                 RC_KEY
                 "=%d;"
                 ERRMSG_KEY
-                "=spawn failed;",
-                           spawn_resp->rc);
+                "=spawn failed;", spawn_resp->rc);
         client_resp_send(task_resp, fd);
         client_resp_free(task_resp);
         spawn_req_free(spawn_req);
@@ -682,8 +648,7 @@ _handle_spawn(int fd, int lrank, client_req_t *req) {
 
 /**************************************************/
 
-extern int
-handle_pmi2_cmd(int fd, int lrank) {
+extern int handle_pmi2_cmd(int fd, int lrank) {
     int i, len;
     char len_buf[7], *buf = NULL;
     client_req_t *req = NULL;

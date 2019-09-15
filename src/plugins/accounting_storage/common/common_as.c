@@ -73,11 +73,9 @@ static int _sort_update_object_dec(void *a, void *b) {
     slurmdb_update_object_t *object_a = *(slurmdb_update_object_t **) a;
     slurmdb_update_object_t *object_b = *(slurmdb_update_object_t **) b;
 
-    if ((object_a->type == SLURMDB_MODIFY_ASSOC)
-        && (object_b->type != SLURMDB_MODIFY_ASSOC))
+    if ((object_a->type == SLURMDB_MODIFY_ASSOC) && (object_b->type != SLURMDB_MODIFY_ASSOC))
         return 1;
-    else if ((object_b->type == SLURMDB_MODIFY_ASSOC)
-             && (object_a->type != SLURMDB_MODIFY_ASSOC))
+    else if ((object_b->type == SLURMDB_MODIFY_ASSOC) && (object_a->type != SLURMDB_MODIFY_ASSOC))
         return -1;
     return 0;
 }
@@ -137,8 +135,7 @@ static void _dump_slurmdb_res_records(List res_list) {
  * NOTE: This function will take the object given and free it later so it
  *       needs to be removed from a existing lists prior.
  */
-extern int addto_update_list(List update_list, slurmdb_update_type_t type,
-                             void *object) {
+extern int addto_update_list(List update_list, slurmdb_update_type_t type, void *object) {
     slurmdb_update_object_t *update_object = NULL;
     slurmdb_assoc_rec_t *assoc = object;
     slurmdb_qos_rec_t *qos = object;
@@ -218,8 +215,7 @@ extern int addto_update_list(List update_list, slurmdb_update_type_t type,
         case SLURMDB_MODIFY_ASSOC:
         case SLURMDB_REMOVE_ASSOC:
             xassert(assoc->cluster);
-            update_object->objects = list_create(
-                    slurmdb_destroy_assoc_rec);
+            update_object->objects = list_create(slurmdb_destroy_assoc_rec);
             break;
         case SLURMDB_ADD_QOS:
             /* We are going to send these to the slurmctld's so
@@ -241,15 +237,13 @@ extern int addto_update_list(List update_list, slurmdb_update_type_t type,
             /* fall through */
         case SLURMDB_MODIFY_QOS:
         case SLURMDB_REMOVE_QOS:
-            update_object->objects = list_create(
-                    slurmdb_destroy_qos_rec);
+            update_object->objects = list_create(slurmdb_destroy_qos_rec);
             break;
         case SLURMDB_ADD_WCKEY:
         case SLURMDB_MODIFY_WCKEY:
         case SLURMDB_REMOVE_WCKEY:
             xassert(wckey->cluster);
-            update_object->objects = list_create(
-                    slurmdb_destroy_wckey_rec);
+            update_object->objects = list_create(slurmdb_destroy_wckey_rec);
             break;
         case SLURMDB_ADD_CLUSTER:
         case SLURMDB_REMOVE_CLUSTER:
@@ -265,8 +259,7 @@ extern int addto_update_list(List update_list, slurmdb_update_type_t type,
         case SLURMDB_MODIFY_RES:
         case SLURMDB_REMOVE_RES:
             xassert(res->id != NO_VAL);
-            update_object->objects = list_create(
-                    slurmdb_destroy_res_rec);
+            update_object->objects = list_create(slurmdb_destroy_res_rec);
             break;
         case SLURMDB_UPDATE_FEDS:
             update_object->objects = object;
@@ -293,8 +286,7 @@ extern void dump_update_list(List update_list) {
     itr = list_iterator_create(update_list);
     while ((object = list_next(itr))) {
         if (!object->objects || !list_count(object->objects)) {
-            debug3("\tUPDATE OBJECT WITH NO RECORDS, type: %d",
-                   object->type);
+            debug3("\tUPDATE OBJECT WITH NO RECORDS, type: %d", object->type);
             continue;
         }
         switch (object->type) {
@@ -336,8 +328,7 @@ extern void dump_update_list(List update_list) {
             case SLURMDB_UPDATE_NOTSET:
             default:
                 error("unknown type set in "
-                      "update_object: %d",
-                      object->type);
+                      "update_object: %d", object->type);
                 break;
         }
     }
@@ -400,9 +391,7 @@ extern int cluster_first_reg(char *host, uint16_t port, uint16_t rpc_version) {
  * IN/OUT usage_end: end time
  * RET: error code
  */
-extern int set_usage_information(char **usage_table,
-                                 slurmdbd_msg_type_t type,
-                                 time_t *usage_start, time_t *usage_end) {
+extern int set_usage_information(char **usage_table, slurmdbd_msg_type_t type, time_t *usage_start, time_t *usage_end) {
     time_t start = (*usage_start), end = (*usage_end);
     time_t my_time = time(NULL);
     struct tm start_tm;
@@ -412,15 +401,13 @@ extern int set_usage_information(char **usage_table,
     /* Default is going to be the last day */
     if (!end) {
         if (!slurm_localtime_r(&my_time, &end_tm)) {
-            error("Couldn't get localtime from end %ld",
-                  my_time);
+            error("Couldn't get localtime from end %ld", my_time);
             return SLURM_ERROR;
         }
         end_tm.tm_hour = 0;
     } else {
         if (!slurm_localtime_r(&end, &end_tm)) {
-            error("Couldn't get localtime from user end %ld",
-                  end);
+            error("Couldn't get localtime from user end %ld", end);
             return SLURM_ERROR;
         }
     }
@@ -430,16 +417,14 @@ extern int set_usage_information(char **usage_table,
 
     if (!start) {
         if (!slurm_localtime_r(&my_time, &start_tm)) {
-            error("Couldn't get localtime from start %ld",
-                  my_time);
+            error("Couldn't get localtime from start %ld", my_time);
             return SLURM_ERROR;
         }
         start_tm.tm_hour = 0;
         start_tm.tm_mday--;
     } else {
         if (!slurm_localtime_r(&start, &start_tm)) {
-            error("Couldn't get localtime from user start %ld",
-                  start);
+            error("Couldn't get localtime from user start %ld", start);
             return SLURM_ERROR;
         }
     }
@@ -450,8 +435,7 @@ extern int set_usage_information(char **usage_table,
     if (end - start < 3600) {
         end = start + 3600;
         if (!slurm_localtime_r(&end, &end_tm)) {
-            error("2 Couldn't get localtime from user end %ld",
-                  end);
+            error("2 Couldn't get localtime from user end %ld", end);
             return SLURM_ERROR;
         }
     }
@@ -459,8 +443,7 @@ extern int set_usage_information(char **usage_table,
      * boundaries other wise use the day table.
      */
     //info("%d %d %d", start_tm.tm_hour, end_tm.tm_hour, end-start);
-    if (start_tm.tm_hour || end_tm.tm_hour || (end - start < 86400)
-        || (end > my_time)) {
+    if (start_tm.tm_hour || end_tm.tm_hour || (end - start < 86400) || (end > my_time)) {
         switch (type) {
             case DBD_GET_ASSOC_USAGE:
                 my_usage_table = assoc_hour_table;
@@ -472,12 +455,10 @@ extern int set_usage_information(char **usage_table,
                 my_usage_table = cluster_hour_table;
                 break;
             default:
-                error("Bad type given for hour usage %d %s", type,
-                      slurmdbd_msg_type_2_str(type, 1));
+                error("Bad type given for hour usage %d %s", type, slurmdbd_msg_type_2_str(type, 1));
                 break;
         }
-    } else if (start_tm.tm_mday == 1 && end_tm.tm_mday == 1
-               && (end - start > 86400)) {
+    } else if (start_tm.tm_mday == 1 && end_tm.tm_mday == 1 && (end - start > 86400)) {
         switch (type) {
             case DBD_GET_ASSOC_USAGE:
                 my_usage_table = assoc_month_table;
@@ -489,8 +470,7 @@ extern int set_usage_information(char **usage_table,
                 my_usage_table = cluster_month_table;
                 break;
             default:
-                error("Bad type given for month usage %d %s", type,
-                      slurmdbd_msg_type_2_str(type, 1));
+                error("Bad type given for month usage %d %s", type, slurmdbd_msg_type_2_str(type, 1));
                 break;
         }
     }
@@ -539,8 +519,7 @@ extern void merge_delta_qos_list(List qos_list, List delta_qos_list) {
     list_iterator_destroy(curr_itr);
 }
 
-extern bool is_user_min_admin_level(void *db_conn, uid_t uid,
-                                    slurmdb_admin_level_t min_level) {
+extern bool is_user_min_admin_level(void *db_conn, uid_t uid, slurmdb_admin_level_t min_level) {
     bool is_admin = 1;
     /* This only works when running though the slurmdbd.
      * THERE IS NO AUTHENTICATION WHEN RUNNNING OUT OF THE
@@ -555,8 +534,7 @@ extern bool is_user_min_admin_level(void *db_conn, uid_t uid,
          * plugin since we don't know what accounts are being
          * referenced until after the query.
          */
-        if ((uid != slurmdbd_conf->slurm_user_id && uid != 0)
-            && assoc_mgr_get_admin_level(db_conn, uid) < min_level)
+        if ((uid != slurmdbd_conf->slurm_user_id && uid != 0) && assoc_mgr_get_admin_level(db_conn, uid) < min_level)
             is_admin = 0;
     } else if ((uid != 0) && (uid != slurmctld_conf.slurm_user_id))
         is_admin = 0;
@@ -585,10 +563,8 @@ extern bool is_user_coord(slurmdb_user_rec_t *user, char *account) {
 
 extern bool is_user_any_coord(void *db_conn, slurmdb_user_rec_t *user) {
     xassert(user);
-    if (assoc_mgr_fill_in_user(db_conn, user, 1, NULL, false)
-        != SLURM_SUCCESS) {
-        error("couldn't get information for this user %s(%d)",
-              user->name, user->uid);
+    if (assoc_mgr_fill_in_user(db_conn, user, 1, NULL, false) != SLURM_SUCCESS) {
+        error("couldn't get information for this user %s(%d)", user->name, user->uid);
         return 0;
     }
     return (user->coord_accts && list_count(user->coord_accts));
@@ -609,8 +585,7 @@ extern char *acct_get_db_name(void) {
         while (location[i]) {
             if (location[i] == '.' || location[i] == '/') {
                 debug("%s doesn't look like a database "
-                      "name using %s",
-                      location, DEFAULT_ACCOUNTING_DB);
+                      "name using %s", location, DEFAULT_ACCOUNTING_DB);
                 break;
             }
             i++;
@@ -670,133 +645,100 @@ extern time_t archive_setup_end_time(time_t last_submit, uint32_t purge) {
 
 
 /* execute archive script */
-extern int archive_run_script(slurmdb_archive_cond_t *arch_cond,
-                              char *cluster_name, time_t last_submit) {
+extern int archive_run_script(slurmdb_archive_cond_t *arch_cond, char *cluster_name, time_t last_submit) {
     char *args[] = {arch_cond->archive_script, NULL};
     struct stat st;
     char **env = NULL;
     time_t curr_end;
 
     if (stat(arch_cond->archive_script, &st) < 0) {
-        error("archive_run_script: failed to stat %s: %m",
-              arch_cond->archive_script);
+        error("archive_run_script: failed to stat %s: %m", arch_cond->archive_script);
         return SLURM_ERROR;
     }
 
     if (!(st.st_mode & S_IFREG)) {
         errno = EACCES;
-        error("archive_run_script: %s isn't a regular file",
-              arch_cond->archive_script);
+        error("archive_run_script: %s isn't a regular file", arch_cond->archive_script);
         return SLURM_ERROR;
     }
 
     if (access(arch_cond->archive_script, X_OK) < 0) {
         errno = EACCES;
-        error("archive_run_script: %s is not executable",
-              arch_cond->archive_script);
+        error("archive_run_script: %s is not executable", arch_cond->archive_script);
         return SLURM_ERROR;
     }
 
     env = env_array_create();
-    env_array_append_fmt(&env, "SLURM_ARCHIVE_CLUSTER", "%s",
-                         cluster_name);
+    env_array_append_fmt(&env, "SLURM_ARCHIVE_CLUSTER", "%s", cluster_name);
 
     if (arch_cond->purge_event != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_event))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_event))) {
             error("Parsing purge events failed");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_EVENTS", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_event));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_EVENT", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_EVENTS", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_event));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_EVENT", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_job != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_job))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_job))) {
             error("Parsing purge job failed");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_JOBS", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_job));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_JOB", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_JOBS", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_job));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_JOB", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_resv != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_job))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_job))) {
             error("Parsing purge job failed");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_RESV", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_job));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_RESV", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_RESV", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_job));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_RESV", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_step != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_step))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_step))) {
             error("Parsing purge step");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_STEPS", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_step));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_STEP", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_STEPS", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_step));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_STEP", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_suspend != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_suspend))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_suspend))) {
             error("Parsing purge suspend");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_SUSPEND", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_suspend));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_SUSPEND", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_SUSPEND", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_suspend));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_SUSPEND", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_txn != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_txn))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_txn))) {
             error("Parsing purge txn");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_TXN", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_txn));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_TXN", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_TXN", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_txn));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_TXN", "%ld", (long) curr_end);
     }
 
     if (arch_cond->purge_usage != NO_VAL) {
-        if (!(curr_end = archive_setup_end_time(
-                last_submit, arch_cond->purge_usage))) {
+        if (!(curr_end = archive_setup_end_time(last_submit, arch_cond->purge_usage))) {
             error("Parsing purge usage");
             return SLURM_ERROR;
         }
 
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_USAGE", "%u",
-                             SLURMDB_PURGE_ARCHIVE_SET(
-                                     arch_cond->purge_usage));
-        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_USAGE", "%ld",
-                             (long) curr_end);
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_USAGE", "%u", SLURMDB_PURGE_ARCHIVE_SET(arch_cond->purge_usage));
+        env_array_append_fmt(&env, "SLURM_ARCHIVE_LAST_USAGE", "%ld", (long) curr_end);
     }
 
 #ifdef _PATH_STDPATH
@@ -811,9 +753,9 @@ extern int archive_run_script(slurmdb_archive_cond_t *arch_cond,
     return SLURM_SUCCESS;
 }
 
-static char *_make_archive_name(time_t period_start, time_t period_end,
-                                char *cluster_name, char *arch_dir,
-                                char *arch_type, uint32_t archive_period) {
+static char *
+_make_archive_name(time_t period_start, time_t period_end, char *cluster_name, char *arch_dir, char *arch_type,
+                   uint32_t archive_period) {
     char *name = NULL, *fullname = NULL;
     struct tm time_tm;
     uint32_t num = 2;
@@ -822,8 +764,7 @@ static char *_make_archive_name(time_t period_start, time_t period_end,
     time_tm.tm_sec = 0;
     time_tm.tm_min = 0;
 
-    xstrfmtcat(name, "%s/%s_%s_archive_", arch_dir, cluster_name,
-               arch_type);
+    xstrfmtcat(name, "%s/%s_%s_archive_", arch_dir, cluster_name, arch_type);
 
     /* set up the start time based off the period we are purging */
     if (SLURMDB_PURGE_IN_HOURS(archive_period)) {
@@ -835,17 +776,13 @@ static char *_make_archive_name(time_t period_start, time_t period_end,
     }
 
     /* Add start time to file name. */
-    xstrfmtcat(name, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u_",
-               (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
-               time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min,
-               time_tm.tm_sec);
+    xstrfmtcat(name, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u_", (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
+               time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec);
 
     slurm_localtime_r((time_t *) &period_end, &time_tm);
     /* Add end time to file name. */
-    xstrfmtcat(name, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u",
-               (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
-               time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min,
-               time_tm.tm_sec);
+    xstrfmtcat(name, "%4.4u-%2.2u-%2.2uT%2.2u:%2.2u:%2.2u", (time_tm.tm_year + 1900), (time_tm.tm_mon + 1),
+               time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec);
 
     /* If the file already exists, generate a new file name. */
     fullname = xstrdup(name);
@@ -859,10 +796,8 @@ static char *_make_archive_name(time_t period_start, time_t period_end,
     return fullname;
 }
 
-extern int archive_write_file(Buf buffer, char *cluster_name,
-                              time_t period_start, time_t period_end,
-                              char *arch_dir, char *arch_type,
-                              uint32_t archive_period) {
+extern int archive_write_file(Buf buffer, char *cluster_name, time_t period_start, time_t period_end, char *arch_dir,
+                              char *arch_type, uint32_t archive_period) {
     int fd = 0;
     int rc = SLURM_SUCCESS;
     char *new_file = NULL;
@@ -873,16 +808,13 @@ extern int archive_write_file(Buf buffer, char *cluster_name,
     slurm_mutex_lock(&local_file_lock);
 
     /* write the buffer to file */
-    new_file = _make_archive_name(period_start, period_end,
-                                  cluster_name, arch_dir,
-                                  arch_type, archive_period);
+    new_file = _make_archive_name(period_start, period_end, cluster_name, arch_dir, arch_type, archive_period);
     if (!new_file) {
         error("%s: Unable to make archive file name.", __func__);
         return SLURM_ERROR;
     }
 
-    debug("Storing %s archive for %s at %s",
-          arch_type, cluster_name, new_file);
+    debug("Storing %s archive for %s at %s", arch_type, cluster_name, new_file);
 
     fd = creat(new_file, 0600);
     if (fd < 0) {

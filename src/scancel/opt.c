@@ -141,22 +141,18 @@ extern bool has_job_steps(void) {
     return false;
 }
 
-static uint32_t
-_xlate_state_name(const char *state_name, bool env_var) {
+static uint32_t _xlate_state_name(const char *state_name, bool env_var) {
     uint32_t i = job_state_num(state_name);
 
     if (i != NO_VAL)
         return i;
 
     if (env_var) {
-        fprintf(stderr, "Unrecognized SCANCEL_STATE value: %s\n",
-                state_name);
+        fprintf(stderr, "Unrecognized SCANCEL_STATE value: %s\n", state_name);
     } else {
-        fprintf(stderr, "Invalid job state specified: %s\n",
-                state_name);
+        fprintf(stderr, "Invalid job state specified: %s\n", state_name);
     }
-    fprintf(stderr,
-            "Valid job states are PENDING, RUNNING, and SUSPENDED\n");
+    fprintf(stderr, "Valid job states are PENDING, RUNNING, and SUSPENDED\n");
     exit(1);
 }
 
@@ -257,8 +253,7 @@ static void _opt_env(void) {
         else if (xstrcasecmp(val, "F") == 0)
             opt.interactive = false;
         else
-            error("Unrecognized SCANCEL_INTERACTIVE value: %s",
-                  val);
+            error("Unrecognized SCANCEL_INTERACTIVE value: %s", val);
     }
 
     if ((val = getenv("SCANCEL_NAME"))) {
@@ -291,8 +286,7 @@ static void _opt_env(void) {
         else if (xstrcasecmp(val, "F") == 0)
             opt.verbose = 0;
         else
-            error("Unrecognized SCANCEL_VERBOSE value: %s",
-                  val);
+            error("Unrecognized SCANCEL_VERBOSE value: %s", val);
     }
 
     if ((val = getenv("SCANCEL_WCKEY"))) {
@@ -308,40 +302,37 @@ opt_args(): 通过命令行args和getopt_long设置选项
 static void _opt_args(int argc, char **argv) {
     char **rest = NULL;
     int opt_char, option_index;
-    static struct option long_options[] = {
-            {"account",     required_argument, 0, 'A'},
-            {"batch",       no_argument,       0, 'b'},
-            {"ctld",        no_argument,       0, OPT_LONG_CTLD},
-            {"full",        no_argument,       0, 'f'},
-            {"help",        no_argument,       0, OPT_LONG_HELP},
-            {"hurry",       no_argument,       0, 'H'},
-            {"interactive", no_argument,       0, 'i'},
-            {"cluster",     required_argument, 0, 'M'},
-            {"clusters",    required_argument, 0, 'M'},
-            {"jobname",     required_argument, 0, 'n'},
-            {"name",        required_argument, 0, 'n'},
-            {"nodelist",    required_argument, 0, 'w'},
-            {"partition",   required_argument, 0, 'p'},
-            {"qos",         required_argument, 0, 'q'},
-            {"quiet",       no_argument,       0, 'Q'},
-            {"reservation", required_argument, 0, 'R'},
-            {"sibling",     required_argument, 0, OPT_LONG_SIBLING},
-            {"signal",      required_argument, 0, 's'},
-            {"state",       required_argument, 0, 't'},
-            {"usage",       no_argument,       0, OPT_LONG_USAGE},
-            {"user",        required_argument, 0, 'u'},
-            {"verbose",     no_argument,       0, 'v'},
-            {"version",     no_argument,       0, 'V'},
-            {"wckey",       required_argument, 0, OPT_LONG_WCKEY},
-            {NULL, 0,                          0, 0}};
+    static struct option long_options[] = {{"account",     required_argument, 0, 'A'},
+                                           {"batch",       no_argument,       0, 'b'},
+                                           {"ctld",        no_argument,       0, OPT_LONG_CTLD},
+                                           {"full",        no_argument,       0, 'f'},
+                                           {"help",        no_argument,       0, OPT_LONG_HELP},
+                                           {"hurry",       no_argument,       0, 'H'},
+                                           {"interactive", no_argument,       0, 'i'},
+                                           {"cluster",     required_argument, 0, 'M'},
+                                           {"clusters",    required_argument, 0, 'M'},
+                                           {"jobname",     required_argument, 0, 'n'},
+                                           {"name",        required_argument, 0, 'n'},
+                                           {"nodelist",    required_argument, 0, 'w'},
+                                           {"partition",   required_argument, 0, 'p'},
+                                           {"qos",         required_argument, 0, 'q'},
+                                           {"quiet",       no_argument,       0, 'Q'},
+                                           {"reservation", required_argument, 0, 'R'},
+                                           {"sibling",     required_argument, 0, OPT_LONG_SIBLING},
+                                           {"signal",      required_argument, 0, 's'},
+                                           {"state",       required_argument, 0, 't'},
+                                           {"usage",       no_argument,       0, OPT_LONG_USAGE},
+                                           {"user",        required_argument, 0, 'u'},
+                                           {"verbose",     no_argument,       0, 'v'},
+                                           {"version",     no_argument,       0, 'V'},
+                                           {"wckey",       required_argument, 0, OPT_LONG_WCKEY},
+                                           {NULL, 0,                          0, 0}};
 
-    while ((opt_char = getopt_long(argc, argv, "A:bfHiM:n:p:Qq:R:s:t:u:vVw:",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "A:bfHiM:n:p:Qq:R:s:t:u:vVw:", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) '?':
-                fprintf(stderr,
-                        "Try \"scancel --help\" for more "
-                        "information\n");
+                fprintf(stderr, "Try \"scancel --help\" for more "
+                                "information\n");
                 exit(1);
                 break;
             case (int) 'A':
@@ -390,8 +381,7 @@ static void _opt_args(int argc, char **argv) {
             case (int) 's':
                 opt.signal = sig_name2num(optarg);
                 if (!opt.signal) {
-                    fprintf(stderr, "Unknown job signal: %s\n",
-                            optarg);
+                    fprintf(stderr, "Unknown job signal: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -435,8 +425,7 @@ static void _opt_args(int argc, char **argv) {
         exit(1);
 }
 
-static char **
-_xlate_job_step_ids(char **rest) {
+static char **_xlate_job_step_ids(char **rest) {
     int buf_size, buf_offset, id_args_size, i, j;
     long job_id, tmp_l;
     char **id_args = NULL, *next_str;
@@ -455,8 +444,7 @@ _xlate_job_step_ids(char **rest) {
         id_args[i] = xstrdup(rest[i]);
         if ((i + 4) >= id_args_size) {
             id_args_size *= 2;
-            id_args = xrealloc(id_args, sizeof(char *) *
-                                        id_args_size);
+            id_args = xrealloc(id_args, sizeof(char *) * id_args_size);
         }
     }
 
@@ -538,8 +526,7 @@ _xlate_job_step_ids(char **rest) {
              * simply split the string on commas. */
             if ((i + 4) >= id_args_size) {
                 id_args_size *= 2;
-                id_args = xrealloc(id_args, sizeof(char *) *
-                                            id_args_size);
+                id_args = xrealloc(id_args, sizeof(char *) * id_args_size);
             }
             for (j = id_args_size - 1; j > (i + 1); j--)
                 id_args[j] = id_args[j - 1];
@@ -558,8 +545,7 @@ _xlate_job_step_ids(char **rest) {
  * opt_verify : perform some post option processing verification
  *
  */
-static bool
-_opt_verify(void) {
+static bool _opt_verify(void) {
     bool verified = true;
 
     if (opt.user_name) { /* translate to user_id */
@@ -569,16 +555,9 @@ _opt_verify(void) {
         }
     }
 
-    if ((opt.account == 0) &&
-        (opt.job_cnt == 0) &&
-        (opt.job_name == NULL) &&
-        (opt.nodelist == NULL) &&
-        (opt.partition == NULL) &&
-        (opt.qos == NULL) &&
-        (opt.reservation == NULL) &&
-        (opt.state == JOB_END) &&
-        (opt.user_name == NULL) &&
-        (opt.wckey == NULL)) {
+    if ((opt.account == 0) && (opt.job_cnt == 0) && (opt.job_name == NULL) && (opt.nodelist == NULL) &&
+        (opt.partition == NULL) && (opt.qos == NULL) && (opt.reservation == NULL) && (opt.state == JOB_END) &&
+        (opt.user_name == NULL) && (opt.wckey == NULL)) {
         error("No job identification provided");
         verified = false; /* no job specification */
     }
@@ -615,26 +594,19 @@ static void _opt_list(void) {
     for (i = 0; i < opt.job_cnt; i++) {
         if (opt.step_id[i] == SLURM_BATCH_SCRIPT) {
             if (opt.array_id[i] == NO_VAL) {
-                info("job_id[%d]      : %u",
-                     i, opt.job_id[i]);
+                info("job_id[%d]      : %u", i, opt.job_id[i]);
             } else if (opt.array_id[i] == INFINITE) {
-                info("job_id[%d]      : %u_*",
-                     i, opt.job_id[i]);
+                info("job_id[%d]      : %u_*", i, opt.job_id[i]);
             } else {
-                info("job_id[%d]      : %u_%u",
-                     i, opt.job_id[i], opt.array_id[i]);
+                info("job_id[%d]      : %u_%u", i, opt.job_id[i], opt.array_id[i]);
             }
         } else {
             if (opt.array_id[i] == NO_VAL) {
-                info("job_step_id[%d] : %u.%u",
-                     i, opt.job_id[i], opt.step_id[i]);
+                info("job_step_id[%d] : %u.%u", i, opt.job_id[i], opt.step_id[i]);
             } else if (opt.array_id[i] == INFINITE) {
-                info("job_step_id[%d] : %u_*.%u",
-                     i, opt.job_id[i], opt.step_id[i]);
+                info("job_step_id[%d] : %u_*.%u", i, opt.job_id[i], opt.step_id[i]);
             } else {
-                info("job_step_id[%d] : %u_%u.%u",
-                     i, opt.job_id[i], opt.array_id[i],
-                     opt.step_id[i]);
+                info("job_step_id[%d] : %u_%u.%u", i, opt.job_id[i], opt.array_id[i], opt.step_id[i]);
             }
         }
     }

@@ -104,9 +104,7 @@ static srun_job_t *job = NULL;
 extern char **environ; /* job environment */ /* 工作环境 */
 bool srun_max_timer = false;
 bool srun_shutdown = false;
-int sig_array[] = {
-        SIGINT, SIGQUIT, SIGCONT, SIGTERM, SIGHUP,
-        SIGALRM, SIGUSR1, SIGUSR2, SIGPIPE, 0};
+int sig_array[] = {SIGINT, SIGQUIT, SIGCONT, SIGTERM, SIGHUP, SIGALRM, SIGUSR1, SIGUSR2, SIGPIPE, 0};
 
 typedef struct _launch_app_data {
     bool got_alloc;
@@ -134,11 +132,9 @@ static void _set_node_alias(void);
 
 static void _setup_env_working_cluster(void);
 
-static void _setup_job_env(srun_job_t *job, List srun_job_list,
-                           bool got_alloc);
+static void _setup_job_env(srun_job_t *job, List srun_job_list, bool got_alloc);
 
-static void _setup_one_job_env(slurm_opt_t *opt_local, srun_job_t *job,
-                               bool got_alloc);
+static void _setup_one_job_env(slurm_opt_t *opt_local, srun_job_t *job, bool got_alloc);
 
 static int _slurm_debug_env_val(void);
 
@@ -255,8 +251,7 @@ static void *_launch_one_app(void *data) {
     relaunch:
     launch_common_set_stdio_fds(job, &cio_fds, opt_local);
 
-    if (!launch_g_step_launch(job, &cio_fds, &global_rc, &step_callbacks,
-                              opt_local)) {
+    if (!launch_g_step_launch(job, &cio_fds, &global_rc, &step_callbacks, opt_local)) {
         if (launch_g_step_wait(job, got_alloc, opt_local) == -1)
             goto relaunch;
     }
@@ -276,8 +271,7 @@ static void *_launch_one_app(void *data) {
  * cause problems for some MPI implementations. Put the pack_node_list records
  * in alphabetic order and reorder pack_task_cnts pack_tids to match
  */
-static void _reorder_pack_recs(char **in_node_list, uint16_t **in_task_cnts,
-                               uint32_t ***in_tids, int total_nnodes) {
+static void _reorder_pack_recs(char **in_node_list, uint16_t **in_task_cnts, uint32_t ***in_tids, int total_nnodes) {
     hostlist_t in_hl, out_hl;
     uint16_t *out_task_cnts = NULL;
     uint32_t **out_tids = NULL;
@@ -294,8 +288,7 @@ static void _reorder_pack_recs(char **in_node_list, uint16_t **in_task_cnts,
     hostlist_uniq(out_hl);
     i = hostlist_count(out_hl);
     if (i != total_nnodes) {
-        error("%s: Invalid hostlist(%s) count(%d)", __func__,
-              *in_node_list, total_nnodes);
+        error("%s: Invalid hostlist(%s) count(%d)", __func__, *in_node_list, total_nnodes);
         goto fini;
     }
 
@@ -304,14 +297,12 @@ static void _reorder_pack_recs(char **in_node_list, uint16_t **in_task_cnts,
     for (i = 0; i < total_nnodes; i++) {
         hostname = hostlist_nth(out_hl, i);
         if (!hostname) {
-            error("%s: Invalid hostlist(%s) count(%d)", __func__,
-                  *in_node_list, total_nnodes);
+            error("%s: Invalid hostlist(%s) count(%d)", __func__, *in_node_list, total_nnodes);
             break;
         }
         j = hostlist_find(in_hl, hostname);
         if (j == -1) {
-            error("%s: Invalid hostlist(%s) parsing", __func__,
-                  *in_node_list);
+            error("%s: Invalid hostlist(%s) parsing", __func__, *in_node_list);
             free(hostname);
             break;
         }
@@ -373,8 +364,7 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
         if (!opt_list) {
             if (first_job)
                 fini_srun(first_job, got_alloc, &global_rc, 0);
-            fatal("%s: have srun_job_list, but no opt_list",
-                  __func__);
+            fatal("%s: have srun_job_list, but no opt_list", __func__);
         }
 
         job_iter = list_iterator_create(srun_job_list);
@@ -385,52 +375,36 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
             total_nnodes += job->nhosts;
 
             xrealloc(pack_task_cnts, sizeof(uint16_t) * total_nnodes);
-            (void) slurm_step_ctx_get(job->step_ctx,
-                                      SLURM_STEP_CTX_TASKS,
-                                      &tmp_task_cnt);
-            xrealloc(pack_tid_offsets,
-                     sizeof(uint32_t) * total_ntasks);
+            (void) slurm_step_ctx_get(job->step_ctx, SLURM_STEP_CTX_TASKS, &tmp_task_cnt);
+            xrealloc(pack_tid_offsets, sizeof(uint32_t) * total_ntasks);
 
-            for (i = total_ntasks - job->ntasks;
-                 i < total_ntasks;
-                 i++)
+            for (i = total_ntasks - job->ntasks; i < total_ntasks; i++)
                 pack_tid_offsets[i] = job->pack_offset;
 
             if (!tmp_task_cnt) {
-                fatal("%s: job %u has NULL task array",
-                      __func__, job->jobid);
+                fatal("%s: job %u has NULL task array", __func__, job->jobid);
                 break; /* To eliminate CLANG error */
             }
-            memcpy(pack_task_cnts + node_offset, tmp_task_cnt,
-                   sizeof(uint16_t) * job->nhosts);
+            memcpy(pack_task_cnts + node_offset, tmp_task_cnt, sizeof(uint16_t) * job->nhosts);
 
             xrealloc(pack_tids, sizeof(uint32_t *) * total_nnodes);
-            (void) slurm_step_ctx_get(job->step_ctx,
-                                      SLURM_STEP_CTX_TIDS,
-                                      &tmp_tids);
+            (void) slurm_step_ctx_get(job->step_ctx, SLURM_STEP_CTX_TIDS, &tmp_tids);
             if (!tmp_tids) {
-                fatal("%s: job %u has NULL task ID array",
-                      __func__, job->jobid);
+                fatal("%s: job %u has NULL task ID array", __func__, job->jobid);
                 break; /* To eliminate CLANG error */
             }
             for (node_inx = 0; node_inx < job->nhosts; node_inx++) {
                 uint32_t *node_tids;
-                node_tids = xmalloc(sizeof(uint32_t) *
-                                    tmp_task_cnt[node_inx]);
+                node_tids = xmalloc(sizeof(uint32_t) * tmp_task_cnt[node_inx]);
                 for (i = 0; i < tmp_task_cnt[node_inx]; i++) {
-                    node_tids[i] = tmp_tids[node_inx][i] +
-                                   job->pack_task_offset;
+                    node_tids[i] = tmp_tids[node_inx][i] + job->pack_task_offset;
                 }
-                pack_tids[node_offset + node_inx] =
-                        node_tids;
+                pack_tids[node_offset + node_inx] = node_tids;
             }
 
-            (void) slurm_step_ctx_get(job->step_ctx,
-                                      SLURM_STEP_CTX_NODE_LIST,
-                                      &node_list);
+            (void) slurm_step_ctx_get(job->step_ctx, SLURM_STEP_CTX_NODE_LIST, &node_list);
             if (!node_list) {
-                fatal("%s: job %u has NULL hostname",
-                      __func__, job->jobid);
+                fatal("%s: job %u has NULL hostname", __func__, job->jobid);
             }
             if (pack_node_list)
                 xstrfmtcat(pack_node_list, ",%s", node_list);
@@ -440,8 +414,7 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
             node_offset += job->nhosts;
         }
         list_iterator_reset(job_iter);
-        _reorder_pack_recs(&pack_node_list, &pack_task_cnts,
-                           &pack_tids, total_nnodes);
+        _reorder_pack_recs(&pack_node_list, &pack_task_cnts, &pack_tids, total_nnodes);
 
         if (need_mpir)
             mpir_init(total_ntasks);
@@ -459,12 +432,10 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
                     slurm_cond_wait(&step_cond, &step_mutex);
                 slurm_mutex_unlock(&step_mutex);
                 if (first_job) {
-                    fini_srun(first_job, got_alloc,
-                              &global_rc, 0);
+                    fini_srun(first_job, got_alloc, &global_rc, 0);
                 }
-                fatal("%s: job allocation count does not match request count (%d != %d)",
-                      __func__, list_count(srun_job_list),
-                      list_count(opt_list));
+                fatal("%s: job allocation count does not match request count (%d != %d)", __func__,
+                      list_count(srun_job_list), list_count(opt_list));
                 break; /* To eliminate CLANG error */
             }
 
@@ -472,22 +443,15 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
             step_cnt++;
             slurm_mutex_unlock(&step_mutex);
             job->pack_node_list = xstrdup(pack_node_list);
-            if ((pack_step_cnt > 1) && pack_task_cnts &&
-                pack_tid_offsets) {
+            if ((pack_step_cnt > 1) && pack_task_cnts && pack_tid_offsets) {
                 xassert(node_offset == job->pack_nnodes);
-                job->pack_task_cnts = xcalloc(job->pack_nnodes,
-                                              sizeof(uint16_t));
-                memcpy(job->pack_task_cnts, pack_task_cnts,
-                       sizeof(uint16_t) * job->pack_nnodes);
-                job->pack_tids = xcalloc(job->pack_nnodes,
-                                         sizeof(uint32_t *));
-                memcpy(job->pack_tids, pack_tids,
-                       sizeof(uint32_t *) * job->pack_nnodes);
+                job->pack_task_cnts = xcalloc(job->pack_nnodes, sizeof(uint16_t));
+                memcpy(job->pack_task_cnts, pack_task_cnts, sizeof(uint16_t) * job->pack_nnodes);
+                job->pack_tids = xcalloc(job->pack_nnodes, sizeof(uint32_t *));
+                memcpy(job->pack_tids, pack_tids, sizeof(uint32_t *) * job->pack_nnodes);
 
-                job->pack_tid_offsets = xcalloc(
-                        total_ntasks, sizeof(uint32_t));
-                memcpy(job->pack_tid_offsets, pack_tid_offsets,
-                       sizeof(uint32_t) * total_ntasks);
+                job->pack_tid_offsets = xcalloc(total_ntasks, sizeof(uint32_t));
+                memcpy(job->pack_tid_offsets, pack_tid_offsets, sizeof(uint32_t) * total_ntasks);
             }
 
             opts = xmalloc(sizeof(_launch_app_data_t));
@@ -499,8 +463,7 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
             opts->step_mutex = &step_mutex;
             srun_opt->pack_step_cnt = pack_step_cnt;
 
-            slurm_thread_create_detached(NULL, _launch_one_app,
-                                         opts);
+            slurm_thread_create_detached(NULL, _launch_one_app, opts);
         }
         xfree(pack_node_list);
         xfree(pack_task_cnts);
@@ -519,32 +482,22 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
         if (need_mpir)
             mpir_init(job->ntasks);
         if (job->pack_jobid && (job->pack_jobid != NO_VAL)) {
-            (void) slurm_step_ctx_get(job->step_ctx,
-                                      SLURM_STEP_CTX_TASKS,
-                                      &tmp_task_cnt);
-            job->pack_task_cnts = xcalloc(job->pack_nnodes,
-                                          sizeof(uint16_t));
-            memcpy(job->pack_task_cnts, tmp_task_cnt,
-                   sizeof(uint16_t) * job->pack_nnodes);
-            (void) slurm_step_ctx_get(job->step_ctx,
-                                      SLURM_STEP_CTX_TIDS,
-                                      &tmp_tids);
-            job->pack_tids = xcalloc(job->pack_nnodes,
-                                     sizeof(uint32_t *));
-            memcpy(job->pack_tids, tmp_tids,
-                   sizeof(uint32_t *) * job->pack_nnodes);
+            (void) slurm_step_ctx_get(job->step_ctx, SLURM_STEP_CTX_TASKS, &tmp_task_cnt);
+            job->pack_task_cnts = xcalloc(job->pack_nnodes, sizeof(uint16_t));
+            memcpy(job->pack_task_cnts, tmp_task_cnt, sizeof(uint16_t) * job->pack_nnodes);
+            (void) slurm_step_ctx_get(job->step_ctx, SLURM_STEP_CTX_TIDS, &tmp_tids);
+            job->pack_tids = xcalloc(job->pack_nnodes, sizeof(uint32_t *));
+            memcpy(job->pack_tids, tmp_tids, sizeof(uint32_t *) * job->pack_nnodes);
             job->pack_node_list = xstrdup(job->nodelist);
 
-            job->pack_tid_offsets = xcalloc(job->ntasks,
-                                            sizeof(uint32_t));
+            job->pack_tid_offsets = xcalloc(job->ntasks, sizeof(uint32_t));
             if (job->pack_offset) {
                 /*
                  * Only starting one hetjob component,
                  * pack_offset should be zero
                  */
                 for (i = 0; i < job->ntasks; i++) {
-                    job->pack_tid_offsets[i] =
-                            job->pack_offset;
+                    job->pack_tid_offsets[i] = job->pack_offset;
                 }
             }
         }
@@ -558,8 +511,7 @@ static void _launch_app(srun_job_t *job, List srun_job_list, bool got_alloc) {
     }
 }
 
-static void _setup_one_job_env(slurm_opt_t *opt_local, srun_job_t *job,
-                               bool got_alloc) {
+static void _setup_one_job_env(slurm_opt_t *opt_local, srun_job_t *job, bool got_alloc) {
     env_t *env = xmalloc(sizeof(env_t));
     uint16_t *tasks = NULL;
     srun_opt_t *srun_opt = opt_local->srun_opt;
@@ -668,8 +620,7 @@ static void _setup_job_env(srun_job_t *job, List srun_job_list, bool got_alloc) 
         if (!opt_list) {
             if (first_job)
                 fini_srun(first_job, got_alloc, &global_rc, 0);
-            fatal("%s: have srun_job_list, but no opt_list",
-                  __func__);
+            fatal("%s: have srun_job_list, but no opt_list", __func__);
         }
         job_iter = list_iterator_create(srun_job_list);
         opt_iter = list_iterator_create(opt_list);
@@ -677,12 +628,10 @@ static void _setup_job_env(srun_job_t *job, List srun_job_list, bool got_alloc) 
             job = list_next(job_iter);
             if (!job) {
                 if (first_job) {
-                    fini_srun(first_job, got_alloc,
-                              &global_rc, 0);
+                    fini_srun(first_job, got_alloc, &global_rc, 0);
                 }
-                fatal("%s: job allocation count does not match request count (%d != %d)",
-                      __func__, list_count(srun_job_list),
-                      list_count(opt_list));
+                fatal("%s: job allocation count does not match request count (%d != %d)", __func__,
+                      list_count(srun_job_list), list_count(opt_list));
             }
             _setup_one_job_env(opt_local, job, got_alloc);
         }
@@ -711,8 +660,7 @@ static int _file_bcast(slurm_opt_t *opt_local, srun_job_t *job) {
     if (srun_opt->bcast_file) {
         params->dst_fname = xstrdup(srun_opt->bcast_file);
     } else {
-        xstrfmtcat(params->dst_fname, "%s/slurm_bcast_%u.%u",
-                   opt_local->chdir, job->jobid, job->stepid);
+        xstrfmtcat(params->dst_fname, "%s/slurm_bcast_%u.%u", opt_local->chdir, job->jobid, job->stepid);
     }
     params->fanout = 0;
     params->job_id = job->jobid;
@@ -784,8 +732,7 @@ static char *_uint16_array_to_str(int array_len, const uint16_t *array) {
         if (i == array_len - 1) /* last time through loop */
             sep = "";
         if (previous > 0) {
-            xstrfmtcat(str, "%u(x%u)%s",
-                       array[i], previous + 1, sep);
+            xstrfmtcat(str, "%u(x%u)%s", array[i], previous + 1, sep);
         } else {
             xstrfmtcat(str, "%u%s", array[i], sep);
         }
@@ -864,11 +811,9 @@ static void _setup_env_working_cluster(void) {
     strchr函数功能为在一个串中查找给定字符的第一个匹配之处。
     函数原型为：char *strchr(const char *str, int c)，即在参数 str 所指向的字符串中搜索第一次出现字符 c（一个无符号字符）的位置。
     */
-    if (!(addr_ptr = strchr(working_env, ':')) ||
-        !(port_ptr = strchr(addr_ptr + 1, ':')) ||
+    if (!(addr_ptr = strchr(working_env, ':')) || !(port_ptr = strchr(addr_ptr + 1, ':')) ||
         !(rpc_ptr = strchr(port_ptr + 1, ':'))) {
-        error("malformed cluster addr and port in SLURM_WORKING_CLUSTER env var: '%s'",
-              working_env);
+        error("malformed cluster addr and port in SLURM_WORKING_CLUSTER env var: '%s'", working_env);
         exit(1);
     }
 
@@ -898,14 +843,11 @@ static void _setup_env_working_cluster(void) {
         working_cluster_rec->control_host = xstrdup(addr_ptr);
         working_cluster_rec->control_port = strtol(port_ptr, NULL, 10);
         working_cluster_rec->rpc_version = strtol(rpc_ptr, NULL, 10);
-        slurm_set_addr(&working_cluster_rec->control_addr,
-                       working_cluster_rec->control_port,
+        slurm_set_addr(&working_cluster_rec->control_addr, working_cluster_rec->control_port,
                        working_cluster_rec->control_host);
 
         if (select_ptr)
-            working_cluster_rec->plugin_id_select =
-                    select_get_plugin_id_pos(strtol(select_ptr,
-                                                    NULL, 10));
+            working_cluster_rec->plugin_id_select = select_get_plugin_id_pos(strtol(select_ptr, NULL, 10));
     }
     xfree(working_env);
 }

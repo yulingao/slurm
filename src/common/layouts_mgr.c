@@ -106,14 +106,11 @@ static void layouts_conf_spec_free(void *x) {
 typedef struct layout_ops_st {
     layouts_plugin_spec_t *spec;
 
-    int (*conf_done)(xhash_t *entities, layout_t *layout,
-                     s_p_hashtbl_t *tbl);
+    int (*conf_done)(xhash_t *entities, layout_t *layout, s_p_hashtbl_t *tbl);
 
-    void (*entity_parsing)(entity_t *e, s_p_hashtbl_t *etbl,
-                           layout_t *layout);
+    void (*entity_parsing)(entity_t *e, s_p_hashtbl_t *etbl, layout_t *layout);
 
-    int (*update_done)(layout_t *layout, entity_t **e_array,
-                       int e_cnt);
+    int (*update_done)(layout_t *layout, entity_t **e_array, int e_cnt);
 } layout_ops_t;
 
 /*
@@ -121,12 +118,9 @@ typedef struct layout_ops_st {
  *        as previously detailed, that's why though being a global constant,
  *        it is placed in this section.
  */
-const char *layout_syms[] = {
-        "plugin_spec",             /* holds constants, definitions, ... */
-        "layouts_p_conf_done",     /* */
-        "layouts_p_entity_parsing",
-        "layouts_p_update_done",
-};
+const char *layout_syms[] = {"plugin_spec",             /* holds constants, definitions, ... */
+                             "layouts_p_conf_done",     /* */
+                             "layouts_p_entity_parsing", "layouts_p_update_done",};
 
 /*
  * layout_plugin_t - it is the structure holding the plugin context of the
@@ -186,8 +180,7 @@ typedef struct layouts_keydef_st {
  * layouts_keydef_idfunc - identity function to build an hash table of
  *        layouts_keydef_t
  */
-static void layouts_keydef_idfunc(void *item, const char **key,
-                                  uint32_t *key_len) {
+static void layouts_keydef_idfunc(void *item, const char **key, uint32_t *key_len) {
     layouts_keydef_t *keydef = (layouts_keydef_t *) item;
     *key = keydef->key;
     *key_len = strlen(keydef->key);
@@ -293,9 +286,7 @@ static int _string_in_array(const char *str, const char **strings) {
     return 0;
 }
 
-static void _normalize_keydef_keycore(char *buffer, uint32_t size,
-                                      const char *key, const char *plugtype,
-                                      bool cat) {
+static void _normalize_keydef_keycore(char *buffer, uint32_t size, const char *key, const char *plugtype, bool cat) {
     int i;
     char keytmp[PATHLEN];
 
@@ -316,13 +307,11 @@ static void _normalize_keydef_keycore(char *buffer, uint32_t size,
     _cat(buffer, keytmp, size);
 }
 
-static void _normalize_keydef_key(char *buffer, uint32_t size,
-                                  const char *key, const char *plugtype) {
+static void _normalize_keydef_key(char *buffer, uint32_t size, const char *key, const char *plugtype) {
     _normalize_keydef_keycore(buffer, size, key, plugtype, false);
 }
 
-static void _normalize_keydef_mgrkey(char *buffer, uint32_t size,
-                                     const char *key, const char *plugtype) {
+static void _normalize_keydef_mgrkey(char *buffer, uint32_t size, const char *key, const char *plugtype) {
     strlcpy(buffer, "mgr.", size);
     _normalize_keydef_keycore(buffer, size, key, plugtype, true);
 }
@@ -399,8 +388,7 @@ static int _layouts_autoupdate_layout_if_allowed(layout_t *layout);
  *                       LAYOUTS INTERNAL LOCKLESS API                       *
 \*****************************************************************************/
 
-layouts_keydef_t *_layouts_entity_get_kv_keydef(layout_t *l, entity_t *e,
-                                                char *key) {
+layouts_keydef_t *_layouts_entity_get_kv_keydef(layout_t *l, entity_t *e, char *key) {
     char keytmp[PATHLEN];
     if (l == NULL || e == NULL || key == NULL)
         return NULL;
@@ -466,8 +454,7 @@ int _layouts_entity_get_kv_size(layout_t *l, entity_t *e, char *key, size_t *siz
     return SLURM_SUCCESS;
 }
 
-bool _layouts_entity_check_kv_keytype(layout_t *l, entity_t *e, char *key,
-                                      layouts_keydef_types_t key_type) {
+bool _layouts_entity_check_kv_keytype(layout_t *l, entity_t *e, char *key, layouts_keydef_types_t key_type) {
     layouts_keydef_types_t real_type;
     if (l == NULL || e == NULL || key == NULL)
         return SLURM_ERROR;
@@ -491,8 +478,7 @@ int _layouts_entity_pull_kv(layout_t *l, entity_t *e, char *key) {
     return _layouts_autoupdate_layout_if_allowed(l);
 }
 
-int _layouts_entity_set_kv(layout_t *l, entity_t *e, char *key, void *value,
-                           layouts_keydef_types_t key_type) {
+int _layouts_entity_set_kv(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     void *data;
     size_t size;
     layouts_keydef_types_t real_type;
@@ -512,8 +498,7 @@ int _layouts_entity_set_kv(layout_t *l, entity_t *e, char *key, void *value,
             return SLURM_ERROR;
         case L_T_STRING:
             data = xstrdup(value);
-            return entity_set_data_ref(e, key_keydef, data,
-                                       xfree_as_callback);
+            return entity_set_data_ref(e, key_keydef, data, xfree_as_callback);
         case L_T_CUSTOM:
             /* TBD : add a custom_set call */
             value = NULL;
@@ -546,8 +531,7 @@ int _layouts_entity_set_kv(layout_t *l, entity_t *e, char *key, void *value,
     return entity_set_data(e, key_keydef, value, size);
 }
 
-int _layouts_entity_set_kv_ref(layout_t *l, entity_t *e, char *key, void *value,
-                               layouts_keydef_types_t key_type) {
+int _layouts_entity_set_kv_ref(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
     char key_keydef[PATHLEN];
 
@@ -561,25 +545,21 @@ int _layouts_entity_set_kv_ref(layout_t *l, entity_t *e, char *key, void *value,
     return entity_set_data_ref(e, key_keydef, value, xfree_as_callback);
 }
 
-int _layouts_entity_setpush_kv(layout_t *l, entity_t *e, char *key, void *value,
-                               layouts_keydef_types_t key_type) {
+int _layouts_entity_setpush_kv(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
     if (_layouts_entity_set_kv(l, e, key, value, key_type) == SLURM_SUCCESS)
         rc = _layouts_entity_push_kv(l, e, key);
     return rc;
 }
 
-int _layouts_entity_setpush_kv_ref(layout_t *l, entity_t *e, char *key,
-                                   void *value, layouts_keydef_types_t key_type) {
+int _layouts_entity_setpush_kv_ref(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
-    if (_layouts_entity_set_kv_ref(l, e, key, value, key_type) ==
-        SLURM_SUCCESS)
+    if (_layouts_entity_set_kv_ref(l, e, key, value, key_type) == SLURM_SUCCESS)
         rc = _layouts_entity_push_kv(l, e, key);
     return rc;
 }
 
-int _layouts_entity_get_kv(layout_t *l, entity_t *e, char *key, void *value,
-                           layouts_keydef_types_t key_type) {
+int _layouts_entity_get_kv(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     void *data;
     size_t size;
     layouts_keydef_types_t real_type;
@@ -639,8 +619,8 @@ int _layouts_entity_get_kv(layout_t *l, entity_t *e, char *key, void *value,
     return SLURM_SUCCESS;
 }
 
-int _layouts_entity_get_mkv(layout_t *l, entity_t *e, char *keys, void *value,
-                            size_t length, layouts_keydef_types_t key_type) {
+int _layouts_entity_get_mkv(layout_t *l, entity_t *e, char *keys, void *value, size_t length,
+                            layouts_keydef_types_t key_type) {
     char *key = NULL;
     hostlist_t kl;
     size_t processed = 0;
@@ -659,8 +639,7 @@ int _layouts_entity_get_mkv(layout_t *l, entity_t *e, char *keys, void *value,
     while ((key = hostlist_shift(kl))) {
         if (processed >= length) {
             rc++;
-        } else if (_layouts_entity_get_kv_size(l, e, key, &elt_size) ||
-                   (processed + elt_size) > length ||
+        } else if (_layouts_entity_get_kv_size(l, e, key, &elt_size) || (processed + elt_size) > length ||
                    _layouts_entity_get_kv(l, e, key, value, key_type)) {
             rc++;
             processed = length;
@@ -675,9 +654,7 @@ int _layouts_entity_get_mkv(layout_t *l, entity_t *e, char *keys, void *value,
     return rc;
 }
 
-int _layouts_entity_get_kv_ref(layout_t *l, entity_t *e,
-                               char *key, void **value,
-                               layouts_keydef_types_t key_type) {
+int _layouts_entity_get_kv_ref(layout_t *l, entity_t *e, char *key, void **value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
     char key_keydef[PATHLEN];
     void *data;
@@ -697,8 +674,7 @@ int _layouts_entity_get_kv_ref(layout_t *l, entity_t *e,
     return rc;
 }
 
-int _layouts_entity_get_mkv_ref(layout_t *l, entity_t *e, char *keys,
-                                void *value, size_t length,
+int _layouts_entity_get_mkv_ref(layout_t *l, entity_t *e, char *keys, void *value, size_t length,
                                 layouts_keydef_types_t key_type) {
     char *key = NULL;
     hostlist_t kl;
@@ -732,8 +708,7 @@ int _layouts_entity_get_mkv_ref(layout_t *l, entity_t *e, char *keys,
     return rc;
 }
 
-int _layouts_entity_pullget_kv(layout_t *l, entity_t *e, char *key, void *value,
-                               layouts_keydef_types_t key_type) {
+int _layouts_entity_pullget_kv(layout_t *l, entity_t *e, char *key, void *value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
     if (!_layouts_entity_check_kv_keytype(l, e, key, key_type))
         return rc;
@@ -742,9 +717,7 @@ int _layouts_entity_pullget_kv(layout_t *l, entity_t *e, char *key, void *value,
     return rc;
 }
 
-int _layouts_entity_pullget_kv_ref(layout_t *l, entity_t *e,
-                                   char *key, void **value,
-                                   layouts_keydef_types_t key_type) {
+int _layouts_entity_pullget_kv_ref(layout_t *l, entity_t *e, char *key, void **value, layouts_keydef_types_t key_type) {
     int rc = SLURM_ERROR;
     if (!_layouts_entity_check_kv_keytype(l, e, key, key_type))
         return rc;
@@ -757,9 +730,7 @@ int _layouts_entity_pullget_kv_ref(layout_t *l, entity_t *e,
  *                                MANAGER INIT                               *
 \*****************************************************************************/
 
-static void _layouts_init_keydef(xhash_t *keydefs,
-                                 const layouts_keyspec_t *plugin_keyspec,
-                                 layout_plugin_t *plugin) {
+static void _layouts_init_keydef(xhash_t *keydefs, const layouts_keyspec_t *plugin_keyspec, layout_plugin_t *plugin) {
     char keytmp[PATHLEN];
 
     const layouts_keyspec_t *current;
@@ -773,11 +744,9 @@ static void _layouts_init_keydef(xhash_t *keydefs,
     /* iterate over the keys of the plugin */
     for (current = plugin_keyspec; current->key; ++current) {
         /* if not end of list, a keyspec key is mandatory */
-        _normalize_keydef_key(keytmp, PATHLEN, current->key,
-                              plugin->layout->type);
+        _normalize_keydef_key(keytmp, PATHLEN, current->key, plugin->layout->type);
         xassert(xhash_get_str(keydefs, keytmp) == NULL);
-        nkeydef = (layouts_keydef_t *)
-                xmalloc(sizeof(layouts_keydef_t));
+        nkeydef = (layouts_keydef_t *) xmalloc(sizeof(layouts_keydef_t));
         nkeydef->key = xstrdup(keytmp);
         nkeydef->shortkey = xstrdup(current->key);
         nkeydef->type = current->type;
@@ -786,8 +755,7 @@ static void _layouts_init_keydef(xhash_t *keydefs,
         nkeydef->custom_dump = current->custom_dump;
         nkeydef->plugin = plugin;
         if (current->ref_key != NULL) {
-            _normalize_keydef_key(keytmp, PATHLEN, current->ref_key,
-                                  plugin->layout->type);
+            _normalize_keydef_key(keytmp, PATHLEN, current->ref_key, plugin->layout->type);
             nkeydef->ref_key = xstrdup(keytmp);
             nkeydef->ref_shortkey = xstrdup(current->ref_key);
         } else {
@@ -800,11 +768,9 @@ static void _layouts_init_keydef(xhash_t *keydefs,
     /* then add keys managed by the layouts_mgr directly */
     switch (plugin->layout->struct_type) {
         case LAYOUT_STRUCT_TREE:
-            _normalize_keydef_mgrkey(keytmp, PATHLEN, "enclosed",
-                                     plugin->layout->type);
+            _normalize_keydef_mgrkey(keytmp, PATHLEN, "enclosed", plugin->layout->type);
             xassert(xhash_get_str(keydefs, keytmp) == NULL);
-            nkeydef = (layouts_keydef_t *)
-                    xmalloc(sizeof(layouts_keydef_t));
+            nkeydef = (layouts_keydef_t *) xmalloc(sizeof(layouts_keydef_t));
             nkeydef->key = xstrdup(keytmp);
             nkeydef->shortkey = xstrdup("Enclosed");
             nkeydef->type = L_T_STRING;
@@ -816,8 +782,7 @@ static void _layouts_init_keydef(xhash_t *keydefs,
 
 static void _debug_output_keydefs(void *item, void *args) {
     layouts_keydef_t *keydef = (layouts_keydef_t *) item;
-    debug3("layouts/keydefs: loaded: %s flags=0x%08lx refkey=%s",
-           keydef->key, (long unsigned int) keydef->flags,
+    debug3("layouts/keydefs: loaded: %s flags=0x%08lx refkey=%s", keydef->key, (long unsigned int) keydef->flags,
            (keydef->ref_key == NULL) ? "-" : keydef->ref_key);
 
 }
@@ -831,35 +796,26 @@ static int _layouts_init_layouts_walk_helper(void *x, void *arg) {
     void *inserted_item;
     plugin_context_t *plugin_context;
 
-    snprintf(plugin_name, PATHLEN,
-             "layouts/%s_%s", spec->type, spec->name);
+    snprintf(plugin_name, PATHLEN, "layouts/%s_%s", spec->type, spec->name);
     plugin->ops = (layout_ops_t *) xmalloc(sizeof(layout_ops_t));
     debug2("layouts: loading %s...", spec->whole_name);
-    plugin->context = plugin_context = plugin_context_create(
-            plugin_type,
-            plugin_name,
-            (void **) plugin->ops,
-            layout_syms,
-            sizeof(layout_syms));
+    plugin->context = plugin_context = plugin_context_create(plugin_type, plugin_name, (void **) plugin->ops,
+                                                             layout_syms, sizeof(layout_syms));
     if (!plugin_context) {
         error("layouts: error loading %s.", plugin_name);
         return SLURM_ERROR;
     }
     if (!plugin->ops->spec) {
-        error("layouts: plugin_spec must be valid (%s plugin).",
-              plugin_name);
+        error("layouts: plugin_spec must be valid (%s plugin).", plugin_name);
         return SLURM_ERROR;
 
     }
     plugin->name = xstrdup(spec->whole_name);
     plugin->layout = (layout_t *) xmalloc(sizeof(layout_t));
-    layout_init(plugin->layout, spec->name, spec->type, 0,
-                plugin->ops->spec->struct_type);
+    layout_init(plugin->layout, spec->name, spec->type, 0, plugin->ops->spec->struct_type);
     if ((inserted_item = xhash_add(mgr->layouts, plugin->layout)))
         xassert(inserted_item == plugin->layout);
-    _layouts_init_keydef(mgr->keydefs,
-                         plugin->ops->spec->keyspec,
-                         plugin);
+    _layouts_init_keydef(mgr->keydefs, plugin->ops->spec->keyspec, plugin);
     xhash_walk(mgr->keydefs, _debug_output_keydefs, NULL);
     ++*i;
     return SLURM_SUCCESS;
@@ -876,8 +832,7 @@ static void _layouts_mgr_parse_global_conf(layouts_mgr_t *mgr) {
     layouts = slurm_get_layouts();
     parser = strtok_r(layouts, ",", &saveptr);
     while (parser) {
-        nspec = (layouts_conf_spec_t *) xmalloc(
-                sizeof(layouts_conf_spec_t));
+        nspec = (layouts_conf_spec_t *) xmalloc(sizeof(layouts_conf_spec_t));
         nspec->whole_name = xstrdup(_trim(parser));
         slash = strchr(parser, '/');
         if (slash) {
@@ -912,12 +867,9 @@ static void _layouts_mgr_init(layouts_mgr_t *mgr) {
         _layouts_mgr_free(mgr);
     mgr->init_done = true;
     _layouts_mgr_parse_global_conf(mgr);
-    mgr->layouts = xhash_init(layout_hashable_identify_by_type,
-                              _layout_free);
-    mgr->entities = xhash_init(entity_hashable_identify,
-                               _entity_free);
-    mgr->keydefs = xhash_init(layouts_keydef_idfunc,
-                              _layouts_keydef_free);
+    mgr->layouts = xhash_init(layout_hashable_identify_by_type, _layout_free);
+    mgr->entities = xhash_init(entity_hashable_identify, _entity_free);
+    mgr->keydefs = xhash_init(layouts_keydef_idfunc, _layouts_keydef_free);
 }
 
 /*****************************************************************************\
@@ -935,40 +887,29 @@ static char *_conf_get_filename(const char *type) {
 }
 
 static char *_state_get_filename(const char *type) {
-    return xstrdup_printf("%s/layouts_state_%s",
-                          slurmctld_conf.state_save_location,
-                          type);
+    return xstrdup_printf("%s/layouts_state_%s", slurmctld_conf.state_save_location, type);
 }
 
-static s_p_hashtbl_t *_conf_make_hashtbl(int struct_type,
-                                         const s_p_options_t *layout_options) {
+static s_p_hashtbl_t *_conf_make_hashtbl(int struct_type, const s_p_options_t *layout_options) {
     s_p_hashtbl_t *tbl = NULL;
     s_p_hashtbl_t *tbl_relational = NULL;
     s_p_hashtbl_t *tbl_layout = NULL;
     s_p_options_t *relational_options = NULL;
 
     /* generic line option */
-    static s_p_options_t global_options_entity[] = {
-            {"Entity", S_P_STRING},
-            {"Type",   S_P_STRING},
-            {NULL}
-    };
-    static s_p_options_t global_options[] = {
-            {"Priority", S_P_UINT32},
-            {"Entity",   S_P_EXPLINE, NULL, NULL, global_options_entity},
-            {NULL}
-    };
+    static s_p_options_t global_options_entity[] = {{"Entity", S_P_STRING},
+                                                    {"Type",   S_P_STRING},
+                                                    {NULL}};
+    static s_p_options_t global_options[] = {{"Priority", S_P_UINT32},
+                                             {"Entity",   S_P_EXPLINE, NULL, NULL, global_options_entity},
+                                             {NULL}};
 
     /* available for constructing a tree */
-    static s_p_options_t tree_options_entity[] = {
-            {"Enclosed", S_P_STRING},
-            {NULL}
-    };
-    static s_p_options_t tree_options[] = {
-            {"Root",   S_P_STRING},
-            {"Entity", S_P_EXPLINE, NULL, NULL, tree_options_entity},
-            {NULL}
-    };
+    static s_p_options_t tree_options_entity[] = {{"Enclosed", S_P_STRING},
+                                                  {NULL}};
+    static s_p_options_t tree_options[] = {{"Root",   S_P_STRING},
+                                           {"Entity", S_P_EXPLINE, NULL, NULL, tree_options_entity},
+                                           {NULL}};
 
     xassert(layout_options);
 
@@ -1018,8 +959,7 @@ static s_p_hashtbl_t *_conf_make_hashtbl(int struct_type,
 #define _layouts_merge_check(type1, type2)            \
     (entity_option->type == type1 && keydef->type == type2)
 
-static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e,
-                                    s_p_hashtbl_t *etbl, uint32_t flags) {
+static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e, s_p_hashtbl_t *etbl, uint32_t flags) {
     const s_p_options_t *layout_option;
     const s_p_options_t *entity_option;
     layouts_keydef_t *keydef;
@@ -1027,16 +967,12 @@ static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e,
     char *option_key;
 
     for (layout_option = plugin->ops->spec->options;
-         layout_option && xstrcasecmp("Entity", layout_option->key);
-         ++layout_option);
+         layout_option && xstrcasecmp("Entity", layout_option->key); ++layout_option);
     xassert(layout_option);
 
-    for (entity_option = layout_option->line_options;
-         entity_option->key;
-         ++entity_option) {
+    for (entity_option = layout_option->line_options; entity_option->key; ++entity_option) {
         option_key = entity_option->key;
-        _normalize_keydef_key(key_keydef, PATHLEN, option_key,
-                              plugin->layout->type);
+        _normalize_keydef_key(key_keydef, PATHLEN, option_key, plugin->layout->type);
         keydef = xhash_get_str(mgr->keydefs, key_keydef);
         if (!keydef) {
             /* key is not meant to be automatically handled,
@@ -1044,10 +980,8 @@ static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e,
             continue;
         }
         /* do not perform automerge on updates for read-only keys */
-        if (flags & UPDATE_DONE &&
-            keydef->flags & KEYSPEC_RDONLY) {
-            debug4("layouts: do not try to merge RDONLY key '%s'",
-                   keydef->key);
+        if (flags & UPDATE_DONE && keydef->flags & KEYSPEC_RDONLY) {
+            debug4("layouts: do not try to merge RDONLY key '%s'", keydef->key);
             continue;
         }
         if (_layouts_merge_check(S_P_LONG, L_T_LONG)) {
@@ -1069,8 +1003,7 @@ static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e,
             _layouts_load_merge(float, s_p_get_float);
         } else if (_layouts_merge_check(S_P_DOUBLE, L_T_DOUBLE)) {
             _layouts_load_merge(double, s_p_get_double);
-        } else if (_layouts_merge_check(S_P_LONG_DOUBLE,
-                                        L_T_LONG_DOUBLE)) {
+        } else if (_layouts_merge_check(S_P_LONG_DOUBLE, L_T_LONG_DOUBLE)) {
             _layouts_load_merge(long double, s_p_get_long_double);
         } else if (_layouts_merge_check(S_P_STRING, L_T_STRING)) {
             char *newvalue;
@@ -1082,8 +1015,7 @@ static void _layouts_load_automerge(layout_plugin_t *plugin, entity_t *e,
 }
 
 /* extract Enlosed= attributes providing the relational structures info */
-static void _layouts_parse_relations(layout_plugin_t *plugin, entity_t *e,
-                                     s_p_hashtbl_t *entity_tbl) {
+static void _layouts_parse_relations(layout_plugin_t *plugin, entity_t *e, s_p_hashtbl_t *entity_tbl) {
     char *e_enclosed;
     char *e_already_enclosed;
     char *e_new_enclosed;
@@ -1091,14 +1023,10 @@ static void _layouts_parse_relations(layout_plugin_t *plugin, entity_t *e,
     switch (plugin->layout->struct_type) {
         case LAYOUT_STRUCT_TREE:
             if (s_p_get_string(&e_enclosed, "Enclosed", entity_tbl)) {
-                _normalize_keydef_mgrkey(key, PATHLEN, "enclosed",
-                                         plugin->layout->type);
-                e_already_enclosed = (char *)
-                        entity_get_data_ref(e, key);
+                _normalize_keydef_mgrkey(key, PATHLEN, "enclosed", plugin->layout->type);
+                e_already_enclosed = (char *) entity_get_data_ref(e, key);
                 if (e_already_enclosed) {
-                    e_new_enclosed = (char *) xmalloc(
-                            strlen(e_already_enclosed) +
-                            strlen(e_enclosed) + 2);
+                    e_new_enclosed = (char *) xmalloc(strlen(e_already_enclosed) + strlen(e_enclosed) + 2);
                     strcat(e_new_enclosed, e_already_enclosed);
                     strcat(e_new_enclosed, ",");
                     strcat(e_new_enclosed, e_enclosed);
@@ -1111,8 +1039,7 @@ static void _layouts_parse_relations(layout_plugin_t *plugin, entity_t *e,
     }
 }
 
-static int _layouts_read_config_post(layout_plugin_t *plugin,
-                                     s_p_hashtbl_t *tbl) {
+static int _layouts_read_config_post(layout_plugin_t *plugin, s_p_hashtbl_t *tbl) {
     char *root_nodename;
     entity_t *e;
     entity_node_t *enode;
@@ -1139,8 +1066,7 @@ static int _layouts_read_config_post(layout_plugin_t *plugin,
 
             if (!(enode = entity_add_node(e, plugin->layout)))
                 xassert(enode);
-            if (!(root_node = xtree_add_child(
-                    tree, NULL, enode, XTREE_APPEND)))
+            if (!(root_node = xtree_add_child(tree, NULL, enode, XTREE_APPEND)))
                 xassert(root_node);
             enode->node = (void *) root_node;
             break;
@@ -1154,9 +1080,7 @@ static int _layouts_read_config_post(layout_plugin_t *plugin,
  *       filename or a buffer as well as a flag to indicate if it
  *       is a full load or not (state save only)
  */
-static int _layouts_load_config_common(layout_plugin_t *plugin,
-                                       char *filename, Buf buffer,
-                                       uint32_t flags) {
+static int _layouts_load_config_common(layout_plugin_t *plugin, char *filename, Buf buffer, uint32_t flags) {
     s_p_hashtbl_t *tbl = NULL;
     s_p_hashtbl_t **entities_tbl = NULL;
     s_p_hashtbl_t *entity_tbl = NULL;
@@ -1175,8 +1099,7 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
         return SLURM_SUCCESS;
     }
 
-    tbl = _conf_make_hashtbl(plugin->layout->struct_type,
-                             plugin->ops->spec->options);
+    tbl = _conf_make_hashtbl(plugin->layout->struct_type, plugin->ops->spec->options);
     if (filename) {
         if (s_p_parse_file(tbl, NULL, filename, false) == SLURM_ERROR) {
             info("layouts: something went wrong when opening/reading "
@@ -1204,19 +1127,16 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
     }
 
     /* get the config hash tables of the defined entities */
-    if (!s_p_get_expline(&entities_tbl, &entities_tbl_count,
-                         "Entity", tbl)) {
+    if (!s_p_get_expline(&entities_tbl, &entities_tbl_count, "Entity", tbl)) {
         error("layouts: no valid Entity found, can not append any "
-              "information nor construct relations for %s/%s",
-              plugin->layout->type, plugin->layout->name);
+              "information nor construct relations for %s/%s", plugin->layout->type, plugin->layout->name);
         rc = SLURM_ERROR;
         goto cleanup;
     }
 
     /* stage 0: xmalloc an array of entity_t* to save the updated entity_t
      * and give their references in the update_done layout callback */
-    updated_entities = (entity_t **)
-            xmalloc(entities_tbl_count * sizeof(entity_t * ));
+    updated_entities = (entity_t **) xmalloc(entities_tbl_count * sizeof(entity_t * ));
 
     /* stage 1: create the described entities or update them */
     for (i = 0; i < entities_tbl_count; ++i) {
@@ -1242,8 +1162,7 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
                 rc = SLURM_ERROR;
                 continue;
             }
-            if (!_string_in_array(e_type,
-                                  plugin->ops->spec->etypes)) {
+            if (!_string_in_array(e_type, plugin->ops->spec->etypes)) {
                 info("layouts: entity '%s' type (%s) is "
                      "invalid, skipping", e_name, e_type);
                 rc = SLURM_ERROR;
@@ -1256,8 +1175,7 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
 
         } else if (s_p_get_string(&e_type, "Type", entity_tbl)) {
             /* if defined, check that the type is consistent */
-            if (!_string_in_array(e_type,
-                                  plugin->ops->spec->etypes)) {
+            if (!_string_in_array(e_type, plugin->ops->spec->etypes)) {
                 info("layouts: entity '%s' type (%s) is "
                      "invalid, skipping", e_name, e_type);
                 rc = SLURM_ERROR;
@@ -1294,8 +1212,7 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
          * callback is called for further actions.
          */
         if ((flags & PARSE_ENTITY) && plugin->ops->entity_parsing) {
-            plugin->ops->entity_parsing(e, entity_tbl,
-                                        plugin->layout);
+            plugin->ops->entity_parsing(e, entity_tbl, plugin->layout);
         }
 
         /* add the entity ref to the array for further usage when
@@ -1311,8 +1228,7 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
      * the relational structure of the layout.
      * fails in case of error as a root is mandatory to walk the relational
      * structure of the layout */
-    if ((flags & CONF_DONE) &&
-        _layouts_read_config_post(plugin, tbl) != SLURM_SUCCESS) {
+    if ((flags & CONF_DONE) && _layouts_read_config_post(plugin, tbl) != SLURM_SUCCESS) {
         goto cleanup;
     }
 
@@ -1321,11 +1237,9 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
      * layout specific actions.
      */
     if ((flags & CONF_DONE) && plugin->ops->conf_done) {
-        if (!plugin->ops->conf_done(mgr->entities, plugin->layout,
-                                    tbl)) {
+        if (!plugin->ops->conf_done(mgr->entities, plugin->layout, tbl)) {
             error("layouts: plugin %s/%s has an error parsing its"
-                  " configuration", plugin->layout->type,
-                  plugin->layout->name);
+                  " configuration", plugin->layout->type, plugin->layout->name);
             rc = SLURM_ERROR;
             goto cleanup;
         }
@@ -1351,11 +1265,9 @@ static int _layouts_load_config_common(layout_plugin_t *plugin,
      * parsed hash table.
      */
     if ((flags & UPDATE_DONE) && plugin->ops->update_done) {
-        if (!plugin->ops->update_done(plugin->layout, updated_entities,
-                                      entities_tbl_count)) {
+        if (!plugin->ops->update_done(plugin->layout, updated_entities, entities_tbl_count)) {
             error("layouts: plugin %s/%s has an error reacting to"
-                  " entities update", plugin->layout->type,
-                  plugin->layout->name);
+                  " entities update", plugin->layout->type, plugin->layout->name);
             rc = SLURM_ERROR;
             goto cleanup;
         }
@@ -1388,9 +1300,7 @@ static int _layouts_read_config(layout_plugin_t *plugin) {
         fatal("layouts: cannot find configuration file for "
               "required layout '%s'", plugin->name);
     }
-    rc = _layouts_load_config_common(plugin, filename, NULL,
-                                     CONF_DONE |
-                                     PARSE_ENTITY | PARSE_RELATIONS);
+    rc = _layouts_load_config_common(plugin, filename, NULL, CONF_DONE | PARSE_ENTITY | PARSE_RELATIONS);
     xfree(filename);
     return rc;
 }
@@ -1420,19 +1330,16 @@ static int _layouts_read_state(layout_plugin_t *plugin) {
     /* check availability of the file otherwise it will later block
      * waiting for a file to appear (in s_p_parse_file) */
     if (stat(filename, &stat_buf) < 0) {
-        debug("layouts: skipping non existent state file for '%s/%s'",
-              plugin->layout->type, plugin->layout->name);
+        debug("layouts: skipping non existent state file for '%s/%s'", plugin->layout->type, plugin->layout->name);
     } else {
-        rc = _layouts_load_config_common(plugin, filename, NULL,
-                                         PARSE_ENTITY);
+        rc = _layouts_load_config_common(plugin, filename, NULL, PARSE_ENTITY);
     }
     xfree(filename);
     return rc;
 }
 
 static int _layouts_update_state(layout_plugin_t *plugin, Buf buffer) {
-    return _layouts_load_config_common(plugin, NULL, buffer,
-                                       PARSE_ENTITY | UPDATE_DONE);
+    return _layouts_load_config_common(plugin, NULL, buffer, PARSE_ENTITY | UPDATE_DONE);
 }
 
 typedef struct _layouts_build_xtree_walk_st {
@@ -1441,10 +1348,7 @@ typedef struct _layouts_build_xtree_walk_st {
     xtree_t *tree;
 } _layouts_build_xtree_walk_t;
 
-uint8_t _layouts_build_xtree_walk(xtree_node_t *node,
-                                  uint8_t which,
-                                  uint32_t level,
-                                  void *arg) {
+uint8_t _layouts_build_xtree_walk(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     _layouts_build_xtree_walk_t *p = (_layouts_build_xtree_walk_t *) arg;
     entity_t *e;
     entity_node_t *enode;
@@ -1478,13 +1382,11 @@ uint8_t _layouts_build_xtree_walk(xtree_node_t *node,
         enclosed_hostlist = hostlist_create(enclosed_str);
         entity_delete_data(e, p->enclosed_key);
         while ((enclosed_name = hostlist_shift(enclosed_hostlist))) {
-            enclosed_e = xhash_get_str(mgr->entities,
-                                       enclosed_name);
+            enclosed_e = xhash_get_str(mgr->entities, enclosed_name);
             if (!enclosed_e) {
                 error("layouts: entity '%s' specified in "
                       "enclosed entities of entity '%s' "
-                      "not found, ignoring.",
-                      enclosed_name, e->name);
+                      "not found, ignoring.", enclosed_name, e->name);
                 free(enclosed_name);
                 continue;
             }
@@ -1494,8 +1396,7 @@ uint8_t _layouts_build_xtree_walk(xtree_node_t *node,
             enode = entity_add_node(enclosed_e, p->layout);
             xassert(enode);
             /* add it to the tree, getting an xtree_node_t ref */
-            if (!(enclosed_node = xtree_add_child(
-                    p->tree, node, enode, XTREE_APPEND)))
+            if (!(enclosed_node = xtree_add_child(p->tree, node, enode, XTREE_APPEND)))
                 xassert(enclosed_node);
             /* store the xtree_node_t ref in the entity node. It
              * will be used to access this layout tree from the
@@ -1528,19 +1429,9 @@ static int _layouts_build_relations(layout_plugin_t *plugin) {
             tree = layout_get_tree(plugin->layout);
             xassert(tree);
             root_node = xtree_get_root(tree);
-            _normalize_keydef_mgrkey(key, PATHLEN, "enclosed",
-                                     plugin->layout->type);
-            _layouts_build_xtree_walk_t p = {
-                    plugin->layout,
-                    key,
-                    tree
-            };
-            xtree_walk(tree,
-                       root_node,
-                       0,
-                       XTREE_LEVEL_MAX,
-                       _layouts_build_xtree_walk,
-                       &p);
+            _normalize_keydef_mgrkey(key, PATHLEN, "enclosed", plugin->layout->type);
+            _layouts_build_xtree_walk_t p = {plugin->layout, key, tree};
+            xtree_walk(tree, root_node, 0, XTREE_LEVEL_MAX, _layouts_build_xtree_walk, &p);
             break;
     }
     return SLURM_SUCCESS;
@@ -1578,31 +1469,23 @@ static char *_pack_data_key(layouts_keydef_t *keydef, void *value) {
         case L_T_ERROR:
             return NULL;
         case L_T_STRING:
-            return xstrdup_printf("%s=%s", keydef->shortkey,
-                                  (char *) value);
+            return xstrdup_printf("%s=%s", keydef->shortkey, (char *) value);
         case L_T_LONG:
-            return xstrdup_printf("%s=%ld", keydef->shortkey,
-                                  *(long *) value);
+            return xstrdup_printf("%s=%ld", keydef->shortkey, *(long *) value);
         case L_T_UINT16:
-            return xstrdup_printf("%s=%u", keydef->shortkey,
-                                  *(uint16_t *) value);
+            return xstrdup_printf("%s=%u", keydef->shortkey, *(uint16_t *) value);
         case L_T_UINT32:
             return xstrdup_printf("%s=%"
-            PRIu32, keydef->shortkey,
-                    *(uint32_t *) value);
+            PRIu32, keydef->shortkey, *(uint32_t *) value);
         case L_T_BOOLEAN:
             val = *(bool *) value;
-            return xstrdup_printf("%s=%s", keydef->shortkey,
-                                  val ? "true" : "false");
+            return xstrdup_printf("%s=%s", keydef->shortkey, val ? "true" : "false");
         case L_T_FLOAT:
-            return xstrdup_printf("%s=%f", keydef->shortkey,
-                                  *(float *) value);
+            return xstrdup_printf("%s=%f", keydef->shortkey, *(float *) value);
         case L_T_DOUBLE:
-            return xstrdup_printf("%s=%f", keydef->shortkey,
-                                  *(double *) value);
+            return xstrdup_printf("%s=%f", keydef->shortkey, *(double *) value);
         case L_T_LONG_DOUBLE:
-            return xstrdup_printf("%s=%Lf", keydef->shortkey,
-                                  *(long double *) value);
+            return xstrdup_printf("%s=%Lf", keydef->shortkey, *(long double *) value);
         case L_T_CUSTOM:
             if (keydef->custom_dump) {
                 return keydef->custom_dump(value);
@@ -1642,8 +1525,7 @@ static void _pack_entity_layout_data(void *item, void *arg) {
     xassert(keydef);
 
     /* only dump keys related to the targeted layout */
-    if (!xstrncmp(keydef->plugin->layout->type, pargs->layout->type,
-                  PATHLEN)) {
+    if (!xstrncmp(keydef->plugin->layout->type, pargs->layout->type, PATHLEN)) {
         data_dump = _pack_data_key(keydef, data->value);
         /* avoid printing any error in case of NULL pointer returned */
         if (data_dump) {
@@ -1666,8 +1548,7 @@ static void _pack_entity_layout_data(void *item, void *arg) {
  *  Root=%name%
  *
  */
-static uint8_t _pack_layout_tree(xtree_node_t *node, uint8_t which,
-                                 uint32_t level, void *arg) {
+static uint8_t _pack_layout_tree(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     _pack_args_t *pargs;
     xtree_node_t *child;
     entity_node_t *enode;
@@ -1716,11 +1597,8 @@ static uint8_t _pack_layout_tree(xtree_node_t *node, uint8_t which,
     }
 
     /* print this entity as root if necessary */
-    if (level == 0 && !(pargs->flags & LAYOUTS_DUMP_NOLAYOUT)
-        && pargs->type == NULL) {
-        if (pargs->all != 0 ||
-            pargs->list_entities == NULL ||
-            hostlist_find(pargs->list_entities, e_name) != -1) {
+    if (level == 0 && !(pargs->flags & LAYOUTS_DUMP_NOLAYOUT) && pargs->type == NULL) {
+        if (pargs->all != 0 || pargs->list_entities == NULL || hostlist_find(pargs->list_entities, e_name) != -1) {
             str = xstrdup_printf("Root=%s\n", e_name);
             packstr(str, buffer);
             pargs->record_count++;
@@ -1739,8 +1617,7 @@ static uint8_t _pack_layout_tree(xtree_node_t *node, uint8_t which,
     /* add entity keys matching the layout to the current str */
     pargs->current_line = str;
     if (enode && enode->entity) {
-        xhash_walk(enode->entity->data, _pack_entity_layout_data,
-                   pargs);
+        xhash_walk(enode->entity->data, _pack_entity_layout_data, pargs);
     }
     /* the current line might have been extended/remalloced, so
      * we need to sync it again in str for further actions */
@@ -1748,33 +1625,26 @@ static uint8_t _pack_layout_tree(xtree_node_t *node, uint8_t which,
     pargs->current_line = NULL;
 
     /* don't print enclosed if no_relation option */
-    if ((pargs->flags & LAYOUTS_DUMP_NOLAYOUT)
-        && enclosed_str != NULL
-        && pargs->list_entities == NULL) {
+    if ((pargs->flags & LAYOUTS_DUMP_NOLAYOUT) && enclosed_str != NULL && pargs->list_entities == NULL) {
         xfree(enclosed_str);
         xfree(str);
         return 1;
     }
 
     /* don't print non enclosed if no "entities char*" option */
-    if (pargs->all == 0
-        && pargs->list_entities == NULL
-        && enclosed_str == NULL) {
+    if (pargs->all == 0 && pargs->list_entities == NULL && enclosed_str == NULL) {
         xfree(str);
         return 1;
     }
 
     /* don't print entities if not named in "entities char*" */
-    if (pargs->all == 0
-        && pargs->list_entities != NULL
-        && hostlist_find(pargs->list_entities, e_name) == -1) {
+    if (pargs->all == 0 && pargs->list_entities != NULL && hostlist_find(pargs->list_entities, e_name) == -1) {
         xfree(str);
         return 1;
     }
 
     /* don't print entities if not type of "type char*" */
-    if (pargs->type != NULL
-        && (e_type == NULL || xstrcasecmp(e_type, pargs->type) != 0)) {
+    if (pargs->type != NULL && (e_type == NULL || xstrcasecmp(e_type, pargs->type) != 0)) {
         xfree(str);
         return 1;
     }
@@ -1823,10 +1693,9 @@ typedef struct _autoupdate_tree_args {
  * to a particular operator looking for the right type to apply during the 
  * operation
  */
-static int _autoupdate_entity_kv(layouts_keydef_t *keydef,
-                                 layouts_keydef_t *ref_keydef,
-                                 slurm_parser_operator_t operator,
-                                 void *oldvalue, void *value) {
+static int
+_autoupdate_entity_kv(layouts_keydef_t *keydef, layouts_keydef_t *ref_keydef, slurm_parser_operator_t operator,
+                      void *oldvalue, void *value) {
     int rc = SLURM_ERROR;
 
     if (keydef->type != ref_keydef->type)
@@ -1882,19 +1751,16 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
     xassert(keydef);
 
     /* only work on keys that depend of their neighborhood */
-    if (!(keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK) &&
-        !(keydef->flags & KEYSPEC_UPDATE_PARENTS_MASK)) {
+    if (!(keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK) && !(keydef->flags & KEYSPEC_UPDATE_PARENTS_MASK)) {
         return;
     }
 
     /* if children dependant and we are at leaf level, nothing to do */
-    if (keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK &&
-        pargs->which == XTREE_LEAF)
+    if (keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK && pargs->which == XTREE_LEAF)
         return;
 
     /* only work on keys related to the targeted layout */
-    if (xstrncmp(keydef->plugin->layout->type, pargs->enode->layout->type,
-                 PATHLEN)) {
+    if (xstrncmp(keydef->plugin->layout->type, pargs->enode->layout->type, PATHLEN)) {
         return;
     }
 
@@ -1938,20 +1804,16 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
 
         /* only set operation currently provided for parents except
          * for fshare action */
-        _autoupdate_entity_kv(keydef, ref_keydef, S_P_OPERATOR_SET,
-                              oldvalue, value);
+        _autoupdate_entity_kv(keydef, ref_keydef, S_P_OPERATOR_SET, oldvalue, value);
         if (action == KEYSPEC_UPDATE_PARENTS_FSHARE) {
-            _autoupdate_entity_kv(keydef, ref_keydef,
-                                  S_P_OPERATOR_AVG,
-                                  oldvalue, (void *) &count);
+            _autoupdate_entity_kv(keydef, ref_keydef, S_P_OPERATOR_AVG, oldvalue, (void *) &count);
         }
 
         return;
     }
 
     /* process children aggregation */
-    if ((action = keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK) &&
-        pargs->which == XTREE_ENDORDER) {
+    if ((action = keydef->flags & KEYSPEC_UPDATE_CHILDREN_MASK) && pargs->which == XTREE_ENDORDER) {
 
         /* get current node value reference */
         oldvalue = entity_get_data_ref(cnode->entity, keydef->key);
@@ -1973,9 +1835,7 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
 
         /* if count action, do what is necessary and return */
         if (action == KEYSPEC_UPDATE_CHILDREN_COUNT) {
-            _autoupdate_entity_kv(keydef, ref_keydef,
-                                  S_P_OPERATOR_SET,
-                                  oldvalue, (void *) &count);
+            _autoupdate_entity_kv(keydef, ref_keydef, S_P_OPERATOR_SET, oldvalue, (void *) &count);
             return;
         }
 
@@ -1985,8 +1845,7 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
         while (child) {
             /* get child node KV data ref */
             enode = (entity_node_t *) xtree_node_get_data(child);
-            value = entity_get_data_ref(enode->entity,
-                                        ref_keydef->key);
+            value = entity_get_data_ref(enode->entity, ref_keydef->key);
 
             if (!value) {
                 /* try next child */
@@ -2016,8 +1875,7 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
             }
 
             /* update the value according to the operator */
-            _autoupdate_entity_kv(keydef, ref_keydef, operator,
-                                  oldvalue, value);
+            _autoupdate_entity_kv(keydef, ref_keydef, operator, oldvalue, value);
 
             /* then next child */
             child = child->next;
@@ -2025,9 +1883,7 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
 
         /* if average action, do what is necessary before return */
         if (action == KEYSPEC_UPDATE_CHILDREN_AVG) {
-            _autoupdate_entity_kv(keydef, ref_keydef,
-                                  S_P_OPERATOR_AVG,
-                                  oldvalue, (void *) &count);
+            _autoupdate_entity_kv(keydef, ref_keydef, S_P_OPERATOR_AVG, oldvalue, (void *) &count);
             return;
         }
 
@@ -2039,15 +1895,12 @@ static void _tree_update_node_entity_data(void *item, void *arg) {
 /*
  * _autoupdate_layout_tree : internal function used when automatically
  * updating elements of a layout tree using _layouts_autoupdate_layout */
-static uint8_t _autoupdate_layout_tree(xtree_node_t *node, uint8_t which,
-                                       uint32_t level, void *arg) {
+static uint8_t _autoupdate_layout_tree(xtree_node_t *node, uint8_t which, uint32_t level, void *arg) {
     entity_node_t *cnode;
     _autoupdate_tree_args_t sync_args;
 
     /* only need to work for preorder, leaf and endorder cases */
-    if (which != XTREE_PREORDER &&
-        which != XTREE_LEAF &&
-        which != XTREE_ENDORDER) {
+    if (which != XTREE_PREORDER && which != XTREE_LEAF && which != XTREE_ENDORDER) {
         return 1;
     }
 
@@ -2063,8 +1916,7 @@ static uint8_t _autoupdate_layout_tree(xtree_node_t *node, uint8_t which,
 
     /* iterate over the K/V of the entity, syncing them according
      * to their autoupdate flags */
-    xhash_walk(cnode->entity->data, _tree_update_node_entity_data,
-               &sync_args);
+    xhash_walk(cnode->entity->data, _tree_update_node_entity_data, &sync_args);
 
     return 1;
 }
@@ -2075,9 +1927,7 @@ static int _layouts_autoupdate_layout(layout_t *layout) {
     /* autoupdate according to the layout struct type */
     switch (layout->struct_type) {
         case LAYOUT_STRUCT_TREE:
-            xtree_walk(layout->tree, NULL, 0,
-                       XTREE_LEVEL_MAX,
-                       _autoupdate_layout_tree, NULL);
+            xtree_walk(layout->tree, NULL, 0, XTREE_LEVEL_MAX, _autoupdate_layout_tree, NULL);
             break;
     }
 
@@ -2245,14 +2095,11 @@ int layouts_init(void) {
         info("layouts: %d layout(s) to initialize", layouts_count);
 
     mgr->plugins = xmalloc(sizeof(layout_plugin_t) * layouts_count);
-    list_for_each(layouts_mgr.layouts_desc,
-                  _layouts_init_layouts_walk_helper,
-                  &i);
+    list_for_each(layouts_mgr.layouts_desc, _layouts_init_layouts_walk_helper, &i);
     mgr->plugins_count = i;
 
     if (mgr->plugins_count != layouts_count) {
-        error("layouts: only %d/%d layouts loaded, aborting...",
-              mgr->plugins_count, layouts_count);
+        error("layouts: only %d/%d layouts loaded, aborting...", mgr->plugins_count, layouts_count);
         for (i = 0; i < mgr->plugins_count; i++) {
             _layout_plugins_destroy(&mgr->plugins[i]);
         }
@@ -2265,8 +2112,7 @@ int layouts_init(void) {
 
     slurm_mutex_unlock(&layouts_mgr.lock);
 
-    return mgr->plugins_count == layouts_count ?
-           SLURM_SUCCESS : SLURM_ERROR;
+    return mgr->plugins_count == layouts_count ? SLURM_SUCCESS : SLURM_ERROR;
 }
 
 int layouts_fini(void) {
@@ -2335,8 +2181,7 @@ int layouts_load_config(int recover) {
      * generate and store the slurm node entities,
      * add them to the base layout at the same time
      */
-    for (inx = 0, node_ptr = node_record_table_ptr; inx < node_record_count;
-         inx++, node_ptr++) {
+    for (inx = 0, node_ptr = node_record_table_ptr; inx < node_record_count; inx++, node_ptr++) {
         debug3("layouts: loading node %s", node_ptr->name);
         xassert(node_ptr->magic == NODE_MAGIC);
         xassert(node_ptr->config_ptr->magic == CONFIG_MAGIC);
@@ -2359,8 +2204,7 @@ int layouts_load_config(int recover) {
         /* add to the base layout (storing a callback ref to the
          * layout node pointing to it) */
         enode = entity_add_node(entity, layout);
-        ptr = xtree_add_child(layout->tree, layout->tree->root,
-                              (void *) enode, XTREE_APPEND);
+        ptr = xtree_add_child(layout->tree, layout->tree->root, (void *) enode, XTREE_APPEND);
         if (!ptr) {
             error("layouts: unable to add entity of node %s"
                   "in the hashtable, aborting", node_ptr->name);
@@ -2372,8 +2216,7 @@ int layouts_load_config(int recover) {
             enode->node = ptr;
         }
     }
-    debug("layouts: %d/%d nodes in hash table, rc=%d",
-          xhash_count(layouts_mgr.entities), node_record_count, rc);
+    debug("layouts: %d/%d nodes in hash table, rc=%d", xhash_count(layouts_mgr.entities), node_record_count, rc);
 
     if (rc != SLURM_SUCCESS)
         goto exit;
@@ -2395,8 +2238,7 @@ int layouts_load_config(int recover) {
      */
     layouts_count = xhash_count(layouts_mgr.layouts);
     if (layouts_count != mgr->plugins_count + 1) {
-        error("layouts: %d/%d layouts added to hashtable, aborting",
-              layouts_count, mgr->plugins_count + 1);
+        error("layouts: %d/%d layouts added to hashtable, aborting", layouts_count, mgr->plugins_count + 1);
         rc = SLURM_ERROR;
     }
 
@@ -2407,10 +2249,8 @@ int layouts_load_config(int recover) {
     } else {
         debug("layouts: loading stage 1");
         for (i = 0; i < mgr->plugins_count; ++i) {
-            debug3("layouts: reading config for %s",
-                   mgr->plugins[i].name);
-            if (_layouts_read_config(&mgr->plugins[i]) !=
-                SLURM_SUCCESS) {
+            debug3("layouts: reading config for %s", mgr->plugins[i].name);
+            if (_layouts_read_config(&mgr->plugins[i]) != SLURM_SUCCESS) {
                 rc = SLURM_ERROR;
                 break;
             }
@@ -2418,29 +2258,23 @@ int layouts_load_config(int recover) {
         if (recover) {
             debug("layouts: loading stage 1.1 (restore state)");
             for (i = 0; i < mgr->plugins_count; ++i) {
-                debug3("layouts: reading state of %s",
-                       mgr->plugins[i].name);
+                debug3("layouts: reading state of %s", mgr->plugins[i].name);
                 _layouts_read_state(&mgr->plugins[i]);
             }
         }
         debug("layouts: loading stage 2");
         for (i = 0; i < mgr->plugins_count; ++i) {
-            debug3("layouts: creating relations for %s",
-                   mgr->plugins[i].name);
-            if (_layouts_build_relations(&mgr->plugins[i]) !=
-                SLURM_SUCCESS) {
+            debug3("layouts: creating relations for %s", mgr->plugins[i].name);
+            if (_layouts_build_relations(&mgr->plugins[i]) != SLURM_SUCCESS) {
                 rc = SLURM_ERROR;
                 break;
             }
         }
         debug("layouts: loading stage 3");
         for (i = 0; i < mgr->plugins_count; ++i) {
-            debug3("layouts: autoupdating %s",
-                   mgr->plugins[i].name);
+            debug3("layouts: autoupdating %s", mgr->plugins[i].name);
             if (mgr->plugins[i].ops->spec->autoupdate) {
-                if (_layouts_autoupdate_layout(mgr->plugins[i].
-                        layout) !=
-                    SLURM_SUCCESS) {
+                if (_layouts_autoupdate_layout(mgr->plugins[i].layout) != SLURM_SUCCESS) {
                     rc = SLURM_ERROR;
                     break;
                 }
@@ -2493,8 +2327,7 @@ entity_t *layouts_get_entity(const char *name) {
 }
 
 
-int layouts_pack_layout(char *l_type, char *char_entities, char *type,
-                        uint32_t flags, Buf buffer) {
+int layouts_pack_layout(char *l_type, char *char_entities, char *type, uint32_t flags, Buf buffer) {
     _pack_args_t pargs;
     layout_t *layout;
     int orig_offset, fini_offset;
@@ -2537,8 +2370,7 @@ int layouts_pack_layout(char *l_type, char *char_entities, char *type,
     /* pack according to the layout struct type */
     switch (layout->struct_type) {
         case LAYOUT_STRUCT_TREE:
-            xtree_walk(layout->tree, NULL, 0, XTREE_LEVEL_MAX,
-                       _pack_layout_tree, &pargs);
+            xtree_walk(layout->tree, NULL, 0, XTREE_LEVEL_MAX, _pack_layout_tree, &pargs);
             break;
     }
 
@@ -2560,9 +2392,7 @@ int layouts_update_layout(char *l_type, Buf buffer) {
     slurm_mutex_lock(&mgr->lock);
     for (i = 0; i < mgr->plugins_count; i++) {
         if (!xstrcmp(mgr->plugins[i].name, l_type)) {
-            rc = _layouts_update_state((layout_plugin_t *)
-                                               &mgr->plugins[i],
-                                       buffer);
+            rc = _layouts_update_state((layout_plugin_t *) &mgr->plugins[i], buffer);
             slurm_mutex_unlock(&mgr->lock);
             return rc;
         }
@@ -2601,8 +2431,7 @@ int layouts_state_save_layout(char *l_type) {
     START_TIMER;
 
     /* pack the targeted layout into a tmp buffer */
-    error_code = layouts_pack_layout(l_type, "*", NULL,
-                                     LAYOUTS_DUMP_STATE, buffer);
+    error_code = layouts_pack_layout(l_type, "*", NULL, LAYOUTS_DUMP_STATE, buffer);
     if (error_code != SLURM_SUCCESS) {
         error("unable to save layout[%s] state", l_type);
         return error_code;
@@ -2619,15 +2448,13 @@ int layouts_state_save_layout(char *l_type) {
     new_file = xstrdup_printf("%s.new", reg_file);
     log_fd = creat(new_file, 0600);
     if (log_fd < 0 || !(fdump = fdopen(log_fd, "w"))) {
-        error("Can't save state, create file %s error %m",
-              new_file);
+        error("Can't save state, create file %s error %m", new_file);
         error_code = errno;
     } else {
         /* extract the amount of records and then proceed
          * then dump packed strings into the temporary file */
         safe_unpack32(&record_count, buffer);
-        debug("layouts/%s: dumping %u records into state file",
-              l_type, record_count);
+        debug("layouts/%s: dumping %u records into state file", l_type, record_count);
         while (get_buf_offset(buffer) < offset) {
             safe_unpackstr_xmalloc(&tmp_str, &utmp32, buffer);
             if (tmp_str != NULL) {
@@ -2651,12 +2478,10 @@ int layouts_state_save_layout(char *l_type) {
     else {            /* file shuffle */
         (void) unlink(old_file);
         if (link(reg_file, old_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   reg_file, old_file);
+            debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
         (void) unlink(reg_file);
         if (link(new_file, reg_file))
-            debug4("unable to create link for %s -> %s: %m",
-                   new_file, reg_file);
+            debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
         (void) unlink(new_file);
     }
     xfree(old_file);
@@ -2706,62 +2531,43 @@ int layouts_entity_pull_kv(char *l, char *e, char *key) {
     _layouts_entity_wrapper(_layouts_entity_pull_kv, l, e, key);
 }
 
-int layouts_entity_set_kv(char *l, char *e, char *key, void *value,
-                          layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_set_kv, l, e,
-                            key, value, key_type);
+int layouts_entity_set_kv(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_set_kv, l, e, key, value, key_type);
 }
 
-int layouts_entity_set_kv_ref(char *l, char *e, char *key, void *value,
-                              layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_set_kv_ref, l, e,
-                            key, value, key_type);
+int layouts_entity_set_kv_ref(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_set_kv_ref, l, e, key, value, key_type);
 }
 
-int layouts_entity_setpush_kv(char *l, char *e, char *key, void *value,
-                              layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_setpush_kv, l, e,
-                            key, value, key_type);
+int layouts_entity_setpush_kv(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_setpush_kv, l, e, key, value, key_type);
 }
 
-int layouts_entity_setpush_kv_ref(char *l, char *e, char *key, void *value,
-                                  layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_setpush_kv_ref, l, e,
-                            key, value, key_type);
+int layouts_entity_setpush_kv_ref(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_setpush_kv_ref, l, e, key, value, key_type);
 }
 
-int layouts_entity_get_kv(char *l, char *e, char *key, void *value,
-                          layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_get_kv, l, e,
-                            key, value, key_type);
+int layouts_entity_get_kv(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_get_kv, l, e, key, value, key_type);
 }
 
-int layouts_entity_get_mkv(char *l, char *e, char *keys, void *value,
-                           size_t size, layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_get_mkv, l, e,
-                            keys, value, size, key_type);
+int layouts_entity_get_mkv(char *l, char *e, char *keys, void *value, size_t size, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_get_mkv, l, e, keys, value, size, key_type);
 }
 
-int layouts_entity_get_kv_ref(char *l, char *e, char *key, void **value,
-                              layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_get_kv_ref, l, e,
-                            key, value, key_type);
+int layouts_entity_get_kv_ref(char *l, char *e, char *key, void **value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_get_kv_ref, l, e, key, value, key_type);
 }
 
-int layouts_entity_get_mkv_ref(char *l, char *e, char *keys, void *value,
-                               size_t size, layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_get_mkv_ref, l, e,
-                            keys, value, size, key_type);
+int
+layouts_entity_get_mkv_ref(char *l, char *e, char *keys, void *value, size_t size, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_get_mkv_ref, l, e, keys, value, size, key_type);
 }
 
-int layouts_entity_pullget_kv(char *l, char *e, char *key, void *value,
-                              layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_pullget_kv, l, e,
-                            key, value, key_type);
+int layouts_entity_pullget_kv(char *l, char *e, char *key, void *value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_pullget_kv, l, e, key, value, key_type);
 }
 
-int layouts_entity_pullget_kv_ref(char *l, char *e, char *key, void **value,
-                                  layouts_keydef_types_t key_type) {
-    _layouts_entity_wrapper(_layouts_entity_pullget_kv_ref, l, e,
-                            key, value, key_type);
+int layouts_entity_pullget_kv_ref(char *l, char *e, char *key, void **value, layouts_keydef_types_t key_type) {
+    _layouts_entity_wrapper(_layouts_entity_pullget_kv_ref, l, e, key, value, key_type);
 }

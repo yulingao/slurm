@@ -122,8 +122,7 @@ extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid) {
     return false;
 }
 
-extern int
-proctrack_p_wait(uint64_t cont_id) {
+extern int proctrack_p_wait(uint64_t cont_id) {
     if (cont_id == 0 || cont_id == 1) {
         errno = EINVAL;
         return SLURM_ERROR;
@@ -132,7 +131,6 @@ proctrack_p_wait(uint64_t cont_id) {
     return proctrack_p_destroy(cont_id);
 }
 
-extern int
-proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
+extern int proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
     return proctrack_linuxproc_get_pids((pid_t) cont_id, pids, npids);
 }

@@ -89,8 +89,7 @@ extern void tres_freq_cpuset_validate(stepd_step_rec_t *job) {
  * Validate the TRES and select the frequency to set
  * Called from task cgroup code
  */
-extern void tres_freq_cgroup_validate(stepd_step_rec_t *job,
-                                      char *step_alloc_cores) {
+extern void tres_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
 //FIXME - To do
 }
 
@@ -121,8 +120,7 @@ static int _test_val(const char *arg) {
         val = strtol(arg, &end_ptr, 10);
         if ((val == LONG_MAX) || (val < 0) || (end_ptr[0] != '\0'))
             rc = -1;
-    } else if (strcmp(arg, "low") && strcmp(arg, "medium") &&
-               strcmp(arg, "high") && strcmp(arg, "highm1")) {
+    } else if (strcmp(arg, "low") && strcmp(arg, "medium") && strcmp(arg, "high") && strcmp(arg, "highm1")) {
         rc = -1;
     }
 

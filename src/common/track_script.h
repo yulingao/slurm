@@ -69,14 +69,12 @@ extern void track_script_flush_job(uint32_t job_id);
  * IN tid - thread id of thread we are tracking
  * Returns track_script_rec_t
  */
-extern track_script_rec_t *track_script_rec_add(
-        uint32_t job_id, pid_t cpid, pthread_t tid);
+extern track_script_rec_t *track_script_rec_add(uint32_t job_id, pid_t cpid, pthread_t tid);
 
 /*
  * Signal script thread to end
  */
-extern bool track_script_broadcast(track_script_rec_t *track_script_rec,
-                                   int status);
+extern bool track_script_broadcast(track_script_rec_t *track_script_rec, int status);
 
 /* Remove this thread from the track_script system */
 extern void track_script_remove(pthread_t tid);

@@ -138,8 +138,7 @@ extern int task_cgroup_memory_init(void) {
 
     /* Enable memory.use_hierarchy in the root of the cgroup.
      */
-    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0)
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0) != XCGROUP_SUCCESS) {
         error("task/cgroup: unable to create root memory cgroup: %m");
         return SLURM_ERROR;
     }
@@ -151,8 +150,7 @@ extern int task_cgroup_memory_init(void) {
 
     set_swappiness = (slurm_cgroup_conf->memory_swappiness != NO_VAL64);
     if (set_swappiness)
-        xcgroup_set_uint64_param(&memory_cg, "memory.swappiness",
-                                 slurm_cgroup_conf->memory_swappiness);
+        xcgroup_set_uint64_param(&memory_cg, "memory.swappiness", slurm_cgroup_conf->memory_swappiness);
 
     xcgroup_destroy(&memory_cg);
 
@@ -206,25 +204,20 @@ extern int task_cgroup_memory_init(void) {
     PRIu64
     "(%s)",
 
-            totalram, allowed_ram_space,
-            constrain_ram_space ? "enforced" : "permissive",
+            totalram, allowed_ram_space, constrain_ram_space ? "enforced" : "permissive",
 
-            allowed_swap_space,
-            constrain_swap_space ? "enforced" : "permissive",
-            slurm_cgroup_conf->max_ram_percent,
-            (uint64_t) (max_ram / (1024 * 1024)),
+            allowed_swap_space, constrain_swap_space ? "enforced"
+                                                     : "permissive", slurm_cgroup_conf->max_ram_percent, (uint64_t) (
+            max_ram / (1024 * 1024)),
 
-            slurm_cgroup_conf->max_swap_percent,
-            (uint64_t) (max_swap / (1024 * 1024)),
-            slurm_cgroup_conf->min_ram_space,
+            slurm_cgroup_conf->max_swap_percent, (uint64_t) (max_swap /
+                                                             (1024 * 1024)), slurm_cgroup_conf->min_ram_space,
 
-            slurm_cgroup_conf->max_kmem_percent,
-            (uint64_t) (max_kmem / (1024 * 1024)),
-            constrain_kmem_space ? "enforced" : "permissive",
-            slurm_cgroup_conf->min_kmem_space,
+            slurm_cgroup_conf->max_kmem_percent, (uint64_t) (max_kmem / (1024 * 1024)), constrain_kmem_space
+                                                                                        ? "enforced"
+                                                                                        : "permissive", slurm_cgroup_conf->min_kmem_space,
 
-            set_swappiness ? slurm_cgroup_conf->memory_swappiness : 0,
-            set_swappiness ? "set" : "unset");
+            set_swappiness ? slurm_cgroup_conf->memory_swappiness : 0, set_swappiness ? "set" : "unset");
 
     /*
      *  Warning: OOM Killer must be disabled for slurmstepd
@@ -247,9 +240,7 @@ extern int task_cgroup_memory_init(void) {
 extern int task_cgroup_memory_fini(slurm_cgroup_conf_t *slurm_cgroup_conf) {
     xcgroup_t memory_cg;
 
-    if (user_cgroup_path[0] == '\0' ||
-        job_cgroup_path[0] == '\0' ||
-        jobstep_cgroup_path[0] == '\0') {
+    if (user_cgroup_path[0] == '\0' || job_cgroup_path[0] == '\0' || jobstep_cgroup_path[0] == '\0') {
         xcgroup_ns_destroy(&memory_ns);
         return SLURM_SUCCESS;
     }
@@ -368,9 +359,7 @@ static uint64_t kmem_limit_in_bytes(uint64_t mlb) {
     return allowed_kmem_space;
 }
 
-static int memcg_initialize(xcgroup_ns_t *ns, xcgroup_t *cg,
-                            char *path, uint64_t mem_limit, uid_t uid,
-                            gid_t gid) {
+static int memcg_initialize(xcgroup_ns_t *ns, xcgroup_t *cg, char *path, uint64_t mem_limit, uid_t uid, gid_t gid) {
     uint64_t mlb = mem_limit_in_bytes(mem_limit, true);
     uint64_t mlb_soft = mem_limit_in_bytes(mem_limit, false);
     uint64_t mls = swap_limit_in_bytes(mem_limit);
@@ -384,8 +373,7 @@ static int memcg_initialize(xcgroup_ns_t *ns, xcgroup_t *cg,
         PRIu64
         " bytes) to the same value as memory.limit_in_bytes (%"
         PRIu64
-        " bytes) for cgroup: %s",
-                __func__, mlb_soft, mlb, path);
+        " bytes) for cgroup: %s", __func__, mlb_soft, mlb, path);
         mlb_soft = mlb;
     }
 
@@ -414,23 +402,17 @@ static int memcg_initialize(xcgroup_ns_t *ns, xcgroup_t *cg,
      * See https://lwn.net/Articles/516529/
      */
     if (constrain_kmem_space)
-        xcgroup_set_uint64_param(cg, "memory.kmem.limit_in_bytes",
-                                 kmem_limit_in_bytes(mlb));
+        xcgroup_set_uint64_param(cg, "memory.kmem.limit_in_bytes", kmem_limit_in_bytes(mlb));
 
     /* this limit has to be set only if ConstrainSwapSpace is set to yes */
     if (constrain_swap_space) {
-        xcgroup_set_uint64_param(cg, "memory.memsw.limit_in_bytes",
-                                 mls);
+        xcgroup_set_uint64_param(cg, "memory.memsw.limit_in_bytes", mls);
         info("task/cgroup: %s: alloc=%luMB mem.limit=%luMB "
-             "memsw.limit=%luMB", path,
-             (unsigned long) mem_limit,
-             (unsigned long) mlb / (1024 * 1024),
+             "memsw.limit=%luMB", path, (unsigned long) mem_limit, (unsigned long) mlb / (1024 * 1024),
              (unsigned long) mls / (1024 * 1024));
     } else {
         info("task/cgroup: %s: alloc=%luMB mem.limit=%luMB "
-             "memsw.limit=unlimited", path,
-             (unsigned long) mem_limit,
-             (unsigned long) mlb / (1024 * 1024));
+             "memsw.limit=unlimited", path, (unsigned long) mem_limit, (unsigned long) mlb / (1024 * 1024));
     }
 
     return 0;
@@ -697,8 +679,7 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
 
     /* build user cgroup relative path if not set (should not be) */
     if (*user_cgroup_path == '\0') {
-        if (snprintf(user_cgroup_path, PATH_MAX,
-                     "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
+        if (snprintf(user_cgroup_path, PATH_MAX, "%s/uid_%u", slurm_cgpath, uid) >= PATH_MAX) {
             error("unable to build uid %u cgroup relative "
                   "path : %m", uid);
             xfree(slurm_cgpath);
@@ -713,8 +694,7 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
     else
         jobid = job->jobid;
     if (*job_cgroup_path == '\0') {
-        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u",
-                     user_cgroup_path, jobid) >= PATH_MAX) {
+        if (snprintf(job_cgroup_path, PATH_MAX, "%s/job_%u", user_cgroup_path, jobid) >= PATH_MAX) {
             error("task/cgroup: unable to build job %u memory "
                   "cg relative path : %m", jobid);
             return SLURM_ERROR;
@@ -725,15 +705,11 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
     if (*jobstep_cgroup_path == '\0') {
         int cc;
         if (stepid == SLURM_BATCH_SCRIPT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_batch", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_batch", job_cgroup_path);
         } else if (stepid == SLURM_EXTERN_CONT) {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_extern", job_cgroup_path);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_extern", job_cgroup_path);
         } else {
-            cc = snprintf(jobstep_cgroup_path, PATH_MAX,
-                          "%s/step_%u",
-                          job_cgroup_path, stepid);
+            cc = snprintf(jobstep_cgroup_path, PATH_MAX, "%s/step_%u", job_cgroup_path, stepid);
         }
         if (cc >= PATH_MAX) {
             error("task/cgroup: unable to build job step %u.%u "
@@ -774,17 +750,14 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
      * are not working well so it will be really difficult to manage
      * addition/removal of memory amounts at this level. (kernel 2.6.34)
      */
-    if (xcgroup_create(&memory_ns, &user_memory_cg,
-                       user_cgroup_path,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &user_memory_cg, user_cgroup_path, getuid(), getgid()) != XCGROUP_SUCCESS) {
         goto error;
     }
     if (xcgroup_instantiate(&user_memory_cg) != XCGROUP_SUCCESS) {
         xcgroup_destroy(&user_memory_cg);
         goto error;
     }
-    if (xcgroup_set_param(&user_memory_cg, "memory.use_hierarchy", "1")
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_set_param(&user_memory_cg, "memory.use_hierarchy", "1") != XCGROUP_SUCCESS) {
         error("task/cgroup: unable to ask for hierarchical accounting"
               "of user memcg '%s'", user_memory_cg.path);
         xcgroup_destroy(&user_memory_cg);
@@ -795,8 +768,7 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
      * Create job cgroup in the memory ns (it could already exist)
      * and set the associated memory limits.
      */
-    if (memcg_initialize(&memory_ns, &job_memory_cg, job_cgroup_path,
-                         job->job_mem, getuid(), getgid()) < 0) {
+    if (memcg_initialize(&memory_ns, &job_memory_cg, job_cgroup_path, job->job_mem, getuid(), getgid()) < 0) {
         xcgroup_destroy(&user_memory_cg);
         goto error;
     }
@@ -805,16 +777,14 @@ extern int task_cgroup_memory_create(stepd_step_rec_t *job) {
      * Create step cgroup in the memory ns (it should not exists)
      * and set the associated memory limits.
      */
-    if (memcg_initialize(&memory_ns, &step_memory_cg, jobstep_cgroup_path,
-                         job->step_mem, uid, gid) < 0) {
+    if (memcg_initialize(&memory_ns, &step_memory_cg, jobstep_cgroup_path, job->step_mem, uid, gid) < 0) {
         xcgroup_destroy(&user_memory_cg);
         xcgroup_destroy(&job_memory_cg);
         goto error;
     }
 
     if (_register_oom_notifications(step_memory_cg.path) == SLURM_ERROR) {
-        error("%s: Unable to register OOM notifications for %s",
-              __func__, step_memory_cg.path);
+        error("%s: Unable to register OOM notifications for %s", __func__, step_memory_cg.path);
     }
 
     fstatus = SLURM_SUCCESS;
@@ -861,8 +831,7 @@ extern int task_cgroup_memory_check_oom(stepd_step_rec_t *job) {
     ssize_t ret;
     uint32_t jobid;
 
-    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0)
-        != XCGROUP_SUCCESS) {
+    if (xcgroup_create(&memory_ns, &memory_cg, "", 0, 0) != XCGROUP_SUCCESS) {
         error("task/cgroup task_cgroup_memory_check_oom: unable to create root memcg : %m");
         goto fail_xcgroup_create;
     }
@@ -881,8 +850,7 @@ extern int task_cgroup_memory_check_oom(stepd_step_rec_t *job) {
     else if (job->stepid == SLURM_EXTERN_CONT)
         snprintf(step_str, sizeof(step_str), "%u.extern", jobid);
     else
-        snprintf(step_str, sizeof(step_str), "%u.%u",
-                 jobid, job->stepid);
+        snprintf(step_str, sizeof(step_str), "%u.%u", jobid, job->stepid);
 
     if (failcnt_non_zero(&step_memory_cg, "memory.memsw.failcnt")) {
         /*
@@ -909,8 +877,7 @@ extern int task_cgroup_memory_check_oom(stepd_step_rec_t *job) {
     }
 
     if (!oom_thread_created) {
-        debug("%s: OOM events were not monitored for %s", __func__,
-              step_str);
+        debug("%s: OOM events were not monitored for %s", __func__, step_str);
         goto fail_oom_results;
     }
 
@@ -943,16 +910,14 @@ extern int task_cgroup_memory_check_oom(stepd_step_rec_t *job) {
     if (oom_kill_count) {
         error("Detected %"
         PRIu64
-        " oom-kill event(s) in step %s cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.",
-                oom_kill_count, step_str);
+        " oom-kill event(s) in step %s cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.", oom_kill_count, step_str);
         rc = ENOMEM;
     }
     slurm_mutex_unlock(&oom_mutex);
 
     fail_oom_results:
     if ((oom_pipe[1] != -1) && (close(oom_pipe[1]) == -1)) {
-        error("%s: close() failed on oom_pipe[1] fd, step %s: %m",
-              __func__, step_str);
+        error("%s: close() failed on oom_pipe[1] fd, step %s: %m", __func__, step_str);
     }
 
     slurm_mutex_destroy(&oom_mutex);

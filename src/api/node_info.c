@@ -82,21 +82,16 @@ typedef struct load_node_resp_struct {
  * IN node_info_msg_ptr - node information message pointer
  * IN one_liner - print as a single line if true
  */
-void
-slurm_print_node_info_msg(FILE *out, node_info_msg_t *node_info_msg_ptr,
-                          int one_liner) {
+void slurm_print_node_info_msg(FILE *out, node_info_msg_t *node_info_msg_ptr, int one_liner) {
     int i;
     node_info_t *node_ptr = node_info_msg_ptr->node_array;
     char time_str[32];
 
-    slurm_make_time_str((time_t *) &node_info_msg_ptr->last_update,
-                        time_str, sizeof(time_str));
-    fprintf(out, "Node data as of %s, record count %d\n",
-            time_str, node_info_msg_ptr->record_count);
+    slurm_make_time_str((time_t *) &node_info_msg_ptr->last_update, time_str, sizeof(time_str));
+    fprintf(out, "Node data as of %s, record count %d\n", time_str, node_info_msg_ptr->record_count);
 
     for (i = 0; i < node_info_msg_ptr->record_count; i++) {
-        slurm_print_node_table(out, &node_ptr[i],
-                               one_liner);
+        slurm_print_node_table(out, &node_ptr[i], one_liner);
     }
 }
 
@@ -116,19 +111,16 @@ void slurm_print_node_table(FILE *out, node_info_t *node_ptr, int one_liner) {
 
 /* Given data structures containing information about nodes and partitions,
  * populate the node's "partitions" field */
-void
-slurm_populate_node_partitions(node_info_msg_t *node_buffer_ptr,
-                               partition_info_msg_t *part_buffer_ptr) {
+void slurm_populate_node_partitions(node_info_msg_t *node_buffer_ptr, partition_info_msg_t *part_buffer_ptr) {
     int i, j, n, p;
     node_info_t *node_ptr;
     partition_info_t *part_ptr;
 
-    if (!node_buffer_ptr || (node_buffer_ptr->record_count == 0) ||
-        !part_buffer_ptr || (part_buffer_ptr->record_count == 0))
+    if (!node_buffer_ptr || (node_buffer_ptr->record_count == 0) || !part_buffer_ptr ||
+        (part_buffer_ptr->record_count == 0))
         return;
 
-    for (n = 0, node_ptr = node_buffer_ptr->node_array;
-         n < node_buffer_ptr->record_count; n++, node_ptr++) {
+    for (n = 0, node_ptr = node_buffer_ptr->node_array; n < node_buffer_ptr->record_count; n++, node_ptr++) {
         xfree(node_ptr->partitions);
     }
 
@@ -141,22 +133,18 @@ slurm_populate_node_partitions(node_info_msg_t *node_buffer_ptr,
      * node on the partition is a singleton (i.e. Nodes=node1), the
      * begin-end range are both the same node index value.
      */
-    for (p = 0, part_ptr = part_buffer_ptr->partition_array;
-         p < part_buffer_ptr->record_count; p++, part_ptr++) {
+    for (p = 0, part_ptr = part_buffer_ptr->partition_array; p < part_buffer_ptr->record_count; p++, part_ptr++) {
         for (i = 0;; i += 2) {
             if (part_ptr->node_inx[i] == -1)
                 break;
-            for (j = part_ptr->node_inx[i];
-                 j <= part_ptr->node_inx[i + 1]; j++) {
+            for (j = part_ptr->node_inx[i]; j <= part_ptr->node_inx[i + 1]; j++) {
                 char *sep = "";
-                if ((j < 0) ||
-                    (j >= node_buffer_ptr->record_count))
+                if ((j < 0) || (j >= node_buffer_ptr->record_count))
                     continue;
                 node_ptr = node_buffer_ptr->node_array + j;
                 if (node_ptr->partitions)
                     sep = ",";
-                xstrfmtcat(node_ptr->partitions, "%s%s", sep,
-                           part_ptr->name);
+                xstrfmtcat(node_ptr->partitions, "%s%s", sep, part_ptr->name);
             }
         }
     }
@@ -182,8 +170,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     char *line_end = (one_liner) ? " " : "\n   ";
     slurm_ctl_conf_info_msg_t *slurm_ctl_conf_ptr = NULL;
 
-    if (slurm_load_ctl_conf((time_t) NULL, &slurm_ctl_conf_ptr)
-        != SLURM_SUCCESS)
+    if (slurm_load_ctl_conf((time_t) NULL, &slurm_ctl_conf_ptr) != SLURM_SUCCESS)
         fatal("Cannot load slurmctld conf file");
 
     if (my_state & NODE_STATE_CLOUD) {
@@ -210,10 +197,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
         my_state &= (~NODE_STATE_POWERING_DOWN);
         power_str = "+POWERING_DOWN";
     }
-    slurm_get_select_nodeinfo(node_ptr->select_nodeinfo,
-                              SELECT_NODEDATA_SUBCNT,
-                              NODE_STATE_ALLOCATED,
-                              &alloc_cpus);
+    slurm_get_select_nodeinfo(node_ptr->select_nodeinfo, SELECT_NODEDATA_SUBCNT, NODE_STATE_ALLOCATED, &alloc_cpus);
     idle_cpus = node_ptr->cpus - alloc_cpus;
 
     if (idle_cpus && (idle_cpus != node_ptr->cpus)) {
@@ -238,8 +222,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     xstrcat(out, line_end);
 
     /****** Line ******/
-    xstrfmtcat(out, "CPUAlloc=%u CPUTot=%u ",
-               alloc_cpus, node_ptr->cpus);
+    xstrfmtcat(out, "CPUAlloc=%u CPUTot=%u ", alloc_cpus, node_ptr->cpus);
 
     if (node_ptr->cpu_load == NO_VAL)
         xstrcat(out, "CPULoad=N/A");
@@ -282,8 +265,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
         }
 
         if (node_ptr->node_hostname) {
-            xstrfmtcat(out, "NodeHostName=%s ",
-                       node_ptr->node_hostname);
+            xstrfmtcat(out, "NodeHostName=%s ", node_ptr->node_hostname);
             line_used = true;
         }
 
@@ -292,8 +274,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
             line_used = true;
         }
 
-        if (node_ptr->version &&
-            xstrcmp(node_ptr->version, slurm_ctl_conf_ptr->version)) {
+        if (node_ptr->version && xstrcmp(node_ptr->version, slurm_ctl_conf_ptr->version)) {
             xstrfmtcat(out, "Version=%s", node_ptr->version);
             line_used = true;
         }
@@ -309,16 +290,13 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     }
 
     /****** Line ******/
-    slurm_get_select_nodeinfo(node_ptr->select_nodeinfo,
-                              SELECT_NODEDATA_MEM_ALLOC,
-                              NODE_STATE_ALLOCATED,
+    slurm_get_select_nodeinfo(node_ptr->select_nodeinfo, SELECT_NODEDATA_MEM_ALLOC, NODE_STATE_ALLOCATED,
                               &alloc_memory);
     xstrfmtcat(out, "RealMemory=%"
     PRIu64
     " AllocMem=%"
     PRIu64
-    " ",
-            node_ptr->real_memory, alloc_memory);
+    " ", node_ptr->real_memory, alloc_memory);
 
     if (node_ptr->free_mem == NO_VAL64)
         xstrcat(out, "FreeMem=N/A ");
@@ -327,35 +305,28 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     PRIu64
     " ", node_ptr->free_mem);
 
-    xstrfmtcat(out, "Sockets=%u Boards=%u",
-               node_ptr->sockets, node_ptr->boards);
+    xstrfmtcat(out, "Sockets=%u Boards=%u", node_ptr->sockets, node_ptr->boards);
     xstrcat(out, line_end);
 
     /****** core & memory specialization Line (optional) ******/
-    if (node_ptr->core_spec_cnt || node_ptr->cpu_spec_list ||
-        node_ptr->mem_spec_limit) {
+    if (node_ptr->core_spec_cnt || node_ptr->cpu_spec_list || node_ptr->mem_spec_limit) {
         if (node_ptr->core_spec_cnt) {
-            xstrfmtcat(out, "CoreSpecCount=%u ",
-                       node_ptr->core_spec_cnt);
+            xstrfmtcat(out, "CoreSpecCount=%u ", node_ptr->core_spec_cnt);
         }
         if (node_ptr->cpu_spec_list) {
-            xstrfmtcat(out, "CPUSpecList=%s ",
-                       node_ptr->cpu_spec_list);
+            xstrfmtcat(out, "CPUSpecList=%s ", node_ptr->cpu_spec_list);
         }
         if (node_ptr->mem_spec_limit) {
             xstrfmtcat(out, "MemSpecLimit=%"
             PRIu64
-            "",
-                    node_ptr->mem_spec_limit);
+            "", node_ptr->mem_spec_limit);
         }
         xstrcat(out, line_end);
     }
 
     /****** Line ******/
-    xstrfmtcat(out, "State=%s%s%s%s%s ThreadsPerCore=%u TmpDisk=%u Weight=%u ",
-               node_state_string(my_state),
-               cloud_str, comp_str, drain_str, power_str,
-               node_ptr->threads, node_ptr->tmp_disk, node_ptr->weight);
+    xstrfmtcat(out, "State=%s%s%s%s%s ThreadsPerCore=%u TmpDisk=%u Weight=%u ", node_state_string(my_state), cloud_str,
+               comp_str, drain_str, power_str, node_ptr->threads, node_ptr->tmp_disk, node_ptr->weight);
 
     if (node_ptr->owner == NO_VAL) {
         xstrcat(out, "Owner=N/A ");
@@ -365,16 +336,13 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
         xfree(user_name);
     }
 
-    xstrfmtcat(out, "MCS_label=%s",
-               (node_ptr->mcs_label == NULL) ? "N/A" : node_ptr->mcs_label);
+    xstrfmtcat(out, "MCS_label=%s", (node_ptr->mcs_label == NULL) ? "N/A" : node_ptr->mcs_label);
 
     xstrcat(out, line_end);
 
     /****** Line ******/
-    if ((node_ptr->next_state != NO_VAL) &&
-        (my_state & NODE_STATE_REBOOT)) {
-        xstrfmtcat(out, "NextState=%s",
-                   node_state_string(node_ptr->next_state));
+    if ((node_ptr->next_state != NO_VAL) && (my_state & NODE_STATE_REBOOT)) {
+        xstrfmtcat(out, "NextState=%s", node_state_string(node_ptr->next_state));
         xstrcat(out, line_end);
     }
 
@@ -386,16 +354,14 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
 
     /****** Line ******/
     if (node_ptr->boot_time) {
-        slurm_make_time_str((time_t *) &node_ptr->boot_time,
-                            time_str, sizeof(time_str));
+        slurm_make_time_str((time_t *) &node_ptr->boot_time, time_str, sizeof(time_str));
         xstrfmtcat(out, "BootTime=%s ", time_str);
     } else {
         xstrcat(out, "BootTime=None ");
     }
 
     if (node_ptr->slurmd_start_time) {
-        slurm_make_time_str((time_t *) &node_ptr->slurmd_start_time,
-                            time_str, sizeof(time_str));
+        slurm_make_time_str((time_t *) &node_ptr->slurmd_start_time, time_str, sizeof(time_str));
         xstrfmtcat(out, "SlurmdStartTime=%s", time_str);
     } else {
         xstrcat(out, "SlurmdStartTime=None");
@@ -403,13 +369,11 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     xstrcat(out, line_end);
 
     /****** TRES Line ******/
-    select_g_select_nodeinfo_get(node_ptr->select_nodeinfo,
-                                 SELECT_NODEDATA_TRES_ALLOC_FMT_STR,
-                                 NODE_STATE_ALLOCATED, &node_alloc_tres);
+    select_g_select_nodeinfo_get(node_ptr->select_nodeinfo, SELECT_NODEDATA_TRES_ALLOC_FMT_STR, NODE_STATE_ALLOCATED,
+                                 &node_alloc_tres);
     xstrfmtcat(out, "CfgTRES=%s", node_ptr->tres_fmt_str);
     xstrcat(out, line_end);
-    xstrfmtcat(out, "AllocTRES=%s",
-               (node_alloc_tres) ? node_alloc_tres : "");
+    xstrfmtcat(out, "AllocTRES=%s", (node_alloc_tres) ? node_alloc_tres : "");
     xfree(node_alloc_tres);
     xstrcat(out, line_end);
 
@@ -425,35 +389,27 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
     if (!node_ptr->energy || node_ptr->energy->current_watts == NO_VAL)
         xstrcat(out, "CurrentWatts=n/s AveWatts=n/s");
     else
-        xstrfmtcat(out, "CurrentWatts=%u AveWatts=%u",
-                   node_ptr->energy->current_watts,
-                   node_ptr->energy->ave_watts);
+        xstrfmtcat(out, "CurrentWatts=%u AveWatts=%u", node_ptr->energy->current_watts, node_ptr->energy->ave_watts);
 
     xstrcat(out, line_end);
 
     /****** external sensors Line ******/
-    if (!node_ptr->ext_sensors
-        || node_ptr->ext_sensors->consumed_energy == NO_VAL64)
+    if (!node_ptr->ext_sensors || node_ptr->ext_sensors->consumed_energy == NO_VAL64)
         xstrcat(out, "ExtSensorsJoules=n/s ");
     else
         xstrfmtcat(out, "ExtSensorsJoules=%"
     PRIu64
-    " ",
-            node_ptr->ext_sensors->consumed_energy);
+    " ", node_ptr->ext_sensors->consumed_energy);
 
-    if (!node_ptr->ext_sensors
-        || node_ptr->ext_sensors->current_watts == NO_VAL)
+    if (!node_ptr->ext_sensors || node_ptr->ext_sensors->current_watts == NO_VAL)
         xstrcat(out, "ExtSensorsWatts=n/s ");
     else
-        xstrfmtcat(out, "ExtSensorsWatts=%u ",
-                   node_ptr->ext_sensors->current_watts);
+        xstrfmtcat(out, "ExtSensorsWatts=%u ", node_ptr->ext_sensors->current_watts);
 
-    if (!node_ptr->ext_sensors
-        || node_ptr->ext_sensors->temperature == NO_VAL)
+    if (!node_ptr->ext_sensors || node_ptr->ext_sensors->temperature == NO_VAL)
         xstrcat(out, "ExtSensorsTemp=n/s");
     else
-        xstrfmtcat(out, "ExtSensorsTemp=%u",
-                   node_ptr->ext_sensors->temperature);
+        xstrfmtcat(out, "ExtSensorsTemp=%u", node_ptr->ext_sensors->temperature);
 
     xstrcat(out, line_end);
 
@@ -474,8 +430,7 @@ char *slurm_sprint_node_table(node_info_t *node_ptr, int one_liner) {
             xstrfmtcat(out, "%s", tok);
             if ((inx++ == 1) && node_ptr->reason_time) {
                 user_name = uid_to_string(node_ptr->reason_uid);
-                slurm_make_time_str((time_t *) &node_ptr->reason_time,
-                                    time_str, sizeof(time_str));
+                slurm_make_time_str((time_t *) &node_ptr->reason_time, time_str, sizeof(time_str));
                 xstrfmtcat(out, " [%s@%s]", user_name, time_str);
                 xfree(user_name);
             }
@@ -499,12 +454,10 @@ static void _set_node_mixed(node_info_msg_t *resp) {
     if (!resp)
         return;
 
-    for (i = 0, node_ptr = resp->node_array;
-         i < resp->record_count; i++, node_ptr++) {
+    for (i = 0, node_ptr = resp->node_array; i < resp->record_count; i++, node_ptr++) {
         uint16_t used_cpus = 0;
-        select_g_select_nodeinfo_get(node_ptr->select_nodeinfo,
-                                     SELECT_NODEDATA_SUBCNT,
-                                     NODE_STATE_ALLOCATED, &used_cpus);
+        select_g_select_nodeinfo_get(node_ptr->select_nodeinfo, SELECT_NODEDATA_SUBCNT, NODE_STATE_ALLOCATED,
+                                     &used_cpus);
         if ((used_cpus != 0) && (used_cpus != node_ptr->cpus)) {
             node_ptr->node_state &= NODE_STATE_FLAGS;
             node_ptr->node_state |= NODE_STATE_MIXED;
@@ -512,10 +465,9 @@ static void _set_node_mixed(node_info_msg_t *resp) {
     }
 }
 
-static int _load_cluster_nodes(slurm_msg_t *req_msg,
-                               node_info_msg_t **node_info_msg_pptr,
-                               slurmdb_cluster_rec_t *cluster,
-                               uint16_t show_flags) {
+static int
+_load_cluster_nodes(slurm_msg_t *req_msg, node_info_msg_t **node_info_msg_pptr, slurmdb_cluster_rec_t *cluster,
+                    uint16_t show_flags) {
     slurm_msg_t resp_msg;
     int rc;
 
@@ -564,16 +516,13 @@ static void *_load_node_thread(void *args) {
     node_info_msg_t *new_msg = NULL;
     int i, rc;
 
-    if ((rc = _load_cluster_nodes(load_args->req_msg, &new_msg, cluster,
-                                  load_args->show_flags)) || !new_msg) {
-        verbose("Error reading node information from cluster %s: %s",
-                cluster->name, slurm_strerror(rc));
+    if ((rc = _load_cluster_nodes(load_args->req_msg, &new_msg, cluster, load_args->show_flags)) || !new_msg) {
+        verbose("Error reading node information from cluster %s: %s", cluster->name, slurm_strerror(rc));
     } else {
         load_node_resp_struct_t *node_resp;
         for (i = 0; i < new_msg->record_count; i++) {
             if (!new_msg->node_array[i].cluster_name) {
-                new_msg->node_array[i].cluster_name =
-                        xstrdup(cluster->name);
+                new_msg->node_array[i].cluster_name = xstrdup(cluster->name);
             }
         }
         node_resp = xmalloc(sizeof(load_node_resp_struct_t));
@@ -586,10 +535,9 @@ static void *_load_node_thread(void *args) {
     return (void *) NULL;
 }
 
-static int _load_fed_nodes(slurm_msg_t *req_msg,
-                           node_info_msg_t **node_info_msg_pptr,
-                           uint16_t show_flags, char *cluster_name,
-                           slurmdb_federation_rec_t *fed) {
+static int
+_load_fed_nodes(slurm_msg_t *req_msg, node_info_msg_t **node_info_msg_pptr, uint16_t show_flags, char *cluster_name,
+                slurmdb_federation_rec_t *fed) {
     int cluster_inx = 0, i;
     load_node_resp_struct_t *node_resp;
     node_info_msg_t *orig_msg = NULL, *new_msg = NULL;
@@ -605,12 +553,10 @@ static int _load_fed_nodes(slurm_msg_t *req_msg,
 
     /* Spawn one pthread per cluster to collect node information */
     resp_msg_list = list_create(NULL);
-    load_thread = xmalloc(sizeof(pthread_t) *
-                          list_count(fed->cluster_list));
+    load_thread = xmalloc(sizeof(pthread_t) * list_count(fed->cluster_list));
     iter = list_iterator_create(fed->cluster_list);
     while ((cluster = (slurmdb_cluster_rec_t *) list_next(iter))) {
-        if ((cluster->control_host == NULL) ||
-            (cluster->control_host[0] == '\0'))
+        if ((cluster->control_host == NULL) || (cluster->control_host[0] == '\0'))
             continue;    /* Cluster down */
 
         load_args = xmalloc(sizeof(load_node_req_struct_t));
@@ -619,8 +565,7 @@ static int _load_fed_nodes(slurm_msg_t *req_msg,
         load_args->req_msg = req_msg;
         load_args->resp_msg_list = resp_msg_list;
         load_args->show_flags = show_flags;
-        slurm_thread_create(&load_thread[pthread_count],
-                            _load_node_thread, load_args);
+        slurm_thread_create(&load_thread[pthread_count], _load_node_thread, load_args);
         pthread_count++;
     }
     list_iterator_destroy(iter);
@@ -642,20 +587,12 @@ static int _load_fed_nodes(slurm_msg_t *req_msg,
             *node_info_msg_pptr = orig_msg;
         } else {
             /* Merge the node records */
-            orig_msg->last_update = MIN(orig_msg->last_update,
-                                        new_msg->last_update);
-            new_rec_cnt = orig_msg->record_count +
-                          new_msg->record_count;
+            orig_msg->last_update = MIN(orig_msg->last_update, new_msg->last_update);
+            new_rec_cnt = orig_msg->record_count + new_msg->record_count;
             if (new_msg->record_count) {
-                orig_msg->node_array =
-                        xrealloc(orig_msg->node_array,
-                                 sizeof(node_info_t) *
-                                 new_rec_cnt);
-                (void) memcpy(orig_msg->node_array +
-                              orig_msg->record_count,
-                              new_msg->node_array,
-                              sizeof(node_info_t) *
-                              new_msg->record_count);
+                orig_msg->node_array = xrealloc(orig_msg->node_array, sizeof(node_info_t) * new_rec_cnt);
+                (void) memcpy(orig_msg->node_array + orig_msg->record_count, new_msg->node_array,
+                              sizeof(node_info_t) * new_msg->record_count);
                 orig_msg->record_count = new_rec_cnt;
             }
             xfree(new_msg->node_array);
@@ -681,8 +618,7 @@ static int _load_fed_nodes(slurm_msg_t *req_msg,
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_node_info_msg
  */
-extern int slurm_load_node(time_t update_time, node_info_msg_t **resp,
-                           uint16_t show_flags) {
+extern int slurm_load_node(time_t update_time, node_info_msg_t **resp, uint16_t show_flags) {
     slurm_msg_t req_msg;
     node_info_request_msg_t req;
     char *cluster_name = NULL;
@@ -695,8 +631,7 @@ extern int slurm_load_node(time_t update_time, node_info_msg_t **resp,
     else
         cluster_name = slurm_get_cluster_name();
     if ((show_flags & SHOW_FEDERATION) && !(show_flags & SHOW_LOCAL) &&
-        (slurm_load_federation(&ptr) == SLURM_SUCCESS) &&
-        cluster_in_federation(ptr, cluster_name)) {
+        (slurm_load_federation(&ptr) == SLURM_SUCCESS) && cluster_in_federation(ptr, cluster_name)) {
         /* In federation. Need full info from all clusters */
         update_time = (time_t) 0;
         show_flags &= (~SHOW_LOCAL);
@@ -715,11 +650,9 @@ extern int slurm_load_node(time_t update_time, node_info_msg_t **resp,
 
     if ((show_flags & SHOW_FEDERATION) && ptr) { /* "ptr" check for CLANG */
         fed = (slurmdb_federation_rec_t *) ptr;
-        rc = _load_fed_nodes(&req_msg, resp, show_flags, cluster_name,
-                             fed);
+        rc = _load_fed_nodes(&req_msg, resp, show_flags, cluster_name, fed);
     } else {
-        rc = _load_cluster_nodes(&req_msg, resp, working_cluster_rec,
-                                 show_flags);
+        rc = _load_cluster_nodes(&req_msg, resp, working_cluster_rec, show_flags);
     }
 
     if (ptr)
@@ -733,8 +666,8 @@ extern int slurm_load_node(time_t update_time, node_info_msg_t **resp,
  * slurm_load_node2 - equivalent to slurm_load_node() with addition
  *	of cluster record for communications in a federation
  */
-extern int slurm_load_node2(time_t update_time, node_info_msg_t **resp,
-                            uint16_t show_flags, slurmdb_cluster_rec_t *cluster) {
+extern int
+slurm_load_node2(time_t update_time, node_info_msg_t **resp, uint16_t show_flags, slurmdb_cluster_rec_t *cluster) {
     slurm_msg_t req_msg;
     node_info_request_msg_t req;
 
@@ -757,8 +690,7 @@ extern int slurm_load_node2(time_t update_time, node_info_msg_t **resp,
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_node_info_msg
  */
-extern int slurm_load_node_single(node_info_msg_t **resp, char *node_name,
-                                  uint16_t show_flags) {
+extern int slurm_load_node_single(node_info_msg_t **resp, char *node_name, uint16_t show_flags) {
     slurm_msg_t req_msg;
     node_info_single_msg_t req;
 
@@ -769,17 +701,15 @@ extern int slurm_load_node_single(node_info_msg_t **resp, char *node_name,
     req_msg.msg_type = REQUEST_NODE_INFO_SINGLE;
     req_msg.data = &req;
 
-    return _load_cluster_nodes(&req_msg, resp, working_cluster_rec,
-                               show_flags);
+    return _load_cluster_nodes(&req_msg, resp, working_cluster_rec, show_flags);
 }
 
 /*
  * slurm_load_node_single2 - equivalent to slurm_load_node_single() with
  *	addition of cluster record for communications in a federation
  */
-extern int slurm_load_node_single2(node_info_msg_t **resp, char *node_name,
-                                   uint16_t show_flags,
-                                   slurmdb_cluster_rec_t *cluster) {
+extern int
+slurm_load_node_single2(node_info_msg_t **resp, char *node_name, uint16_t show_flags, slurmdb_cluster_rec_t *cluster) {
     slurm_msg_t req_msg;
     node_info_single_msg_t req;
 
@@ -804,9 +734,7 @@ extern int slurm_load_node_single2(node_info_msg_t **resp, char *node_name,
  * RET 0 on success or a slurm error code
  * NOTE: free the response using xfree
  */
-extern int slurm_get_node_energy(char *host, uint16_t delta,
-                                 uint16_t *sensor_cnt,
-                                 acct_gather_energy_t **energy) {
+extern int slurm_get_node_energy(char *host, uint16_t delta, uint16_t *sensor_cnt, acct_gather_energy_t **energy) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -830,9 +758,7 @@ extern int slurm_get_node_energy(char *host, uint16_t delta,
             slurm_conf_get_addr(this_addr, &req_msg.address);
         } else {
             this_addr = "localhost";
-            slurm_set_addr(&req_msg.address,
-                           (uint16_t) slurm_get_slurmd_port(),
-                           this_addr);
+            slurm_set_addr(&req_msg.address, (uint16_t) slurm_get_slurmd_port(), this_addr);
         }
     } else {
         char this_host[256];
@@ -843,9 +769,7 @@ extern int slurm_get_node_energy(char *host, uint16_t delta,
         this_addr = slurm_conf_get_nodeaddr(this_host);
         if (this_addr == NULL)
             this_addr = xstrdup("localhost");
-        slurm_set_addr(&req_msg.address,
-                       (uint16_t) slurm_get_slurmd_port(),
-                       this_addr);
+        slurm_set_addr(&req_msg.address, (uint16_t) slurm_get_slurmd_port(), this_addr);
         xfree(this_addr);
     }
 
@@ -866,10 +790,8 @@ extern int slurm_get_node_energy(char *host, uint16_t delta,
         g_slurm_auth_destroy(resp_msg.auth_cred);
     switch (resp_msg.msg_type) {
         case RESPONSE_ACCT_GATHER_ENERGY:
-            *sensor_cnt = ((acct_gather_node_resp_msg_t *)
-                    resp_msg.data)->sensor_cnt;
-            *energy = ((acct_gather_node_resp_msg_t *)
-                    resp_msg.data)->energy;
+            *sensor_cnt = ((acct_gather_node_resp_msg_t *) resp_msg.data)->sensor_cnt;
+            *energy = ((acct_gather_node_resp_msg_t *) resp_msg.data)->energy;
             ((acct_gather_node_resp_msg_t *) resp_msg.data)->energy = NULL;
             slurm_free_acct_gather_node_resp_msg(resp_msg.data);
             break;

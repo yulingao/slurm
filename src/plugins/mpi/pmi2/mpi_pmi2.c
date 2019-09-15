@@ -82,8 +82,7 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  * The following is executed in slurmstepd.
  */
 
-int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job,
-                                  char ***env) {
+int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
     int rc;
 
     debug("using mpi/pmi2");
@@ -103,15 +102,12 @@ int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job,
     return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job,
-                               char ***env) {
+int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
     int i;
 
-    env_array_overwrite_fmt(env, "PMI_FD", "%u",
-                            TASK_PMI_SOCK(job->ltaskid));
+    env_array_overwrite_fmt(env, "PMI_FD", "%u", TASK_PMI_SOCK(job->ltaskid));
 
-    env_array_overwrite_fmt(env, "PMI_JOBID", "%s",
-                            job_info.pmi_jobid);
+    env_array_overwrite_fmt(env, "PMI_JOBID", "%s", job_info.pmi_jobid);
     env_array_overwrite_fmt(env, "PMI_RANK", "%u", job->gtaskid);
     env_array_overwrite_fmt(env, "PMI_SIZE", "%u", job->ntasks);
     if (job_info.spawn_seq) { /* PMI1.1 needs this env-var */
@@ -136,8 +132,7 @@ int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job,
  * The following is executed in srun.
  */
 
-mpi_plugin_client_state_t *
-p_mpi_hook_client_prelaunch(mpi_plugin_client_info_t *job, char ***env) {
+mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(mpi_plugin_client_info_t *job, char ***env) {
     int rc;
 
     debug("mpi/pmi2: client_prelaunch");

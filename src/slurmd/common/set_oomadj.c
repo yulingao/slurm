@@ -54,16 +54,14 @@ extern int set_oom_adj(int adj) {
     fd = open(oom_adj_file, O_WRONLY);
     if (fd < 0) {
         if (errno == ENOENT) {
-            debug("%s not found. Falling back to oom_adj",
-                  oom_adj_file);
+            debug("%s not found. Falling back to oom_adj", oom_adj_file);
             oom_adj_file = "/proc/self/oom_adj";
             fd = open(oom_adj_file, O_WRONLY);
             if (fd < 0) {
                 if (errno == ENOENT)
                     error("%s not found", oom_adj_file);
                 else
-                    error("failed to open %s: %m",
-                          oom_adj_file);
+                    error("failed to open %s: %m", oom_adj_file);
                 return -1;
             }
             /* Convert range from [-1000,1000] to [-17,15]

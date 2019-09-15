@@ -86,9 +86,8 @@ job_sbcast_cred_msg_t *sbcast_cred;    /* job alloc info and sbcast cred */
 
 static int _bcast_file(struct bcast_parameters *params);
 
-static int _file_bcast(struct bcast_parameters *params,
-                       file_bcast_msg_t *bcast_msg,
-                       job_sbcast_cred_msg_t *sbcast_cred);
+static int
+_file_bcast(struct bcast_parameters *params, file_bcast_msg_t *bcast_msg, job_sbcast_cred_msg_t *sbcast_cred);
 
 static int _file_state(struct bcast_parameters *params);
 
@@ -98,13 +97,11 @@ static int _get_job_info(struct bcast_parameters *params);
 static int _file_state(struct bcast_parameters *params) {
     /* validate the source file */
     if ((fd = open(params->src_fname, O_RDONLY)) < 0) {
-        error("Can't open `%s`: %s", params->src_fname,
-              strerror(errno));
+        error("Can't open `%s`: %s", params->src_fname, strerror(errno));
         return SLURM_ERROR;
     }
     if (fstat(fd, &f_stat)) {
-        error("Can't stat `%s`: %s", params->src_fname,
-              strerror(errno));
+        error("Can't stat `%s`: %s", params->src_fname, strerror(errno));
         return SLURM_ERROR;
     }
 
@@ -135,29 +132,22 @@ static int _get_job_info(struct bcast_parameters *params) {
 
     xassert(params->job_id != NO_VAL);
 
-    rc = slurm_sbcast_lookup(params->job_id, params->pack_job_offset,
-                             params->step_id, &sbcast_cred);
+    rc = slurm_sbcast_lookup(params->job_id, params->pack_job_offset, params->step_id, &sbcast_cred);
     if (rc != SLURM_SUCCESS) {
         if (params->step_id == NO_VAL) {
             if (params->pack_job_offset == NO_VAL) {
-                error("Slurm job ID %u lookup error: %s",
-                      params->job_id,
-                      slurm_strerror(slurm_get_errno()));
+                error("Slurm job ID %u lookup error: %s", params->job_id, slurm_strerror(slurm_get_errno()));
             } else {
-                error("Slurm job ID %u+%u lookup error: %s",
-                      params->job_id, params->pack_job_offset,
+                error("Slurm job ID %u+%u lookup error: %s", params->job_id, params->pack_job_offset,
                       slurm_strerror(slurm_get_errno()));
             }
         } else {
             if (params->pack_job_offset == NO_VAL) {
-                error("Slurm step ID %u.%u lookup error: %s",
-                      params->job_id, params->step_id,
+                error("Slurm step ID %u.%u lookup error: %s", params->job_id, params->step_id,
                       slurm_strerror(slurm_get_errno()));
             } else {
-                error("Slurm step ID %u+%u.%u lookup error: %s",
-                      params->job_id, params->pack_job_offset,
-                      params->step_id,
-                      slurm_strerror(slurm_get_errno()));
+                error("Slurm step ID %u+%u.%u lookup error: %s", params->job_id, params->pack_job_offset,
+                      params->step_id, slurm_strerror(slurm_get_errno()));
             }
         }
         return rc;
@@ -180,9 +170,8 @@ static int _get_job_info(struct bcast_parameters *params) {
 }
 
 /* Issue the RPC to transfer the file's data */
-static int _file_bcast(struct bcast_parameters *params,
-                       file_bcast_msg_t *bcast_msg,
-                       job_sbcast_cred_msg_t *sbcast_cred) {
+static int
+_file_bcast(struct bcast_parameters *params, file_bcast_msg_t *bcast_msg, job_sbcast_cred_msg_t *sbcast_cred) {
     List ret_list = NULL;
     ListIterator itr;
     ret_data_info_t *ret_data_info = NULL;
@@ -193,8 +182,7 @@ static int _file_bcast(struct bcast_parameters *params,
     msg.data = bcast_msg;
     msg.msg_type = REQUEST_FILE_BCAST;
 
-    ret_list = slurm_send_recv_msgs(
-            sbcast_cred->node_list, &msg, params->timeout, true);
+    ret_list = slurm_send_recv_msgs(sbcast_cred->node_list, &msg, params->timeout, true);
     if (ret_list == NULL) {
         error("slurm_send_recv_msgs: %m");
         exit(1);
@@ -202,14 +190,11 @@ static int _file_bcast(struct bcast_parameters *params,
 
     itr = list_iterator_create(ret_list);
     while ((ret_data_info = list_next(itr))) {
-        msg_rc = slurm_get_return_code(ret_data_info->type,
-                                       ret_data_info->data);
+        msg_rc = slurm_get_return_code(ret_data_info->type, ret_data_info->data);
         if (msg_rc == SLURM_SUCCESS)
             continue;
 
-        error("REQUEST_FILE_BCAST(%s): %s",
-              ret_data_info->node_name,
-              slurm_strerror(msg_rc));
+        error("REQUEST_FILE_BCAST(%s): %s", ret_data_info->node_name, slurm_strerror(msg_rc));
         rc = MAX(rc, msg_rc);
     }
     list_iterator_destroy(itr);
@@ -241,10 +226,7 @@ static int _get_block_none(char **buffer, int *orig_len, bool *more) {
     return size;
 }
 
-static int _get_block_zlib(struct bcast_parameters *params,
-                           char **buffer,
-                           int *orig_len,
-                           bool *more) {
+static int _get_block_zlib(struct bcast_parameters *params, char **buffer, int *orig_len, bool *more) {
 #if HAVE_LIBZ
     static z_stream strm;
     int chunk = (256 * 1024);
@@ -310,10 +292,7 @@ static int _get_block_zlib(struct bcast_parameters *params,
 #endif
 }
 
-static int _get_block_lz4(struct bcast_parameters *params,
-                          char **buffer,
-                          int32_t *orig_len,
-                          bool *more) {
+static int _get_block_lz4(struct bcast_parameters *params, char **buffer, int32_t *orig_len, bool *more) {
 #if HAVE_LZ4
     int size_out;
     static int64_t remaining = -1;
@@ -353,10 +332,7 @@ static int _get_block_lz4(struct bcast_parameters *params,
 
 }
 
-static int _next_block(struct bcast_parameters *params,
-                       char **buffer,
-                       int32_t *orig_len,
-                       bool *more) {
+static int _next_block(struct bcast_parameters *params, char **buffer, int32_t *orig_len, bool *more) {
     switch (params->compress) {
         case COMPRESS_OFF:
             return _get_block_none(buffer, orig_len, more);
@@ -411,14 +387,12 @@ static int _bcast_file(struct bcast_parameters *params) {
 
     while (more) {
         START_TIMER;
-        bcast_msg.block_len = _next_block(params, &buffer, &orig_len,
-                                          &more);
+        bcast_msg.block_len = _next_block(params, &buffer, &orig_len, &more);
         END_TIMER;
         time_compression += DELTA_TIMER;
         size_uncompressed += orig_len;
         size_compressed += bcast_msg.block_len;
-        debug("block %u, size %u", bcast_msg.block_no,
-              bcast_msg.block_len);
+        debug("block %u, size %u", bcast_msg.block_no, bcast_msg.block_len);
         bcast_msg.compress = params->compress;
         bcast_msg.uncomp_len = orig_len;
         bcast_msg.block = buffer;
@@ -442,15 +416,12 @@ static int _bcast_file(struct bcast_parameters *params) {
          * "truncation towards zero" which gives unexpected values for
          * pct. This construct avoids that problem.
          */
-        pct = (pct >= 0) ? pct * 100 / size_uncompressed
-                         : -(-pct * 100 / size_uncompressed);
+        pct = (pct >= 0) ? pct * 100 / size_uncompressed : -(-pct * 100 / size_uncompressed);
         verbose("File compressed from %"
         PRIu64
         " to %"
         PRIu64
-        " (%d percent) in %u usec",
-                size_uncompressed, size_compressed, (int) pct,
-                time_compression);
+        " (%d percent) in %u usec", size_uncompressed, size_compressed, (int) pct, time_compression);
     }
 
     return rc;
@@ -563,7 +534,6 @@ extern int bcast_decompress_data(file_bcast_msg_t *req) {
     }
 
     /* compression type not recognized */
-    error("%s: compression type %u not supported.",
-          __func__, req->compress);
+    error("%s: compression type %u not supported.", __func__, req->compress);
     return -1;
 }

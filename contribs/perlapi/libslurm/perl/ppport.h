@@ -3171,24 +3171,28 @@ __DATA__
 #  define DPPP_NAMESPACE DPPP_
 #endif
 
-#define DPPP_CAT2(x,y) CAT2(x,y)
+#define DPPP_CAT2(x, y) CAT2(x,y)
 #define DPPP_(name) DPPP_CAT2(DPPP_NAMESPACE, name)
 
 #ifndef PERL_REVISION
 #  if !defined(__PATCHLEVEL_H_INCLUDED__) && !(defined(PATCHLEVEL) && defined(SUBVERSION))
 #    define PERL_PATCHLEVEL_H_IMPLICIT
+
 #    include <patchlevel.h>
+
 #  endif
 #  if !(defined(PERL_VERSION) || (defined(SUBVERSION) && defined(PATCHLEVEL)))
+
 #    include <could_not_find_Perl_patchlevel.h>
+
 #  endif
 #  ifndef PERL_REVISION
 #    define PERL_REVISION       (5)
-     /* Replace: 1 */
+/* Replace: 1 */
 #    define PERL_VERSION        PATCHLEVEL
 #    define PERL_SUBVERSION     SUBVERSION
-     /* Replace PERL_PATCHLEVEL with PERL_VERSION */
-     /* Replace: 0 */
+/* Replace PERL_PATCHLEVEL with PERL_VERSION */
+/* Replace: 0 */
 #  endif
 #endif
 
@@ -3626,7 +3630,7 @@ __DATA__
 #  define SvUOK(sv) SvIOK_UV(sv)
 #endif
 #ifndef XST_mUV
-#  define XST_mUV(i,v)                   (ST(i) = sv_2mortal(newSVuv(v))  )
+#  define XST_mUV(i, v)                   (ST(i) = sv_2mortal(newSVuv(v))  )
 #endif
 
 #ifndef XSRETURN_UV
@@ -3651,20 +3655,20 @@ __DATA__
 
 #else
 #ifndef memNE
-#  define memNE(s1,s2,l)                 (bcmp(s1,s2,l))
+#  define memNE(s1, s2, l)                 (bcmp(s1,s2,l))
 #endif
 
 #ifndef memEQ
-#  define memEQ(s1,s2,l)                 (!bcmp(s1,s2,l))
+#  define memEQ(s1, s2, l)                 (!bcmp(s1,s2,l))
 #endif
 
 #endif
 #ifndef MoveD
-#  define MoveD(s,d,n,t)                 memmove((char*)(d),(char*)(s), (n) * sizeof(t))
+#  define MoveD(s, d, n, t)                 memmove((char*)(d),(char*)(s), (n) * sizeof(t))
 #endif
 
 #ifndef CopyD
-#  define CopyD(s,d,n,t)                 memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
+#  define CopyD(s, d, n, t)                 memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
 #endif
 
 #ifdef HAS_MEMSET
@@ -3674,35 +3678,35 @@ __DATA__
 
 #else
 #ifndef ZeroD
-#  define ZeroD(d,n,t)                   ((void)memzero((char*)(d), (n) * sizeof(t)), d)
+#  define ZeroD(d, n, t)                   ((void)memzero((char*)(d), (n) * sizeof(t)), d)
 #endif
 
 #endif
 #ifndef PoisonWith
-#  define PoisonWith(d,n,t,b)            (void)memset((char*)(d), (U8)(b), (n) * sizeof(t))
+#  define PoisonWith(d, n, t, b)            (void)memset((char*)(d), (U8)(b), (n) * sizeof(t))
 #endif
 
 #ifndef PoisonNew
-#  define PoisonNew(d,n,t)               PoisonWith(d,n,t,0xAB)
+#  define PoisonNew(d, n, t)               PoisonWith(d,n,t,0xAB)
 #endif
 
 #ifndef PoisonFree
-#  define PoisonFree(d,n,t)              PoisonWith(d,n,t,0xEF)
+#  define PoisonFree(d, n, t)              PoisonWith(d,n,t,0xEF)
 #endif
 
 #ifndef Poison
-#  define Poison(d,n,t)                  PoisonFree(d,n,t)
+#  define Poison(d, n, t)                  PoisonFree(d,n,t)
 #endif
 #ifndef Newx
-#  define Newx(v,n,t)                    New(0,v,n,t)
+#  define Newx(v, n, t)                    New(0,v,n,t)
 #endif
 
 #ifndef Newxc
-#  define Newxc(v,n,t,c)                 Newc(0,v,n,t,c)
+#  define Newxc(v, n, t, c)                 Newc(0,v,n,t,c)
 #endif
 
 #ifndef Newxz
-#  define Newxz(v,n,t)                   Newz(0,v,n,t)
+#  define Newxz(v, n, t)                   Newz(0,v,n,t)
 #endif
 
 #ifndef PERL_UNUSED_DECL
@@ -3764,7 +3768,7 @@ typedef NVTYPE NV;
 #    else
 #      define PTRV                unsigned
 #    endif
-#    define INT2PTR(any,d)        (any)(PTRV)(d)
+#    define INT2PTR(any, d)        (any)(PTRV)(d)
 #  endif
 #endif
 
@@ -3780,7 +3784,7 @@ typedef NVTYPE NV;
 #endif
 
 #ifndef NUM2PTR
-#  define NUM2PTR(any,d)                 (any)PTR2nat(d)
+#  define NUM2PTR(any, d)                 (any)PTR2nat(d)
 #endif
 
 #ifndef PTR2IV
@@ -3823,8 +3827,8 @@ typedef NVTYPE NV;
 #undef STMT_START
 #undef STMT_END
 #ifdef PERL_USE_GCC_BRACE_GROUPS
-#  define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
-#  define STMT_END	)
+#  define STMT_START    (void)(    /* gcc supports ``({ STATEMENTS; })'' */
+#  define STMT_END    )
 #else
 #  if defined(VOIDFLAGS) && (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
 #    define STMT_START	if (1)
@@ -3866,7 +3870,7 @@ typedef NVTYPE NV;
  * correctly computed from the string argument.
  */
 #ifndef gv_stashpvn
-#  define gv_stashpvn(str,len,create)    gv_stashpv(str,create)
+#  define gv_stashpvn(str, len, create)    gv_stashpv(str,create)
 #endif
 
 /* Replace: 1 */
@@ -3943,14 +3947,14 @@ typedef NVTYPE NV;
 #  define CPERLscope(x)                  x
 #endif
 #ifndef PERL_HASH
-#  define PERL_HASH(hash,str,len)        \
-     STMT_START	{ \
-	const char *s_PeRlHaSh = str; \
-	I32 i_PeRlHaSh = len; \
-	U32 hash_PeRlHaSh = 0; \
-	while (i_PeRlHaSh--) \
-	    hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
-	(hash) = hash_PeRlHaSh; \
+#  define PERL_HASH(hash, str, len)        \
+     STMT_START    { \
+    const char *s_PeRlHaSh = str; \
+    I32 i_PeRlHaSh = len; \
+    U32 hash_PeRlHaSh = 0; \
+    while (i_PeRlHaSh--) \
+        hash_PeRlHaSh = hash_PeRlHaSh * 33 + *s_PeRlHaSh++; \
+    (hash) = hash_PeRlHaSh; \
     } STMT_END
 #endif
 
@@ -3970,10 +3974,12 @@ typedef NVTYPE NV;
 # ifdef ARGSproto
 typedef OP* (CPERLscope(*Perl_ppaddr_t))(ARGSproto);
 # else
-typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
+
+typedef OP *(CPERLscope(*Perl_ppaddr_t))(pTHX);
+
 # endif
 
-typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
+typedef OP *(CPERLscope(*Perl_check_t))(pTHX_ OP *);
 
 #endif
 #ifndef isPSXSPC
@@ -4067,7 +4073,9 @@ static U32 DPPP_(my_PL_signals) = D_PPP_PERL_SIGNALS_INIT;
 #elif defined(NEED_PL_signals_GLOBAL)
 U32 DPPP_(my_PL_signals) = D_PPP_PERL_SIGNALS_INIT;
 #else
+
 extern U32 DPPP_(my_PL_signals);
+
 #endif
 #define PL_signals DPPP_(my_PL_signals)
 
@@ -4213,7 +4221,7 @@ extern yy_parser DPPP_(dummy_PL_parser);
 #endif
 
 #ifndef mPUSHp
-#  define mPUSHp(p,l)                    sv_setpvn(PUSHmortal, (p), (l))
+#  define mPUSHp(p, l)                    sv_setpvn(PUSHmortal, (p), (l))
 #endif
 
 #ifndef mPUSHn
@@ -4236,7 +4244,7 @@ extern yy_parser DPPP_(dummy_PL_parser);
 #endif
 
 #ifndef mXPUSHp
-#  define mXPUSHp(p,l)                   STMT_START { EXTEND(sp,1); sv_setpvn(PUSHmortal, (p), (l)); } STMT_END
+#  define mXPUSHp(p, l)                   STMT_START { EXTEND(sp,1); sv_setpvn(PUSHmortal, (p), (l)); } STMT_END
 #endif
 
 #ifndef mXPUSHn
@@ -4285,16 +4293,16 @@ extern yy_parser DPPP_(dummy_PL_parser);
 #endif
 
 #ifndef G_METHOD
-# define G_METHOD		64
+# define G_METHOD        64
 # ifdef call_sv
 #  undef call_sv
 # endif
 # if (PERL_BCDVERSION < 0x5006000)
 #  define call_sv(sv, flags)  ((flags) & G_METHOD ? perl_call_method((char *) SvPV_nolen_const(sv), \
-				(flags) & ~G_METHOD) : perl_call_sv(sv, flags))
+                (flags) & ~G_METHOD) : perl_call_sv(sv, flags))
 # else
 #  define call_sv(sv, flags)  ((flags) & G_METHOD ? Perl_call_method(aTHX_ (char *) SvPV_nolen_const(sv), \
-				(flags) & ~G_METHOD) : Perl_call_sv(aTHX_ sv, flags))
+                (flags) & ~G_METHOD) : Perl_call_sv(aTHX_ sv, flags))
 # endif
 #endif
 
@@ -4305,13 +4313,15 @@ extern yy_parser DPPP_(dummy_PL_parser);
 static SV* DPPP_(my_eval_pv)(char *p, I32 croak_on_error);
 static
 #else
-extern SV* DPPP_(my_eval_pv)(char *p, I32 croak_on_error);
+
+extern SV *DPPP_(my_eval_pv)(char *p, I32 croak_on_error);
+
 #endif
 
 #ifdef eval_pv
 #  undef eval_pv
 #endif
-#define eval_pv(a,b) DPPP_(my_eval_pv)(aTHX_ a,b)
+#define eval_pv(a, b) DPPP_(my_eval_pv)(aTHX_ a,b)
 #define Perl_eval_pv DPPP_(my_eval_pv)
 
 #if defined(NEED_eval_pv) || defined(NEED_eval_pv_GLOBAL)
@@ -4331,7 +4341,7 @@ DPPP_(my_eval_pv)(char *p, I32 croak_on_error)
     PUTBACK;
 
     if (croak_on_error && SvTRUE(GvSV(errgv)))
-	croak(SvPVx(GvSV(errgv), na));
+    croak(SvPVx(GvSV(errgv), na));
 
     return sv;
 }
@@ -4344,13 +4354,15 @@ DPPP_(my_eval_pv)(char *p, I32 croak_on_error)
 static void DPPP_(my_vload_module)(U32 flags, SV *name, SV *ver, va_list *args);
 static
 #else
+
 extern void DPPP_(my_vload_module)(U32 flags, SV *name, SV *ver, va_list *args);
+
 #endif
 
 #ifdef vload_module
 #  undef vload_module
 #endif
-#define vload_module(a,b,c,d) DPPP_(my_vload_module)(aTHX_ a,b,c,d)
+#define vload_module(a, b, c, d) DPPP_(my_vload_module)(aTHX_ a,b,c,d)
 #define Perl_vload_module DPPP_(my_vload_module)
 
 #if defined(NEED_vload_module) || defined(NEED_vload_module_GLOBAL)
@@ -4371,40 +4383,40 @@ DPPP_(my_vload_module)(U32 flags, SV *name, SV *ver, va_list *args)
     SvREADONLY_off(((SVOP*)modname)->op_sv);
     modname->op_private |= OPpCONST_BARE;
     if (ver) {
-	veop = newSVOP(OP_CONST, 0, ver);
+    veop = newSVOP(OP_CONST, 0, ver);
     }
     else
-	veop = NULL;
+    veop = NULL;
     if (flags & PERL_LOADMOD_NOIMPORT) {
-	imop = sawparens(newNULLLIST());
+    imop = sawparens(newNULLLIST());
     }
     else if (flags & PERL_LOADMOD_IMPORT_OPS) {
-	imop = va_arg(*args, OP*);
+    imop = va_arg(*args, OP*);
     }
     else {
-	SV *sv;
-	imop = NULL;
-	sv = va_arg(*args, SV*);
-	while (sv) {
-	    imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
-	    sv = va_arg(*args, SV*);
-	}
+    SV *sv;
+    imop = NULL;
+    sv = va_arg(*args, SV*);
+    while (sv) {
+        imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
+        sv = va_arg(*args, SV*);
+    }
     }
     {
-	const line_t ocopline = PL_copline;
-	COP * const ocurcop = PL_curcop;
-	const int oexpect = PL_expect;
+    const line_t ocopline = PL_copline;
+    COP * const ocurcop = PL_curcop;
+    const int oexpect = PL_expect;
 
 #if (PERL_BCDVERSION >= 0x5004000)
-	utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
-		veop, modname, imop);
+    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
+        veop, modname, imop);
 #else
-	utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(),
-		modname, imop);
+    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(),
+        modname, imop);
 #endif
-	PL_expect = oexpect;
-	PL_copline = ocopline;
-	PL_curcop = ocurcop;
+    PL_expect = oexpect;
+    PL_copline = ocopline;
+    PL_curcop = ocurcop;
     }
 }
 
@@ -4416,7 +4428,9 @@ DPPP_(my_vload_module)(U32 flags, SV *name, SV *ver, va_list *args)
 static void DPPP_(my_load_module)(U32 flags, SV *name, SV *ver, ...);
 static
 #else
+
 extern void DPPP_(my_load_module)(U32 flags, SV *name, SV *ver, ...);
+
 #endif
 
 #ifdef load_module
@@ -4447,7 +4461,9 @@ DPPP_(my_load_module)(U32 flags, SV *name, SV *ver, ...)
 static SV * DPPP_(my_newRV_noinc)(SV *sv);
 static
 #else
-extern SV * DPPP_(my_newRV_noinc)(SV *sv);
+
+extern SV *DPPP_(my_newRV_noinc)(SV *sv);
+
 #endif
 
 #ifdef newRV_noinc
@@ -4478,13 +4494,15 @@ DPPP_(my_newRV_noinc)(SV *sv)
 static void DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv);
 static
 #else
+
 extern void DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv);
+
 #endif
 
 #ifdef newCONSTSUB
 #  undef newCONSTSUB
 #endif
-#define newCONSTSUB(a,b,c) DPPP_(my_newCONSTSUB)(aTHX_ a,b,c)
+#define newCONSTSUB(a, b, c) DPPP_(my_newCONSTSUB)(aTHX_ a,b,c)
 #define Perl_newCONSTSUB DPPP_(my_newCONSTSUB)
 
 #if defined(NEED_newCONSTSUB) || defined(NEED_newCONSTSUB_GLOBAL)
@@ -4496,35 +4514,35 @@ extern void DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv);
 void
 DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 {
-	U32 oldhints = PL_hints;
-	HV *old_cop_stash = PL_curcop->cop_stash;
-	HV *old_curstash = PL_curstash;
-	line_t oldline = PL_curcop->cop_line;
-	PL_curcop->cop_line = D_PPP_PL_copline;
+    U32 oldhints = PL_hints;
+    HV *old_cop_stash = PL_curcop->cop_stash;
+    HV *old_curstash = PL_curstash;
+    line_t oldline = PL_curcop->cop_line;
+    PL_curcop->cop_line = D_PPP_PL_copline;
 
-	PL_hints &= ~HINT_BLOCK_SCOPE;
-	if (stash)
-		PL_curstash = PL_curcop->cop_stash = stash;
+    PL_hints &= ~HINT_BLOCK_SCOPE;
+    if (stash)
+        PL_curstash = PL_curcop->cop_stash = stash;
 
-	newSUB(
+    newSUB(
 
 #if   (PERL_BCDVERSION < 0x5003022)
-		start_subparse(),
+        start_subparse(),
 #elif (PERL_BCDVERSION == 0x5003022)
-     		start_subparse(0),
+             start_subparse(0),
 #else  /* 5.003_23  onwards */
-     		start_subparse(FALSE, 0),
+             start_subparse(FALSE, 0),
 #endif
 
-		newSVOP(OP_CONST, 0, newSVpv((char *) name, 0)),
-		newSVOP(OP_CONST, 0, &PL_sv_no),   /* SvPV(&PL_sv_no) == "" -- GMB */
-		newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
-	);
+        newSVOP(OP_CONST, 0, newSVpv((char *) name, 0)),
+        newSVOP(OP_CONST, 0, &PL_sv_no),   /* SvPV(&PL_sv_no) == "" -- GMB */
+        newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
+    );
 
-	PL_hints = oldhints;
-	PL_curcop->cop_stash = old_cop_stash;
-	PL_curstash = old_curstash;
-	PL_curcop->cop_line = oldline;
+    PL_hints = oldhints;
+    PL_curcop->cop_stash = old_cop_stash;
+    PL_curstash = old_curstash;
+    PL_curcop->cop_line = oldline;
 }
 #endif
 #endif
@@ -4549,7 +4567,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
  */
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || \
-    defined(PERL_CAPI)    || defined(PERL_IMPLICIT_CONTEXT)
+    defined(PERL_CAPI) || defined(PERL_IMPLICIT_CONTEXT)
 
 #ifndef START_MY_CXT
 
@@ -4561,28 +4579,28 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 #if (PERL_BCDVERSION < 0x5004068)
 /* Fetches the SV that keeps the per-interpreter data. */
 #define dMY_CXT_SV \
-	SV *my_cxt_sv = get_sv(MY_CXT_KEY, FALSE)
+    SV *my_cxt_sv = get_sv(MY_CXT_KEY, FALSE)
 #else /* >= perl5.004_68 */
 #define dMY_CXT_SV \
-	SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
-				  sizeof(MY_CXT_KEY)-1, TRUE)
+    SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
+                  sizeof(MY_CXT_KEY)-1, TRUE)
 #endif /* < perl5.004_68 */
 
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */
 #define dMY_CXT	\
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*,SvUV(my_cxt_sv))
+    dMY_CXT_SV;							\
+    my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*,SvUV(my_cxt_sv))
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
  * the interpreter goes away.) */
 #define MY_CXT_INIT \
-	dMY_CXT_SV;							\
-	/* newSV() allocates one more than needed */			\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Zero(my_cxtp, 1, my_cxt_t);					\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+    dMY_CXT_SV;							\
+    /* newSV() allocates one more than needed */			\
+    my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+    Zero(my_cxtp, 1, my_cxt_t);					\
+    sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
@@ -4602,23 +4620,23 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 #ifndef MY_CXT_CLONE
 /* Clones the per-interpreter data. */
 #define MY_CXT_CLONE \
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+    dMY_CXT_SV;							\
+    my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+    Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
+    sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 #endif
 
 #else /* single interpreter */
 
 #ifndef START_MY_CXT
 
-#define START_MY_CXT	static my_cxt_t my_cxt;
-#define dMY_CXT_SV	dNOOP
-#define dMY_CXT		dNOOP
-#define MY_CXT_INIT	NOOP
-#define MY_CXT		my_cxt
+#define START_MY_CXT    static my_cxt_t my_cxt;
+#define dMY_CXT_SV    dNOOP
+#define dMY_CXT        dNOOP
+#define MY_CXT_INIT    NOOP
+#define MY_CXT        my_cxt
 
-#define pMY_CXT		void
+#define pMY_CXT        void
 #define pMY_CXT_
 #define _pMY_CXT
 #define aMY_CXT
@@ -4628,7 +4646,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 #endif /* START_MY_CXT */
 
 #ifndef MY_CXT_CLONE
-#define MY_CXT_CLONE	NOOP
+#define MY_CXT_CLONE    NOOP
 #endif
 
 #endif
@@ -4654,7 +4672,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 #ifndef NVef
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && \
       defined(PERL_PRIfldbl) && (PERL_BCDVERSION != 0x5006000)
-            /* Not very likely, but let's try anyway. */
+/* Not very likely, but let's try anyway. */
 #    define NVef          PERL_PRIeldbl
 #    define NVff          PERL_PRIfldbl
 #    define NVgf          PERL_PRIgldbl
@@ -4667,12 +4685,12 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 
 #ifndef SvREFCNT_inc
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#    define SvREFCNT_inc(sv)		\
-      ({				\
-          SV * const _sv = (SV*)(sv);	\
-          if (_sv)			\
-               (SvREFCNT(_sv))++;	\
-          _sv;				\
+#    define SvREFCNT_inc(sv)        \
+      ({                \
+          SV * const _sv = (SV*)(sv);    \
+          if (_sv)            \
+               (SvREFCNT(_sv))++;    \
+          _sv;                \
       })
 #  else
 #    define SvREFCNT_inc(sv)	\
@@ -4682,11 +4700,11 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 
 #ifndef SvREFCNT_inc_simple
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#    define SvREFCNT_inc_simple(sv)	\
-      ({					\
-          if (sv)				\
-               (SvREFCNT(sv))++;		\
-          (SV *)(sv);				\
+#    define SvREFCNT_inc_simple(sv)    \
+      ({                    \
+          if (sv)                \
+               (SvREFCNT(sv))++;        \
+          (SV *)(sv);                \
       })
 #  else
 #    define SvREFCNT_inc_simple(sv) \
@@ -4696,11 +4714,11 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 
 #ifndef SvREFCNT_inc_NN
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#    define SvREFCNT_inc_NN(sv)		\
-      ({					\
-          SV * const _sv = (SV*)(sv);	\
-          SvREFCNT(_sv)++;		\
-          _sv;				\
+#    define SvREFCNT_inc_NN(sv)        \
+      ({                    \
+          SV * const _sv = (SV*)(sv);    \
+          SvREFCNT(_sv)++;        \
+          _sv;                \
       })
 #  else
 #    define SvREFCNT_inc_NN(sv) \
@@ -4710,11 +4728,11 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 
 #ifndef SvREFCNT_inc_void
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#    define SvREFCNT_inc_void(sv)		\
-      ({					\
-          SV * const _sv = (SV*)(sv);	\
-          if (_sv)			\
-              (void)(SvREFCNT(_sv)++);	\
+#    define SvREFCNT_inc_void(sv)        \
+      ({                    \
+          SV * const _sv = (SV*)(sv);    \
+          if (_sv)            \
+              (void)(SvREFCNT(_sv)++);    \
       })
 #  else
 #    define SvREFCNT_inc_void(sv) \
@@ -4743,7 +4761,9 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 static SV* DPPP_(my_newSV_type)(pTHX_ svtype const t);
 static
 #else
-extern SV* DPPP_(my_newSV_type)(pTHX_ svtype const t);
+
+extern SV *DPPP_(my_newSV_type)(pTHX_ svtype const t);
+
 #endif
 
 #ifdef newSV_type
@@ -4772,7 +4792,7 @@ DPPP_(my_newSV_type)(pTHX_ svtype const t)
 # define D_PPP_CONSTPV_ARG(x)  (x)
 #endif
 #ifndef newSVpvn
-#  define newSVpvn(data,len)             ((data)                                              \
+#  define newSVpvn(data, len)             ((data)                                              \
                                     ? ((len) ? newSVpv((data), (len)) : newSVpv("", 0)) \
                                     : newSV(0))
 #endif
@@ -4789,13 +4809,15 @@ DPPP_(my_newSV_type)(pTHX_ svtype const t)
 static SV * DPPP_(my_newSVpvn_flags)(pTHX_ const char *s, STRLEN len, U32 flags);
 static
 #else
-extern SV * DPPP_(my_newSVpvn_flags)(pTHX_ const char *s, STRLEN len, U32 flags);
+
+extern SV *DPPP_(my_newSVpvn_flags)(pTHX_ const char *s, STRLEN len, U32 flags);
+
 #endif
 
 #ifdef newSVpvn_flags
 #  undef newSVpvn_flags
 #endif
-#define newSVpvn_flags(a,b,c) DPPP_(my_newSVpvn_flags)(aTHX_ a,b,c)
+#define newSVpvn_flags(a, b, c) DPPP_(my_newSVpvn_flags)(aTHX_ a,b,c)
 #define Perl_newSVpvn_flags DPPP_(my_newSVpvn_flags)
 
 #if defined(NEED_newSVpvn_flags) || defined(NEED_newSVpvn_flags_GLOBAL)
@@ -4937,22 +4959,22 @@ DPPP_(my_sv_2pvbyte)(pTHX_ SV *sv, STRLEN *lp)
 static char * DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
 static
 #else
-extern char * DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
+
+extern char *DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
+
 #endif
 
 #ifdef sv_2pv_flags
 #  undef sv_2pv_flags
 #endif
-#define sv_2pv_flags(a,b,c) DPPP_(my_sv_2pv_flags)(aTHX_ a,b,c)
+#define sv_2pv_flags(a, b, c) DPPP_(my_sv_2pv_flags)(aTHX_ a,b,c)
 #define Perl_sv_2pv_flags DPPP_(my_sv_2pv_flags)
 
 #if defined(NEED_sv_2pv_flags) || defined(NEED_sv_2pv_flags_GLOBAL)
 
-char *
-DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags)
-{
-  STRLEN n_a = (STRLEN) flags;
-  return sv_2pv(sv, lp ? lp : &n_a);
+char *DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags) {
+    STRLEN n_a = (STRLEN) flags;
+    return sv_2pv(sv, lp ? lp : &n_a);
 }
 
 #endif
@@ -4961,13 +4983,15 @@ DPPP_(my_sv_2pv_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 static char * DPPP_(my_sv_pvn_force_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
 static
 #else
-extern char * DPPP_(my_sv_pvn_force_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
+
+extern char *DPPP_(my_sv_pvn_force_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags);
+
 #endif
 
 #ifdef sv_pvn_force_flags
 #  undef sv_pvn_force_flags
 #endif
-#define sv_pvn_force_flags(a,b,c) DPPP_(my_sv_pvn_force_flags)(aTHX_ a,b,c)
+#define sv_pvn_force_flags(a, b, c) DPPP_(my_sv_pvn_force_flags)(aTHX_ a,b,c)
 #define Perl_sv_pvn_force_flags DPPP_(my_sv_pvn_force_flags)
 
 #if defined(NEED_sv_pvn_force_flags) || defined(NEED_sv_pvn_force_flags_GLOBAL)
@@ -4983,7 +5007,7 @@ DPPP_(my_sv_pvn_force_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 
 #endif
 
-#if (PERL_BCDVERSION < 0x5008008) || ( (PERL_BCDVERSION >= 0x5009000) && (PERL_BCDVERSION < 0x5009003) )
+#if (PERL_BCDVERSION < 0x5008008) || ((PERL_BCDVERSION >= 0x5009000) && (PERL_BCDVERSION < 0x5009003))
 # define DPPP_SVPV_NOLEN_LP_ARG &PL_na
 #else
 # define DPPP_SVPV_NOLEN_LP_ARG 0
@@ -5075,7 +5099,7 @@ DPPP_(my_sv_pvn_force_flags)(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 #  define SvPV_nomg_const_nolen(sv)      SvPV_flags_const_nolen(sv, 0)
 #endif
 #ifndef SvPV_renew
-#  define SvPV_renew(sv,n)               STMT_START { SvLEN_set(sv, n); \
+#  define SvPV_renew(sv, n)               STMT_START { SvLEN_set(sv, n); \
                  SvPV_set((sv), (char *) saferealloc(          \
                        (Malloc_t)SvPVX(sv), (MEM_SIZE)((n)))); \
                } STMT_END
@@ -5320,13 +5344,15 @@ DPPP_(my_sv_setpvf_mg_nocontext)(SV *sv, const char *pat, ...)
 static SV * DPPP_(my_newSVpvn_share)(pTHX_ const char *src, I32 len, U32 hash);
 static
 #else
-extern SV * DPPP_(my_newSVpvn_share)(pTHX_ const char *src, I32 len, U32 hash);
+
+extern SV *DPPP_(my_newSVpvn_share)(pTHX_ const char *src, I32 len, U32 hash);
+
 #endif
 
 #ifdef newSVpvn_share
 #  undef newSVpvn_share
 #endif
-#define newSVpvn_share(a,b,c) DPPP_(my_newSVpvn_share)(aTHX_ a,b,c)
+#define newSVpvn_share(a, b, c) DPPP_(my_newSVpvn_share)(aTHX_ a,b,c)
 #define Perl_newSVpvn_share DPPP_(my_newSVpvn_share)
 
 #if defined(NEED_newSVpvn_share) || defined(NEED_newSVpvn_share_GLOBAL)
@@ -5929,7 +5955,7 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 
 #if (PERL_BCDVERSION < 0x5004000)
 
-  /* code that uses sv_magic_portable will not compile */
+/* code that uses sv_magic_portable will not compile */
 
 #elif (PERL_BCDVERSION < 0x5008000)
 
@@ -5997,8 +6023,8 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 
 #ifndef CopSTASH_eq
 #  define CopSTASH_eq(c,hv)              ((hv) && (CopSTASHPV(c) == HvNAME(hv) \
-					|| (CopSTASHPV(c) && HvNAME(hv) \
-					&& strEQ(CopSTASHPV(c), HvNAME(hv)))))
+                    || (CopSTASHPV(c) && HvNAME(hv) \
+                    && strEQ(CopSTASHPV(c), HvNAME(hv)))))
 #endif
 
 #else
@@ -6007,11 +6033,11 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 #endif
 
 #ifndef CopFILEGV_set
-#  define CopFILEGV_set(c,gv)            ((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
+#  define CopFILEGV_set(c, gv)            ((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #endif
 
 #ifndef CopFILE_set
-#  define CopFILE_set(c,pv)              CopFILEGV_set((c), gv_fetchfile(pv))
+#  define CopFILE_set(c, pv)              CopFILEGV_set((c), gv_fetchfile(pv))
 #endif
 
 #ifndef CopFILESV
@@ -6031,7 +6057,7 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 #endif
 
 #ifndef CopSTASH_set
-#  define CopSTASH_set(c,hv)             ((c)->cop_stash = (hv))
+#  define CopSTASH_set(c, hv)             ((c)->cop_stash = (hv))
 #endif
 
 #ifndef CopSTASHPV
@@ -6039,11 +6065,11 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 #endif
 
 #ifndef CopSTASHPV_set
-#  define CopSTASHPV_set(c,pv)           CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
+#  define CopSTASHPV_set(c, pv)           CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
 #endif
 
 #ifndef CopSTASH_eq
-#  define CopSTASH_eq(c,hv)              (CopSTASH(c) == (hv))
+#  define CopSTASH_eq(c, hv)              (CopSTASH(c) == (hv))
 #endif
 
 #endif /* USE_ITHREADS */
@@ -6109,13 +6135,15 @@ DPPP_(my_warner)(U32 err, const char *pat, ...)
 static bool DPPP_(my_grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
 static
 #else
-extern bool DPPP_(my_grok_numeric_radix)(pTHX_ const char ** sp, const char * send);
+
+extern bool DPPP_(my_grok_numeric_radix)(pTHX_ const char **sp, const char *send);
+
 #endif
 
 #ifdef grok_numeric_radix
 #  undef grok_numeric_radix
 #endif
-#define grok_numeric_radix(a,b) DPPP_(my_grok_numeric_radix)(aTHX_ a,b)
+#define grok_numeric_radix(a, b) DPPP_(my_grok_numeric_radix)(aTHX_ a,b)
 #define Perl_grok_numeric_radix DPPP_(my_grok_numeric_radix)
 
 #if defined(NEED_grok_numeric_radix) || defined(NEED_grok_numeric_radix_GLOBAL)
@@ -6165,13 +6193,15 @@ DPPP_(my_grok_numeric_radix)(pTHX_ const char **sp, const char *send)
 static int DPPP_(my_grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
 static
 #else
-extern int DPPP_(my_grok_number)(pTHX_ const char * pv, STRLEN len, UV * valuep);
+
+extern int DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep);
+
 #endif
 
 #ifdef grok_number
 #  undef grok_number
 #endif
-#define grok_number(a,b,c) DPPP_(my_grok_number)(aTHX_ a,b,c)
+#define grok_number(a, b, c) DPPP_(my_grok_number)(aTHX_ a,b,c)
 #define Perl_grok_number DPPP_(my_grok_number)
 
 #if defined(NEED_grok_number) || defined(NEED_grok_number_GLOBAL)
@@ -6222,7 +6252,7 @@ DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
               digit = *s - '0';
               if (digit >= 0 && digit <= 9) {
                 value = value * 10 + digit;
-		if (++s < send) {
+        if (++s < send) {
                   digit = *s - '0';
                   if (digit >= 0 && digit <= 9) {
                     value = value * 10 + digit;
@@ -6270,7 +6300,7 @@ DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
                                       }
                                     }
                                   }
-				}
+                }
                               }
                             }
                           }
@@ -6282,7 +6312,7 @@ DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
               }
             }
           }
-	}
+    }
       }
     }
     numtype |= IS_NUMBER_IN_UV;
@@ -6379,13 +6409,15 @@ DPPP_(my_grok_number)(pTHX_ const char *pv, STRLEN len, UV *valuep)
 static UV DPPP_(my_grok_bin)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
 static
 #else
-extern UV DPPP_(my_grok_bin)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
+
+extern UV DPPP_(my_grok_bin)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+
 #endif
 
 #ifdef grok_bin
 #  undef grok_bin
 #endif
-#define grok_bin(a,b,c,d) DPPP_(my_grok_bin)(aTHX_ a,b,c,d)
+#define grok_bin(a, b, c, d) DPPP_(my_grok_bin)(aTHX_ a,b,c,d)
 #define Perl_grok_bin DPPP_(my_grok_bin)
 
 #if defined(NEED_grok_bin) || defined(NEED_grok_bin_GLOBAL)
@@ -6435,22 +6467,22 @@ DPPP_(my_grok_bin)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
                 value_nv = (NV) value;
             }
             value_nv *= 2.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount. */
+        /* If an NV has not enough bits in its mantissa to
+         * represent a UV this summing of small low-order numbers
+         * is a waste of time (because the NV cannot preserve
+         * the low-order bits anyway): we could just remember when
+         * did we overflow and in the end just multiply value_nv by the
+         * right amount. */
             value_nv += (NV)(bit - '0');
             continue;
         }
         if (bit == '_' && len && allow_underscores && (bit = s[1])
             && (bit == '0' || bit == '1'))
-	    {
-		--len;
-		++s;
+        {
+        --len;
+        ++s;
                 goto redo;
-	    }
+        }
         if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
             warn("Illegal binary digit '%c' ignored", *s);
         break;
@@ -6458,10 +6490,10 @@ DPPP_(my_grok_bin)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+    || (!overflowed && value > 0xffffffff  )
 #endif
-	) {
-	warn("Binary number > 0b11111111111111111111111111111111 non-portable");
+    ) {
+    warn("Binary number > 0b11111111111111111111111111111111 non-portable");
     }
     *len_p = s - start;
     if (!overflowed) {
@@ -6481,13 +6513,15 @@ DPPP_(my_grok_bin)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 static UV DPPP_(my_grok_hex)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
 static
 #else
-extern UV DPPP_(my_grok_hex)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
+
+extern UV DPPP_(my_grok_hex)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+
 #endif
 
 #ifdef grok_hex
 #  undef grok_hex
 #endif
-#define grok_hex(a,b,c,d) DPPP_(my_grok_hex)(aTHX_ a,b,c,d)
+#define grok_hex(a, b, c, d) DPPP_(my_grok_hex)(aTHX_ a,b,c,d)
 #define Perl_grok_hex DPPP_(my_grok_hex)
 
 #if defined(NEED_grok_hex) || defined(NEED_grok_hex_GLOBAL)
@@ -6521,7 +6555,7 @@ DPPP_(my_grok_hex)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
     }
 
     for (; len-- && *s; s++) {
-	xdigit = strchr((char *) PL_hexdigit, *s);
+    xdigit = strchr((char *) PL_hexdigit, *s);
         if (xdigit) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
@@ -6537,22 +6571,22 @@ DPPP_(my_grok_hex)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
                 value_nv = (NV) value;
             }
             value_nv *= 16.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount of 16-tuples. */
+        /* If an NV has not enough bits in its mantissa to
+         * represent a UV this summing of small low-order numbers
+         * is a waste of time (because the NV cannot preserve
+         * the low-order bits anyway): we could just remember when
+         * did we overflow and in the end just multiply value_nv by the
+         * right amount of 16-tuples. */
             value_nv += (NV)((xdigit - PL_hexdigit) & 15);
             continue;
         }
         if (*s == '_' && len && allow_underscores && s[1]
-		&& (xdigit = strchr((char *) PL_hexdigit, s[1])))
-	    {
-		--len;
-		++s;
+        && (xdigit = strchr((char *) PL_hexdigit, s[1])))
+        {
+        --len;
+        ++s;
                 goto redo;
-	    }
+        }
         if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
             warn("Illegal hexadecimal digit '%c' ignored", *s);
         break;
@@ -6560,10 +6594,10 @@ DPPP_(my_grok_hex)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+    || (!overflowed && value > 0xffffffff  )
 #endif
-	) {
-	warn("Hexadecimal number > 0xffffffff non-portable");
+    ) {
+    warn("Hexadecimal number > 0xffffffff non-portable");
     }
     *len_p = s - start;
     if (!overflowed) {
@@ -6583,13 +6617,15 @@ DPPP_(my_grok_hex)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 static UV DPPP_(my_grok_oct)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
 static
 #else
-extern UV DPPP_(my_grok_oct)(pTHX_ const char * start, STRLEN * len_p, I32 * flags, NV * result);
+
+extern UV DPPP_(my_grok_oct)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result);
+
 #endif
 
 #ifdef grok_oct
 #  undef grok_oct
 #endif
-#define grok_oct(a,b,c,d) DPPP_(my_grok_oct)(aTHX_ a,b,c,d)
+#define grok_oct(a, b, c, d) DPPP_(my_grok_oct)(aTHX_ a,b,c,d)
 #define Perl_grok_oct DPPP_(my_grok_oct)
 
 #if defined(NEED_grok_oct) || defined(NEED_grok_oct_GLOBAL)
@@ -6625,22 +6661,22 @@ DPPP_(my_grok_oct)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
                 value_nv = (NV) value;
             }
             value_nv *= 8.0;
-	    /* If an NV has not enough bits in its mantissa to
-	     * represent a UV this summing of small low-order numbers
-	     * is a waste of time (because the NV cannot preserve
-	     * the low-order bits anyway): we could just remember when
-	     * did we overflow and in the end just multiply value_nv by the
-	     * right amount of 8-tuples. */
+        /* If an NV has not enough bits in its mantissa to
+         * represent a UV this summing of small low-order numbers
+         * is a waste of time (because the NV cannot preserve
+         * the low-order bits anyway): we could just remember when
+         * did we overflow and in the end just multiply value_nv by the
+         * right amount of 8-tuples. */
             value_nv += (NV)digit;
             continue;
         }
         if (digit == ('_' - '0') && len && allow_underscores
             && (digit = s[1] - '0') && (digit >= 0 && digit <= 7))
-	    {
-		--len;
-		++s;
+        {
+        --len;
+        ++s;
                 goto redo;
-	    }
+        }
         /* Allow \octal to work the DWIM way (that is, stop scanning
          * as soon as non-octal characters are seen, complain only iff
          * someone seems to want to use the digits eight and nine). */
@@ -6653,10 +6689,10 @@ DPPP_(my_grok_oct)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+    || (!overflowed && value > 0xffffffff  )
 #endif
-	) {
-	warn("Octal number > 037777777777 non-portable");
+    ) {
+    warn("Octal number > 037777777777 non-portable");
     }
     *len_p = s - start;
     if (!overflowed) {
@@ -6676,7 +6712,9 @@ DPPP_(my_grok_oct)(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *resul
 static int DPPP_(my_my_snprintf)(char * buffer, const Size_t len, const char * format, ...);
 static
 #else
-extern int DPPP_(my_my_snprintf)(char * buffer, const Size_t len, const char * format, ...);
+
+extern int DPPP_(my_my_snprintf)(char *buffer, const Size_t len, const char *format, ...);
+
 #endif
 
 #define my_snprintf DPPP_(my_my_snprintf)
@@ -6698,7 +6736,7 @@ DPPP_(my_my_snprintf)(char *buffer, const Size_t len, const char *format, ...)
 #endif
     va_end(ap);
     if (retval < 0 || (len > 0 && (Size_t)retval >= len))
-	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
+    Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
     return retval;
 }
 
@@ -6710,7 +6748,9 @@ DPPP_(my_my_snprintf)(char *buffer, const Size_t len, const char *format, ...)
 static int DPPP_(my_my_sprintf)(char * buffer, const char * pat, ...);
 static
 #else
-extern int DPPP_(my_my_sprintf)(char * buffer, const char * pat, ...);
+
+extern int DPPP_(my_my_sprintf)(char *buffer, const char *pat, ...);
+
 #endif
 
 #define my_sprintf DPPP_(my_my_sprintf)
@@ -6752,7 +6792,9 @@ DPPP_(my_my_sprintf)(char *buffer, const char* pat, ...)
 static Size_t DPPP_(my_my_strlcat)(char * dst, const char * src, Size_t size);
 static
 #else
-extern Size_t DPPP_(my_my_strlcat)(char * dst, const char * src, Size_t size);
+
+extern Size_t DPPP_(my_my_strlcat)(char *dst, const char *src, Size_t size);
+
 #endif
 
 #define my_strlcat DPPP_(my_my_strlcat)
@@ -6782,7 +6824,9 @@ DPPP_(my_my_strlcat)(char *dst, const char *src, Size_t size)
 static Size_t DPPP_(my_my_strlcpy)(char * dst, const char * src, Size_t size);
 static
 #else
-extern Size_t DPPP_(my_my_strlcpy)(char * dst, const char * src, Size_t size);
+
+extern Size_t DPPP_(my_my_strlcpy)(char *dst, const char *src, Size_t size);
+
 #endif
 
 #define my_strlcpy DPPP_(my_my_strlcpy)
@@ -6872,13 +6916,17 @@ DPPP_(my_my_strlcpy)(char *dst, const char *src, Size_t size)
 static char * DPPP_(my_pv_escape)(pTHX_ SV * dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags);
 static
 #else
-extern char * DPPP_(my_pv_escape)(pTHX_ SV * dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags);
+
+extern char *
+DPPP_(my_pv_escape)(pTHX_ SV *dsv, char const *const str, const STRLEN count, const STRLEN max, STRLEN *const escaped,
+                    const U32 flags);
+
 #endif
 
 #ifdef pv_escape
 #  undef pv_escape
 #endif
-#define pv_escape(a,b,c,d,e,f) DPPP_(my_pv_escape)(aTHX_ a,b,c,d,e,f)
+#define pv_escape(a, b, c, d, e, f) DPPP_(my_pv_escape)(aTHX_ a,b,c,d,e,f)
 #define Perl_pv_escape DPPP_(my_pv_escape)
 
 #if defined(NEED_pv_escape) || defined(NEED_pv_escape_GLOBAL)
@@ -6902,7 +6950,7 @@ DPPP_(my_pv_escape)(pTHX_ SV *dsv, char const * const str,
     octbuf[0] = esc;
 
     if (!(flags & PERL_PV_ESCAPE_NOCLEAR))
-	sv_setpvs(dsv, "");
+    sv_setpvs(dsv, "");
 
 #if defined(is_utf8_string) && defined(utf8_to_uvchr)
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
@@ -6912,9 +6960,9 @@ DPPP_(my_pv_escape)(pTHX_ SV *dsv, char const * const str,
     for (; pv < end && (!max || wrote < max) ; pv += readsize) {
         const UV u =
 #if defined(is_utf8_string) && defined(utf8_to_uvchr)
-		     isuni ? utf8_to_uvchr((U8*)pv, &readsize) :
+             isuni ? utf8_to_uvchr((U8*)pv, &readsize) :
 #endif
-			     (U8)*pv;
+                 (U8)*pv;
         const U8 c = (U8)u & 0xFF;
 
         if (u > 255 || (flags & PERL_PV_ESCAPE_ALL)) {
@@ -6928,43 +6976,43 @@ DPPP_(my_pv_escape)(pTHX_ SV *dsv, char const * const str,
             chsize = 1;
         } else {
             if (c == dq || c == esc || !isPRINT(c)) {
-	        chsize = 2;
+            chsize = 2;
                 switch (c) {
-		case '\\' : /* fallthrough */
-		case '%'  : if (c == esc)
-		                octbuf[1] = esc;
-		            else
-		                chsize = 1;
-		            break;
-		case '\v' : octbuf[1] = 'v'; break;
-		case '\t' : octbuf[1] = 't'; break;
-		case '\r' : octbuf[1] = 'r'; break;
-		case '\n' : octbuf[1] = 'n'; break;
-		case '\f' : octbuf[1] = 'f'; break;
+        case '\\' : /* fallthrough */
+        case '%'  : if (c == esc)
+                        octbuf[1] = esc;
+                    else
+                        chsize = 1;
+                    break;
+        case '\v' : octbuf[1] = 'v'; break;
+        case '\t' : octbuf[1] = 't'; break;
+        case '\r' : octbuf[1] = 'r'; break;
+        case '\n' : octbuf[1] = 'n'; break;
+        case '\f' : octbuf[1] = 'f'; break;
                 case '"'  : if (dq == '"')
-				octbuf[1] = '"';
-			    else
-				chsize = 1;
-			    break;
-		default:    chsize = my_snprintf(octbuf, sizeof octbuf,
-				pv < end && isDIGIT((U8)*(pv+readsize))
-				? "%c%03o" : "%c%o", esc, c);
+                octbuf[1] = '"';
+                else
+                chsize = 1;
+                break;
+        default:    chsize = my_snprintf(octbuf, sizeof octbuf,
+                pv < end && isDIGIT((U8)*(pv+readsize))
+                ? "%c%03o" : "%c%o", esc, c);
                 }
             } else {
                 chsize = 1;
             }
-	}
-	if (max && wrote + chsize > max) {
-	    break;
+    }
+    if (max && wrote + chsize > max) {
+        break;
         } else if (chsize > 1) {
             sv_catpvn(dsv, octbuf, chsize);
             wrote += chsize;
-	} else {
-	    char tmp[2];
-	    my_snprintf(tmp, sizeof tmp, "%c", c);
+    } else {
+        char tmp[2];
+        my_snprintf(tmp, sizeof tmp, "%c", c);
             sv_catpvn(dsv, tmp, 1);
-	    wrote++;
-	}
+        wrote++;
+    }
         if (flags & PERL_PV_ESCAPE_FIRSTCHAR)
             break;
     }
@@ -6981,13 +7029,16 @@ DPPP_(my_pv_escape)(pTHX_ SV *dsv, char const * const str,
 static char * DPPP_(my_pv_pretty)(pTHX_ SV * dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags);
 static
 #else
-extern char * DPPP_(my_pv_pretty)(pTHX_ SV * dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags);
+
+extern char *DPPP_(my_pv_pretty)(pTHX_ SV *dsv, char const *const str, const STRLEN count, const STRLEN max,
+                                 char const *const start_color, char const *const end_color, const U32 flags);
+
 #endif
 
 #ifdef pv_pretty
 #  undef pv_pretty
 #endif
-#define pv_pretty(a,b,c,d,e,f,g) DPPP_(my_pv_pretty)(aTHX_ a,b,c,d,e,f,g)
+#define pv_pretty(a, b, c, d, e, f, g) DPPP_(my_pv_pretty)(aTHX_ a,b,c,d,e,f,g)
 #define Perl_pv_pretty DPPP_(my_pv_pretty)
 
 #if defined(NEED_pv_pretty) || defined(NEED_pv_pretty_GLOBAL)
@@ -7001,7 +7052,7 @@ DPPP_(my_pv_pretty)(pTHX_ SV *dsv, char const * const str, const STRLEN count,
     STRLEN escaped;
 
     if (!(flags & PERL_PV_PRETTY_NOCLEAR))
-	sv_setpvs(dsv, "");
+    sv_setpvs(dsv, "");
 
     if (dq == '"')
         sv_catpvs(dsv, "\"");
@@ -7017,12 +7068,12 @@ DPPP_(my_pv_pretty)(pTHX_ SV *dsv, char const * const str, const STRLEN count,
         sv_catpv(dsv, D_PPP_CONSTPV_ARG(end_color));
 
     if (dq == '"')
-	sv_catpvs(dsv, "\"");
+    sv_catpvs(dsv, "\"");
     else if (flags & PERL_PV_PRETTY_LTGT)
         sv_catpvs(dsv, ">");
 
     if ((flags & PERL_PV_PRETTY_ELLIPSES) && escaped < count)
-	sv_catpvs(dsv, "...");
+    sv_catpvs(dsv, "...");
 
     return SvPVX(dsv);
 }
@@ -7035,13 +7086,15 @@ DPPP_(my_pv_pretty)(pTHX_ SV *dsv, char const * const str, const STRLEN count,
 static char * DPPP_(my_pv_display)(pTHX_ SV * dsv, const char * pv, STRLEN cur, STRLEN len, STRLEN pvlim);
 static
 #else
-extern char * DPPP_(my_pv_display)(pTHX_ SV * dsv, const char * pv, STRLEN cur, STRLEN len, STRLEN pvlim);
+
+extern char *DPPP_(my_pv_display)(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim);
+
 #endif
 
 #ifdef pv_display
 #  undef pv_display
 #endif
-#define pv_display(a,b,c,d,e) DPPP_(my_pv_display)(aTHX_ a,b,c,d,e)
+#define pv_display(a, b, c, d, e) DPPP_(my_pv_display)(aTHX_ a,b,c,d,e)
 #define Perl_pv_display DPPP_(my_pv_display)
 
 #if defined(NEED_pv_display) || defined(NEED_pv_display_GLOBAL)
@@ -7051,7 +7104,7 @@ DPPP_(my_pv_display)(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRL
 {
     pv_pretty(dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP);
     if (len > cur && pv[cur] == '\0')
-	sv_catpvs(dsv, "\\0");
+    sv_catpvs(dsv, "\\0");
     return SvPVX(dsv);
 }
 

@@ -64,8 +64,7 @@ int slurm_reconfigure(void) {
 
     req.msg_type = REQUEST_RECONFIGURE;
 
-    if (slurm_send_recv_controller_rc_msg(&req, &rc,
-                                          working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_rc_msg(&req, &rc, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     if (rc)
@@ -153,8 +152,7 @@ static int _send_message_controller(int dest, slurm_msg_t *req) {
      * always communicate with a single node (primary or some backup per
      * value of "dest")
      */
-    if ((fd = slurm_open_controller_conn_spec(dest,
-                                              working_cluster_rec)) < 0) {
+    if ((fd = slurm_open_controller_conn_spec(dest, working_cluster_rec)) < 0) {
         slurm_seterrno_ret(SLURMCTLD_COMMUNICATIONS_CONNECTION_ERROR);
     }
 
@@ -175,8 +173,7 @@ static int _send_message_controller(int dest, slurm_msg_t *req) {
     else if (resp_msg.msg_type != RESPONSE_SLURM_RC)
         rc = SLURM_UNEXPECTED_MSG_ERROR;
     else
-        rc = slurm_get_return_code(resp_msg.msg_type,
-                                   resp_msg.data);
+        rc = slurm_get_return_code(resp_msg.msg_type, resp_msg.data);
 
     slurm_free_msg_members(&resp_msg);
 
@@ -192,8 +189,7 @@ static int _send_message_controller(int dest, slurm_msg_t *req) {
  * IN debug_flags_set   - new debug flags value
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int
-slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_minus) {
+extern int slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_minus) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -208,8 +204,7 @@ slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_minus) {
     req_msg.msg_type = REQUEST_SET_DEBUG_FLAGS;
     req_msg.data = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -231,8 +226,7 @@ slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_minus) {
  * IN debug_level - requested debug level
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int
-slurm_set_debug_level(uint32_t debug_level) {
+extern int slurm_set_debug_level(uint32_t debug_level) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -246,8 +240,7 @@ slurm_set_debug_level(uint32_t debug_level) {
     req_msg.msg_type = REQUEST_SET_DEBUG_LEVEL;
     req_msg.data = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -283,8 +276,7 @@ int slurm_set_schedlog_level(uint32_t schedlog_level) {
     req_msg.msg_type = REQUEST_SET_SCHEDLOG_LEVEL;
     req_msg.data = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -320,8 +312,7 @@ extern int slurm_set_fs_dampeningfactor(uint16_t factor) {
     req_msg.msg_type = REQUEST_SET_FS_DAMPENING_FACTOR;
     req_msg.data = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {

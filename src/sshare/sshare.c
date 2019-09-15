@@ -46,8 +46,7 @@
 #define OPT_LONG_HELP  0x100
 #define OPT_LONG_USAGE 0x101
 
-static int _get_info(shares_request_msg_t *shares_req,
-                     shares_response_msg_t **shares_resp);
+static int _get_info(shares_request_msg_t *shares_req, shares_response_msg_t **shares_resp);
 
 static int _addto_name_char_list(List char_list, char *names, bool gid);
 
@@ -78,26 +77,24 @@ int main(int argc, char **argv) {
     int option_index;
     bool all_users = 0;
 
-    static struct option long_options[] = {
-            {"accounts",   1, 0, 'A'},
-            {"all",        0, 0, 'a'},
-            {"helpformat", 0, 0, 'e'},
-            {"long",       0, 0, 'l'},
-            {"partition",  0, 0, 'm'},
-            {"cluster",    1, 0, 'M'},
-            {"clusters",   1, 0, 'M'},
-            {"noheader",   0, 0, 'n'},
-            {"format",     1, 0, 'o'},
-            {"parsable",   0, 0, 'p'},
-            {"parsable2",  0, 0, 'P'},
-            {"users",      1, 0, 'u'},
-            {"Users",      0, 0, 'U'},
-            {"verbose",    0, 0, 'v'},
-            {"version",    0, 0, 'V'},
-            {"help",       0, 0, OPT_LONG_HELP},
-            {"usage",      0, 0, OPT_LONG_USAGE},
-            {NULL,         0, 0, 0}
-    };
+    static struct option long_options[] = {{"accounts",   1, 0, 'A'},
+                                           {"all",        0, 0, 'a'},
+                                           {"helpformat", 0, 0, 'e'},
+                                           {"long",       0, 0, 'l'},
+                                           {"partition",  0, 0, 'm'},
+                                           {"cluster",    1, 0, 'M'},
+                                           {"clusters",   1, 0, 'M'},
+                                           {"noheader",   0, 0, 'n'},
+                                           {"format",     1, 0, 'o'},
+                                           {"parsable",   0, 0, 'p'},
+                                           {"parsable2",  0, 0, 'P'},
+                                           {"users",      1, 0, 'u'},
+                                           {"Users",      0, 0, 'U'},
+                                           {"verbose",    0, 0, 'v'},
+                                           {"version",    0, 0, 'V'},
+                                           {"help",       0, 0, OPT_LONG_HELP},
+                                           {"usage",      0, 0, OPT_LONG_USAGE},
+                                           {NULL,         0, 0, 0}};
 
     exit_code = 0;
     long_flag = 0;
@@ -107,8 +104,7 @@ int main(int argc, char **argv) {
     slurm_conf_init(NULL);
     log_init("sshare", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
-    while ((opt_char = getopt_long(argc, argv, "aA:ehlM:no:pPqUu:t:vVm",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "aA:ehlM:no:pPqUu:t:vVm", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) '?':
                 fprintf(stderr, "Try \"sshare --help\" "
@@ -120,8 +116,7 @@ int main(int argc, char **argv) {
                 break;
             case 'A':
                 if (!req_msg.acct_list)
-                    req_msg.acct_list =
-                            list_create(slurm_destroy_char);
+                    req_msg.acct_list = list_create(slurm_destroy_char);
                 slurm_addto_char_list(req_msg.acct_list, optarg);
                 break;
             case 'e':
@@ -136,8 +131,7 @@ int main(int argc, char **argv) {
                 break;
             case 'M':
                 FREE_NULL_LIST(clusters);
-                if (!(clusters =
-                              slurmdb_get_info_cluster(optarg))) {
+                if (!(clusters = slurmdb_get_info_cluster(optarg))) {
                     print_db_notok(optarg, 0);
                     exit(1);
                 }
@@ -153,12 +147,10 @@ int main(int argc, char **argv) {
                 xstrfmtcat(opt_field_list, "%s,", optarg);
                 break;
             case 'p':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_ENDING;
                 break;
             case 'P':
-                print_fields_parsable_print =
-                        PRINT_FIELDS_PARSABLE_NO_ENDING;
+                print_fields_parsable_print = PRINT_FIELDS_PARSABLE_NO_ENDING;
                 break;
             case 'u':
                 if (!xstrcmp(optarg, "-1")) {
@@ -167,8 +159,7 @@ int main(int argc, char **argv) {
                 }
                 all_users = 0;
                 if (!req_msg.user_list)
-                    req_msg.user_list =
-                            list_create(slurm_destroy_char);
+                    req_msg.user_list = list_create(slurm_destroy_char);
                 _addto_name_char_list(req_msg.user_list, optarg, 0);
                 break;
             case 'U':
@@ -188,8 +179,7 @@ int main(int argc, char **argv) {
                 exit(0);
             default:
                 exit_code = 1;
-                fprintf(stderr, "getopt error, returned %c\n",
-                        opt_char);
+                fprintf(stderr, "getopt error, returned %c\n", opt_char);
                 exit(exit_code);
         }
     }
@@ -201,14 +191,12 @@ int main(int argc, char **argv) {
     }
 
     if (all_users) {
-        if (req_msg.user_list
-            && list_count(req_msg.user_list)) {
+        if (req_msg.user_list && list_count(req_msg.user_list)) {
             FREE_NULL_LIST(req_msg.user_list);
         }
         if (verbosity)
             fprintf(stderr, "Users requested:\n\t: all\n");
-    } else if (verbosity && req_msg.user_list
-               && list_count(req_msg.user_list)) {
+    } else if (verbosity && req_msg.user_list && list_count(req_msg.user_list)) {
         fprintf(stderr, "Users requested:\n");
         ListIterator itr = list_iterator_create(req_msg.user_list);
         while ((temp = list_next(itr)))
@@ -218,8 +206,7 @@ int main(int argc, char **argv) {
         struct passwd *pwd;
         if ((pwd = getpwuid(getuid()))) {
             if (!req_msg.user_list) {
-                req_msg.user_list =
-                        list_create(slurm_destroy_char);
+                req_msg.user_list = list_create(slurm_destroy_char);
             }
             temp = xstrdup(pwd->pw_name);
             list_append(req_msg.user_list, temp);
@@ -287,8 +274,7 @@ static int _multi_cluster(shares_request_msg_t *req_msg) {
     return rc;
 }
 
-static int _get_info(shares_request_msg_t *shares_req,
-                     shares_response_msg_t **shares_resp) {
+static int _get_info(shares_request_msg_t *shares_req, shares_response_msg_t **shares_resp) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -299,8 +285,7 @@ static int _get_info(shares_request_msg_t *shares_req,
     req_msg.msg_type = REQUEST_SHARE_INFO;
     req_msg.data = shares_req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -356,16 +341,13 @@ static int _addto_name_char_list(List char_list, char *names, bool gid) {
                     memcpy(name, names + start, (i - start));
                     //info("got %s %d", name, i-start);
                     if (isdigit((int) *name)) {
-                        uint32_t id = strtoul(name,
-                                              NULL, 10);
+                        uint32_t id = strtoul(name, NULL, 10);
                         xfree(name);
-                        name = _convert_to_name(
-                                id, gid);
+                        name = _convert_to_name(id, gid);
                     }
 
                     while ((tmp_char = list_next(itr))) {
-                        if (!xstrcasecmp(tmp_char,
-                                         name))
+                        if (!xstrcasecmp(tmp_char, name))
                             break;
                     }
 
@@ -438,10 +420,8 @@ static void _print_version(void) {
     print_slurm_version();
     if (quiet_flag == -1) {
         long version = slurm_api_version();
-        printf("slurm_api_version: %ld, %ld.%ld.%ld\n", version,
-               SLURM_VERSION_MAJOR(version),
-               SLURM_VERSION_MINOR(version),
-               SLURM_VERSION_MICRO(version));
+        printf("slurm_api_version: %ld, %ld.%ld.%ld\n", version, SLURM_VERSION_MAJOR(version),
+               SLURM_VERSION_MINOR(version), SLURM_VERSION_MICRO(version));
     }
 }
 

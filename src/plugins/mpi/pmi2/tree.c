@@ -81,34 +81,16 @@ static uint32_t spawned_srun_ports_size = 0;
 static uint16_t *spawned_srun_ports = NULL;
 
 
-static int (*tree_cmd_handlers[])(int fd, Buf buf) = {
-        _handle_kvs_fence,
-        _handle_kvs_fence_resp,
-        _handle_spawn,
-        _handle_spawn_resp,
-        _handle_name_publish,
-        _handle_name_unpublish,
-        _handle_name_lookup,
-        _handle_ring,
-        _handle_ring_resp,
-        NULL
-};
-
-static char *tree_cmd_names[] = {
-        "TREE_CMD_KVS_FENCE",
-        "TREE_CMD_KVS_FENCE_RESP",
-        "TREE_CMD_SPAWN",
-        "TREE_CMD_SPAWN_RESP",
-        "TREE_CMD_NAME_PUBLISH",
-        "TREE_CMD_NAME_UNPUBLISH",
-        "TREE_CMD_NAME_LOOKUP",
-        "TREE_CMD_RING",
-        "TREE_CMD_RING_RESP",
-        NULL,
-};
-
 static int
-_handle_kvs_fence(int fd, Buf buf) {
+(*tree_cmd_handlers[])(int fd, Buf buf) = {_handle_kvs_fence, _handle_kvs_fence_resp, _handle_spawn, _handle_spawn_resp,
+                                           _handle_name_publish, _handle_name_unpublish, _handle_name_lookup,
+                                           _handle_ring, _handle_ring_resp, NULL};
+
+static char *tree_cmd_names[] = {"TREE_CMD_KVS_FENCE", "TREE_CMD_KVS_FENCE_RESP", "TREE_CMD_SPAWN",
+                                 "TREE_CMD_SPAWN_RESP", "TREE_CMD_NAME_PUBLISH", "TREE_CMD_NAME_UNPUBLISH",
+                                 "TREE_CMD_NAME_LOOKUP", "TREE_CMD_RING", "TREE_CMD_RING_RESP", NULL,};
+
+static int _handle_kvs_fence(int fd, Buf buf) {
     uint32_t from_nodeid, num_children, temp32, seq;
     char *from_node = NULL;
     int rc = SLURM_SUCCESS;
@@ -119,12 +101,10 @@ _handle_kvs_fence(int fd, Buf buf) {
     safe_unpack32(&seq, buf);
 
     debug3("mpi/pmi2: in _handle_kvs_fence, from node %u(%s) representing"
-           " %u offspring, seq=%u", from_nodeid, from_node, num_children,
-           seq);
+           " %u offspring, seq=%u", from_nodeid, from_node, num_children, seq);
     if (seq != kvs_seq) {
         error("mpi/pmi2: invalid kvs seq from node %u(%s) ignored, "
-              "expect %u got %u",
-              from_nodeid, from_node, kvs_seq, seq);
+              "expect %u got %u", from_nodeid, from_node, kvs_seq, seq);
         goto out;
     }
     if (seq == tree_info.children_kvs_seq[from_nodeid]) {
@@ -147,18 +127,14 @@ _handle_kvs_fence(int fd, Buf buf) {
         if (rc != SLURM_SUCCESS) {
             if (in_stepd()) {
                 error("mpi/pmi2: failed to send temp kvs"
-                      " to %s",
-                      tree_info.parent_node ?: "srun");
-                send_kvs_fence_resp_to_clients(
-                        rc,
-                        "mpi/pmi2: failed to send temp kvs");
+                      " to %s", tree_info.parent_node ?: "srun");
+                send_kvs_fence_resp_to_clients(rc, "mpi/pmi2: failed to send temp kvs");
             } else {
                 error("mpi/pmi2: failed to send temp kvs"
                       " to compute nodes");
             }
             /* cancel the step to avoid tasks hang */
-            slurm_kill_job_step(job_info.jobid, job_info.stepid,
-                                SIGKILL);
+            slurm_kill_job_step(job_info.jobid, job_info.stepid, SIGKILL);
         } else {
             if (in_stepd())
                 waiting_kvs_resp = 1;
@@ -176,8 +152,7 @@ _handle_kvs_fence(int fd, Buf buf) {
     goto out;
 }
 
-static int
-_handle_kvs_fence_resp(int fd, Buf buf) {
+static int _handle_kvs_fence_resp(int fd, Buf buf) {
     char *key, *val, *errmsg = NULL;
     int rc = SLURM_SUCCESS;
     uint32_t temp32, seq;
@@ -190,8 +165,7 @@ _handle_kvs_fence_resp(int fd, Buf buf) {
               "seq %d kvs_seq %d from srun ignored", seq, kvs_seq);
         return rc;
     } else if (seq != kvs_seq - 1) {
-        error("mpi/pmi2: invalid kvs seq from srun, expect %u got %u",
-              kvs_seq - 1, seq);
+        error("mpi/pmi2: invalid kvs seq from srun, expect %u got %u", kvs_seq - 1, seq);
         rc = SLURM_ERROR;;
         errmsg = "mpi/pmi2: invalid kvs seq from srun";
         goto resp;
@@ -230,8 +204,7 @@ _handle_kvs_fence_resp(int fd, Buf buf) {
 }
 
 /* only called in srun */
-static int
-_handle_spawn(int fd, Buf buf) {
+static int _handle_spawn(int fd, Buf buf) {
     int rc;
     spawn_req_t *req = NULL;
     spawn_resp_t *resp = NULL;
@@ -275,25 +248,20 @@ _handle_spawn(int fd, Buf buf) {
     return rc;
 }
 
-static int
-_send_task_spawn_resp_pmi20(spawn_resp_t *spawn_resp, int task_fd,
-                            int task_lrank) {
+static int _send_task_spawn_resp_pmi20(spawn_resp_t *spawn_resp, int task_fd, int task_lrank) {
     int i, rc;
     client_resp_t *task_resp;
     char *error_codes = NULL;
 
     task_resp = client_resp_new();
-    client_resp_append(task_resp,
-                       CMD_KEY
-                               "="
-                               SPAWNRESP_CMD
-                               ";"
-                               RC_KEY
-                               "=%d;"
-                               JOBID_KEY
-                               "=%s;",
-                       spawn_resp->rc,
-                       spawn_resp->jobid);
+    client_resp_append(task_resp, CMD_KEY
+            "="
+            SPAWNRESP_CMD
+            ";"
+            RC_KEY
+            "=%d;"
+            JOBID_KEY
+            "=%s;", spawn_resp->rc, spawn_resp->jobid);
     /* seems that simple2pmi does not consider rc */
     if (spawn_resp->rc != SLURM_SUCCESS) {
         xstrfmtcat(error_codes, "%d", spawn_resp->rc);
@@ -306,14 +274,12 @@ _send_task_spawn_resp_pmi20(spawn_resp_t *spawn_resp, int task_fd,
         }
 
         for (i = 1; i < spawn_resp->error_cnt; i++) {
-            xstrfmtcat(error_codes, ",%d",
-                       spawn_resp->error_codes[i]);
+            xstrfmtcat(error_codes, ",%d", spawn_resp->error_codes[i]);
         }
     }
     if (error_codes) {
         client_resp_append(task_resp, ERRCODES_KEY
-                "=%s;",
-                           error_codes);
+                "=%s;", error_codes);
         xfree(error_codes);
     }
 
@@ -322,25 +288,21 @@ _send_task_spawn_resp_pmi20(spawn_resp_t *spawn_resp, int task_fd,
     return rc;
 }
 
-static int
-_send_task_spawn_resp_pmi11(spawn_resp_t *spawn_resp, int task_fd,
-                            int task_lrank) {
+static int _send_task_spawn_resp_pmi11(spawn_resp_t *spawn_resp, int task_fd, int task_lrank) {
     int i, rc;
     client_resp_t *task_resp;
     char *error_codes = NULL;
 
     task_resp = client_resp_new();
-    client_resp_append(task_resp,
-                       CMD_KEY
-                               "="
-                               SPAWNRESULT_CMD
-                               " "
-                               RC_KEY
-                               "=%d "
-                               JOBID_KEY
-                               "=%s", /* JOBID_KEY is not required */
-                       spawn_resp->rc,
-                       spawn_resp->jobid);
+    client_resp_append(task_resp, CMD_KEY
+            "="
+            SPAWNRESULT_CMD
+            " "
+            RC_KEY
+            "=%d "
+            JOBID_KEY
+            "=%s", /* JOBID_KEY is not required */
+                       spawn_resp->rc, spawn_resp->jobid);
 
     if (spawn_resp->rc != SLURM_SUCCESS) {
         xstrfmtcat(error_codes, "%d", spawn_resp->rc);
@@ -353,15 +315,13 @@ _send_task_spawn_resp_pmi11(spawn_resp_t *spawn_resp, int task_fd,
         }
 
         for (i = 1; i < spawn_resp->error_cnt; i++) {
-            xstrfmtcat(error_codes, ",%d",
-                       spawn_resp->error_codes[i]);
+            xstrfmtcat(error_codes, ",%d", spawn_resp->error_codes[i]);
         }
     }
     if (error_codes) {
         client_resp_append(task_resp, " "
                 ERRCODES_KEY
-                "=%s\n",
-                           error_codes);
+                "=%s\n", error_codes);
         xfree(error_codes);
     } else {
         client_resp_append(task_resp, "\n");
@@ -373,8 +333,7 @@ _send_task_spawn_resp_pmi11(spawn_resp_t *spawn_resp, int task_fd,
 }
 
 /* called in stepd and srun */
-static int
-_handle_spawn_resp(int fd, Buf buf) {
+static int _handle_spawn_resp(int fd, Buf buf) {
     int rc, task_fd, task_lrank;
     spawn_resp_t *spawn_resp;
     char *from_node = NULL;
@@ -394,19 +353,15 @@ _handle_spawn_resp(int fd, Buf buf) {
     }
 
     if (from_node == NULL) { /* stepd */
-        debug3("mpi/pmi2: spawned tasks of %s launched",
-               spawn_resp->jobid);
+        debug3("mpi/pmi2: spawned tasks of %s launched", spawn_resp->jobid);
         if (is_pmi20()) {
             _send_task_spawn_resp_pmi20(spawn_resp, task_fd, task_lrank);
         } else if (is_pmi11()) {
             _send_task_spawn_resp_pmi11(spawn_resp, task_fd, task_lrank);
         }
     } else {        /* srun */
-        debug3("mpi/pmi2: spawned tasks of %s launched",
-               spawn_resp->jobid);
-        spawned_srun_ports = xrealloc(spawned_srun_ports,
-                                      spawn_resp->seq *
-                                      sizeof(uint16_t));
+        debug3("mpi/pmi2: spawned tasks of %s launched", spawn_resp->jobid);
+        spawned_srun_ports = xrealloc(spawned_srun_ports, spawn_resp->seq * sizeof(uint16_t));
         spawned_srun_ports_size = spawn_resp->seq; /* seq start from 1 */
         spawned_srun_ports[spawn_resp->seq - 1] = spawn_resp->pmi_port;
         /* forward resp to stepd */
@@ -420,8 +375,7 @@ _handle_spawn_resp(int fd, Buf buf) {
 
 
 /* name serv handlers called only in srun */
-static int
-_handle_name_publish(int fd, Buf buf) {
+static int _handle_name_publish(int fd, Buf buf) {
     int rc;
     uint32_t tmp32;
     char *name = NULL, *port = NULL;
@@ -441,8 +395,7 @@ _handle_name_publish(int fd, Buf buf) {
     xfree(port);
     resp_buf = init_buf(32);
     pack32((uint32_t) rc, resp_buf);
-    rc = slurm_msg_sendto(fd, get_buf_data(resp_buf),
-                          get_buf_offset(resp_buf));
+    rc = slurm_msg_sendto(fd, get_buf_data(resp_buf), get_buf_offset(resp_buf));
     free_buf(resp_buf);
 
     debug3("mpi/pmi2: out _handle_name_publish");
@@ -453,8 +406,7 @@ _handle_name_publish(int fd, Buf buf) {
     goto out;
 }
 
-static int
-_handle_name_unpublish(int fd, Buf buf) {
+static int _handle_name_unpublish(int fd, Buf buf) {
     int rc;
     uint32_t tmp32;
     char *name = NULL;
@@ -472,8 +424,7 @@ _handle_name_unpublish(int fd, Buf buf) {
     xfree(name);
     resp_buf = init_buf(32);
     pack32((uint32_t) rc, resp_buf);
-    rc = slurm_msg_sendto(fd, get_buf_data(resp_buf),
-                          get_buf_offset(resp_buf));
+    rc = slurm_msg_sendto(fd, get_buf_data(resp_buf), get_buf_offset(resp_buf));
     free_buf(resp_buf);
 
     debug3("mpi/pmi2: out _handle_name_unpublish");
@@ -484,8 +435,7 @@ _handle_name_unpublish(int fd, Buf buf) {
     goto out;
 }
 
-static int
-_handle_name_lookup(int fd, Buf buf) {
+static int _handle_name_lookup(int fd, Buf buf) {
     int rc = SLURM_SUCCESS, rc2;
     uint32_t tmp32;
     char *name = NULL, *port = NULL;
@@ -502,8 +452,7 @@ _handle_name_lookup(int fd, Buf buf) {
     out:
     resp_buf = init_buf(1024);
     packstr(port, resp_buf);
-    rc2 = slurm_msg_sendto(fd, get_buf_data(resp_buf),
-                           get_buf_offset(resp_buf));
+    rc2 = slurm_msg_sendto(fd, get_buf_data(resp_buf), get_buf_offset(resp_buf));
     rc = MAX(rc, rc2);
     free_buf(resp_buf);
     xfree(name);
@@ -518,8 +467,7 @@ _handle_name_lookup(int fd, Buf buf) {
 }
 
 /* handles ring_in message from one of our stepd children */
-static int
-_handle_ring(int fd, Buf buf) {
+static int _handle_ring(int fd, Buf buf) {
     uint32_t rank, count, temp32;
     char *left = NULL;
     char *right = NULL;
@@ -567,8 +515,7 @@ _handle_ring(int fd, Buf buf) {
 }
 
 /* handles ring_out messages coming in from parent in stepd tree */
-static int
-_handle_ring_resp(int fd, Buf buf) {
+static int _handle_ring_resp(int fd, Buf buf) {
     uint32_t count, temp32;
     char *left = NULL;
     char *right = NULL;
@@ -602,8 +549,7 @@ _handle_ring_resp(int fd, Buf buf) {
 }
 
 /**************************************************************/
-extern int
-handle_tree_cmd(int fd) {
+extern int handle_tree_cmd(int fd) {
     char *req_buf = NULL;
     uint32_t len;
     Buf buf = NULL;
@@ -638,8 +584,7 @@ handle_tree_cmd(int fd) {
     return SLURM_ERROR;
 }
 
-extern int
-tree_msg_to_srun(uint32_t len, char *msg) {
+extern int tree_msg_to_srun(uint32_t len, char *msg) {
     int fd, rc;
 
     fd = slurm_open_stream(tree_info.srun_addr, true);
@@ -654,8 +599,7 @@ tree_msg_to_srun(uint32_t len, char *msg) {
     return rc;
 }
 
-extern int
-tree_msg_to_srun_with_resp(uint32_t len, char *msg, Buf *resp_ptr) {
+extern int tree_msg_to_srun_with_resp(uint32_t len, char *msg, Buf *resp_ptr) {
     int fd, rc;
     Buf buf = NULL;
     char *data = NULL;
@@ -686,8 +630,7 @@ tree_msg_to_srun_with_resp(uint32_t len, char *msg, Buf *resp_ptr) {
     return SLURM_ERROR;
 }
 
-extern int
-tree_msg_to_spawned_sruns(uint32_t len, char *msg) {
+extern int tree_msg_to_spawned_sruns(uint32_t len, char *msg) {
     int i = 0, rc = SLURM_SUCCESS, fd = -1, sent = 0;
     slurm_addr_t srun_addr;
 

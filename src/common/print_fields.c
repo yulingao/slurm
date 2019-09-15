@@ -66,15 +66,11 @@ extern void print_fields_header(List print_fields_list) {
 
     itr = list_iterator_create(print_fields_list);
     while ((field = list_next(itr))) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && (curr_inx == field_count))
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && (curr_inx == field_count))
             printf("%s", field->name);
-        else if (print_fields_parsable_print
-                 && fields_delimiter) {
+        else if (print_fields_parsable_print && fields_delimiter) {
             printf("%s%s", field->name, fields_delimiter);
-        } else if (print_fields_parsable_print
-                   && !fields_delimiter) {
+        } else if (print_fields_parsable_print && !fields_delimiter) {
             printf("%s|", field->name);
 
         } else {
@@ -89,8 +85,7 @@ extern void print_fields_header(List print_fields_list) {
         return;
     while ((field = list_next(itr))) {
         int abs_len = abs(field->len);
-        printf("%*.*s ", abs_len, abs_len,
-               "-----------------------------------------------------");
+        printf("%*.*s ", abs_len, abs_len, "-----------------------------------------------------");
     }
     list_iterator_destroy(itr);
     printf("\n");
@@ -101,8 +96,7 @@ extern void print_fields_date(print_field_t *field, time_t value, int last) {
     char temp_char[abs_len + 1];
 
     slurm_make_time_str(&value, (char *) temp_char, sizeof(temp_char));
-    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING
-        && last)
+    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
         printf("%s", temp_char);
     else if (print_fields_parsable_print && !fields_delimiter)
         printf("%s|", temp_char);
@@ -126,8 +120,7 @@ extern void print_fields_str(print_field_t *field, char *value, int last) {
     } else
         print_this = value;
 
-    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING
-        && last)
+    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
         printf("%s", print_this);
     else if (print_fields_parsable_print && !fields_delimiter)
         printf("%s|", print_this);
@@ -156,11 +149,8 @@ extern void print_fields_str(print_field_t *field, char *value, int last) {
 extern void print_fields_uint16(print_field_t *field, uint32_t value, int last) {
     int abs_len = abs(field->len);
     /* (value == unset)  || (value == cleared) */
-    if (((uint16_t) value == NO_VAL16)
-        || ((uint16_t) value == INFINITE16)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+    if (((uint16_t) value == NO_VAL16) || ((uint16_t) value == INFINITE16)) {
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -168,9 +158,7 @@ extern void print_fields_uint16(print_field_t *field, uint32_t value, int last) 
         else
             printf("%*s ", field->len, " ");
     } else {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%u", value);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%u|", value);
@@ -187,9 +175,7 @@ extern void print_fields_uint32(print_field_t *field, uint32_t value, int last) 
     int abs_len = abs(field->len);
     /* (value == unset)  || (value == cleared) */
     if ((value == NO_VAL) || (value == INFINITE)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -197,9 +183,7 @@ extern void print_fields_uint32(print_field_t *field, uint32_t value, int last) 
         else
             printf("%*s ", field->len, " ");
     } else {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%u", value);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%u|", value);
@@ -217,9 +201,7 @@ extern void print_fields_uint64(print_field_t *field, uint64_t value, int last) 
 
     /* (value == unset)  || (value == cleared) */
     if ((value == NO_VAL64) || (value == INFINITE64)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -227,15 +209,12 @@ extern void print_fields_uint64(print_field_t *field, uint64_t value, int last) 
         else
             printf("%*s ", field->len, " ");
     } else {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%llu", (long long unsigned) value);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%llu|", (long long unsigned) value);
         else if (print_fields_parsable_print && fields_delimiter)
-            printf("%llu%s", (long long unsigned) value,
-                   fields_delimiter);
+            printf("%llu%s", (long long unsigned) value, fields_delimiter);
         else if (field->len == abs_len)
             printf("%*llu ", abs_len, (long long unsigned) value);
         else
@@ -246,11 +225,9 @@ extern void print_fields_uint64(print_field_t *field, uint64_t value, int last) 
 extern void print_fields_double(print_field_t *field, double value, int last) {
     int abs_len = abs(field->len);
     /* (value == unset)  || (value == cleared) */
-    if ((value == NO_VAL64) || (value == INFINITE64) ||
-        (value == (uint64_t) NO_VAL) || (value == (uint64_t) INFINITE)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+    if ((value == NO_VAL64) || (value == INFINITE64) || (value == (uint64_t) NO_VAL) ||
+        (value == (uint64_t) INFINITE)) {
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -258,9 +235,7 @@ extern void print_fields_double(print_field_t *field, double value, int last) {
         else
             printf("%*s ", field->len, " ");
     } else {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%f", value);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%f|", value);
@@ -295,9 +270,7 @@ extern void print_fields_time(print_field_t *field, uint32_t value, int last) {
     int abs_len = abs(field->len);
     /* (value == unset)  || (value == cleared) */
     if ((value == NO_VAL) || (value == INFINITE)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -307,9 +280,7 @@ extern void print_fields_time(print_field_t *field, uint32_t value, int last) {
     } else {
         char time_buf[32];
         mins2time_str((time_t) value, time_buf, sizeof(time_buf));
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%s", time_buf);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%s|", time_buf);
@@ -322,14 +293,11 @@ extern void print_fields_time(print_field_t *field, uint32_t value, int last) {
     }
 }
 
-extern void print_fields_time_from_secs(print_field_t *field,
-                                        uint64_t value, int last) {
+extern void print_fields_time_from_secs(print_field_t *field, uint64_t value, int last) {
     int abs_len = abs(field->len);
     /* (value == unset)  || (value == cleared) */
     if ((value == NO_VAL64) || (value == INFINITE64)) {
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last);
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("|");
         else if (print_fields_parsable_print && fields_delimiter)
@@ -339,9 +307,7 @@ extern void print_fields_time_from_secs(print_field_t *field,
     } else {
         char time_buf[32];
         secs2time_str((time_t) value, time_buf, sizeof(time_buf));
-        if (print_fields_parsable_print
-            == PRINT_FIELDS_PARSABLE_NO_ENDING
-            && last)
+        if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
             printf("%s", time_buf);
         else if (print_fields_parsable_print && !fields_delimiter)
             printf("%s|", time_buf);
@@ -367,8 +333,7 @@ extern void print_fields_char_list(print_field_t *field, List value, int last) {
         print_this = slurm_char_list_to_xstr(value);
     }
 
-    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING
-        && last)
+    if (print_fields_parsable_print == PRINT_FIELDS_PARSABLE_NO_ENDING && last)
         printf("%s", print_this);
     else if (print_fields_parsable_print && !fields_delimiter)
         printf("%s|", print_this);

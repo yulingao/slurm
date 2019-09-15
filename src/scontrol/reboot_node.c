@@ -66,8 +66,7 @@ extern int scontrol_cancel_reboot(char *nodes) {
  *
  * RET SLURM_SUCCESS or a slurm error code
  */
-extern int scontrol_reboot_nodes(char *node_list, bool asap,
-                                 uint32_t next_state, char *reason) {
+extern int scontrol_reboot_nodes(char *node_list, bool asap, uint32_t next_state, char *reason) {
     slurm_ctl_conf_t *conf;
     int rc;
     slurm_msg_t msg;

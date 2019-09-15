@@ -43,16 +43,11 @@
 
 
 typedef enum {
-    PMIXP_PROTO_NONE = 0,
-    PMIXP_PROTO_SLURM,
-    PMIXP_PROTO_DIRECT
+    PMIXP_PROTO_NONE = 0, PMIXP_PROTO_SLURM, PMIXP_PROTO_DIRECT
 } pmixp_conn_proto_t;
 
 typedef enum {
-    PMIXP_CONN_NONE = 0,
-    PMIXP_CONN_PERSIST,
-    PMIXP_CONN_TEMP,
-    PMIXP_CONN_EMPTY,
+    PMIXP_CONN_NONE = 0, PMIXP_CONN_PERSIST, PMIXP_CONN_TEMP, PMIXP_CONN_EMPTY,
 } pmixp_conn_type_t;
 
 /* this routine tries to complete message processing on message
@@ -65,8 +60,7 @@ typedef struct pmixp_conn_struct {
     pmixp_io_engine_t *eng;
     void *hdr;
 
-    void (*rcv_progress_cb)(struct pmixp_conn_struct *conn,
-                            void *hdr, void *msg);
+    void (*rcv_progress_cb)(struct pmixp_conn_struct *conn, void *hdr, void *msg);
 
     pmixp_conn_proto_t proto;
     pmixp_conn_type_t type;
@@ -76,26 +70,20 @@ typedef struct pmixp_conn_struct {
     void *ret_data;
 } pmixp_conn_t;
 
-typedef void (*pmixp_conn_new_msg_cb_t)(pmixp_conn_t *conn,
-                                        void *hdr, void *msg);
+typedef void (*pmixp_conn_new_msg_cb_t)(pmixp_conn_t *conn, void *hdr, void *msg);
 
 typedef void (*pmixp_conn_ret_cb_t)(pmixp_conn_t *conn);
 
-void pmixp_conn_init(pmixp_p2p_data_t slurm_hdr,
-                     pmixp_p2p_data_t direct_hdr);
+void pmixp_conn_init(pmixp_p2p_data_t slurm_hdr, pmixp_p2p_data_t direct_hdr);
 
 void pmixp_conn_fini(void);
 
 void pmixp_conn_cleanup(void);
 
-pmixp_conn_t *pmixp_conn_new_temp(pmixp_conn_proto_t proto, int fd,
-                                  pmixp_conn_new_msg_cb_t msg_cb);
+pmixp_conn_t *pmixp_conn_new_temp(pmixp_conn_proto_t proto, int fd, pmixp_conn_new_msg_cb_t msg_cb);
 
-pmixp_conn_t *pmixp_conn_new_persist(pmixp_conn_proto_t proto,
-                                     pmixp_io_engine_t *eng,
-                                     pmixp_conn_new_msg_cb_t msg_cb,
-                                     pmixp_conn_ret_cb_t ret_cb,
-                                     void *conn_data);
+pmixp_conn_t *pmixp_conn_new_persist(pmixp_conn_proto_t proto, pmixp_io_engine_t *eng, pmixp_conn_new_msg_cb_t msg_cb,
+                                     pmixp_conn_ret_cb_t ret_cb, void *conn_data);
 
 void pmixp_conn_return(pmixp_conn_t *hndl);
 

@@ -95,21 +95,18 @@ static void *_heartbeat_thread(void *no_data) {
          * Rebuild file path each beat just in case someone changes
          * StateSaveLocation and runs reconfigure.
          */
-        reg_file = xstrdup_printf("%s/heartbeat",
-                                  slurmctld_conf.state_save_location);
+        reg_file = xstrdup_printf("%s/heartbeat", slurmctld_conf.state_save_location);
         new_file = xstrdup_printf("%s.new", reg_file);
 
         fd = open(new_file, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC, 0600);
         if (fd < 0) {
-            error("%s: heartbeat file creation failed to %s.",
-                  __func__, new_file);
+            error("%s: heartbeat file creation failed to %s.", __func__, new_file);
             goto delay;
         }
 
         nl = HTON_uint64(((uint64_t) now));
         if (write(fd, &nl, sizeof(uint64_t)) != sizeof(uint64_t)) {
-            error("%s: heartbeat write failed to %s.",
-                  __func__, new_file);
+            error("%s: heartbeat write failed to %s.", __func__, new_file);
             close(fd);
             (void) unlink(new_file);
             goto delay;
@@ -117,8 +114,7 @@ static void *_heartbeat_thread(void *no_data) {
 
         nl = HTON_uint64(((uint64_t) backup_inx));
         if (write(fd, &nl, sizeof(uint64_t)) != sizeof(uint64_t)) {
-            error("%s: heartbeat write failed to %s.",
-                  __func__, new_file);
+            error("%s: heartbeat write failed to %s.", __func__, new_file);
             close(fd);
             (void) unlink(new_file);
             goto delay;
@@ -132,8 +128,7 @@ static void *_heartbeat_thread(void *no_data) {
         /* shuffle files around */
         (void) unlink(reg_file);
         if (link(new_file, reg_file))
-            debug("%s: unable to create link for %s -> %s, %m",
-                  __func__, new_file, reg_file);
+            debug("%s: unable to create link for %s -> %s, %m", __func__, new_file, reg_file);
         (void) unlink(new_file);
 
         delay:
@@ -175,8 +170,7 @@ time_t get_last_heartbeat(int *server_inx) {
     uint64_t value;
     uint64_t inx;
 
-    file = xstrdup_printf("%s/heartbeat",
-                          slurmctld_conf.state_save_location);
+    file = xstrdup_printf("%s/heartbeat", slurmctld_conf.state_save_location);
 
     /*
      * Retry the open() in case the primary is rearranging things
@@ -185,28 +179,24 @@ time_t get_last_heartbeat(int *server_inx) {
      */
     for (i = 0; (i < OPEN_RETRIES) && (fd < 0); i++) {
         if (i) {
-            debug("%s: sleeping before attempt %d to open heartbeat",
-                  __func__, i);
+            debug("%s: sleeping before attempt %d to open heartbeat", __func__, i);
             usleep(100000);
         }
         fd = open(file, O_RDONLY);
     }
 
     if (fd < 0) {
-        error("%s: heartbeat open attempt failed from %s.",
-              __func__, file);
+        error("%s: heartbeat open attempt failed from %s.", __func__, file);
         xfree(file);
         return 0;
     }
 
     if (read(fd, &value, sizeof(uint64_t)) != sizeof(uint64_t)) {
-        error("%s: heartbeat read failed from %s.",
-              __func__, file);
+        error("%s: heartbeat read failed from %s.", __func__, file);
         value = 0;
     }
     if (read(fd, &inx, sizeof(uint64_t)) != sizeof(uint64_t)) {
-        error("%s: heartbeat read failed from %s.",
-              __func__, file);
+        error("%s: heartbeat read failed from %s.", __func__, file);
     } else if (server_inx) {
         *server_inx = NTOH_uint64(inx);
     }

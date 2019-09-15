@@ -101,16 +101,14 @@ extern int task_p_slurmd_batch_request(batch_job_launch_msg_t *req) {
 /*
  * task_p_slurmd_launch_request()
  */
-extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req,
-                                        uint32_t node_id) {
+extern int task_p_slurmd_launch_request(launch_tasks_request_msg_t *req, uint32_t node_id) {
     return SLURM_SUCCESS;
 }
 
 /*
  * task_p_slurmd_reserve_resources()
  */
-extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req,
-                                           uint32_t node_id) {
+extern int task_p_slurmd_reserve_resources(launch_tasks_request_msg_t *req, uint32_t node_id) {
     debug("task_p_slurmd_reserve_resources: %u %u", req->job_id, node_id);
     return SLURM_SUCCESS;
 }
@@ -154,8 +152,7 @@ extern int task_p_pre_setuid(stepd_step_rec_t *job) {
  *	--task-prolog (from srun command line).
  */
 extern int task_p_pre_launch(stepd_step_rec_t *job) {
-    debug("task_p_pre_launch: %u.%u, task %d",
-          job->jobid, job->stepid, job->envtp->procid);
+    debug("task_p_pre_launch: %u.%u, task %d", job->jobid, job->stepid, job->envtp->procid);
     return SLURM_SUCCESS;
 }
 
@@ -164,8 +161,7 @@ extern int task_p_pre_launch(stepd_step_rec_t *job) {
  * in privileged mode, just after slurm_spank_task_init_privileged
  */
 extern int task_p_pre_launch_priv(stepd_step_rec_t *job, pid_t pid) {
-    debug("task_p_pre_launch_priv: %u.%u",
-          job->jobid, job->stepid);
+    debug("task_p_pre_launch_priv: %u.%u", job->jobid, job->stepid);
     return SLURM_SUCCESS;
 }
 
@@ -175,8 +171,7 @@ extern int task_p_pre_launch_priv(stepd_step_rec_t *job, pid_t pid) {
  *	followed by TaskEpilog program (from slurm.conf).
  */
 extern int task_p_post_term(stepd_step_rec_t *job, stepd_step_task_info_t *task) {
-    debug("task_p_post_term: %u.%u, task %d",
-          job->jobid, job->stepid, task->id);
+    debug("task_p_post_term: %u.%u, task %d", job->jobid, job->stepid, task->id);
     return SLURM_SUCCESS;
 }
 

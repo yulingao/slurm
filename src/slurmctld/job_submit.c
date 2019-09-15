@@ -56,22 +56,15 @@
 #include "src/slurmctld/locks.h"
 
 typedef struct slurm_submit_ops {
-    int (*submit)(struct job_descriptor *job_desc,
-                  uint32_t submit_uid,
-                  char **err_msg);
+    int (*submit)(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg);
 
-    int (*modify)(struct job_descriptor *job_desc,
-                  struct job_record *job_ptr,
-                  uint32_t submit_uid);
+    int (*modify)(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid);
 } slurm_submit_ops_t;
 
 /*
  * Must be synchronized with slurm_submit_ops_t above.
  */
-static const char *syms[] = {
-        "job_submit",
-        "job_modify"
-};
+static const char *syms[] = {"job_submit", "job_modify"};
 
 static int g_context_cnt = -1;
 static slurm_submit_ops_t *ops = NULL;
@@ -107,17 +100,14 @@ extern int job_submit_plugin_init(void) {
     names = tmp_plugin_list;
     while ((type = strtok_r(names, ",", &last))) {
         xrecalloc(ops, g_context_cnt + 1, sizeof(slurm_submit_ops_t));
-        xrecalloc(g_context, g_context_cnt + 1,
-                  sizeof(plugin_context_t * ));
+        xrecalloc(g_context, g_context_cnt + 1, sizeof(plugin_context_t * ));
         if (xstrncmp(type, "job_submit/", 11) == 0)
             type += 11; /* backward compatibility */
         type = xstrdup_printf("job_submit/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;
@@ -212,8 +202,7 @@ extern int job_submit_plugin_reconfig(void) {
  * IN submit_uid - User issuing job submit request
  * OUT err_msg - Custom error message to the user, caller to xfree results
  */
-extern int job_submit_plugin_submit(struct job_descriptor *job_desc,
-                                    uint32_t submit_uid, char **err_msg) {
+extern int job_submit_plugin_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
     DEF_TIMERS;
     int i, rc;
 
@@ -246,9 +235,7 @@ extern int job_submit_plugin_submit(struct job_descriptor *job_desc,
  * If any plugin function returns anything other than SLURM_SUCCESS
  * then stop and forward it's return value.
  */
-extern int job_submit_plugin_modify(struct job_descriptor *job_desc,
-                                    struct job_record *job_ptr,
-                                    uint32_t submit_uid) {
+extern int job_submit_plugin_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
     DEF_TIMERS;
     int i, rc;
 

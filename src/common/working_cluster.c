@@ -55,8 +55,7 @@
  */
 
 extern uint16_t slurmdb_setup_cluster_dims(void) {
-    return working_cluster_rec ?
-           working_cluster_rec->dimensions : SYSTEM_DIMENSIONS;
+    return working_cluster_rec ? working_cluster_rec->dimensions : SYSTEM_DIMENSIONS;
 }
 
 extern int *slurmdb_setup_cluster_dim_size(void) {
@@ -106,8 +105,7 @@ extern uint32_t slurmdb_setup_cluster_flags(void) {
 }
 
 static uint32_t _str_2_cluster_flags(char *flags_in) {
-    if (xstrcasestr(flags_in, "AlpsCray")
-        || xstrcasestr(flags_in, "CrayXT"))
+    if (xstrcasestr(flags_in, "AlpsCray") || xstrcasestr(flags_in, "CrayXT"))
         return CLUSTER_FLAG_CRAY_A;
 
     if (xstrcasestr(flags_in, "FrontEnd"))
@@ -176,8 +174,7 @@ extern uint32_t slurmdb_setup_plugin_id_select(void) {
     return select_get_plugin_id();
 }
 
-extern void
-slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg) {
+extern void slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg) {
     xassert(msg);
     xassert(msg->working_cluster_rec);
     xassert(msg->node_list);
@@ -189,15 +186,12 @@ slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg) {
     working_cluster_rec = (slurmdb_cluster_rec_t *) msg->working_cluster_rec;
     msg->working_cluster_rec = NULL;
 
-    working_cluster_rec->plugin_id_select =
-            select_get_plugin_id_pos(working_cluster_rec->plugin_id_select);
+    working_cluster_rec->plugin_id_select = select_get_plugin_id_pos(working_cluster_rec->plugin_id_select);
 
-    slurm_set_addr(&working_cluster_rec->control_addr,
-                   working_cluster_rec->control_port,
+    slurm_set_addr(&working_cluster_rec->control_addr, working_cluster_rec->control_port,
                    working_cluster_rec->control_host);
 
-    if (setenvf(NULL, "SLURM_CLUSTER_NAME", "%s",
-                working_cluster_rec->name) < 0)
+    if (setenvf(NULL, "SLURM_CLUSTER_NAME", "%s", working_cluster_rec->name) < 0)
         error("unable to set SLURM_CLUSTER_NAME in environment");
 
     add_remote_nodes_to_conf_tbls(msg->node_list, msg->node_addr);

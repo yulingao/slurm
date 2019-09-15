@@ -66,10 +66,8 @@ double get_priority_from_factors(priority_factors_object_t *prio_factors);
 /*****************************************************************************
  * Job Line Format Options
  *****************************************************************************/
-int job_format_add_function(List list, int width, bool right_justify,
-                            char *suffix,
-                            int (*function)(priority_factors_object_t *,
-                                            int, bool, char *));
+int job_format_add_function(List list, int width, bool right_justify, char *suffix,
+                            int (*function)(priority_factors_object_t *, int, bool, char *));
 
 #define job_format_add_job_id(list, wid, right, suffix) \
     job_format_add_function(list,wid,right,suffix,_print_job_job_id)
@@ -121,73 +119,50 @@ int job_format_add_function(List list, int width, bool right_justify,
 /*****************************************************************************
  * Job Line Print Functions
  *****************************************************************************/
-int _print_job_job_id(priority_factors_object_t *job, int width,
-                      bool right_justify, char *suffix);
+int _print_job_job_id(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_prefix(priority_factors_object_t *job, int width,
-                      bool right_justify, char *suffix);
+int _print_job_prefix(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_age_priority_normalized(priority_factors_object_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_age_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_age_priority_weighted(priority_factors_object_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_age_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_assoc_priority_normalized(priority_factors_object_t *job, int width,
-                                     bool right_justify, char *suffix);
+int _print_assoc_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_assoc_priority_weighted(priority_factors_object_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_assoc_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_cluster_name(priority_factors_object_t *job, int width,
-                        bool right, char *suffix);
+int _print_cluster_name(priority_factors_object_t *job, int width, bool right, char *suffix);
 
-int _print_fs_priority_normalized(priority_factors_object_t *job, int width,
-                                  bool right_justify, char *suffix);
+int _print_fs_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_fs_priority_weighted(priority_factors_object_t *job, int width,
-                                bool right_justify, char *suffix);
+int _print_fs_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_priority_normalized(priority_factors_object_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_job_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_priority_weighted(priority_factors_object_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_job_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_js_priority_normalized(priority_factors_object_t *job, int width,
-                                  bool right_justify, char *suffix);
+int _print_js_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_js_priority_weighted(priority_factors_object_t *job, int width,
-                                bool right_justify, char *suffix);
+int _print_js_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_part_priority_normalized(priority_factors_object_t *job, int width,
-                                    bool right_justify, char *suffix);
+int _print_part_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_part_priority_weighted(priority_factors_object_t *job, int width,
-                                  bool right_justify, char *suffix);
+int _print_part_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_partition(priority_factors_object_t *job, int width,
-                     bool right_justify, char *suffix);
+int _print_partition(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_qos_priority_normalized(priority_factors_object_t *job, int width,
-                                   bool right_justify, char *suffix);
+int _print_qos_priority_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_qos_priority_weighted(priority_factors_object_t *job, int width,
-                                 bool right_justify, char *suffix);
+int _print_qos_priority_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_site_priority(priority_factors_object_t *job, int width,
-                         bool right, char *suffix);
+int _print_site_priority(priority_factors_object_t *job, int width, bool right, char *suffix);
 
-int _print_job_nice(priority_factors_object_t *job, int width,
-                    bool right_justify, char *suffix);
+int _print_job_nice(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_job_user_name(priority_factors_object_t *job, int width,
-                         bool right_justify, char *suffix);
+int _print_job_user_name(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_tres_normalized(priority_factors_object_t *job, int width,
-                           bool right_justify, char *suffix);
+int _print_tres_normalized(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
-int _print_tres_weighted(priority_factors_object_t *job, int width,
-                         bool right_justify, char *suffix);
+int _print_tres_weighted(priority_factors_object_t *job, int width, bool right_justify, char *suffix);
 
 #endif

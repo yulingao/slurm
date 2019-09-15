@@ -70,15 +70,9 @@ static int _server_conn_read(eio_obj_t *obj, List objs);
 
 static int _timer_conn_read(eio_obj_t *obj, List objs);
 
-static struct io_operations srv_ops = {
-        .readable = &_conn_readable,
-        .handle_read = &_server_conn_read
-};
+static struct io_operations srv_ops = {.readable = &_conn_readable, .handle_read = &_server_conn_read};
 
-static struct io_operations to_ops = {
-        .readable = &_conn_readable,
-        .handle_read = &_timer_conn_read
-};
+static struct io_operations to_ops = {.readable = &_conn_readable, .handle_read = &_timer_conn_read};
 
 static bool _conn_readable(eio_obj_t *obj) {
     if (obj->shutdown == true) {
@@ -104,9 +98,7 @@ static int _server_conn_read(eio_obj_t *obj, List objs) {
             if (shutdown) {
                 obj->shutdown = true;
                 if (shutdown < 0) {
-                    PMIXP_ERROR_NO(shutdown,
-                                   "sd=%d failure",
-                                   obj->fd);
+                    PMIXP_ERROR_NO(shutdown, "sd=%d failure", obj->fd);
                 }
             }
             return 0;
@@ -120,19 +112,16 @@ static int _server_conn_read(eio_obj_t *obj, List objs) {
             if ((errno == ECONNABORTED) || (errno == EWOULDBLOCK)) {
                 return 0;
             }
-            PMIXP_ERROR_STD("accept()ing connection sd=%d",
-                            obj->fd);
+            PMIXP_ERROR_STD("accept()ing connection sd=%d", obj->fd);
             return 0;
         }
 
         if (pmixp_info_srv_usock_fd() == obj->fd) {
-            PMIXP_DEBUG("Slurm PROTO: accepted connection: sd=%d",
-                        fd);
+            PMIXP_DEBUG("Slurm PROTO: accepted connection: sd=%d", fd);
             /* read command from socket and handle it */
             pmixp_server_slurm_conn(fd);
         } else if (pmixp_dconn_poll_fd() == obj->fd) {
-            PMIXP_DEBUG("DIRECT PROTO: accepted connection: sd=%d",
-                        fd);
+            PMIXP_DEBUG("DIRECT PROTO: accepted connection: sd=%d", fd);
             /* read command from socket and handle it */
             pmixp_server_direct_conn(fd);
 
@@ -225,8 +214,7 @@ static void *_agent_thread(void *unused) {
 
     _io_handle = eio_handle_create(0);
 
-    obj = eio_obj_create(pmixp_info_srv_usock_fd(), &srv_ops,
-                         (void *) (-1));
+    obj = eio_obj_create(pmixp_info_srv_usock_fd(), &srv_ops, (void *) (-1));
     eio_new_initial_obj(_io_handle, obj);
 
     obj = eio_obj_create(timer_data.work_in, &to_ops, (void *) (-1));
@@ -235,8 +223,7 @@ static void *_agent_thread(void *unused) {
     pmixp_info_io_set(_io_handle);
 
     if (PMIXP_DCONN_PROGRESS_SW == pmixp_dconn_progress_type()) {
-        obj = eio_obj_create(pmixp_dconn_poll_fd(), &srv_ops,
-                             (void *) (-1));
+        obj = eio_obj_create(pmixp_dconn_poll_fd(), &srv_ops, (void *) (-1));
         eio_new_initial_obj(_io_handle, obj);
     } else {
         pmixp_dconn_regio(_io_handle);
@@ -318,13 +305,11 @@ int pmixp_agent_start(void) {
         pmixp_server_run_cperf();
     }
 
-    PMIXP_DEBUG("agent thread started: tid = %lu",
-                (unsigned long) _agent_tid);
+    PMIXP_DEBUG("agent thread started: tid = %lu", (unsigned long) _agent_tid);
 
     slurm_thread_create(&_timer_tid, _pmix_timer_thread, NULL);
 
-    PMIXP_DEBUG("timer thread started: tid = %lu",
-                (unsigned long) _timer_tid);
+    PMIXP_DEBUG("timer thread started: tid = %lu", (unsigned long) _timer_tid);
 
     slurm_mutex_unlock(&agent_mutex);
     return SLURM_SUCCESS;

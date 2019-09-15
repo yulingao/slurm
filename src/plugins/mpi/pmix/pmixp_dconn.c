@@ -61,8 +61,7 @@ int pmixp_dconn_init(int node_cnt, pmixp_p2p_data_t direct_hdr) {
     } else
 #endif
     {
-        _poll_fd = pmixp_dconn_tcp_prepare(&_pmixp_dconn_h,
-                                           &ep_data, &ep_len);
+        _poll_fd = pmixp_dconn_tcp_prepare(&_pmixp_dconn_h, &ep_data, &ep_len);
         _progress_type = PMIXP_DCONN_PROGRESS_SW;
         _conn_type = PMIXP_DCONN_CONN_TYPE_TWOSIDE;
     }
@@ -107,8 +106,7 @@ void pmixp_dconn_fini() {
     _pmixp_dconn_conn_cnt = 0;
 }
 
-int pmixp_dconn_connect_do(pmixp_dconn_t *dconn, void *ep_data,
-                           size_t ep_len, void *init_msg) {
+int pmixp_dconn_connect_do(pmixp_dconn_t *dconn, void *ep_data, size_t ep_len, void *init_msg) {
     return _pmixp_dconn_h.connect(dconn->priv, ep_data, ep_len, init_msg);
 }
 

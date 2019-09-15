@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -18,9 +17,7 @@
  * srun -n8 -m cyclic ./testpmixring
  */
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int spawned, size, rank, appnum;
     struct timeval tv, tv2;
     int ring_rank, ring_size;
@@ -46,15 +43,13 @@ main(int argc, char **argv)
     snprintf(val, sizeof(val), "pmi_rank=%d", rank);
     PMIX_Ring(val, &ring_rank, &ring_size, left, right, 128);
 
-    printf("pmi_rank:%d ring_rank:%d ring_size:%d left:%s mine:%s right:%s\n",
-           rank, ring_rank, ring_size, left, val, right);
+    printf("pmi_rank:%d ring_rank:%d ring_size:%d left:%s mine:%s right:%s\n", rank, ring_rank, ring_size, left, val,
+           right);
 
     PMI2_Finalize();
 
     gettimeofday(&tv2, NULL);
-    printf("%f\n",
-           ((tv2.tv_sec - tv.tv_sec) * 1000.0
-            + (tv2.tv_usec - tv.tv_usec) / 1000.0));
+    printf("%f\n", ((tv2.tv_sec - tv.tv_sec) * 1000.0 + (tv2.tv_usec - tv.tv_usec) / 1000.0));
 
     return 0;
 }

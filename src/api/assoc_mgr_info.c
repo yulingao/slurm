@@ -51,9 +51,7 @@
  * Load requested controller assoc_mgr state.
  *
  */
-extern int
-slurm_load_assoc_mgr_info(assoc_mgr_info_request_msg_t *req,
-                          assoc_mgr_info_msg_t **resp) {
+extern int slurm_load_assoc_mgr_info(assoc_mgr_info_request_msg_t *req, assoc_mgr_info_msg_t **resp) {
     int cc;
     slurm_msg_t msg_request;
     slurm_msg_t msg_reply;
@@ -64,8 +62,7 @@ slurm_load_assoc_mgr_info(assoc_mgr_info_request_msg_t *req,
     msg_request.msg_type = REQUEST_ASSOC_MGR_INFO;
     msg_request.data = req;
 
-    cc = slurm_send_recv_controller_msg(&msg_request, &msg_reply,
-                                        working_cluster_rec);
+    cc = slurm_send_recv_controller_msg(&msg_request, &msg_reply, working_cluster_rec);
     if (cc < 0)
         return SLURM_ERROR;
 

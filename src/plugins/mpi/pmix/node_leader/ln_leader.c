@@ -96,8 +96,7 @@ int prepare_srv_socket(char *path) {
 
     if (strlen(path) >= sizeof(sa.sun_path)) {
         /*PMIXP_ERROR_STD*/
-        printf("UNIX socket path is too long: %lu, max %lu",
-               (unsigned long) strlen(path),
+        printf("UNIX socket path is too long: %lu, max %lu", (unsigned long) strlen(path),
                (unsigned long) sizeof(sa.sun_path) - 1);
         return SLURM_ERROR;
     }
@@ -107,8 +106,7 @@ int prepare_srv_socket(char *path) {
         /* remove old file */
         if (0 != unlink(path)) {
             /*PMIXP_ERROR_STD*/
-            printf("Cannot delete outdated socket fine: %s",
-                   path);
+            printf("Cannot delete outdated socket fine: %s", path);
             return SLURM_ERROR;
         }
     }
@@ -148,8 +146,7 @@ int connect_to_server(char *path) {
 
     if (strlen(path) >= sizeof(sa.sun_path)) {
         /*PMIXP_ERROR_STD*/
-        printf("UNIX socket path is too long: %lu, max %lu",
-               (unsigned long) strlen(path),
+        printf("UNIX socket path is too long: %lu, max %lu", (unsigned long) strlen(path),
                (unsigned long) sizeof(sa.sun_path) - 1);
         return -1;
     }
@@ -186,12 +183,10 @@ void service_requests(int fd) {
             local_records_t rec;
             int ret = read(cfd, &rec, sizeof(rec));
             if (ret != sizeof(rec)) {
-                fprintf("%s:%d: read mismatch: %d vs %d\n",
-                        __FILE__, __LINE__, ret, sizeof(rec));
+                fprintf("%s:%d: read mismatch: %d vs %d\n", __FILE__, __LINE__, ret, sizeof(rec));
                 exit(0);
             }
-            fprintf(stderr, "New client connected: jobid=%d, stepid=%d, fd = %d\n",
-                    rec.jobid, rec.stepid, fd);
+            fprintf(stderr, "New client connected: jobid=%d, stepid=%d, fd = %d\n", rec.jobid, rec.stepid, fd);
         }
     }
 }

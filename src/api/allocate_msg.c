@@ -72,15 +72,10 @@ static void _handle_msg(void *arg, slurm_msg_t *msg);
 
 static pthread_mutex_t msg_thr_start_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t msg_thr_start_cond = PTHREAD_COND_INITIALIZER;
-static struct io_operations message_socket_ops = {
-        .readable = &eio_message_socket_readable,
-        .handle_read = &eio_message_socket_accept,
-        .handle_msg = &_handle_msg
-};
+static struct io_operations message_socket_ops = {.readable = &eio_message_socket_readable, .handle_read = &eio_message_socket_accept, .handle_msg = &_handle_msg};
 
 static void *_msg_thr_internal(void *arg) {
-    int signals[] = {SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGTERM,
-                     SIGUSR1, SIGUSR2, 0};
+    int signals[] = {SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2, 0};
 
     debug("Entering _msg_thr_internal");
     xsignal_block(signals);
@@ -93,9 +88,8 @@ static void *_msg_thr_internal(void *arg) {
     return NULL;
 }
 
-extern allocation_msg_thread_t *slurm_allocation_msg_thr_create(
-        uint16_t *port,
-        const slurm_allocation_callbacks_t *callbacks) {
+extern allocation_msg_thread_t *
+slurm_allocation_msg_thr_create(uint16_t *port, const slurm_allocation_callbacks_t *callbacks) {
     int sock = -1;
     eio_obj_t *obj;
     struct allocation_msg_thread *msg_thr = NULL;
@@ -106,18 +100,15 @@ extern allocation_msg_thread_t *slurm_allocation_msg_thr_create(
     debug("Entering slurm_allocation_msg_thr_create()");
 
     slurm_uid = (uid_t) slurm_get_slurm_user_id();
-    msg_thr = (struct allocation_msg_thread *) xmalloc(
-            sizeof(struct allocation_msg_thread));
+    msg_thr = (struct allocation_msg_thread *) xmalloc(sizeof(struct allocation_msg_thread));
 
     /* Initialize the callback pointers */
     if (callbacks != NULL) {
         /* copy the user specified callback pointers */
-        memcpy(&(msg_thr->callback), callbacks,
-               sizeof(slurm_allocation_callbacks_t));
+        memcpy(&(msg_thr->callback), callbacks, sizeof(slurm_allocation_callbacks_t));
     } else {
         /* set all callbacks to NULL */
-        memset(&(msg_thr->callback), 0,
-               sizeof(slurm_allocation_callbacks_t));
+        memset(&(msg_thr->callback), 0, sizeof(slurm_allocation_callbacks_t));
     }
 
     ports = slurm_get_srun_port_range();
@@ -151,10 +142,8 @@ extern allocation_msg_thread_t *slurm_allocation_msg_thr_create(
     return (allocation_msg_thread_t *) msg_thr;
 }
 
-extern void slurm_allocation_msg_thr_destroy(
-        allocation_msg_thread_t *arg) {
-    struct allocation_msg_thread *msg_thr =
-            (struct allocation_msg_thread *) arg;
+extern void slurm_allocation_msg_thr_destroy(allocation_msg_thread_t *arg) {
+    struct allocation_msg_thread *msg_thr = (struct allocation_msg_thread *) arg;
     if (msg_thr == NULL)
         return;
 
@@ -165,8 +154,7 @@ extern void slurm_allocation_msg_thr_destroy(
     xfree(msg_thr);
 }
 
-static void _handle_node_fail(struct allocation_msg_thread *msg_thr,
-                              slurm_msg_t *msg) {
+static void _handle_node_fail(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     srun_node_fail_msg_t *nf = (srun_node_fail_msg_t *) msg->data;
 
     if (msg_thr->callback.node_fail != NULL)
@@ -178,8 +166,7 @@ static void _handle_node_fail(struct allocation_msg_thread *msg_thr,
  * Job will be killed shortly after timeout.
  * This RPC can arrive multiple times with the same or updated timeouts.
  */
-static void _handle_timeout(struct allocation_msg_thread *msg_thr,
-                            slurm_msg_t *msg) {
+static void _handle_timeout(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     srun_timeout_msg_t *to = (srun_timeout_msg_t *) msg->data;
 
     debug3("received timeout message");
@@ -188,8 +175,7 @@ static void _handle_timeout(struct allocation_msg_thread *msg_thr,
         (msg_thr->callback.timeout)(to);
 }
 
-static void _handle_user_msg(struct allocation_msg_thread *msg_thr,
-                             slurm_msg_t *msg) {
+static void _handle_user_msg(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     srun_user_msg_t *um = (srun_user_msg_t *) msg->data;
     debug3("received user message");
 
@@ -197,8 +183,7 @@ static void _handle_user_msg(struct allocation_msg_thread *msg_thr,
         (msg_thr->callback.user_msg)(um);
 }
 
-static void _handle_ping(struct allocation_msg_thread *msg_thr,
-                         slurm_msg_t *msg) {
+static void _handle_ping(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     srun_ping_msg_t *ping = (srun_ping_msg_t *) msg->data;
     debug3("received ping message");
     slurm_send_rc_msg(msg, SLURM_SUCCESS);
@@ -207,8 +192,7 @@ static void _handle_ping(struct allocation_msg_thread *msg_thr,
         (msg_thr->callback.ping)(ping);
 }
 
-static void _handle_job_complete(struct allocation_msg_thread *msg_thr,
-                                 slurm_msg_t *msg) {
+static void _handle_job_complete(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     srun_job_complete_msg_t *comp = (srun_job_complete_msg_t *) msg->data;
     debug3("job complete message received");
 
@@ -216,8 +200,7 @@ static void _handle_job_complete(struct allocation_msg_thread *msg_thr,
         (msg_thr->callback.job_complete)(comp);
 }
 
-static void _handle_suspend(struct allocation_msg_thread *msg_thr,
-                            slurm_msg_t *msg) {
+static void _handle_suspend(struct allocation_msg_thread *msg_thr, slurm_msg_t *msg) {
     suspend_msg_t *sus_msg = (suspend_msg_t *) msg->data;
     debug3("received suspend message");
 
@@ -225,8 +208,7 @@ static void _handle_suspend(struct allocation_msg_thread *msg_thr,
         (msg_thr->callback.job_suspend)(sus_msg);
 }
 
-static void _net_forward(struct allocation_msg_thread *msg_thr,
-                         slurm_msg_t *forward_msg) {
+static void _net_forward(struct allocation_msg_thread *msg_thr, slurm_msg_t *forward_msg) {
     net_forward_msg_t *msg = (net_forward_msg_t *) forward_msg->data;
     int *local, *remote;
     eio_obj_t *e1, *e2;
@@ -242,8 +224,7 @@ static void _net_forward(struct allocation_msg_thread *msg_thr,
         slurm_set_addr(&local_addr, msg->port, msg->target);
         *local = slurm_open_msg_conn(&local_addr);
         if (*local == -1) {
-            error("%s: failed to open x11 port `%s:%d`: %m",
-                  __func__, msg->target, msg->port);
+            error("%s: failed to open x11 port `%s:%d`: %m", __func__, msg->target, msg->port);
             goto error;
         }
     } else if (msg->target) {
@@ -256,8 +237,7 @@ static void _net_forward(struct allocation_msg_thread *msg_thr,
         len = strlen(addr.sun_path) + 1 + sizeof(addr.sun_family);
         if (((*local = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) ||
             ((connect(*local, (struct sockaddr *) &addr, len)) < 0)) {
-            error("%s: failed to open x11 display on `%s`: %m",
-                  __func__, msg->target);
+            error("%s: failed to open x11 display on `%s`: %m", __func__, msg->target);
             goto error;
         }
     }
@@ -286,18 +266,15 @@ static void _net_forward(struct allocation_msg_thread *msg_thr,
     xfree(remote);
 }
 
-static void
-_handle_msg(void *arg, slurm_msg_t *msg) {
-    struct allocation_msg_thread *msg_thr =
-            (struct allocation_msg_thread *) arg;
+static void _handle_msg(void *arg, slurm_msg_t *msg) {
+    struct allocation_msg_thread *msg_thr = (struct allocation_msg_thread *) arg;
     uid_t req_uid;
     uid_t uid = getuid();
 
     req_uid = g_slurm_auth_get_uid(msg->auth_cred);
 
     if ((req_uid != slurm_uid) && (req_uid != 0) && (req_uid != uid)) {
-        error("Security violation, slurm message from uid %u",
-              (unsigned int) req_uid);
+        error("Security violation, slurm message from uid %u", (unsigned int) req_uid);
         return;
     }
 
@@ -325,8 +302,7 @@ _handle_msg(void *arg, slurm_msg_t *msg) {
             _net_forward(msg_thr, msg);
             break;
         default:
-            error("%s: received spurious message type: %u",
-                  __func__, msg->msg_type);
+            error("%s: received spurious message type: %u", __func__, msg->msg_type);
             break;
     }
     return;

@@ -29,18 +29,17 @@
 
 shared int inx[THREADS];
 
-int main(int argc, char * argv[])
-{
-	printf("Hello from %d of %d\n", MYTHREAD, THREADS);
-	inx[MYTHREAD] = MYTHREAD;
-	upc_barrier;
-	if (MYTHREAD == 0) {
-		int i, total = 0;
-		for (i = 0; i < THREADS; i++)
-			total += inx[i];
-		/* Make sure "Total" message is last for Expect parsing*/
-		sleep(1);
-		printf("Total is %d\n", total);
-	}
-	return 0;
+int main(int argc, char *argv[]) {
+    printf("Hello from %d of %d\n", MYTHREAD, THREADS);
+    inx[MYTHREAD] = MYTHREAD;
+    upc_barrier;
+    if (MYTHREAD == 0) {
+        int i, total = 0;
+        for (i = 0; i < THREADS; i++)
+            total += inx[i];
+        /* Make sure "Total" message is last for Expect parsing*/
+        sleep(1);
+        printf("Total is %d\n", total);
+    }
+    return 0;
 }

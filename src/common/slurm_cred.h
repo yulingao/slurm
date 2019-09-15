@@ -194,8 +194,7 @@ int slurm_cred_fini(void);
  *
  * Returns NULL on failure.
  */
-slurm_cred_t *slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg,
-                                uint16_t protocol_version);
+slurm_cred_t *slurm_cred_create(slurm_cred_ctx_t ctx, slurm_cred_arg_t *arg, uint16_t protocol_version);
 
 /*
  * Copy a slurm credential.
@@ -237,8 +236,7 @@ extern void *slurm_cred_get_arg(slurm_cred_t *cred, int cred_arg_type);
  *   - Credential has not been revoked
  *   - Credential has not been replayed
  */
-int slurm_cred_verify(slurm_cred_ctx_t ctx, slurm_cred_t *cred,
-                      slurm_cred_arg_t *arg, uint16_t protocol_version);
+int slurm_cred_verify(slurm_cred_ctx_t ctx, slurm_cred_t *cred, slurm_cred_arg_t *arg, uint16_t protocol_version);
 
 /*
  * Rewind the last play of credential cred. This allows the credential
@@ -261,8 +259,7 @@ void slurm_cred_handle_reissue(slurm_cred_ctx_t ctx, slurm_cred_t *cred);
  *           (local time from slurmctld server)
  * start_time IN - job start time, used to recongnize job requeue
  */
-int slurm_cred_revoke(slurm_cred_ctx_t ctx, uint32_t jobid, time_t time,
-                      time_t start_time);
+int slurm_cred_revoke(slurm_cred_ctx_t ctx, uint32_t jobid, time_t time, time_t start_time);
 
 /*
  * Report if a all credentials for a give job id have been
@@ -322,8 +319,7 @@ slurm_cred_t *slurm_cred_unpack(Buf buffer, uint16_t protocol_version);
  * Get a pointer to the slurm credential signature
  * (used by slurm IO connections to verify connecting agent)
  */
-int slurm_cred_get_signature(slurm_cred_t *cred, char **datap,
-                             uint32_t *len);
+int slurm_cred_get_signature(slurm_cred_t *cred, char **datap, uint32_t *len);
 
 /*
  * Retrieve the set of cores that were allocated to the job and step then
@@ -332,9 +328,9 @@ int slurm_cred_get_signature(slurm_cred_t *cred, char **datap,
  *
  * NOTE: caller must xfree the returned strings.
  */
-void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
-                        char **job_alloc_cores, char **step_alloc_cores,
-                        uint64_t *job_mem_limit, uint64_t *step_mem_limit);
+void
+format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus, char **job_alloc_cores, char **step_alloc_cores,
+                   uint64_t *job_mem_limit, uint64_t *step_mem_limit);
 
 /*
  * Retrieve the job and step generic resources (gres) allocate to this job
@@ -342,8 +338,7 @@ void format_core_allocs(slurm_cred_t *cred, char *node_name, uint16_t cpus,
  *
  * NOTE: Caller must destroy the returned lists
  */
-extern void get_cred_gres(slurm_cred_t *cred, char *node_name,
-                          List *job_gres_list, List *step_gres_list);
+extern void get_cred_gres(slurm_cred_t *cred, char *node_name, List *job_gres_list, List *step_gres_list);
 
 /*
  * Print a slurm job credential using the info() call
@@ -368,19 +363,14 @@ typedef struct {
     char *nodes;
 } sbcast_cred_arg_t;
 
-sbcast_cred_t *create_sbcast_cred(slurm_cred_ctx_t ctx,
-                                  sbcast_cred_arg_t *arg,
-                                  uint16_t protocol_version);
+sbcast_cred_t *create_sbcast_cred(slurm_cred_ctx_t ctx, sbcast_cred_arg_t *arg, uint16_t protocol_version);
 
 void delete_sbcast_cred(sbcast_cred_t *sbcast_cred);
 
-sbcast_cred_arg_t *extract_sbcast_cred(slurm_cred_ctx_t ctx,
-                                       sbcast_cred_t *sbcast_cred,
-                                       uint16_t block_no,
-                                       uint16_t protocol_version);
+sbcast_cred_arg_t *
+extract_sbcast_cred(slurm_cred_ctx_t ctx, sbcast_cred_t *sbcast_cred, uint16_t block_no, uint16_t protocol_version);
 
-void pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer,
-                      uint16_t protocol_Version);
+void pack_sbcast_cred(sbcast_cred_t *sbcast_cred, Buf buffer, uint16_t protocol_Version);
 
 sbcast_cred_t *unpack_sbcast_cred(Buf buffer, uint16_t protocol_version);
 

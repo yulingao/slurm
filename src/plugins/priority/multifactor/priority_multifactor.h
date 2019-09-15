@@ -53,14 +53,11 @@
 
 extern void priority_p_set_assoc_usage(slurmdb_assoc_rec_t *assoc);
 
-extern double priority_p_calc_fs_factor(
-        long double usage_efctv, long double shares_norm);
+extern double priority_p_calc_fs_factor(long double usage_efctv, long double shares_norm);
 
-extern bool decay_apply_new_usage(
-        struct job_record *job_ptr, time_t *start_time_ptr);
+extern bool decay_apply_new_usage(struct job_record *job_ptr, time_t *start_time_ptr);
 
-extern int decay_apply_weighted_factors(
-        struct job_record *job_ptr, time_t *start_time_ptr);
+extern int decay_apply_weighted_factors(struct job_record *job_ptr, time_t *start_time_ptr);
 
 extern void set_assoc_usage_norm(slurmdb_assoc_rec_t *assoc);
 

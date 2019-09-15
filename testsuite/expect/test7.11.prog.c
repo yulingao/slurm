@@ -38,133 +38,108 @@
 /*
  * All spank plugins must define this macro for the Slurm plugin loader.
  */
-SPANK_PLUGIN(test_suite, 1);
+SPANK_PLUGIN(test_suite,
+1);
 
-static int opt_arg_srun   = 0;
+static int opt_arg_srun = 0;
 static int opt_arg_sbatch = 0;
 static char *opt_out_file = NULL;
 
 static int _test_opt_process_srun(int val, const char *optarg, int remote);
+
 static int _test_opt_process_sbatch(int val, const char *optarg, int remote);
 
 /*
  *  Provide a --test_suite=[opt_arg] option to srun:
  */
-struct spank_option spank_options[] =
-{
-	{ "test_suite_srun",
-	  "[opt_arg_srun]",
-	  "Component of slurm test suite.",
-	  2,
-	  0,
-	  _test_opt_process_srun
-	},
-	SPANK_OPTIONS_TABLE_END
-};
-struct spank_option spank_options_reg[] =
-{
-	{ "test_suite_sbatch",
-	  "[opt_arg_sbatch]",
-	  "Registered component of slurm test suite.",
-	  2,
-	  0,
-	  _test_opt_process_sbatch
-	},
-	SPANK_OPTIONS_TABLE_END
-};
+struct spank_option spank_options[] = {
+        {"test_suite_srun", "[opt_arg_srun]", "Component of slurm test suite.", 2, 0, _test_opt_process_srun},
+        SPANK_OPTIONS_TABLE_END};
+struct spank_option spank_options_reg[] = {
+        {"test_suite_sbatch", "[opt_arg_sbatch]", "Registered component of slurm test suite.", 2, 0,
+         _test_opt_process_sbatch}, SPANK_OPTIONS_TABLE_END};
 
-static int _test_opt_process_srun(int val, const char *optarg, int remote)
-{
-	opt_arg_srun = atoi(optarg);
-	if (!remote)
-		slurm_info("%s: opt_arg_srun=%d", __func__, opt_arg_srun);
+static int _test_opt_process_srun(int val, const char *optarg, int remote) {
+    opt_arg_srun = atoi(optarg);
+    if (!remote)
+        slurm_info("%s: opt_arg_srun=%d", __func__, opt_arg_srun);
 
-	return (0);
+    return (0);
 }
 
-static int _test_opt_process_sbatch(int val, const char *optarg, int remote)
-{
-	opt_arg_sbatch = atoi(optarg);
-	if (!remote)
-		slurm_info("%s: opt_arg_sbatch=%d", __func__, opt_arg_sbatch);
+static int _test_opt_process_sbatch(int val, const char *optarg, int remote) {
+    opt_arg_sbatch = atoi(optarg);
+    if (!remote)
+        slurm_info("%s: opt_arg_sbatch=%d", __func__, opt_arg_sbatch);
 
-	return (0);
+    return (0);
 }
 
 /*  Called from both srun and slurmd */
-int slurm_spank_init(spank_t sp, int ac, char **av)
-{
-	spank_context_t context;
+int slurm_spank_init(spank_t sp, int ac, char **av) {
+    spank_context_t context;
 
-	context = spank_context();
-	if ((context != S_CTX_LOCAL) && (context != S_CTX_REMOTE) &&
-	    (context != S_CTX_ALLOCATOR))
-		slurm_error("spank_context error");
-	if (SPANK_JOB_ENV_TESTS &&
-	    ((context == S_CTX_LOCAL) || (context == S_CTX_ALLOCATOR))) {
-		/* Testing logic for spank_job_control_env options */
-		char test_value[200];
-		spank_err_t err;
-		spank_job_control_setenv(sp, "DUMMY", "DV",   1);
-		spank_job_control_setenv(sp, "NAME", "VALUE", 1);
-		spank_job_control_setenv(sp, "name", "value", 1);
+    context = spank_context();
+    if ((context != S_CTX_LOCAL) && (context != S_CTX_REMOTE) && (context != S_CTX_ALLOCATOR))
+        slurm_error("spank_context error");
+    if (SPANK_JOB_ENV_TESTS && ((context == S_CTX_LOCAL) || (context == S_CTX_ALLOCATOR))) {
+        /* Testing logic for spank_job_control_env options */
+        char test_value[200];
+        spank_err_t err;
+        spank_job_control_setenv(sp, "DUMMY", "DV", 1);
+        spank_job_control_setenv(sp, "NAME", "VALUE", 1);
+        spank_job_control_setenv(sp, "name", "value", 1);
 /*		spank_job_control_setenv(sp, "PATH", "/", 1); */
-		memset(test_value, 0, sizeof(test_value));
-		err = spank_job_control_getenv(
-			sp, "NAME", test_value, sizeof(test_value));
-		if (err != ESPANK_SUCCESS)
-			slurm_error("spank_get_job_env error, NULL");
-		else if (strcmp(test_value, "VALUE"))
-			slurm_error("spank_get_job_env error, bad value");
-		spank_job_control_unsetenv(sp, "DUMMY");
-	}
+        memset(test_value, 0, sizeof(test_value));
+        err = spank_job_control_getenv(sp, "NAME", test_value, sizeof(test_value));
+        if (err != ESPANK_SUCCESS)
+            slurm_error("spank_get_job_env error, NULL");
+        else if (strcmp(test_value, "VALUE"))
+            slurm_error("spank_get_job_env error, bad value");
+        spank_job_control_unsetenv(sp, "DUMMY");
+    }
 
-	if (spank_option_register(sp, spank_options_reg) != ESPANK_SUCCESS)
-		slurm_error("spank_option_register error");
-	if (spank_remote(sp) && (ac == 1))
-		opt_out_file = strdup(av[0]);
+    if (spank_option_register(sp, spank_options_reg) != ESPANK_SUCCESS)
+        slurm_error("spank_option_register error");
+    if (spank_remote(sp) && (ac == 1))
+        opt_out_file = strdup(av[0]);
 
-	return (0);
+    return (0);
 }
 
 /* Called from both srun and slurmd, not tested here
 int slurm_spank_init_post_opt(spank_t sp, int ac, char **av) */
 
 /* Called from srun only */
-int slurm_spank_local_user_init(spank_t sp, int ac, char **av)
-{
-	slurm_info("slurm_spank_local_user_init");
+int slurm_spank_local_user_init(spank_t sp, int ac, char **av) {
+    slurm_info("slurm_spank_local_user_init");
 
-	return (0);
+    return (0);
 }
 
 /* Called from slurmd only */
-int slurm_spank_task_init(spank_t sp, int ac, char **av)
-{
-	uid_t my_uid;
-	int argc, i;
-	char **argv;
+int slurm_spank_task_init(spank_t sp, int ac, char **av) {
+    uid_t my_uid;
+    int argc, i;
+    char **argv;
 
-	if (opt_out_file) {
-		FILE *fp = NULL;
-		for (i = 0; (i < 10) && !fp; i++)
-			fp = fopen(opt_out_file, "a");
-		if (!fp)
-			return -1;
-		fprintf(fp, "%s: opt_arg_sbatch=%d opt_arg_srun=%d\n",
-			__func__, opt_arg_sbatch, opt_arg_srun);
-		if (spank_get_item(sp, S_JOB_UID, &my_uid) == ESPANK_SUCCESS)
-			fprintf(fp, "spank_get_item: my_uid=%d\n", my_uid);
-                if (spank_get_item(sp, S_JOB_ARGV, &argc, &argv) ==
-		    ESPANK_SUCCESS) {
-			for (i = 0; i < argc; i++) {
-				fprintf(fp, "spank_get_item: argv[%d]=%s\n",
-					i, argv[i]);
-			}
-		}
-		fclose(fp);
-	}
-	return 0;
+    if (opt_out_file) {
+        FILE *fp = NULL;
+        for (i = 0; (i < 10) && !fp; i++)
+            fp = fopen(opt_out_file, "a");
+        if (!fp)
+            return -1;
+        fprintf(fp, "%s: opt_arg_sbatch=%d opt_arg_srun=%d\n", __func__, opt_arg_sbatch, opt_arg_srun);
+        if (spank_get_item(sp, S_JOB_UID, &my_uid) == ESPANK_SUCCESS)
+            fprintf(fp, "spank_get_item: my_uid=%d\n", my_uid);
+        if (spank_get_item(sp, S_JOB_ARGV, &argc, &argv) == ESPANK_SUCCESS) {
+            for (i = 0; i < argc; i++) {
+                fprintf(fp, "spank_get_item: argv[%d]=%s\n", i, argv[i]);
+            }
+        }
+        fclose(fp);
+    }
+    return 0;
 }
 
 /* Called from slurmd only, not tested here
@@ -174,21 +149,18 @@ int slurm_spank_task_post_fork(spank_t sp, int ac, char **av) */
 int slurm_spank_task_exit(spank_t sp, int ac, char **av) */
 
 /* Called from both srun and slurmd */
-int slurm_spank_exit(spank_t sp, int ac, char **av)
-{
-	int i;
+int slurm_spank_exit(spank_t sp, int ac, char **av) {
+    int i;
 
-	if (opt_out_file) {
-		FILE *fp = NULL;
-		for (i = 0; (i < 10) && !fp; i++)
-			fp = fopen(opt_out_file, "a");
-		if (!fp)
-			return -1;
-		fprintf(fp, "%s: opt_arg_sbatch=%d opt_arg_srun=%d\n",
-			__func__, opt_arg_sbatch, opt_arg_srun);
-		fclose(fp);
-	} else
-		slurm_info("%s: opt_arg_sbatch=%d opt_arg_srun=%d",
-			   __func__, opt_arg_sbatch, opt_arg_srun);
-	return 0;
+    if (opt_out_file) {
+        FILE *fp = NULL;
+        for (i = 0; (i < 10) && !fp; i++)
+            fp = fopen(opt_out_file, "a");
+        if (!fp)
+            return -1;
+        fprintf(fp, "%s: opt_arg_sbatch=%d opt_arg_srun=%d\n", __func__, opt_arg_sbatch, opt_arg_srun);
+        fclose(fp);
+    } else
+        slurm_info("%s: opt_arg_sbatch=%d opt_arg_srun=%d", __func__, opt_arg_sbatch, opt_arg_srun);
+    return 0;
 }

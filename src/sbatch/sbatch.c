@@ -168,12 +168,9 @@ int main(int argc, char **argv) {
     {
         bool more_packs = false;
         init_envs(&pack_env);
-        process_options_second_pass(pack_argc, pack_argv,
-                                    &pack_argc_off, pack_inx,
-                                    &more_packs, script_name ? xbasename(script_name) : "stdin",
-                                    script_body, script_size);
-        if ((pack_argc_off >= 0) && (pack_argc_off < pack_argc) &&
-            !xstrcmp(pack_argv[pack_argc_off], ":")) {
+        process_options_second_pass(pack_argc, pack_argv, &pack_argc_off, pack_inx, &more_packs,
+                                    script_name ? xbasename(script_name) : "stdin", script_body, script_size);
+        if ((pack_argc_off >= 0) && (pack_argc_off < pack_argc) && !xstrcmp(pack_argv[pack_argc_off], ":")) {
             /* pack_argv[0] moves from "salloc" to ":" */
             pack_argc -= pack_argc_off;
             pack_argv += pack_argc_off;
@@ -288,11 +285,9 @@ int main(int argc, char **argv) {
      */
     if (opt.clusters) {
         if (job_req_list) {
-            rc = slurmdb_get_first_pack_cluster(job_req_list,
-                                                opt.clusters, &working_cluster_rec);
+            rc = slurmdb_get_first_pack_cluster(job_req_list, opt.clusters, &working_cluster_rec);
         } else {
-            rc = slurmdb_get_first_avail_cluster(desc,
-                                                 opt.clusters, &working_cluster_rec);
+            rc = slurmdb_get_first_avail_cluster(desc, opt.clusters, &working_cluster_rec);
         }
         if (rc != SLURM_SUCCESS) {
             print_db_notok(opt.clusters, 0);
@@ -367,8 +362,7 @@ int main(int argc, char **argv) {
         if (!sbopt.parsable) {
             printf("Submitted batch job %u", resp->job_id);
             if (working_cluster_rec)
-                printf(" on cluster %s",
-                       working_cluster_rec->name);
+                printf(" on cluster %s", working_cluster_rec->name);
             printf("\n");
         } else {
             printf("%u", resp->job_id);
@@ -446,9 +440,7 @@ static int _job_wait(uint32_t job_id) {
 
         rc = slurm_load_job(&resp, job_id, SHOW_ALL);
         if (rc == SLURM_SUCCESS) {
-            for (i = 0, job_ptr = resp->job_array;
-                 (i < resp->record_count) && complete;
-                 i++, job_ptr++) {
+            for (i = 0, job_ptr = resp->job_array; (i < resp->record_count) && complete; i++, job_ptr++) {
                 if (IS_JOB_FINISHED(job_ptr)) {
                     if (WIFEXITED(job_ptr->exit_code)) {
                         ec2 = WEXITSTATUS(job_ptr->exit_code);
@@ -461,8 +453,7 @@ static int _job_wait(uint32_t job_id) {
             }
             slurm_free_job_info_msg(resp);
         } else if (rc == ESLURM_INVALID_JOB_ID) {
-            error("Job %u no longer found and exit code not found",
-                  job_id);
+            error("Job %u no longer found and exit code not found", job_id);
         } else {
             complete = false;
             error("Currently unable to load job state information, retrying: %m");
@@ -494,10 +485,8 @@ static char *_find_quote_token(char *tmp, char *sep, char **last) {
                 quote_double--;
             else
                 quote_double++;
-        } else if (((start[i] == sep[0]) || (start[i] == '\0')) &&
-                   (quote_single == 0) && (quote_double == 0)) {
-            if (((start[0] == '\'') && (start[i - 1] == '\'')) ||
-                ((start[0] == '\"') && (start[i - 1] == '\"'))) {
+        } else if (((start[i] == sep[0]) || (start[i] == '\0')) && (quote_single == 0) && (quote_double == 0)) {
+            if (((start[0] == '\'') && (start[i - 1] == '\'')) || ((start[0] == '\"') && (start[i - 1] == '\"'))) {
                 start++;
                 i -= 2;
             }
@@ -508,8 +497,7 @@ static char *_find_quote_token(char *tmp, char *sep, char **last) {
             start[i] = '\0';
             return start;
         } else if (start[i] == '\0') {
-            error("Improperly formed environment variable (%s)",
-                  start);
+            error("Improperly formed environment variable (%s)", start);
             *last = &start[i];
             return start;
         }
@@ -530,25 +518,21 @@ static void _env_merge_filter(job_desc_msg_t *desc) {
     while (tok) {
 
         if (xstrcasecmp(tok, "ALL") == 0) {
-            env_array_merge(&desc->environment,
-                            (const char **) environ);
+            env_array_merge(&desc->environment, (const char **) environ);
             tok = _find_quote_token(NULL, ",", &last);
             continue;
         }
 
         if (strchr(tok, '=')) {
             save_env[0] = tok;
-            env_array_merge(&desc->environment,
-                            (const char **) save_env);
+            env_array_merge(&desc->environment, (const char **) save_env);
         } else {
             len = strlen(tok);
             for (i = 0; environ[i]; i++) {
-                if (xstrncmp(tok, environ[i], len) ||
-                    (environ[i][len] != '='))
+                if (xstrncmp(tok, environ[i], len) || (environ[i][len] != '='))
                     continue;
                 save_env[0] = environ[i];
-                env_array_merge(&desc->environment,
-                                (const char **) save_env);
+                env_array_merge(&desc->environment, (const char **) save_env);
                 break;
             }
         }
@@ -560,8 +544,7 @@ static void _env_merge_filter(job_desc_msg_t *desc) {
         if (xstrncmp("SLURM_", environ[i], 6))
             continue;
         save_env[0] = environ[i];
-        env_array_merge(&desc->environment,
-                        (const char **) save_env);
+        env_array_merge(&desc->environment, (const char **) save_env);
     }
 }
 
@@ -708,22 +691,18 @@ static int _fill_job_desc_from_opts(job_desc_msg_t *desc) {
         env_array_merge(&desc->environment, (const char **) environ);
     } else if (!xstrcasecmp(sbopt.export_env, "NONE")) {
         desc->environment = env_array_create();
-        env_array_merge_slurm(&desc->environment,
-                              (const char **) environ);
+        env_array_merge_slurm(&desc->environment, (const char **) environ);
         opt.get_user_env_time = 0;
     } else {
         _env_merge_filter(desc);
         opt.get_user_env_time = 0;
     }
     if (opt.get_user_env_time >= 0) {
-        env_array_overwrite(&desc->environment,
-                            "SLURM_GET_USER_ENV", "1");
+        env_array_overwrite(&desc->environment, "SLURM_GET_USER_ENV", "1");
     }
 
     if ((opt.distribution & SLURM_DIST_STATE_BASE) == SLURM_DIST_ARBITRARY) {
-        env_array_overwrite_fmt(&desc->environment,
-                                "SLURM_ARBITRARY_NODELIST",
-                                "%s", desc->req_nodes);
+        env_array_overwrite_fmt(&desc->environment, "SLURM_ARBITRARY_NODELIST", "%s", desc->req_nodes);
     }
 
     desc->env_size = envcount(desc->environment);
@@ -747,8 +726,7 @@ static int _fill_job_desc_from_opts(job_desc_msg_t *desc) {
 
     if (opt.spank_job_env_size) {
         desc->spank_job_env_size = opt.spank_job_env_size;
-        desc->spank_job_env =
-                xmalloc(sizeof(char *) * opt.spank_job_env_size);
+        desc->spank_job_env = xmalloc(sizeof(char *) * opt.spank_job_env_size);
         for (i = 0; i < opt.spank_job_env_size; i++)
             desc->spank_job_env[i] = xstrdup(opt.spank_job_env[i]);
     }
@@ -773,15 +751,13 @@ static int _fill_job_desc_from_opts(job_desc_msg_t *desc) {
     if (opt.gpu_bind)
         xstrfmtcat(opt.tres_bind, "gpu:%s", opt.gpu_bind);
     if (tres_bind_verify_cmdline(opt.tres_bind)) {
-        error("Invalid --tres-bind argument: %s. Ignored",
-              opt.tres_bind);
+        error("Invalid --tres-bind argument: %s. Ignored", opt.tres_bind);
         xfree(opt.tres_bind);
     }
     desc->tres_bind = xstrdup(opt.tres_bind);
     xfmt_tres_freq(&opt.tres_freq, "gpu", opt.gpu_freq);
     if (tres_freq_verify_cmdline(opt.tres_freq)) {
-        error("Invalid --tres-freq argument: %s. Ignored",
-              opt.tres_freq);
+        error("Invalid --tres-freq argument: %s. Ignored", opt.tres_freq);
         xfree(opt.tres_freq);
     }
     desc->tres_freq = xstrdup(opt.tres_freq);
@@ -824,8 +800,7 @@ static void _set_spank_env(void) {
 
     for (i = 0; i < opt.spank_job_env_size; i++) {
         if (setenvfs("SLURM_SPANK_%s", opt.spank_job_env[i]) < 0) {
-            error("unable to set %s in environment",
-                  opt.spank_job_env[i]);
+            error("unable to set %s in environment", opt.spank_job_env[i]);
         }
     }
 }
@@ -864,8 +839,7 @@ static int _set_umask_env(void) {
         umask(mask);
     }
 
-    sprintf(mask_char, "0%d%d%d",
-            ((mask >> 6) & 07), ((mask >> 3) & 07), mask & 07);
+    sprintf(mask_char, "0%d%d%d", ((mask >> 6) & 07), ((mask >> 3) & 07), mask & 07);
     if (setenvf(NULL, "SLURM_UMASK", "%s", mask_char) < 0) {
         error("unable to set SLURM_UMASK in environment");
         return SLURM_ERROR;

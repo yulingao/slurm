@@ -40,69 +40,65 @@
 
 #include "sstat.h"
 
-int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
-             uint32_t req_cpufreq_min, uint32_t req_cpufreq_max,
-             uint32_t req_cpufreq_gov,
-             uint16_t use_protocol_ver);
+int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist, uint32_t req_cpufreq_min, uint32_t req_cpufreq_max,
+             uint32_t req_cpufreq_gov, uint16_t use_protocol_ver);
 
 /*
  * Globals
  */
 sstat_parameters_t params;
-print_field_t fields[] = {
-        {10,  "AveCPU",              print_fields_str,  PRINT_AVECPU},
-        {10,  "AveCPUFreq",          print_fields_str,  PRINT_ACT_CPUFREQ},
-        {12,  "AveDiskRead",         print_fields_str,  PRINT_AVEDISKREAD},
-        {12,  "AveDiskWrite",        print_fields_str,  PRINT_AVEDISKWRITE},
-        {10,  "AvePages",            print_fields_str,  PRINT_AVEPAGES},
-        {10,  "AveRSS",              print_fields_str,  PRINT_AVERSS},
-        {10,  "AveVMSize",           print_fields_str,  PRINT_AVEVSIZE},
-        {14,  "ConsumedEnergy",      print_fields_str,  PRINT_CONSUMED_ENERGY},
-        {17,  "ConsumedEnergyRaw",   print_fields_uint64,
-                                                        PRINT_CONSUMED_ENERGY_RAW},
-        {-12, "JobID",               print_fields_str,  PRINT_JOBID},
-        {12,  "MaxDiskRead",         print_fields_str,  PRINT_MAXDISKREAD},
-        {15,  "MaxDiskReadNode",     print_fields_str,  PRINT_MAXDISKREADNODE},
-        {15,  "MaxDiskReadTask",     print_fields_uint, PRINT_MAXDISKREADTASK},
-        {12,  "MaxDiskWrite",        print_fields_str,  PRINT_MAXDISKWRITE},
-        {16,  "MaxDiskWriteNode",    print_fields_str,  PRINT_MAXDISKWRITENODE},
-        {16,  "MaxDiskWriteTask",    print_fields_uint, PRINT_MAXDISKWRITETASK},
-        {8,   "MaxPages",            print_fields_str,  PRINT_MAXPAGES},
-        {12,  "MaxPagesNode",        print_fields_str,  PRINT_MAXPAGESNODE},
-        {14,  "MaxPagesTask",        print_fields_uint, PRINT_MAXPAGESTASK},
-        {10,  "MaxRSS",              print_fields_str,  PRINT_MAXRSS},
-        {10,  "MaxRSSNode",          print_fields_str,  PRINT_MAXRSSNODE},
-        {10,  "MaxRSSTask",          print_fields_uint, PRINT_MAXRSSTASK},
-        {10,  "MaxVMSize",           print_fields_str,  PRINT_MAXVSIZE},
-        {14,  "MaxVMSizeNode",       print_fields_str,  PRINT_MAXVSIZENODE},
-        {14,  "MaxVMSizeTask",       print_fields_uint, PRINT_MAXVSIZETASK},
-        {10,  "MinCPU",              print_fields_str,  PRINT_MINCPU},
-        {10,  "MinCPUNode",          print_fields_str,  PRINT_MINCPUNODE},
-        {10,  "MinCPUTask",          print_fields_uint, PRINT_MINCPUTASK},
-        {20,  "Nodelist",            print_fields_str,  PRINT_NODELIST},
-        {8,   "NTasks",              print_fields_uint, PRINT_NTASKS},
-        {20,  "Pids",                print_fields_str,  PRINT_PIDS},
-        {10,  "ReqCPUFreq",          print_fields_str,  PRINT_REQ_CPUFREQ_MIN}, /*vestigial*/
-        {13,  "ReqCPUFreqMin",       print_fields_str,  PRINT_REQ_CPUFREQ_MIN},
-        {13,  "ReqCPUFreqMax",       print_fields_str,  PRINT_REQ_CPUFREQ_MAX},
-        {13,  "ReqCPUFreqGov",       print_fields_str,  PRINT_REQ_CPUFREQ_GOV},
-        {14,  "TRESUsageInAve",      print_fields_str,  PRINT_TRESUIA},
-        {14,  "TRESUsageInMax",      print_fields_str,  PRINT_TRESUIM},
-        {18,  "TRESUsageInMaxNode",  print_fields_str,  PRINT_TRESUIMN},
-        {18,  "TRESUsageInMaxTask",  print_fields_str,  PRINT_TRESUIMT},
-        {14,  "TRESUsageInMin",      print_fields_str,  PRINT_TRESUIMI},
-        {18,  "TRESUsageInMinNode",  print_fields_str,  PRINT_TRESUIMIN},
-        {18,  "TRESUsageInMinTask",  print_fields_str,  PRINT_TRESUIMIT},
-        {14,  "TRESUsageInTot",      print_fields_str,  PRINT_TRESUIT},
-        {15,  "TRESUsageOutAve",     print_fields_str,  PRINT_TRESUOA},
-        {15,  "TRESUsageOutMax",     print_fields_str,  PRINT_TRESUOM},
-        {19,  "TRESUsageOutMaxNode", print_fields_str,  PRINT_TRESUOMN},
-        {19,  "TRESUsageOutMaxTask", print_fields_str,  PRINT_TRESUOMT},
-        {15,  "TRESUsageOutMin",     print_fields_str,  PRINT_TRESUOMI},
-        {19,  "TRESUsageOutMinNode", print_fields_str,  PRINT_TRESUOMIN},
-        {19,  "TRESUsageOutMinTask", print_fields_str,  PRINT_TRESUOMIT},
-        {15,  "TRESUsageOutTot",     print_fields_str,  PRINT_TRESUOT},
-        {0, NULL, NULL,                                 0}};
+print_field_t fields[] = {{10,  "AveCPU",              print_fields_str,    PRINT_AVECPU},
+                          {10,  "AveCPUFreq",          print_fields_str,    PRINT_ACT_CPUFREQ},
+                          {12,  "AveDiskRead",         print_fields_str,    PRINT_AVEDISKREAD},
+                          {12,  "AveDiskWrite",        print_fields_str,    PRINT_AVEDISKWRITE},
+                          {10,  "AvePages",            print_fields_str,    PRINT_AVEPAGES},
+                          {10,  "AveRSS",              print_fields_str,    PRINT_AVERSS},
+                          {10,  "AveVMSize",           print_fields_str,    PRINT_AVEVSIZE},
+                          {14,  "ConsumedEnergy",      print_fields_str,    PRINT_CONSUMED_ENERGY},
+                          {17,  "ConsumedEnergyRaw",   print_fields_uint64, PRINT_CONSUMED_ENERGY_RAW},
+                          {-12, "JobID",               print_fields_str,    PRINT_JOBID},
+                          {12,  "MaxDiskRead",         print_fields_str,    PRINT_MAXDISKREAD},
+                          {15,  "MaxDiskReadNode",     print_fields_str,    PRINT_MAXDISKREADNODE},
+                          {15,  "MaxDiskReadTask",     print_fields_uint,   PRINT_MAXDISKREADTASK},
+                          {12,  "MaxDiskWrite",        print_fields_str,    PRINT_MAXDISKWRITE},
+                          {16,  "MaxDiskWriteNode",    print_fields_str,    PRINT_MAXDISKWRITENODE},
+                          {16,  "MaxDiskWriteTask",    print_fields_uint,   PRINT_MAXDISKWRITETASK},
+                          {8,   "MaxPages",            print_fields_str,    PRINT_MAXPAGES},
+                          {12,  "MaxPagesNode",        print_fields_str,    PRINT_MAXPAGESNODE},
+                          {14,  "MaxPagesTask",        print_fields_uint,   PRINT_MAXPAGESTASK},
+                          {10,  "MaxRSS",              print_fields_str,    PRINT_MAXRSS},
+                          {10,  "MaxRSSNode",          print_fields_str,    PRINT_MAXRSSNODE},
+                          {10,  "MaxRSSTask",          print_fields_uint,   PRINT_MAXRSSTASK},
+                          {10,  "MaxVMSize",           print_fields_str,    PRINT_MAXVSIZE},
+                          {14,  "MaxVMSizeNode",       print_fields_str,    PRINT_MAXVSIZENODE},
+                          {14,  "MaxVMSizeTask",       print_fields_uint,   PRINT_MAXVSIZETASK},
+                          {10,  "MinCPU",              print_fields_str,    PRINT_MINCPU},
+                          {10,  "MinCPUNode",          print_fields_str,    PRINT_MINCPUNODE},
+                          {10,  "MinCPUTask",          print_fields_uint,   PRINT_MINCPUTASK},
+                          {20,  "Nodelist",            print_fields_str,    PRINT_NODELIST},
+                          {8,   "NTasks",              print_fields_uint,   PRINT_NTASKS},
+                          {20,  "Pids",                print_fields_str,    PRINT_PIDS},
+                          {10,  "ReqCPUFreq",          print_fields_str,    PRINT_REQ_CPUFREQ_MIN}, /*vestigial*/
+                          {13,  "ReqCPUFreqMin",       print_fields_str,    PRINT_REQ_CPUFREQ_MIN},
+                          {13,  "ReqCPUFreqMax",       print_fields_str,    PRINT_REQ_CPUFREQ_MAX},
+                          {13,  "ReqCPUFreqGov",       print_fields_str,    PRINT_REQ_CPUFREQ_GOV},
+                          {14,  "TRESUsageInAve",      print_fields_str,    PRINT_TRESUIA},
+                          {14,  "TRESUsageInMax",      print_fields_str,    PRINT_TRESUIM},
+                          {18,  "TRESUsageInMaxNode",  print_fields_str,    PRINT_TRESUIMN},
+                          {18,  "TRESUsageInMaxTask",  print_fields_str,    PRINT_TRESUIMT},
+                          {14,  "TRESUsageInMin",      print_fields_str,    PRINT_TRESUIMI},
+                          {18,  "TRESUsageInMinNode",  print_fields_str,    PRINT_TRESUIMIN},
+                          {18,  "TRESUsageInMinTask",  print_fields_str,    PRINT_TRESUIMIT},
+                          {14,  "TRESUsageInTot",      print_fields_str,    PRINT_TRESUIT},
+                          {15,  "TRESUsageOutAve",     print_fields_str,    PRINT_TRESUOA},
+                          {15,  "TRESUsageOutMax",     print_fields_str,    PRINT_TRESUOM},
+                          {19,  "TRESUsageOutMaxNode", print_fields_str,    PRINT_TRESUOMN},
+                          {19,  "TRESUsageOutMaxTask", print_fields_str,    PRINT_TRESUOMT},
+                          {15,  "TRESUsageOutMin",     print_fields_str,    PRINT_TRESUOMI},
+                          {19,  "TRESUsageOutMinNode", print_fields_str,    PRINT_TRESUOMIN},
+                          {19,  "TRESUsageOutMinTask", print_fields_str,    PRINT_TRESUOMIT},
+                          {15,  "TRESUsageOutTot",     print_fields_str,    PRINT_TRESUOT},
+                          {0, NULL, NULL,                                   0}};
 
 List jobs = NULL;
 slurmdb_job_rec_t job;
@@ -111,8 +107,7 @@ List print_fields_list = NULL;
 ListIterator print_fields_itr = NULL;
 int field_count = 0;
 
-int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
-             uint32_t req_cpufreq_min, uint32_t req_cpufreq_max,
+int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist, uint32_t req_cpufreq_min, uint32_t req_cpufreq_max,
              uint32_t req_cpufreq_gov, uint16_t use_protocol_ver) {
     job_step_stat_response_msg_t *step_stat_response = NULL;
     int rc = SLURM_SUCCESS;
@@ -125,14 +120,11 @@ int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
     char *ave_usage_tmp = NULL;
 
     debug("requesting info for job %u.%u", jobid, stepid);
-    if ((rc = slurm_job_step_stat(jobid, stepid, nodelist, use_protocol_ver,
-                                  &step_stat_response)) != SLURM_SUCCESS) {
+    if ((rc = slurm_job_step_stat(jobid, stepid, nodelist, use_protocol_ver, &step_stat_response)) != SLURM_SUCCESS) {
         if (rc == ESLURM_INVALID_JOB_ID) {
-            debug("job step %u.%u has already completed",
-                  jobid, stepid);
+            debug("job step %u.%u has already completed", jobid, stepid);
         } else {
-            error("problem getting step_layout for %u.%u: %s",
-                  jobid, stepid, slurm_strerror(rc));
+            error("problem getting step_layout for %u.%u: %s", jobid, stepid, slurm_strerror(rc));
         }
         slurm_job_step_pids_response_msg_free(step_stat_response);
         return rc;
@@ -163,8 +155,7 @@ int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
             for (i = 0; i < step_stat->step_pids->pid_cnt; i++) {
                 if (step.pid_str)
                     xstrcat(step.pid_str, ",");
-                xstrfmtcat(step.pid_str, "%u",
-                           step_stat->step_pids->pid[i]);
+                xstrfmtcat(step.pid_str, "%u", step_stat->step_pids->pid[i]);
             }
         }
 
@@ -176,13 +167,10 @@ int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
             hostlist_push_host(hl, step_stat->step_pids->node_name);
             ntasks += step_stat->num_tasks;
             if (step_stat->jobacct) {
-                if (!assoc_mgr_tres_list &&
-                    step_stat->jobacct->tres_list) {
-                    assoc_mgr_lock_t locks =
-                            {.tres = WRITE_LOCK};
+                if (!assoc_mgr_tres_list && step_stat->jobacct->tres_list) {
+                    assoc_mgr_lock_t locks = {.tres = WRITE_LOCK};
                     assoc_mgr_lock(&locks);
-                    assoc_mgr_post_tres_list(
-                            step_stat->jobacct->tres_list);
+                    assoc_mgr_post_tres_list(step_stat->jobacct->tres_list);
                     assoc_mgr_unlock(&locks);
                     /*
                      * assoc_mgr_post_tres_list destroys the
@@ -196,11 +184,9 @@ int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
                  * assoc_mgr is set up.
                  */
                 if (!total_jobacct)
-                    total_jobacct =
-                            jobacctinfo_create(NULL);
+                    total_jobacct = jobacctinfo_create(NULL);
 
-                jobacctinfo_aggregate(total_jobacct,
-                                      step_stat->jobacct);
+                jobacctinfo_aggregate(total_jobacct, step_stat->jobacct);
             }
         }
     }
@@ -225,12 +211,10 @@ int _do_stat(uint32_t jobid, uint32_t stepid, char *nodelist,
         step.stats.act_cpufreq /= (double) tot_tasks;
 
         ave_usage_tmp = step.stats.tres_usage_in_ave;
-        step.stats.tres_usage_in_ave = slurmdb_ave_tres_usage(
-                ave_usage_tmp, tot_tasks);
+        step.stats.tres_usage_in_ave = slurmdb_ave_tres_usage(ave_usage_tmp, tot_tasks);
         xfree(ave_usage_tmp);
         ave_usage_tmp = step.stats.tres_usage_out_ave;
-        step.stats.tres_usage_out_ave = slurmdb_ave_tres_usage(
-                ave_usage_tmp, tot_tasks);
+        step.stats.tres_usage_out_ave = slurmdb_ave_tres_usage(ave_usage_tmp, tot_tasks);
         xfree(ave_usage_tmp);
 
         step.ntasks = tot_tasks;
@@ -281,15 +265,12 @@ int main(int argc, char **argv) {
             job_info_msg_t *job_ptr = NULL;
             hostlist_t hl;
 
-            if (slurm_load_job(
-                    &job_ptr, selected_step->jobid, SHOW_ALL)) {
-                error("couldn't get info for job %u",
-                      selected_step->jobid);
+            if (slurm_load_job(&job_ptr, selected_step->jobid, SHOW_ALL)) {
+                error("couldn't get info for job %u", selected_step->jobid);
                 continue;
             }
 
-            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION,
-                                   job_ptr->job_array[0].start_protocol_ver);
+            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION, job_ptr->job_array[0].start_protocol_ver);
             stepid = SLURM_BATCH_SCRIPT;
             hl = hostlist_create(job_ptr->job_array[0].nodes);
             nodelist = hostlist_shift(hl);
@@ -300,14 +281,11 @@ int main(int argc, char **argv) {
             /* get the extern step info */
             job_info_msg_t *job_ptr = NULL;
 
-            if (slurm_load_job(
-                    &job_ptr, selected_step->jobid, SHOW_ALL)) {
-                error("couldn't get info for job %u",
-                      selected_step->jobid);
+            if (slurm_load_job(&job_ptr, selected_step->jobid, SHOW_ALL)) {
+                error("couldn't get info for job %u", selected_step->jobid);
                 continue;
             }
-            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION,
-                                   job_ptr->job_array[0].start_protocol_ver);
+            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION, job_ptr->job_array[0].start_protocol_ver);
             stepid = SLURM_EXTERN_CONT;
             nodelist = job_ptr->job_array[0].nodes;
             slurm_free_job_info_msg(job_ptr);
@@ -316,23 +294,15 @@ int main(int argc, char **argv) {
         } else if (params.opt_all_steps) {
             job_step_info_response_msg_t *step_ptr = NULL;
             int i = 0;
-            if (slurm_get_job_steps(
-                    0, selected_step->jobid, NO_VAL,
-                    &step_ptr, SHOW_ALL)) {
-                error("couldn't get steps for job %u",
-                      selected_step->jobid);
+            if (slurm_get_job_steps(0, selected_step->jobid, NO_VAL, &step_ptr, SHOW_ALL)) {
+                error("couldn't get steps for job %u", selected_step->jobid);
                 continue;
             }
 
             for (i = 0; i < step_ptr->job_step_count; i++) {
-                _do_stat(selected_step->jobid,
-                         step_ptr->job_steps[i].step_id,
-                         step_ptr->job_steps[i].nodes,
-                         step_ptr->job_steps[i].cpu_freq_min,
-                         step_ptr->job_steps[i].cpu_freq_max,
-                         step_ptr->job_steps[i].cpu_freq_gov,
-                         step_ptr->job_steps[i].
-                                 start_protocol_ver);
+                _do_stat(selected_step->jobid, step_ptr->job_steps[i].step_id, step_ptr->job_steps[i].nodes,
+                         step_ptr->job_steps[i].cpu_freq_min, step_ptr->job_steps[i].cpu_freq_max,
+                         step_ptr->job_steps[i].cpu_freq_gov, step_ptr->job_steps[i].start_protocol_ver);
             }
             slurm_free_job_step_info_response_msg(step_ptr);
             continue;
@@ -341,16 +311,12 @@ int main(int argc, char **argv) {
             job_step_info_response_msg_t *step_ptr = NULL;
             job_step_info_t *step_info;
 
-            if (slurm_get_job_steps(
-                    0, selected_step->jobid, NO_VAL,
-                    &step_ptr, SHOW_ALL)) {
-                error("couldn't get steps for job %u",
-                      selected_step->jobid);
+            if (slurm_get_job_steps(0, selected_step->jobid, NO_VAL, &step_ptr, SHOW_ALL)) {
+                error("couldn't get steps for job %u", selected_step->jobid);
                 continue;
             }
             if (!step_ptr->job_step_count) {
-                error("no steps running for job %u",
-                      selected_step->jobid);
+                error("no steps running for job %u", selected_step->jobid);
                 continue;
             }
 
@@ -358,8 +324,7 @@ int main(int argc, char **argv) {
              * just skip it.  They should ask for it
              * directly.
              */
-            if ((step_ptr->job_steps[0].step_id ==
-                 SLURM_EXTERN_CONT) && step_ptr->job_step_count > 1)
+            if ((step_ptr->job_steps[0].step_id == SLURM_EXTERN_CONT) && step_ptr->job_step_count > 1)
                 step_info = ++step_ptr->job_steps;
             else
                 step_info = step_ptr->job_steps;
@@ -368,11 +333,9 @@ int main(int argc, char **argv) {
             req_cpufreq_min = step_info->cpu_freq_min;
             req_cpufreq_max = step_info->cpu_freq_max;
             req_cpufreq_gov = step_info->cpu_freq_gov;
-            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION,
-                                   step_info->start_protocol_ver);
+            use_protocol_ver = MIN(SLURM_PROTOCOL_VERSION, step_info->start_protocol_ver);
         }
-        _do_stat(selected_step->jobid, stepid, nodelist,
-                 req_cpufreq_min, req_cpufreq_max, req_cpufreq_gov,
+        _do_stat(selected_step->jobid, stepid, nodelist, req_cpufreq_min, req_cpufreq_max, req_cpufreq_gov,
                  use_protocol_ver);
         if (free_nodelist && nodelist)
             free(nodelist);

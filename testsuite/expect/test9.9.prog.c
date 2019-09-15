@@ -34,55 +34,53 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-static inline void _spawn_job(char *path, char **argv)
-{
-	int status;
-	pid_t pid;
+static inline void _spawn_job(char *path, char **argv) {
+    int status;
+    pid_t pid;
 
-	while ((pid = fork()) < 0)
-		usleep(100);
-	if (pid == 0) {
-		close(1);
-		close(2);
-		execv(path, argv);
-		exit(0);
-	}
-	waitpid(-1, &status, WNOHANG);	/* reap processes when possible */
+    while ((pid = fork()) < 0)
+        usleep(100);
+    if (pid == 0) {
+        close(1);
+        close(2);
+        execv(path, argv);
+        exit(0);
+    }
+    waitpid(-1, &status, WNOHANG);    /* reap processes when possible */
 
-	//system(command);
+    //system(command);
 }
 
-int main (int argc, char **argv)
-{
-	char *command[10];
-	int iterations, status;
-	int i;
+int main(int argc, char **argv) {
+    char *command[10];
+    int iterations, status;
+    int i;
 
-	if (argc != 5) {
-		printf("FAILURE: Usage: test9.9.prog <sbatch_path> "
-		       "<exec_prog> <prog_name> <iterations>\n");
-		exit(1);
-	}
-	iterations = atoi(argv[4]);
-	if (iterations < 1) {
-		printf("FAILURE: Invalid iterations count (%s)\n", argv[4]);
-		exit(1);
-	}
+    if (argc != 5) {
+        printf("FAILURE: Usage: test9.9.prog <sbatch_path> "
+               "<exec_prog> <prog_name> <iterations>\n");
+        exit(1);
+    }
+    iterations = atoi(argv[4]);
+    if (iterations < 1) {
+        printf("FAILURE: Invalid iterations count (%s)\n", argv[4]);
+        exit(1);
+    }
 
-	command[0] = "sbatch";
-	command[1] = "-J";
-	command[2] = argv[3];
-	command[3] = "-o";
-	command[4] = "/dev/null";
-	command[5] = "--wrap";
-	command[6] = argv[2];
-	command[7] = NULL;
+    command[0] = "sbatch";
+    command[1] = "-J";
+    command[2] = argv[3];
+    command[3] = "-o";
+    command[4] = "/dev/null";
+    command[5] = "--wrap";
+    command[6] = argv[2];
+    command[7] = NULL;
 
-	for (i = 0; i < iterations; i++) {
-		_spawn_job(argv[1], command);
-	}
+    for (i = 0; i < iterations; i++) {
+        _spawn_job(argv[1], command);
+    }
 
-	while ((wait(&status) >= 0)) ;
+    while ((wait(&status) >= 0));
 
-	return 0;
+    return 0;
 }

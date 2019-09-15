@@ -69,8 +69,7 @@ extern int slurm_load_topo(topo_info_response_msg_t **resp) {
     req_msg.msg_type = REQUEST_TOPO_INFO;
     req_msg.data = NULL;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -100,10 +99,7 @@ extern int slurm_load_topo(topo_info_response_msg_t **resp) {
  * IN topo_info_msg_ptr - switch topology information message pointer
  * IN one_liner - print as a single line if not zero
  */
-extern void slurm_print_topo_info_msg(
-        FILE *out,
-        topo_info_response_msg_t *topo_info_msg_ptr,
-        int one_liner) {
+extern void slurm_print_topo_info_msg(FILE *out, topo_info_response_msg_t *topo_info_msg_ptr, int one_liner) {
     int i;
     topo_info_t *topo_ptr = topo_info_msg_ptr->topo_array;
 
@@ -125,8 +121,7 @@ extern void slurm_print_topo_info_msg(
  * RET out - char * containing formatted output (must be freed after call)
  *	   NULL is returned on failure.
  */
-extern void slurm_print_topo_record(FILE *out, topo_info_t *topo_ptr,
-                                    int one_liner) {
+extern void slurm_print_topo_record(FILE *out, topo_info_t *topo_ptr, int one_liner) {
     char *env, *line = NULL;
     int max_len = 0, len;
 
@@ -134,8 +129,8 @@ extern void slurm_print_topo_record(FILE *out, topo_info_t *topo_ptr,
         max_len = atoi(env);
 
     /****** Line 1 ******/
-    len = xstrfmtcat(line, "SwitchName=%s Level=%u LinkSpeed=%u",
-                     topo_ptr->name, topo_ptr->level, topo_ptr->link_speed);
+    len = xstrfmtcat(line, "SwitchName=%s Level=%u LinkSpeed=%u", topo_ptr->name, topo_ptr->level,
+                     topo_ptr->link_speed);
 
     if (topo_ptr->nodes)
         len += xstrfmtcat(line, " Nodes=%s", topo_ptr->nodes);

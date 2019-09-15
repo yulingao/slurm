@@ -72,22 +72,18 @@ static char **_array_copy(int n, char **src);
 
 static void _array_free(char ***array);
 
-static void _job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid,
-                                char *ifname, char *ofname, char *efname);
+static void _job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid, char *ifname, char *ofname, char *efname);
 
 static void _srun_info_destructor(void *arg);
 
-static stepd_step_task_info_t *_task_info_create(int taskid, int gtaskid,
-                                                 char *ifname, char *ofname,
-                                                 char *efname);
+static stepd_step_task_info_t *_task_info_create(int taskid, int gtaskid, char *ifname, char *ofname, char *efname);
 
 static void _task_info_destroy(stepd_step_task_info_t *t, uint16_t multi_prog);
 
 /*
  * return the default output filename for a batch job
  */
-static char *
-_batchfilename(stepd_step_rec_t *job, const char *name) {
+static char *_batchfilename(stepd_step_rec_t *job, const char *name) {
     if (name == NULL) {
         if (job->array_task_id == NO_VAL)
             return fname_create(job, "slurm-%J.out", 0);
@@ -108,8 +104,7 @@ _batchfilename(stepd_step_rec_t *job, const char *name) {
  * object will be used.  If is a valid number, but it does not match
  * "taskid", then the file descriptor will be connected to /dev/null.
  */
-static char *
-_expand_stdio_filename(char *filename, int gtaskid, stepd_step_rec_t *job) {
+static char *_expand_stdio_filename(char *filename, int gtaskid, stepd_step_rec_t *job) {
     int id;
 
     if (filename == NULL)
@@ -130,9 +125,7 @@ _expand_stdio_filename(char *filename, int gtaskid, stepd_step_rec_t *job) {
         return xstrdup("/dev/null");
 }
 
-static void
-_job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid,
-                    char *ifname, char *ofname, char *efname) {
+static void _job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid, char *ifname, char *ofname, char *efname) {
     int i, node_id = job->nodeid;
     char *in, *out, *err;
     uint32_t pack_offset = 0;
@@ -158,21 +151,13 @@ _job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid,
     }
 #endif
 
-    job->task = (stepd_step_task_info_t **)
-            xmalloc(job->node_tasks * sizeof(stepd_step_task_info_t * ));
+    job->task = (stepd_step_task_info_t **) xmalloc(job->node_tasks * sizeof(stepd_step_task_info_t * ));
 
     for (i = 0; i < job->node_tasks; i++) {
-        in = _expand_stdio_filename(ifname,
-                                    gtid[node_id][i] + pack_offset,
-                                    job);
-        out = _expand_stdio_filename(ofname,
-                                     gtid[node_id][i] + pack_offset,
-                                     job);
-        err = _expand_stdio_filename(efname,
-                                     gtid[node_id][i] + pack_offset,
-                                     job);
-        job->task[i] = _task_info_create(i, gtid[node_id][i], in, out,
-                                         err);
+        in = _expand_stdio_filename(ifname, gtid[node_id][i] + pack_offset, job);
+        out = _expand_stdio_filename(ofname, gtid[node_id][i] + pack_offset, job);
+        err = _expand_stdio_filename(efname, gtid[node_id][i] + pack_offset, job);
+        job->task[i] = _task_info_create(i, gtid[node_id][i], in, out, err);
         if ((job->flags & LAUNCH_MULTI_PROG) == 0) {
             job->task[i]->argc = job->argc;
             job->task[i]->argv = job->argv;
@@ -185,17 +170,13 @@ _job_init_task_info(stepd_step_rec_t *job, uint32_t **gtid,
             multi_prog_parse(job, gtid);
         xfree(switch_type);
         for (i = 0; i < job->node_tasks; i++) {
-            multi_prog_get_argv(job->argv[1], job->env,
-                                gtid[node_id][i],
-                                &job->task[i]->argc,
-                                &job->task[i]->argv,
+            multi_prog_get_argv(job->argv[1], job->env, gtid[node_id][i], &job->task[i]->argc, &job->task[i]->argv,
                                 job->argc, job->argv);
         }
     }
 }
 
-static char **
-_array_copy(int n, char **src) {
+static char **_array_copy(int n, char **src) {
     char **dst = xmalloc((n + 1) * sizeof(char *));
     int i;
 
@@ -207,8 +188,7 @@ _array_copy(int n, char **src) {
     return dst;
 }
 
-static void
-_array_free(char ***array) {
+static void _array_free(char ***array) {
     int i = 0;
     while ((*array)[i] != NULL)
         xfree((*array)[i++]);
@@ -217,14 +197,12 @@ _array_free(char ***array) {
 }
 
 /* destructor for list routines */
-static void
-_srun_info_destructor(void *arg) {
+static void _srun_info_destructor(void *arg) {
     srun_info_t *srun = (srun_info_t *) arg;
     srun_info_destroy(srun);
 }
 
-static void
-_task_info_destroy(stepd_step_task_info_t *t, uint16_t multi_prog) {
+static void _task_info_destroy(stepd_step_task_info_t *t, uint16_t multi_prog) {
     slurm_mutex_lock(&t->mutex);
     slurm_mutex_unlock(&t->mutex);
     slurm_mutex_destroy(&t->mutex);
@@ -264,8 +242,7 @@ static void _slurm_cred_to_step_rec(slurm_cred_t *cred, stepd_step_rec_t *job) {
 }
 
 /* create a slurmd job structure from a launch tasks message */
-extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
-                                               uint16_t protocol_version) {
+extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg, uint16_t protocol_version) {
     stepd_step_rec_t *job = NULL;
     srun_info_t *srun = NULL;
     slurm_addr_t resp_addr;
@@ -289,8 +266,7 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
     job->node_name = xstrdup(msg->complete_nodelist);
 #endif
     if (nodeid < 0) {
-        error("couldn't find node %s in %s",
-              job->node_name, msg->complete_nodelist);
+        error("couldn't find node %s in %s", job->node_name, msg->complete_nodelist);
         stepd_step_rec_destroy(job);
         return NULL;
     }
@@ -300,8 +276,7 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
     slurm_mutex_init(&job->state_mutex);
     job->node_tasks = msg->tasks_to_launch[nodeid];
     job->task_cnts = xcalloc(msg->nnodes, sizeof(uint16_t));
-    memcpy(job->task_cnts, msg->tasks_to_launch,
-           sizeof(uint16_t) * msg->nnodes);
+    memcpy(job->task_cnts, msg->tasks_to_launch, sizeof(uint16_t) * msg->nnodes);
     job->ntasks = msg->ntasks;
     job->jobid = msg->job_id;
     job->stepid = msg->job_step_id;
@@ -346,28 +321,19 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
     job->pack_nnodes = msg->pack_nnodes;    /* Used for env vars */
     if (msg->pack_nnodes && msg->pack_ntasks && msg->pack_task_cnts) {
         job->pack_ntasks = msg->pack_ntasks;    /* Used for env vars */
-        job->pack_task_cnts = xcalloc(msg->pack_nnodes,
-                                      sizeof(uint16_t));
-        memcpy(job->pack_task_cnts, msg->pack_task_cnts,
-               sizeof(uint16_t) * msg->pack_nnodes);
+        job->pack_task_cnts = xcalloc(msg->pack_nnodes, sizeof(uint16_t));
+        memcpy(job->pack_task_cnts, msg->pack_task_cnts, sizeof(uint16_t) * msg->pack_nnodes);
         if (msg->pack_tids) {
             /* pack_tids == NULL if request from pre-v19.05 srun */
-            job->pack_tids = xcalloc(msg->pack_nnodes,
-                                     sizeof(uint32_t *));
+            job->pack_tids = xcalloc(msg->pack_nnodes, sizeof(uint32_t *));
             for (i = 0; i < msg->pack_nnodes; i++) {
-                job->pack_tids[i] =
-                        xcalloc(job->pack_task_cnts[i],
-                                sizeof(uint32_t));
-                memcpy(job->pack_tids[i], msg->pack_tids[i],
-                       sizeof(uint32_t) *
-                       job->pack_task_cnts[i]);
+                job->pack_tids[i] = xcalloc(job->pack_task_cnts[i], sizeof(uint32_t));
+                memcpy(job->pack_tids[i], msg->pack_tids[i], sizeof(uint32_t) * job->pack_task_cnts[i]);
             }
         }
         if (msg->pack_tid_offsets) {
-            job->pack_tid_offsets = xcalloc(job->pack_ntasks,
-                                            sizeof(uint32_t));
-            memcpy(job->pack_tid_offsets, msg->pack_tid_offsets,
-                   job->pack_ntasks * sizeof(uint32_t));
+            job->pack_tid_offsets = xcalloc(job->pack_ntasks, sizeof(uint32_t));
+            memcpy(job->pack_tid_offsets, msg->pack_tid_offsets, job->pack_ntasks * sizeof(uint32_t));
         }
     }
     job->pack_offset = msg->pack_offset;    /* Used for env vars & labels */
@@ -415,12 +381,9 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
     if (!msg->resp_port)
         msg->num_resp_port = 0;
     if (msg->num_resp_port) {
-        job->envtp->comm_port =
-                msg->resp_port[nodeid % msg->num_resp_port];
+        job->envtp->comm_port = msg->resp_port[nodeid % msg->num_resp_port];
         memcpy(&resp_addr, &msg->orig_addr, sizeof(slurm_addr_t));
-        slurm_set_addr(&resp_addr,
-                       msg->resp_port[nodeid % msg->num_resp_port],
-                       NULL);
+        slurm_set_addr(&resp_addr, msg->resp_port[nodeid % msg->num_resp_port], NULL);
     } else {
         memset(&resp_addr, 0, sizeof(slurm_addr_t));
     }
@@ -428,15 +391,12 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
         msg->flags |= LAUNCH_USER_MANAGED_IO;
     if ((msg->flags & LAUNCH_USER_MANAGED_IO) == 0) {
         memcpy(&io_addr, &msg->orig_addr, sizeof(slurm_addr_t));
-        slurm_set_addr(&io_addr,
-                       msg->io_port[nodeid % msg->num_io_port],
-                       NULL);
+        slurm_set_addr(&io_addr, msg->io_port[nodeid % msg->num_io_port], NULL);
     } else {
         memset(&io_addr, 0, sizeof(slurm_addr_t));
     }
 
-    srun = srun_info_create(msg->cred, &resp_addr, &io_addr,
-                            protocol_version);
+    srun = srun_info_create(msg->cred, &resp_addr, &io_addr, protocol_version);
 
     job->profile = msg->profile;
     job->task_prolog = xstrdup(msg->task_prolog);
@@ -456,24 +416,20 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
     */
     acct_gather_profile_g_node_step_start(job);
 
-    acct_gather_profile_startpoll(msg->acctg_freq,
-                                  conf->job_acct_gather_freq);
+    acct_gather_profile_startpoll(msg->acctg_freq, conf->job_acct_gather_freq);
 
     job->timelimit = (time_t) -1;
     job->flags = msg->flags;
     job->switch_job = msg->switch_job;
     job->open_mode = msg->open_mode;
     job->options = msg->options;
-    format_core_allocs(msg->cred, conf->node_name, conf->cpus,
-                       &job->job_alloc_cores, &job->step_alloc_cores,
+    format_core_allocs(msg->cred, conf->node_name, conf->cpus, &job->job_alloc_cores, &job->step_alloc_cores,
                        &job->job_mem, &job->step_mem);
 
     if (job->step_mem && conf->job_acct_oom_kill) {
-        jobacct_gather_set_mem_limit(job->jobid, job->stepid,
-                                     job->step_mem);
+        jobacct_gather_set_mem_limit(job->jobid, job->stepid, job->step_mem);
     } else if (job->job_mem && conf->job_acct_oom_kill) {
-        jobacct_gather_set_mem_limit(job->jobid, job->stepid,
-                                     job->job_mem);
+        jobacct_gather_set_mem_limit(job->jobid, job->stepid, job->job_mem);
     }
 
     /* only need these values on the extern step, don't copy otherwise */
@@ -486,19 +442,16 @@ extern stepd_step_rec_t *stepd_step_rec_create(launch_tasks_request_msg_t *msg,
         job->x11_target_port = msg->x11_target_port;
     }
 
-    get_cred_gres(msg->cred, conf->node_name,
-                  &job->job_gres_list, &job->step_gres_list);
+    get_cred_gres(msg->cred, conf->node_name, &job->job_gres_list, &job->step_gres_list);
 
     list_append(job->sruns, (void *) srun);
 
-    _job_init_task_info(job, msg->global_task_ids,
-                        msg->ifname, msg->ofname, msg->efname);
+    _job_init_task_info(job, msg->global_task_ids, msg->ifname, msg->ofname, msg->efname);
 
     return job;
 }
 
-extern stepd_step_rec_t *
-batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
+extern stepd_step_rec_t *batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
     stepd_step_rec_t *job;
     srun_info_t *srun = NULL;
     char *in_name;
@@ -558,8 +511,7 @@ batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
     */
     acct_gather_profile_g_node_step_start(job);
     /* needed for the jobacct_gather plugin to start */
-    acct_gather_profile_startpoll(msg->acctg_freq,
-                                  conf->job_acct_gather_freq);
+    acct_gather_profile_startpoll(msg->acctg_freq, conf->job_acct_gather_freq);
 
     job->open_mode = msg->open_mode;
     job->overcommit = (bool) msg->overcommit;
@@ -589,16 +541,14 @@ batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
     if (msg->cpus_per_node)
         job->cpus = msg->cpus_per_node[0];
 
-    format_core_allocs(msg->cred, conf->node_name, conf->cpus,
-                       &job->job_alloc_cores, &job->step_alloc_cores,
+    format_core_allocs(msg->cred, conf->node_name, conf->cpus, &job->job_alloc_cores, &job->step_alloc_cores,
                        &job->job_mem, &job->step_mem);
     if (job->step_mem && conf->job_acct_oom_kill)
         jobacct_gather_set_mem_limit(job->jobid, NO_VAL, job->step_mem);
     else if (job->job_mem && conf->job_acct_oom_kill)
         jobacct_gather_set_mem_limit(job->jobid, NO_VAL, job->job_mem);
 
-    get_cred_gres(msg->cred, conf->node_name,
-                  &job->job_gres_list, &job->step_gres_list);
+    get_cred_gres(msg->cred, conf->node_name, &job->job_gres_list, &job->step_gres_list);
 
     srun = srun_info_create(NULL, NULL, NULL, NO_VAL16);
 
@@ -624,8 +574,7 @@ batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
     else
         in_name = fname_create(job, msg->std_in, 0);
 
-    job->task[0] = _task_info_create(0, 0, in_name,
-                                     _batchfilename(job, msg->std_out),
+    job->task[0] = _task_info_create(0, 0, in_name, _batchfilename(job, msg->std_out),
                                      _batchfilename(job, msg->std_err));
     job->task[0]->argc = job->argc;
     job->task[0]->argv = job->argv;
@@ -633,8 +582,7 @@ batch_stepd_step_rec_create(batch_job_launch_msg_t *msg) {
     return job;
 }
 
-extern void
-stepd_step_rec_destroy(stepd_step_rec_t *job) {
+extern void stepd_step_rec_destroy(stepd_step_rec_t *job) {
     uint16_t multi_prog = 0;
     int i;
 
@@ -690,8 +638,7 @@ stepd_step_rec_destroy(stepd_step_rec_t *job) {
 }
 
 extern srun_info_t *
-srun_info_create(slurm_cred_t *cred, slurm_addr_t *resp_addr,
-                 slurm_addr_t *ioaddr, uint16_t protocol_version) {
+srun_info_create(slurm_cred_t *cred, slurm_addr_t *resp_addr, slurm_addr_t *ioaddr, uint16_t protocol_version) {
     char *data = NULL;
     uint32_t len = 0;
     srun_info_t *srun = xmalloc(sizeof(srun_info_t));
@@ -716,8 +663,7 @@ srun_info_create(slurm_cred_t *cred, slurm_addr_t *resp_addr,
         memcpy((void *) key->data, data, len);
 
         if (len < SLURM_IO_KEY_SIZE)
-            memset((void *) (key->data + len), 0,
-                   SLURM_IO_KEY_SIZE - len);
+            memset((void *) (key->data + len), 0, SLURM_IO_KEY_SIZE - len);
     }
 
     if (ioaddr != NULL)
@@ -727,15 +673,12 @@ srun_info_create(slurm_cred_t *cred, slurm_addr_t *resp_addr,
     return srun;
 }
 
-extern void
-srun_info_destroy(srun_info_t *srun) {
+extern void srun_info_destroy(srun_info_t *srun) {
     xfree(srun->key);
     xfree(srun);
 }
 
-static stepd_step_task_info_t *_task_info_create(int taskid, int gtaskid,
-                                                 char *ifname, char *ofname,
-                                                 char *efname) {
+static stepd_step_task_info_t *_task_info_create(int taskid, int gtaskid, char *ifname, char *ofname, char *efname) {
     stepd_step_task_info_t *t = xmalloc(sizeof(stepd_step_task_info_t));
 
     xassert(taskid >= 0);

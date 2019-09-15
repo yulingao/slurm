@@ -103,25 +103,19 @@ static void _prec_extra(jag_prec_t *prec, uint32_t taskid) {
     bool exit_early = false;
 
     /* Find which task cgroups to use */
-    task_memory_cg = list_find_first(task_memory_cg_list,
-                                     find_task_cg_info,
-                                     &taskid);
-    task_cpuacct_cg = list_find_first(task_cpuacct_cg_list,
-                                      find_task_cg_info,
-                                      &taskid);
+    task_memory_cg = list_find_first(task_memory_cg_list, find_task_cg_info, &taskid);
+    task_cpuacct_cg = list_find_first(task_cpuacct_cg_list, find_task_cg_info, &taskid);
 
     /*
      * We should always find the task cgroups; if we don't for some reason,
      * just print an error and return.
      */
     if (!task_cpuacct_cg) {
-        error("%s: Could not find task_cpuacct_cg, this should never happen",
-              __func__);
+        error("%s: Could not find task_cpuacct_cg, this should never happen", __func__);
         exit_early = true;
     }
     if (!task_memory_cg) {
-        error("%s: Could not find task_memory_cg, this should never happen",
-              __func__);
+        error("%s: Could not find task_memory_cg, this should never happen", __func__);
         exit_early = true;
     }
     if (exit_early)
@@ -131,11 +125,9 @@ static void _prec_extra(jag_prec_t *prec, uint32_t taskid) {
     //START_TIMER;
     /* info("before"); */
     /* print_jag_prec(prec); */
-    xcgroup_get_param(task_cpuacct_cg, "cpuacct.stat",
-                      &cpu_time, &cpu_time_size);
+    xcgroup_get_param(task_cpuacct_cg, "cpuacct.stat", &cpu_time, &cpu_time_size);
     if (cpu_time == NULL) {
-        debug2("%s: failed to collect cpuacct.stat pid %d ppid %d",
-               __func__, prec->pid, prec->ppid);
+        debug2("%s: failed to collect cpuacct.stat pid %d ppid %d", __func__, prec->pid, prec->ppid);
     } else {
         sscanf(cpu_time, "%*s %lu %*s %lu", &utime, &stime);
         /*
@@ -146,11 +138,9 @@ static void _prec_extra(jag_prec_t *prec, uint32_t taskid) {
         prec->ssec = stime;
     }
 
-    xcgroup_get_param(task_memory_cg, "memory.stat",
-                      &memory_stat, &memory_stat_size);
+    xcgroup_get_param(task_memory_cg, "memory.stat", &memory_stat, &memory_stat_size);
     if (memory_stat == NULL) {
-        debug2("%s: failed to collect memory.stat  pid %d ppid %d",
-               __func__, prec->pid, prec->ppid);
+        debug2("%s: failed to collect memory.stat  pid %d ppid %d", __func__, prec->pid, prec->ppid);
     } else {
         /*
          * This number represents the amount of "dirty" private memory
@@ -169,8 +159,7 @@ static void _prec_extra(jag_prec_t *prec, uint32_t taskid) {
          */
         if ((ptr = strstr(memory_stat, "total_pgmajfault"))) {
             sscanf(ptr, "total_pgmajfault %lu", &total_pgpgin);
-            prec->tres_data[TRES_ARRAY_PAGES].size_read =
-                    total_pgpgin;
+            prec->tres_data[TRES_ARRAY_PAGES].size_read = total_pgpgin;
         }
     }
 
@@ -296,8 +285,7 @@ extern int fini(void) {
  *    is a Linux-style stat entry. We disregard the data if they look
  *    wrong.
  */
-extern void jobacct_gather_p_poll_data(
-        List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
+extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin, uint64_t cont_id, bool profile) {
     static jag_callbacks_t callbacks;
     static bool first = 1;
 
@@ -307,8 +295,7 @@ extern void jobacct_gather_p_poll_data(
         callbacks.prec_extra = _prec_extra;
     }
 
-    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks,
-                         profile);
+    jag_common_poll_data(task_list, pgid_plugin, cont_id, &callbacks, profile);
 
     return;
 }
@@ -320,12 +307,10 @@ extern int jobacct_gather_p_endpoll(void) {
 }
 
 extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id) {
-    if (jobacct_gather_cgroup_cpuacct_attach_task(pid, jobacct_id) !=
-        SLURM_SUCCESS)
+    if (jobacct_gather_cgroup_cpuacct_attach_task(pid, jobacct_id) != SLURM_SUCCESS)
         return SLURM_ERROR;
 
-    if (jobacct_gather_cgroup_memory_attach_task(pid, jobacct_id) !=
-        SLURM_SUCCESS)
+    if (jobacct_gather_cgroup_memory_attach_task(pid, jobacct_id) != SLURM_SUCCESS)
         return SLURM_ERROR;
 
     /* if (jobacct_gather_cgroup_blkio_attach_task(pid, jobacct_id) != */
@@ -360,19 +345,16 @@ extern char *jobacct_cgroup_create_slurm_cg(xcgroup_ns_t *ns) {
 #endif
 
     /* create slurm cgroup in the ns (it could already exist) */
-    if (xcgroup_create(ns, &slurm_cg, pre,
-                       getuid(), getgid()) != XCGROUP_SUCCESS) {
+    if (xcgroup_create(ns, &slurm_cg, pre, getuid(), getgid()) != XCGROUP_SUCCESS) {
         return pre;
     }
 
     if (xcgroup_instantiate(&slurm_cg) != XCGROUP_SUCCESS) {
-        error("unable to build slurm cgroup for ns %s: %m",
-              ns->subsystems);
+        error("unable to build slurm cgroup for ns %s: %m", ns->subsystems);
         xcgroup_destroy(&slurm_cg);
         return pre;
     } else {
-        debug3("slurm cgroup %s successfully created for ns %s: %m",
-               pre, ns->subsystems);
+        debug3("slurm cgroup %s successfully created for ns %s: %m", pre, ns->subsystems);
         xcgroup_destroy(&slurm_cg);
     }
 

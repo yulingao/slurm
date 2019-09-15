@@ -53,8 +53,7 @@
  * IN flags      - see KILL_JOB_* flags in slurm.h
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int
-slurm_kill_job(uint32_t job_id, uint16_t signal, uint16_t flags) {
+extern int slurm_kill_job(uint32_t job_id, uint16_t signal, uint16_t flags) {
     int rc;
     slurm_msg_t msg;
     job_step_kill_msg_t req;
@@ -88,8 +87,7 @@ slurm_kill_job(uint32_t job_id, uint16_t signal, uint16_t flags) {
  * IN signal     - signal number
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int
-slurm_kill_job_step(uint32_t job_id, uint32_t step_id, uint16_t signal) {
+extern int slurm_kill_job_step(uint32_t job_id, uint32_t step_id, uint16_t signal) {
     int rc;
     slurm_msg_t msg;
     job_step_kill_msg_t req;
@@ -118,8 +116,7 @@ slurm_kill_job_step(uint32_t job_id, uint32_t step_id, uint16_t signal) {
 
 /* slurm_kill_job2()
  */
-int
-slurm_kill_job2(const char *job_id, uint16_t signal, uint16_t flags) {
+int slurm_kill_job2(const char *job_id, uint16_t signal, uint16_t flags) {
     int cc;
     slurm_msg_t msg;
     job_step_kill_msg_t req;

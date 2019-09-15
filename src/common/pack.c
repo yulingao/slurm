@@ -156,8 +156,7 @@ Buf create_buf(char *data, uint32_t size) {
     Buf my_buf;
 
     if (size > MAX_BUF_SIZE) {
-        error("%s: Buffer size limit exceeded (%u > %u)",
-              __func__, size, MAX_BUF_SIZE);
+        error("%s: Buffer size limit exceeded (%u > %u)", __func__, size, MAX_BUF_SIZE);
         return NULL;
     }
 
@@ -231,8 +230,7 @@ void grow_buf(Buf buffer, uint32_t size) {
     if (buffer->mmaped)
         fatal_abort("attempt to grow mmap()'d buffer not supported");
     if ((buffer->size + size) > MAX_BUF_SIZE) {
-        error("%s: Buffer size limit exceeded (%u > %u)",
-              __func__, (buffer->size + size), MAX_BUF_SIZE);
+        error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + size), MAX_BUF_SIZE);
         return;
     }
 
@@ -245,8 +243,7 @@ Buf init_buf(uint32_t size) {
     Buf my_buf;
 
     if (size > MAX_BUF_SIZE) {
-        error("%s: Buffer size limit exceeded (%u > %u)",
-              __func__, size, MAX_BUF_SIZE);
+        error("%s: Buffer size limit exceeded (%u > %u)", __func__, size, MAX_BUF_SIZE);
         return NULL;
     }
     if (size <= 0)
@@ -284,9 +281,7 @@ void pack_time(time_t val, Buf buffer) {
 
     if (remaining_buf(buffer) < sizeof(n64)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -330,9 +325,7 @@ void packdouble(double val, Buf buffer) {
     nl = HTON_uint64(uval.u);
     if (remaining_buf(buffer) < sizeof(nl)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -450,9 +443,7 @@ void pack64(uint64_t val, Buf buffer) {
 
     if (remaining_buf(buffer) < sizeof(nl)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -487,9 +478,7 @@ void pack32(uint32_t val, Buf buffer) {
 
     if (remaining_buf(buffer) < sizeof(nl)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -718,9 +707,7 @@ void pack16(uint16_t val, Buf buffer) {
 
     if (remaining_buf(buffer) < sizeof(ns)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -754,9 +741,7 @@ int unpack16(uint16_t *valp, Buf buffer) {
 void pack8(uint8_t val, Buf buffer) {
     if (remaining_buf(buffer) < sizeof(uint8_t)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -816,14 +801,12 @@ void packmem(char *valp, uint32_t size_val, Buf buffer) {
     uint32_t ns = htonl(size_val);
 
     if (size_val > MAX_PACK_MEM_LEN) {
-        error("%s: Buffer to be packed is too large (%u > %u)",
-              __func__, size_val, MAX_PACK_MEM_LEN);
+        error("%s: Buffer to be packed is too large (%u > %u)", __func__, size_val, MAX_PACK_MEM_LEN);
         return;
     }
     if (remaining_buf(buffer) < (sizeof(ns) + size_val)) {
         if ((buffer->size + size_val + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + size_val + BUF_SIZE),
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + size_val + BUF_SIZE),
                   MAX_BUF_SIZE);
             return;
         }
@@ -859,8 +842,7 @@ int unpackmem_ptr(char **valp, uint32_t *size_valp, Buf buffer) {
     buffer->processed += sizeof(ns);
 
     if (*size_valp > MAX_ARRAY_LEN_LARGE) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         if (remaining_buf(buffer) < *size_valp)
@@ -891,8 +873,7 @@ int unpackmem(char *valp, uint32_t *size_valp, Buf buffer) {
     buffer->processed += sizeof(ns);
 
     if (*size_valp > MAX_ARRAY_LEN_LARGE) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         if (remaining_buf(buffer) < *size_valp)
@@ -924,15 +905,13 @@ int unpackmem_xmalloc(char **valp, uint32_t *size_valp, Buf buffer) {
     buffer->processed += sizeof(ns);
 
     if (*size_valp > MAX_ARRAY_LEN_LARGE) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_ARRAY_LEN_LARGE);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         if (remaining_buf(buffer) < *size_valp)
             return SLURM_ERROR;
         *valp = xmalloc_nz(*size_valp);
-        memcpy(*valp, &buffer->head[buffer->processed],
-               *size_valp);
+        memcpy(*valp, &buffer->head[buffer->processed], *size_valp);
         buffer->processed += *size_valp;
     } else
         *valp = NULL;
@@ -958,8 +937,7 @@ int unpackmem_malloc(char **valp, uint32_t *size_valp, Buf buffer) {
     *size_valp = ntohl(ns);
     buffer->processed += sizeof(ns);
     if (*size_valp > MAX_ARRAY_LEN_SMALL) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_ARRAY_LEN_SMALL);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_ARRAY_LEN_SMALL);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         if (remaining_buf(buffer) < *size_valp)
@@ -969,8 +947,7 @@ int unpackmem_malloc(char **valp, uint32_t *size_valp, Buf buffer) {
             log_oom(__FILE__, __LINE__, __func__);
             abort();
         }
-        memcpy(*valp, &buffer->head[buffer->processed],
-               *size_valp);
+        memcpy(*valp, &buffer->head[buffer->processed], *size_valp);
         buffer->processed += *size_valp;
     } else
         *valp = NULL;
@@ -1002,8 +979,7 @@ int unpackstr_xmalloc_escaped(char **valp, uint32_t *size_valp, Buf buffer) {
     buffer->processed += sizeof(ns);
 
     if (*size_valp > MAX_PACK_MEM_LEN) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_PACK_MEM_LEN);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_PACK_MEM_LEN);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         uint32_t cnt = *size_valp;
@@ -1058,9 +1034,7 @@ void packstr_array(char **valp, uint32_t size_val, Buf buffer) {
 
     if (remaining_buf(buffer) < sizeof(ns)) {
         if ((buffer->size + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + BUF_SIZE),
-                  MAX_BUF_SIZE);
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + BUF_SIZE), MAX_BUF_SIZE);
             return;
         }
         buffer->size += BUF_SIZE;
@@ -1096,8 +1070,7 @@ int unpackstr_array(char ***valp, uint32_t *size_valp, Buf buffer) {
     buffer->processed += sizeof(ns);
 
     if (*size_valp > MAX_ARRAY_LEN_MEDIUM) {
-        error("%s: Buffer to be unpacked is too large (%u > %u)",
-              __func__, *size_valp, MAX_ARRAY_LEN_MEDIUM);
+        error("%s: Buffer to be unpacked is too large (%u > %u)", __func__, *size_valp, MAX_ARRAY_LEN_MEDIUM);
         return SLURM_ERROR;
     } else if (*size_valp > 0) {
         *valp = xmalloc_nz(sizeof(char *) * (*size_valp + 1));
@@ -1121,8 +1094,7 @@ int unpackstr_array(char ***valp, uint32_t *size_valp, Buf buffer) {
 void packmem_array(char *valp, uint32_t size_val, Buf buffer) {
     if (remaining_buf(buffer) < size_val) {
         if ((buffer->size + size_val + BUF_SIZE) > MAX_BUF_SIZE) {
-            error("%s: Buffer size limit exceeded (%u > %u)",
-                  __func__, (buffer->size + size_val + BUF_SIZE),
+            error("%s: Buffer size limit exceeded (%u > %u)", __func__, (buffer->size + size_val + BUF_SIZE),
                   MAX_BUF_SIZE);
             return;
         }

@@ -48,10 +48,7 @@ typedef struct slurm_mcs_ops {
 /*
  * Must be synchronized with slurm_mcs_ops_t above.
  */
-static const char *syms[] = {
-        "mcs_p_set_mcs_label",
-        "mcs_p_check_mcs_label"
-};
+static const char *syms[] = {"mcs_p_set_mcs_label", "mcs_p_check_mcs_label"};
 
 static slurm_mcs_ops_t ops;
 static plugin_context_t *g_mcs_context = NULL;
@@ -108,8 +105,7 @@ extern int slurm_mcs_init(void) {
     _slurm_mcs_check_and_load_enforced(mcs_params_common);
     _slurm_mcs_check_and_load_select(mcs_params_common);
 
-    g_mcs_context = plugin_context_create(
-            plugin_type, type, (void **) &ops, syms, sizeof(syms));
+    g_mcs_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
 
     if (!g_mcs_context) {
         error("cannot create %s context for %s", plugin_type, type);
@@ -211,10 +207,8 @@ extern int slurm_mcs_get_enforced(void) {
 }
 
 extern int slurm_mcs_get_select(struct job_record *job_ptr) {
-    if ((select_value == MCS_SELECT_SELECT) ||
-        ((select_value == MCS_SELECT_ONDEMANDSELECT) &&
-         job_ptr->details &&
-         (job_ptr->details->whole_node == WHOLE_NODE_MCS)))
+    if ((select_value == MCS_SELECT_SELECT) || ((select_value == MCS_SELECT_ONDEMANDSELECT) && job_ptr->details &&
+                                                (job_ptr->details->whole_node == WHOLE_NODE_MCS)))
         return 1;
     else
         return 0;

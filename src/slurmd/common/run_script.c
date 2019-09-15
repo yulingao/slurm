@@ -74,10 +74,8 @@ int waitpid_timeout(const char *name, pid_t pid, int *pstatus, int timeout) {
             error("waitpid: %m");
             return (-1);
         } else if (timeout_ms <= 0) {
-            info("%s%stimeout after %ds: killing pgid %d",
-                 name != NULL ? name : "",
-                 name != NULL ? ": " : "",
-                 timeout, pid);
+            info("%s%stimeout after %ds: killing pgid %d", name != NULL ? name : "", name != NULL ? ": " : "", timeout,
+                 pid);
             killpg(pid, SIGKILL);
             options = 0;
         } else {
@@ -102,9 +100,7 @@ int waitpid_timeout(const char *name, pid_t pid, int *pstatus, int timeout) {
  * uid IN: user ID of job owner
  * RET 0 on success, -1 on failure.
  */
-static int
-_run_one_script(const char *name, const char *path, uint32_t job_id,
-                int max_wait, char **env, uid_t uid) {
+static int _run_one_script(const char *name, const char *path, uint32_t job_id, int max_wait, char **env, uid_t uid) {
     int status;
     pid_t cpid;
 
@@ -113,8 +109,7 @@ _run_one_script(const char *name, const char *path, uint32_t job_id,
         return 0;
 
     if (job_id) {
-        debug("[job %u] attempting to run %s [%s]",
-              job_id, name, path);
+        debug("[job %u] attempting to run %s [%s]", job_id, name, path);
     } else
         debug("attempting to run %s [%s]", name, path);
 
@@ -136,8 +131,7 @@ _run_one_script(const char *name, const char *path, uint32_t job_id,
            detacts itself from a child before we add the pid
            to the container in the parent of the fork.
         */
-        if (container_g_join(job_id, getuid())
-            != SLURM_SUCCESS)
+        if (container_g_join(job_id, getuid()) != SLURM_SUCCESS)
             error("container_g_join(%u): %m", job_id);
 
         argv[0] = (char *) xstrdup(path);
@@ -196,8 +190,7 @@ static List _script_list_create(const char *pattern) {
     return l;
 }
 
-int run_script(const char *name, const char *pattern, uint32_t job_id,
-               int max_wait, char **env, uid_t uid) {
+int run_script(const char *name, const char *pattern, uint32_t job_id, int max_wait, char **env, uid_t uid) {
     int rc = 0;
     List l;
     ListIterator i;

@@ -40,8 +40,7 @@
 
 #include "src/common/mapping.h"
 
-static void _dump_config(uint32_t node_cnt, uint32_t task_cnt,
-                         uint16_t *tasks, uint32_t **tids, int offset) {
+static void _dump_config(uint32_t node_cnt, uint32_t task_cnt, uint16_t *tasks, uint32_t **tids, int offset) {
     int i, j;
 
     error("%s: Unable to find task offset %d", __func__, offset);
@@ -55,11 +54,7 @@ static void _dump_config(uint32_t node_cnt, uint32_t task_cnt,
 /*
  * pack_process_mapping()
  */
-char *
-pack_process_mapping(uint32_t node_cnt,
-                     uint32_t task_cnt,
-                     uint16_t *tasks,
-                     uint32_t **tids) {
+char *pack_process_mapping(uint32_t node_cnt, uint32_t task_cnt, uint16_t *tasks, uint32_t **tids) {
     int offset, i;
     int start_node, end_node;
     char *packing = NULL;
@@ -86,8 +81,7 @@ pack_process_mapping(uint32_t node_cnt,
                  * quota on this node
                  */
                 if (offset > tids[i][next_task[i]]) {
-                    _dump_config(node_cnt, task_cnt,
-                                 tasks, tids, offset);
+                    _dump_config(node_cnt, task_cnt, tasks, tids, offset);
                     abort();
                 }
                 if (offset == tids[i][next_task[i]]) {
@@ -108,8 +102,7 @@ pack_process_mapping(uint32_t node_cnt,
                 continue;
             }
 
-            for (j = next_task[i]; ((j + 1) < tasks[i])
-                                   && ((tids[i][j] + 1) == tids[i][j + 1]); j++);
+            for (j = next_task[i]; ((j + 1) < tasks[i]) && ((tids[i][j] + 1) == tids[i][j + 1]); j++);
             j++;
             /*
              * First run determines the depth
@@ -123,8 +116,7 @@ pack_process_mapping(uint32_t node_cnt,
                  * sequentially next after last tid
                  *    on the previous node
                  */
-                if (tids[i - 1][next_task[i - 1] - 1] + 1
-                    != tids[i][next_task[i]]) {
+                if (tids[i - 1][next_task[i - 1] - 1] + 1 != tids[i][next_task[i]]) {
                     end_node = i;
                     continue;
                 }
@@ -141,8 +133,7 @@ pack_process_mapping(uint32_t node_cnt,
                 end_node = i;
             }
         }
-        xstrfmtcat(packing, ",(%u,%u,%u)",
-                   start_node, end_node - start_node, depth);
+        xstrfmtcat(packing, ",(%u,%u,%u)", start_node, end_node - start_node, depth);
         offset += mapped;
     }
     xfree(next_task);
@@ -150,11 +141,7 @@ pack_process_mapping(uint32_t node_cnt,
     return packing;
 }
 
-uint32_t *
-unpack_process_mapping_flat(char *map,
-                            uint32_t node_cnt,
-                            uint32_t task_cnt,
-                            uint16_t *tasks) {
+uint32_t *unpack_process_mapping_flat(char *map, uint32_t node_cnt, uint32_t task_cnt, uint16_t *tasks) {
     /*
      * Start from the flat array. For i'th task is located
      * on the task_map[i]'th node
@@ -207,12 +194,7 @@ unpack_process_mapping: The mapping string should start from %s", prefix);
     return NULL;
 }
 
-int
-unpack_process_mapping(char *map,
-                       uint32_t node_cnt,
-                       uint32_t task_cnt,
-                       uint16_t *tasks,
-                       uint32_t **tids) {
+int unpack_process_mapping(char *map, uint32_t node_cnt, uint32_t task_cnt, uint16_t *tasks, uint32_t **tids) {
     /*
      * Start from the flat array. For i'th task is located
      * on the task_map[i]'th node

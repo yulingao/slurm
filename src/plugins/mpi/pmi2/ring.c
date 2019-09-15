@@ -225,8 +225,7 @@ static int pmix_stepd_send(const char *buf, uint32_t size, int rank) {
         retries++;
         if (retries >= MAX_RETRIES) {
             /* cancel the step to avoid tasks hang */
-            slurm_kill_job_step(job_info.jobid, job_info.stepid,
-                                SIGKILL);
+            slurm_kill_job_step(job_info.jobid, job_info.stepid, SIGKILL);
         }
 
         /* didn't succeeded, but we'll retry again,
@@ -257,8 +256,7 @@ int pmix_ring_init(const pmi2_job_info_t *job, char ***env) {
         if (width >= 2) {
             pmix_stepd_width = width;
         } else {
-            info("Invalid %s value detected (%d), using (%d).",
-                 PMIX_RING_TREE_WIDTH_ENV, width, pmix_stepd_width);
+            info("Invalid %s value detected (%d), using (%d).", PMIX_RING_TREE_WIDTH_ENV, width, pmix_stepd_width);
         }
     }
 
@@ -346,8 +344,7 @@ int pmix_ring_finalize() {
 int pmix_ring_out(int count, char *left, char *right) {
     int rc = SLURM_SUCCESS;
 
-    debug3("mpi/pmi2: in pmix_ring_out rank=%d count=%d left=%s right=%s",
-           pmix_stepd_rank, count, left, right);
+    debug3("mpi/pmi2: in pmix_ring_out rank=%d count=%d left=%s right=%s", pmix_stepd_rank, count, left, right);
 
     /* our parent will send us a pmix_ring_out message, the count value
      * contained in this message will be the rank of the first process
@@ -419,8 +416,8 @@ int pmix_ring_out(int count, char *left, char *right) {
         /* get global rank of our i-th child stepd */
         int rank = pmix_stepd_rank_child(i);
 
-        debug3("mpi/pmi2: rank=%d sending RING_OUT to rank=%d count=%d left=%s right=%s",
-               pmix_stepd_rank, rank, msg->count, msg->left, msg->right);
+        debug3("mpi/pmi2: rank=%d sending RING_OUT to rank=%d count=%d left=%s right=%s", pmix_stepd_rank, rank,
+               msg->count, msg->left, msg->right);
 
         /* send message to child */
         rc = pmix_stepd_send(get_buf_data(buf), (uint32_t) size_buf(buf), rank);
@@ -441,12 +438,8 @@ int pmix_ring_out(int count, char *left, char *right) {
 
         /* construct message and send to client */
         client_resp_t *resp = client_resp_new();
-        client_resp_append(resp, "%s=%s;%s=%d;%s=%d;%s=%s;%s=%s;",
-                           CMD_KEY, RINGRESP_CMD,
-                           RC_KEY, 0,
-                           RING_COUNT_KEY, msg->count,
-                           RING_LEFT_KEY, msg->left,
-                           RING_RIGHT_KEY, msg->right);
+        client_resp_append(resp, "%s=%s;%s=%d;%s=%d;%s=%s;%s=%s;", CMD_KEY, RINGRESP_CMD, RC_KEY, 0, RING_COUNT_KEY,
+                           msg->count, RING_LEFT_KEY, msg->left, RING_RIGHT_KEY, msg->right);
         client_resp_send(resp, STEPD_PMI_SOCK(i));
         client_resp_free(resp);
     }
@@ -495,8 +488,8 @@ int pmix_ring_in(int ring_id, int count, char *left, char *right) {
     int i;
     int rc = SLURM_SUCCESS;
 
-    debug3("mpi/pmi2: in pmix_ring_in rank=%d ring_id=%d count=%d left=%s right=%s",
-           pmix_stepd_rank, ring_id, count, left, right);
+    debug3("mpi/pmi2: in pmix_ring_in rank=%d ring_id=%d count=%d left=%s right=%s", pmix_stepd_rank, ring_id, count,
+           left, right);
 
     /* record values from child's ring_in message */
     pmix_ring_msg *msg = &pmix_ring_msgs[ring_id];
@@ -549,8 +542,8 @@ int pmix_ring_in(int ring_id, int count, char *left, char *right) {
             /* get global rank of our parent stepd */
             int rank = pmix_stepd_rank_parent();
 
-            debug3("mpi/pmi2: rank=%d sending RING_IN to rank=%d count=%d left=%s right=%s",
-                   my_rank, rank, count, leftmost, rightmost);
+            debug3("mpi/pmi2: rank=%d sending RING_IN to rank=%d count=%d left=%s right=%s", my_rank, rank, count,
+                   leftmost, rightmost);
 
             /* send message to parent */
             rc = pmix_stepd_send(get_buf_data(buf), (uint32_t) size_buf(buf), rank);

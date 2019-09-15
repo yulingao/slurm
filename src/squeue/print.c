@@ -107,12 +107,10 @@ int print_jobs_array(job_info_t *jobs, int size, List format) {
             tok = strtok_r(tmp, ",", &save_ptr);
             while (tok) {
                 if (_filter_job_part(tok) == 0) {
-                    job_rec_ptr = xmalloc(
-                            sizeof(squeue_job_rec_t));
+                    job_rec_ptr = xmalloc(sizeof(squeue_job_rec_t));
                     job_rec_ptr->job_ptr = jobs + i;
                     job_rec_ptr->part_name = xstrdup(tok);
-                    job_rec_ptr->part_prio =
-                            _part_get_prio_tier(tok);
+                    job_rec_ptr->part_prio = _part_get_prio_tier(tok);
                     list_append(l, (void *) job_rec_ptr);
                 }
                 tok = strtok_r(NULL, ",", &save_ptr);
@@ -175,8 +173,7 @@ static void _merge_job_reason(job_info_t *job_ptr, job_info_t *task_ptr) {
         return;
 
     if (!job_ptr->state_desc) {
-        job_ptr->state_desc =
-                xstrdup(job_reason_string(job_ptr->state_reason));
+        job_ptr->state_desc = xstrdup(job_reason_string(job_ptr->state_reason));
     }
     task_desc = job_reason_string(task_ptr->state_reason);
     if (strstr(job_ptr->state_desc, task_desc))
@@ -198,8 +195,7 @@ static void _combine_pending_array_tasks(List job_list) {
 
     job_iterator = list_iterator_create(job_list);
     while ((job_rec_ptr = list_next(job_iterator))) {
-        if (!IS_JOB_PENDING(job_rec_ptr->job_ptr) ||
-            !job_rec_ptr->job_ptr->array_task_str ||
+        if (!IS_JOB_PENDING(job_rec_ptr->job_ptr) || !job_rec_ptr->job_ptr->array_task_str ||
             !job_rec_ptr->job_ptr->array_bitmap)
             continue;
         update_cnt = 0;
@@ -210,26 +206,20 @@ static void _combine_pending_array_tasks(List job_list) {
             if (!IS_JOB_PENDING(task_rec_ptr->job_ptr))
                 continue;    /* Not pending */
             if ((task_rec_ptr == job_rec_ptr) ||
-                (task_rec_ptr->job_ptr->array_job_id !=
-                 job_rec_ptr->job_ptr->array_job_id) ||
-                (task_rec_ptr->job_ptr->array_task_id >=
-                 bitmap_size))
+                (task_rec_ptr->job_ptr->array_job_id != job_rec_ptr->job_ptr->array_job_id) ||
+                (task_rec_ptr->job_ptr->array_task_id >= bitmap_size))
                 continue;    /* Different job array ID */
-            if (xstrcmp(task_rec_ptr->job_ptr->name,
-                        job_rec_ptr->job_ptr->name))
+            if (xstrcmp(task_rec_ptr->job_ptr->name, job_rec_ptr->job_ptr->name))
                 continue;    /* Different name */
-            if (xstrcmp(task_rec_ptr->job_ptr->partition,
-                        job_rec_ptr->job_ptr->partition))
+            if (xstrcmp(task_rec_ptr->job_ptr->partition, job_rec_ptr->job_ptr->partition))
                 continue;    /* Different partition */
             /* Want to see each reason separately */
             if (params.array_unique_flag)
                 continue;
             /* Combine this task into master job array record */
             update_cnt++;
-            _merge_job_reason(job_rec_ptr->job_ptr,
-                              task_rec_ptr->job_ptr);
-            bit_set(task_bitmap,
-                    task_rec_ptr->job_ptr->array_task_id);
+            _merge_job_reason(job_rec_ptr->job_ptr, task_rec_ptr->job_ptr);
+            bit_set(task_bitmap, task_rec_ptr->job_ptr->array_task_id);
             list_delete_item(task_iterator);
         }
         list_iterator_destroy(task_iterator);
@@ -241,18 +231,15 @@ static void _combine_pending_array_tasks(List job_list) {
             if (bitstr_len < 0)
                 bitstr_len = 64;
             xfree(job_rec_ptr->job_ptr->array_task_str);
-            job_rec_ptr->job_ptr->array_task_str =
-                    xmalloc(bitstr_len);
+            job_rec_ptr->job_ptr->array_task_str = xmalloc(bitstr_len);
             if (bitstr_len > 0)
-                bit_fmt(job_rec_ptr->job_ptr->array_task_str,
-                        bitstr_len, task_bitmap);
+                bit_fmt(job_rec_ptr->job_ptr->array_task_str, bitstr_len, task_bitmap);
             else {
                 /* Print the full bitmap's string
                  * representation.  For huge bitmaps this can
                  * take roughly one minute, so let the client do
                  * the work */
-                job_rec_ptr->job_ptr->array_task_str =
-                        bit_fmt_full(task_bitmap);
+                job_rec_ptr->job_ptr->array_task_str = bit_fmt_full(task_bitmap);
             }
         }
     }
@@ -270,8 +257,7 @@ static uint32_t _part_get_prio_tier(char *part_name) {
     uint32_t part_prio = 1;    /* Default partition priority */
     int i;
 
-    for (i = 0, part_ptr = part_info_msg->partition_array;
-         i < part_info_msg->record_count; i++, part_ptr++) {
+    for (i = 0, part_ptr = part_info_msg->partition_array; i < part_info_msg->record_count; i++, part_ptr++) {
         if (!xstrcmp(part_ptr->name, part_name)) {
             part_prio = part_ptr->priority_tier;
             break;
@@ -362,17 +348,11 @@ int _print_secs(long time, int width, bool right, bool cut_output) {
     if ((time < 0) || (time > YEAR_SECONDS))
         snprintf(str, FORMAT_STRING_SIZE, "INVALID");
     else if (days)
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld-%2.2ld:%2.2ld:%2.2ld",
-                 days, hours, minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld-%2.2ld:%2.2ld:%2.2ld", days, hours, minutes, seconds);
     else if (hours)
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld:%2.2ld:%2.2ld",
-                 hours, minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld:%2.2ld:%2.2ld", hours, minutes, seconds);
     else
-        snprintf(str, FORMAT_STRING_SIZE,
-                 "%ld:%2.2ld",
-                 minutes, seconds);
+        snprintf(str, FORMAT_STRING_SIZE, "%ld:%2.2ld", minutes, seconds);
 
     _print_str(str, width, right, cut_output);
     return SLURM_SUCCESS;
@@ -398,10 +378,7 @@ static int _print_one_job_from_format(job_info_t *job, List list) {
     int total_width = 0;
 
     while ((current = list_next(iter))) {
-        if (current->
-                function(job, current->width, current->right_justify,
-                         current->suffix)
-            != SLURM_SUCCESS)
+        if (current->function(job, current->width, current->right_justify, current->suffix) != SLURM_SUCCESS)
             return SLURM_ERROR;
         if (current->width)
             total_width += (current->width + 1);
@@ -428,8 +405,7 @@ static int _print_job_from_format(void *x, void *arg) {
 
     if (job_rec_ptr->part_name) {
         xfree(job_rec_ptr->job_ptr->partition);
-        job_rec_ptr->job_ptr->partition = xstrdup(job_rec_ptr->
-                part_name);
+        job_rec_ptr->job_ptr->partition = xstrdup(job_rec_ptr->part_name);
 
     }
     if (job_rec_ptr->job_ptr->array_task_str && params.array_flag) {
@@ -461,9 +437,8 @@ static int _print_job_from_format(void *x, void *arg) {
     return SLURM_SUCCESS;
 }
 
-int
-job_format_add_function(List list, int width, bool right, char *suffix,
-                        int (*function)(job_info_t *, int, bool, char *)) {
+int job_format_add_function(List list, int width, bool right, char *suffix,
+                            int (*function)(job_info_t *, int, bool, char *)) {
     job_format_t *tmp = (job_format_t *) xmalloc(sizeof(job_format_t));
     tmp->function = function;
     tmp->width = width;
@@ -474,14 +449,12 @@ job_format_add_function(List list, int width, bool right, char *suffix,
     return SLURM_SUCCESS;
 }
 
-int _print_job_array_job_id(job_info_t *job, int width, bool right,
-                            char *suffix) {
+int _print_job_array_job_id(job_info_t *job, int width, bool right, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (job == NULL) {    /* Print the Header instead */
         _print_str("ARRAY_JOB_ID", width, right, true);
-    } else if (job->array_task_str ||
-               (job->array_task_id != NO_VAL)) {
+    } else if (job->array_task_str || (job->array_task_id != NO_VAL)) {
         snprintf(id, FORMAT_STRING_SIZE, "%u", job->array_job_id);
         _print_str(id, width, right, true);
     } else {
@@ -493,8 +466,7 @@ int _print_job_array_job_id(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_array_task_id(job_info_t *job, int width, bool right,
-                             char *suffix) {
+int _print_job_array_task_id(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL) {    /* Print the Header instead */
         _print_str("ARRAY_TASK_ID", width, right, true);
     } else if (job->array_task_str) {
@@ -534,8 +506,7 @@ int _print_job_burst_buffer(job_info_t *job, int width, bool right, char *suffix
     return SLURM_SUCCESS;
 }
 
-int _print_job_burst_buffer_state(job_info_t *job, int width, bool right,
-                                  char *suffix) {
+int _print_job_burst_buffer_state(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("BURST_BUFFER_STATE", width, right, true);
     else {
@@ -546,8 +517,7 @@ int _print_job_burst_buffer_state(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_cluster_name(job_info_t *job, int width, bool right,
-                            char *suffix) {
+int _print_job_cluster_name(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("CLUSTER", width, right, true);
     else
@@ -566,8 +536,7 @@ int _print_job_core_spec(job_info_t *job, int width, bool right, char *suffix) {
     } else if (job->core_spec == NO_VAL16) {
         _print_str("N/A", width, right, true);
     } else if (job->core_spec & CORE_SPEC_THREAD) {
-        snprintf(spec, FORMAT_STRING_SIZE, "%d Threads",
-                 (job->core_spec & (~CORE_SPEC_THREAD)));
+        snprintf(spec, FORMAT_STRING_SIZE, "%d Threads", (job->core_spec & (~CORE_SPEC_THREAD)));
         _print_str(spec, width, right, true);
     } else {
         _print_int(job->core_spec, width, right, true);
@@ -598,22 +567,18 @@ int _print_job_job_id(job_info_t *job, int width, bool right, char *suffix) {
         if (getenv("SLURM_BITSTR_LEN")) {
             len = strlen(job->array_task_str) + 64;
             buf = xmalloc(len);
-            sprintf(buf, "%u_[%s]", job->array_job_id,
-                    job->array_task_str);
+            sprintf(buf, "%u_[%s]", job->array_job_id, job->array_task_str);
             _print_str(buf, width, right, false);
             xfree(buf);
         } else {
-            snprintf(id, FORMAT_STRING_SIZE, "%u_[%s]",
-                     job->array_job_id, job->array_task_str);
+            snprintf(id, FORMAT_STRING_SIZE, "%u_[%s]", job->array_job_id, job->array_task_str);
             _print_str(id, width, right, true);
         }
     } else if (job->array_task_id != NO_VAL) {
-        snprintf(id, FORMAT_STRING_SIZE, "%u_%u",
-                 job->array_job_id, job->array_task_id);
+        snprintf(id, FORMAT_STRING_SIZE, "%u_%u", job->array_job_id, job->array_task_id);
         _print_str(id, width, right, true);
     } else if (job->pack_job_id) {
-        snprintf(id, FORMAT_STRING_SIZE, "%u+%u",
-                 job->pack_job_id, job->pack_job_offset);
+        snprintf(id, FORMAT_STRING_SIZE, "%u+%u", job->pack_job_id, job->pack_job_offset);
         _print_str(id, width, right, true);
     } else {
         snprintf(id, FORMAT_STRING_SIZE, "%u", job->job_id);
@@ -756,15 +721,13 @@ int _print_job_job_state(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("STATE", width, right, true);
     else
-        _print_str(job_state_string(job->job_state), width, right,
-                   true);
+        _print_str(job_state_string(job->job_state), width, right, true);
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_job_last_sched_eval(job_info_t *job, int width, bool right,
-                               char *suffix) {
+int _print_job_last_sched_eval(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("LAST_SCHED_EVAL", width, right, true);
     else
@@ -774,20 +737,17 @@ int _print_job_last_sched_eval(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_job_state_compact(job_info_t *job, int width, bool right,
-                                 char *suffix) {
+int _print_job_job_state_compact(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("ST", width, right, true);
     else
-        _print_str(job_state_string_compact(job->job_state), width,
-                   right, true);
+        _print_str(job_state_string_compact(job->job_state), width, right, true);
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_job_time_left(job_info_t *job, int width, bool right,
-                         char *suffix) {
+int _print_job_time_left(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("TIME_LEFT", width, right, true);
     else if (job->time_limit == INFINITE)
@@ -803,8 +763,7 @@ int _print_job_time_left(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_time_limit(job_info_t *job, int width, bool right,
-                          char *suffix) {
+int _print_job_time_limit(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("TIME_LIMIT", width, right, true);
     else if (job->time_limit == INFINITE)
@@ -818,8 +777,7 @@ int _print_job_time_limit(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_pack_job_offset(job_info_t *job, int width, bool right,
-                               char *suffix) {
+int _print_job_pack_job_offset(job_info_t *job, int width, bool right, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (job == NULL)    /* Print the Header instead */
@@ -835,8 +793,7 @@ int _print_job_pack_job_offset(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_pack_job_id(job_info_t *job, int width, bool right,
-                           char *suffix) {
+int _print_job_pack_job_id(job_info_t *job, int width, bool right, char *suffix) {
     char id[FORMAT_STRING_SIZE];
 
     if (job == NULL)    /* Print the Header instead */
@@ -852,8 +809,7 @@ int _print_job_pack_job_id(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_pack_job_id_set(job_info_t *job, int width, bool right,
-                               char *suffix) {
+int _print_job_pack_job_id_set(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("PACK_JOB_ID_SET", width, right, true);
     else if (job->pack_job_id == 0)
@@ -866,8 +822,7 @@ int _print_job_pack_job_id_set(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_time_used(job_info_t *job, int width, bool right,
-                         char *suffix) {
+int _print_job_time_used(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("TIME", width, right, true);
     else
@@ -892,13 +847,11 @@ long job_time_used(job_info_t *job_ptr) {
         end_time = job_ptr->end_time;
 
     if (job_ptr->suspend_time)
-        return (long) (difftime(end_time, job_ptr->suspend_time)
-                       + job_ptr->pre_sus_time);
+        return (long) (difftime(end_time, job_ptr->suspend_time) + job_ptr->pre_sus_time);
     return (long) (difftime(end_time, job_ptr->start_time));
 }
 
-int _print_job_time_submit(job_info_t *job, int width, bool right,
-                           char *suffix) {
+int _print_job_time_submit(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)        /* Print the Header instead */
         _print_str("SUBMIT_TIME", width, right, true);
     else
@@ -908,8 +861,7 @@ int _print_job_time_submit(job_info_t *job, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_job_time_start(job_info_t *job, int width, bool right,
-                          char *suffix) {
+int _print_job_time_start(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("START_TIME", width, right, true);
     else
@@ -932,8 +884,7 @@ int _print_job_deadline(job_info_t *job, int width, bool right, char *suffix) {
 int _print_job_time_end(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("END_TIME", width, right, true);
-    else if ((job->time_limit == INFINITE) &&
-             (job->end_time > time(NULL)))
+    else if ((job->time_limit == INFINITE) && (job->end_time > time(NULL)))
         _print_str("NONE", width, right, true);
     else
         _print_time(job->end_time, 0, width, right);
@@ -947,8 +898,7 @@ int _print_job_priority(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("PRIORITY", width, right, true);
     else {
-        double prio = (double) job->priority /
-                      (double) ((uint32_t) 0xffffffff);
+        double prio = (double) job->priority / (double) ((uint32_t) 0xffffffff);
         sprintf(temp, "%16.14f", prio);
         _print_str(temp, width, right, true);
     }
@@ -993,17 +943,12 @@ int _print_job_schednodes(job_info_t *job, int width, bool right, char *suffix) 
     return SLURM_SUCCESS;
 }
 
-int _print_job_reason_list(job_info_t *job, int width, bool right,
-                           char *suffix) {
+int _print_job_reason_list(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL) {    /* Print the Header instead */
         _print_str("NODELIST(REASON)", width, right, false);
-    } else if (!IS_JOB_COMPLETING(job)
-               && (IS_JOB_PENDING(job)
-                   || IS_JOB_STAGE_OUT(job)
-                   || IS_JOB_TIMEOUT(job)
-                   || IS_JOB_OOM(job)
-                   || IS_JOB_DEADLINE(job)
-                   || IS_JOB_FAILED(job))) {
+    } else if (!IS_JOB_COMPLETING(job) &&
+               (IS_JOB_PENDING(job) || IS_JOB_STAGE_OUT(job) || IS_JOB_TIMEOUT(job) || IS_JOB_OOM(job) ||
+                IS_JOB_DEADLINE(job) || IS_JOB_FAILED(job))) {
         char *reason_fmt = NULL, *reason = NULL;
         if (job->state_desc)
             reason = job->state_desc;
@@ -1053,8 +998,7 @@ int _print_job_num_cpus(job_info_t *job, int width, bool right, char *suffix) {
     return SLURM_SUCCESS;
 }
 
-int _print_job_num_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_num_nodes(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[8];
 
     if (job == NULL)    /* Print the Header instead */
@@ -1068,8 +1012,7 @@ int _print_job_num_nodes(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_num_sct(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_job_num_sct(job_info_t *job, int width, bool right_justify, char *suffix) {
     char sockets[10];
     char cores[10];
     char threads[10];
@@ -1078,20 +1021,17 @@ int _print_job_num_sct(job_info_t *job, int width, bool right_justify,
         if (job->sockets_per_node == NO_VAL16)
             strcpy(sockets, "*");
         else
-            convert_num_unit((float) job->sockets_per_node, sockets,
-                             sizeof(sockets), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->sockets_per_node, sockets, sizeof(sockets), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         if (job->cores_per_socket == NO_VAL16)
             strcpy(cores, "*");
         else
-            convert_num_unit((float) job->cores_per_socket, cores,
-                             sizeof(cores), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->cores_per_socket, cores, sizeof(cores), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         if (job->threads_per_core == NO_VAL16)
             strcpy(threads, "*");
         else
-            convert_num_unit((float) job->threads_per_core, threads,
-                             sizeof(threads), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->threads_per_core, threads, sizeof(threads), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         xstrfmtcat(sct, "%s:%s:%s", sockets, cores, threads);
         _print_str(sct, width, right_justify, true);
@@ -1118,21 +1058,18 @@ int _print_job_num_tasks(job_info_t *job, int width, bool right, char *suffix) {
     return SLURM_SUCCESS;
 }
 
-int _print_job_over_subscribe(job_info_t *job, int width, bool right_justify,
-                              char *suffix) {
+int _print_job_over_subscribe(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {    /* Print the Header instead */
         _print_str("OVER_SUBSCRIBE", width, right_justify, true);
     } else {
-        _print_str(job_share_string(job->shared),
-                   width, right_justify, true);
+        _print_str(job_share_string(job->shared), width, right_justify, true);
     }
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_job_contiguous(job_info_t *job, int width, bool right_justify,
-                          char *suffix) {
+int _print_job_contiguous(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("CONTIGUOUS", width, right_justify, true);
     else {
@@ -1144,16 +1081,13 @@ int _print_job_contiguous(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_pn_min_cpus(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_pn_min_cpus(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[8];
 
     if (job == NULL)    /* Print the Header instead */
         _print_str("MIN_CPUS", width, right_justify, true);
     else {
-        convert_num_unit((float) job->pn_min_cpus, tmp_char,
-                         sizeof(tmp_char), UNIT_NONE, NO_VAL,
-                         params.convert_flags);
+        convert_num_unit((float) job->pn_min_cpus, tmp_char, sizeof(tmp_char), UNIT_NONE, NO_VAL, params.convert_flags);
         _print_str(tmp_char, width, right_justify, true);
     }
     if (suffix)
@@ -1161,8 +1095,7 @@ int _print_pn_min_cpus(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_sockets(job_info_t *job, int width, bool right_justify,
-                   char *suffix) {
+int _print_sockets(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[8];
 
     if (job == NULL)    /* Print the Header instead */
@@ -1171,8 +1104,7 @@ int _print_sockets(job_info_t *job, int width, bool right_justify,
         if (job->sockets_per_node == NO_VAL16)
             strcpy(tmp_char, "*");
         else
-            convert_num_unit((float) job->sockets_per_node, tmp_char,
-                             sizeof(tmp_char), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->sockets_per_node, tmp_char, sizeof(tmp_char), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         _print_str(tmp_char, width, right_justify, true);
     }
@@ -1181,8 +1113,7 @@ int _print_sockets(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_cores(job_info_t *job, int width, bool right_justify,
-                 char *suffix) {
+int _print_cores(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[8];
 
     if (job == NULL)    /* Print the Header instead */
@@ -1191,8 +1122,7 @@ int _print_cores(job_info_t *job, int width, bool right_justify,
         if (job->cores_per_socket == NO_VAL16)
             strcpy(tmp_char, "*");
         else
-            convert_num_unit((float) job->cores_per_socket, tmp_char,
-                             sizeof(tmp_char), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->cores_per_socket, tmp_char, sizeof(tmp_char), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         _print_str(tmp_char, width, right_justify, true);
     }
@@ -1201,8 +1131,7 @@ int _print_cores(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_threads(job_info_t *job, int width, bool right_justify,
-                   char *suffix) {
+int _print_threads(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[8];
 
     if (job == NULL)    /* Print the Header instead */
@@ -1211,8 +1140,7 @@ int _print_threads(job_info_t *job, int width, bool right_justify,
         if (job->threads_per_core == NO_VAL16)
             strcpy(tmp_char, "*");
         else
-            convert_num_unit((float) job->threads_per_core, tmp_char,
-                             sizeof(tmp_char), UNIT_NONE, NO_VAL,
+            convert_num_unit((float) job->threads_per_core, tmp_char, sizeof(tmp_char), UNIT_NONE, NO_VAL,
                              params.convert_flags);
         _print_str(tmp_char, width, right_justify, true);
     }
@@ -1221,17 +1149,14 @@ int _print_threads(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_pn_min_memory(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_pn_min_memory(job_info_t *job, int width, bool right_justify, char *suffix) {
     char min_mem[10];
 
     if (job == NULL)    /* Print the Header instead */
         _print_str("MIN_MEMORY", width, right_justify, true);
     else {
         job->pn_min_memory &= (~MEM_PER_CPU);
-        convert_num_unit((float) job->pn_min_memory, min_mem,
-                         sizeof(min_mem), UNIT_MEGA, NO_VAL,
-                         params.convert_flags);
+        convert_num_unit((float) job->pn_min_memory, min_mem, sizeof(min_mem), UNIT_MEGA, NO_VAL, params.convert_flags);
         _print_str(min_mem, width, right_justify, true);
     }
 
@@ -1240,16 +1165,13 @@ int _print_pn_min_memory(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int
-_print_pn_min_tmp_disk(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_pn_min_tmp_disk(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_char[10];
 
     if (job == NULL)    /* Print the Header instead */
         _print_str("MIN_TMP_DISK", width, right_justify, true);
     else {
-        convert_num_unit((float) job->pn_min_tmp_disk, tmp_char,
-                         sizeof(tmp_char), UNIT_MEGA, NO_VAL,
+        convert_num_unit((float) job->pn_min_tmp_disk, tmp_char, sizeof(tmp_char), UNIT_MEGA, NO_VAL,
                          params.convert_flags);
         _print_str(tmp_char, width, right_justify, true);
     }
@@ -1259,8 +1181,7 @@ _print_pn_min_tmp_disk(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_req_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_req_nodes(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("REQ_NODES", width, right_justify, true);
     else
@@ -1270,8 +1191,7 @@ int _print_job_req_nodes(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_exc_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_exc_nodes(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("EXC_NODES", width, right_justify, true);
     else
@@ -1281,18 +1201,14 @@ int _print_job_exc_nodes(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int
-_print_job_req_node_inx(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_req_node_inx(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("REQ_NODES_BY_INX", width, right_justify, true);
     else {
         int *current = job->req_node_inx;
         int curr_width = 0;
         while (*current != -1 && curr_width < width) {
-            curr_width +=
-                    _print_int(*current, width, right_justify,
-                               true);
+            curr_width += _print_int(*current, width, right_justify, true);
             printf(",");
         }
         while (curr_width < width)
@@ -1303,18 +1219,14 @@ _print_job_req_node_inx(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int
-_print_job_exc_node_inx(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_exc_node_inx(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("EXC_NODES_BY_INX", width, right_justify, true);
     else {
         int *current = job->exc_node_inx;
         int curr_width = 0;
         while (*current != -1 && curr_width < width) {
-            curr_width +=
-                    _print_int(*current, width, right_justify,
-                               true);
+            curr_width += _print_int(*current, width, right_justify, true);
             printf(",");
         }
         while (curr_width < width)
@@ -1325,8 +1237,7 @@ _print_job_exc_node_inx(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_features(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_features(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("FEATURES", width, right_justify, true);
     else
@@ -1336,8 +1247,7 @@ int _print_job_features(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_cluster_features(job_info_t *job, int width, bool right_justify,
-                                char *suffix) {
+int _print_job_cluster_features(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("CLUSTER_FEATURES", width, right_justify, true);
     else
@@ -1347,8 +1257,7 @@ int _print_job_cluster_features(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_account(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_job_account(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("ACCOUNT", width, right_justify, true);
     else
@@ -1358,8 +1267,7 @@ int _print_job_account(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_admin_comment(job_info_t *job, int width, bool right_justify,
-                             char *suffix) {
+int _print_job_admin_comment(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("ADMIN_COMMENT", width, right_justify, true);
     else
@@ -1369,8 +1277,7 @@ int _print_job_admin_comment(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_system_comment(job_info_t *job, int width, bool right_justify,
-                              char *suffix) {
+int _print_job_system_comment(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("SYSTEM_COMMENT", width, right_justify, true);
     else
@@ -1380,8 +1287,7 @@ int _print_job_system_comment(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_comment(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_job_comment(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("COMMENT", width, right_justify, true);
     else
@@ -1391,8 +1297,7 @@ int _print_job_comment(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_dependency(job_info_t *job, int width, bool right_justify,
-                          char *suffix) {
+int _print_job_dependency(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)    /* Print the Header instead */
         _print_str("DEPENDENCY", width, right_justify, true);
     else if (job->dependency)
@@ -1404,8 +1309,7 @@ int _print_job_dependency(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_qos(job_info_t *job, int width, bool right_justify,
-                   char *suffix) {
+int _print_job_qos(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("QOS", width, right_justify, true);
     else
@@ -1415,16 +1319,13 @@ int _print_job_qos(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_select_jobinfo(job_info_t *job, int width, bool right_justify,
-                              char *suffix) {
+int _print_job_select_jobinfo(job_info_t *job, int width, bool right_justify, char *suffix) {
     char select_buf[100];
 
     if (job == NULL)    /* Print the Header instead */
-        select_g_select_jobinfo_sprint(NULL,
-                                       select_buf, sizeof(select_buf), SELECT_PRINT_HEAD);
+        select_g_select_jobinfo_sprint(NULL, select_buf, sizeof(select_buf), SELECT_PRINT_HEAD);
     else
-        select_g_select_jobinfo_sprint(job->select_jobinfo,
-                                       select_buf, sizeof(select_buf), SELECT_PRINT_DATA);
+        select_g_select_jobinfo_sprint(job->select_jobinfo, select_buf, sizeof(select_buf), SELECT_PRINT_DATA);
     _print_str(select_buf, width, right_justify, true);
 
     if (suffix)
@@ -1432,8 +1333,7 @@ int _print_job_select_jobinfo(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_reservation(job_info_t *job, int width, bool right_justify,
-                           char *suffix) {
+int _print_job_reservation(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)     /* Print the Header instead */
         _print_str("RESERVATION", width, right_justify, true);
     else
@@ -1443,8 +1343,7 @@ int _print_job_reservation(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_command(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_job_command(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("COMMAND", width, right_justify, true);
     else
@@ -1454,8 +1353,7 @@ int _print_job_command(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_work_dir(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_work_dir(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("WORK_DIR", width, right_justify, true);
     else
@@ -1465,8 +1363,7 @@ int _print_job_work_dir(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_nice(job_info_t *job, int width, bool right_justify,
-                    char *suffix) {
+int _print_job_nice(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NICE", width, right_justify, true);
     else {
@@ -1479,8 +1376,7 @@ int _print_job_nice(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_accrue_time(job_info_t *job, int width, bool right_justify,
-                           char *suffix) {
+int _print_job_accrue_time(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ACCRUE_TIME", width, right_justify, true);
     else {
@@ -1492,8 +1388,7 @@ int _print_job_accrue_time(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_alloc_nodes(job_info_t *job, int width, bool right_justify,
-                           char *suffix) {
+int _print_job_alloc_nodes(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ALLOC_NODES", width, right_justify, true);
     else
@@ -1504,8 +1399,7 @@ int _print_job_alloc_nodes(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_alloc_sid(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_alloc_sid(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ALLOC_SID", width, right_justify, true);
     else
@@ -1516,8 +1410,7 @@ int _print_job_alloc_sid(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_assoc_id(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_assoc_id(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ASSOC_ID", width, right_justify, true);
     else
@@ -1529,8 +1422,7 @@ int _print_job_assoc_id(job_info_t *job, int width, bool right_justify,
 
 }
 
-int _print_job_batch_flag(job_info_t *job, int width, bool right_justify,
-                          char *suffix) {
+int _print_job_batch_flag(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("BATCH_FLAG", width, right_justify, true);
     else
@@ -1541,8 +1433,7 @@ int _print_job_batch_flag(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_boards_per_node(job_info_t *job, int width, bool right_justify,
-                               char *suffix) {
+int _print_job_boards_per_node(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("BOARDS_PER_NODE", width, right_justify, true);
     else if (job->boards_per_node == NO_VAL16)
@@ -1555,8 +1446,7 @@ int _print_job_boards_per_node(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify,
-                             char *suffix) {
+int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("CPUS_PER_TASK", width, right_justify, true);
     else if (job->cpus_per_task == NO_VAL16)
@@ -1569,8 +1459,7 @@ int _print_job_cpus_per_task(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_derived_ec(job_info_t *job, int width, bool right_justify,
-                          char *suffix) {
+int _print_job_derived_ec(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("DERIVED_EC", width, right_justify, true);
     else
@@ -1582,8 +1471,7 @@ int _print_job_derived_ec(job_info_t *job, int width, bool right_justify,
 
 }
 
-int _print_job_eligible_time(job_info_t *job, int width, bool right_justify,
-                             char *suffix) {
+int _print_job_eligible_time(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ELIGIBLE_TIME", width, right_justify, true);
     else {
@@ -1595,8 +1483,7 @@ int _print_job_eligible_time(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_exit_code(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_exit_code(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("EXIT_CODE", width, right_justify, true);
     else
@@ -1607,14 +1494,12 @@ int _print_job_exit_code(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_origin(job_info_t *job, int width, bool right_justify,
-                          char *suffix) {
+int _print_job_fed_origin(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ORIGIN", width, right_justify, true);
     else {
         if (job->fed_origin_str)
-            _print_str(job->fed_origin_str, width, right_justify,
-                       true);
+            _print_str(job->fed_origin_str, width, right_justify, true);
         else
             _print_str("NA", width, right_justify, true);
     }
@@ -1624,8 +1509,7 @@ int _print_job_fed_origin(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_origin_raw(job_info_t *job, int width, bool right_justify,
-                              char *suffix) {
+int _print_job_fed_origin_raw(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ORIGIN_RAW", width, right_justify, true);
     else {
@@ -1641,14 +1525,12 @@ int _print_job_fed_origin_raw(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_siblings_active(job_info_t *job, int width,
-                                   bool right_justify, char *suffix) {
+int _print_job_fed_siblings_active(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ACTIVE_SIBLINGS", width, right_justify, true);
     else {
         if (job->fed_siblings_active_str)
-            _print_str(job->fed_siblings_active_str, width, right_justify,
-                       true);
+            _print_str(job->fed_siblings_active_str, width, right_justify, true);
         else
             _print_str("NA", width, right_justify, true);
     }
@@ -1658,8 +1540,7 @@ int _print_job_fed_siblings_active(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_siblings_active_raw(job_info_t *job, int width,
-                                       bool right_justify, char *suffix) {
+int _print_job_fed_siblings_active_raw(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("ACTIVE_SIBLINGS_RAW", width, right_justify, true);
     else {
@@ -1684,14 +1565,12 @@ int _print_job_fed_siblings_active_raw(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_siblings_viable(job_info_t *job, int width,
-                                   bool right_justify, char *suffix) {
+int _print_job_fed_siblings_viable(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("VIABLE_SIBLINGS", width, right_justify, true);
     else {
         if (job->fed_siblings_viable_str)
-            _print_str(job->fed_siblings_viable_str, width,
-                       right_justify, true);
+            _print_str(job->fed_siblings_viable_str, width, right_justify, true);
         else
             _print_str("NA", width, right_justify, true);
     }
@@ -1701,8 +1580,7 @@ int _print_job_fed_siblings_viable(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_fed_siblings_viable_raw(job_info_t *job, int width,
-                                       bool right_justify, char *suffix) {
+int _print_job_fed_siblings_viable_raw(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("VIALBLE_SIBLINGS_RAW", width, right_justify, true);
     else {
@@ -1727,8 +1605,7 @@ int _print_job_fed_siblings_viable_raw(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_max_cpus(job_info_t *job, int width, bool right_justify,
-                        char *suffix) {
+int _print_job_max_cpus(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("MAX_CPUS", width, right_justify, true);
     else if (job->max_cpus != 0)
@@ -1741,8 +1618,7 @@ int _print_job_max_cpus(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_max_nodes(job_info_t *job, int width, bool right_justify,
-                         char *suffix) {
+int _print_job_max_nodes(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("MAX_NODES", width, right_justify, true);
     else if (job->max_nodes != 0)
@@ -1755,8 +1631,7 @@ int _print_job_max_nodes(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_network(job_info_t *job, int width, bool right_justify,
-                       char *suffix) {
+int _print_job_network(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NETWORK", width, right_justify, true);
     else
@@ -1767,12 +1642,10 @@ int _print_job_network(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_ntasks_per_core(job_info_t *job, int width, bool right_justify,
-                               char *suffix) {
+int _print_job_ntasks_per_core(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NTASKS_PER_CORE", width, right_justify, true);
-    else if ((job->ntasks_per_core == NO_VAL16) ||
-             (job->ntasks_per_core == INFINITE16))
+    else if ((job->ntasks_per_core == NO_VAL16) || (job->ntasks_per_core == INFINITE16))
         _print_str("N/A", width, right_justify, true);
     else
         _print_int(job->ntasks_per_core, width, right_justify, true);
@@ -1782,12 +1655,10 @@ int _print_job_ntasks_per_core(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_ntasks_per_node(job_info_t *job, int width, bool right_justify,
-                               char *suffix) {
+int _print_job_ntasks_per_node(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NTASKS_PER_NODE", width, right_justify, true);
-    else if ((job->ntasks_per_node == NO_VAL16) ||
-             (job->ntasks_per_node == INFINITE16))
+    else if ((job->ntasks_per_node == NO_VAL16) || (job->ntasks_per_node == INFINITE16))
         _print_str("N/A", width, right_justify, true);
     else
         _print_int(job->ntasks_per_node, width, right_justify, true);
@@ -1797,12 +1668,10 @@ int _print_job_ntasks_per_node(job_info_t *job, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_job_ntasks_per_socket(job_info_t *job, int width,
-                                 bool right_justify, char *suffix) {
+int _print_job_ntasks_per_socket(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NTASKS_PER_SOCKET", width, right_justify, true);
-    else if ((job->ntasks_per_socket == NO_VAL16) ||
-             (job->ntasks_per_socket == INFINITE16))
+    else if ((job->ntasks_per_socket == NO_VAL16) || (job->ntasks_per_socket == INFINITE16))
         _print_str("N/A", width, right_justify, true);
     else
         _print_int(job->ntasks_per_socket, width, right_justify, true);
@@ -1812,12 +1681,10 @@ int _print_job_ntasks_per_socket(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_ntasks_per_board(job_info_t *job, int width,
-                                bool right_justify, char *suffix) {
+int _print_job_ntasks_per_board(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("NTASKS_PER_BOARD", width, right_justify, true);
-    else if ((job->ntasks_per_board == NO_VAL16) ||
-             (job->ntasks_per_board == INFINITE16))
+    else if ((job->ntasks_per_board == NO_VAL16) || (job->ntasks_per_board == INFINITE16))
         _print_str("N/A", width, right_justify, true);
     else
         _print_int(job->ntasks_per_board, width, right_justify, true);
@@ -1827,8 +1694,7 @@ int _print_job_ntasks_per_board(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_preempt_time(job_info_t *job, int width,
-                            bool right_justify, char *suffix) {
+int _print_job_preempt_time(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("PREEMPT_TIME", width, right_justify, true);
     else if (job->preempt_time == INFINITE)
@@ -1844,20 +1710,17 @@ int _print_job_preempt_time(job_info_t *job, int width,
 
 }
 
-int _print_job_profile(job_info_t *job, int width,
-                       bool right_justify, char *suffix) {
+int _print_job_profile(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("PROFILE", width, right_justify, true);
     else
-        _print_str(acct_gather_profile_to_string(job->profile),
-                   width, right_justify, true);
+        _print_str(acct_gather_profile_to_string(job->profile), width, right_justify, true);
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_job_reboot(job_info_t *job, int width,
-                      bool right_justify, char *suffix) {
+int _print_job_reboot(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("REBOOT", width, right_justify, true);
     else
@@ -1868,8 +1731,7 @@ int _print_job_reboot(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_req_switch(job_info_t *job, int width,
-                          bool right_justify, char *suffix) {
+int _print_job_req_switch(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("REQ_SWITCH", width, right_justify, true);
     else
@@ -1880,8 +1742,7 @@ int _print_job_req_switch(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_requeue(job_info_t *job, int width,
-                       bool right_justify, char *suffix) {
+int _print_job_requeue(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("REQUEUE", width, right_justify, true);
     else
@@ -1893,8 +1754,7 @@ int _print_job_requeue(job_info_t *job, int width,
 
 }
 
-int _print_job_resize_time(job_info_t *job, int width,
-                           bool right_justify, char *suffix) {
+int _print_job_resize_time(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("RESIZE_TIME", width, right_justify, true);
     else if (job->resize_time)
@@ -1908,8 +1768,7 @@ int _print_job_resize_time(job_info_t *job, int width,
 
 }
 
-int _print_job_restart_cnt(job_info_t *job, int width,
-                           bool right_justify, char *suffix) {
+int _print_job_restart_cnt(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("RESTART_COUNT", width, right_justify, true);
     else
@@ -1920,8 +1779,7 @@ int _print_job_restart_cnt(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_sockets_per_board(job_info_t *job, int width,
-                                 bool right_justify, char *suffix) {
+int _print_job_sockets_per_board(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("SOCKETS_PER_BOARD", width, right_justify, true);
     else
@@ -1933,8 +1791,7 @@ int _print_job_sockets_per_board(job_info_t *job, int width,
 
 }
 
-int _print_job_std_err(job_info_t *job, int width,
-                       bool right_justify, char *suffix) {
+int _print_job_std_err(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_line[1024];
 
     if (job == NULL)
@@ -1946,8 +1803,7 @@ int _print_job_std_err(job_info_t *job, int width,
     else if (job->std_out)
         _print_str(job->std_out, width, right_justify, true);
     else {
-        snprintf(tmp_line, sizeof(tmp_line), "%s/slurm-%u.out",
-                 job->work_dir, job->job_id);
+        snprintf(tmp_line, sizeof(tmp_line), "%s/slurm-%u.out", job->work_dir, job->job_id);
 
         _print_str(tmp_line, width, right_justify, true);
     }
@@ -1957,8 +1813,7 @@ int _print_job_std_err(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_std_in(job_info_t *job, int width,
-                      bool right_justify, char *suffix) {
+int _print_job_std_in(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("STDIN", width, right_justify, true);
     else
@@ -1970,8 +1825,7 @@ int _print_job_std_in(job_info_t *job, int width,
 
 }
 
-int _print_job_std_out(job_info_t *job, int width,
-                       bool right_justify, char *suffix) {
+int _print_job_std_out(job_info_t *job, int width, bool right_justify, char *suffix) {
     char tmp_line[1024];
 
     if (job == NULL)
@@ -1979,8 +1833,7 @@ int _print_job_std_out(job_info_t *job, int width,
     else if (job->std_out)
         _print_str(job->std_out, width, right_justify, true);
     else {
-        snprintf(tmp_line, sizeof(tmp_line), "%s/slurm-%u.out",
-                 job->work_dir, job->job_id);
+        snprintf(tmp_line, sizeof(tmp_line), "%s/slurm-%u.out", job->work_dir, job->job_id);
 
         _print_str(tmp_line, width, right_justify, true);
     }
@@ -1990,8 +1843,7 @@ int _print_job_std_out(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_min_time(job_info_t *job, int width,
-                        bool right_justify, char *suffix) {
+int _print_job_min_time(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("TIME_MIN", width, right_justify, true);
     else
@@ -2002,30 +1854,25 @@ int _print_job_min_time(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_wait4switch(job_info_t *job, int width,
-                           bool right_justify, char *suffix) {
+int _print_job_wait4switch(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL)
         _print_str("WAIT4SWITCH", width, right_justify, true);
     else
-        _print_secs(job->wait4switch,
-                    width, right_justify, true);
+        _print_secs(job->wait4switch, width, right_justify, true);
 
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_job_cpus_per_tres(job_info_t *job, int width,
-                             bool right_justify, char *suffix) {
+int _print_job_cpus_per_tres(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("CPUS_PER_TRES", width, right_justify, true);
     } else {
         if (job->cpus_per_tres)
-            _print_str(job->cpus_per_tres, width,
-                       right_justify, true);
+            _print_str(job->cpus_per_tres, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2033,17 +1880,14 @@ int _print_job_cpus_per_tres(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_mem_per_tres(job_info_t *job, int width,
-                            bool right_justify, char *suffix) {
+int _print_job_mem_per_tres(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("MEM_PER_TRES", width, right_justify, true);
     } else {
         if (job->mem_per_tres)
-            _print_str(job->mem_per_tres, width,
-                       right_justify, true);
+            _print_str(job->mem_per_tres, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2051,20 +1895,16 @@ int _print_job_mem_per_tres(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_alloc(job_info_t *job, int width,
-                          bool right_justify, char *suffix) {
+int _print_job_tres_alloc(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_ALLOC", width, right_justify, true);
     } else {
         if (job->tres_alloc_str)
-            _print_str(job->tres_alloc_str, width,
-                       right_justify, true);
+            _print_str(job->tres_alloc_str, width, right_justify, true);
         else if (job->tres_req_str)
-            _print_str(job->tres_req_str, width,
-                       right_justify, true);
+            _print_str(job->tres_req_str, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2072,17 +1912,14 @@ int _print_job_tres_alloc(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_bind(job_info_t *job, int width,
-                         bool right_justify, char *suffix) {
+int _print_job_tres_bind(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_BIND", width, right_justify, true);
     } else {
         if (job->tres_bind)
-            _print_str(job->tres_bind, width,
-                       right_justify, true);
+            _print_str(job->tres_bind, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2090,17 +1927,14 @@ int _print_job_tres_bind(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_freq(job_info_t *job, int width,
-                         bool right_justify, char *suffix) {
+int _print_job_tres_freq(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_FREQ", width, right_justify, true);
     } else {
         if (job->tres_freq)
-            _print_str(job->tres_freq, width,
-                       right_justify, true);
+            _print_str(job->tres_freq, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2108,17 +1942,14 @@ int _print_job_tres_freq(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_per_job(job_info_t *job, int width,
-                            bool right_justify, char *suffix) {
+int _print_job_tres_per_job(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_PER_JOB", width, right_justify, true);
     } else {
         if (job->tres_per_job)
-            _print_str(job->tres_per_job, width,
-                       right_justify, true);
+            _print_str(job->tres_per_job, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2126,17 +1957,14 @@ int _print_job_tres_per_job(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_per_node(job_info_t *job, int width,
-                             bool right_justify, char *suffix) {
+int _print_job_tres_per_node(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_PER_NODE", width, right_justify, true);
     } else {
         if (job->tres_per_node)
-            _print_str(job->tres_per_node, width,
-                       right_justify, true);
+            _print_str(job->tres_per_node, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2144,17 +1972,14 @@ int _print_job_tres_per_node(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_per_socket(job_info_t *job, int width,
-                               bool right_justify, char *suffix) {
+int _print_job_tres_per_socket(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_PER_SOCKET", width, right_justify, true);
     } else {
         if (job->tres_per_socket)
-            _print_str(job->tres_per_socket, width,
-                       right_justify, true);
+            _print_str(job->tres_per_socket, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2162,17 +1987,14 @@ int _print_job_tres_per_socket(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_tres_per_task(job_info_t *job, int width,
-                             bool right_justify, char *suffix) {
+int _print_job_tres_per_task(job_info_t *job, int width, bool right_justify, char *suffix) {
     if (job == NULL) {
         _print_str("TRES_PER_TASK", width, right_justify, true);
     } else {
         if (job->tres_per_task)
-            _print_str(job->tres_per_task, width,
-                       right_justify, true);
+            _print_str(job->tres_per_task, width, right_justify, true);
         else
-            _print_str("N/A", width,
-                       right_justify, true);
+            _print_str("N/A", width, right_justify, true);
 
     }
     if (suffix)
@@ -2180,8 +2002,7 @@ int _print_job_tres_per_task(job_info_t *job, int width,
     return SLURM_SUCCESS;
 }
 
-int _print_job_mcs_label(job_info_t *job, int width,
-                         bool right, char *suffix) {
+int _print_job_mcs_label(job_info_t *job, int width, bool right, char *suffix) {
     if (job == NULL)
         _print_str("MCSLABEL", width, right, true);
     else
@@ -2203,10 +2024,7 @@ static int _print_step_from_format(void *x, void *arg) {
     int total_width = 0;
 
     while ((current = list_next(i))) {
-        if (current->
-                function(job_step, current->width,
-                         current->right_justify, current->suffix)
-            != SLURM_SUCCESS)
+        if (current->function(job_step, current->width, current->right_justify, current->suffix) != SLURM_SUCCESS)
             return SLURM_ERROR;
         if (current->width)
             total_width += current->width;
@@ -2219,12 +2037,9 @@ static int _print_step_from_format(void *x, void *arg) {
     return SLURM_SUCCESS;
 }
 
-int
-step_format_add_function(List list, int width, bool right_justify,
-                         char *suffix,
-                         int (*function)(job_step_info_t *, int, bool, char *)) {
-    step_format_t *tmp =
-            (step_format_t *) xmalloc(sizeof(step_format_t));
+int step_format_add_function(List list, int width, bool right_justify, char *suffix,
+                             int (*function)(job_step_info_t *, int, bool, char *)) {
+    step_format_t *tmp = (step_format_t *) xmalloc(sizeof(step_format_t));
     tmp->function = function;
     tmp->width = width;
     tmp->right_justify = right_justify;
@@ -2234,8 +2049,7 @@ step_format_add_function(List list, int width, bool right_justify,
     return SLURM_SUCCESS;
 }
 
-int _print_step_cluster_name(job_step_info_t *step, int width, bool right,
-                             char *suffix) {
+int _print_step_cluster_name(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("CLUSTER", width, right, true);
     else
@@ -2253,33 +2067,24 @@ int _print_step_id(job_step_info_t *step, int width, bool right, char *suffix) {
         _print_str("STEPID", width, right, true);
     } else if (step->array_job_id) {
         if (step->step_id == SLURM_PENDING_STEP) {    /* Pending */
-            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.TBD",
-                     step->array_job_id, step->array_task_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.TBD", step->array_job_id, step->array_task_id);
         } else if (step->step_id == SLURM_EXTERN_CONT) {
-            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.Extern",
-                     step->array_job_id, step->array_task_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.Extern", step->array_job_id, step->array_task_id);
         } else if (step->step_id == SLURM_BATCH_SCRIPT) {
-            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.Batch",
-                     step->array_job_id, step->array_task_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.Batch", step->array_job_id, step->array_task_id);
         } else {
-            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.%u",
-                     step->array_job_id, step->array_task_id,
-                     step->step_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u_%u.%u", step->array_job_id, step->array_task_id, step->step_id);
         }
         _print_str(id, width, right, true);
     } else {
         if (step->step_id == SLURM_PENDING_STEP) {    /* Pending */
-            snprintf(id, FORMAT_STRING_SIZE, "%u.TBD",
-                     step->job_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u.TBD", step->job_id);
         } else if (step->step_id == SLURM_EXTERN_CONT) {
-            snprintf(id, FORMAT_STRING_SIZE, "%u.Extern",
-                     step->job_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u.Extern", step->job_id);
         } else if (step->step_id == SLURM_BATCH_SCRIPT) {
-            snprintf(id, FORMAT_STRING_SIZE, "%u.Batch",
-                     step->job_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u.Batch", step->job_id);
         } else {
-            snprintf(id, FORMAT_STRING_SIZE, "%u.%u",
-                     step->job_id, step->step_id);
+            snprintf(id, FORMAT_STRING_SIZE, "%u.%u", step->job_id, step->step_id);
         }
         _print_str(id, width, right, true);
     }
@@ -2288,8 +2093,7 @@ int _print_step_id(job_step_info_t *step, int width, bool right, char *suffix) {
     return SLURM_SUCCESS;
 }
 
-int _print_step_partition(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_partition(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("PARTITION", width, right, true);
     else {
@@ -2300,15 +2104,13 @@ int _print_step_partition(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_prefix(job_step_info_t *step, int width, bool right,
-                       char *suffix) {
+int _print_step_prefix(job_step_info_t *step, int width, bool right, char *suffix) {
     if (suffix)
         printf("%s", suffix);
     return SLURM_SUCCESS;
 }
 
-int _print_step_user_id(job_step_info_t *step, int width, bool right,
-                        char *suffix) {
+int _print_step_user_id(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("UID", width, right, true);
     else
@@ -2318,8 +2120,7 @@ int _print_step_user_id(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_user_name(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_user_name(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("USER", width, right, true);
     else {
@@ -2331,8 +2132,7 @@ int _print_step_user_name(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_time_limit(job_step_info_t *step, int width, bool right,
-                           char *suffix) {
+int _print_step_time_limit(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("TIME_LIMIT", width, right, true);
     else if (step->time_limit == INFINITE)
@@ -2344,8 +2144,7 @@ int _print_step_time_limit(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_time_start(job_step_info_t *step, int width, bool right,
-                           char *suffix) {
+int _print_step_time_start(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("START_TIME", width, false, true);
     else
@@ -2355,8 +2154,7 @@ int _print_step_time_start(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_time_used(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_time_used(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("TIME", width, right, true);
     else {
@@ -2368,8 +2166,7 @@ int _print_step_time_used(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_name(job_step_info_t *step, int width, bool right,
-                     char *suffix) {
+int _print_step_name(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("NAME", width, right, true);
     else
@@ -2379,8 +2176,7 @@ int _print_step_name(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_nodes(job_step_info_t *step, int width, bool right,
-                      char *suffix) {
+int _print_step_nodes(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("NODELIST", width, right, false);
     else
@@ -2391,8 +2187,7 @@ int _print_step_nodes(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_num_tasks(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_num_tasks(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)    /* Print the Header instead */
         _print_str("TASKS", width, right, true);
     else
@@ -2402,8 +2197,7 @@ int _print_step_num_tasks(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_array_job_id(job_step_info_t *step, int width, bool right,
-                             char *suffix) {
+int _print_step_array_job_id(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("ARRAY_JOB_ID", width, right, true);
     else if (step->array_job_id != NO_VAL)
@@ -2416,8 +2210,7 @@ int _print_step_array_job_id(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_array_task_id(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_array_task_id(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("ARRAY_TASK_ID", width, right, true);
     else if (step->array_task_id != NO_VAL)
@@ -2430,8 +2223,7 @@ int _print_step_array_task_id(job_step_info_t *step, int width, bool right,
 
 }
 
-int _print_step_chpt_dir(job_step_info_t *step, int width, bool right,
-                         char *suffix) {
+int _print_step_chpt_dir(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("CHECKPOINT_DIR", width, right, true);
     else
@@ -2443,8 +2235,7 @@ int _print_step_chpt_dir(job_step_info_t *step, int width, bool right,
 
 }
 
-int _print_step_chpt_interval(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_chpt_interval(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("CHECKPOINT_INTERVAL", width, right, true);
     else
@@ -2455,8 +2246,7 @@ int _print_step_chpt_interval(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_job_id(job_step_info_t *step, int width, bool right,
-                       char *suffix) {
+int _print_step_job_id(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("JOB_ID", width, right, true);
     else
@@ -2467,8 +2257,7 @@ int _print_step_job_id(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_network(job_step_info_t *step, int width, bool right,
-                        char *suffix) {
+int _print_step_network(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("NETWORK", width, right, true);
     else
@@ -2479,8 +2268,7 @@ int _print_step_network(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_node_inx(job_step_info_t *step, int width, bool right,
-                         char *suffix) {
+int _print_step_node_inx(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("NODE_INDEX", width, right, true);
     else {
@@ -2501,8 +2289,7 @@ int _print_step_node_inx(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_num_cpus(job_step_info_t *step, int width, bool right,
-                         char *suffix) {
+int _print_step_num_cpus(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("NUM_CPUS", width, right, true);
     else
@@ -2513,8 +2300,7 @@ int _print_step_num_cpus(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_cpu_freq(job_step_info_t *step, int width, bool right,
-                         char *suffix) {
+int _print_step_cpu_freq(job_step_info_t *step, int width, bool right, char *suffix) {
     char bfm[16], bfx[16], bfg[16], bfall[48];
 
     if (step == NULL) {
@@ -2534,8 +2320,7 @@ int _print_step_cpu_freq(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_resv_ports(job_step_info_t *step, int width, bool right,
-                           char *suffix) {
+int _print_step_resv_ports(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("RESERVED_PORTS", width, right, true);
     else
@@ -2546,8 +2331,7 @@ int _print_step_resv_ports(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_state(job_step_info_t *step, int width, bool right,
-                      char *suffix) {
+int _print_step_state(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("STATE", width, right, true);
     else
@@ -2558,8 +2342,7 @@ int _print_step_state(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_cpus_per_tres(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_cpus_per_tres(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("CPUS_PER_TRES", width, right, true);
     else
@@ -2570,8 +2353,7 @@ int _print_step_cpus_per_tres(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_mem_per_tres(job_step_info_t *step, int width, bool right,
-                             char *suffix) {
+int _print_step_mem_per_tres(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("MEM_PER_TRES", width, right, true);
     else
@@ -2582,8 +2364,7 @@ int _print_step_mem_per_tres(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_bind(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_tres_bind(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_BIND", width, right, true);
     else
@@ -2594,8 +2375,7 @@ int _print_step_tres_bind(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_freq(job_step_info_t *step, int width, bool right,
-                          char *suffix) {
+int _print_step_tres_freq(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_FREQ", width, right, true);
     else
@@ -2606,8 +2386,7 @@ int _print_step_tres_freq(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_per_step(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_tres_per_step(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_PER_STEP", width, right, true);
     else
@@ -2618,8 +2397,7 @@ int _print_step_tres_per_step(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_per_node(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_tres_per_node(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_PER_JOB", width, right, true);
     else
@@ -2630,8 +2408,7 @@ int _print_step_tres_per_node(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_per_socket(job_step_info_t *step, int width, bool right,
-                                char *suffix) {
+int _print_step_tres_per_socket(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_PER_SOCKET", width, right, true);
     else
@@ -2642,8 +2419,7 @@ int _print_step_tres_per_socket(job_step_info_t *step, int width, bool right,
     return SLURM_SUCCESS;
 }
 
-int _print_step_tres_per_task(job_step_info_t *step, int width, bool right,
-                              char *suffix) {
+int _print_step_tres_per_task(job_step_info_t *step, int width, bool right, char *suffix) {
     if (step == NULL)
         _print_str("TRES_PER_TASK", width, right, true);
     else
@@ -2676,18 +2452,13 @@ static int _filter_job(job_info_t *job) {
         iterator = list_iterator_create(params.job_list);
         while ((job_step_id = list_next(iterator))) {
             if (((job_step_id->array_id == NO_VAL) &&
-                 ((job_step_id->job_id == job->array_job_id) ||
-                  (job_step_id->job_id == job->job_id))) ||
-                ((job_step_id->array_id == job->array_task_id) &&
-                 (job_step_id->job_id == job->array_job_id))) {
+                 ((job_step_id->job_id == job->array_job_id) || (job_step_id->job_id == job->job_id))) ||
+                ((job_step_id->array_id == job->array_task_id) && (job_step_id->job_id == job->array_job_id))) {
                 filter = 0;
                 break;
             }
-            if ((job_step_id->array_id != NO_VAL) &&
-                (job_step_id->job_id == job->array_job_id) &&
-                (job->array_bitmap &&
-                 bit_test((bitstr_t *) job->array_bitmap,
-                          job_step_id->array_id))) {
+            if ((job_step_id->array_id != NO_VAL) && (job_step_id->job_id == job->array_job_id) &&
+                (job->array_bitmap && bit_test((bitstr_t *) job->array_bitmap, job_step_id->array_id))) {
                 filter = 0;
                 partial_array = true;
                 break;
@@ -2740,8 +2511,7 @@ static int _filter_job(job_info_t *job) {
         filter = 1;
         iterator = list_iterator_create(params.account_list);
         while ((account = list_next(iterator))) {
-            if ((job->account != NULL) &&
-                (xstrcasecmp(account, job->account) == 0)) {
+            if ((job->account != NULL) && (xstrcasecmp(account, job->account) == 0)) {
                 filter = 0;
                 break;
             }
@@ -2755,8 +2525,7 @@ static int _filter_job(job_info_t *job) {
         filter = 1;
         iterator = list_iterator_create(params.qos_list);
         while ((qos = list_next(iterator))) {
-            if ((job->qos != NULL) &&
-                (xstrcasecmp(qos, job->qos) == 0)) {
+            if ((job->qos != NULL) && (xstrcasecmp(qos, job->qos) == 0)) {
                 filter = 0;
                 break;
             }
@@ -2786,17 +2555,12 @@ static int _filter_job(job_info_t *job) {
         if (filter == 1)
             return 3;
     } else {
-        if (!IS_JOB_PENDING(job) &&
-            !IS_JOB_RUNNING(job) &&
-            !IS_JOB_STAGE_OUT(job) &&
-            !IS_JOB_SUSPENDED(job) &&
+        if (!IS_JOB_PENDING(job) && !IS_JOB_RUNNING(job) && !IS_JOB_STAGE_OUT(job) && !IS_JOB_SUSPENDED(job) &&
             !IS_JOB_COMPLETING(job))
             return 4;
     }
 
-    if ((params.nodes)
-        && ((job->nodes == NULL)
-            || (!hostset_intersects(params.nodes, job->nodes))))
+    if ((params.nodes) && ((job->nodes == NULL) || (!hostset_intersects(params.nodes, job->nodes))))
         return 5;
 
     if (params.user_list) {
@@ -2814,8 +2578,7 @@ static int _filter_job(job_info_t *job) {
     }
 
     if (params.reservation) {
-        if ((job->resv_name == NULL) ||
-            (xstrcmp(job->resv_name, params.reservation))) {
+        if ((job->resv_name == NULL) || (xstrcmp(job->resv_name, params.reservation))) {
             return 7;
         }
     }
@@ -2824,8 +2587,7 @@ static int _filter_job(job_info_t *job) {
         filter = 1;
         iterator = list_iterator_create(params.name_list);
         while ((name = list_next(iterator))) {
-            if ((job->name != NULL) &&
-                (xstrcasecmp(name, job->name) == 0)) {
+            if ((job->name != NULL) && (xstrcasecmp(name, job->name) == 0)) {
                 filter = 0;
                 break;
             }
@@ -2842,8 +2604,7 @@ static int _filter_job(job_info_t *job) {
         new_array_bitmap = bit_alloc(array_len);
         iterator = list_iterator_create(params.job_list);
         while ((job_step_id = list_next(iterator))) {
-            if ((job_step_id->job_id == job->array_job_id) &&
-                (job_step_id->array_id < array_len)) {
+            if ((job_step_id->job_id == job->array_job_id) && (job_step_id->array_id < array_len)) {
                 bit_set(new_array_bitmap, job_step_id->array_id);
             }
         }
@@ -2853,14 +2614,12 @@ static int _filter_job(job_info_t *job) {
         xfree(job->array_task_str);
         i = bit_set_count((bitstr_t *) job->array_bitmap);
         if (i == 1) {
-            job->array_task_id =
-                    bit_ffs((bitstr_t *) job->array_bitmap);
+            job->array_task_id = bit_ffs((bitstr_t *) job->array_bitmap);
             bit_free((bitstr_t *) job->array_bitmap);
         } else {
             i = i * 16 + 10;
             job->array_task_str = xmalloc(i);
-            (void) bit_fmt(job->array_task_str, i,
-                           (bitstr_t *) job->array_bitmap);
+            (void) bit_fmt(job->array_task_str, i, (bitstr_t *) job->array_bitmap);
         }
     }
 
@@ -2913,10 +2672,8 @@ static int _filter_step(job_step_info_t *step) {
         iterator = list_iterator_create(params.job_list);
         while ((job_step_id = list_next(iterator))) {
             if (((job_step_id->array_id == NO_VAL) &&
-                 ((job_step_id->job_id == step->array_job_id) ||
-                  (job_step_id->job_id == step->job_id))) ||
-                ((job_step_id->array_id == step->array_task_id) &&
-                 (job_step_id->job_id == step->array_job_id))) {
+                 ((job_step_id->job_id == step->array_job_id) || (job_step_id->job_id == step->job_id))) ||
+                ((job_step_id->array_id == step->array_task_id) && (job_step_id->job_id == step->array_job_id))) {
                 filter = 0;
                 break;
             }
@@ -2947,10 +2704,8 @@ static int _filter_step(job_step_info_t *step) {
             if (job_step_id->step_id != step->step_id)
                 continue;
             if (((job_step_id->array_id == NO_VAL) &&
-                 ((job_step_id->job_id == step->array_job_id) ||
-                  (job_step_id->job_id == step->job_id))) ||
-                ((job_step_id->array_id == step->array_task_id) &&
-                 (job_step_id->job_id == step->array_job_id))) {
+                 ((job_step_id->job_id == step->array_job_id) || (job_step_id->job_id == step->job_id))) ||
+                ((job_step_id->array_id == step->array_task_id) && (job_step_id->job_id == step->array_job_id))) {
                 filter = 0;
                 break;
             }
@@ -2960,9 +2715,7 @@ static int _filter_step(job_step_info_t *step) {
             return 3;
     }
 
-    if ((params.nodes)
-        && ((step->nodes == NULL)
-            || (!hostset_intersects(params.nodes, step->nodes))))
+    if ((params.nodes) && ((step->nodes == NULL) || (!hostset_intersects(params.nodes, step->nodes))))
         return 5;
 
     if (params.user_list) {

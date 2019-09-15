@@ -74,8 +74,7 @@ static bool _store_locks(slurmctld_lock_t lock_levels) {
         return false;
     slurmctld_locked = true;
 
-    memcpy((void *) &thread_locks, (void *) &lock_levels,
-           sizeof(slurmctld_lock_t));
+    memcpy((void *) &thread_locks, (void *) &lock_levels, sizeof(slurmctld_lock_t));
 
     return true;
 }
@@ -85,8 +84,7 @@ static bool _clear_locks(slurmctld_lock_t lock_levels) {
         return false;
     slurmctld_locked = false;
 
-    if (memcmp((void *) &thread_locks, (void *) &lock_levels,
-               sizeof(slurmctld_lock_t)))
+    if (memcmp((void *) &thread_locks, (void *) &lock_levels, sizeof(slurmctld_lock_t)))
         return false;
 
     memset((void *) &thread_locks, 0, sizeof(slurmctld_lock_t));
@@ -188,13 +186,11 @@ int report_locks_set(void) {
     _report_lock_set(&part, PART_LOCK);
     _report_lock_set(&fed, FED_LOCK);
 
-    lock_count = strlen(conf) + strlen(job) + strlen(node)
-                 + strlen(part) + strlen(fed);
+    lock_count = strlen(conf) + strlen(job) + strlen(node) + strlen(part) + strlen(fed);
 
     if (lock_count > 0) {
         error("Locks left set "
-              "config:%s, job:%s, node:%s, partition:%s, federation:%s",
-              conf, job, node, part, fed);
+              "config:%s, job:%s, node:%s, partition:%s, federation:%s", conf, job, node, part, fed);
     }
     return lock_count;
 }

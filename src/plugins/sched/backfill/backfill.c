@@ -204,10 +204,9 @@ static List pack_job_list = NULL;
 static xhash_t *user_usage_map = NULL; /* look up user usage when no assoc */
 
 /*********************** local functions *********************/
-static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
-                             bitstr_t *res_bitmap,
-                             node_space_map_t *node_space,
-                             int *node_space_recs);
+static void
+_add_reservation(uint32_t start_time, uint32_t end_reserve, bitstr_t *res_bitmap, node_space_map_t *node_space,
+                 int *node_space_recs);
 
 static void _adjust_hetjob_prio(uint32_t *prio, uint32_t val);
 
@@ -217,11 +216,9 @@ static int _clear_job_start_times(void *x, void *arg);
 
 static int _clear_qos_blocked_times(void *x, void *arg);
 
-static void _do_diag_stats(struct timeval *tv1, struct timeval *tv2,
-                           int node_space_recs);
+static void _do_diag_stats(struct timeval *tv1, struct timeval *tv2, int node_space_recs);
 
-static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now,
-                                node_space_map_t *node_space);
+static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now, node_space_map_t *node_space);
 
 static bool _hetjob_any_resv(struct job_record *het_leader);
 
@@ -233,8 +230,7 @@ static void _job_pack_deadlock_fini(void);
 
 static bool _job_pack_deadlock_test(struct job_record *job_ptr);
 
-static bool _job_part_valid(struct job_record *job_ptr,
-                            struct part_record *part_ptr);
+static bool _job_part_valid(struct job_record *job_ptr, struct part_record *part_ptr);
 
 static void _load_config(void);
 
@@ -244,8 +240,7 @@ static bool _more_work(time_t last_backfill_time);
 
 static uint32_t _my_sleep(int64_t usec);
 
-static int _num_feature_count(struct job_record *job_ptr, bool *has_xand,
-                              bool *has_xor);
+static int _num_feature_count(struct job_record *job_ptr, bool *has_xand, bool *has_xor);
 
 static int _pack_find_map(void *x, void *key);
 
@@ -257,30 +252,24 @@ static void _pack_start_clear(void);
 
 static time_t _pack_start_find(struct job_record *job_ptr, time_t now);
 
-static void _pack_start_set(struct job_record *job_ptr, time_t latest_start,
-                            uint32_t comp_time_limit);
+static void _pack_start_set(struct job_record *job_ptr, time_t latest_start, uint32_t comp_time_limit);
 
-static void _pack_start_test_single(node_space_map_t *node_space,
-                                    pack_job_map_t *map, bool single);
+static void _pack_start_test_single(node_space_map_t *node_space, pack_job_map_t *map, bool single);
 
 static int _pack_start_test_list(void *map, void *node_space);
 
-static void _pack_start_test(node_space_map_t *node_space,
-                             uint32_t pack_job_id);
+static void _pack_start_test(node_space_map_t *node_space, uint32_t pack_job_id);
 
-static void _reset_job_time_limit(struct job_record *job_ptr, time_t now,
-                                  node_space_map_t *node_space);
+static void _reset_job_time_limit(struct job_record *job_ptr, time_t now, node_space_map_t *node_space);
 
 static int _set_hetjob_details(void *x, void *arg);
 
 static int _start_job(struct job_record *job_ptr, bitstr_t *avail_bitmap);
 
-static bool _test_resv_overlap(node_space_map_t *node_space,
-                               bitstr_t *use_bitmap, uint32_t start_time,
-                               uint32_t end_reserve);
+static bool
+_test_resv_overlap(node_space_map_t *node_space, bitstr_t *use_bitmap, uint32_t start_time, uint32_t end_reserve);
 
-static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
-                      uint32_t min_nodes, uint32_t max_nodes,
+static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap, uint32_t min_nodes, uint32_t max_nodes,
                       uint32_t req_nodes, bitstr_t *exc_core_bitmap);
 
 static int _yield_locks(int64_t usec);
@@ -290,20 +279,18 @@ static void _bf_map_key_id(void *item, const char **key, uint32_t *key_len);
 static void _bf_map_free(void *item);
 
 /* Log resources to be allocated to a pending job */
-static void _dump_job_sched(struct job_record *job_ptr, time_t end_time,
-                            bitstr_t *avail_bitmap) {
+static void _dump_job_sched(struct job_record *job_ptr, time_t end_time, bitstr_t *avail_bitmap) {
     char begin_buf[32], end_buf[32], *node_list;
 
     slurm_make_time_str(&job_ptr->start_time, begin_buf, sizeof(begin_buf));
     slurm_make_time_str(&end_time, end_buf, sizeof(end_buf));
     node_list = bitmap2node_name(avail_bitmap);
-    info("%pJ to start at %s, end at %s on nodes %s in partition %s",
-         job_ptr, begin_buf, end_buf, node_list, job_ptr->part_ptr->name);
+    info("%pJ to start at %s, end at %s on nodes %s in partition %s", job_ptr, begin_buf, end_buf, node_list,
+         job_ptr->part_ptr->name);
     xfree(node_list);
 }
 
-static void _dump_job_test(struct job_record *job_ptr, bitstr_t *avail_bitmap,
-                           time_t start_time) {
+static void _dump_job_test(struct job_record *job_ptr, bitstr_t *avail_bitmap, time_t start_time) {
     char begin_buf[32], *node_list;
 
     if (start_time == 0)
@@ -322,13 +309,10 @@ static void _dump_node_space_table(node_space_map_t *node_space_ptr) {
 
     info("=========================================");
     while (1) {
-        slurm_make_time_str(&node_space_ptr[i].begin_time,
-                            begin_buf, sizeof(begin_buf));
-        slurm_make_time_str(&node_space_ptr[i].end_time,
-                            end_buf, sizeof(end_buf));
+        slurm_make_time_str(&node_space_ptr[i].begin_time, begin_buf, sizeof(begin_buf));
+        slurm_make_time_str(&node_space_ptr[i].end_time, end_buf, sizeof(end_buf));
         node_list = bitmap2node_name(node_space_ptr[i].avail_bitmap);
-        info("Begin:%s End:%s Nodes:%s",
-             begin_buf, end_buf, node_list);
+        info("Begin:%s End:%s Nodes:%s", begin_buf, end_buf, node_list);
         xfree(node_list);
         if ((i = node_space_ptr[i].next) == 0)
             break;
@@ -354,8 +338,7 @@ static bool _many_pending_rpcs(void) {
 
     slurm_mutex_lock(&slurmctld_config.thread_count_lock);
     //info("thread_count = %u", slurmctld_config.server_thread_count);
-    if ((max_rpc_cnt > 0) &&
-        (slurmctld_config.server_thread_count >= max_rpc_cnt))
+    if ((max_rpc_cnt > 0) && (slurmctld_config.server_thread_count >= max_rpc_cnt))
         many_pending_rpcs = true;
     slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
 
@@ -370,8 +353,7 @@ static bool _many_pending_rpcs(void) {
  * OUT has_xor - true if features are XORed together
  * RET Total count for ALL job features, even counts with XAND separator
  */
-static int _num_feature_count(struct job_record *job_ptr, bool *has_xand,
-                              bool *has_xor) {
+static int _num_feature_count(struct job_record *job_ptr, bool *has_xand, bool *has_xor) {
     struct job_details *detail_ptr = job_ptr->details;
     int rc = 0;
     ListIterator feat_iter;
@@ -410,8 +392,7 @@ static int _clear_qos_blocked_times(void *x, void *arg) {
  * IN exc_core_bitmap - cores which can not be used
  * RET SLURM_SUCCESS on success, otherwise an error code
  */
-static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
-                      uint32_t min_nodes, uint32_t max_nodes,
+static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap, uint32_t min_nodes, uint32_t max_nodes,
                       uint32_t req_nodes, bitstr_t *exc_core_bitmap) {
     bitstr_t *low_bitmap = NULL, *tmp_bitmap = NULL;
     int rc = SLURM_SUCCESS;
@@ -436,40 +417,28 @@ static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
         tmp_bitmap = bit_copy(*avail_bitmap);
         feat_iter = list_iterator_create(feature_cache);
         while ((feat_ptr = (job_feature_t *) list_next(feat_iter))) {
-            detail_ptr->feature_list =
-                    list_create(feature_list_delete);
+            detail_ptr->feature_list = list_create(feature_list_delete);
             feature_base = xmalloc(sizeof(job_feature_t));
             feature_base->name = xstrdup(feat_ptr->name);
             feature_base->op_code = feat_ptr->op_code;
             list_append(detail_ptr->feature_list, feature_base);
-            while ((feat_ptr->paren > 0) &&
-                   ((feat_ptr = (job_feature_t *)
-                           list_next(feat_iter)))) {
+            while ((feat_ptr->paren > 0) && ((feat_ptr = (job_feature_t *) list_next(feat_iter)))) {
                 feature_base = xmalloc(sizeof(job_feature_t));
                 feature_base->name = xstrdup(feat_ptr->name);
                 feature_base->op_code = feat_ptr->op_code;
-                list_append(detail_ptr->feature_list,
-                            feature_base);
+                list_append(detail_ptr->feature_list, feature_base);
             }
             feature_base->op_code = FEATURE_OP_END;
             feat_min_node = MAX(1, feature_base->count);
 
-            if ((job_req_node_filter(job_ptr, *avail_bitmap, true)
-                 == SLURM_SUCCESS) &&
+            if ((job_req_node_filter(job_ptr, *avail_bitmap, true) == SLURM_SUCCESS) &&
                 (bit_set_count(*avail_bitmap) >= feat_min_node)) {
-                preemptee_candidates =
-                        slurm_find_preemptable_jobs(job_ptr);
-                rc = select_g_job_test(job_ptr, *avail_bitmap,
-                                       feat_min_node, max_nodes,
-                                       req_nodes,
-                                       SELECT_MODE_WILL_RUN,
-                                       preemptee_candidates,
-                                       &preemptee_job_list,
+                preemptee_candidates = slurm_find_preemptable_jobs(job_ptr);
+                rc = select_g_job_test(job_ptr, *avail_bitmap, feat_min_node, max_nodes, req_nodes,
+                                       SELECT_MODE_WILL_RUN, preemptee_candidates, &preemptee_job_list,
                                        exc_core_bitmap);
                 FREE_NULL_LIST(preemptee_job_list);
-                if ((rc == SLURM_SUCCESS) &&
-                    ((high_start == 0) ||
-                     (high_start < job_ptr->start_time))) {
+                if ((rc == SLURM_SUCCESS) && ((high_start == 0) || (high_start < job_ptr->start_time))) {
                     high_start = job_ptr->start_time;
                     low_bitmap = *avail_bitmap;
                     *avail_bitmap = NULL;
@@ -505,39 +474,26 @@ static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
         tmp_bitmap = bit_copy(*avail_bitmap);
         feat_iter = list_iterator_create(feature_cache);
         while ((feat_ptr = (job_feature_t *) list_next(feat_iter))) {
-            detail_ptr->feature_list =
-                    list_create(feature_list_delete);
+            detail_ptr->feature_list = list_create(feature_list_delete);
             feature_base = xmalloc(sizeof(job_feature_t));
             feature_base->name = xstrdup(feat_ptr->name);
             feature_base->op_code = feat_ptr->op_code;
             list_append(detail_ptr->feature_list, feature_base);
-            while ((feat_ptr->paren > 0) &&
-                   ((feat_ptr = (job_feature_t *)
-                           list_next(feat_iter)))) {
+            while ((feat_ptr->paren > 0) && ((feat_ptr = (job_feature_t *) list_next(feat_iter)))) {
                 feature_base = xmalloc(sizeof(job_feature_t));
                 feature_base->name = xstrdup(feat_ptr->name);
                 feature_base->op_code = feat_ptr->op_code;
-                list_append(detail_ptr->feature_list,
-                            feature_base);
+                list_append(detail_ptr->feature_list, feature_base);
             }
             feature_base->op_code = FEATURE_OP_END;
 
-            if ((job_req_node_filter(job_ptr, *avail_bitmap, true)
-                 == SLURM_SUCCESS) &&
+            if ((job_req_node_filter(job_ptr, *avail_bitmap, true) == SLURM_SUCCESS) &&
                 (bit_set_count(*avail_bitmap) >= min_nodes)) {
-                preemptee_candidates =
-                        slurm_find_preemptable_jobs(job_ptr);
-                rc = select_g_job_test(job_ptr, *avail_bitmap,
-                                       min_nodes, max_nodes,
-                                       req_nodes,
-                                       SELECT_MODE_WILL_RUN,
-                                       preemptee_candidates,
-                                       &preemptee_job_list,
-                                       exc_core_bitmap);
+                preemptee_candidates = slurm_find_preemptable_jobs(job_ptr);
+                rc = select_g_job_test(job_ptr, *avail_bitmap, min_nodes, max_nodes, req_nodes, SELECT_MODE_WILL_RUN,
+                                       preemptee_candidates, &preemptee_job_list, exc_core_bitmap);
                 FREE_NULL_LIST(preemptee_job_list);
-                if ((rc == SLURM_SUCCESS) &&
-                    ((low_start == 0) ||
-                     (low_start > job_ptr->start_time))) {
+                if ((rc == SLURM_SUCCESS) && ((low_start == 0) || (low_start > job_ptr->start_time))) {
                     low_start = job_ptr->start_time;
                     low_bitmap = *avail_bitmap;
                     *avail_bitmap = NULL;
@@ -562,19 +518,13 @@ static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
         /* Restore the original feature information */
         detail_ptr->feature_list = feature_cache;
     } else if (detail_ptr->feature_list) {
-        if ((job_req_node_filter(job_ptr, *avail_bitmap, true) !=
-             SLURM_SUCCESS) ||
+        if ((job_req_node_filter(job_ptr, *avail_bitmap, true) != SLURM_SUCCESS) ||
             (bit_set_count(*avail_bitmap) < min_nodes)) {
             rc = ESLURM_NODES_BUSY;
         } else {
-            preemptee_candidates =
-                    slurm_find_preemptable_jobs(job_ptr);
-            rc = select_g_job_test(job_ptr, *avail_bitmap,
-                                   min_nodes, max_nodes, req_nodes,
-                                   SELECT_MODE_WILL_RUN,
-                                   preemptee_candidates,
-                                   &preemptee_job_list,
-                                   exc_core_bitmap);
+            preemptee_candidates = slurm_find_preemptable_jobs(job_ptr);
+            rc = select_g_job_test(job_ptr, *avail_bitmap, min_nodes, max_nodes, req_nodes, SELECT_MODE_WILL_RUN,
+                                   preemptee_candidates, &preemptee_job_list, exc_core_bitmap);
             FREE_NULL_LIST(preemptee_job_list);
         }
     } else {
@@ -594,26 +544,17 @@ static int _try_sched(struct job_record *job_ptr, bitstr_t **avail_bitmap,
             debug2("%s exclude core bitmap: %s", __func__, str);
         }
 
-        rc = select_g_job_test(job_ptr, *avail_bitmap, min_nodes,
-                               max_nodes, req_nodes,
-                               SELECT_MODE_WILL_RUN,
-                               preemptee_candidates,
-                               &preemptee_job_list,
-                               exc_core_bitmap);
+        rc = select_g_job_test(job_ptr, *avail_bitmap, min_nodes, max_nodes, req_nodes, SELECT_MODE_WILL_RUN,
+                               preemptee_candidates, &preemptee_job_list, exc_core_bitmap);
         FREE_NULL_LIST(preemptee_job_list);
 
         job_ptr->details->share_res = orig_shared;
 
-        if (((rc != SLURM_SUCCESS) || (job_ptr->start_time > now)) &&
-            (orig_shared != 0)) {
+        if (((rc != SLURM_SUCCESS) || (job_ptr->start_time > now)) && (orig_shared != 0)) {
             FREE_NULL_BITMAP(*avail_bitmap);
             *avail_bitmap = tmp_bitmap;
-            rc = select_g_job_test(job_ptr, *avail_bitmap,
-                                   min_nodes, max_nodes, req_nodes,
-                                   SELECT_MODE_WILL_RUN,
-                                   preemptee_candidates,
-                                   &preemptee_job_list,
-                                   exc_core_bitmap);
+            rc = select_g_job_test(job_ptr, *avail_bitmap, min_nodes, max_nodes, req_nodes, SELECT_MODE_WILL_RUN,
+                                   preemptee_candidates, &preemptee_job_list, exc_core_bitmap);
             FREE_NULL_LIST(preemptee_job_list);
         } else
             FREE_NULL_BITMAP(tmp_bitmap);
@@ -667,10 +608,8 @@ static void _load_config(void) {
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_interval="))) {
         backfill_interval = atoi(tmp_ptr + 12);
-        if (backfill_interval < 1 ||
-            backfill_interval > MAX_BACKFILL_INTERVAL) {
-            error("Invalid SchedulerParameters bf_interval: %d",
-                  backfill_interval);
+        if (backfill_interval < 1 || backfill_interval > MAX_BACKFILL_INTERVAL) {
+            error("Invalid SchedulerParameters bf_interval: %d", backfill_interval);
             backfill_interval = BACKFILL_INTERVAL;
         }
     } else {
@@ -690,10 +629,8 @@ static void _load_config(void) {
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_window="))) {
         backfill_window = atoi(tmp_ptr + 10) * 60;  /* mins to secs */
-        if (backfill_window < 1 ||
-            backfill_window > MAX_BACKFILL_WINDOW) {
-            error("Invalid SchedulerParameters bf_window: %d",
-                  backfill_window);
+        if (backfill_window < 1 || backfill_window > MAX_BACKFILL_WINDOW) {
+            error("Invalid SchedulerParameters bf_window: %d", backfill_window);
             backfill_window = BACKFILL_WINDOW;
         }
     } else {
@@ -704,19 +641,15 @@ static void _load_config(void) {
         max_backfill_job_cnt = atoi(tmp_ptr + 16);
     else
         max_backfill_job_cnt = 100;
-    if (max_backfill_job_cnt < 1 ||
-        max_backfill_job_cnt > MAX_BF_MAX_JOB_TEST) {
-        error("Invalid SchedulerParameters bf_max_job_test: %d",
-              max_backfill_job_cnt);
+    if (max_backfill_job_cnt < 1 || max_backfill_job_cnt > MAX_BF_MAX_JOB_TEST) {
+        error("Invalid SchedulerParameters bf_max_job_test: %d", max_backfill_job_cnt);
         max_backfill_job_cnt = 100;
     }
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_resolution="))) {
         backfill_resolution = atoi(tmp_ptr + 14);
-        if (backfill_resolution < 1 ||
-            backfill_resolution > MAX_BACKFILL_RESOLUTION) {
-            error("Invalid SchedulerParameters bf_resolution: %d",
-                  backfill_resolution);
+        if (backfill_resolution < 1 || backfill_resolution > MAX_BACKFILL_RESOLUTION) {
+            error("Invalid SchedulerParameters bf_resolution: %d", backfill_resolution);
             backfill_resolution = BACKFILL_RESOLUTION;
         }
     } else {
@@ -725,10 +658,8 @@ static void _load_config(void) {
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_array_resv="))) {
         bf_max_job_array_resv = atoi(tmp_ptr + 22);
-        if (bf_max_job_array_resv < 0 ||
-            bf_max_job_array_resv > MAX_BF_MAX_JOB_ARRAY_RESV) {
-            error("Invalid SchedulerParameters bf_max_job_array_resv: %d",
-                  bf_max_job_array_resv);
+        if (bf_max_job_array_resv < 0 || bf_max_job_array_resv > MAX_BF_MAX_JOB_ARRAY_RESV) {
+            error("Invalid SchedulerParameters bf_max_job_array_resv: %d", bf_max_job_array_resv);
             bf_max_job_array_resv = BF_MAX_JOB_ARRAY_RESV;
         }
     } else {
@@ -738,25 +669,20 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_part="))) {
         max_backfill_job_per_part = atoi(tmp_ptr + 16);
         if (max_backfill_job_per_part < 0) {
-            error("Invalid SchedulerParameters bf_max_job_part: %d",
-                  max_backfill_job_per_part);
+            error("Invalid SchedulerParameters bf_max_job_part: %d", max_backfill_job_per_part);
             max_backfill_job_per_part = 0;
         }
     } else {
         max_backfill_job_per_part = 0;
     }
-    if ((max_backfill_job_per_part != 0) &&
-        (max_backfill_job_per_part >= max_backfill_job_cnt)) {
-        error("bf_max_job_part >= bf_max_job_test (%u >= %u)",
-              max_backfill_job_per_part, max_backfill_job_cnt);
+    if ((max_backfill_job_per_part != 0) && (max_backfill_job_per_part >= max_backfill_job_cnt)) {
+        error("bf_max_job_part >= bf_max_job_test (%u >= %u)", max_backfill_job_per_part, max_backfill_job_cnt);
     }
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_start="))) {
         max_backfill_jobs_start = atoi(tmp_ptr + 17);
-        if (max_backfill_jobs_start < 0 ||
-            max_backfill_jobs_start > MAX_BF_MAX_JOB_START) {
-            error("Invalid SchedulerParameters bf_max_job_start: %d",
-                  max_backfill_jobs_start);
+        if (max_backfill_jobs_start < 0 || max_backfill_jobs_start > MAX_BF_MAX_JOB_START) {
+            error("Invalid SchedulerParameters bf_max_job_start: %d", max_backfill_jobs_start);
             max_backfill_jobs_start = 0;
         }
     } else {
@@ -766,25 +692,21 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_user="))) {
         max_backfill_job_per_user = atoi(tmp_ptr + 16);
         if (max_backfill_job_per_user < 0) {
-            error("Invalid SchedulerParameters bf_max_job_user: %d",
-                  max_backfill_job_per_user);
+            error("Invalid SchedulerParameters bf_max_job_user: %d", max_backfill_job_per_user);
             max_backfill_job_per_user = 0;
         }
     } else {
         max_backfill_job_per_user = 0;
     }
-    if ((max_backfill_job_per_user != 0) &&
-        (max_backfill_job_per_user > max_backfill_job_cnt)) {
-        info("warning: bf_max_job_user > bf_max_job_test (%u > %u)",
-             max_backfill_job_per_user, max_backfill_job_cnt);
+    if ((max_backfill_job_per_user != 0) && (max_backfill_job_per_user > max_backfill_job_cnt)) {
+        info("warning: bf_max_job_user > bf_max_job_test (%u > %u)", max_backfill_job_per_user, max_backfill_job_cnt);
     }
 
     bf_job_part_count_reserve = 0;
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_job_part_count_reserve="))) {
         int job_cnt = atoi(tmp_ptr + 26);
         if (job_cnt < 0 || job_cnt > MAX_BF_JOB_PART_COUNT_RESERVE) {
-            error("Invalid SchedulerParameters bf_job_part_count_reserve: %d",
-                  job_cnt);
+            error("Invalid SchedulerParameters bf_job_part_count_reserve: %d", job_cnt);
         } else {
             bf_job_part_count_reserve = job_cnt;
         }
@@ -793,37 +715,31 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_user_part="))) {
         max_backfill_job_per_user_part = atoi(tmp_ptr + 21);
         if (max_backfill_job_per_user_part < 0) {
-            error("Invalid SchedulerParameters bf_max_job_user_part: %d",
-                  max_backfill_job_per_user_part);
+            error("Invalid SchedulerParameters bf_max_job_user_part: %d", max_backfill_job_per_user_part);
             max_backfill_job_per_user_part = 0;
         }
     } else {
         max_backfill_job_per_user_part = 0;
     }
-    if ((max_backfill_job_per_user_part != 0) &&
-        (max_backfill_job_per_user_part > max_backfill_job_cnt)) {
-        info("warning: bf_max_job_user_part > bf_max_job_test (%u > %u)",
-             max_backfill_job_per_user_part, max_backfill_job_cnt);
+    if ((max_backfill_job_per_user_part != 0) && (max_backfill_job_per_user_part > max_backfill_job_cnt)) {
+        info("warning: bf_max_job_user_part > bf_max_job_test (%u > %u)", max_backfill_job_per_user_part,
+             max_backfill_job_cnt);
     }
 
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_max_job_assoc="))) {
         max_backfill_job_per_assoc = atoi(tmp_ptr + 17);
         if (max_backfill_job_per_assoc < 0) {
-            error("Invalid SchedulerParameters bf_max_job_assoc: %d",
-                  max_backfill_job_per_assoc);
+            error("Invalid SchedulerParameters bf_max_job_assoc: %d", max_backfill_job_per_assoc);
             max_backfill_job_per_assoc = 0;
         }
     } else {
         max_backfill_job_per_assoc = 0;
     }
-    if ((max_backfill_job_per_assoc != 0) &&
-        (max_backfill_job_per_assoc > max_backfill_job_cnt)) {
-        info("warning: bf_max_job_assoc > bf_max_job_test (%u > %u)",
-             max_backfill_job_per_assoc, max_backfill_job_cnt);
+    if ((max_backfill_job_per_assoc != 0) && (max_backfill_job_per_assoc > max_backfill_job_cnt)) {
+        info("warning: bf_max_job_assoc > bf_max_job_test (%u > %u)", max_backfill_job_per_assoc, max_backfill_job_cnt);
     }
-    if ((max_backfill_job_per_assoc != 0) &&
-        (max_backfill_job_per_user != 0)) {
+    if ((max_backfill_job_per_assoc != 0) && (max_backfill_job_per_user != 0)) {
         error("Both bf_max_job_user and bf_max_job_assoc are set: "
               "bf_max_job_assoc taking precedence.");
         max_backfill_job_per_user = 0;
@@ -833,8 +749,7 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_min_age_reserve="))) {
         int min_age = atoi(tmp_ptr + 19);
         if (min_age < 0 || min_age > MAX_BF_MIN_AGE_RESERVE) {
-            error("Invalid SchedulerParameters bf_min_age_reserve: %d",
-                  min_age);
+            error("Invalid SchedulerParameters bf_min_age_reserve: %d", min_age);
         } else {
             bf_min_age_reserve = min_age;
         }
@@ -846,8 +761,7 @@ static void _load_config(void) {
         tmp_ptr += 20;
         min_prio = strtoull(tmp_ptr, NULL, 10);
         if (!min_prio || min_prio > MAX_BF_MIN_PRIO_RESERVE) {
-            error("Invalid SchedulerParameters bf_min_prio_reserve: %llu",
-                  min_prio);
+            error("Invalid SchedulerParameters bf_min_prio_reserve: %llu", min_prio);
         } else {
             bf_min_prio_reserve = (uint32_t) min_prio;
         }
@@ -869,10 +783,8 @@ static void _load_config(void) {
 
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_yield_interval="))) {
         yield_interval = atoi(tmp_ptr + 18);
-        if ((yield_interval <= 0) ||
-            (yield_interval > MAX_BF_YIELD_INTERVAL)) {
-            error("Invalid backfill scheduler bf_yield_interval: %d",
-                  yield_interval);
+        if ((yield_interval <= 0) || (yield_interval > MAX_BF_YIELD_INTERVAL)) {
+            error("Invalid backfill scheduler bf_yield_interval: %d", yield_interval);
             yield_interval = YIELD_INTERVAL;
         }
     } else {
@@ -882,8 +794,7 @@ static void _load_config(void) {
     if ((tmp_ptr = xstrcasestr(sched_params, "bf_yield_sleep="))) {
         yield_sleep = (int64_t) atoll(tmp_ptr + 15);
         if (yield_sleep <= 0 || yield_sleep > MAX_YIELD_SLEEP) {
-            error("Invalid backfill scheduler bf_yield_sleep: %d",
-                  yield_sleep);
+            error("Invalid backfill scheduler bf_yield_sleep: %d", yield_sleep);
             yield_sleep = YIELD_SLEEP;
         }
     } else {
@@ -900,8 +811,7 @@ static void _load_config(void) {
         else if (!xstrcasecmp(tmp_ptr, "avg"))
             bf_hetjob_prio |= HETJOB_PRIO_AVG;
         else
-            error("Invalid SchedulerParameters bf_hetjob_prio: %s",
-                  tmp_ptr);
+            error("Invalid SchedulerParameters bf_hetjob_prio: %s", tmp_ptr);
     }
 
     bf_hetjob_immediate = false;
@@ -920,8 +830,7 @@ static void _load_config(void) {
     else
         max_rpc_cnt = 0;
     if ((max_rpc_cnt < 0) || (max_rpc_cnt > MAX_MAX_RPC_CNT)) {
-        error("Invalid SchedulerParameters max_rpc_cnt: %d",
-              max_rpc_cnt);
+        error("Invalid SchedulerParameters max_rpc_cnt: %d", max_rpc_cnt);
         max_rpc_cnt = 0;
     }
 
@@ -940,8 +849,7 @@ extern void backfill_reconfig(void) {
  * IN tv2 - end (current) time
  * IN node_space_recs - count of records in resouces/time table being tested
  */
-static void _do_diag_stats(struct timeval *tv1, struct timeval *tv2,
-                           int node_space_recs) {
+static void _do_diag_stats(struct timeval *tv1, struct timeval *tv2, int node_space_recs) {
     uint32_t delta_t, real_time;
 
     delta_t = (tv2->tv_sec - tv1->tv_sec) * 1000000;
@@ -954,12 +862,9 @@ static void _do_diag_stats(struct timeval *tv1, struct timeval *tv2,
     slurmctld_diag_stats.bf_cycle_last = real_time;
 
     slurmctld_diag_stats.bf_depth_sum += slurmctld_diag_stats.bf_last_depth;
-    slurmctld_diag_stats.bf_depth_try_sum +=
-            slurmctld_diag_stats.bf_last_depth_try;
-    if (slurmctld_diag_stats.bf_cycle_last >
-        slurmctld_diag_stats.bf_cycle_max) {
-        slurmctld_diag_stats.bf_cycle_max = slurmctld_diag_stats.
-                bf_cycle_last;
+    slurmctld_diag_stats.bf_depth_try_sum += slurmctld_diag_stats.bf_last_depth_try;
+    if (slurmctld_diag_stats.bf_cycle_last > slurmctld_diag_stats.bf_cycle_max) {
+        slurmctld_diag_stats.bf_cycle_max = slurmctld_diag_stats.bf_cycle_last;
     }
     slurmctld_diag_stats.bf_table_size = node_space_recs;
     slurmctld_diag_stats.bf_table_size_sum += node_space_recs;
@@ -975,8 +880,7 @@ extern void *backfill_agent(void *args) {
     double wait_time;
     static time_t last_backfill_time = 0;
     /* Read config and partitions; Write jobs and nodes */
-    slurmctld_lock_t all_locks = {
-            READ_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
+    slurmctld_lock_t all_locks = {READ_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
     bool load_config;
     bool short_sleep = false;
     int backfill_cnt = 0;
@@ -1013,8 +917,7 @@ extern void *backfill_agent(void *args) {
             _load_config();
         now = time(NULL);
         wait_time = difftime(now, last_backfill_time);
-        if ((wait_time < backfill_interval) ||
-            job_is_completing(NULL) || _many_pending_rpcs() ||
+        if ((wait_time < backfill_interval) || job_is_completing(NULL) || _many_pending_rpcs() ||
             !avail_front_end(NULL) || !_more_work(last_backfill_time)) {
             short_sleep = true;
             continue;
@@ -1059,8 +962,7 @@ static int _clear_job_start_times(void *x, void *arg) {
  * partition state or the backfill scheduler needs to be stopped.
  */
 static int _yield_locks(int64_t usec) {
-    slurmctld_lock_t all_locks = {
-            READ_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
+    slurmctld_lock_t all_locks = {READ_LOCK, WRITE_LOCK, WRITE_LOCK, READ_LOCK, READ_LOCK};
     time_t job_update, node_update, part_update;
     bool load_config = false;
     int yield_rpc_cnt;
@@ -1074,13 +976,11 @@ static int _yield_locks(int64_t usec) {
     while (!stop_backfill) {
         bf_sleep_usec += _my_sleep(usec);
         slurm_mutex_lock(&slurmctld_config.thread_count_lock);
-        if ((max_rpc_cnt == 0) ||
-            (slurmctld_config.server_thread_count <= yield_rpc_cnt)) {
+        if ((max_rpc_cnt == 0) || (slurmctld_config.server_thread_count <= yield_rpc_cnt)) {
             slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
             break;
         }
-        verbose("backfill: continuing to yield locks, %d RPCs pending",
-                slurmctld_config.server_thread_count);
+        verbose("backfill: continuing to yield locks, %d RPCs pending", slurmctld_config.server_thread_count);
         slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
     }
     lock_slurmctld(all_locks);
@@ -1089,9 +989,7 @@ static int _yield_locks(int64_t usec) {
         load_config = true;
     slurm_mutex_unlock(&config_lock);
 
-    if ((last_job_update == job_update) &&
-        (last_node_update == node_update) &&
-        (last_part_update == part_update) &&
+    if ((last_job_update == job_update) && (last_node_update == node_update) && (last_part_update == part_update) &&
         (!stop_backfill) && (!load_config))
         return 0;
     else
@@ -1100,16 +998,14 @@ static int _yield_locks(int64_t usec) {
 
 /* Test if this job still has access to the specified partition. The job's
  * available partitions may have changed when locks were released */
-static bool _job_part_valid(struct job_record *job_ptr,
-                            struct part_record *part_ptr) {
+static bool _job_part_valid(struct job_record *job_ptr, struct part_record *part_ptr) {
     struct part_record *avail_part_ptr;
     ListIterator part_iterator;
     bool rc = false;
 
     if (job_ptr->part_ptr_list) {
         part_iterator = list_iterator_create(job_ptr->part_ptr_list);
-        while ((avail_part_ptr = (struct part_record *)
-                list_next(part_iterator))) {
+        while ((avail_part_ptr = (struct part_record *) list_next(part_iterator))) {
             if (avail_part_ptr == part_ptr) {
                 rc = true;
                 break;
@@ -1139,28 +1035,22 @@ static bool _job_runnable_now(struct job_record *job_ptr) {
      * max_run_tasks number of jobs in the array. If max_run_tasks is 0, it
      * wasn't set, so ignore it.
      */
-    if (job_ptr->array_recs &&
-        ((job_ptr->array_recs->pend_run_tasks >= bf_max_job_array_resv) ||
-         (job_ptr->array_recs->max_run_tasks &&
-          (job_ptr->array_recs->pend_run_tasks >=
-           job_ptr->array_recs->max_run_tasks))))
+    if (job_ptr->array_recs && ((job_ptr->array_recs->pend_run_tasks >= bf_max_job_array_resv) ||
+                                (job_ptr->array_recs->max_run_tasks &&
+                                 (job_ptr->array_recs->pend_run_tasks >= job_ptr->array_recs->max_run_tasks))))
         return false;
 
-    select_g_select_jobinfo_get(job_ptr->select_jobinfo,
-                                SELECT_JOBDATA_CLEANING, &cleaning);
+    select_g_select_jobinfo_get(job_ptr->select_jobinfo, SELECT_JOBDATA_CLEANING, &cleaning);
     if (cleaning)            /* Started, requeue and completing */
         return false;
 
     return true;
 }
 
-static void _restore_preempt_state(struct job_record *job_ptr,
-                                   time_t *tmp_preempt_start_time,
-                                   bool *tmp_preempt_in_progress) {
-    if ((*tmp_preempt_start_time != 0)
-        && (job_ptr->details->preempt_start_time == 0)) {
-        job_ptr->details->preempt_start_time =
-                *tmp_preempt_start_time;
+static void
+_restore_preempt_state(struct job_record *job_ptr, time_t *tmp_preempt_start_time, bool *tmp_preempt_in_progress) {
+    if ((*tmp_preempt_start_time != 0) && (job_ptr->details->preempt_start_time == 0)) {
+        job_ptr->details->preempt_start_time = *tmp_preempt_start_time;
         job_ptr->preempt_in_progress = *tmp_preempt_in_progress;
         *tmp_preempt_start_time = 0;
         *tmp_preempt_in_progress = false;
@@ -1196,8 +1086,7 @@ static uint32_t _hetjob_calc_prio(struct job_record *het_leader) {
 
     iter = list_iterator_create(het_leader->pack_job_list);
     while ((het_comp = list_next(iter))) {
-        if (het_comp->part_ptr_list && het_comp->priority_array &&
-            (nparts = list_count(het_comp->part_ptr_list))) {
+        if (het_comp->part_ptr_list && het_comp->priority_array && (nparts = list_count(het_comp->part_ptr_list))) {
             for (i = 0; i < nparts; i++) {
                 tmp = het_comp->priority_array[i];
                 if (tmp == 0) { /* job held */
@@ -1243,8 +1132,7 @@ static uint32_t _hetjob_calc_prio_tier(struct job_record *het_leader) {
 
     iter = list_iterator_create(het_leader->pack_job_list);
     while ((het_comp = list_next(iter))) {
-        if (het_comp->part_ptr_list &&
-            list_count(het_comp->part_ptr_list)) {
+        if (het_comp->part_ptr_list && list_count(het_comp->part_ptr_list)) {
             iter2 = list_iterator_create(het_comp->part_ptr_list);
             while ((part_ptr = list_next(iter2))) {
                 tmp = part_ptr->priority_tier;
@@ -1259,8 +1147,7 @@ static uint32_t _hetjob_calc_prio_tier(struct job_record *het_leader) {
         }
         if ((bf_hetjob_prio & HETJOB_PRIO_MIN) && (prio_tier == 0))
             break; /* Minimum found. */
-        if ((bf_hetjob_prio & HETJOB_PRIO_MAX) &&
-            (prio_tier == (NO_VAL16 - 1)))
+        if ((bf_hetjob_prio & HETJOB_PRIO_MAX) && (prio_tier == (NO_VAL16 - 1)))
             break; /* Maximum found. */
     }
     list_iterator_destroy(iter);
@@ -1300,8 +1187,7 @@ static int _set_hetjob_details(void *x, void *arg) {
     struct job_record *job_ptr = (struct job_record *) x;
     pack_details_t *details = NULL;
 
-    if (IS_JOB_PENDING(job_ptr) && job_ptr->pack_job_id &&
-        !job_ptr->pack_job_offset && job_ptr->pack_job_list) {
+    if (IS_JOB_PENDING(job_ptr) && job_ptr->pack_job_id && !job_ptr->pack_job_offset && job_ptr->pack_job_list) {
         /*
          * Pending hetjob leader component. Do calculations only once
          * for whole hetjob. xmalloc memory for 1 pack_details struct,
@@ -1315,8 +1201,7 @@ static int _set_hetjob_details(void *x, void *arg) {
         details->priority_tier = _hetjob_calc_prio_tier(job_ptr);
         details->priority = _hetjob_calc_prio(job_ptr);
 
-        list_for_each(job_ptr->pack_job_list,
-                      _set_hetjob_pack_details, details);
+        list_for_each(job_ptr->pack_job_list, _set_hetjob_pack_details, details);
     }
 
     return SLURM_SUCCESS;
@@ -1365,8 +1250,7 @@ static slurmdb_bf_usage_t *_bf_map_find_add(xhash_t *map, uid_t uid) {
  * Check if limit exceeded. Reset usage if usage time is before current
  * scheduling iteration time
  */
-static bool _check_bf_usage(
-        slurmdb_bf_usage_t *usage, int limit, time_t sched_time) {
+static bool _check_bf_usage(slurmdb_bf_usage_t *usage, int limit, time_t sched_time) {
     if (usage->last_sched < sched_time) {
         usage->last_sched = sched_time;
         usage->count = 0;
@@ -1379,28 +1263,19 @@ static bool _check_bf_usage(
  * Check if job exceeds configured count limits
  * returns true if count exceeded
  */
-static bool _job_exceeds_max_bf_param(struct job_record *job_ptr,
-                                      time_t sched_start) {
-    slurmdb_bf_usage_t *part_usage = NULL, *user_usage = NULL,
-            *assoc_usage = NULL, *user_part_usage = NULL;
+static bool _job_exceeds_max_bf_param(struct job_record *job_ptr, time_t sched_start) {
+    slurmdb_bf_usage_t *part_usage = NULL, *user_usage = NULL, *assoc_usage = NULL, *user_part_usage = NULL;
 
     slurmdb_assoc_rec_t *assoc_ptr = job_ptr->assoc_ptr;
     struct part_record *part_ptr = job_ptr->part_ptr;
 
     if (max_backfill_job_per_user_part) {
         xassert(part_ptr->bf_data);
-        user_part_usage = _bf_map_find_add(
-                part_ptr->bf_data->user_usage,
-                job_ptr->user_id);
-        if (_check_bf_usage(user_part_usage,
-                            max_backfill_job_per_user_part,
-                            sched_start)) {
+        user_part_usage = _bf_map_find_add(part_ptr->bf_data->user_usage, job_ptr->user_id);
+        if (_check_bf_usage(user_part_usage, max_backfill_job_per_user_part, sched_start)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
                 info("backfill: have already checked %u jobs for user %u on partition %s; skipping job %u, %pJ",
-                     max_backfill_job_per_user_part,
-                     job_ptr->user_id,
-                     job_ptr->part_ptr->name,
-                     job_ptr->job_id,
+                     max_backfill_job_per_user_part, job_ptr->user_id, job_ptr->part_ptr->name, job_ptr->job_id,
                      job_ptr);
             return true;
         }
@@ -1409,13 +1284,10 @@ static bool _job_exceeds_max_bf_param(struct job_record *job_ptr,
     if (max_backfill_job_per_part) {
         xassert(part_ptr->bf_data);
         part_usage = part_ptr->bf_data->job_usage;
-        if (_check_bf_usage(part_usage, max_backfill_job_per_part,
-                            sched_start)) {
+        if (_check_bf_usage(part_usage, max_backfill_job_per_part, sched_start)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: have already checked %u jobs for partition %s; skipping %pJ",
-                     max_backfill_job_per_part,
-                     job_ptr->part_ptr->name,
-                     job_ptr);
+                info("backfill: have already checked %u jobs for partition %s; skipping %pJ", max_backfill_job_per_part,
+                     job_ptr->part_ptr->name, job_ptr);
             return true;
         }
     }
@@ -1423,26 +1295,19 @@ static bool _job_exceeds_max_bf_param(struct job_record *job_ptr,
     if (max_backfill_job_per_assoc) {
         if (assoc_ptr) {
             if (!assoc_ptr->bf_usage)
-                assoc_ptr->bf_usage =
-                        xmalloc(sizeof(slurmdb_bf_usage_t));
+                assoc_ptr->bf_usage = xmalloc(sizeof(slurmdb_bf_usage_t));
             assoc_usage = assoc_ptr->bf_usage;
 
-            if (_check_bf_usage(assoc_usage,
-                                max_backfill_job_per_assoc,
-                                sched_start)) {
+            if (_check_bf_usage(assoc_usage, max_backfill_job_per_assoc, sched_start)) {
                 if (debug_flags & DEBUG_FLAG_BACKFILL)
                     info("backfill: have already checked %u jobs for user %u, assoc %u; skipping %pJ",
-                         max_backfill_job_per_assoc,
-                         job_ptr->user_id,
-                         job_ptr->assoc_id,
-                         job_ptr);
+                         max_backfill_job_per_assoc, job_ptr->user_id, job_ptr->assoc_id, job_ptr);
                 return true;
             }
         } else {
             /* Null assoc_ptr indicates no database */
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: no assoc for job %u, required for parameter bf_max_job_per_assoc",
-                     job_ptr->job_id);
+                info("backfill: no assoc for job %u, required for parameter bf_max_job_per_assoc", job_ptr->job_id);
             assoc_usage = NULL;
         }
     }
@@ -1450,25 +1315,19 @@ static bool _job_exceeds_max_bf_param(struct job_record *job_ptr,
     if (max_backfill_job_per_user) {
         if (assoc_ptr && assoc_ptr->user_rec) {
             if (!assoc_ptr->user_rec->bf_usage)
-                assoc_ptr->user_rec->bf_usage =
-                        xmalloc(sizeof(slurmdb_bf_usage_t));
+                assoc_ptr->user_rec->bf_usage = xmalloc(sizeof(slurmdb_bf_usage_t));
             user_usage = assoc_ptr->user_rec->bf_usage;
         } else {
             /* No database, or user rec missing from assoc */
             if (!user_usage_map)
-                user_usage_map = xhash_init(_bf_map_key_id,
-                                            _bf_map_free);
-            user_usage = _bf_map_find_add(user_usage_map,
-                                          job_ptr->user_id);
+                user_usage_map = xhash_init(_bf_map_key_id, _bf_map_free);
+            user_usage = _bf_map_find_add(user_usage_map, job_ptr->user_id);
         }
 
-        if (_check_bf_usage(user_usage, max_backfill_job_per_user,
-                            sched_start)) {
+        if (_check_bf_usage(user_usage, max_backfill_job_per_user, sched_start)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: have already checked %u jobs for user %u; skipping %pJ",
-                     max_backfill_job_per_user,
-                     job_ptr->user_id,
-                     job_ptr);
+                info("backfill: have already checked %u jobs for user %u; skipping %pJ", max_backfill_job_per_user,
+                     job_ptr->user_id, job_ptr);
             return true;
         }
     }
@@ -1523,16 +1382,13 @@ static int _attempt_backfill(void) {
     time_t tmp_preempt_start_time = 0;
     bool tmp_preempt_in_progress = false;
     /* QOS Read lock */
-    assoc_mgr_lock_t qos_read_lock =
-            {NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK,
-             NO_LOCK, NO_LOCK, NO_LOCK};
+    assoc_mgr_lock_t qos_read_lock = {NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
 
     bf_sleep_usec = 0;
     job_start_cnt = 0;
 
     if (!fed_mgr_sibs_synced()) {
-        info("backfill: %s returning, federation siblings not synced yet",
-             __func__);
+        info("backfill: %s returning, federation siblings not synced yet", __func__);
         return SLURM_SUCCESS;
     }
 
@@ -1569,14 +1425,12 @@ static int _attempt_backfill(void) {
     gettimeofday(&bf_time1, NULL);
 
     slurmctld_diag_stats.bf_queue_len = job_test_count;
-    slurmctld_diag_stats.bf_queue_len_sum += slurmctld_diag_stats.
-            bf_queue_len;
+    slurmctld_diag_stats.bf_queue_len_sum += slurmctld_diag_stats.bf_queue_len;
     slurmctld_diag_stats.bf_last_depth = 0;
     slurmctld_diag_stats.bf_last_depth_try = 0;
     slurmctld_diag_stats.bf_when_last_cycle = now;
 
-    node_space = xmalloc(sizeof(node_space_map_t) *
-                         (max_backfill_job_cnt * 2 + 1));
+    node_space = xmalloc(sizeof(node_space_map_t) * (max_backfill_job_cnt * 2 + 1));
     node_space[0].begin_time = sched_start;
     window_end = sched_start + backfill_window;
     node_space[0].end_time = window_end;
@@ -1592,8 +1446,7 @@ static int _attempt_backfill(void) {
 
     if (assoc_limit_stop) {
         assoc_mgr_lock(&qos_read_lock);
-        list_for_each(assoc_mgr_qos_list,
-                      _clear_qos_blocked_times, NULL);
+        list_for_each(assoc_mgr_qos_list, _clear_qos_blocked_times, NULL);
         assoc_mgr_unlock(&qos_read_lock);
     }
 
@@ -1603,8 +1456,7 @@ static int _attempt_backfill(void) {
     bit_clear_all(bf_ignore_node_bitmap);
 
     while (1) {
-        uint32_t bf_array_task_id, bf_job_priority,
-                prio_reserve;
+        uint32_t bf_array_task_id, bf_job_priority, prio_reserve;
         bool get_boot_time = false;
 
         job_queue_rec = (job_queue_rec_t *) list_pop(job_queue);
@@ -1620,15 +1472,13 @@ static int _attempt_backfill(void) {
         bf_array_task_id = job_queue_rec->array_task_id;
         xfree(job_queue_rec);
 
-        if (slurmctld_config.shutdown_time ||
-            (difftime(time(NULL), orig_sched_start) >= bf_max_time)) {
+        if (slurmctld_config.shutdown_time || (difftime(time(NULL), orig_sched_start) >= bf_max_time)) {
             break;
         }
 
         many_rpcs = false;
         slurm_mutex_lock(&slurmctld_config.thread_count_lock);
-        if ((max_rpc_cnt > 0) &&
-            (slurmctld_config.server_thread_count >= max_rpc_cnt))
+        if ((max_rpc_cnt > 0) && (slurmctld_config.server_thread_count >= max_rpc_cnt))
             many_rpcs = true;
         slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
 
@@ -1636,19 +1486,14 @@ static int _attempt_backfill(void) {
             if (debug_flags & DEBUG_FLAG_BACKFILL) {
                 END_TIMER;
                 info("backfill: yielding locks after testing "
-                     "%u(%d) jobs, %s",
-                     slurmctld_diag_stats.bf_last_depth,
-                     job_test_count, TIME_STR);
+                     "%u(%d) jobs, %s", slurmctld_diag_stats.bf_last_depth, job_test_count, TIME_STR);
             }
-            if ((_yield_locks(yield_sleep) && !backfill_continue) ||
-                (slurmctld_conf.last_update != config_update) ||
+            if ((_yield_locks(yield_sleep) && !backfill_continue) || (slurmctld_conf.last_update != config_update) ||
                 (last_part_update != part_update)) {
                 if (debug_flags & DEBUG_FLAG_BACKFILL) {
                     info("backfill: system state changed, "
                          "breaking out after testing "
-                         "%u(%d) jobs",
-                         slurmctld_diag_stats.bf_last_depth,
-                         job_test_count);
+                         "%u(%d) jobs", slurmctld_diag_stats.bf_last_depth, job_test_count);
                 }
                 rc = 1;
                 break;
@@ -1663,8 +1508,7 @@ static int _attempt_backfill(void) {
             START_TIMER;
         }
 
-        if ((job_ptr->array_task_id != bf_array_task_id) &&
-            (bf_array_task_id == NO_VAL)) {
+        if ((job_ptr->array_task_id != bf_array_task_id) && (bf_array_task_id == NO_VAL)) {
             /* Job array element started in other partition,
              * reset pointer to "master" job array record */
             job_ptr = find_job_record(job_ptr->array_job_id);
@@ -1673,8 +1517,7 @@ static int _attempt_backfill(void) {
         }
 
         /* Restore preemption state if needed. */
-        _restore_preempt_state(job_ptr, &tmp_preempt_start_time,
-                               &tmp_preempt_in_progress);
+        _restore_preempt_state(job_ptr, &tmp_preempt_start_time, &tmp_preempt_in_progress);
 
         /*
          * Establish baseline (worst case) start time for pack job
@@ -1682,8 +1525,7 @@ static int _attempt_backfill(void) {
          */
         _pack_start_set(job_ptr, (now + YEAR_SECONDS), NO_VAL);
 
-        if (job_ptr->pack_job_id &&
-            (job_ptr->state_reason == WAIT_NO_REASON)) {
+        if (job_ptr->pack_job_id && (job_ptr->state_reason == WAIT_NO_REASON)) {
             xfree(job_ptr->state_desc);
             job_ptr->state_reason = WAIT_RESOURCES;
         }
@@ -1708,40 +1550,28 @@ static int _attempt_backfill(void) {
             assoc_rec.partition = job_ptr->part_ptr->name;
             assoc_rec.uid = job_ptr->user_id;
 
-            if (!assoc_mgr_fill_in_assoc(acct_db_conn, &assoc_rec,
-                                         accounting_enforce,
-                                         &job_ptr->assoc_ptr,
-                                         false)) {
+            if (!assoc_mgr_fill_in_assoc(acct_db_conn, &assoc_rec, accounting_enforce, &job_ptr->assoc_ptr, false)) {
                 job_ptr->state_reason = WAIT_NO_REASON;
                 xfree(job_ptr->state_desc);
                 job_ptr->assoc_id = assoc_rec.id;
                 last_job_update = now;
             } else {
-                debug("backfill: %pJ has invalid association",
-                      job_ptr);
+                debug("backfill: %pJ has invalid association", job_ptr);
                 xfree(job_ptr->state_desc);
-                job_ptr->state_reason =
-                        WAIT_ASSOC_RESOURCE_LIMIT;
+                job_ptr->state_reason = WAIT_ASSOC_RESOURCE_LIMIT;
                 continue;
             }
         }
 
         if (job_ptr->qos_id) {
-            assoc_mgr_lock_t locks = {
-                    READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK,
-                    NO_LOCK, NO_LOCK, NO_LOCK};
+            assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
 
             assoc_mgr_lock(&locks);
-            if (job_ptr->assoc_ptr
-                && (accounting_enforce & ACCOUNTING_ENFORCE_QOS)
-                && ((job_ptr->qos_id >= g_qos_count) ||
-                    !job_ptr->assoc_ptr->usage ||
-                    !job_ptr->assoc_ptr->usage->valid_qos ||
-                    !bit_test(job_ptr->assoc_ptr->usage->valid_qos,
-                              job_ptr->qos_id))
-                && !job_ptr->limit_set.qos) {
-                debug("backfill: %pJ has invalid QOS",
-                      job_ptr);
+            if (job_ptr->assoc_ptr && (accounting_enforce & ACCOUNTING_ENFORCE_QOS) &&
+                ((job_ptr->qos_id >= g_qos_count) || !job_ptr->assoc_ptr->usage ||
+                 !job_ptr->assoc_ptr->usage->valid_qos ||
+                 !bit_test(job_ptr->assoc_ptr->usage->valid_qos, job_ptr->qos_id)) && !job_ptr->limit_set.qos) {
+                debug("backfill: %pJ has invalid QOS", job_ptr);
                 xfree(job_ptr->state_desc);
                 job_ptr->state_reason = FAIL_QOS;
                 last_job_update = now;
@@ -1765,63 +1595,47 @@ static int _attempt_backfill(void) {
         }
 
         if (job_ptr->part_ptr->qos_ptr)
-            qos_part_blocked_until =
-                    job_ptr->part_ptr->qos_ptr->blocked_until;
+            qos_part_blocked_until = job_ptr->part_ptr->qos_ptr->blocked_until;
         else
             qos_part_blocked_until = 0;
 
-        if (part_policy_valid_qos(job_ptr->part_ptr, job_ptr->qos_ptr,
-                                  job_ptr) != SLURM_SUCCESS) {
+        if (part_policy_valid_qos(job_ptr->part_ptr, job_ptr->qos_ptr, job_ptr) != SLURM_SUCCESS) {
             assoc_mgr_unlock(&qos_read_lock);
             continue;
         }
         assoc_mgr_unlock(&qos_read_lock);
 
-        if (!assoc_limit_stop &&
-            !acct_policy_job_runnable_pre_select(job_ptr, false)) {
+        if (!assoc_limit_stop && !acct_policy_job_runnable_pre_select(job_ptr, false)) {
             continue;
         }
 
-        if (!(prio_reserve = acct_policy_get_prio_thresh(
-                job_ptr, false)))
+        if (!(prio_reserve = acct_policy_get_prio_thresh(job_ptr, false)))
             prio_reserve = bf_min_prio_reserve;
 
         if (prio_reserve && (debug_flags & DEBUG_FLAG_BACKFILL))
-            info("backfill: %pJ has a prio_reserve of %u",
-                 job_ptr, prio_reserve);
+            info("backfill: %pJ has a prio_reserve of %u", job_ptr, prio_reserve);
 
         job_no_reserve = 0;
-        if (prio_reserve &&
-            (job_ptr->priority < prio_reserve)) {
+        if (prio_reserve && (job_ptr->priority < prio_reserve)) {
             job_no_reserve = TEST_NOW_ONLY;
         } else if (bf_min_age_reserve && job_ptr->details->begin_time) {
-            pend_time = difftime(time(NULL),
-                                 job_ptr->details->begin_time);
+            pend_time = difftime(time(NULL), job_ptr->details->begin_time);
             if (pend_time < bf_min_age_reserve)
                 job_no_reserve = TEST_NOW_ONLY;
         }
 
         /* If partition data is needed and not yet initialized, do so */
         if (!job_ptr->part_ptr->bf_data &&
-            (bf_job_part_count_reserve ||
-             max_backfill_job_per_user_part ||
-             max_backfill_job_per_part)) {
-            bf_part_data_t *part_data =
-                    xmalloc(sizeof(bf_part_data_t));
-            part_data->job_usage =
-                    xmalloc(sizeof(slurmdb_bf_usage_t));
-            part_data->resv_usage =
-                    xmalloc(sizeof(slurmdb_bf_usage_t));
-            part_data->user_usage = xhash_init(_bf_map_key_id,
-                                               _bf_map_free);
+            (bf_job_part_count_reserve || max_backfill_job_per_user_part || max_backfill_job_per_part)) {
+            bf_part_data_t *part_data = xmalloc(sizeof(bf_part_data_t));
+            part_data->job_usage = xmalloc(sizeof(slurmdb_bf_usage_t));
+            part_data->resv_usage = xmalloc(sizeof(slurmdb_bf_usage_t));
+            part_data->user_usage = xhash_init(_bf_map_key_id, _bf_map_free);
             job_ptr->part_ptr->bf_data = part_data;
         }
 
         if ((job_no_reserve == 0) && bf_job_part_count_reserve) {
-            if (_check_bf_usage(
-                    job_ptr->part_ptr->bf_data->resv_usage,
-                    bf_job_part_count_reserve,
-                    orig_sched_start))
+            if (_check_bf_usage(job_ptr->part_ptr->bf_data->resv_usage, bf_job_part_count_reserve, orig_sched_start))
                 job_no_reserve = TEST_NOW_ONLY;
         }
 
@@ -1858,8 +1672,7 @@ static int _attempt_backfill(void) {
         if (!_job_part_valid(job_ptr, part_ptr))
             continue;    /* Partition change during lock yield */
         if ((job_ptr->array_task_id != NO_VAL) || job_ptr->array_recs) {
-            if ((reject_array_job_id == job_ptr->array_job_id) &&
-                (reject_array_part == part_ptr))
+            if ((reject_array_job_id == job_ptr->array_job_id) && (reject_array_part == part_ptr))
                 continue;  /* already rejected array element */
 
             /* assume reject whole array for now, clear if OK */
@@ -1876,50 +1689,39 @@ static int _attempt_backfill(void) {
         }
 
         if (debug_flags & DEBUG_FLAG_BACKFILL) {
-            info("backfill test for %pJ Prio=%u Partition=%s",
-                 job_ptr, job_ptr->priority,
-                 job_ptr->part_ptr->name);
+            info("backfill test for %pJ Prio=%u Partition=%s", job_ptr, job_ptr->priority, job_ptr->part_ptr->name);
         }
 
         /* Test to see if we've exceeded any per user/partition limit */
         if (_job_exceeds_max_bf_param(job_ptr, orig_sched_start))
             continue;
 
-        if (((part_ptr->state_up & PARTITION_SCHED) == 0) ||
-            (part_ptr->node_bitmap == NULL)) {
+        if (((part_ptr->state_up & PARTITION_SCHED) == 0) || (part_ptr->node_bitmap == NULL)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: partition %s not usable",
-                     job_ptr->part_ptr->name);
+                info("backfill: partition %s not usable", job_ptr->part_ptr->name);
             continue;
         }
 
-        if ((!job_independent(job_ptr, 0)) ||
-            (license_job_test(job_ptr, time(NULL), true) !=
-             SLURM_SUCCESS)) {
+        if ((!job_independent(job_ptr, 0)) || (license_job_test(job_ptr, time(NULL), true) != SLURM_SUCCESS)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
                 info("backfill: %pJ not runable now", job_ptr);
             continue;
         }
 
         /* Determine minimum and maximum node counts */
-        error_code = get_node_cnts(job_ptr, qos_flags, part_ptr,
-                                   &min_nodes, &req_nodes, &max_nodes);
+        error_code = get_node_cnts(job_ptr, qos_flags, part_ptr, &min_nodes, &req_nodes, &max_nodes);
 
         if (error_code == ESLURM_ACCOUNTING_POLICY) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: %pJ acct policy node limit",
-                     job_ptr);
+                info("backfill: %pJ acct policy node limit", job_ptr);
             continue;
-        } else if (error_code ==
-                   ESLURM_REQUESTED_PART_CONFIG_UNAVAILABLE) {
+        } else if (error_code == ESLURM_REQUESTED_PART_CONFIG_UNAVAILABLE) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: %pJ node count too high",
-                     job_ptr);
+                info("backfill: %pJ node count too high", job_ptr);
             continue;
         } else if (error_code != SLURM_SUCCESS) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: error setting nodes for %pJ: %s",
-                     job_ptr, slurm_strerror(error_code));
+                info("backfill: error setting nodes for %pJ: %s", job_ptr, slurm_strerror(error_code));
             continue;
         }
 
@@ -1938,23 +1740,20 @@ static int _attempt_backfill(void) {
             part_time_limit = YEAR_MINUTES;
         else
             part_time_limit = part_ptr->max_time;
-        if ((job_ptr->time_limit == NO_VAL) ||
-            (job_ptr->time_limit == INFINITE)) {
+        if ((job_ptr->time_limit == NO_VAL) || (job_ptr->time_limit == INFINITE)) {
             time_limit = part_time_limit;
             job_ptr->limit_set.time = 1;
         } else {
             if (part_ptr->max_time == INFINITE)
                 time_limit = job_ptr->time_limit;
             else
-                time_limit = MIN(job_ptr->time_limit,
-                                 part_time_limit);
+                time_limit = MIN(job_ptr->time_limit, part_time_limit);
         }
         if (deadline_time_limit)
             comp_time_limit = MIN(time_limit, deadline_time_limit);
         else
             comp_time_limit = time_limit;
-        if ((qos_flags & QOS_FLAG_NO_RESERVE) &&
-            slurm_get_preempt_mode())
+        if ((qos_flags & QOS_FLAG_NO_RESERVE) && slurm_get_preempt_mode())
             time_limit = job_ptr->time_limit = 1;
         else if (job_ptr->time_min && (job_ptr->time_min < time_limit))
             time_limit = job_ptr->time_limit = job_ptr->time_min;
@@ -1965,21 +1764,17 @@ static int _attempt_backfill(void) {
             if (qos_blocked_until > later_start) {
                 later_start = qos_blocked_until;
                 if (debug_flags & DEBUG_FLAG_BACKFILL)
-                    info("QOS blocked_until move start_res to %ld",
-                         later_start);
+                    info("QOS blocked_until move start_res to %ld", later_start);
             }
             if (qos_part_blocked_until > later_start) {
                 later_start = qos_part_blocked_until;
                 if (debug_flags & DEBUG_FLAG_BACKFILL)
-                    info("Part QOS blocked_until move start_res to %ld",
-                         later_start);
+                    info("Part QOS blocked_until move start_res to %ld", later_start);
             }
         }
 
         TRY_LATER:
-        if (slurmctld_config.shutdown_time ||
-            (difftime(time(NULL), orig_sched_start) >=
-             bf_max_time)) {
+        if (slurmctld_config.shutdown_time || (difftime(time(NULL), orig_sched_start) >= bf_max_time)) {
             _set_job_time_limit(job_ptr, orig_time_limit);
             break;
         }
@@ -1987,8 +1782,7 @@ static int _attempt_backfill(void) {
 
         many_rpcs = false;
         slurm_mutex_lock(&slurmctld_config.thread_count_lock);
-        if ((max_rpc_cnt > 0) &&
-            (slurmctld_config.server_thread_count >= max_rpc_cnt))
+        if ((max_rpc_cnt > 0) && (slurmctld_config.server_thread_count >= max_rpc_cnt))
             many_rpcs = true;
         slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
 
@@ -1998,19 +1792,15 @@ static int _attempt_backfill(void) {
             if (debug_flags & DEBUG_FLAG_BACKFILL) {
                 END_TIMER;
                 info("backfill: yielding locks after testing "
-                     "%u(%d) jobs tested, %u time slots, %s",
-                     slurmctld_diag_stats.bf_last_depth,
-                     job_test_count, test_time_count, TIME_STR);
+                     "%u(%d) jobs tested, %u time slots, %s", slurmctld_diag_stats.bf_last_depth, job_test_count,
+                     test_time_count, TIME_STR);
             }
-            if ((_yield_locks(yield_sleep) && !backfill_continue) ||
-                (slurmctld_conf.last_update != config_update) ||
+            if ((_yield_locks(yield_sleep) && !backfill_continue) || (slurmctld_conf.last_update != config_update) ||
                 (last_part_update != part_update)) {
                 if (debug_flags & DEBUG_FLAG_BACKFILL) {
                     info("backfill: system state changed, "
                          "breaking out after testing "
-                         "%u(%d) jobs",
-                         slurmctld_diag_stats.bf_last_depth,
-                         job_test_count);
+                         "%u(%d) jobs", slurmctld_diag_stats.bf_last_depth, job_test_count);
                 }
                 rc = 1;
                 break;
@@ -2049,12 +1839,10 @@ static int _attempt_backfill(void) {
         resv_end = 0;
         later_start = 0;
         /* Determine impact of any advance reservations */
-        j = job_test_resv(job_ptr, &start_res, true, &avail_bitmap,
-                          &exc_core_bitmap, &resv_overlap, false);
+        j = job_test_resv(job_ptr, &start_res, true, &avail_bitmap, &exc_core_bitmap, &resv_overlap, false);
         if (j != SLURM_SUCCESS) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: %pJ reservation defer",
-                     job_ptr);
+                info("backfill: %pJ reservation defer", job_ptr);
             _set_job_time_limit(job_ptr, orig_time_limit);
             continue;
         }
@@ -2073,26 +1861,22 @@ static int _attempt_backfill(void) {
         filter_by_node_owner(job_ptr, avail_bitmap);
         filter_by_node_mcs(job_ptr, mcs_select, avail_bitmap);
         for (j = 0;;) {
-            if ((node_space[j].end_time > start_res) &&
-                node_space[j].next && (later_start == 0))
+            if ((node_space[j].end_time > start_res) && node_space[j].next && (later_start == 0))
                 later_start = node_space[j].end_time;
             if (node_space[j].end_time <= start_res);
             else if (node_space[j].begin_time <= end_time) {
-                bit_and(avail_bitmap,
-                        node_space[j].avail_bitmap);
+                bit_and(avail_bitmap, node_space[j].avail_bitmap);
             } else
                 break;
             if ((j = node_space[j].next) == 0)
                 break;
         }
-        if (resv_end && (++resv_end < window_end) &&
-            ((later_start == 0) || (resv_end < later_start))) {
+        if (resv_end && (++resv_end < window_end) && ((later_start == 0) || (resv_end < later_start))) {
             later_start = resv_end;
         }
 
         if (job_ptr->details->exc_node_bitmap) {
-            bit_and_not(avail_bitmap,
-                        job_ptr->details->exc_node_bitmap);
+            bit_and_not(avail_bitmap, job_ptr->details->exc_node_bitmap);
         }
 
         /* Test if insufficient nodes remain OR
@@ -2100,10 +1884,9 @@ static int _attempt_backfill(void) {
          *	nodes lack features OR
          *	no change since previously tested nodes (only changes
          *	in other partition nodes) */
-        if ((bit_set_count(avail_bitmap) < min_nodes) ||
-            ((job_ptr->details->req_node_bitmap) &&
-             (!bit_super_set(job_ptr->details->req_node_bitmap,
-                             avail_bitmap))) ||
+        if ((bit_set_count(avail_bitmap) < min_nodes) || ((job_ptr->details->req_node_bitmap) &&
+                                                          (!bit_super_set(job_ptr->details->req_node_bitmap,
+                                                                          avail_bitmap))) ||
             (job_req_node_filter(job_ptr, avail_bitmap, true))) {
             if (later_start && !job_no_reserve) {
                 job_ptr->start_time = 0;
@@ -2126,8 +1909,7 @@ static int _attempt_backfill(void) {
         bit_not(resv_bitmap);
 
         /* this is the time consuming operation */
-        debug2("backfill: entering _try_sched for %pJ.",
-               job_ptr);
+        debug2("backfill: entering _try_sched for %pJ.", job_ptr);
 
         if (!already_counted) {
             slurmctld_diag_stats.bf_last_depth_try++;
@@ -2136,14 +1918,12 @@ static int _attempt_backfill(void) {
         if (debug_flags & DEBUG_FLAG_BACKFILL_MAP)
             _dump_job_test(job_ptr, avail_bitmap, start_res);
         test_fini = -1;
-        build_active_feature_bitmap(job_ptr, avail_bitmap,
-                                    &active_bitmap);
+        build_active_feature_bitmap(job_ptr, avail_bitmap, &active_bitmap);
         job_ptr->bit_flags |= BACKFILL_TEST;
         job_ptr->bit_flags |= job_no_reserve;    /* 0 or TEST_NOW_ONLY */
 
         if (active_bitmap) {
-            j = _try_sched(job_ptr, &active_bitmap, min_nodes,
-                           max_nodes, req_nodes, exc_core_bitmap);
+            j = _try_sched(job_ptr, &active_bitmap, min_nodes, max_nodes, req_nodes, exc_core_bitmap);
             if (j == SLURM_SUCCESS) {
                 FREE_NULL_BITMAP(avail_bitmap);
                 avail_bitmap = active_bitmap;
@@ -2171,13 +1951,10 @@ static int _attempt_backfill(void) {
                    job_ptr);
             /* Determine impact of any advance reservations */
             resv_end = 0;
-            j = job_test_resv(job_ptr, &start_res, false,
-                              &tmp_node_bitmap, &tmp_core_bitmap,
-                              &resv_overlap, true);
+            j = job_test_resv(job_ptr, &start_res, false, &tmp_node_bitmap, &tmp_core_bitmap, &resv_overlap, true);
             if (resv_overlap)
                 resv_end = find_resv_end(start_res);
-            if (resv_end && (++resv_end < window_end) &&
-                ((later_start == 0) || (resv_end < later_start))) {
+            if (resv_end && (++resv_end < window_end) && ((later_start == 0) || (resv_end < later_start))) {
                 later_start = resv_end;
             }
             if (j == SLURM_SUCCESS) {
@@ -2194,10 +1971,8 @@ static int _attempt_backfill(void) {
             for (j = 0;;) {
                 if (node_space[j].end_time <= start_res);
                 else if (node_space[j].begin_time <= end_time) {
-                    if (node_space[j].begin_time >
-                        orig_end_time)
-                        bit_and(avail_bitmap,
-                                node_space[j].avail_bitmap);
+                    if (node_space[j].begin_time > orig_end_time)
+                        bit_and(avail_bitmap, node_space[j].avail_bitmap);
                 } else
                     break;
                 if ((j = node_space[j].next) == 0)
@@ -2207,8 +1982,7 @@ static int _attempt_backfill(void) {
         if (test_fini != 1) {
             /* Either active_bitmap was NULL or not usable by the
              * job. Test using avail_bitmap instead */
-            j = _try_sched(job_ptr, &avail_bitmap, min_nodes,
-                           max_nodes, req_nodes, exc_core_bitmap);
+            j = _try_sched(job_ptr, &avail_bitmap, min_nodes, max_nodes, req_nodes, exc_core_bitmap);
             if (test_fini == 0) {
                 job_ptr->details->share_res = save_share_res;
                 job_ptr->details->whole_node = save_whole_node;
@@ -2237,38 +2011,30 @@ static int _attempt_backfill(void) {
          * selected for this job to be allocated
          */
         if ((job_ptr->start_time <= now) &&
-            (bit_overlap(avail_bitmap, cg_node_bitmap) ||
-             bit_overlap(avail_bitmap, rs_node_bitmap))) {
+            (bit_overlap(avail_bitmap, cg_node_bitmap) || bit_overlap(avail_bitmap, rs_node_bitmap))) {
             /* Need to wait for in-progress completion/epilog */
             job_ptr->start_time = now + 1;
             later_start = 0;
         }
-        if ((job_ptr->start_time <= now) &&
-            ((bb = bb_g_job_test_stage_in(job_ptr, true)) != 1)) {
+        if ((job_ptr->start_time <= now) && ((bb = bb_g_job_test_stage_in(job_ptr, true)) != 1)) {
             if (job_ptr->state_reason != WAIT_NO_REASON) { ;
             } else if (bb == -1) {
                 xfree(job_ptr->state_desc);
-                job_ptr->state_reason =
-                        WAIT_BURST_BUFFER_RESOURCE;
-                job_ptr->start_time =
-                        bb_g_job_get_est_start(job_ptr);
+                job_ptr->state_reason = WAIT_BURST_BUFFER_RESOURCE;
+                job_ptr->start_time = bb_g_job_get_est_start(job_ptr);
             } else {    /* bb == 0 */
                 xfree(job_ptr->state_desc);
                 job_ptr->state_reason = WAIT_BURST_BUFFER_STAGING;
                 job_ptr->start_time = now + 1;
             }
-            sched_debug3("%pJ. State=%s. Reason=%s. Priority=%u.",
-                         job_ptr,
-                         job_state_string(job_ptr->job_state),
-                         job_reason_string(job_ptr->state_reason),
-                         job_ptr->priority);
+            sched_debug3("%pJ. State=%s. Reason=%s. Priority=%u.", job_ptr, job_state_string(job_ptr->job_state),
+                         job_reason_string(job_ptr->state_reason), job_ptr->priority);
             last_job_update = now;
             _set_job_time_limit(job_ptr, orig_time_limit);
             later_start = 0;
             if (bb == -1)
                 continue;
-        } else if ((job_ptr->pack_job_id == 0) &&
-                   (job_ptr->start_time <= now)) { /* Can start now */
+        } else if ((job_ptr->pack_job_id == 0) && (job_ptr->start_time <= now)) { /* Can start now */
             uint32_t save_time_limit = job_ptr->time_limit;
             uint32_t hard_limit;
             bool reset_time = false;
@@ -2277,8 +2043,7 @@ static int _attempt_backfill(void) {
             /* get fed job lock from origin cluster */
             if (fed_mgr_job_lock(job_ptr)) {
                 if (debug_flags & DEBUG_FLAG_BACKFILL)
-                    info("backfill: %pJ can't get fed job lock from origin cluster to backfill job",
-                         job_ptr);
+                    info("backfill: %pJ can't get fed job lock from origin cluster to backfill job", job_ptr);
                 rc = ESLURM_FED_JOB_LOCK;
                 goto skip_start;
             }
@@ -2300,15 +2065,12 @@ static int _attempt_backfill(void) {
             skip_start:
             if (qos_flags & QOS_FLAG_NO_RESERVE) {
                 if (orig_time_limit == NO_VAL) {
-                    acct_policy_alter_job(
-                            job_ptr, comp_time_limit);
+                    acct_policy_alter_job(job_ptr, comp_time_limit);
                     job_ptr->time_limit = comp_time_limit;
                     job_ptr->limit_set.time = 1;
                 } else {
-                    acct_policy_alter_job(
-                            job_ptr, orig_time_limit);
-                    _set_job_time_limit(job_ptr,
-                                        orig_time_limit);
+                    acct_policy_alter_job(job_ptr, orig_time_limit);
+                    _set_job_time_limit(job_ptr, orig_time_limit);
                 }
             } else if ((rc == SLURM_SUCCESS) && job_ptr->time_min) {
                 /* Set time limit as high as possible */
@@ -2319,8 +2081,7 @@ static int _attempt_backfill(void) {
                 acct_policy_alter_job(job_ptr, comp_time_limit);
                 job_ptr->time_limit = comp_time_limit;
                 job_ptr->limit_set.time = 1;
-            } else if (deadline_time_limit &&
-                       (rc == SLURM_SUCCESS)) {
+            } else if (deadline_time_limit && (rc == SLURM_SUCCESS)) {
                 acct_policy_alter_job(job_ptr, comp_time_limit);
                 job_ptr->time_limit = comp_time_limit;
                 reset_time = true;
@@ -2339,28 +2100,22 @@ static int _attempt_backfill(void) {
                     hard_limit = YEAR_SECONDS;
                 else
                     hard_limit = job_ptr->time_limit * 60;
-                job_ptr->end_time = job_ptr->start_time +
-                                    hard_limit;
+                job_ptr->end_time = job_ptr->start_time + hard_limit;
                 /*
                  * Only set if start_time. end_time must be set
                  * beforehand for _reset_job_time_limit.
                  */
                 if (reset_time) {
-                    _reset_job_time_limit(job_ptr, now,
-                                          node_space);
+                    _reset_job_time_limit(job_ptr, now, node_space);
                     time_limit = job_ptr->time_limit;
                 }
             } else if (rc == SLURM_SUCCESS) {
                 error("%s: start_time of 0 on successful "
-                      "backfill. This shouldn't happen. :)",
-                      __func__);
+                      "backfill. This shouldn't happen. :)", __func__);
             }
 
-            if ((rc == ESLURM_RESERVATION_BUSY) ||
-                (rc == ESLURM_ACCOUNTING_POLICY &&
-                 !assoc_limit_stop) ||
-                (rc == ESLURM_POWER_NOT_AVAIL) ||
-                (rc == ESLURM_POWER_RESERVED)) {
+            if ((rc == ESLURM_RESERVATION_BUSY) || (rc == ESLURM_ACCOUNTING_POLICY && !assoc_limit_stop) ||
+                (rc == ESLURM_POWER_NOT_AVAIL) || (rc == ESLURM_POWER_RESERVED)) {
                 /* Unknown future start time, just skip job */
                 job_ptr->start_time = orig_start_time;
                 _set_job_time_limit(job_ptr, orig_time_limit);
@@ -2378,22 +2133,17 @@ static int _attempt_backfill(void) {
                     job_ptr->start_time = later_start;
                 else
                     job_ptr->start_time = now + 500;
-                if (job_ptr->qos_blocking_ptr &&
-                    job_state_qos_grp_limit(
-                            job_ptr->state_reason)) {
+                if (job_ptr->qos_blocking_ptr && job_state_qos_grp_limit(job_ptr->state_reason)) {
                     assoc_mgr_lock(&qos_read_lock);
                     qos_ptr = job_ptr->qos_blocking_ptr;
-                    if (qos_ptr->blocked_until <
-                        job_ptr->start_time) {
-                        qos_ptr->blocked_until =
-                                job_ptr->start_time;
+                    if (qos_ptr->blocked_until < job_ptr->start_time) {
+                        qos_ptr->blocked_until = job_ptr->start_time;
                     }
                     assoc_mgr_unlock(&qos_read_lock);
                 }
             } else if (rc != SLURM_SUCCESS) {
                 if (debug_flags & DEBUG_FLAG_BACKFILL) {
-                    info("backfill: planned start of %pJ failed: %s",
-                         job_ptr, slurm_strerror(rc));
+                    info("backfill: planned start of %pJ failed: %s", job_ptr, slurm_strerror(rc));
                 }
                 /* Drop through and reserve these resources.
                  * Likely due to state changes during sleep.
@@ -2408,51 +2158,36 @@ static int _attempt_backfill(void) {
                 /* Update the database if job time limit
                  * changed and move to next job */
                 if (save_time_limit != job_ptr->time_limit)
-                    jobacct_storage_job_start_direct(
-                            acct_db_conn, job_ptr);
+                    jobacct_storage_job_start_direct(acct_db_conn, job_ptr);
                 job_start_cnt++;
-                if (max_backfill_jobs_start &&
-                    (job_start_cnt >= max_backfill_jobs_start)) {
+                if (max_backfill_jobs_start && (job_start_cnt >= max_backfill_jobs_start)) {
                     if (debug_flags & DEBUG_FLAG_BACKFILL) {
                         info("backfill: bf_max_job_start"
-                             " limit of %d reached",
-                             max_backfill_jobs_start);
+                             " limit of %d reached", max_backfill_jobs_start);
                     }
                     break;
                 }
-                if (is_job_array_head &&
-                    (job_ptr->array_task_id != NO_VAL)) {
+                if (is_job_array_head && (job_ptr->array_task_id != NO_VAL)) {
                     /* Try starting next task of job array */
-                    job_ptr = find_job_record(job_ptr->
-                            array_job_id);
-                    if (job_ptr &&
-                        IS_JOB_PENDING(job_ptr) &&
-                        (bb_g_job_test_stage_in(
-                                job_ptr, false) == 1))
+                    job_ptr = find_job_record(job_ptr->array_job_id);
+                    if (job_ptr && IS_JOB_PENDING(job_ptr) && (bb_g_job_test_stage_in(job_ptr, false) == 1))
                         goto next_task;
                 }
                 continue;
             }
         } else if (job_ptr->pack_job_id != 0) {
             uint32_t max_time_limit;
-            max_time_limit = _get_job_max_tl(job_ptr, now,
-                                             node_space);
+            max_time_limit = _get_job_max_tl(job_ptr, now, node_space);
             comp_time_limit = MIN(comp_time_limit, max_time_limit);
-            job_ptr->node_cnt_wag =
-                    MAX(bit_set_count(avail_bitmap), 1);
-            _pack_start_set(job_ptr, job_ptr->start_time,
-                            comp_time_limit);
+            job_ptr->node_cnt_wag = MAX(bit_set_count(avail_bitmap), 1);
+            _pack_start_set(job_ptr, job_ptr->start_time, comp_time_limit);
             _set_job_time_limit(job_ptr, orig_time_limit);
-            if (bf_hetjob_immediate &&
-                (!max_backfill_jobs_start ||
-                 (job_start_cnt < max_backfill_jobs_start)))
-                _pack_start_test(node_space,
-                                 job_ptr->pack_job_id);
+            if (bf_hetjob_immediate && (!max_backfill_jobs_start || (job_start_cnt < max_backfill_jobs_start)))
+                _pack_start_test(node_space, job_ptr->pack_job_id);
         }
 
         if ((job_ptr->start_time > now) && (job_no_reserve != 0)) {
-            if ((orig_start_time != 0) &&
-                (orig_start_time < job_ptr->start_time)) {
+            if ((orig_start_time != 0) && (orig_start_time < job_ptr->start_time)) {
                 /* Can start earlier in different partition */
                 job_ptr->start_time = orig_start_time;
             }
@@ -2464,28 +2199,22 @@ static int _attempt_backfill(void) {
             /* Try later when some nodes currently reserved for
              * pending jobs are free */
             if (debug_flags & DEBUG_FLAG_BACKFILL) {
-                info("backfill: Try later %pJ later_start %ld",
-                     job_ptr, later_start);
+                info("backfill: Try later %pJ later_start %ld", job_ptr, later_start);
             }
             job_ptr->start_time = 0;
             goto TRY_LATER;
         }
 
         start_time = job_ptr->start_time;
-        end_reserve = job_ptr->start_time + boot_time +
-                      (time_limit * 60);
-        start_time = (start_time / backfill_resolution) *
-                     backfill_resolution;
-        end_reserve = (end_reserve / backfill_resolution) *
-                      backfill_resolution;
+        end_reserve = job_ptr->start_time + boot_time + (time_limit * 60);
+        start_time = (start_time / backfill_resolution) * backfill_resolution;
+        end_reserve = (end_reserve / backfill_resolution) * backfill_resolution;
 
         if (job_ptr->start_time > (sched_start + backfill_window)) {
             /* Starts too far in the future to worry about */
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                _dump_job_sched(job_ptr, end_reserve,
-                                avail_bitmap);
-            if ((orig_start_time != 0) &&
-                (orig_start_time < job_ptr->start_time)) {
+                _dump_job_sched(job_ptr, end_reserve, avail_bitmap);
+            if ((orig_start_time != 0) && (orig_start_time < job_ptr->start_time)) {
                 /* Can start earlier in different partition */
                 job_ptr->start_time = orig_start_time;
             }
@@ -2495,37 +2224,24 @@ static int _attempt_backfill(void) {
 
         if (node_space_recs >= max_backfill_job_cnt) {
             if (debug_flags & DEBUG_FLAG_BACKFILL) {
-                info("backfill: table size limit of %u reached",
-                     max_backfill_job_cnt);
+                info("backfill: table size limit of %u reached", max_backfill_job_cnt);
             }
-            if ((max_backfill_job_per_part != 0) &&
-                (max_backfill_job_per_part >=
-                 max_backfill_job_cnt)) {
-                error("bf_max_job_part >= bf_max_job_test (%u >= %u)",
-                      max_backfill_job_per_part,
-                      max_backfill_job_cnt);
-            } else if ((max_backfill_job_per_user != 0) &&
-                       (max_backfill_job_per_user >
-                        max_backfill_job_cnt)) {
-                info("warning: bf_max_job_user > bf_max_job_test (%u > %u)",
-                     max_backfill_job_per_user,
+            if ((max_backfill_job_per_part != 0) && (max_backfill_job_per_part >= max_backfill_job_cnt)) {
+                error("bf_max_job_part >= bf_max_job_test (%u >= %u)", max_backfill_job_per_part, max_backfill_job_cnt);
+            } else if ((max_backfill_job_per_user != 0) && (max_backfill_job_per_user > max_backfill_job_cnt)) {
+                info("warning: bf_max_job_user > bf_max_job_test (%u > %u)", max_backfill_job_per_user,
                      max_backfill_job_cnt);
-            } else if ((max_backfill_job_per_assoc != 0) &&
-                       (max_backfill_job_per_assoc >
-                        max_backfill_job_cnt)) {
-                info("warning: bf_max_job_assoc > bf_max_job_test (%u > %u)",
-                     max_backfill_job_per_assoc,
+            } else if ((max_backfill_job_per_assoc != 0) && (max_backfill_job_per_assoc > max_backfill_job_cnt)) {
+                info("warning: bf_max_job_assoc > bf_max_job_test (%u > %u)", max_backfill_job_per_assoc,
                      max_backfill_job_cnt);
             }
             _set_job_time_limit(job_ptr, orig_time_limit);
             break;
         }
 
-        if ((job_ptr->start_time > now) &&
-            (job_ptr->state_reason != WAIT_BURST_BUFFER_RESOURCE) &&
+        if ((job_ptr->start_time > now) && (job_ptr->state_reason != WAIT_BURST_BUFFER_RESOURCE) &&
             (job_ptr->state_reason != WAIT_BURST_BUFFER_STAGING) &&
-            _test_resv_overlap(node_space, avail_bitmap,
-                               start_time, end_reserve)) {
+            _test_resv_overlap(node_space, avail_bitmap, start_time, end_reserve)) {
             /* This job overlaps with an existing reservation for
              * job to be backfill scheduled, which the sched
              * plugin does not know about. Try again later. */
@@ -2533,8 +2249,7 @@ static int _attempt_backfill(void) {
             job_ptr->start_time = 0;
             if (debug_flags & DEBUG_FLAG_BACKFILL) {
                 info("backfill: %pJ overlaps with existing reservation start_time=%u end_reserve=%u boot_time=%u later_start %ld",
-                     job_ptr, start_time, end_reserve,
-                     boot_time, later_start);
+                     job_ptr, start_time, end_reserve, boot_time, later_start);
             }
             goto TRY_LATER;
         }
@@ -2550,41 +2265,25 @@ static int _attempt_backfill(void) {
         if (!assoc_limit_stop) {
             uint32_t selected_node_cnt;
             uint64_t tres_req_cnt[slurmctld_tres_cnt];
-            assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK,
-                                      READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK
-            };
+            assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
 
             selected_node_cnt = bit_set_count(avail_bitmap);
-            memcpy(tres_req_cnt, job_ptr->tres_req_cnt,
-                   sizeof(tres_req_cnt));
-            tres_req_cnt[TRES_ARRAY_CPU] =
-                    (uint64_t) (job_ptr->total_cpus ?
-                                job_ptr->total_cpus :
-                                job_ptr->details->min_cpus);
+            memcpy(tres_req_cnt, job_ptr->tres_req_cnt, sizeof(tres_req_cnt));
+            tres_req_cnt[TRES_ARRAY_CPU] = (uint64_t) (job_ptr->total_cpus ? job_ptr->total_cpus
+                                                                           : job_ptr->details->min_cpus);
 
-            tres_req_cnt[TRES_ARRAY_MEM] = job_get_tres_mem(
-                    job_ptr->job_resrcs,
-                    job_ptr->details->pn_min_memory,
-                    tres_req_cnt[TRES_ARRAY_CPU],
-                    selected_node_cnt);
+            tres_req_cnt[TRES_ARRAY_MEM] = job_get_tres_mem(job_ptr->job_resrcs, job_ptr->details->pn_min_memory,
+                                                            tres_req_cnt[TRES_ARRAY_CPU], selected_node_cnt);
 
-            tres_req_cnt[TRES_ARRAY_NODE] =
-                    (uint64_t) selected_node_cnt;
+            tres_req_cnt[TRES_ARRAY_NODE] = (uint64_t) selected_node_cnt;
 
             assoc_mgr_lock(&locks);
-            gres_set_job_tres_cnt(job_ptr->gres_list,
-                                  selected_node_cnt,
-                                  tres_req_cnt,
-                                  true);
+            gres_set_job_tres_cnt(job_ptr->gres_list, selected_node_cnt, tres_req_cnt, true);
 
-            tres_req_cnt[TRES_ARRAY_BILLING] =
-                    assoc_mgr_tres_weighted(
-                            tres_req_cnt,
-                            job_ptr->part_ptr->billing_weights,
-                            slurmctld_conf.priority_flags, true);
+            tres_req_cnt[TRES_ARRAY_BILLING] = assoc_mgr_tres_weighted(tres_req_cnt, job_ptr->part_ptr->billing_weights,
+                                                                       slurmctld_conf.priority_flags, true);
 
-            if (!acct_policy_job_runnable_post_select(job_ptr,
-                                                      tres_req_cnt, true)) {
+            if (!acct_policy_job_runnable_post_select(job_ptr, tres_req_cnt, true)) {
                 assoc_mgr_unlock(&locks);
                 if (debug_flags & DEBUG_FLAG_BACKFILL) {
                     info("backfill: adding reservation for %pJ blocked by acct_policy_job_runnable_post_select",
@@ -2603,10 +2302,7 @@ static int _attempt_backfill(void) {
         }
 
         if (bf_job_part_count_reserve) {
-            if (_check_bf_usage(
-                    job_ptr->part_ptr->bf_data->resv_usage,
-                    bf_job_part_count_reserve,
-                    orig_sched_start)) {
+            if (_check_bf_usage(job_ptr->part_ptr->bf_data->resv_usage, bf_job_part_count_reserve, orig_sched_start)) {
                 _set_job_time_limit(job_ptr, orig_time_limit);
                 continue;
             }
@@ -2618,12 +2314,10 @@ static int _attempt_backfill(void) {
         xfree(job_ptr->sched_nodes);
         job_ptr->sched_nodes = bitmap2node_name(avail_bitmap);
         bit_not(avail_bitmap);
-        _add_reservation(start_time, end_reserve,
-                         avail_bitmap, node_space, &node_space_recs);
+        _add_reservation(start_time, end_reserve, avail_bitmap, node_space, &node_space_recs);
         if (debug_flags & DEBUG_FLAG_BACKFILL_MAP)
             _dump_node_space_table(node_space);
-        if ((orig_start_time != 0) &&
-            (orig_start_time < job_ptr->start_time)) {
+        if ((orig_start_time != 0) && (orig_start_time < job_ptr->start_time)) {
             /* Can start earlier in different partition */
             job_ptr->start_time = orig_start_time;
         }
@@ -2642,24 +2336,18 @@ static int _attempt_backfill(void) {
              * maximum number of runnable tasks. If max_run_tasks is
              * 0, then it wasn't set, so ignore it.
              */
-            if ((test_array_count < bf_max_job_array_resv) &&
-                (test_array_count <
-                 job_ptr->array_recs->task_cnt) &&
+            if ((test_array_count < bf_max_job_array_resv) && (test_array_count < job_ptr->array_recs->task_cnt) &&
                 (!job_ptr->array_recs->max_run_tasks ||
-                 (job_ptr->array_recs->pend_run_tasks <
-                  job_ptr->array_recs->max_run_tasks)))
+                 (job_ptr->array_recs->pend_run_tasks < job_ptr->array_recs->max_run_tasks)))
                 goto next_task;
         }
     }
 
     /* Restore preemption state if needed. */
-    _restore_preempt_state(job_ptr, &tmp_preempt_start_time,
-                           &tmp_preempt_in_progress);
+    _restore_preempt_state(job_ptr, &tmp_preempt_start_time, &tmp_preempt_in_progress);
 
     _job_pack_deadlock_fini();
-    if (!bf_hetjob_immediate &&
-        (!max_backfill_jobs_start ||
-         (job_start_cnt < max_backfill_jobs_start)))
+    if (!bf_hetjob_immediate && (!max_backfill_jobs_start || (job_start_cnt < max_backfill_jobs_start)))
         _pack_start_test(node_space, 0);
 
     FREE_NULL_BITMAP(avail_bitmap);
@@ -2678,16 +2366,14 @@ static int _attempt_backfill(void) {
     _do_diag_stats(&bf_time1, &bf_time2, node_space_recs);
     if (debug_flags & DEBUG_FLAG_BACKFILL) {
         END_TIMER;
-        info("backfill: completed testing %u(%d) jobs, %s",
-             slurmctld_diag_stats.bf_last_depth,
-             job_test_count, TIME_STR);
+        info("backfill: completed testing %u(%d) jobs, %s", slurmctld_diag_stats.bf_last_depth, job_test_count,
+             TIME_STR);
     }
 
     slurm_mutex_lock(&slurmctld_config.thread_count_lock);
     if (slurmctld_config.server_thread_count >= 150) {
         info("backfill: %d pending RPCs at cycle end, consider "
-             "configuring max_rpc_cnt",
-             slurmctld_config.server_thread_count);
+             "configuring max_rpc_cnt", slurmctld_config.server_thread_count);
     }
     slurm_mutex_unlock(&slurmctld_config.thread_count_lock);
 
@@ -2708,18 +2394,14 @@ static int _start_job(struct job_record *job_ptr, bitstr_t *resv_bitmap) {
         job_ptr->details->exc_node_bitmap = bit_copy(resv_bitmap);
     if (job_ptr->array_recs)
         is_job_array_head = true;
-    rc = select_nodes(job_ptr, false, NULL, NULL, false,
-                      SLURMDB_JOB_FLAG_BACKFILL);
+    rc = select_nodes(job_ptr, false, NULL, NULL, false, SLURMDB_JOB_FLAG_BACKFILL);
     if (is_job_array_head && job_ptr->details) {
         struct job_record *base_job_ptr;
         base_job_ptr = find_job_record(job_ptr->array_job_id);
-        if (base_job_ptr && base_job_ptr != job_ptr
-            && base_job_ptr->array_recs) {
-            FREE_NULL_BITMAP(
-                    base_job_ptr->details->exc_node_bitmap);
+        if (base_job_ptr && base_job_ptr != job_ptr && base_job_ptr->array_recs) {
+            FREE_NULL_BITMAP(base_job_ptr->details->exc_node_bitmap);
             if (orig_exc_nodes)
-                base_job_ptr->details->exc_node_bitmap =
-                        bit_copy(orig_exc_nodes);
+                base_job_ptr->details->exc_node_bitmap = bit_copy(orig_exc_nodes);
         }
     }
     if (job_ptr->details) { /* select_nodes() might reset exc_node_bitmap */
@@ -2730,8 +2412,7 @@ static int _start_job(struct job_record *job_ptr, bitstr_t *resv_bitmap) {
     if (rc == SLURM_SUCCESS) {
         /* job initiated */
         last_job_update = time(NULL);
-        info("backfill: Started %pJ in %s on %s",
-             job_ptr, job_ptr->part_ptr->name, job_ptr->nodes);
+        info("backfill: Started %pJ in %s on %s", job_ptr, job_ptr->part_ptr->name, job_ptr->nodes);
         power_g_job_start(job_ptr);
         if (job_ptr->batch_flag == 0)
             srun_allocate(job_ptr);
@@ -2742,24 +2423,20 @@ static int _start_job(struct job_record *job_ptr, bitstr_t *resv_bitmap) {
         if (job_ptr->pack_job_id)
             slurmctld_diag_stats.backfilled_pack_jobs++;
         if (debug_flags & DEBUG_FLAG_BACKFILL) {
-            info("backfill: Jobs backfilled since boot: %u",
-                 slurmctld_diag_stats.backfilled_jobs);
+            info("backfill: Jobs backfilled since boot: %u", slurmctld_diag_stats.backfilled_jobs);
         }
-    } else if ((job_ptr->job_id != fail_jobid) &&
-               (rc != ESLURM_ACCOUNTING_POLICY)) {
+    } else if ((job_ptr->job_id != fail_jobid) && (rc != ESLURM_ACCOUNTING_POLICY)) {
         char *node_list;
         bit_not(resv_bitmap);
         node_list = bitmap2node_name(resv_bitmap);
         /* This happens when a job has sharing disabled and
          * a selected node is still completing some job,
          * which should be a temporary situation. */
-        verbose("backfill: Failed to start %pJ with %s avail: %s",
-                job_ptr, node_list, slurm_strerror(rc));
+        verbose("backfill: Failed to start %pJ with %s avail: %s", job_ptr, node_list, slurm_strerror(rc));
         xfree(node_list);
         fail_jobid = job_ptr->job_id;
     } else {
-        debug3("backfill: Failed to start %pJ: %s",
-               job_ptr, slurm_strerror(rc));
+        debug3("backfill: Failed to start %pJ: %s", job_ptr, slurm_strerror(rc));
     }
 
     return rc;
@@ -2770,8 +2447,7 @@ static int _start_job(struct job_record *job_ptr, bitstr_t *resv_bitmap) {
  * planned for use by other jobs and that job's min/max time limit
  * Return NO_VAL if no restriction
  */
-static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now,
-                                node_space_map_t *node_space) {
+static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now, node_space_map_t *node_space) {
     int32_t j;
     time_t comp_time = 0;
     uint32_t max_tl = NO_VAL;
@@ -2782,11 +2458,9 @@ static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now,
     for (j = 0;;) {
         if ((node_space[j].begin_time != now) && // No current conflicts
             (node_space[j].begin_time < job_ptr->end_time) &&
-            (!bit_super_set(job_ptr->node_bitmap,
-                            node_space[j].avail_bitmap))) {
+            (!bit_super_set(job_ptr->node_bitmap, node_space[j].avail_bitmap))) {
             /* Job overlaps pending job's resource reservation */
-            if ((comp_time == 0) ||
-                (comp_time > node_space[j].begin_time))
+            if ((comp_time == 0) || (comp_time > node_space[j].begin_time))
                 comp_time = node_space[j].begin_time;
         }
         if ((j = node_space[j].next) == 0)
@@ -2805,8 +2479,7 @@ static uint32_t _get_job_max_tl(struct job_record *job_ptr, time_t now,
  *	Avoid using resources reserved for pending jobs or in resource
  *	reservations
  */
-static void _reset_job_time_limit(struct job_record *job_ptr, time_t now,
-                                  node_space_map_t *node_space) {
+static void _reset_job_time_limit(struct job_record *job_ptr, time_t now, node_space_map_t *node_space) {
     int32_t j, resv_delay;
     uint32_t orig_time_limit = job_ptr->time_limit;
     uint32_t new_time_limit;
@@ -2814,8 +2487,7 @@ static void _reset_job_time_limit(struct job_record *job_ptr, time_t now,
     for (j = 0;;) {
         if ((node_space[j].begin_time != now) && // No current conflicts
             (node_space[j].begin_time < job_ptr->end_time) &&
-            (!bit_super_set(job_ptr->node_bitmap,
-                            node_space[j].avail_bitmap))) {
+            (!bit_super_set(job_ptr->node_bitmap, node_space[j].avail_bitmap))) {
             /* Job overlaps pending job's resource reservation */
             resv_delay = difftime(node_space[j].begin_time, now);
             resv_delay /= 60;    /* seconds to minutes */
@@ -2833,8 +2505,7 @@ static void _reset_job_time_limit(struct job_record *job_ptr, time_t now,
     job_time_adj_resv(job_ptr);
 
     if (orig_time_limit != job_ptr->time_limit) {
-        info("backfill: %pJ time limit changed from %u to %u",
-             job_ptr, orig_time_limit, job_ptr->time_limit);
+        info("backfill: %pJ time limit changed from %u to %u", job_ptr, orig_time_limit, job_ptr->time_limit);
     }
 }
 
@@ -2843,8 +2514,7 @@ static bool _more_work(time_t last_backfill_time) {
     bool rc = false;
 
     slurm_mutex_lock(&thread_flag_mutex);
-    if ((last_job_update >= last_backfill_time) ||
-        (last_node_update >= last_backfill_time) ||
+    if ((last_job_update >= last_backfill_time) || (last_node_update >= last_backfill_time) ||
         (last_part_update >= last_backfill_time)) {
         rc = true;
     }
@@ -2854,10 +2524,9 @@ static bool _more_work(time_t last_backfill_time) {
 }
 
 /* Create a reservation for a job in the future */
-static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
-                             bitstr_t *res_bitmap,
-                             node_space_map_t *node_space,
-                             int *node_space_recs) {
+static void
+_add_reservation(uint32_t start_time, uint32_t end_reserve, bitstr_t *res_bitmap, node_space_map_t *node_space,
+                 int *node_space_recs) {
     bool placed = false;
     int i, j;
 
@@ -2880,8 +2549,7 @@ static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
             node_space[i].begin_time = start_time;
             node_space[i].end_time = node_space[j].end_time;
             node_space[j].end_time = start_time;
-            node_space[i].avail_bitmap =
-                    bit_copy(node_space[j].avail_bitmap);
+            node_space[i].avail_bitmap = bit_copy(node_space[j].avail_bitmap);
             node_space[i].next = node_space[j].next;
             node_space[j].next = i;
             (*node_space_recs)++;
@@ -2897,12 +2565,9 @@ static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
                     /* insert end entry record */
                     i = *node_space_recs;
                     node_space[i].begin_time = end_reserve;
-                    node_space[i].end_time = node_space[j].
-                            end_time;
+                    node_space[i].end_time = node_space[j].end_time;
                     node_space[j].end_time = end_reserve;
-                    node_space[i].avail_bitmap =
-                            bit_copy(node_space[j].
-                                    avail_bitmap);
+                    node_space[i].avail_bitmap = bit_copy(node_space[j].avail_bitmap);
                     node_space[i].next = node_space[j].next;
                     node_space[j].next = i;
                     (*node_space_recs)++;
@@ -2919,11 +2584,9 @@ static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
     }
 
     for (j = 0;;) {
-        if ((node_space[j].begin_time >= start_time) &&
-            (node_space[j].end_time <= end_reserve))
+        if ((node_space[j].begin_time >= start_time) && (node_space[j].end_time <= end_reserve))
             bit_and(node_space[j].avail_bitmap, res_bitmap);
-        if ((node_space[j].begin_time >= end_reserve) ||
-            ((j = node_space[j].next) == 0))
+        if ((node_space[j].begin_time >= end_reserve) || ((j = node_space[j].next) == 0))
             break;
     }
 
@@ -2932,8 +2595,7 @@ static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
     for (i = 0;;) {
         if ((j = node_space[i].next) == 0)
             break;
-        if (!bit_equal(node_space[i].avail_bitmap,
-                       node_space[j].avail_bitmap)) {
+        if (!bit_equal(node_space[i].avail_bitmap, node_space[j].avail_bitmap)) {
             i = j;
             continue;
         }
@@ -2952,15 +2614,13 @@ static void _add_reservation(uint32_t start_time, uint32_t end_reserve,
  * IN start_time - start time of job
  * IN end_reserve - end time of job
  */
-static bool _test_resv_overlap(node_space_map_t *node_space,
-                               bitstr_t *use_bitmap, uint32_t start_time,
-                               uint32_t end_reserve) {
+static bool
+_test_resv_overlap(node_space_map_t *node_space, bitstr_t *use_bitmap, uint32_t start_time, uint32_t end_reserve) {
     bool overlap = false;
     int j;
 
     for (j = 0;;) {
-        if ((node_space[j].end_time > start_time) &&
-            (node_space[j].begin_time < end_reserve) &&
+        if ((node_space[j].end_time > start_time) && (node_space[j].begin_time < end_reserve) &&
             (!bit_super_set(use_bitmap, node_space[j].avail_bitmap))) {
             overlap = true;
             break;
@@ -2996,8 +2656,7 @@ static int _pack_find_map(void *x, void *key) {
     pack_job_map_t *map = (pack_job_map_t *) x;
     uint32_t *pack_job_id = (uint32_t *) key;
 
-    if ((pack_job_id == NULL) ||
-        (map->pack_job_id == *pack_job_id))
+    if ((pack_job_id == NULL) || (map->pack_job_id == *pack_job_id))
         return 1;
     return 0;
 }
@@ -3010,8 +2669,7 @@ static int _pack_find_rec(void *x, void *key) {
     pack_job_rec_t *rec = (pack_job_rec_t *) x;
     uint32_t *job_id = (uint32_t *) key;
 
-    if ((job_id == NULL) ||
-        (rec->job_id == *job_id))
+    if ((job_id == NULL) || (rec->job_id == *job_id))
         return 1;
     return 0;
 }
@@ -3032,8 +2690,7 @@ static void _pack_start_clear(void) {
             list_delete_item(iter);
         } else {
             map->prev_start = 0;
-            (void) list_delete_all(map->pack_job_list,
-                                   _pack_find_rec, NULL);
+            (void) list_delete_all(map->pack_job_list, _pack_find_rec, NULL);
         }
     }
     list_iterator_destroy(iter);
@@ -3073,12 +2730,9 @@ static time_t _pack_start_find(struct job_record *job_ptr, time_t now) {
     time_t latest_start = (time_t) 0;
 
     if (job_ptr->pack_job_id) {
-        map = (pack_job_map_t *) list_find_first(pack_job_list,
-                                                 _pack_find_map,
-                                                 &job_ptr->pack_job_id);
+        map = (pack_job_map_t *) list_find_first(pack_job_list, _pack_find_map, &job_ptr->pack_job_id);
         if (map) {
-            latest_start = _pack_start_compute(map,
-                                               job_ptr->job_id);
+            latest_start = _pack_start_compute(map, job_ptr->job_id);
         }
 
         /*
@@ -3100,8 +2754,7 @@ static time_t _pack_start_find(struct job_record *job_ptr, time_t now) {
 
         if (latest_start && (debug_flags & DEBUG_FLAG_HETERO_JOBS)) {
             long int delay = MAX(0, latest_start - time(NULL));
-            info("%pJ in partition %s expected to start in %ld secs",
-                 job_ptr, job_ptr->part_ptr->name, delay);
+            info("%pJ in partition %s expected to start in %ld secs", job_ptr, job_ptr->part_ptr->name, delay);
         }
     }
 
@@ -3113,27 +2766,21 @@ static time_t _pack_start_find(struct job_record *job_ptr, time_t now) {
  * started in multiple partitions, we only record the earliest start time
  * for the job in any partition.
  */
-static void _pack_start_set(struct job_record *job_ptr, time_t latest_start,
-                            uint32_t comp_time_limit) {
+static void _pack_start_set(struct job_record *job_ptr, time_t latest_start, uint32_t comp_time_limit) {
     pack_job_map_t *map;
     pack_job_rec_t *rec;
 
     if (comp_time_limit == NO_VAL)
         comp_time_limit = job_ptr->time_limit;
     if (job_ptr->pack_job_id) {
-        map = (pack_job_map_t *) list_find_first(pack_job_list,
-                                                 _pack_find_map,
-                                                 &job_ptr->pack_job_id);
+        map = (pack_job_map_t *) list_find_first(pack_job_list, _pack_find_map, &job_ptr->pack_job_id);
         if (map) {
             if (!map->comp_time_limit) {
                 map->comp_time_limit = comp_time_limit;
             } else {
-                map->comp_time_limit = MIN(map->comp_time_limit,
-                                           comp_time_limit);
+                map->comp_time_limit = MIN(map->comp_time_limit, comp_time_limit);
             }
-            rec = list_find_first(map->pack_job_list,
-                                  _pack_find_rec,
-                                  &job_ptr->job_id);
+            rec = list_find_first(map->pack_job_list, _pack_find_rec, &job_ptr->job_id);
             if (rec && (rec->latest_start <= latest_start)) {
                 /*
                  * This job can start an earlier time in
@@ -3168,8 +2815,7 @@ static void _pack_start_set(struct job_record *job_ptr, time_t latest_start,
         if (debug_flags & DEBUG_FLAG_HETERO_JOBS) {
             time_t latest_start = _pack_start_compute(map, 0);
             long int delay = MAX(0, latest_start - time(NULL));
-            info("%pJ in partition %s set to start in %ld secs",
-                 job_ptr, job_ptr->part_ptr->name, delay);
+            info("%pJ in partition %s set to start in %ld secs", job_ptr, job_ptr->part_ptr->name, delay);
         }
     }
 }
@@ -3188,23 +2834,19 @@ static bool _pack_job_full(pack_job_map_t *map) {
 
     pack_job_ptr = find_job_record(map->pack_job_id);
     if (!pack_job_ptr || !pack_job_ptr->pack_job_list ||
-        (!IS_JOB_RUNNING(pack_job_ptr) &&
-         !_job_runnable_now(pack_job_ptr))) {
+        (!IS_JOB_RUNNING(pack_job_ptr) && !_job_runnable_now(pack_job_ptr))) {
         return false;
     }
 
     iter = list_iterator_create(pack_job_ptr->pack_job_list);
     while ((job_ptr = (struct job_record *) list_next(iter))) {
-        if ((job_ptr->magic != JOB_MAGIC) ||
-            (job_ptr->pack_job_id != map->pack_job_id)) {
+        if ((job_ptr->magic != JOB_MAGIC) || (job_ptr->pack_job_id != map->pack_job_id)) {
             rc = false;    /* bad job pointer */
             break;
         }
         if (IS_JOB_RUNNING(job_ptr))
             continue;
-        if (!list_find_first(map->pack_job_list, _pack_find_rec,
-                             &job_ptr->job_id) ||
-            !_job_runnable_now(job_ptr)) {
+        if (!list_find_first(map->pack_job_list, _pack_find_rec, &job_ptr->job_id) || !_job_runnable_now(job_ptr)) {
             rc = false;
             break;
         }
@@ -3234,47 +2876,34 @@ static bool _pack_job_limit_check(pack_job_map_t *map, time_t now) {
     uint64_t tres_req_cnt[slurmctld_tres_cnt];
     uint64_t **tres_alloc_save = NULL;
 
-    tres_alloc_save = xmalloc(sizeof(uint64_t *) *
-                              list_count(map->pack_job_list));
+    tres_alloc_save = xmalloc(sizeof(uint64_t *) * list_count(map->pack_job_list));
     slurmctld_tres_size = sizeof(uint64_t) * slurmctld_tres_cnt;
     iter = list_iterator_create(map->pack_job_list);
     while ((rec = (pack_job_rec_t *) list_next(iter))) {
-        assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK,
-                                  READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
+        assoc_mgr_lock_t locks = {READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK};
 
         job_ptr = rec->job_ptr;
         job_ptr->part_ptr = rec->part_ptr;
         selected_node_cnt = job_ptr->node_cnt_wag;
-        memcpy(tres_req_cnt, job_ptr->tres_req_cnt,
-               slurmctld_tres_size);
-        tres_req_cnt[TRES_ARRAY_CPU] = (uint64_t) (job_ptr->total_cpus ?
-                                                   job_ptr->total_cpus :
-                                                   job_ptr->details->min_cpus);
-        tres_req_cnt[TRES_ARRAY_MEM] = job_get_tres_mem(
-                job_ptr->job_resrcs,
-                job_ptr->details->pn_min_memory,
-                tres_req_cnt[TRES_ARRAY_CPU],
-                selected_node_cnt);
+        memcpy(tres_req_cnt, job_ptr->tres_req_cnt, slurmctld_tres_size);
+        tres_req_cnt[TRES_ARRAY_CPU] = (uint64_t) (job_ptr->total_cpus ? job_ptr->total_cpus
+                                                                       : job_ptr->details->min_cpus);
+        tres_req_cnt[TRES_ARRAY_MEM] = job_get_tres_mem(job_ptr->job_resrcs, job_ptr->details->pn_min_memory,
+                                                        tres_req_cnt[TRES_ARRAY_CPU], selected_node_cnt);
         tres_req_cnt[TRES_ARRAY_NODE] = (uint64_t) selected_node_cnt;
 
         assoc_mgr_lock(&locks);
-        gres_set_job_tres_cnt(job_ptr->gres_list, selected_node_cnt,
-                              tres_req_cnt, true);
+        gres_set_job_tres_cnt(job_ptr->gres_list, selected_node_cnt, tres_req_cnt, true);
 
-        tres_req_cnt[TRES_ARRAY_BILLING] =
-                assoc_mgr_tres_weighted(
-                        tres_req_cnt,
-                        job_ptr->part_ptr->billing_weights,
-                        slurmctld_conf.priority_flags, true);
+        tres_req_cnt[TRES_ARRAY_BILLING] = assoc_mgr_tres_weighted(tres_req_cnt, job_ptr->part_ptr->billing_weights,
+                                                                   slurmctld_conf.priority_flags, true);
 
         if (acct_policy_job_runnable_pre_select(job_ptr, true) &&
-            acct_policy_job_runnable_post_select(job_ptr,
-                                                 tres_req_cnt, true)) {
+            acct_policy_job_runnable_post_select(job_ptr, tres_req_cnt, true)) {
             assoc_mgr_unlock(&locks);
             tres_alloc_save[begun_jobs++] = job_ptr->tres_alloc_cnt;
             job_ptr->tres_alloc_cnt = xmalloc(slurmctld_tres_size);
-            memcpy(job_ptr->tres_alloc_cnt, tres_req_cnt,
-                   slurmctld_tres_size);
+            memcpy(job_ptr->tres_alloc_cnt, tres_req_cnt, slurmctld_tres_size);
             acct_policy_job_begin(job_ptr);
 
         } else {
@@ -3326,12 +2955,10 @@ static int _pack_start_now(pack_job_map_t *map, node_space_map_t *node_space) {
          * Identify the nodes which this job can use
          */
         start_res = now;
-        rc = job_test_resv(job_ptr, &start_res, true, &avail_bitmap,
-                           &exc_core_bitmap, &resv_overlap, false);
+        rc = job_test_resv(job_ptr, &start_res, true, &avail_bitmap, &exc_core_bitmap, &resv_overlap, false);
         FREE_NULL_BITMAP(exc_core_bitmap);
         if (rc != SLURM_SUCCESS) {
-            error("%pJ failed to start due to reservation",
-                  job_ptr);
+            error("%pJ failed to start due to reservation", job_ptr);
             FREE_NULL_BITMAP(avail_bitmap);
             break;
         }
@@ -3343,13 +2970,11 @@ static int _pack_start_now(pack_job_map_t *map, node_space_map_t *node_space) {
         mcs_select = slurm_mcs_get_select(job_ptr);
         filter_by_node_mcs(job_ptr, mcs_select, avail_bitmap);
         if (job_ptr->details->exc_node_bitmap) {
-            bit_and_not(avail_bitmap,
-                        job_ptr->details->exc_node_bitmap);
+            bit_and_not(avail_bitmap, job_ptr->details->exc_node_bitmap);
         }
 
         if (fed_mgr_job_lock(job_ptr)) {
-            error("%pJ failed to start due to fed job lock",
-                  job_ptr);
+            error("%pJ failed to start due to fed job lock", job_ptr);
             FREE_NULL_BITMAP(avail_bitmap);
             continue;
         }
@@ -3418,16 +3043,13 @@ static void _pack_kill_now(pack_job_map_t *map) {
     int cred_lifetime = 1200;
     uint32_t save_bitflags;
 
-    (void) slurm_cred_ctx_get(slurmctld_config.cred_ctx,
-                              SLURM_CRED_OPT_EXPIRY_WINDOW,
-                              &cred_lifetime);
+    (void) slurm_cred_ctx_get(slurmctld_config.cred_ctx, SLURM_CRED_OPT_EXPIRY_WINDOW, &cred_lifetime);
     iter = list_iterator_create(map->pack_job_list);
     while ((rec = (pack_job_rec_t *) list_next(iter))) {
         job_ptr = rec->job_ptr;
         if (IS_JOB_PENDING(job_ptr))
             continue;
-        info("Deallocate %pJ due to pack job start failure",
-             job_ptr);
+        info("Deallocate %pJ due to pack job start failure", job_ptr);
         job_ptr->details->begin_time = now + cred_lifetime + 1;
         job_ptr->end_time = now;
         job_ptr->job_state = JOB_PENDING | JOB_COMPLETING;
@@ -3443,8 +3065,7 @@ static void _pack_kill_now(pack_job_map_t *map) {
         job_ptr->bit_flags |= JOB_KILL_HURRY;
         acct_policy_add_job_submit(job_ptr);
         job_ptr->bit_flags = save_bitflags;
-        if (!job_ptr->node_bitmap_cg ||
-            (bit_set_count(job_ptr->node_bitmap_cg) == 0))
+        if (!job_ptr->node_bitmap_cg || (bit_set_count(job_ptr->node_bitmap_cg) == 0))
             batch_requeue_fini(job_ptr);
     }
     list_iterator_destroy(iter);
@@ -3456,8 +3077,7 @@ static void _pack_kill_now(pack_job_map_t *map) {
  * map IN - info about this heterogeneous job
  * single IN - true if testing single heterogeneous jobs
  */
-static void _pack_start_test_single(node_space_map_t *node_space,
-                                    pack_job_map_t *map, bool single) {
+static void _pack_start_test_single(node_space_map_t *node_space, pack_job_map_t *map, bool single) {
     time_t now = time(NULL);
     int rc;
 
@@ -3466,8 +3086,7 @@ static void _pack_start_test_single(node_space_map_t *node_space,
 
     if (!_pack_job_full(map)) {
         if (debug_flags & DEBUG_FLAG_HETERO_JOBS) {
-            info("Pack job %u has indefinite start time",
-                 map->pack_job_id);
+            info("Pack job %u has indefinite start time", map->pack_job_id);
         }
         if (!single)
             map->prev_start = now + YEAR_SECONDS;
@@ -3477,8 +3096,7 @@ static void _pack_start_test_single(node_space_map_t *node_space,
     map->prev_start = _pack_start_compute(map, 0);
     if (map->prev_start > now) {
         if (debug_flags & DEBUG_FLAG_HETERO_JOBS) {
-            info("Pack job %u should be able to start in %u seconds",
-                 map->pack_job_id,
+            info("Pack job %u should be able to start in %u seconds", map->pack_job_id,
                  (uint32_t) (map->prev_start - now));
         }
         return;
@@ -3486,8 +3104,7 @@ static void _pack_start_test_single(node_space_map_t *node_space,
 
     if (!_pack_job_limit_check(map, now)) {
         if (debug_flags & DEBUG_FLAG_HETERO_JOBS) {
-            info("Pack job %u prevented from starting by account/QOS limit",
-                 map->pack_job_id);
+            info("Pack job %u prevented from starting by account/QOS limit", map->pack_job_id);
         }
         map->prev_start = now + YEAR_SECONDS;
         return;
@@ -3499,25 +3116,21 @@ static void _pack_start_test_single(node_space_map_t *node_space,
     rc = _pack_start_now(map, node_space);
     if (rc != SLURM_SUCCESS) {
         if (debug_flags & DEBUG_FLAG_HETERO_JOBS) {
-            info("Failed to start pack job %u",
-                 map->pack_job_id);
+            info("Failed to start pack job %u", map->pack_job_id);
         }
         _pack_kill_now(map);
     } else {
         job_start_cnt += list_count(map->pack_job_list);
-        if (max_backfill_jobs_start &&
-            (job_start_cnt >= max_backfill_jobs_start)) {
+        if (max_backfill_jobs_start && (job_start_cnt >= max_backfill_jobs_start)) {
             if (debug_flags & DEBUG_FLAG_BACKFILL)
-                info("backfill: bf_max_job_start limit of %d reached",
-                     max_backfill_jobs_start);
+                info("backfill: bf_max_job_start limit of %d reached", max_backfill_jobs_start);
         }
     }
 
 }
 
 static int _pack_start_test_list(void *map, void *node_space) {
-    if (!max_backfill_jobs_start ||
-        (job_start_cnt < max_backfill_jobs_start))
+    if (!max_backfill_jobs_start || (job_start_cnt < max_backfill_jobs_start))
         _pack_start_test_single(node_space, map, false);
 
     return SLURM_SUCCESS;
@@ -3535,13 +3148,10 @@ static void _pack_start_test(node_space_map_t *node_space, uint32_t pack_job_id)
 
     if (!pack_job_id) {
         /* Test all maps. */
-        (void) list_for_each(pack_job_list,
-                             _pack_start_test_list, node_space);
+        (void) list_for_each(pack_job_list, _pack_start_test_list, node_space);
     } else {
         /* Test single map. */
-        map = (pack_job_map_t *) list_find_first(pack_job_list,
-                                                 _pack_find_map,
-                                                 &pack_job_id);
+        map = (pack_job_map_t *) list_find_first(pack_job_list, _pack_find_map, &pack_job_id);
         _pack_start_test_single(node_space, map, true);
     }
 }
@@ -3623,20 +3233,15 @@ static bool _job_pack_deadlock_test(struct job_record *job_ptr) {
     if (!deadlock_global_list) {
         deadlock_global_list = list_create(_deadlock_global_list_del);
     } else {
-        dl_part_ptr = list_find_first(deadlock_global_list,
-                                      _deadlock_global_list_srch,
-                                      job_ptr->part_ptr);
+        dl_part_ptr = list_find_first(deadlock_global_list, _deadlock_global_list_srch, job_ptr->part_ptr);
     }
     if (!dl_part_ptr) {
         dl_part_ptr = xmalloc(sizeof(deadlock_part_struct_t));
-        dl_part_ptr->deadlock_job_list =
-                list_create(_deadlock_part_list_del);
+        dl_part_ptr->deadlock_job_list = list_create(_deadlock_part_list_del);
         dl_part_ptr->part_ptr = job_ptr->part_ptr;
         list_append(deadlock_global_list, dl_part_ptr);
     } else {
-        dl_job_ptr = list_find_first(dl_part_ptr->deadlock_job_list,
-                                     _deadlock_part_list_srch,
-                                     job_ptr);
+        dl_job_ptr = list_find_first(dl_part_ptr->deadlock_job_list, _deadlock_part_list_srch, job_ptr);
     }
     if (!dl_job_ptr) {
         dl_job_ptr = xmalloc(sizeof(deadlock_job_struct_t));
@@ -3653,18 +3258,12 @@ static bool _job_pack_deadlock_test(struct job_record *job_ptr) {
      */
     if (debug_flags & DEBUG_FLAG_BACKFILL) {
         part_iter = list_iterator_create(deadlock_global_list);
-        while ((dl_part_ptr2 = (deadlock_part_struct_t *)
-                list_next(part_iter))) {
-            info("Partition %s PackJobs:",
-                 dl_part_ptr2->part_ptr->name);
-            job_iter = list_iterator_create(dl_part_ptr2->
-                    deadlock_job_list);
-            while ((dl_job_ptr2 = (deadlock_job_struct_t *)
-                    list_next(job_iter))) {
+        while ((dl_part_ptr2 = (deadlock_part_struct_t *) list_next(part_iter))) {
+            info("Partition %s PackJobs:", dl_part_ptr2->part_ptr->name);
+            job_iter = list_iterator_create(dl_part_ptr2->deadlock_job_list);
+            while ((dl_job_ptr2 = (deadlock_job_struct_t *) list_next(job_iter))) {
                 info("   PackJob %u to start at %"
-                PRIu64,
-                        dl_job_ptr2->pack_job_id,
-                        (uint64_t) dl_job_ptr2->start_time);
+                PRIu64, dl_job_ptr2->pack_job_id, (uint64_t) dl_job_ptr2->start_time);
             }
             list_iterator_destroy(job_iter);
         }
@@ -3680,22 +3279,15 @@ static bool _job_pack_deadlock_test(struct job_record *job_ptr) {
     while ((dl_part_ptr2 = (deadlock_part_struct_t *) list_next(part_iter))) {
         if (dl_part_ptr2 == dl_part_ptr)  /* Current partion, skip it */
             continue;
-        dl_job_ptr2 = list_find_first(dl_part_ptr2->deadlock_job_list,
-                                      _deadlock_part_list_srch,
-                                      job_ptr);
+        dl_job_ptr2 = list_find_first(dl_part_ptr2->deadlock_job_list, _deadlock_part_list_srch, job_ptr);
         if (!dl_job_ptr2)   /* Pack job not in this partion, no check */
             continue;
         job_iter = list_iterator_create(dl_part_ptr->deadlock_job_list);
-        while ((dl_job_ptr2 = (deadlock_job_struct_t *)
-                list_next(job_iter))) {
+        while ((dl_job_ptr2 = (deadlock_job_struct_t *) list_next(job_iter))) {
             if (dl_job_ptr2->pack_job_id == dl_job_ptr->pack_job_id)
                 break;    /* Self */
-            dl_job_ptr3 = list_find_first(
-                    dl_part_ptr2->deadlock_job_list,
-                    _deadlock_part_list_srch2,
-                    dl_job_ptr2);
-            if (dl_job_ptr3 &&
-                (dl_job_ptr3->start_time < dl_job_ptr->start_time)) {
+            dl_job_ptr3 = list_find_first(dl_part_ptr2->deadlock_job_list, _deadlock_part_list_srch2, dl_job_ptr2);
+            if (dl_job_ptr3 && (dl_job_ptr3->start_time < dl_job_ptr->start_time)) {
                 have_deadlock = true;
                 break;
             }
@@ -3704,11 +3296,8 @@ static bool _job_pack_deadlock_test(struct job_record *job_ptr) {
 
         if (have_deadlock && (debug_flags & DEBUG_FLAG_BACKFILL)) {
             info("Pack job %u in partition %s would deadlock "
-                 "with pack job %u in partition %s, skipping it",
-                 dl_job_ptr->pack_job_id,
-                 dl_part_ptr->part_ptr->name,
-                 dl_job_ptr3->pack_job_id,
-                 dl_part_ptr2->part_ptr->name);
+                 "with pack job %u in partition %s, skipping it", dl_job_ptr->pack_job_id, dl_part_ptr->part_ptr->name,
+                 dl_job_ptr3->pack_job_id, dl_part_ptr2->part_ptr->name);
         }
         if (have_deadlock)
             break;

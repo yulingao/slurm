@@ -45,8 +45,7 @@ extern slurmdb_cluster_rec_t *fed_mgr_cluster_rec;
 
 extern void add_fed_job_info(struct job_record *job_ptr);
 
-extern int fed_mgr_add_sibling_conn(slurm_persist_conn_t *persist_conn,
-                                    char **out_buffer);
+extern int fed_mgr_add_sibling_conn(slurm_persist_conn_t *persist_conn, char **out_buffer);
 
 extern char *fed_mgr_cluster_ids_to_names(uint64_t cluster_ids);
 
@@ -70,18 +69,13 @@ extern int fed_mgr_is_origin_job(struct job_record *job_ptr);
 
 extern bool fed_mgr_is_tracker_only_job(struct job_record *job_ptr);
 
-extern int fed_mgr_job_allocate(slurm_msg_t *msg,
-                                job_desc_msg_t *job_desc, bool alloc_only,
-                                uid_t uid, uint16_t protocol_version,
-                                uint32_t *job_id_ptr, int *alloc_code,
-                                char **err_msg);
+extern int
+fed_mgr_job_allocate(slurm_msg_t *msg, job_desc_msg_t *job_desc, bool alloc_only, uid_t uid, uint16_t protocol_version,
+                     uint32_t *job_id_ptr, int *alloc_code, char **err_msg);
 
-extern int fed_mgr_job_cancel(struct job_record *job_ptr, uint16_t signal,
-                              uint16_t flags, uid_t uid,
-                              bool kill_viable);
+extern int fed_mgr_job_cancel(struct job_record *job_ptr, uint16_t signal, uint16_t flags, uid_t uid, bool kill_viable);
 
-extern int fed_mgr_job_complete(struct job_record *job_ptr,
-                                uint32_t return_code, time_t start_time);
+extern int fed_mgr_job_complete(struct job_record *job_ptr, uint32_t return_code, time_t start_time);
 
 extern bool fed_mgr_job_is_locked(struct job_record *job_ptr);
 
@@ -97,17 +91,13 @@ extern int fed_mgr_job_unlock(struct job_record *job_ptr);
 
 extern int fed_mgr_job_requeue(struct job_record *job_ptr);
 
-extern int fed_mgr_job_requeue_test(struct job_record *job_ptr,
-                                    uint32_t flags);
+extern int fed_mgr_job_requeue_test(struct job_record *job_ptr, uint32_t flags);
 
-extern int fed_mgr_job_revoke(struct job_record *job_ptr,
-                              bool job_complete, uint32_t exit_code,
-                              time_t start_time);
+extern int fed_mgr_job_revoke(struct job_record *job_ptr, bool job_complete, uint32_t exit_code, time_t start_time);
 
 extern int fed_mgr_job_revoke_sibs(struct job_record *job_ptr);
 
-extern int fed_mgr_job_start(struct job_record *job_ptr,
-                             time_t start_time);
+extern int fed_mgr_job_start(struct job_record *job_ptr, time_t start_time);
 
 extern int fed_mgr_q_sib_msg(slurm_msg_t *sib_msg, uint32_t rpc_uid);
 
@@ -119,14 +109,11 @@ extern bool fed_mgr_sibs_synced();
 
 extern int fed_mgr_state_save(char *state_save_location);
 
-extern int fed_mgr_update_job(uint32_t job_id, job_desc_msg_t *job_specs,
-                              uint64_t update_sibs, uid_t uid);
+extern int fed_mgr_update_job(uint32_t job_id, job_desc_msg_t *job_specs, uint64_t update_sibs, uid_t uid);
 
-extern int fed_mgr_update_job_clusters(struct job_record *job_ptr,
-                                       char *spec_clusters);
+extern int fed_mgr_update_job_clusters(struct job_record *job_ptr, char *spec_clusters);
 
-extern int fed_mgr_update_job_cluster_features(struct job_record *job_ptr,
-                                               char *req_features);
+extern int fed_mgr_update_job_cluster_features(struct job_record *job_ptr, char *req_features);
 
 extern int fed_mgr_update_feds(slurmdb_update_object_t *update);
 

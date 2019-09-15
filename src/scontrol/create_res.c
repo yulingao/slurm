@@ -87,11 +87,9 @@ static char *_process_plus_minus(char plus_or_minus, char *src) {
  * RET 0 on success, -1 on err and prints message
  */
 extern int
-scontrol_parse_res_options(int argc, char **argv, const char *msg,
-                           resv_desc_msg_t *resv_msg_ptr,
-                           int *free_user_str, int *free_acct_str,
-                           int *free_tres_license, int *free_tres_bb,
-                           int *free_tres_corecnt, int *free_tres_nodecnt) {
+scontrol_parse_res_options(int argc, char **argv, const char *msg, resv_desc_msg_t *resv_msg_ptr, int *free_user_str,
+                           int *free_acct_str, int *free_tres_license, int *free_tres_bb, int *free_tres_corecnt,
+                           int *free_tres_nodecnt) {
     int i;
     int duration = -3;   /* -1 == INFINITE, -2 == error, -3 == not set */
     char *err_msg = NULL;
@@ -127,13 +125,11 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
         if (!xstrncasecmp(tag, "Accounts", MAX(taglen, 1))) {
             if (resv_msg_ptr->accounts) {
                 exit_code = 1;
-                error("Parameter %s specified more than once",
-                      argv[i]);
+                error("Parameter %s specified more than once", argv[i]);
                 return SLURM_ERROR;
             }
             if (plus_minus) {
-                resv_msg_ptr->accounts =
-                        _process_plus_minus(plus_minus, val);
+                resv_msg_ptr->accounts = _process_plus_minus(plus_minus, val);
                 *free_acct_str = 1;
                 plus_minus = '\0';
             } else {
@@ -143,8 +139,7 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
         } else if (!xstrncasecmp(tag, "Flags", MAX(taglen, 2))) {
             uint64_t f;
             if (plus_minus) {
-                char *tmp =
-                        _process_plus_minus(plus_minus, val);
+                char *tmp = _process_plus_minus(plus_minus, val);
                 f = parse_resv_flags(tmp, msg);
                 xfree(tmp);
                 plus_minus = '\0';
@@ -160,33 +155,28 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
         } else if (!xstrncasecmp(tag, "Users", MAX(taglen, 1))) {
             if (resv_msg_ptr->users) {
                 exit_code = 1;
-                error("Parameter %s specified more than once",
-                      argv[i]);
+                error("Parameter %s specified more than once", argv[i]);
                 return SLURM_ERROR;
             }
             if (plus_minus) {
-                resv_msg_ptr->users =
-                        _process_plus_minus(plus_minus, val);
+                resv_msg_ptr->users = _process_plus_minus(plus_minus, val);
                 *free_user_str = 1;
                 plus_minus = '\0';
             } else {
                 resv_msg_ptr->users = val;
             }
 
-        } else if (!xstrncasecmp(tag, "ReservationName",
-                                 MAX(taglen, 1))) {
+        } else if (!xstrncasecmp(tag, "ReservationName", MAX(taglen, 1))) {
             resv_msg_ptr->name = val;
 
-        } else if (xstrncasecmp(tag, "BurstBuffer", MAX(taglen, 2))
-                   == 0) {
+        } else if (xstrncasecmp(tag, "BurstBuffer", MAX(taglen, 2)) == 0) {
             resv_msg_ptr->burst_buffer = val;
 
         } else if (xstrncasecmp(tag, "StartTime", MAX(taglen, 1)) == 0) {
             time_t t = parse_time(val, 0);
             if (errno == ESLURM_INVALID_TIME_VALUE) {
                 exit_code = 1;
-                error("Invalid start time %s.  %s",
-                      argv[i], msg);
+                error("Invalid start time %s.  %s", argv[i], msg);
                 return SLURM_ERROR;
             }
             resv_msg_ptr->start_time = t;
@@ -211,19 +201,15 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
             resv_msg_ptr->duration = (uint32_t) duration;
             if (plus_minus) {
                 if (resv_msg_ptr->flags == NO_VAL)
-                    resv_msg_ptr->flags =
-                            PLUS_MINUS(plus_minus);
+                    resv_msg_ptr->flags = PLUS_MINUS(plus_minus);
                 else
-                    resv_msg_ptr->flags |=
-                            PLUS_MINUS(plus_minus);
+                    resv_msg_ptr->flags |= PLUS_MINUS(plus_minus);
                 plus_minus = '\0';
             }
         } else if (xstrncasecmp(tag, "NodeCnt", MAX(taglen, 5)) == 0 ||
                    xstrncasecmp(tag, "NodeCount", MAX(taglen, 5)) == 0) {
 
-            if (parse_resv_nodecnt(resv_msg_ptr, val,
-                                   free_tres_nodecnt, false,
-                                   &err_msg) == SLURM_ERROR) {
+            if (parse_resv_nodecnt(resv_msg_ptr, val, free_tres_nodecnt, false, &err_msg) == SLURM_ERROR) {
                 error("%s", err_msg);
                 xfree(err_msg);
                 exit_code = 1;
@@ -236,17 +222,14 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
                    xstrncasecmp(tag, "CPUCount", MAX(taglen, 5)) == 0) {
 
             /* only have this on a cons_res machine */
-            if (state_control_corecnt_supported()
-                != SLURM_SUCCESS) {
+            if (state_control_corecnt_supported() != SLURM_SUCCESS) {
                 error("CoreCnt or CPUCnt is only supported when SelectType includes select/cons_res or SelectTypeParameters includes OTHER_CONS_RES on a Cray.");
                 exit_code = 1;
                 return SLURM_ERROR;
             }
 
-            if (state_control_parse_resv_corecnt(resv_msg_ptr, val,
-                                                 free_tres_corecnt,
-                                                 false, &err_msg)
-                == SLURM_ERROR) {
+            if (state_control_parse_resv_corecnt(resv_msg_ptr, val, free_tres_corecnt, false, &err_msg) ==
+                SLURM_ERROR) {
                 error("%s", err_msg);
                 xfree(err_msg);
                 exit_code = 1;
@@ -262,18 +245,12 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
         } else if (xstrncasecmp(tag, "Licenses", MAX(taglen, 2)) == 0) {
             resv_msg_ptr->licenses = val;
 
-        } else if (xstrncasecmp(tag, "PartitionName", MAX(taglen, 1))
-                   == 0) {
+        } else if (xstrncasecmp(tag, "PartitionName", MAX(taglen, 1)) == 0) {
             resv_msg_ptr->partition = val;
 
         } else if (xstrncasecmp(tag, "TRES", MAX(taglen, 1)) == 0) {
-            if (state_control_parse_resv_tres(val, resv_msg_ptr,
-                                              free_tres_license,
-                                              free_tres_bb,
-                                              free_tres_corecnt,
-                                              free_tres_nodecnt,
-                                              &err_msg)
-                == SLURM_ERROR) {
+            if (state_control_parse_resv_tres(val, resv_msg_ptr, free_tres_license, free_tres_bb, free_tres_corecnt,
+                                              free_tres_nodecnt, &err_msg) == SLURM_ERROR) {
                 error("%s", err_msg);
                 xfree(err_msg);
                 exit_code = 1;
@@ -281,9 +258,7 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
             }
 
         } else if (xstrncasecmp(tag, "Watts", MAX(taglen, 1)) == 0) {
-            if (state_control_parse_resv_watts(val, resv_msg_ptr,
-                                               &err_msg)
-                == SLURM_ERROR) {
+            if (state_control_parse_resv_watts(val, resv_msg_ptr, &err_msg) == SLURM_ERROR) {
                 error("%s", err_msg);
                 xfree(err_msg);
                 exit_code = 1;
@@ -299,8 +274,7 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
 
         if (plus_minus != '\0') {
             exit_code = 1;
-            error("The +=/-= notation is not supported when updating %.*s.  %s",
-                  taglen, tag, msg);
+            error("The +=/-= notation is not supported when updating %.*s.  %s", taglen, tag, msg);
             return SLURM_ERROR;
         }
 
@@ -318,19 +292,14 @@ scontrol_parse_res_options(int argc, char **argv, const char *msg,
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *     error message and returns 0.
  */
-extern int
-scontrol_update_res(int argc, char **argv) {
+extern int scontrol_update_res(int argc, char **argv) {
     resv_desc_msg_t resv_msg;
     int err, ret = 0;
-    int free_user_str = 0, free_acct_str = 0, free_tres_license = 0,
-            free_tres_bb = 0, free_tres_corecnt = 0, free_tres_nodecnt = 0;
+    int free_user_str = 0, free_acct_str = 0, free_tres_license = 0, free_tres_bb = 0, free_tres_corecnt = 0, free_tres_nodecnt = 0;
 
     slurm_init_resv_desc_msg(&resv_msg);
-    err = scontrol_parse_res_options(argc, argv, "No reservation update.",
-                                     &resv_msg, &free_user_str,
-                                     &free_acct_str, &free_tres_license,
-                                     &free_tres_bb, &free_tres_corecnt,
-                                     &free_tres_nodecnt);
+    err = scontrol_parse_res_options(argc, argv, "No reservation update.", &resv_msg, &free_user_str, &free_acct_str,
+                                     &free_tres_license, &free_tres_bb, &free_tres_corecnt, &free_tres_nodecnt);
     if (err)
         goto SCONTROL_UPDATE_RES_CLEANUP;
 
@@ -373,20 +342,15 @@ scontrol_update_res(int argc, char **argv) {
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *     error message and returns 0.
  */
-extern int
-scontrol_create_res(int argc, char **argv) {
+extern int scontrol_create_res(int argc, char **argv) {
     resv_desc_msg_t resv_msg;
     char *new_res_name = NULL;
-    int free_user_str = 0, free_acct_str = 0, free_tres_license = 0,
-            free_tres_bb = 0, free_tres_corecnt = 0, free_tres_nodecnt = 0;
+    int free_user_str = 0, free_acct_str = 0, free_tres_license = 0, free_tres_bb = 0, free_tres_corecnt = 0, free_tres_nodecnt = 0;
     int err, ret = 0;
 
     slurm_init_resv_desc_msg(&resv_msg);
-    err = scontrol_parse_res_options(argc, argv, "No reservation created.",
-                                     &resv_msg, &free_user_str,
-                                     &free_acct_str, &free_tres_license,
-                                     &free_tres_bb, &free_tres_corecnt,
-                                     &free_tres_nodecnt);
+    err = scontrol_parse_res_options(argc, argv, "No reservation created.", &resv_msg, &free_user_str, &free_acct_str,
+                                     &free_tres_license, &free_tres_bb, &free_tres_corecnt, &free_tres_nodecnt);
 
     if (err)
         goto SCONTROL_CREATE_RES_CLEANUP;
@@ -396,21 +360,18 @@ scontrol_create_res(int argc, char **argv) {
         error("A start time must be given.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
     }
-    if (resv_msg.end_time == (time_t) NO_VAL &&
-        resv_msg.duration == NO_VAL) {
+    if (resv_msg.end_time == (time_t) NO_VAL && resv_msg.duration == NO_VAL) {
         exit_code = 1;
         error("An end time or duration must be given.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
     }
-    if (resv_msg.end_time != (time_t) NO_VAL &&
-        resv_msg.duration != NO_VAL &&
+    if (resv_msg.end_time != (time_t) NO_VAL && resv_msg.duration != NO_VAL &&
         resv_msg.start_time + resv_msg.duration * 60 != resv_msg.end_time) {
         exit_code = 1;
         error("StartTime + Duration does not equal EndTime.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
     }
-    if (resv_msg.start_time > resv_msg.end_time &&
-        resv_msg.end_time != (time_t) NO_VAL) {
+    if (resv_msg.start_time > resv_msg.end_time && resv_msg.end_time != (time_t) NO_VAL) {
         exit_code = 1;
         error("Start time cannot be after end time.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
@@ -420,8 +381,7 @@ scontrol_create_res(int argc, char **argv) {
      * If "ALL" is specified for the nodes and a partition is specified,
      * only allocate all of the nodes the partition.
      */
-    if ((resv_msg.partition != NULL) && (resv_msg.node_list != NULL) &&
-        (xstrcasecmp(resv_msg.node_list, "ALL") == 0)) {
+    if ((resv_msg.partition != NULL) && (resv_msg.node_list != NULL) && (xstrcasecmp(resv_msg.node_list, "ALL") == 0)) {
         if (resv_msg.flags == NO_VAL)
             resv_msg.flags = RESERVE_FLAG_PART_NODES;
         else
@@ -432,10 +392,8 @@ scontrol_create_res(int argc, char **argv) {
      * If "ALL" is specified for the nodes and RESERVE_FLAG_PART_NODES
      * flag is set make sure a partition name is specified.
      */
-    if ((resv_msg.partition == NULL) && (resv_msg.node_list != NULL) &&
-        (xstrcasecmp(resv_msg.node_list, "ALL") == 0) &&
-        (resv_msg.flags != NO_VAL) &&
-        (resv_msg.flags & RESERVE_FLAG_PART_NODES)) {
+    if ((resv_msg.partition == NULL) && (resv_msg.node_list != NULL) && (xstrcasecmp(resv_msg.node_list, "ALL") == 0) &&
+        (resv_msg.flags != NO_VAL) && (resv_msg.flags & RESERVE_FLAG_PART_NODES)) {
         exit_code = 1;
         error("Part_Nodes flag requires specifying a Partition.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
@@ -445,13 +403,10 @@ scontrol_create_res(int argc, char **argv) {
      * If the following parameters are null, but a partition is named, then
      * make the reservation for the whole partition.
      */
-    if ((resv_msg.core_cnt == 0) &&
-        (resv_msg.burst_buffer == NULL ||
-         resv_msg.burst_buffer[0] == '\0') &&
+    if ((resv_msg.core_cnt == 0) && (resv_msg.burst_buffer == NULL || resv_msg.burst_buffer[0] == '\0') &&
         (resv_msg.node_cnt == NULL || resv_msg.node_cnt[0] == 0) &&
         (resv_msg.node_list == NULL || resv_msg.node_list[0] == '\0') &&
-        (resv_msg.licenses == NULL || resv_msg.licenses[0] == '\0') &&
-        (resv_msg.resv_watts == NO_VAL)) {
+        (resv_msg.licenses == NULL || resv_msg.licenses[0] == '\0') && (resv_msg.resv_watts == NO_VAL)) {
         if (resv_msg.partition == NULL) {
             exit_code = 1;
             error("CoreCnt, Nodes, NodeCnt, BurstBuffer, Licenses or Watts must be specified.  No reservation created.");
@@ -469,12 +424,10 @@ scontrol_create_res(int argc, char **argv) {
         error("Either Users or Accounts must be specified.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;
     }
-    if (resv_msg.resv_watts != NO_VAL &&
-        (!(resv_msg.flags & RESERVE_FLAG_ANY_NODES) ||
-         (resv_msg.core_cnt != 0) ||
-         (resv_msg.node_cnt != NULL && resv_msg.node_cnt[0] != 0) ||
-         (resv_msg.node_list != NULL && resv_msg.node_list[0] != '\0') ||
-         (resv_msg.licenses != NULL && resv_msg.licenses[0] != '\0'))) {
+    if (resv_msg.resv_watts != NO_VAL && (!(resv_msg.flags & RESERVE_FLAG_ANY_NODES) || (resv_msg.core_cnt != 0) ||
+                                          (resv_msg.node_cnt != NULL && resv_msg.node_cnt[0] != 0) ||
+                                          (resv_msg.node_list != NULL && resv_msg.node_list[0] != '\0') ||
+                                          (resv_msg.licenses != NULL && resv_msg.licenses[0] != '\0'))) {
         exit_code = 1;
         error("A power reservation must be empty and set the LICENSE_ONLY flag.  No reservation created.");
         goto SCONTROL_CREATE_RES_CLEANUP;

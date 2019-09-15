@@ -74,8 +74,7 @@
 #include "src/slurmd/slurmstepd/slurmstepd.h"
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
-static int _init_from_slurmd(int sock, char **argv, slurm_addr_t **_cli,
-                             slurm_addr_t **_self, slurm_msg_t **_msg);
+static int _init_from_slurmd(int sock, char **argv, slurm_addr_t **_cli, slurm_addr_t **_self, slurm_msg_t **_msg);
 
 static void _dump_user_env(void);
 
@@ -85,8 +84,7 @@ static void _send_fail_to_slurmd(int sock);
 
 static void _got_ack_from_slurmd(int);
 
-static stepd_step_rec_t *_step_setup(slurm_addr_t *cli, slurm_addr_t *self,
-                                     slurm_msg_t *msg);
+static stepd_step_rec_t *_step_setup(slurm_addr_t *cli, slurm_addr_t *self, slurm_msg_t *msg);
 
 #ifdef MEMORY_LEAK_DEBUG
 static void _step_cleanup(stepd_step_rec_t *job, slurm_msg_t *msg, int rc);
@@ -97,18 +95,13 @@ static int _process_cmdline(int argc, char **argv);
 /*
  *  List of signals to block in this process
  */
-int slurmstepd_blocked_signals[] = {
-        SIGINT, SIGTERM, SIGTSTP,
-        SIGQUIT, SIGPIPE, SIGUSR1,
-        SIGUSR2, SIGALRM, SIGHUP, 0
-};
+int slurmstepd_blocked_signals[] = {SIGINT, SIGTERM, SIGTSTP, SIGQUIT, SIGPIPE, SIGUSR1, SIGUSR2, SIGALRM, SIGHUP, 0};
 
 /* global variable */
 slurmd_conf_t *conf;
 extern char **environ;
 
-int
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
     slurm_addr_t *cli;
     slurm_addr_t *self;
     slurm_msg_t *msg;
@@ -183,9 +176,8 @@ main(int argc, char **argv) {
     return stepd_cleanup(msg, job, cli, self, rc, 1);
 }
 
-extern int stepd_cleanup(slurm_msg_t *msg, stepd_step_rec_t *job,
-                         slurm_addr_t *cli, slurm_addr_t *self,
-                         int rc, bool only_mem) {
+extern int
+stepd_cleanup(slurm_msg_t *msg, stepd_step_rec_t *job, slurm_addr_t *cli, slurm_addr_t *self, int rc, bool only_mem) {
     if (!only_mem) {
         if (job->batch)
             batch_finish(job, rc); /* sends batch complete message */
@@ -292,8 +284,7 @@ static slurmd_conf_t *read_slurmd_conf_lite(int fd) {
         confl->log_opts.syslog_level = LOG_LEVEL_QUIET;
 
     confl->acct_freq_task = NO_VAL16;
-    tmp_int = acct_gather_parse_freq(PROFILE_TASK,
-                                     confl->job_acct_gather_freq);
+    tmp_int = acct_gather_parse_freq(PROFILE_TASK, confl->job_acct_gather_freq);
     if (tmp_int != -1)
         confl->acct_freq_task = tmp_int;
 
@@ -396,8 +387,7 @@ static int _process_cmdline(int argc, char **argv) {
 }
 
 
-static void
-_send_ok_to_slurmd(int sock) {
+static void _send_ok_to_slurmd(int sock) {
     /* If running under valgrind/memcheck, this pipe doesn't work correctly
      * so just skip it. */
 #if (SLURMSTEPD_MEMCHECK == 0)
@@ -409,8 +399,7 @@ _send_ok_to_slurmd(int sock) {
 #endif
 }
 
-static void
-_send_fail_to_slurmd(int sock) {
+static void _send_fail_to_slurmd(int sock) {
     /* If running under valgrind/memcheck, this pipe doesn't work correctly
      * so just skip it. */
 #if (SLURMSTEPD_MEMCHECK == 0)
@@ -426,8 +415,7 @@ _send_fail_to_slurmd(int sock) {
 #endif
 }
 
-static void
-_got_ack_from_slurmd(int sock) {
+static void _got_ack_from_slurmd(int sock) {
     /* If running under valgrind/memcheck, this pipe doesn't work correctly
      * so just skip it. */
 #if (SLURMSTEPD_MEMCHECK == 0)
@@ -460,9 +448,7 @@ static void _set_job_log_prefix(uint32_t jobid, uint32_t stepid) {
  *  This function handles the initialization information from slurmd
  *  sent by _send_slurmstepd_init() in src/slurmd/slurmd/req.c.
  */
-static int
-_init_from_slurmd(int sock, char **argv,
-                  slurm_addr_t **_cli, slurm_addr_t **_self, slurm_msg_t **_msg) {
+static int _init_from_slurmd(int sock, char **argv, slurm_addr_t **_cli, slurm_addr_t **_self, slurm_msg_t **_msg) {
     char *incoming_buffer = NULL;
     Buf buffer;
     int step_type;
@@ -499,14 +485,10 @@ _init_from_slurmd(int sock, char **argv,
         incoming_buffer = xmalloc(len);
         safe_read(sock, incoming_buffer, len);
         buffer = create_buf(incoming_buffer, len);
-        slurm_unpack_list(&tmp_list,
-                          slurmdb_unpack_tres_rec,
-                          slurmdb_destroy_tres_rec,
-                          buffer, SLURM_PROTOCOL_VERSION);
+        slurm_unpack_list(&tmp_list, slurmdb_unpack_tres_rec, slurmdb_destroy_tres_rec, buffer, SLURM_PROTOCOL_VERSION);
         free_buf(buffer);
     } else {
-        fatal("%s: We didn't get any tres from slurmd. This should never happen.",
-              __func__);
+        fatal("%s: We didn't get any tres from slurmd. This should never happen.", __func__);
     }
 
     xassert(tmp_list);
@@ -546,8 +528,7 @@ _init_from_slurmd(int sock, char **argv,
     switch_g_slurmd_step_init();
 
     slurm_get_ip_str(&step_complete.parent_addr, &port, buf, 16);
-    debug3("slurmstepd rank %d, parent address = %s, port = %u",
-           step_complete.rank, buf, port);
+    debug3("slurmstepd rank %d, parent address = %s, port = %u", step_complete.rank, buf, port);
 
     /* receive cli from slurmd */
     safe_read(sock, &len, sizeof(int));
@@ -567,8 +548,7 @@ _init_from_slurmd(int sock, char **argv,
         safe_read(sock, incoming_buffer, len);
         buffer = create_buf(incoming_buffer, len);
         self = xmalloc(sizeof(slurm_addr_t));
-        if (slurm_unpack_slurm_addr_no_alloc(self, buffer)
-            == SLURM_ERROR) {
+        if (slurm_unpack_slurm_addr_no_alloc(self, buffer) == SLURM_ERROR) {
             fatal("slurmstepd: problem with unpack of "
                   "slurmd_conf");
         }
@@ -630,9 +610,7 @@ _init_from_slurmd(int sock, char **argv,
     _set_job_log_prefix(jobid, stepid);
 
     if (!conf->hwloc_xml)
-        conf->hwloc_xml = xstrdup_printf("%s/hwloc_topo_%u.%u.xml",
-                                         conf->spooldir,
-                                         jobid, stepid);
+        conf->hwloc_xml = xstrdup_printf("%s/hwloc_topo_%u.%u.xml", conf->spooldir, jobid, stepid);
 
     /*
      * Swap the field to the srun client version, which will eventually
@@ -653,8 +631,7 @@ _init_from_slurmd(int sock, char **argv,
     exit(1);
 }
 
-static stepd_step_rec_t *
-_step_setup(slurm_addr_t *cli, slurm_addr_t *self, slurm_msg_t *msg) {
+static stepd_step_rec_t *_step_setup(slurm_addr_t *cli, slurm_addr_t *self, slurm_msg_t *msg) {
     stepd_step_rec_t *job = NULL;
 
     switch (msg->msg_type) {
@@ -664,8 +641,7 @@ _step_setup(slurm_addr_t *cli, slurm_addr_t *self, slurm_msg_t *msg) {
             break;
         case REQUEST_LAUNCH_TASKS:
             debug2("setup for a launch_task");
-            job = mgr_launch_tasks_setup(msg->data, cli, self,
-                                         msg->protocol_version);
+            job = mgr_launch_tasks_setup(msg->data, cli, self, msg->protocol_version);
             break;
         default:
             fatal("handle_launch_message: Unrecognized launch RPC");
@@ -683,23 +659,19 @@ _step_setup(slurm_addr_t *cli, slurm_addr_t *self, slurm_msg_t *msg) {
     /* Establish GRES environment variables */
     if (conf->debug_flags & DEBUG_FLAG_GRES) {
         gres_plugin_job_state_log(job->job_gres_list, job->jobid);
-        gres_plugin_step_state_log(job->step_gres_list, job->jobid,
-                                   job->stepid);
+        gres_plugin_step_state_log(job->step_gres_list, job->jobid, job->stepid);
     }
     if (msg->msg_type == REQUEST_BATCH_JOB_LAUNCH) {
         gres_plugin_job_set_env(&job->env, job->job_gres_list, 0);
     } else if (msg->msg_type == REQUEST_LAUNCH_TASKS) {
-        gres_plugin_step_set_env(&job->env, job->step_gres_list, 0,
-                                 NULL, NULL, -1);
+        gres_plugin_step_set_env(&job->env, job->step_gres_list, 0, NULL, NULL, -1);
     }
 
     /*
      * Add slurmd node topology informations to job env array
      */
-    env_array_overwrite(&job->env, "SLURM_TOPOLOGY_ADDR",
-                        conf->node_topo_addr);
-    env_array_overwrite(&job->env, "SLURM_TOPOLOGY_ADDR_PATTERN",
-                        conf->node_topo_pattern);
+    env_array_overwrite(&job->env, "SLURM_TOPOLOGY_ADDR", conf->node_topo_addr);
+    env_array_overwrite(&job->env, "SLURM_TOPOLOGY_ADDR_PATTERN", conf->node_topo_pattern);
 
     set_msg_node_id(job);
 

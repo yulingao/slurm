@@ -100,11 +100,9 @@ extern int spawn_resp_send_to_fd(spawn_resp_t *resp, int fd);
 
 extern int spawn_resp_send_to_srun(spawn_resp_t *resp);
 
-extern int spawn_psr_enqueue(uint32_t seq, int fd, int lrank,
-                             char *from_node);
+extern int spawn_psr_enqueue(uint32_t seq, int fd, int lrank, char *from_node);
 
-extern int spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank,
-                             char **from_node);
+extern int spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank, char **from_node);
 
 extern uint32_t spawn_seq_next(void);
 

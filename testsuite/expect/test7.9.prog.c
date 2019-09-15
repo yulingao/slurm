@@ -36,48 +36,47 @@
 #define _DEBUG         0
 #define _EXTREME_DEBUG 0
 
-int main (int argc, char **argv)
-{
-	int i;
-	struct stat buf;
+int main(int argc, char **argv) {
+    int i;
+    struct stat buf;
 
-	/* sleep for 0 to 100 msec to induce some randomness
-	 * and better detect any synchronization issues */
-	usleep(time(NULL) % 100000);
+    /* sleep for 0 to 100 msec to induce some randomness
+     * and better detect any synchronization issues */
+    usleep(time(NULL) % 100000);
 
-	/* start at fd=3
-	 * skip stdin, stdout, and stderr */
-	for (i=3; i<256; i++) {
-		if (fstat(i, &buf))
-			continue;
-		printf("FAILED: File descriptor %d is open\n", i);
+    /* start at fd=3
+     * skip stdin, stdout, and stderr */
+    for (i = 3; i < 256; i++) {
+        if (fstat(i, &buf))
+            continue;
+        printf("FAILED: File descriptor %d is open\n", i);
 #if _DEBUG
-{
-		printf("  st_mode:    0%o\n",(int) buf.st_mode);
-		printf("  st_uid:     %d\n", (int) buf.st_uid);
-		printf("  st_gid:     %d\n", (int) buf.st_gid);
-		printf("  st_size:    %d\n", (int) buf.st_size);
-		printf("  st_ino:     %d\n", (int) buf.st_ino);
-		printf("  st_dev:     %d\n", (int) buf.st_dev);
+        {
+                printf("  st_mode:    0%o\n",(int) buf.st_mode);
+                printf("  st_uid:     %d\n", (int) buf.st_uid);
+                printf("  st_gid:     %d\n", (int) buf.st_gid);
+                printf("  st_size:    %d\n", (int) buf.st_size);
+                printf("  st_ino:     %d\n", (int) buf.st_ino);
+                printf("  st_dev:     %d\n", (int) buf.st_dev);
 #if _EXTREME_DEBUG
-	{
-		char data[64];
-		int j;
-		size_t data_size;
+            {
+                char data[64];
+                int j;
+                size_t data_size;
 
-		lseek(i, 0, SEEK_SET);
-		data_size = read(i, data, 64);
-		if (data_size < 0)
-			printf("  read error: %s", strerror(errno));
-		else {
-			printf("  bytes read: %d\n", (int) data_size);
-			for (j=0; j<data_size; j++)
-				printf("  data[%d]:0x%x\n", j, data[j]);
-		}
-	}
+                lseek(i, 0, SEEK_SET);
+                data_size = read(i, data, 64);
+                if (data_size < 0)
+                    printf("  read error: %s", strerror(errno));
+                else {
+                    printf("  bytes read: %d\n", (int) data_size);
+                    for (j=0; j<data_size; j++)
+                        printf("  data[%d]:0x%x\n", j, data[j]);
+                }
+            }
 #endif
-}
+        }
 #endif
-	}
-	exit(0);
+    }
+    exit(0);
 }

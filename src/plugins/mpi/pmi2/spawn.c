@@ -65,16 +65,14 @@ typedef struct pending_spawn_req {
 
 static psr_t *psr_list = NULL;
 
-extern spawn_subcmd_t *
-spawn_subcmd_new(void) {
+extern spawn_subcmd_t *spawn_subcmd_new(void) {
     spawn_subcmd_t *subcmd;
 
     subcmd = xmalloc(sizeof(spawn_subcmd_t));
     return subcmd;
 }
 
-extern void
-spawn_subcmd_free(spawn_subcmd_t *subcmd) {
+extern void spawn_subcmd_free(spawn_subcmd_t *subcmd) {
     int i;
 
     if (subcmd) {
@@ -101,8 +99,7 @@ spawn_subcmd_free(spawn_subcmd_t *subcmd) {
     }
 }
 
-extern spawn_req_t *
-spawn_req_new(void) {
+extern spawn_req_t *spawn_req_new(void) {
     spawn_req_t *req;
 
     req = xmalloc(sizeof(spawn_req_t));
@@ -111,8 +108,7 @@ spawn_req_new(void) {
     return req;
 }
 
-extern void
-spawn_req_free(spawn_req_t *req) {
+extern void spawn_req_free(spawn_req_t *req) {
     int i;
 
     if (req) {
@@ -139,8 +135,7 @@ spawn_req_free(spawn_req_t *req) {
     }
 }
 
-extern void
-spawn_req_pack(spawn_req_t *req, Buf buf) {
+extern void spawn_req_pack(spawn_req_t *req, Buf buf) {
     int i, j;
     spawn_subcmd_t *subcmd;
     void *auth_cred;
@@ -185,8 +180,7 @@ spawn_req_pack(spawn_req_t *req, Buf buf) {
     }
 }
 
-extern int
-spawn_req_unpack(spawn_req_t **req_ptr, Buf buf) {
+extern int spawn_req_unpack(spawn_req_t **req_ptr, Buf buf) {
     spawn_req_t *req = NULL;
     spawn_subcmd_t *subcmd = NULL;
     uint32_t temp32;
@@ -215,8 +209,7 @@ spawn_req_unpack(spawn_req_t **req_ptr, Buf buf) {
     (void) g_slurm_auth_destroy(auth_cred);
     my_uid = getuid();
     if ((auth_uid != 0) && (auth_uid != my_uid)) {
-        error("mpi/pmi2: spawn request apparently from uid %u",
-              (uint32_t) auth_uid);
+        error("mpi/pmi2: spawn request apparently from uid %u", (uint32_t) auth_uid);
         return SLURM_ERROR;
     }
 
@@ -244,24 +237,18 @@ spawn_req_unpack(spawn_req_t **req_ptr, Buf buf) {
         safe_unpack32(&(subcmd->max_procs), buf);
         safe_unpack32(&(subcmd->argc), buf);
         if (subcmd->argc > 0) {
-            safe_xcalloc(subcmd->argv, subcmd->argc,
-                         sizeof(char *));
+            safe_xcalloc(subcmd->argv, subcmd->argc, sizeof(char *));
             for (j = 0; j < subcmd->argc; j++) {
-                safe_unpackstr_xmalloc(&(subcmd->argv[j]),
-                                       &temp32, buf);
+                safe_unpackstr_xmalloc(&(subcmd->argv[j]), &temp32, buf);
             }
         }
         safe_unpack32(&(subcmd->info_cnt), buf);
         if (subcmd->info_cnt > 0) {
-            safe_xcalloc(subcmd->info_keys, subcmd->info_cnt,
-                         sizeof(char *));
-            safe_xcalloc(subcmd->info_vals, subcmd->info_cnt,
-                         sizeof(char *));
+            safe_xcalloc(subcmd->info_keys, subcmd->info_cnt, sizeof(char *));
+            safe_xcalloc(subcmd->info_vals, subcmd->info_cnt, sizeof(char *));
             for (j = 0; j < subcmd->info_cnt; j++) {
-                safe_unpackstr_xmalloc(&(subcmd->info_keys[j]),
-                                       &temp32, buf);
-                safe_unpackstr_xmalloc(&(subcmd->info_vals[j]),
-                                       &temp32, buf);
+                safe_unpackstr_xmalloc(&(subcmd->info_keys[j]), &temp32, buf);
+                safe_unpackstr_xmalloc(&(subcmd->info_vals[j]), &temp32, buf);
             }
         }
     }
@@ -273,8 +260,7 @@ spawn_req_unpack(spawn_req_t **req_ptr, Buf buf) {
     return SLURM_ERROR;
 }
 
-extern int
-spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr) {
+extern int spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr) {
     Buf req_buf = NULL, resp_buf = NULL;
     int rc;
     uint16_t cmd;
@@ -283,8 +269,7 @@ spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr) {
     cmd = TREE_CMD_SPAWN;
     pack16(cmd, req_buf);
     spawn_req_pack(req, req_buf);
-    rc = tree_msg_to_srun_with_resp(get_buf_offset(req_buf),
-                                    get_buf_data(req_buf), &resp_buf);
+    rc = tree_msg_to_srun_with_resp(get_buf_offset(req_buf), get_buf_data(req_buf), &resp_buf);
     free_buf(req_buf);
 
     if (rc == SLURM_SUCCESS) {
@@ -296,16 +281,14 @@ spawn_req_send_to_srun(spawn_req_t *req, spawn_resp_t **resp_ptr) {
 
 /**************************************************************/
 
-extern spawn_resp_t *
-spawn_resp_new(void) {
+extern spawn_resp_t *spawn_resp_new(void) {
     spawn_resp_t *resp;
 
     resp = xmalloc(sizeof(spawn_resp_t));
     return resp;
 }
 
-extern void
-spawn_resp_free(spawn_resp_t *resp) {
+extern void spawn_resp_free(spawn_resp_t *resp) {
     if (resp) {
         xfree(resp->jobid);
         xfree(resp->error_codes);
@@ -313,8 +296,7 @@ spawn_resp_free(spawn_resp_t *resp) {
     }
 }
 
-extern void
-spawn_resp_pack(spawn_resp_t *resp, Buf buf) {
+extern void spawn_resp_pack(spawn_resp_t *resp, Buf buf) {
     int i;
 
     pack32(resp->seq, buf);
@@ -327,8 +309,7 @@ spawn_resp_pack(spawn_resp_t *resp, Buf buf) {
     }
 }
 
-extern int
-spawn_resp_unpack(spawn_resp_t **resp_ptr, Buf buf) {
+extern int spawn_resp_unpack(spawn_resp_t **resp_ptr, Buf buf) {
     spawn_resp_t *resp = NULL;
     uint32_t temp32;
     int i;
@@ -354,8 +335,7 @@ spawn_resp_unpack(spawn_resp_t **resp_ptr, Buf buf) {
     return SLURM_ERROR;
 }
 
-extern int
-spawn_resp_send_to_stepd(spawn_resp_t *resp, char *node) {
+extern int spawn_resp_send_to_stepd(spawn_resp_t *resp, char *node) {
     Buf buf;
     int rc;
     uint16_t cmd;
@@ -366,15 +346,12 @@ spawn_resp_send_to_stepd(spawn_resp_t *resp, char *node) {
     pack16(cmd, buf);
     spawn_resp_pack(resp, buf);
 
-    rc = slurm_forward_data(&node, tree_sock_addr,
-                            get_buf_offset(buf),
-                            get_buf_data(buf));
+    rc = slurm_forward_data(&node, tree_sock_addr, get_buf_offset(buf), get_buf_data(buf));
     free_buf(buf);
     return rc;
 }
 
-extern int
-spawn_resp_send_to_srun(spawn_resp_t *resp) {
+extern int spawn_resp_send_to_srun(spawn_resp_t *resp) {
     Buf buf;
     int rc;
     uint16_t cmd;
@@ -390,8 +367,7 @@ spawn_resp_send_to_srun(spawn_resp_t *resp) {
     return rc;
 }
 
-extern int
-spawn_resp_send_to_fd(spawn_resp_t *resp, int fd) {
+extern int spawn_resp_send_to_fd(spawn_resp_t *resp, int fd) {
     Buf buf;
     int rc;
 
@@ -409,8 +385,7 @@ spawn_resp_send_to_fd(spawn_resp_t *resp, int fd) {
 
 /**************************************************************/
 
-extern int
-spawn_psr_enqueue(uint32_t seq, int fd, int lrank, char *from_node) {
+extern int spawn_psr_enqueue(uint32_t seq, int fd, int lrank, char *from_node) {
     psr_t *psr;
 
     psr = xmalloc(sizeof(psr_t));
@@ -423,8 +398,7 @@ spawn_psr_enqueue(uint32_t seq, int fd, int lrank, char *from_node) {
     return SLURM_SUCCESS;
 }
 
-extern int
-spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank, char **from_node) {
+extern int spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank, char **from_node) {
     psr_t *psr, **pprev;
 
     pprev = &psr_list;
@@ -446,13 +420,11 @@ spawn_psr_dequeue(uint32_t seq, int *fd, int *lrank, char **from_node) {
     return SLURM_ERROR;
 }
 
-extern uint32_t
-spawn_seq_next(void) {
+extern uint32_t spawn_seq_next(void) {
     return spawn_seq++;
 }
 
-static int
-_exec_srun_single(spawn_req_t *req, char **env) {
+static int _exec_srun_single(spawn_req_t *req, char **env) {
     int argc, i, j;
     char **argv = NULL;
     spawn_subcmd_t *subcmd;
@@ -467,8 +439,7 @@ _exec_srun_single(spawn_req_t *req, char **env) {
     argv[j++] = "--mpi=pmi2";
     if (job_info.srun_opt && job_info.srun_opt->srun_opt->no_alloc) {
         argv[j++] = "--no-alloc";
-        xstrfmtcat(argv[j++], "--nodelist=%s",
-                   job_info.srun_opt->nodelist);
+        xstrfmtcat(argv[j++], "--nodelist=%s", job_info.srun_opt->nodelist);
     }
 
     xstrfmtcat(argv[j++], "--ntasks=%d", subcmd->max_procs);
@@ -477,19 +448,16 @@ _exec_srun_single(spawn_req_t *req, char **env) {
         if (0) {
 
         } else if (!xstrcmp(subcmd->info_keys[i], "host")) {
-            xstrfmtcat(argv[j++], "--nodelist=%s",
-                       subcmd->info_vals[i]);
+            xstrfmtcat(argv[j++], "--nodelist=%s", subcmd->info_vals[i]);
 
         } else if (!xstrcmp(subcmd->info_keys[i], "arch")) {
             error("mpi/pmi2: spawn info key 'arch' not supported");
 
         } else if (!xstrcmp(subcmd->info_keys[i], "wdir")) {
-            xstrfmtcat(argv[j++], "--chdir=%s",
-                       subcmd->info_vals[i]);
+            xstrfmtcat(argv[j++], "--chdir=%s", subcmd->info_vals[i]);
 
         } else if (!xstrcmp(subcmd->info_keys[i], "path")) {
-            env_array_overwrite_fmt(&env, "PATH", "%s",
-                                    subcmd->info_vals[i]);
+            env_array_overwrite_fmt(&env, "PATH", "%s", subcmd->info_vals[i]);
 
         } else if (!xstrcmp(subcmd->info_keys[i], "file")) {
             error("mpi/pmi2: spawn info key 'file' not supported");
@@ -498,8 +466,7 @@ _exec_srun_single(spawn_req_t *req, char **env) {
             error("mpi/pmi2: spawn info key 'soft' not supported");
 
         } else {
-            error("mpi/pmi2: unknown spawn info key '%s' ignored",
-                  subcmd->info_keys[i]);
+            error("mpi/pmi2: unknown spawn info key '%s' ignored", subcmd->info_keys[i]);
         }
     }
     argv[j++] = subcmd->cmd;
@@ -520,8 +487,7 @@ _exec_srun_single(spawn_req_t *req, char **env) {
     return SLURM_ERROR;
 }
 
-static int
-_exec_srun_multiple(spawn_req_t *req, char **env) {
+static int _exec_srun_multiple(spawn_req_t *req, char **env) {
     int argc, ntasks, i, j, spawn_cnt, fd;
     char **argv = NULL, *buf = NULL;
     spawn_subcmd_t *subcmd = NULL;
@@ -546,8 +512,7 @@ _exec_srun_multiple(spawn_req_t *req, char **env) {
         if (subcmd->max_procs == 1) {
             xstrfmtcat(buf, "%d  %s", ntasks, subcmd->cmd);
         } else {
-            xstrfmtcat(buf, "%d-%d  %s", ntasks,
-                       ntasks + subcmd->max_procs - 1, subcmd->cmd);
+            xstrfmtcat(buf, "%d-%d  %s", ntasks, ntasks + subcmd->max_procs - 1, subcmd->cmd);
         }
         for (i = 0; i < subcmd->argc; i++) {
             xstrfmtcat(buf, " %s", subcmd->argv[i]);
@@ -570,8 +535,7 @@ _exec_srun_multiple(spawn_req_t *req, char **env) {
     xstrfmtcat(argv[j++], "--ntasks=%d", ntasks);
     if (job_info.srun_opt && job_info.srun_opt->srun_opt->no_alloc) {
         argv[j++] = "--no-alloc";
-        xstrfmtcat(argv[j++], "--nodelist=%s",
-                   job_info.srun_opt->nodelist);
+        xstrfmtcat(argv[j++], "--nodelist=%s", job_info.srun_opt->nodelist);
     }
     argv[j++] = "--multi-prog";
     argv[j++] = fbuf;
@@ -588,8 +552,7 @@ _exec_srun_multiple(spawn_req_t *req, char **env) {
     return SLURM_ERROR;
 }
 
-static void
-_setup_exec_srun(spawn_req_t *req) {
+static void _setup_exec_srun(spawn_req_t *req) {
     char **env, env_key[32];
     int i, rc;
     spawn_resp_t *resp;
@@ -601,16 +564,12 @@ _setup_exec_srun(spawn_req_t *req) {
     /* TODO: unset some env-vars */
 
     env_array_overwrite_fmt(&env, "SLURM_JOB_ID", "%u", job_info.jobid);
-    env_array_overwrite_fmt(&env, PMI2_SPAWNER_JOBID_ENV, "%s",
-                            job_info.pmi_jobid);
-    env_array_overwrite_fmt(&env, PMI2_PMI_JOBID_ENV, "%s-%u",
-                            job_info.pmi_jobid, req->seq);
+    env_array_overwrite_fmt(&env, PMI2_SPAWNER_JOBID_ENV, "%s", job_info.pmi_jobid);
+    env_array_overwrite_fmt(&env, PMI2_PMI_JOBID_ENV, "%s-%u", job_info.pmi_jobid, req->seq);
     env_array_overwrite_fmt(&env, PMI2_SPAWN_SEQ_ENV, "%u", req->seq);
-    env_array_overwrite_fmt(&env, PMI2_SPAWNER_PORT_ENV, "%hu",
-                            tree_info.pmi_port);
+    env_array_overwrite_fmt(&env, PMI2_SPAWNER_PORT_ENV, "%hu", tree_info.pmi_port);
     /* preput kvs */
-    env_array_overwrite_fmt(&env, PMI2_PREPUT_CNT_ENV, "%d",
-                            req->preput_cnt);
+    env_array_overwrite_fmt(&env, PMI2_PREPUT_CNT_ENV, "%d", req->preput_cnt);
     for (i = 0; i < req->preput_cnt; i++) {
         snprintf(env_key, 32, PMI2_PPKEY_ENV
                 "%d", i);
@@ -636,15 +595,13 @@ _setup_exec_srun(spawn_req_t *req) {
 
     /* fake a srun address */
     tree_info.srun_addr = xmalloc(sizeof(slurm_addr_t));
-    slurm_set_addr(tree_info.srun_addr, tree_info.pmi_port,
-                   "127.0.0.1");
+    slurm_set_addr(tree_info.srun_addr, tree_info.pmi_port, "127.0.0.1");
     spawn_resp_send_to_srun(resp);
     spawn_resp_free(resp);
     exit(errno);
 }
 
-extern int
-spawn_job_do_spawn(spawn_req_t *req) {
+extern int spawn_job_do_spawn(spawn_req_t *req) {
     pid_t child_pid;
 
     child_pid = fork();
@@ -662,8 +619,7 @@ spawn_job_do_spawn(spawn_req_t *req) {
     return SLURM_ERROR;
 }
 
-static int
-_wait_for_all(void) {
+static int _wait_for_all(void) {
     pid_t child;
     int i, status, exited;
 
@@ -680,8 +636,7 @@ _wait_for_all(void) {
     return exited;
 }
 
-extern void
-spawn_job_wait(void) {
+extern void spawn_job_wait(void) {
     int exited, i, wait;
 
     if (job_info.srun_opt) {

@@ -62,8 +62,7 @@ extern bool get_reg_resp;
  * Message aggregation types
  */
 typedef enum {
-    WINDOW_TIME,
-    WINDOW_MSGS
+    WINDOW_TIME, WINDOW_MSGS
 } msg_aggr_param_type_t;
 
 /*

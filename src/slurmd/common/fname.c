@@ -53,19 +53,15 @@
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
 
-static void _batch_path_check(char **p, char **q, char **name,
-                              unsigned int wid, stepd_step_rec_t *job,
-                              int taskid);
+static void _batch_path_check(char **p, char **q, char **name, unsigned int wid, stepd_step_rec_t *job, int taskid);
 
-static char *_create_batch_fname(char *name, char *path,
-                                 stepd_step_rec_t *job, int taskid);
+static char *_create_batch_fname(char *name, char *path, stepd_step_rec_t *job, int taskid);
 
-static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job,
-                                int taskid);
+static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job, int taskid);
 
-static void _step_path_check(char **p, char **q, char **name, unsigned int wid,
-                             bool double_p, stepd_step_rec_t *job, int taskid,
-                             int offset);
+static void
+_step_path_check(char **p, char **q, char **name, unsigned int wid, bool double_p, stepd_step_rec_t *job, int taskid,
+                 int offset);
 
 /*
  * Max zero-padding width
@@ -164,8 +160,7 @@ extern char *fname_create2(batch_job_launch_msg_t *req) {
     return name;
 }
 
-static char *_create_batch_fname(char *name, char *path, stepd_step_rec_t *job,
-                                 int taskid) {
+static char *_create_batch_fname(char *name, char *path, stepd_step_rec_t *job, int taskid) {
     unsigned int wid = 0;
     char *p, *q;
     q = p = path;
@@ -181,8 +176,7 @@ static char *_create_batch_fname(char *name, char *path, stepd_step_rec_t *job,
             if (isdigit(*(++p))) {
                 unsigned long in_width = 0;
                 xmemcat(name, q, p - 1);
-                if ((in_width = strtoul(p, &p, 10)) >
-                    MAX_WIDTH) {
+                if ((in_width = strtoul(p, &p, 10)) > MAX_WIDTH) {
                     wid = MAX_WIDTH;
                 } else
                     wid = (unsigned int) in_width;
@@ -203,8 +197,7 @@ static char *_create_batch_fname(char *name, char *path, stepd_step_rec_t *job,
     return name;
 }
 
-static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job,
-                                int taskid) {
+static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job, int taskid) {
 
     unsigned int wid = 0;
     char *p, *q;
@@ -221,8 +214,7 @@ static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job,
 
             if (isdigit(*(++p))) {
                 unsigned long in_width = 0;
-                if ((in_width = strtoul(p, &p, 10)) ==
-                    MAX_WIDTH) {
+                if ((in_width = strtoul(p, &p, 10)) == MAX_WIDTH) {
                     /* Remove % and double digit 10 */
                     str_offset = 3;
                 } else
@@ -232,8 +224,7 @@ static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job,
                     break;
 
             }
-            _step_path_check(&p, &q, &name, wid, double_p,
-                             job, taskid, str_offset);
+            _step_path_check(&p, &q, &name, wid, double_p, job, taskid, str_offset);
             wid = 0;
         } else
             p++;
@@ -252,9 +243,9 @@ static char *_create_step_fname(char *name, char *path, stepd_step_rec_t *job,
  * Substitute the path option for a step.
  *
  */
-static void _step_path_check(char **p, char **q, char **name, unsigned int wid,
-                             bool double_p, stepd_step_rec_t *job, int taskid,
-                             int offset) {
+static void
+_step_path_check(char **p, char **q, char **name, unsigned int wid, bool double_p, stepd_step_rec_t *job, int taskid,
+                 int offset) {
     switch (**p) {
         case '%': /* This is in case there is a 3rd %, ie. %%% */
             xmemcat(*name, *q, *p - 1);
@@ -306,15 +297,12 @@ static void _step_path_check(char **p, char **q, char **name, unsigned int wid,
  * those used with "srun" (parsed in fname_create found in
  * src/srun/libsrun/fname.c).
  */
-static void _batch_path_check(char **p, char **q, char **name,
-                              unsigned int wid, stepd_step_rec_t *job,
-                              int taskid) {
+static void _batch_path_check(char **p, char **q, char **name, unsigned int wid, stepd_step_rec_t *job, int taskid) {
 
     switch (**p) {
         case 'a':  /* '%a' => array task id   */
             xmemcat(*name, *q, *p - 1);
-            xstrfmtcat(*name, "%0*u", wid,
-                       job->array_task_id);
+            xstrfmtcat(*name, "%0*u", wid, job->array_task_id);
             *q = ++(*p);
             break;
         case 'A':  /* '%A' => array master job id */

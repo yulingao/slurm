@@ -66,13 +66,11 @@ static void _free_ccm_info(ccm_info_t *ccm_info);
 
 static int *_ccm_convert_nodelist(char *nodelist, int *node_cnt);
 
-static char *_ccm_create_unique_file(char *uniqnm, int *fd,
-                                     ccm_info_t *ccm_info);
+static char *_ccm_create_unique_file(char *uniqnm, int *fd, ccm_info_t *ccm_info);
 
 static char *_ccm_create_nidlist_file(ccm_info_t *ccm_info);
 
-static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
-                                  const char *ccm_script);
+static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type, const char *ccm_script);
 
 /*
  * Open the CCM config file and read the CCM_QUEUES list of partition
@@ -91,8 +89,7 @@ static char *_get_ccm_partition(ccm_config_t *ccm_config) {
     ccm_config->num_ccm_partitions = 0;
     fp = fopen(CCM_CONF_PATH, "r");
     if (fp == NULL) {
-        snprintf(err_buf, sizeof(err_buf),
-                 "CCM unable to open %s, %m\n", CCM_CONF_PATH);
+        snprintf(err_buf, sizeof(err_buf), "CCM unable to open %s, %m\n", CCM_CONF_PATH);
         err_mesg = err_buf;
         return err_mesg;
     }
@@ -108,12 +105,9 @@ static char *_get_ccm_partition(ccm_config_t *ccm_config) {
             if (sscanf(entry, " %1[""#""]", extra) == 1) {
                 continue;
             }
-            num_ents = _parse_ccm_config(entry,
-                                         ccm_config->ccm_partition);
+            num_ents = _parse_ccm_config(entry, ccm_config->ccm_partition);
             if (num_ents <= 0) {
-                snprintf(err_buf, sizeof(err_buf),
-                         "CCM bad CCM_QUEUES %s in %s\n",
-                         entry, CCM_CONF_PATH);
+                snprintf(err_buf, sizeof(err_buf), "CCM bad CCM_QUEUES %s in %s\n", entry, CCM_CONF_PATH);
                 err_mesg = err_buf;
                 free(entry);
                 return err_mesg;
@@ -122,12 +116,10 @@ static char *_get_ccm_partition(ccm_config_t *ccm_config) {
             break;
         }
     }
-    debug2("CCM _get_ccm_partition num_ents %d",
-           ccm_config->num_ccm_partitions);
+    debug2("CCM _get_ccm_partition num_ents %d", ccm_config->num_ccm_partitions);
     if (ccm_config->num_ccm_partitions > 0) {
         for (i = 0; i < ccm_config->num_ccm_partitions; i++) {
-            debug2("CCM ccm_config->ccm_partition[%d] %s", i,
-                   ccm_config->ccm_partition[i]);
+            debug2("CCM ccm_config->ccm_partition[%d] %s", i, ccm_config->ccm_partition[i]);
         }
     }
     free(entry);
@@ -205,8 +197,7 @@ static int *_ccm_convert_nodelist(char *nodelist, int *nid_cnt) {
         return NULL;
     }
     if (!(cnt = hostlist_count(hl))) {
-        CRAY_ERR("CCM nodelist %s hostlist_count cnt %d",
-                 nodelist, cnt);
+        CRAY_ERR("CCM nodelist %s hostlist_count cnt %d", nodelist, cnt);
         hostlist_destroy(hl);
         return NULL;
     }
@@ -235,8 +226,7 @@ static int *_ccm_convert_nodelist(char *nodelist, int *nid_cnt) {
  * uniq_fd is set to -1.  The caller is responsible to free the returned
  * file name.
  */
-static char *_ccm_create_unique_file(char *uniqnm, int *uniq_fd,
-                                     ccm_info_t *ccm_info) {
+static char *_ccm_create_unique_file(char *uniqnm, int *uniq_fd, ccm_info_t *ccm_info) {
     int fd = -1;
     char *tmpfilenm = NULL;
 
@@ -248,11 +238,9 @@ static char *_ccm_create_unique_file(char *uniqnm, int *uniq_fd,
     tmpfilenm = xstrdup(uniqnm);
     fd = mkstemp(tmpfilenm);
     if (fd < 0) {
-        CRAY_ERR("CCM job %u unable to mkstemp %s, %m",
-                 ccm_info->job_id, uniqnm);
+        CRAY_ERR("CCM job %u unable to mkstemp %s, %m", ccm_info->job_id, uniqnm);
     } else if ((fchmod(fd, 0644)) < 0) {
-        CRAY_ERR("CCM job %u file %s, fd %d, fchmod error, %m",
-                 ccm_info->job_id, uniqnm, fd);
+        CRAY_ERR("CCM job %u file %s, fd %d, fchmod error, %m", ccm_info->job_id, uniqnm, fd);
         close(fd);
         fd = -1;
     }
@@ -287,30 +275,26 @@ static char *_ccm_create_nidlist_file(ccm_info_t *ccm_info) {
      * Create a unique temp file; name of the file will be passed
      * in an env variable to the CCM prolog/epilog.
      */
-    unique_filenm = _ccm_create_unique_file(CCM_CRAY_UNIQUE_FILENAME, &fd,
-                                            ccm_info);
+    unique_filenm = _ccm_create_unique_file(CCM_CRAY_UNIQUE_FILENAME, &fd, ccm_info);
     if (!unique_filenm) {
         return NULL;
     }
     if ((tmp_fp = fdopen(fd, "w")) == NULL) {
-        CRAY_ERR("CCM job %u file %s, fd %d, fdopen error %m",
-                 ccm_info->job_id, unique_filenm, fd);
+        CRAY_ERR("CCM job %u file %s, fd %d, fdopen error %m", ccm_info->job_id, unique_filenm, fd);
         close(fd);
         xfree(unique_filenm);
         return NULL;
     }
     /* Convert the nodelist into an array of nids */
     nodes = _ccm_convert_nodelist(ccm_info->nodelist, &nodecnt);
-    debug("CCM job %u nodelist %s, nodecnt %d", ccm_info->job_id,
-          ccm_info->nodelist, nodecnt);
+    debug("CCM job %u nodelist %s, nodecnt %d", ccm_info->job_id, ccm_info->nodelist, nodecnt);
     if (!nodes) {
         fclose(tmp_fp);
         xfree(unique_filenm);
         return NULL;
     }
     for (i = 0; i < nodecnt; i++) {
-        debug3("CCM job %u nodes[%d] is %d",
-               ccm_info->job_id, i, nodes[i]);
+        debug3("CCM job %u nodes[%d] is %d", ccm_info->job_id, i, nodes[i]);
     }
 
     memset(&step_layout_req, 0, sizeof(slurm_step_layout_req_t));
@@ -331,25 +315,21 @@ static char *_ccm_create_nidlist_file(ccm_info_t *ccm_info) {
     /* Determine how many PEs(tasks) will be run on each node */
     step_layout = slurm_step_layout_create(&step_layout_req);
     if (!step_layout) {
-        CRAY_ERR("CCM job %u slurm_step_layout_create failure",
-                 ccm_info->job_id);
+        CRAY_ERR("CCM job %u slurm_step_layout_create failure", ccm_info->job_id);
         fclose(tmp_fp);
         xfree(unique_filenm);
         xfree(nodes);
         return NULL;
     }
-    debug2("CCM job %u step_layout node_cnt %d", ccm_info->job_id,
-           step_layout->node_cnt);
+    debug2("CCM job %u step_layout node_cnt %d", ccm_info->job_id, step_layout->node_cnt);
     /* Fill in the nodelist file with an entry per PE */
     for (i = 0; i < step_layout->node_cnt; i++) {
-        debug2("CCM job %u step_layout nodes[%d] %d, tasks[%d] %d",
-               ccm_info->job_id, i, nodes[i], i,
+        debug2("CCM job %u step_layout nodes[%d] %d, tasks[%d] %d", ccm_info->job_id, i, nodes[i], i,
                step_layout->tasks[i]);
         for (j = 0; j < step_layout->tasks[i]; j++) {
             fprintf(tmp_fp, "%d\n", nodes[i]);
             debug3("CCM job %u nodelist file step tasks[%d] %d, "
-                   "j %d nodes[%d] %d", ccm_info->job_id, i,
-                   step_layout->tasks[i], j, i, nodes[i]);
+                   "j %d nodes[%d] %d", ccm_info->job_id, i, step_layout->tasks[i], j, i, nodes[i]);
         }
     }
     slurm_step_layout_destroy(step_layout);
@@ -364,8 +344,7 @@ static char *_ccm_create_nidlist_file(ccm_info_t *ccm_info) {
  * scripts.  Fork a child to exec the script; wait for the child to complete.
  * Return value of kill so caller can decide what further action to take.
  */
-static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
-                                  const char *ccm_script) {
+static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type, const char *ccm_script) {
     int cpid, ret, status, wait_rc, kill = 1;
     char strval[128], *nid_list_file = NULL;
     const char *argv[4];
@@ -375,21 +354,18 @@ static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
     if (!xstrcasecmp(ccm_type, "prolog")) {
         nid_list_file = _ccm_create_nidlist_file(ccm_info);
         if (nid_list_file == NULL) {
-            CRAY_ERR("CCM job %u unable to create nidlist file",
-                     ccm_info->job_id);
+            CRAY_ERR("CCM job %u unable to create nidlist file", ccm_info->job_id);
             return kill;
         }
     }
     /* Fork a child to exec the CCM script */
     cpid = fork();
     if (cpid < 0) {
-        CRAY_ERR("CCM job %u %s fork failed, %m", ccm_info->job_id,
-                 ccm_type);
+        CRAY_ERR("CCM job %u %s fork failed, %m", ccm_info->job_id, ccm_type);
         if (nid_list_file) {
             ret = unlink(nid_list_file);
             if (ret == -1) {
-                CRAY_ERR("CCM job %u unable to unlink %s",
-                         ccm_info->job_id, nid_list_file);
+                CRAY_ERR("CCM job %u unable to unlink %s", ccm_info->job_id, nid_list_file);
             }
             xfree(nid_list_file);
         }
@@ -403,18 +379,15 @@ static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
         snprintf(strval, sizeof(strval), "%u", ccm_info->user_id);
         setenv("ALPS_PREP_UID", strval, 1);
         if (nid_list_file) {
-            setenv("ALPS_PREP_NIDFILE",
-                   (const char *) nid_list_file, 1);
+            setenv("ALPS_PREP_NIDFILE", (const char *) nid_list_file, 1);
         }
         argv[0] = "sh";
         argv[1] = "-c";
         argv[2] = ccm_script;
         argv[3] = NULL;
-        debug("CCM job %u invoking %s %s", ccm_info->job_id, ccm_type,
-              ccm_script);
+        debug("CCM job %u invoking %s %s", ccm_info->job_id, ccm_type, ccm_script);
         execv("/bin/sh", (char *const *) argv);
-        CRAY_ERR("CCM job %u %s %s execv failed, %m",
-                 ccm_info->job_id, ccm_type, ccm_script);
+        CRAY_ERR("CCM job %u %s %s execv failed, %m", ccm_info->job_id, ccm_type, ccm_script);
         exit(127);
     } else {
         /* parent */
@@ -425,16 +398,13 @@ static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
                     ret = WEXITSTATUS(status);
                     if (ret != 0) {
                         info("CCM job %u %s waitpid "
-                             "ret %d",
-                             ccm_info->job_id,
-                             ccm_type, ret);
+                             "ret %d", ccm_info->job_id, ccm_type, ret);
                     } else {
                         kill = 0;
                     }
                 } else if (WIFSIGNALED(status)) {
                     info("CCM job %u %s received "
-                         "signal %d", ccm_info->job_id,
-                         ccm_type, WTERMSIG(status));
+                         "signal %d", ccm_info->job_id, ccm_type, WTERMSIG(status));
                 } else {
                     /* Success */
                     kill = 0;
@@ -444,23 +414,20 @@ static int _run_ccm_prolog_epilog(ccm_info_t *ccm_info, char *ccm_type,
                 if (errno == EINTR) {
                     continue;
                 }
-                CRAY_ERR("CCM job %u %s waitpid error %m",
-                         ccm_info->job_id, ccm_type);
+                CRAY_ERR("CCM job %u %s waitpid error %m", ccm_info->job_id, ccm_type);
                 break;
             }
         }
         if (nid_list_file) {
             ret = unlink(nid_list_file);
             if (ret == -1) {
-                info("CCM job %u unable to unlink %s, %m",
-                     ccm_info->job_id, nid_list_file);
+                info("CCM job %u unable to unlink %s, %m", ccm_info->job_id, nid_list_file);
             }
             xfree(nid_list_file);
         }
     }
     END_TIMER;
-    debug("CCM job %u %s completed in %s", ccm_info->job_id, ccm_type,
-          TIME_STR);
+    debug("CCM job %u %s completed in %s", ccm_info->job_id, ccm_type, TIME_STR);
     return kill;
 }
 
@@ -491,8 +458,7 @@ extern void ccm_get_config(void) {
     } else {
         if (ccm_config.num_ccm_partitions > 0) {
             ccm_config.ccm_enabled = 1;
-            info("CCM prolog %s, epilog %s",
-                 ccm_prolog_path, ccm_epilog_path);
+            info("CCM prolog %s, epilog %s", ccm_prolog_path, ccm_epilog_path);
         }
     }
     return;
@@ -508,8 +474,7 @@ extern int ccm_check_partitions(struct job_record *job_ptr) {
 
     ccm_partition = 0;
     partition = job_ptr->partition;
-    debug2("CCM job %u ccm_check_partitions partition %s",
-           job_ptr->job_id, partition);
+    debug2("CCM job %u ccm_check_partitions partition %s", job_ptr->job_id, partition);
     for (i = 0; i < ccm_config.num_ccm_partitions; i++) {
         if (!xstrcasecmp(partition, ccm_config.ccm_partition[i])) {
             ccm_partition = 1;
@@ -531,10 +496,8 @@ extern void *ccm_begin(void *args) {
     ccm_info_t ccm_info;
     char err_str_buf[128], srun_msg_buf[256];
     struct job_record *job_ptr = (struct job_record *) args;
-    slurmctld_lock_t job_read_lock =
-            {NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
-    slurmctld_lock_t job_write_lock =
-            {NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, READ_LOCK};
+    slurmctld_lock_t job_read_lock = {NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t job_write_lock = {NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, READ_LOCK};
 
     lock_slurmctld(job_read_lock);
     if (job_ptr->magic != JOB_MAGIC) {
@@ -549,8 +512,7 @@ extern void *ccm_begin(void *args) {
 
     job_id = job_ptr->job_id;
 
-    debug2("CCM job %u_ccm_begin partition %s", job_ptr->job_id,
-           job_ptr->partition);
+    debug2("CCM job %u_ccm_begin partition %s", job_ptr->job_id, job_ptr->partition);
     memset(&ccm_info, 0, sizeof(ccm_info_t));
 
     ccm_info.job_id = job_ptr->job_id;
@@ -564,18 +526,14 @@ extern void *ccm_begin(void *args) {
     ccm_info.num_cpu_groups = job_ptr->job_resrcs->cpu_array_cnt;
     copysz = ccm_info.num_cpu_groups * sizeof(uint16_t);
     ccm_info.cpus_per_node = xmalloc(copysz);
-    memcpy(ccm_info.cpus_per_node, job_ptr->job_resrcs->cpu_array_value,
-           copysz);
+    memcpy(ccm_info.cpus_per_node, job_ptr->job_resrcs->cpu_array_value, copysz);
     copysz = ccm_info.num_cpu_groups * sizeof(uint32_t);
     ccm_info.cpu_count_reps = xmalloc(copysz);
-    memcpy(ccm_info.cpu_count_reps, job_ptr->job_resrcs->cpu_array_reps,
-           copysz);
+    memcpy(ccm_info.cpu_count_reps, job_ptr->job_resrcs->cpu_array_reps, copysz);
     ccm_info.num_tasks = job_ptr->details->num_tasks;
     if (ccm_info.num_tasks == 0) {
-        ccm_info.num_tasks =
-                job_ptr->cpu_cnt / ccm_info.cpus_per_task;
-        debug("CCM job %u ccm_info.num_tasks was 0; now %d",
-              job_ptr->job_id, ccm_info.num_tasks);
+        ccm_info.num_tasks = job_ptr->cpu_cnt / ccm_info.cpus_per_task;
+        debug("CCM job %u ccm_info.num_tasks was 0; now %d", job_ptr->job_id, ccm_info.num_tasks);
     }
     /*
      * When task_dist is set to PLANE, the plane_size is still 0.
@@ -585,28 +543,23 @@ extern void *ccm_begin(void *args) {
      * I don't think either value impacts that, but leave this code
      * here.
      */
-    if ((job_ptr->details->task_dist == 0) ||
-        (job_ptr->details->task_dist > SLURM_DIST_UNKNOWN) ||
+    if ((job_ptr->details->task_dist == 0) || (job_ptr->details->task_dist > SLURM_DIST_UNKNOWN) ||
         (job_ptr->details->task_dist == SLURM_DIST_PLANE)) {
         ccm_info.task_dist = SLURM_DIST_BLOCK;
-        debug("CCM job %u job task_dist %d, CCM using SLURM_DIST_BLOCK",
-              job_ptr->job_id, job_ptr->details->task_dist);
+        debug("CCM job %u job task_dist %d, CCM using SLURM_DIST_BLOCK", job_ptr->job_id, job_ptr->details->task_dist);
     } else {
         ccm_info.task_dist = job_ptr->details->task_dist;
     }
     ccm_info.plane_size = job_ptr->details->plane_size;
 
     debug("CCM job %u, user_id %u, nodelist %s, node_cnt %d, "
-          "num_tasks %d", ccm_info.job_id, ccm_info.user_id,
-          ccm_info.nodelist, ccm_info.node_cnt, ccm_info.num_tasks);
-    debug("CCM job %u cpus_per_task %d, task_dist %u, plane_size %d",
-          ccm_info.job_id, ccm_info.cpus_per_task, ccm_info.task_dist,
-          ccm_info.plane_size);
+          "num_tasks %d", ccm_info.job_id, ccm_info.user_id, ccm_info.nodelist, ccm_info.node_cnt, ccm_info.num_tasks);
+    debug("CCM job %u cpus_per_task %d, task_dist %u, plane_size %d", ccm_info.job_id, ccm_info.cpus_per_task,
+          ccm_info.task_dist, ccm_info.plane_size);
     for (i = num_ents = 0; i < ccm_info.num_cpu_groups; i++) {
         for (j = 0; j < ccm_info.cpu_count_reps[i]; j++) {
-            debug3("CCM job %u cpus_per_node[%d] %d, i %d, j %d",
-                   ccm_info.job_id, num_ents,
-                   ccm_info.cpus_per_node[i], i, j);
+            debug3("CCM job %u cpus_per_node[%d] %d, i %d, j %d", ccm_info.job_id, num_ents, ccm_info.cpus_per_node[i],
+                   i, j);
             num_ents++;
         }
     }
@@ -614,33 +567,26 @@ extern void *ccm_begin(void *args) {
 
     if (ccm_info.node_cnt != num_ents) {
         CRAY_ERR("CCM job %u ccm_info.node_cnt %d doesn't match the "
-                 "number of cpu_count_reps entries %d",
-                 job_id, ccm_info.node_cnt, num_ents);
-        snprintf(err_str_buf, sizeof(err_str_buf),
-                 "node_cnt %d != cpu_count_reps %d, prolog not run",
+                 "number of cpu_count_reps entries %d", job_id, ccm_info.node_cnt, num_ents);
+        snprintf(err_str_buf, sizeof(err_str_buf), "node_cnt %d != cpu_count_reps %d, prolog not run",
                  ccm_info.node_cnt, num_ents);
     } else {
-        kill = _run_ccm_prolog_epilog(&ccm_info, "prolog",
-                                      ccm_prolog_path);
-        snprintf(err_str_buf, sizeof(err_str_buf),
-                 "prolog failed");
+        kill = _run_ccm_prolog_epilog(&ccm_info, "prolog", ccm_prolog_path);
+        snprintf(err_str_buf, sizeof(err_str_buf), "prolog failed");
     }
 
     lock_slurmctld(job_write_lock);
-    if ((job_ptr->magic != JOB_MAGIC) ||
-        (job_ptr->job_id != job_id)) {
+    if ((job_ptr->magic != JOB_MAGIC) || (job_ptr->job_id != job_id)) {
         unlock_slurmctld(job_write_lock);
         error("ccm job %u has disappeared after running ccm", job_id);
         return NULL;
     }
-    debug("CCM ccm_begin job %u prolog_running_decr, cur %d",
-          ccm_info.job_id, job_ptr->details->prolog_running);
+    debug("CCM ccm_begin job %u prolog_running_decr, cur %d", ccm_info.job_id, job_ptr->details->prolog_running);
     prolog_running_decr(job_ptr);
     if (kill) {
         /* Stop the launch */
         CRAY_ERR("CCM %s, job %u killed", err_str_buf, job_ptr->job_id);
-        snprintf(srun_msg_buf, sizeof(srun_msg_buf),
-                 "CCM %s, job %u killed", err_str_buf, ccm_info.job_id);
+        snprintf(srun_msg_buf, sizeof(srun_msg_buf), "CCM %s, job %u killed", err_str_buf, ccm_info.job_id);
         srun_user_message(job_ptr, srun_msg_buf);
         (void) job_signal(job_ptr, SIGKILL, 0, 0, false);
     }
@@ -662,8 +608,7 @@ extern void *ccm_fini(void *args) {
     ccm_info_t ccm_info;
     time_t delay;
     struct job_record *job_ptr = (struct job_record *) args;
-    slurmctld_lock_t job_read_lock =
-            {NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+    slurmctld_lock_t job_read_lock = {NO_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
 
     memset(&ccm_info, 0, sizeof(ccm_info_t));
     lock_slurmctld(job_read_lock);
@@ -678,8 +623,7 @@ extern void *ccm_fini(void *args) {
      */
     if (job_ptr->details && (job_ptr->details->prolog_running > 0)) {
         delay = time(0) + CCM_MAX_EPILOG_DELAY;
-        info("CCM job %u epilog delayed; prolog_running %d",
-             ccm_info.job_id, job_ptr->details->prolog_running);
+        info("CCM job %u epilog delayed; prolog_running %d", ccm_info.job_id, job_ptr->details->prolog_running);
         while (job_ptr->details->prolog_running > 0) {
             usleep(100000);
             if (time(0) >= delay) {
@@ -689,8 +633,7 @@ extern void *ccm_fini(void *args) {
             }
         }
     }
-    debug2("CCM epilog job %u, user_id %u", ccm_info.job_id,
-           ccm_info.user_id);
+    debug2("CCM epilog job %u, user_id %u", ccm_info.job_id, ccm_info.user_id);
     rc = _run_ccm_prolog_epilog(&ccm_info, "epilog", ccm_epilog_path);
     if (rc) {
         /* Log a failure, no further action to take */

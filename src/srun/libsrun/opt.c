@@ -91,8 +91,7 @@ static void _usage(void);
 int error_exit = 1;
 int immediate_exit = 1;
 srun_opt_t sropt;
-slurm_opt_t opt =
-        {.srun_opt = &sropt, .help_func = _help, .usage_func = _usage};
+slurm_opt_t opt = {.srun_opt = &sropt, .help_func = _help, .usage_func = _usage};
 List opt_list = NULL;
 int pass_number = 0;
 time_t srun_begin_time = 0;
@@ -105,8 +104,7 @@ static slurm_opt_t *_get_first_opt(int pack_offset);
 
 static slurm_opt_t *_get_next_opt(int pack_offset, slurm_opt_t *opt_last);
 
-static bitstr_t *_get_pack_group(const int argc, char **argv,
-                                 int default_pack_offset, bool *opt_found);
+static bitstr_t *_get_pack_group(const int argc, char **argv, int default_pack_offset, bool *opt_found);
 
 /* fill in default options  */
 static void _opt_default(void);
@@ -139,9 +137,7 @@ static slurm_opt_t *_get_first_opt(int pack_offset) {
     if (!opt_list) {
         if (!sropt.pack_grp_bits && (pack_offset == -1))
             return &opt;
-        if (sropt.pack_grp_bits &&
-            (pack_offset >= 0) &&
-            (pack_offset < bit_size(sropt.pack_grp_bits)) &&
+        if (sropt.pack_grp_bits && (pack_offset >= 0) && (pack_offset < bit_size(sropt.pack_grp_bits)) &&
             bit_test(sropt.pack_grp_bits, pack_offset))
             return &opt;
         return NULL;
@@ -333,8 +329,7 @@ extern int initialize_and_process_args(int argc, char **argv, int *argc_off) {
     int i, i_first, i_last;
     bool opt_found = false;
 
-    pack_grp_bits = _get_pack_group(argc, argv, default_pack_offset++,
-                                    &opt_found);
+    pack_grp_bits = _get_pack_group(argc, argv, default_pack_offset++, &opt_found);
     i_first = bit_ffs(pack_grp_bits);
     i_last = bit_fls(pack_grp_bits);
     for (i = i_first; i <= i_last; i++) {
@@ -467,87 +462,86 @@ typedef struct {
     int type;
 } env_vars_t;
 
-env_vars_t env_vars[] = {
-        {"SLURM_ACCOUNT",            'A'},
-        {"SLURM_ACCTG_FREQ",         LONG_OPT_ACCTG_FREQ},
-        {"SLURM_BCAST",              LONG_OPT_BCAST},
-        {"SLURM_BURST_BUFFER",       LONG_OPT_BURST_BUFFER_SPEC},
-        {"SLURM_CLUSTERS",           'M'},
-        {"SLURM_CHECKPOINT",         LONG_OPT_CHECKPOINT},
-        {"SLURM_CLUSTER_CONSTRAINT", LONG_OPT_CLUSTER_CONSTRAINT},
-        {"SLURM_COMPRESS",           LONG_OPT_COMPRESS},
-        {"SLURM_CONSTRAINT",         'C'},
-        {"SLURM_CORE_SPEC",          'S'},
-        {"SLURM_CPUS_PER_TASK",      'c'},
-        {"SLURM_CPU_BIND",           LONG_OPT_CPU_BIND},
-        {"SLURM_CPU_FREQ_REQ",       LONG_OPT_CPU_FREQ},
-        {"SLURM_CPUS_PER_GPU",       LONG_OPT_CPUS_PER_GPU},
-        {"SLURM_DELAY_BOOT",         LONG_OPT_DELAY_BOOT},
-        {"SLURM_DEPENDENCY",         'd'},
-        {"SLURM_DISABLE_STATUS",     'X'},
-        {"SLURM_DISTRIBUTION",       'm'},
-        {"SLURM_EPILOG",             LONG_OPT_EPILOG},
-        {"SLURM_EXCLUSIVE",          LONG_OPT_EXCLUSIVE},
-        {"SLURM_EXPORT_ENV",         LONG_OPT_EXPORT},
-        {"SRUN_EXPORT_ENV",          LONG_OPT_EXPORT}, /* overrides SLURM_EXPORT_ENV */
-        {"SLURM_GPUS",               'G'},
-        {"SLURM_GPU_BIND",           LONG_OPT_GPU_BIND},
-        {"SLURM_GPU_FREQ",           LONG_OPT_GPU_FREQ},
-        {"SLURM_GPUS_PER_NODE",      LONG_OPT_GPUS_PER_NODE},
-        {"SLURM_GPUS_PER_SOCKET",    LONG_OPT_GPUS_PER_SOCKET},
-        {"SLURM_GPUS_PER_TASK",      LONG_OPT_GPUS_PER_TASK},
-        {"SLURM_GRES",               LONG_OPT_GRES},
-        {"SLURM_GRES_FLAGS",         LONG_OPT_GRES_FLAGS},
-        {"SLURM_HINT",               LONG_OPT_HINT},
-        {"SLURM_JOB_ID",             LONG_OPT_JOBID},
-        {"SLURM_JOB_NAME",           'J'},
-        {"SLURM_JOB_NODELIST",       LONG_OPT_ALLOC_NODELIST},
-        {"SLURM_JOB_NUM_NODES",      'N'},
-        {"SLURM_KILL_BAD_EXIT",      'K'},
-        {"SLURM_LABELIO",            'l'},
-        {"SLURM_MEM_BIND",           LONG_OPT_MEM_BIND},
-        {"SLURM_MEM_PER_CPU",        LONG_OPT_MEM_PER_CPU},
-        {"SLURM_MEM_PER_GPU",        LONG_OPT_MEM_PER_GPU},
-        {"SLURM_MEM_PER_NODE",       LONG_OPT_MEM},
-        {"SLURM_MPI_TYPE",           LONG_OPT_MPI},
-        {"SLURM_NCORES_PER_SOCKET",  LONG_OPT_CORESPERSOCKET},
-        {"SLURM_NETWORK",            LONG_OPT_NETWORK},
-        {"SLURM_NO_KILL",            'k'},
-        {"SLURM_NPROCS",             'n'}, /* deprecated, should be removed */
+env_vars_t env_vars[] = {{"SLURM_ACCOUNT",            'A'},
+                         {"SLURM_ACCTG_FREQ",         LONG_OPT_ACCTG_FREQ},
+                         {"SLURM_BCAST",              LONG_OPT_BCAST},
+                         {"SLURM_BURST_BUFFER",       LONG_OPT_BURST_BUFFER_SPEC},
+                         {"SLURM_CLUSTERS",           'M'},
+                         {"SLURM_CHECKPOINT",         LONG_OPT_CHECKPOINT},
+                         {"SLURM_CLUSTER_CONSTRAINT", LONG_OPT_CLUSTER_CONSTRAINT},
+                         {"SLURM_COMPRESS",           LONG_OPT_COMPRESS},
+                         {"SLURM_CONSTRAINT",         'C'},
+                         {"SLURM_CORE_SPEC",          'S'},
+                         {"SLURM_CPUS_PER_TASK",      'c'},
+                         {"SLURM_CPU_BIND",           LONG_OPT_CPU_BIND},
+                         {"SLURM_CPU_FREQ_REQ",       LONG_OPT_CPU_FREQ},
+                         {"SLURM_CPUS_PER_GPU",       LONG_OPT_CPUS_PER_GPU},
+                         {"SLURM_DELAY_BOOT",         LONG_OPT_DELAY_BOOT},
+                         {"SLURM_DEPENDENCY",         'd'},
+                         {"SLURM_DISABLE_STATUS",     'X'},
+                         {"SLURM_DISTRIBUTION",       'm'},
+                         {"SLURM_EPILOG",             LONG_OPT_EPILOG},
+                         {"SLURM_EXCLUSIVE",          LONG_OPT_EXCLUSIVE},
+                         {"SLURM_EXPORT_ENV",         LONG_OPT_EXPORT},
+                         {"SRUN_EXPORT_ENV",          LONG_OPT_EXPORT}, /* overrides SLURM_EXPORT_ENV */
+                         {"SLURM_GPUS",               'G'},
+                         {"SLURM_GPU_BIND",           LONG_OPT_GPU_BIND},
+                         {"SLURM_GPU_FREQ",           LONG_OPT_GPU_FREQ},
+                         {"SLURM_GPUS_PER_NODE",      LONG_OPT_GPUS_PER_NODE},
+                         {"SLURM_GPUS_PER_SOCKET",    LONG_OPT_GPUS_PER_SOCKET},
+                         {"SLURM_GPUS_PER_TASK",      LONG_OPT_GPUS_PER_TASK},
+                         {"SLURM_GRES",               LONG_OPT_GRES},
+                         {"SLURM_GRES_FLAGS",         LONG_OPT_GRES_FLAGS},
+                         {"SLURM_HINT",               LONG_OPT_HINT},
+                         {"SLURM_JOB_ID",             LONG_OPT_JOBID},
+                         {"SLURM_JOB_NAME",           'J'},
+                         {"SLURM_JOB_NODELIST",       LONG_OPT_ALLOC_NODELIST},
+                         {"SLURM_JOB_NUM_NODES",      'N'},
+                         {"SLURM_KILL_BAD_EXIT",      'K'},
+                         {"SLURM_LABELIO",            'l'},
+                         {"SLURM_MEM_BIND",           LONG_OPT_MEM_BIND},
+                         {"SLURM_MEM_PER_CPU",        LONG_OPT_MEM_PER_CPU},
+                         {"SLURM_MEM_PER_GPU",        LONG_OPT_MEM_PER_GPU},
+                         {"SLURM_MEM_PER_NODE",       LONG_OPT_MEM},
+                         {"SLURM_MPI_TYPE",           LONG_OPT_MPI},
+                         {"SLURM_NCORES_PER_SOCKET",  LONG_OPT_CORESPERSOCKET},
+                         {"SLURM_NETWORK",            LONG_OPT_NETWORK},
+                         {"SLURM_NO_KILL",            'k'},
+                         {"SLURM_NPROCS",             'n'}, /* deprecated, should be removed */
         /* listed first so SLURM_NTASKS overrides */
-        {"SLURM_NTASKS",             'n'},
-        {"SLURM_NSOCKETS_PER_NODE",  LONG_OPT_SOCKETSPERNODE},
-        {"SLURM_NTASKS_PER_NODE",    LONG_OPT_NTASKSPERNODE},
-        {"SLURM_OPEN_MODE",          LONG_OPT_OPEN_MODE},
-        {"SLURM_OVERCOMMIT",         'O'},
-        {"SLURM_PARTITION",          'p'},
-        {"SLURM_POWER",              LONG_OPT_POWER},
-        {"SLURM_PROFILE",            LONG_OPT_PROFILE},
-        {"SLURM_PROLOG",             LONG_OPT_PROLOG},
-        {"SLURM_QOS",                'q'},
-        {"SLURM_REMOTE_CWD",         'D'},
-        {"SLURM_REQ_SWITCH",         LONG_OPT_SWITCH_REQ},
-        {"SLURM_RESERVATION",        LONG_OPT_RESERVATION},
-        {"SLURM_RESV_PORTS",         LONG_OPT_RESV_PORTS},
-        {"SLURM_SIGNAL",             LONG_OPT_SIGNAL},
-        {"SLURM_SPREAD_JOB",         LONG_OPT_SPREAD_JOB},
-        {"SLURM_SRUN_MULTI",         LONG_OPT_MULTI},
-        {"SLURM_STDERRMODE",         'e'},
-        {"SLURM_STDINMODE",          'i'},
-        {"SLURM_STDOUTMODE",         'o'},
-        {"SLURM_TASK_EPILOG",        LONG_OPT_TASK_EPILOG},
-        {"SLURM_TASK_PROLOG",        LONG_OPT_TASK_PROLOG},
-        {"SLURM_THREAD_SPEC",        LONG_OPT_THREAD_SPEC},
-        {"SLURM_THREADS",            'T'},
-        {"SLURM_TIMELIMIT",          't'},
-        {"SLURM_UNBUFFEREDIO",       'u'},
-        {"SLURM_USE_MIN_NODES",      LONG_OPT_USE_MIN_NODES},
-        {"SLURM_WAIT",               'W'},
-        {"SLURM_WAIT4SWITCH",        LONG_OPT_SWITCH_WAIT},
-        {"SLURM_WCKEY",              LONG_OPT_WCKEY},
-        {"SLURM_WORKING_DIR",        'D'},
-        {"SLURMD_DEBUG",             LONG_OPT_SLURMD_DEBUG},
-        {NULL}};
+                         {"SLURM_NTASKS",             'n'},
+                         {"SLURM_NSOCKETS_PER_NODE",  LONG_OPT_SOCKETSPERNODE},
+                         {"SLURM_NTASKS_PER_NODE",    LONG_OPT_NTASKSPERNODE},
+                         {"SLURM_OPEN_MODE",          LONG_OPT_OPEN_MODE},
+                         {"SLURM_OVERCOMMIT",         'O'},
+                         {"SLURM_PARTITION",          'p'},
+                         {"SLURM_POWER",              LONG_OPT_POWER},
+                         {"SLURM_PROFILE",            LONG_OPT_PROFILE},
+                         {"SLURM_PROLOG",             LONG_OPT_PROLOG},
+                         {"SLURM_QOS",                'q'},
+                         {"SLURM_REMOTE_CWD",         'D'},
+                         {"SLURM_REQ_SWITCH",         LONG_OPT_SWITCH_REQ},
+                         {"SLURM_RESERVATION",        LONG_OPT_RESERVATION},
+                         {"SLURM_RESV_PORTS",         LONG_OPT_RESV_PORTS},
+                         {"SLURM_SIGNAL",             LONG_OPT_SIGNAL},
+                         {"SLURM_SPREAD_JOB",         LONG_OPT_SPREAD_JOB},
+                         {"SLURM_SRUN_MULTI",         LONG_OPT_MULTI},
+                         {"SLURM_STDERRMODE",         'e'},
+                         {"SLURM_STDINMODE",          'i'},
+                         {"SLURM_STDOUTMODE",         'o'},
+                         {"SLURM_TASK_EPILOG",        LONG_OPT_TASK_EPILOG},
+                         {"SLURM_TASK_PROLOG",        LONG_OPT_TASK_PROLOG},
+                         {"SLURM_THREAD_SPEC",        LONG_OPT_THREAD_SPEC},
+                         {"SLURM_THREADS",            'T'},
+                         {"SLURM_TIMELIMIT",          't'},
+                         {"SLURM_UNBUFFEREDIO",       'u'},
+                         {"SLURM_USE_MIN_NODES",      LONG_OPT_USE_MIN_NODES},
+                         {"SLURM_WAIT",               'W'},
+                         {"SLURM_WAIT4SWITCH",        LONG_OPT_SWITCH_WAIT},
+                         {"SLURM_WCKEY",              LONG_OPT_WCKEY},
+                         {"SLURM_WORKING_DIR",        'D'},
+                         {"SLURMD_DEBUG",             LONG_OPT_SLURMD_DEBUG},
+                         {NULL}};
 
 /*
  * _opt_env(): used by initialize_and_process_args to set options via
@@ -561,14 +555,10 @@ static void _opt_env(int pack_offset) {
     while (e->var) {
         if ((val = getenv(e->var)))
             slurm_process_option(&opt, e->type, val, true, false);
-        if ((pack_offset >= 0) &&
-            strcmp(e->var, "SLURM_JOBID") &&
-            strcmp(e->var, "SLURM_JOB_ID")) {
-            snprintf(key, sizeof(key), "%s_PACK_GROUP_%d",
-                     e->var, pack_offset);
+        if ((pack_offset >= 0) && strcmp(e->var, "SLURM_JOBID") && strcmp(e->var, "SLURM_JOB_ID")) {
+            snprintf(key, sizeof(key), "%s_PACK_GROUP_%d", e->var, pack_offset);
             if ((val = getenv(key)))
-                slurm_process_option(&opt, e->type, val,
-                                     true, false);
+                slurm_process_option(&opt, e->type, val, true, false);
         }
         e++;
     }
@@ -594,8 +584,7 @@ static void _opt_env(int pack_offset) {
  * opt_found OUT - Set to true if --pack-group option found
  * RET bitmap if pack groups to run
  */
-static bitstr_t *_get_pack_group(const int argc, char **argv,
-                                 int default_pack_offset, bool *opt_found) {
+static bitstr_t *_get_pack_group(const int argc, char **argv, int default_pack_offset, bool *opt_found) {
     int i, opt_char, option_index = 0;
     char *tmp = NULL;
     bitstr_t *pack_grp_bits = bit_alloc(MAX_PACK_COUNT);
@@ -605,8 +594,7 @@ static bitstr_t *_get_pack_group(const int argc, char **argv,
 
     *opt_found = false;
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, opt_string,
-                                   optz, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, opt_string, optz, &option_index)) != -1) {
         slurm_process_option(&opt, opt_char, optarg, false, true);
     }
     slurm_option_table_destroy(optz);
@@ -633,8 +621,7 @@ static bitstr_t *_get_pack_group(const int argc, char **argv,
         char *end_ptr = NULL;
         i = strtol(tmp, &end_ptr, 10);
         if ((i < 0) || (i >= MAX_PACK_COUNT) || (end_ptr[0] != '\0')) {
-            error("Invalid --pack-group value: %s",
-                  sropt.pack_group);
+            error("Invalid --pack-group value: %s", sropt.pack_group);
             exit(error_exit);
         }
         bit_set(pack_grp_bits, i);
@@ -655,8 +642,7 @@ static void _set_options(const int argc, char **argv) {
     struct option *optz = slurm_option_table_create(&opt, &opt_string);
 
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, opt_string,
-                                   optz, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, opt_string, optz, &option_index)) != -1) {
         slurm_process_option(&opt, opt_char, optarg, false, false);
     }
 
@@ -740,47 +726,39 @@ static void _opt_args(int argc, char **argv, int pack_offset) {
     if (sropt.test_exec) {
         /* Validate command's existence */
         if (sropt.prolog && xstrcasecmp(sropt.prolog, "none")) {
-            if ((fullpath = search_path(opt.chdir, sropt.prolog,
-                                        true, R_OK | X_OK, true)))
+            if ((fullpath = search_path(opt.chdir, sropt.prolog, true, R_OK | X_OK, true)))
                 sropt.prolog = fullpath;
             else
-                error("prolog '%s' not found in PATH or CWD (%s), or wrong permissions",
-                      sropt.prolog, opt.chdir);
+                error("prolog '%s' not found in PATH or CWD (%s), or wrong permissions", sropt.prolog, opt.chdir);
         }
         if (sropt.epilog && xstrcasecmp(sropt.epilog, "none")) {
-            if ((fullpath = search_path(opt.chdir, sropt.epilog,
-                                        true, R_OK | X_OK, true)))
+            if ((fullpath = search_path(opt.chdir, sropt.epilog, true, R_OK | X_OK, true)))
                 sropt.epilog = fullpath;
             else
-                error("epilog '%s' not found in PATH or CWD (%s), or wrong permissions",
-                      sropt.epilog, opt.chdir);
+                error("epilog '%s' not found in PATH or CWD (%s), or wrong permissions", sropt.epilog, opt.chdir);
         }
         if (sropt.task_prolog) {
-            if ((fullpath = search_path(opt.chdir, sropt.task_prolog,
-                                        true, R_OK | X_OK, true)))
+            if ((fullpath = search_path(opt.chdir, sropt.task_prolog, true, R_OK | X_OK, true)))
                 sropt.task_prolog = fullpath;
             else
-                error("task-prolog '%s' not found in PATH or CWD (%s), or wrong permissions",
-                      sropt.task_prolog, opt.chdir);
+                error("task-prolog '%s' not found in PATH or CWD (%s), or wrong permissions", sropt.task_prolog,
+                      opt.chdir);
         }
         if (sropt.task_epilog) {
-            if ((fullpath = search_path(opt.chdir, sropt.task_epilog,
-                                        true, R_OK | X_OK, true)))
+            if ((fullpath = search_path(opt.chdir, sropt.task_epilog, true, R_OK | X_OK, true)))
                 sropt.task_epilog = fullpath;
             else
-                error("task-epilog '%s' not found in PATH or CWD (%s), or wrong permissions",
-                      sropt.task_epilog, opt.chdir);
+                error("task-epilog '%s' not found in PATH or CWD (%s), or wrong permissions", sropt.task_epilog,
+                      opt.chdir);
         }
     }
 
     /* may exit() if an error with the multi_prog script */
     (void) launch_g_handle_multi_prog_verify(command_pos, &opt);
 
-    if (!sropt.multi_prog && (sropt.test_exec || sropt.bcast_flag) &&
-        sropt.argv && sropt.argv[command_pos]) {
+    if (!sropt.multi_prog && (sropt.test_exec || sropt.bcast_flag) && sropt.argv && sropt.argv[command_pos]) {
 
-        if ((fullpath = search_path(opt.chdir, sropt.argv[command_pos],
-                                    true, X_OK, true))) {
+        if ((fullpath = search_path(opt.chdir, sropt.argv[command_pos], true, X_OK, true))) {
             xfree(sropt.argv[command_pos]);
             sropt.argv[command_pos] = fullpath;
         } else {
@@ -807,8 +785,7 @@ static bool _opt_verify(void) {
      */
     if (sropt.slurmd_debug + LOG_LEVEL_ERROR > LOG_LEVEL_DEBUG2) {
         sropt.slurmd_debug = LOG_LEVEL_DEBUG2 - LOG_LEVEL_ERROR;
-        info("Using srun's max debug increment of %d",
-             sropt.slurmd_debug);
+        info("Using srun's max debug increment of %d", sropt.slurmd_debug);
     }
 
     if (opt.quiet && opt.verbose) {
@@ -867,16 +844,10 @@ static bool _opt_verify(void) {
             opt.nodes_set = false;
     }
 
-    if (opt.hint &&
-        (!(sropt.cpu_bind_type & ~CPU_BIND_VERBOSE)) &&
-        (opt.ntasks_per_core == NO_VAL) &&
+    if (opt.hint && (!(sropt.cpu_bind_type & ~CPU_BIND_VERBOSE)) && (opt.ntasks_per_core == NO_VAL) &&
         (opt.threads_per_core == NO_VAL)) {
-        if (verify_hint(opt.hint,
-                        &opt.sockets_per_node,
-                        &opt.cores_per_socket,
-                        &opt.threads_per_core,
-                        &opt.ntasks_per_core,
-                        &sropt.cpu_bind_type)) {
+        if (verify_hint(opt.hint, &opt.sockets_per_node, &opt.cores_per_socket, &opt.threads_per_core,
+                        &opt.ntasks_per_core, &sropt.cpu_bind_type)) {
             exit(error_exit);
         }
     }
@@ -921,8 +892,7 @@ static bool _opt_verify(void) {
                       "hostfile");
                 exit(error_exit);
             } else {
-                debug("loaded nodes (%s) from hostfile",
-                      opt.nodelist);
+                debug("loaded nodes (%s) from hostfile", opt.nodelist);
             }
         }
     } else {
@@ -955,8 +925,7 @@ static bool _opt_verify(void) {
         /* Set --threads 1 */
         slurm_process_option(&opt, 'T', "1", false, false);
         /* Set --msg-timeout 15 */
-        slurm_process_option(&opt, LONG_OPT_MSG_TIMEOUT, "1",
-                             false, false);
+        slurm_process_option(&opt, LONG_OPT_MSG_TIMEOUT, "1", false, false);
     }
 
     pmi_server_max_threads(sropt.max_threads);
@@ -967,16 +936,14 @@ static bool _opt_verify(void) {
      * laid it out how it should be so don't mess with it print an
      * error later if it doesn't work the way they wanted
      */
-    if (opt.max_nodes && opt.nodelist &&
-        ((opt.distribution & SLURM_DIST_STATE_BASE) != SLURM_DIST_ARBITRARY)) {
+    if (opt.max_nodes && opt.nodelist && ((opt.distribution & SLURM_DIST_STATE_BASE) != SLURM_DIST_ARBITRARY)) {
         hostlist_t hl = hostlist_create(opt.nodelist);
         int count = hostlist_count(hl);
         if (count > opt.max_nodes) {
             int i = 0;
             error("Required nodelist includes more nodes than "
                   "permitted by max-node count (%d > %d). "
-                  "Eliminating nodes from the nodelist.",
-                  count, opt.max_nodes);
+                  "Eliminating nodes from the nodelist.", count, opt.max_nodes);
             count -= opt.max_nodes;
             while (i < count) {
                 char *name = hostlist_pop(hl);
@@ -999,15 +966,12 @@ static bool _opt_verify(void) {
     }
 
     if (opt.cpus_set && (opt.cpus_per_task <= 0)) {
-        error("invalid number of cpus per task (-c %d)",
-              opt.cpus_per_task);
+        error("invalid number of cpus per task (-c %d)", opt.cpus_per_task);
         verified = false;
     }
 
-    if ((opt.min_nodes < 0) || (opt.max_nodes < 0) ||
-        (opt.max_nodes && (opt.min_nodes > opt.max_nodes))) {
-        error("invalid number of nodes (-N %d-%d)",
-              opt.min_nodes, opt.max_nodes);
+    if ((opt.min_nodes < 0) || (opt.max_nodes < 0) || (opt.max_nodes && (opt.min_nodes > opt.max_nodes))) {
+        error("invalid number of nodes (-N %d-%d)", opt.min_nodes, opt.max_nodes);
         verified = false;
     }
 
@@ -1021,10 +985,7 @@ static bool _opt_verify(void) {
         /* if cpu_bind_type doesn't already have a auto pref,
          * choose the level based on the level of ntasks
          */
-        if (!(sropt.cpu_bind_type & (CPU_BIND_TO_SOCKETS |
-                                     CPU_BIND_TO_CORES |
-                                     CPU_BIND_TO_THREADS |
-                                     CPU_BIND_TO_LDOMS |
+        if (!(sropt.cpu_bind_type & (CPU_BIND_TO_SOCKETS | CPU_BIND_TO_CORES | CPU_BIND_TO_THREADS | CPU_BIND_TO_LDOMS |
                                      CPU_BIND_TO_BOARDS))) {
             sropt.cpu_bind_type |= CPU_BIND_TO_CORES;
         }
@@ -1033,10 +994,7 @@ static bool _opt_verify(void) {
         /* if cpu_bind_type doesn't already have a auto pref,
          * choose the level based on the level of ntasks
          */
-        if (!(sropt.cpu_bind_type & (CPU_BIND_TO_SOCKETS |
-                                     CPU_BIND_TO_CORES |
-                                     CPU_BIND_TO_THREADS |
-                                     CPU_BIND_TO_LDOMS |
+        if (!(sropt.cpu_bind_type & (CPU_BIND_TO_SOCKETS | CPU_BIND_TO_CORES | CPU_BIND_TO_THREADS | CPU_BIND_TO_LDOMS |
                                      CPU_BIND_TO_BOARDS))) {
             sropt.cpu_bind_type |= CPU_BIND_TO_SOCKETS;
         }
@@ -1058,16 +1016,13 @@ static bool _opt_verify(void) {
         opt.nodes_set = true;
     }
 
-    if ((opt.nodes_set || opt.extra_set) &&
-        ((opt.min_nodes == opt.max_nodes) || (opt.max_nodes == 0)) &&
+    if ((opt.nodes_set || opt.extra_set) && ((opt.min_nodes == opt.max_nodes) || (opt.max_nodes == 0)) &&
         !opt.ntasks_set) {
         /* 1 proc / node default */
         opt.ntasks = opt.min_nodes;
 
         /* 1 proc / min_[socket * core * thread] default */
-        if ((opt.sockets_per_node != NO_VAL) &&
-            (opt.cores_per_socket != NO_VAL) &&
-            (opt.threads_per_core != NO_VAL)) {
+        if ((opt.sockets_per_node != NO_VAL) && (opt.cores_per_socket != NO_VAL) && (opt.threads_per_core != NO_VAL)) {
             opt.ntasks *= opt.sockets_per_node;
             opt.ntasks *= opt.cores_per_socket;
             opt.ntasks *= opt.threads_per_core;
@@ -1086,9 +1041,7 @@ static bool _opt_verify(void) {
                 error("memory allocation failure");
                 exit(error_exit);
             }
-            if (((opt.distribution & SLURM_DIST_STATE_BASE) ==
-                 SLURM_DIST_ARBITRARY) &&
-                !opt.ntasks_set) {
+            if (((opt.distribution & SLURM_DIST_STATE_BASE) == SLURM_DIST_ARBITRARY) && !opt.ntasks_set) {
                 opt.ntasks = hostlist_count(hl);
                 opt.ntasks_set = true;
             }
@@ -1114,8 +1067,7 @@ static bool _opt_verify(void) {
         if ((opt.ntasks < opt.min_nodes) && (opt.ntasks > 0)) {
             char *tmp = NULL;
             info("Warning: can't run %d processes on %d "
-                 "nodes, setting nnodes to %d",
-                 opt.ntasks, opt.min_nodes, opt.ntasks);
+                 "nodes, setting nnodes to %d", opt.ntasks, opt.min_nodes, opt.ntasks);
             opt.min_nodes = opt.ntasks;
             if (opt.max_nodes && (opt.min_nodes > opt.max_nodes))
                 opt.max_nodes = opt.min_nodes;
@@ -1135,21 +1087,17 @@ static bool _opt_verify(void) {
                     free(host);
                 }
                 xfree(opt.nodelist);
-                opt.nodelist =
-                        hostlist_ranged_string_xmalloc(hl);
+                opt.nodelist = hostlist_ranged_string_xmalloc(hl);
             }
         }
 
-        if ((opt.ntasks_per_node != NO_VAL) && opt.min_nodes &&
-            (opt.ntasks_per_node != (opt.ntasks / opt.min_nodes))) {
+        if ((opt.ntasks_per_node != NO_VAL) && opt.min_nodes && (opt.ntasks_per_node != (opt.ntasks / opt.min_nodes))) {
             if (opt.ntasks > opt.ntasks_per_node)
                 info("Warning: can't honor --ntasks-per-node "
                      "set to %u which doesn't match the "
                      "requested tasks %u with the number of "
                      "requested nodes %u. Ignoring "
-                     "--ntasks-per-node.",
-                     opt.ntasks_per_node,
-                     opt.ntasks, opt.min_nodes);
+                     "--ntasks-per-node.", opt.ntasks_per_node, opt.ntasks, opt.min_nodes);
             opt.ntasks_per_node = NO_VAL;
         }
 
@@ -1171,8 +1119,7 @@ static bool _opt_verify(void) {
     if (!sropt.mpi_type)
         sropt.mpi_type = slurm_get_mpi_default();
     if (mpi_hook_client_init(sropt.mpi_type) == SLURM_ERROR) {
-        error("invalid MPI type '%s', --mpi=list for acceptable types",
-              sropt.mpi_type);
+        error("invalid MPI type '%s', --mpi=list for acceptable types", sropt.mpi_type);
         exit(error_exit);
     }
 
@@ -1235,8 +1182,7 @@ extern char *spank_get_job_env(const char *name) {
     int i, len;
     char *tmp_str = NULL;
 
-    if ((name == NULL) || (name[0] == '\0') ||
-        (strchr(name, (int) '=') != NULL)) {
+    if ((name == NULL) || (name[0] == '\0') || (strchr(name, (int) '=') != NULL)) {
         slurm_seterrno(EINVAL);
         return NULL;
     }
@@ -1255,13 +1201,11 @@ extern char *spank_get_job_env(const char *name) {
     return NULL;
 }
 
-extern int spank_set_job_env(const char *name, const char *value,
-                             int overwrite) {
+extern int spank_set_job_env(const char *name, const char *value, int overwrite) {
     int i, len;
     char *tmp_str = NULL;
 
-    if ((name == NULL) || (name[0] == '\0') ||
-        (strchr(name, (int) '=') != NULL)) {
+    if ((name == NULL) || (name[0] == '\0') || (strchr(name, (int) '=') != NULL)) {
         slurm_seterrno(EINVAL);
         return -1;
     }
@@ -1293,8 +1237,7 @@ extern int spank_unset_job_env(const char *name) {
     int i, j, len;
     char *tmp_str = NULL;
 
-    if ((name == NULL) || (name[0] == '\0') ||
-        (strchr(name, (int) '=') != NULL)) {
+    if ((name == NULL) || (name[0] == '\0') || (strchr(name, (int) '=') != NULL)) {
         slurm_seterrno(EINVAL);
         return -1;
     }
@@ -1324,194 +1267,189 @@ static bool _under_parallel_debugger(void) {
 }
 
 static void _usage(void) {
-    printf(
-            "Usage: srun [-N nnodes] [-n ntasks] [-i in] [-o out] [-e err]\n"
-            "            [-c ncpus] [-r n] [-p partition] [--hold] [-t minutes]\n"
-            "            [-D path] [--immediate[=secs]] [--overcommit] [--no-kill]\n"
-            "            [--oversubscribe] [--label] [--unbuffered] [-m dist] [-J jobname]\n"
-            "            [--jobid=id] [--verbose] [--slurmd_debug=#] [--gres=list]\n"
-            "            [-T threads] [-W sec] [--checkpoint=time] [--gres-flags=opts]\n"
-            "            [--licenses=names] [--clusters=cluster_names]\n"
-            "            [--restart-dir=dir] [--qos=qos] [--time-min=minutes]\n"
-            "            [--contiguous] [--mincpus=n] [--mem=MB] [--tmp=MB] [-C list]\n"
-            "            [--mpi=type] [--account=name] [--dependency=type:jobid]\n"
-            "            [--kill-on-bad-exit] [--propagate[=rlimits] [--comment=name]\n"
-            "            [--cpu-bind=...] [--mem-bind=...] [--network=type]\n"
-            "            [--ntasks-per-node=n] [--ntasks-per-socket=n] [reservation=name]\n"
-            "            [--ntasks-per-core=n] [--mem-per-cpu=MB] [--preserve-env]\n"
-            "            [--profile=...]\n"
-            "            [--mail-type=type] [--mail-user=user] [--nice[=value]]\n"
-            "            [--prolog=fname] [--epilog=fname]\n"
-            "            [--task-prolog=fname] [--task-epilog=fname]\n"
-            "            [--ctrl-comm-ifhn=addr] [--multi-prog] [--mcs-label=mcs]\n"
-            "            [--cpu-freq=min[-max[:gov]] [--power=flags] [--spread-job]\n"
-            "            [--switches=max-switches{@max-time-to-wait}] [--reboot]\n"
-            "            [--core-spec=cores] [--thread-spec=threads]\n"
-            "            [--bb=burst_buffer_spec] [--bbf=burst_buffer_file]\n"
-            "            [--bcast=<dest_path>] [--compress[=library]]\n"
-            "            [--acctg-freq=<datatype>=<interval>] [--delay-boot=mins]\n"
-            "            [-w hosts...] [-x hosts...] [--use-min-nodes]\n"
-            "            [--mpi-combine=yes|no] [--pack-group=value]\n"
-            "            [--cpus-per-gpu=n] [--gpus=n] [--gpu-bind=...] [--gpu-freq=...]\n"
-            "            [--gpus-per-node=n] [--gpus-per-socket=n]  [--gpus-per-task=n]\n"
-            "            [--mem-per-gpu=MB]\n"
-            "            executable [args...]\n");
+    printf("Usage: srun [-N nnodes] [-n ntasks] [-i in] [-o out] [-e err]\n"
+           "            [-c ncpus] [-r n] [-p partition] [--hold] [-t minutes]\n"
+           "            [-D path] [--immediate[=secs]] [--overcommit] [--no-kill]\n"
+           "            [--oversubscribe] [--label] [--unbuffered] [-m dist] [-J jobname]\n"
+           "            [--jobid=id] [--verbose] [--slurmd_debug=#] [--gres=list]\n"
+           "            [-T threads] [-W sec] [--checkpoint=time] [--gres-flags=opts]\n"
+           "            [--licenses=names] [--clusters=cluster_names]\n"
+           "            [--restart-dir=dir] [--qos=qos] [--time-min=minutes]\n"
+           "            [--contiguous] [--mincpus=n] [--mem=MB] [--tmp=MB] [-C list]\n"
+           "            [--mpi=type] [--account=name] [--dependency=type:jobid]\n"
+           "            [--kill-on-bad-exit] [--propagate[=rlimits] [--comment=name]\n"
+           "            [--cpu-bind=...] [--mem-bind=...] [--network=type]\n"
+           "            [--ntasks-per-node=n] [--ntasks-per-socket=n] [reservation=name]\n"
+           "            [--ntasks-per-core=n] [--mem-per-cpu=MB] [--preserve-env]\n"
+           "            [--profile=...]\n"
+           "            [--mail-type=type] [--mail-user=user] [--nice[=value]]\n"
+           "            [--prolog=fname] [--epilog=fname]\n"
+           "            [--task-prolog=fname] [--task-epilog=fname]\n"
+           "            [--ctrl-comm-ifhn=addr] [--multi-prog] [--mcs-label=mcs]\n"
+           "            [--cpu-freq=min[-max[:gov]] [--power=flags] [--spread-job]\n"
+           "            [--switches=max-switches{@max-time-to-wait}] [--reboot]\n"
+           "            [--core-spec=cores] [--thread-spec=threads]\n"
+           "            [--bb=burst_buffer_spec] [--bbf=burst_buffer_file]\n"
+           "            [--bcast=<dest_path>] [--compress[=library]]\n"
+           "            [--acctg-freq=<datatype>=<interval>] [--delay-boot=mins]\n"
+           "            [-w hosts...] [-x hosts...] [--use-min-nodes]\n"
+           "            [--mpi-combine=yes|no] [--pack-group=value]\n"
+           "            [--cpus-per-gpu=n] [--gpus=n] [--gpu-bind=...] [--gpu-freq=...]\n"
+           "            [--gpus-per-node=n] [--gpus-per-socket=n]  [--gpus-per-task=n]\n"
+           "            [--mem-per-gpu=MB]\n"
+           "            executable [args...]\n");
 }
 
 static void _help(void) {
     slurm_ctl_conf_t *conf;
 
-    printf(
-            "Usage: srun [OPTIONS...] executable [args...]\n"
-            "\n"
-            "Parallel run options:\n"
-            "  -A, --account=name          charge job to specified account\n"
-            "      --acctg-freq=<datatype>=<interval> accounting and profiling sampling\n"
-            "                              intervals. Supported datatypes:\n"
-            "                              task=<interval> energy=<interval>\n"
-            "                              network=<interval> filesystem=<interval>\n"
-            "      --bb=<spec>             burst buffer specifications\n"
-            "      --bbf=<file_name>       burst buffer specification file\n"
-            "      --bcast=<dest_path>     Copy executable file to compute nodes\n"
-            "  -b, --begin=time            defer job until HH:MM MM/DD/YY\n"
-            "  -c, --cpus-per-task=ncpus   number of cpus required per task\n"
-            "      --checkpoint=time       job step checkpoint interval\n"
-            "      --comment=name          arbitrary comment\n"
-            "      --compress[=library]    data compression library used with --bcast\n"
-            "      --cpu-freq=min[-max[:gov]] requested cpu frequency (and governor)\n"
-            "  -d, --dependency=type:jobid defer job until condition on jobid is satisfied\n"
-            "      --deadline=time         remove the job if no ending possible before\n"
-            "                              this deadline (start > (deadline - time[-min]))\n"
-            "      --delay-boot=mins       delay boot for desired node features\n"
-            "  -D, --chdir=path            change remote current working directory\n"
-            "      --export=env_vars|NONE  environment variables passed to launcher with\n"
-            "                              optional values or NONE (pass no variables)\n"
-            "  -e, --error=err             location of stderr redirection\n"
-            "      --epilog=program        run \"program\" after launching job step\n"
-            "  -E, --preserve-env          env vars for node and task counts override\n"
-            "                              command-line flags\n"
-            "      --gres=list             required generic resources\n"
-            "      --gres-flags=opts       flags related to GRES management\n"
-            "  -H, --hold                  submit job in held state\n"
-            "  -i, --input=in              location of stdin redirection\n"
-            "  -I, --immediate[=secs]      exit if resources not available in \"secs\"\n"
-            "      --jobid=id              run under already allocated job\n"
-            "  -J, --job-name=jobname      name of job\n"
-            "  -k, --no-kill               do not kill job on node failure\n"
-            "  -K, --kill-on-bad-exit      kill the job if any task terminates with a\n"
-            "                              non-zero exit code\n"
-            "  -l, --label                 prepend task number to lines of stdout/err\n"
-            "  -L, --licenses=names        required license, comma separated\n"
-            "  -M, --clusters=names        Comma separated list of clusters to issue\n"
-            "                              commands to.  Default is current cluster.\n"
-            "                              Name of 'all' will submit to run on all clusters.\n"
-            "                              NOTE: SlurmDBD must up.\n"
-            "  -m, --distribution=type     distribution method for processes to nodes\n"
-            "                              (type = block|cyclic|arbitrary)\n"
-            "      --mail-type=type        notify on state change: BEGIN, END, FAIL or ALL\n"
-            "      --mail-user=user        who to send email notification for job state\n"
-            "                              changes\n"
-            "      --mcs-label=mcs         mcs label if mcs plugin mcs/group is used\n"
-            "      --mpi=type              type of MPI being used\n"
-            "      --multi-prog            if set the program name specified is the\n"
-            "                              configuration specification for multiple programs\n"
-            "  -n, --ntasks=ntasks         number of tasks to run\n"
-            "      --nice[=value]          decrease scheduling priority by value\n"
-            "      --ntasks-per-node=n     number of tasks to invoke on each node\n"
-            "  -N, --nodes=N               number of nodes on which to run (N = min[-max])\n"
-            "  -o, --output=out            location of stdout redirection\n"
-            "  -O, --overcommit            overcommit resources\n"
-            "      --pack-group=value      pack job allocation(s) in which to launch\n"
-            "                              application\n"
-            "  -p, --partition=partition   partition requested\n"
-            "      --power=flags           power management options\n"
-            "      --priority=value        set the priority of the job to value\n"
-            "      --prolog=program        run \"program\" before launching job step\n"
-            "      --profile=value         enable acct_gather_profile for detailed data\n"
-            "                              value is all or none or any combination of\n"
-            "                              energy, lustre, network or task\n"
-            "      --propagate[=rlimits]   propagate all [or specific list of] rlimits\n"
-            #ifdef HAVE_PTY_H
-            "      --pty                   run task zero in pseudo terminal\n"
-            #endif
-            "      --quit-on-interrupt     quit on single Ctrl-C\n"
-            "  -q, --qos=qos               quality of service\n"
-            "  -Q, --quiet                 quiet mode (suppress informational messages)\n"
-            "      --reboot                reboot block before starting job\n"
-            "  -r, --relative=n            run job step relative to node n of allocation\n"
-            "      --restart-dir=dir       directory of checkpoint image files to restart\n"
-            "                              from\n"
-            "  -s, --oversubscribe         over-subscribe resources with other jobs\n"
-            "  -S, --core-spec=cores       count of reserved cores\n"
-            "      --signal=[B:]num[@time] send signal when time limit within time seconds\n"
-            "      --slurmd-debug=level    slurmd debug level\n"
-            "      --spread-job            spread job across as many nodes as possible\n"
-            "      --switches=max-switches{@max-time-to-wait}\n"
-            "                              Optimum switches and max time to wait for optimum\n"
-            "      --task-epilog=program   run \"program\" after launching task\n"
-            "      --task-prolog=program   run \"program\" before launching task\n"
-            "      --thread-spec=threads   count of reserved threads\n"
-            "  -T, --threads=threads       set srun launch fanout\n"
-            "  -t, --time=minutes          time limit\n"
-            "      --time-min=minutes      minimum time limit (if distinct)\n"
-            "  -u, --unbuffered            do not line-buffer stdout/err\n"
-            "      --use-min-nodes         if a range of node counts is given, prefer the\n"
-            "                              smaller count\n"
-            "  -v, --verbose               verbose mode (multiple -v's increase verbosity)\n"
-            "  -W, --wait=sec              seconds to wait after first task exits\n"
-            "                              before killing job\n"
-            "      --wckey=wckey           wckey to run job under\n"
-            "  -X, --disable-status        Disable Ctrl-C status feature\n"
-            "\n"
-            "Constraint options:\n"
-            "      --cluster-constraint=list specify a list of cluster-constraints\n"
-            "      --contiguous            demand a contiguous range of nodes\n"
-            "  -C, --constraint=list       specify a list of constraints\n"
-            "      --mem=MB                minimum amount of real memory\n"
-            "      --mincpus=n             minimum number of logical processors (threads)\n"
-            "                              per node\n"
-            "      --reservation=name      allocate resources from named reservation\n"
-            "      --tmp=MB                minimum amount of temporary disk\n"
-            "  -w, --nodelist=hosts...     request a specific list of hosts\n"
-            "  -x, --exclude=hosts...      exclude a specific list of hosts\n"
-            "  -Z, --no-allocate           don't allocate nodes (must supply -w)\n"
-            "\n"
-            "Consumable resources related options:\n"
-            "      --exclusive[=user]      allocate nodes in exclusive mode when\n"
-            "                              cpu consumable resource is enabled\n"
-            "                              or don't share CPUs for job steps\n"
-            "      --exclusive[=mcs]       allocate nodes in exclusive mode when\n"
-            "                              cpu consumable resource is enabled\n"
-            "                              and mcs plugin is enabled\n"
-            "                              or don't share CPUs for job steps\n"
-            "      --mem-per-cpu=MB        maximum amount of real memory per allocated\n"
-            "                              cpu required by the job.\n"
-            "                              --mem >= --mem-per-cpu if --mem is specified.\n"
-            "      --resv-ports            reserve communication ports\n"
-            "\n"
-            "Affinity/Multi-core options: (when the task/affinity plugin is enabled)\n"
-            "  -B, --extra-node-info=S[:C[:T]]           Expands to:\n"
-            "      --sockets-per-node=S    number of sockets per node to allocate\n"
-            "      --cores-per-socket=C    number of cores per socket to allocate\n"
-            "      --threads-per-core=T    number of threads per core to allocate\n"
-            "                              each field can be 'min' or wildcard '*'\n"
-            "                              total cpus requested = (N x S x C x T)\n"
-            "\n"
-            "      --ntasks-per-core=n     number of tasks to invoke on each core\n"
-            "      --ntasks-per-socket=n   number of tasks to invoke on each socket\n");
+    printf("Usage: srun [OPTIONS...] executable [args...]\n"
+           "\n"
+           "Parallel run options:\n"
+           "  -A, --account=name          charge job to specified account\n"
+           "      --acctg-freq=<datatype>=<interval> accounting and profiling sampling\n"
+           "                              intervals. Supported datatypes:\n"
+           "                              task=<interval> energy=<interval>\n"
+           "                              network=<interval> filesystem=<interval>\n"
+           "      --bb=<spec>             burst buffer specifications\n"
+           "      --bbf=<file_name>       burst buffer specification file\n"
+           "      --bcast=<dest_path>     Copy executable file to compute nodes\n"
+           "  -b, --begin=time            defer job until HH:MM MM/DD/YY\n"
+           "  -c, --cpus-per-task=ncpus   number of cpus required per task\n"
+           "      --checkpoint=time       job step checkpoint interval\n"
+           "      --comment=name          arbitrary comment\n"
+           "      --compress[=library]    data compression library used with --bcast\n"
+           "      --cpu-freq=min[-max[:gov]] requested cpu frequency (and governor)\n"
+           "  -d, --dependency=type:jobid defer job until condition on jobid is satisfied\n"
+           "      --deadline=time         remove the job if no ending possible before\n"
+           "                              this deadline (start > (deadline - time[-min]))\n"
+           "      --delay-boot=mins       delay boot for desired node features\n"
+           "  -D, --chdir=path            change remote current working directory\n"
+           "      --export=env_vars|NONE  environment variables passed to launcher with\n"
+           "                              optional values or NONE (pass no variables)\n"
+           "  -e, --error=err             location of stderr redirection\n"
+           "      --epilog=program        run \"program\" after launching job step\n"
+           "  -E, --preserve-env          env vars for node and task counts override\n"
+           "                              command-line flags\n"
+           "      --gres=list             required generic resources\n"
+           "      --gres-flags=opts       flags related to GRES management\n"
+           "  -H, --hold                  submit job in held state\n"
+           "  -i, --input=in              location of stdin redirection\n"
+           "  -I, --immediate[=secs]      exit if resources not available in \"secs\"\n"
+           "      --jobid=id              run under already allocated job\n"
+           "  -J, --job-name=jobname      name of job\n"
+           "  -k, --no-kill               do not kill job on node failure\n"
+           "  -K, --kill-on-bad-exit      kill the job if any task terminates with a\n"
+           "                              non-zero exit code\n"
+           "  -l, --label                 prepend task number to lines of stdout/err\n"
+           "  -L, --licenses=names        required license, comma separated\n"
+           "  -M, --clusters=names        Comma separated list of clusters to issue\n"
+           "                              commands to.  Default is current cluster.\n"
+           "                              Name of 'all' will submit to run on all clusters.\n"
+           "                              NOTE: SlurmDBD must up.\n"
+           "  -m, --distribution=type     distribution method for processes to nodes\n"
+           "                              (type = block|cyclic|arbitrary)\n"
+           "      --mail-type=type        notify on state change: BEGIN, END, FAIL or ALL\n"
+           "      --mail-user=user        who to send email notification for job state\n"
+           "                              changes\n"
+           "      --mcs-label=mcs         mcs label if mcs plugin mcs/group is used\n"
+           "      --mpi=type              type of MPI being used\n"
+           "      --multi-prog            if set the program name specified is the\n"
+           "                              configuration specification for multiple programs\n"
+           "  -n, --ntasks=ntasks         number of tasks to run\n"
+           "      --nice[=value]          decrease scheduling priority by value\n"
+           "      --ntasks-per-node=n     number of tasks to invoke on each node\n"
+           "  -N, --nodes=N               number of nodes on which to run (N = min[-max])\n"
+           "  -o, --output=out            location of stdout redirection\n"
+           "  -O, --overcommit            overcommit resources\n"
+           "      --pack-group=value      pack job allocation(s) in which to launch\n"
+           "                              application\n"
+           "  -p, --partition=partition   partition requested\n"
+           "      --power=flags           power management options\n"
+           "      --priority=value        set the priority of the job to value\n"
+           "      --prolog=program        run \"program\" before launching job step\n"
+           "      --profile=value         enable acct_gather_profile for detailed data\n"
+           "                              value is all or none or any combination of\n"
+           "                              energy, lustre, network or task\n"
+           "      --propagate[=rlimits]   propagate all [or specific list of] rlimits\n"
+           #ifdef HAVE_PTY_H
+           "      --pty                   run task zero in pseudo terminal\n"
+           #endif
+           "      --quit-on-interrupt     quit on single Ctrl-C\n"
+           "  -q, --qos=qos               quality of service\n"
+           "  -Q, --quiet                 quiet mode (suppress informational messages)\n"
+           "      --reboot                reboot block before starting job\n"
+           "  -r, --relative=n            run job step relative to node n of allocation\n"
+           "      --restart-dir=dir       directory of checkpoint image files to restart\n"
+           "                              from\n"
+           "  -s, --oversubscribe         over-subscribe resources with other jobs\n"
+           "  -S, --core-spec=cores       count of reserved cores\n"
+           "      --signal=[B:]num[@time] send signal when time limit within time seconds\n"
+           "      --slurmd-debug=level    slurmd debug level\n"
+           "      --spread-job            spread job across as many nodes as possible\n"
+           "      --switches=max-switches{@max-time-to-wait}\n"
+           "                              Optimum switches and max time to wait for optimum\n"
+           "      --task-epilog=program   run \"program\" after launching task\n"
+           "      --task-prolog=program   run \"program\" before launching task\n"
+           "      --thread-spec=threads   count of reserved threads\n"
+           "  -T, --threads=threads       set srun launch fanout\n"
+           "  -t, --time=minutes          time limit\n"
+           "      --time-min=minutes      minimum time limit (if distinct)\n"
+           "  -u, --unbuffered            do not line-buffer stdout/err\n"
+           "      --use-min-nodes         if a range of node counts is given, prefer the\n"
+           "                              smaller count\n"
+           "  -v, --verbose               verbose mode (multiple -v's increase verbosity)\n"
+           "  -W, --wait=sec              seconds to wait after first task exits\n"
+           "                              before killing job\n"
+           "      --wckey=wckey           wckey to run job under\n"
+           "  -X, --disable-status        Disable Ctrl-C status feature\n"
+           "\n"
+           "Constraint options:\n"
+           "      --cluster-constraint=list specify a list of cluster-constraints\n"
+           "      --contiguous            demand a contiguous range of nodes\n"
+           "  -C, --constraint=list       specify a list of constraints\n"
+           "      --mem=MB                minimum amount of real memory\n"
+           "      --mincpus=n             minimum number of logical processors (threads)\n"
+           "                              per node\n"
+           "      --reservation=name      allocate resources from named reservation\n"
+           "      --tmp=MB                minimum amount of temporary disk\n"
+           "  -w, --nodelist=hosts...     request a specific list of hosts\n"
+           "  -x, --exclude=hosts...      exclude a specific list of hosts\n"
+           "  -Z, --no-allocate           don't allocate nodes (must supply -w)\n"
+           "\n"
+           "Consumable resources related options:\n"
+           "      --exclusive[=user]      allocate nodes in exclusive mode when\n"
+           "                              cpu consumable resource is enabled\n"
+           "                              or don't share CPUs for job steps\n"
+           "      --exclusive[=mcs]       allocate nodes in exclusive mode when\n"
+           "                              cpu consumable resource is enabled\n"
+           "                              and mcs plugin is enabled\n"
+           "                              or don't share CPUs for job steps\n"
+           "      --mem-per-cpu=MB        maximum amount of real memory per allocated\n"
+           "                              cpu required by the job.\n"
+           "                              --mem >= --mem-per-cpu if --mem is specified.\n"
+           "      --resv-ports            reserve communication ports\n"
+           "\n"
+           "Affinity/Multi-core options: (when the task/affinity plugin is enabled)\n"
+           "  -B, --extra-node-info=S[:C[:T]]           Expands to:\n"
+           "      --sockets-per-node=S    number of sockets per node to allocate\n"
+           "      --cores-per-socket=C    number of cores per socket to allocate\n"
+           "      --threads-per-core=T    number of threads per core to allocate\n"
+           "                              each field can be 'min' or wildcard '*'\n"
+           "                              total cpus requested = (N x S x C x T)\n"
+           "\n"
+           "      --ntasks-per-core=n     number of tasks to invoke on each core\n"
+           "      --ntasks-per-socket=n   number of tasks to invoke on each socket\n");
     conf = slurm_conf_lock();
-    if (xstrstr(conf->task_plugin, "affinity") ||
-        xstrstr(conf->task_plugin, "cgroup")) {
-        printf(
-                "      --cpu-bind=             Bind tasks to CPUs\n"
-                "                              (see \"--cpu-bind=help\" for options)\n"
-                "      --hint=                 Bind tasks according to application hints\n"
-                "                              (see \"--hint=help\" for options)\n");
+    if (xstrstr(conf->task_plugin, "affinity") || xstrstr(conf->task_plugin, "cgroup")) {
+        printf("      --cpu-bind=             Bind tasks to CPUs\n"
+               "                              (see \"--cpu-bind=help\" for options)\n"
+               "      --hint=                 Bind tasks according to application hints\n"
+               "                              (see \"--hint=help\" for options)\n");
     }
     if (xstrstr(conf->task_plugin, "affinity")) {
-        printf(
-                "      --mem-bind=             Bind memory to locality domains (ldom)\n"
-                "                              (see \"--mem-bind=help\" for options)\n");
+        printf("      --mem-bind=             Bind memory to locality domains (ldom)\n"
+               "                              (see \"--mem-bind=help\" for options)\n");
     }
     slurm_conf_unlock();
 

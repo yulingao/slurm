@@ -134,9 +134,7 @@ slurmctld_config_t slurmctld_config;
 #endif
 
 typedef enum {
-    KNL_SYSTEM_TYPE_NOT_SET,
-    KNL_SYSTEM_TYPE_INTEL,
-    KNL_SYSTEM_TYPE_DELL,
+    KNL_SYSTEM_TYPE_NOT_SET, KNL_SYSTEM_TYPE_INTEL, KNL_SYSTEM_TYPE_DELL,
 } knl_system_type_t;
 
 /*
@@ -199,24 +197,22 @@ static int mcdram_pct[KNL_MCDRAM_CNT];
 static uint64_t *mcdram_per_node = NULL;
 static bitstr_t *knl_node_bitmap = NULL;    /* KNL nodes found by syscfg */
 
-static s_p_options_t knl_conf_file_options[] = {
-        {"AllowMCDRAM",      S_P_STRING},
-        {"AllowNUMA",        S_P_STRING},
-        {"AllowUserBoot",    S_P_STRING},
-        {"BootTime",         S_P_UINT32},
-        {"DefaultMCDRAM",    S_P_STRING},
-        {"DefaultNUMA",      S_P_STRING},
-        {"Force",            S_P_UINT32},
-        {"LogFile",          S_P_STRING},
-        {"McPath",           S_P_STRING},
-        {"NodeRebootWeight", S_P_UINT32},
-        {"NumaCpuBind",      S_P_STRING},
-        {"SyscfgPath",       S_P_STRING},
-        {"SyscfgTimeout",    S_P_UINT32},
-        {"SystemType",       S_P_STRING},
-        {"UmeCheckInterval", S_P_UINT32},
-        {NULL}
-};
+static s_p_options_t knl_conf_file_options[] = {{"AllowMCDRAM",      S_P_STRING},
+                                                {"AllowNUMA",        S_P_STRING},
+                                                {"AllowUserBoot",    S_P_STRING},
+                                                {"BootTime",         S_P_UINT32},
+                                                {"DefaultMCDRAM",    S_P_STRING},
+                                                {"DefaultNUMA",      S_P_STRING},
+                                                {"Force",            S_P_UINT32},
+                                                {"LogFile",          S_P_STRING},
+                                                {"McPath",           S_P_STRING},
+                                                {"NodeRebootWeight", S_P_UINT32},
+                                                {"NumaCpuBind",      S_P_STRING},
+                                                {"SyscfgPath",       S_P_STRING},
+                                                {"SyscfgTimeout",    S_P_UINT32},
+                                                {"SystemType",       S_P_STRING},
+                                                {"UmeCheckInterval", S_P_UINT32},
+                                                {NULL}};
 
 static s_p_hashtbl_t *_config_make_tbl(char *filename);
 
@@ -347,8 +343,7 @@ static uint16_t _knl_mcdram_token(char *token) {
         mcdram_num = KNL_CACHE;
     else if (!xstrcasecmp(token, "hybrid"))
         mcdram_num = KNL_HYBRID;
-    else if (!xstrcasecmp(token, "flat") ||
-             !xstrcasecmp(token, "memory"))
+    else if (!xstrcasecmp(token, "flat") || !xstrcasecmp(token, "memory"))
         mcdram_num = KNL_FLAT;
     else if (!xstrcasecmp(token, "equal"))
         mcdram_num = KNL_EQUAL;
@@ -543,8 +538,7 @@ static void _update_cpu_bind(void) {
             rc = SLURM_ERROR;
             break;
         }
-        if (xlate_cpu_bind_str(sep + 1, &cpu_bind_val) !=
-            SLURM_SUCCESS) {
+        if (xlate_cpu_bind_str(sep + 1, &cpu_bind_val) != SLURM_SUCCESS) {
             rc = SLURM_ERROR;
             break;
         }
@@ -562,8 +556,7 @@ static void _update_cpu_bind(void) {
     xfree(tmp);
 
     if (rc != SLURM_SUCCESS) {
-        error("%s: Invalid NumaCpuBind (%s), ignored",
-              plugin_type, numa_cpu_bind);
+        error("%s: Invalid NumaCpuBind (%s), ignored", plugin_type, numa_cpu_bind);
     }
 
     if (debug_flag) {
@@ -643,8 +636,7 @@ static char *_run_script(char *cmd_path, char **script_argv, int *status) {
         gettimeofday(&tstart, NULL);
         while (1) {
             if (slurmctld_config.shutdown_time) {
-                error("%s: killing %s operation on shutdown",
-                      __func__, script_argv[1]);
+                error("%s: killing %s operation on shutdown", __func__, script_argv[1]);
                 break;
             }
             fds.fd = pfd[0];
@@ -652,8 +644,7 @@ static char *_run_script(char *cmd_path, char **script_argv, int *status) {
             fds.revents = 0;
             new_wait = syscfg_timeout - _tot_wait(&tstart);
             if (new_wait <= 0) {
-                error("%s: %s poll timeout @ %d msec",
-                      __func__, script_argv[1], syscfg_timeout);
+                error("%s: %s poll timeout @ %d msec", __func__, script_argv[1], syscfg_timeout);
                 break;
             }
             new_wait = MIN(new_wait, MAX_POLL_WAIT);
@@ -661,14 +652,12 @@ static char *_run_script(char *cmd_path, char **script_argv, int *status) {
             if (i == 0) {
                 continue;
             } else if (i < 0) {
-                error("%s: %s poll:%m", __func__,
-                      script_argv[1]);
+                error("%s: %s poll:%m", __func__, script_argv[1]);
                 break;
             }
             if ((fds.revents & POLLIN) == 0)
                 break;
-            i = read(pfd[0], resp + resp_offset,
-                     resp_size - resp_offset);
+            i = read(pfd[0], resp + resp_offset, resp_size - resp_offset);
             if (i == 0) {
                 break;
             } else if (i < 0) {
@@ -755,9 +744,7 @@ static void *_ume_agent(void *args) {
                 fd_size += 64;
                 fd = xrealloc(fd, sizeof(int) * fd_size);
             }
-            snprintf(ume_path, ume_path_size,
-                     "%s/mc%d/csrow%d/ue_count",
-                     mc_path, mc_num, csrow_num);
+            snprintf(ume_path, ume_path_size, "%s/mc%d/csrow%d/ue_count", mc_path, mc_num, csrow_num);
             if ((fd[fd_cnt] = open(ume_path, 0)) >= 0)
                 fd_cnt++;
             else
@@ -793,8 +780,7 @@ static void *_ume_agent(void *args) {
             break;
         /* Sleep before retry */
         req.tv_sec = ume_check_interval / USEC_IN_SEC;
-        req.tv_nsec = (ume_check_interval % USEC_IN_SEC) *
-                      NSEC_IN_USEC;
+        req.tv_nsec = (ume_check_interval % USEC_IN_SEC) * NSEC_IN_USEC;
         (void) nanosleep(&req, NULL);
     }
 
@@ -844,21 +830,18 @@ extern int init(void) {
         debug_flag = true;
 
     knl_conf_file = get_extra_conf_path("knl_generic.conf");
-    if ((stat(knl_conf_file, &stat_buf) == 0) &&
-        (tbl = _config_make_tbl(knl_conf_file))) {
+    if ((stat(knl_conf_file, &stat_buf) == 0) && (tbl = _config_make_tbl(knl_conf_file))) {
         if (s_p_get_string(&tmp_str, "AllowMCDRAM", tbl)) {
             allow_mcdram = _knl_mcdram_parse(tmp_str, ",");
             if (_knl_mcdram_bits_cnt(allow_mcdram) < 1) {
-                fatal("knl_generic.conf: Invalid AllowMCDRAM=%s",
-                      tmp_str);
+                fatal("knl_generic.conf: Invalid AllowMCDRAM=%s", tmp_str);
             }
             xfree(tmp_str);
         }
         if (s_p_get_string(&tmp_str, "AllowNUMA", tbl)) {
             allow_numa = _knl_numa_parse(tmp_str, ",");
             if (_knl_numa_bits_cnt(allow_numa) < 1) {
-                fatal("knl_generic.conf: Invalid AllowNUMA=%s",
-                      tmp_str);
+                fatal("knl_generic.conf: Invalid AllowNUMA=%s", tmp_str);
             }
             xfree(tmp_str);
         }
@@ -870,36 +853,30 @@ extern int init(void) {
         if (s_p_get_string(&tmp_str, "DefaultMCDRAM", tbl)) {
             default_mcdram = _knl_mcdram_parse(tmp_str, ",");
             if (_knl_mcdram_bits_cnt(default_mcdram) != 1) {
-                fatal("knl_generic.conf: Invalid DefaultMCDRAM=%s",
-                      tmp_str);
+                fatal("knl_generic.conf: Invalid DefaultMCDRAM=%s", tmp_str);
             }
             xfree(tmp_str);
         }
         if (s_p_get_string(&tmp_str, "DefaultNUMA", tbl)) {
             default_numa = _knl_numa_parse(tmp_str, ",");
             if (_knl_numa_bits_cnt(default_numa) != 1) {
-                fatal("knl_generic.conf: Invalid DefaultNUMA=%s",
-                      tmp_str);
+                fatal("knl_generic.conf: Invalid DefaultNUMA=%s", tmp_str);
             }
             xfree(tmp_str);
         }
         (void) s_p_get_uint32(&force_load, "Force", tbl);
         (void) s_p_get_string(&mc_path, "McPath", tbl);
-        (void) s_p_get_uint32(&node_reboot_weight, "NodeRebootWeight",
-                              tbl);
+        (void) s_p_get_uint32(&node_reboot_weight, "NodeRebootWeight", tbl);
         if (s_p_get_string(&numa_cpu_bind, "NumaCpuBind", tbl))
             _update_cpu_bind();
         (void) s_p_get_string(&syscfg_path, "SyscfgPath", tbl);
         if (s_p_get_string(&tmp_str, "SystemType", tbl)) {
-            if ((knl_system_type = _knl_system_type_token(tmp_str))
-                == KNL_SYSTEM_TYPE_NOT_SET)
-                fatal("knl_generic.conf: Invalid SystemType=%s.",
-                      tmp_str);
+            if ((knl_system_type = _knl_system_type_token(tmp_str)) == KNL_SYSTEM_TYPE_NOT_SET)
+                fatal("knl_generic.conf: Invalid SystemType=%s.", tmp_str);
             xfree(tmp_str);
         }
         (void) s_p_get_uint32(&syscfg_timeout, "SyscfgTimeout", tbl);
-        (void) s_p_get_uint32(&ume_check_interval, "UmeCheckInterval",
-                              tbl);
+        (void) s_p_get_uint32(&ume_check_interval, "UmeCheckInterval", tbl);
 
         s_p_hashtbl_destroy(tbl);
     } else if (errno != ENOENT) {
@@ -931,8 +908,7 @@ extern int init(void) {
     }
 
     if ((resume_program = slurm_get_resume_program())) {
-        error("Use of ResumeProgram with %s not currently supported",
-              plugin_name);
+        error("Use of ResumeProgram with %s not currently supported", plugin_name);
         xfree(resume_program);
         rc = SLURM_ERROR;
     }
@@ -943,12 +919,10 @@ extern int init(void) {
         allow_user_str = _make_uid_str(allowed_uid, allowed_uid_cnt);
         default_mcdram_str = _knl_mcdram_str(default_mcdram);
         default_numa_str = _knl_numa_str(default_numa);
-        info("AllowMCDRAM=%s AllowNUMA=%s",
-             allow_mcdram_str, allow_numa_str);
+        info("AllowMCDRAM=%s AllowNUMA=%s", allow_mcdram_str, allow_numa_str);
         info("AllowUserBoot=%s", allow_user_str);
         info("BootTIme=%u", boot_time);
-        info("DefaultMCDRAM=%s DefaultNUMA=%s",
-             default_mcdram_str, default_numa_str);
+        info("DefaultMCDRAM=%s DefaultNUMA=%s", default_mcdram_str, default_numa_str);
         info("Force=%u", force_load);
         info("McPath=%s", mc_path);
         info("NodeRebootWeight=%u", node_reboot_weight);
@@ -965,8 +939,7 @@ extern int init(void) {
     }
     gres_plugin_add("hbm");
 
-    if ((rc == SLURM_SUCCESS) &&
-        ume_check_interval && run_in_daemon("slurmd")) {
+    if ((rc == SLURM_SUCCESS) && ume_check_interval && run_in_daemon("slurmd")) {
         slurm_mutex_lock(&ume_mutex);
         slurm_thread_create(&ume_thread, _ume_agent, NULL);
         slurm_mutex_unlock(&ume_mutex);
@@ -1042,8 +1015,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
         /* This node on cluster lacks syscfg; should not be KNL */
         static bool log_event = true;
         if (log_event) {
-            info("%s: syscfg program not found or node isn't KNL, can not get KNL modes",
-                 __func__);
+            info("%s: syscfg program not found or node isn't KNL, can not get KNL modes", __func__);
             log_event = false;
         }
         *avail_modes = NULL;
@@ -1073,8 +1045,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
     }
     resp_msg = _run_script(syscfg_path, argv, &status);
     if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-        error("%s: syscfg (get cluster mode) status:%u response:%s",
-              __func__, status, resp_msg);
+        error("%s: syscfg (get cluster mode) status:%u response:%s", __func__, status, resp_msg);
     }
     if (resp_msg == NULL) {
         info("%s: syscfg returned no information", __func__);
@@ -1124,8 +1095,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
                 xfree(resp_msg);
                 resp_msg = _run_script(syscfg_path, argv, &status);
                 if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-                    error("%s: syscfg (get cluster mode) status:%u response:%s",
-                          __func__, status, resp_msg);
+                    error("%s: syscfg (get cluster mode) status:%u response:%s", __func__, status, resp_msg);
                 }
                 if (resp_msg == NULL)
                     info("%s: syscfg -h --SystemMemoryModel returned no information", __func__);
@@ -1176,8 +1146,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
     }
     resp_msg = _run_script(syscfg_path, argv, &status);
     if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-        error("%s: syscfg (get memory mode) status:%u response:%s",
-              __func__, status, resp_msg);
+        error("%s: syscfg (get memory mode) status:%u response:%s", __func__, status, resp_msg);
     }
     if (resp_msg == NULL) {
         info("%s: syscfg returned no information", __func__);
@@ -1201,8 +1170,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
             tok += len;
             if (!xstrncasecmp(tok, "Cache", 3)) {
                 xstrfmtcat(cur_state, "%s%s", cur_sep, "cache");
-            } else if (!xstrncasecmp(tok, "Flat", 3) ||
-                       !xstrncasecmp(tok, "Memory", 3)) {
+            } else if (!xstrncasecmp(tok, "Flat", 3) || !xstrncasecmp(tok, "Memory", 3)) {
                 xstrfmtcat(cur_state, "%s%s", cur_sep, "flat");
             } else if (!xstrncasecmp(tok, "Hybrid", 3)) {
                 xstrfmtcat(cur_state, "%s%s", cur_sep, "hybrid");
@@ -1223,8 +1191,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
                 xfree(resp_msg);
                 resp_msg = _run_script(syscfg_path, argv, &status);
                 if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-                    error("%s: syscfg (get memory mode) status help:%u response:%s",
-                          __func__, status, resp_msg);
+                    error("%s: syscfg (get memory mode) status help:%u response:%s", __func__, status, resp_msg);
                 }
                 if (resp_msg == NULL)
                     info("%s: syscfg -h returned no information", __func__);
@@ -1237,8 +1204,7 @@ extern void node_features_p_node_state(char **avail_modes, char **current_mode) 
             xstrfmtcat(avail_states, "%s%s", avail_sep, "cache");
             avail_sep = ",";
         }
-        if (xstrcasestr(resp_msg, "Flat") ||
-            xstrcasestr(resp_msg, "Memory")) {
+        if (xstrcasestr(resp_msg, "Flat") || xstrcasestr(resp_msg, "Memory")) {
             xstrfmtcat(avail_states, "%s%s", avail_sep, "flat");
             avail_sep = ",";
         }
@@ -1309,9 +1275,8 @@ extern int node_features_p_job_valid(char *job_features) {
             break;
         }
         tok = strtok_r(NULL, "[]()|", &save_ptr);
-        if (tok &&
-            ((last_sep == '&') ||    /* e.g. "equal&(flat|cache)" */
-             (tok[0] == '&'))) {    /* e.g. "(flat|cache)&equal" */
+        if (tok && ((last_sep == '&') ||    /* e.g. "equal&(flat|cache)" */
+                    (tok[0] == '&'))) {    /* e.g. "(flat|cache)&equal" */
             last_mcdram_cnt += mcdram_cnt;
             last_numa_cnt += numa_cnt;
         } else {
@@ -1419,8 +1384,7 @@ extern int node_features_p_node_set(char *active_features) {
         /* This node on cluster lacks syscfg; should not be KNL */
         static bool log_event = true;
         if (log_event) {
-            error("%s: syscfg program not found or node isn't KNL; can not set KNL modes",
-                  __func__);
+            error("%s: syscfg program not found or node isn't KNL; can not set KNL modes", __func__);
             log_event = false;
         }
         return SLURM_ERROR;
@@ -1447,8 +1411,7 @@ extern int node_features_p_node_set(char *active_features) {
     }
     resp_msg = _run_script(syscfg_path, argv, &status);
     if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-        error("%s: syscfg (get cluster mode) status:%u response:%s",
-              __func__, status, resp_msg);
+        error("%s: syscfg (get cluster mode) status:%u response:%s", __func__, status, resp_msg);
         error_code = SLURM_ERROR;
     }
     if (resp_msg == NULL) {
@@ -1492,8 +1455,7 @@ extern int node_features_p_node_set(char *active_features) {
                 argv[6] = NULL;
                 break;
             case KNL_SYSTEM_TYPE_DELL:
-                snprintf(tmp, sizeof(tmp),
-                         "--SystemMemoryModel=%s", numa_mode);
+                snprintf(tmp, sizeof(tmp), "--SystemMemoryModel=%s", numa_mode);
                 argv[0] = "syscfg";
                 argv[1] = tmp;
                 argv[2] = NULL;
@@ -1504,8 +1466,7 @@ extern int node_features_p_node_set(char *active_features) {
         }
         resp_msg = _run_script(syscfg_path, argv, &status);
         if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-            error("%s: syscfg (set cluster mode) status:%u response:%s",
-                  __func__, status, resp_msg);
+            error("%s: syscfg (set cluster mode) status:%u response:%s", __func__, status, resp_msg);
             error_code = SLURM_ERROR;
         } else {
             _log_script_argv(argv, resp_msg);
@@ -1534,8 +1495,7 @@ extern int node_features_p_node_set(char *active_features) {
     }
     resp_msg = _run_script(syscfg_path, argv, &status);
     if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-        error("%s: syscfg (get memory mode) status:%u response:%s",
-              __func__, status, resp_msg);
+        error("%s: syscfg (get memory mode) status:%u response:%s", __func__, status, resp_msg);
         error_code = SLURM_ERROR;
     }
     if (resp_msg == NULL) {
@@ -1590,8 +1550,7 @@ extern int node_features_p_node_set(char *active_features) {
                 argv[6] = NULL;
                 break;
             case KNL_SYSTEM_TYPE_DELL:
-                snprintf(tmp, sizeof(tmp),
-                         "--ProcEmbMemMode=%s", mcdram_mode);
+                snprintf(tmp, sizeof(tmp), "--ProcEmbMemMode=%s", mcdram_mode);
                 argv[0] = "syscfg";
                 argv[1] = tmp;
                 argv[2] = NULL;
@@ -1603,8 +1562,7 @@ extern int node_features_p_node_set(char *active_features) {
 
         resp_msg = _run_script(syscfg_path, argv, &status);
         if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0)) {
-            error("%s: syscfg (set memory mode) status:%u response:%s",
-                  __func__, status, resp_msg);
+            error("%s: syscfg (set memory mode) status:%u response:%s", __func__, status, resp_msg);
             error_code = SLURM_ERROR;
         } else {
             _log_script_argv(argv, resp_msg);
@@ -1631,8 +1589,7 @@ extern bitstr_t *node_features_p_get_node_bitmap(void) {
 extern int node_features_p_overlap(bitstr_t *active_bitmap) {
     int cnt = 0;
 
-    if (!knl_node_bitmap || !active_bitmap ||
-        !(cnt = bit_overlap(active_bitmap, knl_node_bitmap)))
+    if (!knl_node_bitmap || !active_bitmap || !(cnt = bit_overlap(active_bitmap, knl_node_bitmap)))
         return 0;
 
     return cnt;
@@ -1650,8 +1607,7 @@ extern bool node_features_p_node_power(void) {
  * IN node_bitmap - bitmap of nodes changed
  * RET error code
  */
-extern int node_features_p_node_update(char *active_features,
-                                       bitstr_t *node_bitmap) {
+extern int node_features_p_node_update(char *active_features, bitstr_t *node_bitmap) {
     int i, i_first, i_last;
     int rc = SLURM_SUCCESS, numa_inx = -1;
     int mcdram_inx = 0;
@@ -1702,8 +1658,7 @@ extern int node_features_p_node_update(char *active_features,
         if (!bit_test(node_bitmap, i))
             continue;
         if (i >= node_record_count) {
-            error("%s: Invalid node index (%d >= %d)",
-                  __func__, i, node_record_count);
+            error("%s: Invalid node index (%d >= %d)", __func__, i, node_record_count);
             rc = SLURM_ERROR;
             break;
         }
@@ -1711,14 +1666,10 @@ extern int node_features_p_node_update(char *active_features,
         if ((numa_inx >= 0) && cpu_bind[numa_inx])
             node_ptr->cpu_bind = cpu_bind[numa_inx];
         if (mcdram_per_node && (mcdram_inx >= 0)) {
-            mcdram_size = mcdram_per_node[i] *
-                          (100 - mcdram_pct[mcdram_inx]) / 100;
+            mcdram_size = mcdram_per_node[i] * (100 - mcdram_pct[mcdram_inx]) / 100;
             if (!node_ptr->gres)
-                node_ptr->gres =
-                        xstrdup(node_ptr->config_ptr->gres);
-            gres_plugin_node_feature(node_ptr->name, "hbm",
-                                     mcdram_size, &node_ptr->gres,
-                                     &node_ptr->gres_list);
+                node_ptr->gres = xstrdup(node_ptr->config_ptr->gres);
+            gres_plugin_node_feature(node_ptr->name, "hbm", mcdram_size, &node_ptr->gres, &node_ptr->gres_list);
         }
     }
 
@@ -1732,8 +1683,7 @@ extern int node_features_p_node_update(char *active_features,
  * arg IN - Pointer to struct node_record record
  * update_node_msg IN - Pointer to update request
  */
-extern bool node_features_p_node_update_valid(void *arg,
-                                              update_node_msg_t *update_node_msg) {
+extern bool node_features_p_node_update_valid(void *arg, update_node_msg_t *update_node_msg) {
     struct node_record *node_ptr = (struct node_record *) arg;
     char *tmp, *save_ptr = NULL, *tok;
     bool is_knl = false, invalid_feature = false;
@@ -1771,8 +1721,8 @@ extern bool node_features_p_node_update_valid(void *arg,
         }
         xfree(tmp);
         if (invalid_feature) {
-            info("Invalid AvailableFeatures update request (%s) for non-KNL node %s",
-                 update_node_msg->features, node_ptr->name);
+            info("Invalid AvailableFeatures update request (%s) for non-KNL node %s", update_node_msg->features,
+                 node_ptr->name);
             return false;
         }
     }
@@ -1790,8 +1740,8 @@ extern bool node_features_p_node_update_valid(void *arg,
         }
         xfree(tmp);
         if (invalid_feature) {
-            info("Invalid ActiveFeatures update request (%s) for non-KNL node %s",
-                 update_node_msg->features_act, node_ptr->name);
+            info("Invalid ActiveFeatures update request (%s) for non-KNL node %s", update_node_msg->features_act,
+                 node_ptr->name);
             return false;
         }
     }
@@ -1800,16 +1750,12 @@ extern bool node_features_p_node_update_valid(void *arg,
      * For non-KNL node, active and available features must match
      */
     if (!update_node_msg->features) {
-        update_node_msg->features =
-                xstrdup(update_node_msg->features_act);
+        update_node_msg->features = xstrdup(update_node_msg->features_act);
     } else if (!update_node_msg->features_act) {
-        update_node_msg->features_act =
-                xstrdup(update_node_msg->features);
-    } else if (xstrcmp(update_node_msg->features,
-                       update_node_msg->features_act)) {
-        info("Invalid ActiveFeatures != AvailableFeatures (%s != %s) for non-KNL node %s",
-             update_node_msg->features, update_node_msg->features_act,
-             node_ptr->name);
+        update_node_msg->features_act = xstrdup(update_node_msg->features);
+    } else if (xstrcmp(update_node_msg->features, update_node_msg->features_act)) {
+        info("Invalid ActiveFeatures != AvailableFeatures (%s != %s) for non-KNL node %s", update_node_msg->features,
+             update_node_msg->features_act, node_ptr->name);
         return false;
     }
 
@@ -1833,8 +1779,7 @@ extern bool node_features_p_changeable_feature(char *feature) {
  * IN node_inx - index of node in node table
  * RET node's new merged features, must be xfreed
  */
-extern char *node_features_p_node_xlate(char *new_features, char *orig_features,
-                                        char *avail_features, int node_inx) {
+extern char *node_features_p_node_xlate(char *new_features, char *orig_features, char *avail_features, int node_inx) {
     char *node_features = NULL;
     char *tmp, *save_ptr = NULL, *sep = "", *tok;
     uint16_t new_mcdram = 0, new_numa = 0;
@@ -1866,10 +1811,8 @@ extern char *node_features_p_node_xlate(char *new_features, char *orig_features,
             tmp = xstrdup(new_features);
             tok = strtok_r(tmp, ",", &save_ptr);
             while (tok) {
-                if ((_knl_mcdram_token(tok) == 0) &&
-                    (_knl_numa_token(tok) == 0)) {
-                    xstrfmtcat(node_features, "%s%s", sep,
-                               tok);
+                if ((_knl_mcdram_token(tok) == 0) && (_knl_numa_token(tok) == 0)) {
+                    xstrfmtcat(node_features, "%s%s", sep, tok);
                     sep = ",";
                 }
                 tok = strtok_r(NULL, ",", &save_ptr);
@@ -1897,11 +1840,9 @@ extern char *node_features_p_node_xlate(char *new_features, char *orig_features,
             tmp = xstrdup(orig_features);
             tok = strtok_r(tmp, ",", &save_ptr);
             while (tok) {
-                if ((new_mcdram == 0) &&
-                    (tmp_mcdram = _knl_mcdram_token(tok)))
+                if ((new_mcdram == 0) && (tmp_mcdram = _knl_mcdram_token(tok)))
                     new_mcdram |= tmp_mcdram;
-                else if ((new_numa == 0) &&
-                         (tmp_numa = _knl_numa_token(tok)))
+                else if ((new_numa == 0) && (tmp_numa = _knl_numa_token(tok)))
                     new_numa |= tmp_numa;
                 tok = strtok_r(NULL, ",", &save_ptr);
             }

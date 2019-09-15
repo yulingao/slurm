@@ -95,8 +95,7 @@ static int _cpu_freq_cpu_avail(int cpx);
 
 static int _cpu_freq_current_state(int cpx);
 
-static uint16_t _cpu_freq_next_cpu(char **core_range, uint16_t *cpx,
-                                   uint16_t *start, uint16_t *end);
+static uint16_t _cpu_freq_next_cpu(char **core_range, uint16_t *cpx, uint16_t *start, uint16_t *end);
 
 static uint32_t _cpu_freq_get_scaling_freq(int cpuidx, char *option);
 
@@ -188,14 +187,12 @@ static int _test_cpu_owner_lock(int cpu_id, uint32_t job_id) {
 
     if (job_id != in_job_id) {
         /* Result of various race conditions */
-        debug("%s: CPU %d now owned by job %u rather than job %u",
-              __func__, cpu_id, in_job_id, job_id);
+        debug("%s: CPU %d now owned by job %u rather than job %u", __func__, cpu_id, in_job_id, job_id);
         close(fd);
         return -1;
     }
     close(fd);
-    debug2("%s: CPU %d owned by job %u as expected",
-           __func__, cpu_id, job_id);
+    debug2("%s: CPU %d owned by job %u as expected", __func__, cpu_id, job_id);
 
     return 0;
 
@@ -234,8 +231,7 @@ static int _derive_avail_freq(int cpuidx) {
  * Return: SLURM_SUCCESS or SLURM_ERROR
  *         avail_freq array will be in strictly ascending order
  */
-static int
-_cpu_freq_cpu_avail(int cpuidx) {
+static int _cpu_freq_cpu_avail(int cpuidx) {
     FILE *fp = NULL;
     char path[PATH_MAX];
     int i, j, k;
@@ -261,8 +257,7 @@ _cpu_freq_cpu_avail(int cpuidx) {
         for (j = 0; j < i; j++) {
             if (freq < cpufreq[cpuidx].avail_freq[j]) {
                 for (k = i; k >= j; k--) {
-                    cpufreq[cpuidx].avail_freq[k + 1] =
-                            cpufreq[cpuidx].avail_freq[k];
+                    cpufreq[cpuidx].avail_freq[k + 1] = cpufreq[cpuidx].avail_freq[k];
                 }
                 break;
             }
@@ -280,8 +275,7 @@ _cpu_freq_cpu_avail(int cpuidx) {
  * called to check if the node supports setting CPU frequency
  * if so, initialize fields in cpu_freq_data structure
  */
-extern void
-cpu_freq_init(slurmd_conf_t *conf) {
+extern void cpu_freq_init(slurmd_conf_t *conf) {
     char path[PATH_MAX];
     struct stat statbuf;
     FILE *fp;
@@ -311,20 +305,16 @@ cpu_freq_init(slurmd_conf_t *conf) {
     cpu_freq_count = conf->block_map_size;
     if (!cpufreq) {
         int cpuidx;
-        cpufreq = (struct cpu_freq_data *)
-                xmalloc(cpu_freq_count *
-                        sizeof(struct cpu_freq_data));
+        cpufreq = (struct cpu_freq_data *) xmalloc(cpu_freq_count * sizeof(struct cpu_freq_data));
 
         for (cpuidx = 0; cpuidx < cpu_freq_count; cpuidx++)
             _cpu_freq_init_data(cpuidx);
     }
 
-    debug2("Gathering cpu frequency information for %u cpus",
-           cpu_freq_count);
+    debug2("Gathering cpu frequency information for %u cpus", cpu_freq_count);
     for (i = 0; i < cpu_freq_count; i++) {
-        snprintf(path, sizeof(path),
-                 PATH_TO_CPU
-                 "cpu%u/cpufreq/scaling_available_governors", i);
+        snprintf(path, sizeof(path), PATH_TO_CPU
+                                     "cpu%u/cpufreq/scaling_available_governors", i);
         if ((fp = fopen(path, "r")) == NULL)
             continue;
         if (fgets(value, LINE_LEN, fp) == NULL) {
@@ -371,16 +361,14 @@ cpu_freq_init(slurmd_conf_t *conf) {
             continue;
         if ((i == 0) && (debug_flags & DEBUG_FLAG_CPU_FREQ)) {
             for (j = 0; j < cpufreq[i].nfreq; j++) {
-                info("cpu_freq: frequency %u defined on cpu 0",
-                     cpufreq[i].avail_freq[j]);
+                info("cpu_freq: frequency %u defined on cpu 0", cpufreq[i].avail_freq[j]);
             }
         }
     }
     return;
 }
 
-extern void
-cpu_freq_fini(void) {
+extern void cpu_freq_fini(void) {
     xfree(cpufreq);
     xfree(slurmd_spooldir);
 }
@@ -388,8 +376,7 @@ cpu_freq_fini(void) {
 /*
  * reset debug flag (slurmd)
  */
-extern void
-cpu_freq_reconfig(void) {
+extern void cpu_freq_reconfig(void) {
     /* reset local static variables */
     cpu_freq_govs = 0;
     debug_flags = slurm_get_debug_flags();
@@ -398,19 +385,16 @@ cpu_freq_reconfig(void) {
 /*
  * Send the cpu_frequency table info to slurmstepd
  */
-extern void
-cpu_freq_send_info(int fd) {
+extern void cpu_freq_send_info(int fd) {
     if (cpu_freq_count) {
         safe_write(fd, &cpu_freq_count, sizeof(uint16_t));
-        safe_write(fd, cpufreq,
-                   (cpu_freq_count * sizeof(struct cpu_freq_data)));
+        safe_write(fd, cpufreq, (cpu_freq_count * sizeof(struct cpu_freq_data)));
     } else {
         safe_write(fd, &cpu_freq_count, sizeof(uint16_t));
     }
     return;
     rwfail:
-    error("Unable to send CPU frequency information for %u CPUs",
-          cpu_freq_count);
+    error("Unable to send CPU frequency information for %u CPUs", cpu_freq_count);
     return;
 }
 
@@ -418,25 +402,19 @@ cpu_freq_send_info(int fd) {
 /*
  * Receive the cpu_frequency table info from slurmd
  */
-extern void
-cpu_freq_recv_info(int fd) {
+extern void cpu_freq_recv_info(int fd) {
     safe_read(fd, &cpu_freq_count, sizeof(uint16_t));
 
     if (cpu_freq_count) {
         if (!cpufreq) {
-            cpufreq = (struct cpu_freq_data *)
-                    xmalloc(cpu_freq_count *
-                            sizeof(struct cpu_freq_data));
+            cpufreq = (struct cpu_freq_data *) xmalloc(cpu_freq_count * sizeof(struct cpu_freq_data));
         }
-        safe_read(fd, cpufreq,
-                  (cpu_freq_count * sizeof(struct cpu_freq_data)));
-        debug2("Received CPU frequency information for %u CPUs",
-               cpu_freq_count);
+        safe_read(fd, cpufreq, (cpu_freq_count * sizeof(struct cpu_freq_data)));
+        debug2("Received CPU frequency information for %u CPUs", cpu_freq_count);
     }
     return;
     rwfail:
-    error("Unable to receive CPU frequency information for %u CPUs",
-          cpu_freq_count);
+    error("Unable to receive CPU frequency information for %u CPUs", cpu_freq_count);
     cpu_freq_count = 0;
     return;
 }
@@ -446,8 +424,7 @@ cpu_freq_recv_info(int fd) {
  * Called from task cpuset code with task launch request containing
  *  a pointer to a hex map string of the cpus to be used by this step
  */
-extern void
-cpu_freq_cpuset_validate(stepd_step_rec_t *job) {
+extern void cpu_freq_cpuset_validate(stepd_step_rec_t *job) {
     int cpuidx, cpu_num;
     bitstr_t *cpus_to_set;
     bitstr_t *cpu_map;
@@ -464,22 +441,17 @@ cpu_freq_cpuset_validate(stepd_step_rec_t *job) {
         xfree(launch_params);
     }
 
-    if (((job->stepid == SLURM_BATCH_SCRIPT) && !set_batch_freq) ||
-        (job->stepid == SLURM_EXTERN_CONT))
+    if (((job->stepid == SLURM_BATCH_SCRIPT) && !set_batch_freq) || (job->stepid == SLURM_EXTERN_CONT))
         return;
 
     debug_flags = slurm_get_debug_flags(); /* init for slurmstepd */
     if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
         info("cpu_freq_cpuset_validate: request: min=(%12d  %8x) "
-             "max=(%12d %8x) governor=%8x",
-             job->cpu_freq_min, job->cpu_freq_min,
-             job->cpu_freq_max, job->cpu_freq_max,
+             "max=(%12d %8x) governor=%8x", job->cpu_freq_min, job->cpu_freq_min, job->cpu_freq_max, job->cpu_freq_max,
              job->cpu_freq_gov);
-        info("  jobid=%u, stepid=%u, tasks=%u cpu/task=%u, cpus=%u",
-             job->jobid, job->stepid, job->node_tasks,
+        info("  jobid=%u, stepid=%u, tasks=%u cpu/task=%u, cpus=%u", job->jobid, job->stepid, job->node_tasks,
              job->cpus_per_task, job->cpus);
-        info("  cpu_bind_type=%4x, cpu_bind map=%s",
-             job->cpu_bind_type, job->cpu_bind);
+        info("  cpu_bind_type=%4x, cpu_bind map=%s", job->cpu_bind_type, job->cpu_bind);
     }
 
     if (!cpu_freq_count)
@@ -545,8 +517,7 @@ cpu_freq_cpuset_validate(stepd_step_rec_t *job) {
  * Called from task cgroup cpuset code with string containing
  *  the list of cpus to be used by this step
  */
-extern void
-cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
+extern void cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
     uint16_t start = USHRT_MAX;
     uint16_t end = USHRT_MAX;
     uint16_t cpuidx = 0;
@@ -561,35 +532,27 @@ cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
         xfree(launch_params);
     }
 
-    if (((job->stepid == SLURM_BATCH_SCRIPT) && !set_batch_freq) ||
-        (job->stepid == SLURM_EXTERN_CONT))
+    if (((job->stepid == SLURM_BATCH_SCRIPT) && !set_batch_freq) || (job->stepid == SLURM_EXTERN_CONT))
         return;
 
     debug_flags = slurm_get_debug_flags(); /* init for slurmstepd */
     if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
         info("cpu_freq_cgroup_validate: request: min=(%12d  %8x) "
-             "max=(%12d %8x) governor=%8x",
-             job->cpu_freq_min, job->cpu_freq_min,
-             job->cpu_freq_max, job->cpu_freq_max,
+             "max=(%12d %8x) governor=%8x", job->cpu_freq_min, job->cpu_freq_min, job->cpu_freq_max, job->cpu_freq_max,
              job->cpu_freq_gov);
-        info("  jobid=%u, stepid=%u, tasks=%u cpu/task=%u, cpus=%u",
-             job->jobid, job->stepid, job->node_tasks,
+        info("  jobid=%u, stepid=%u, tasks=%u cpu/task=%u, cpus=%u", job->jobid, job->stepid, job->node_tasks,
              job->cpus_per_task, job->cpus);
-        info("  cpu_bind_type=%4x, cpu_bind map=%s",
-             job->cpu_bind_type, job->cpu_bind);
-        info("  step logical cores = %s, step physical cores = %s",
-             job->step_alloc_cores, step_alloc_cores);
+        info("  cpu_bind_type=%4x, cpu_bind map=%s", job->cpu_bind_type, job->cpu_bind);
+        info("  step logical cores = %s, step physical cores = %s", job->step_alloc_cores, step_alloc_cores);
     }
     if (!cpu_freq_count)
         return;
 
     /* set entries in cpu frequency table for this step's cpus */
     core_range = step_alloc_cores;
-    while ((cpuidx = _cpu_freq_next_cpu(&core_range, &cpuidx,
-                                        &start, &end)) != USHRT_MAX) {
+    while ((cpuidx = _cpu_freq_next_cpu(&core_range, &cpuidx, &start, &end)) != USHRT_MAX) {
         if (cpuidx >= cpu_freq_count) {
-            error("cpu_freq_validate: index %u exceeds cpu count %u",
-                  cpuidx, cpu_freq_count);
+            error("cpu_freq_validate: index %u exceeds cpu count %u", cpuidx, cpu_freq_count);
             return;
         }
         _cpu_freq_setup_data(job, cpuidx);
@@ -604,9 +567,7 @@ cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
  *   no leading/trailing punctuation, either comma separated or dash
  *   separated: e.g., "4-6,8,10,13-15"
  */
-uint16_t
-_cpu_freq_next_cpu(char **core_range, uint16_t *cpuidx,
-                   uint16_t *start, uint16_t *end) {
+uint16_t _cpu_freq_next_cpu(char **core_range, uint16_t *cpuidx, uint16_t *start, uint16_t *end) {
     int i;
     char *p;
 
@@ -674,14 +635,12 @@ _cpu_freq_next_cpu(char **core_range, uint16_t *cpuidx,
  *
  * Return: SLURM_SUCCESS or SLURM_ERROR
  */
-static int
-_cpu_freq_get_cur_gov(int cpuidx) {
+static int _cpu_freq_get_cur_gov(int cpuidx) {
     FILE *fp = NULL;
     char path[PATH_MAX], gov_value[LINE_LEN];
     int j;
 
-    snprintf(path, sizeof(path),
-             PATH_TO_CPU "cpu%u/cpufreq/scaling_governor", cpuidx);
+    snprintf(path, sizeof(path), PATH_TO_CPU "cpu%u/cpufreq/scaling_governor", cpuidx);
     if ((fp = fopen(path, "r")) == NULL) {
         error("%s: Could not open scaling_governor", __func__);
         return SLURM_ERROR;
@@ -707,8 +666,7 @@ _cpu_freq_get_cur_gov(int cpuidx) {
 /*
  * set cpu governor
  */
-static int
-_cpu_freq_set_gov(stepd_step_rec_t *job, int cpuidx, char *gov) {
+static int _cpu_freq_set_gov(stepd_step_rec_t *job, int cpuidx, char *gov) {
     char path[PATH_MAX];
     FILE *fp;
     int fd, rc;
@@ -737,8 +695,7 @@ _cpu_freq_set_gov(stepd_step_rec_t *job, int cpuidx, char *gov) {
  *
  * Return: value of scaling_min_freq, or 0 on error
  */
-static uint32_t
-_cpu_freq_get_scaling_freq(int cpuidx, char *option) {
+static uint32_t _cpu_freq_get_scaling_freq(int cpuidx, char *option) {
     FILE *fp = NULL;
     char path[PATH_MAX];
     uint32_t freq;
@@ -763,8 +720,7 @@ _cpu_freq_get_scaling_freq(int cpuidx, char *option) {
  *
  * Return: true if file found
  */
-static bool
-_cpu_freq_test_scaling_freq(int cpuidx, char *option) {
+static bool _cpu_freq_test_scaling_freq(int cpuidx, char *option) {
     char path[PATH_MAX];
     struct stat stat_buf;
 
@@ -781,9 +737,7 @@ _cpu_freq_test_scaling_freq(int cpuidx, char *option) {
  * -- assume governor already set to userspace ---
  *
  */
-static int
-_cpu_freq_set_scaling_freq(stepd_step_rec_t *job, int cpx, uint32_t freq,
-                           char *option) {
+static int _cpu_freq_set_scaling_freq(stepd_step_rec_t *job, int cpx, uint32_t freq, char *option) {
     char path[PATH_MAX];
     FILE *fp;
     int fd, rc;
@@ -807,8 +761,7 @@ _cpu_freq_set_scaling_freq(stepd_step_rec_t *job, int cpx, uint32_t freq,
     if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
         newfreq = _cpu_freq_get_scaling_freq(cpx, option);
         if (newfreq != freq) {
-            error("Failed to set freq_scaling %s to %u (org=%u)",
-                  option, freq, newfreq);
+            error("Failed to set freq_scaling %s to %u (org=%u)", option, freq, newfreq);
         }
     }
     return rc;
@@ -821,8 +774,7 @@ _cpu_freq_set_scaling_freq(stepd_step_rec_t *job, int cpx, uint32_t freq,
  * IN:     cpuidx        - cpu to query
  * Return: SLURM_SUCCESS or SLURM_ERROR
  */
-static int
-_cpu_freq_current_state(int cpuidx) {
+static int _cpu_freq_current_state(int cpuidx) {
     static int freq_file = -1;
     uint32_t freq;
 
@@ -880,8 +832,7 @@ _cpu_freq_current_state(int cpuidx) {
 /*
  * Copy string representation of a governor into cpufreq structure for a cpu.
  */
-static int
-_cpu_freq_govspec_string(uint32_t cpu_freq, int cpuidx) {
+static int _cpu_freq_govspec_string(uint32_t cpu_freq, int cpuidx) {
 
     if ((cpu_freq & CPU_FREQ_RANGE_FLAG) == 0)
         return SLURM_ERROR;
@@ -916,8 +867,7 @@ _cpu_freq_govspec_string(uint32_t cpu_freq, int cpuidx) {
  * Convert frequency_spec into an actual frequency
  * Returns -- frequency from avail frequency list, or NO_VAL
  */
-uint32_t
-_cpu_freq_freqspec_num(uint32_t cpu_freq, int cpuidx) {
+uint32_t _cpu_freq_freqspec_num(uint32_t cpu_freq, int cpuidx) {
     int fx, j;
     if (!cpufreq || !cpufreq[cpuidx].nfreq)
         return NO_VAL;
@@ -951,14 +901,11 @@ _cpu_freq_freqspec_num(uint32_t cpu_freq, int cpuidx) {
     /* check for request above or below available values */
     if (cpu_freq < cpufreq[cpuidx].avail_freq[0]) {
         error("Rounding requested frequency %d "
-              "up to lowest available %d", cpu_freq,
-              cpufreq[cpuidx].avail_freq[0]);
+              "up to lowest available %d", cpu_freq, cpufreq[cpuidx].avail_freq[0]);
         return cpufreq[cpuidx].avail_freq[0];
-    } else if (cpufreq[cpuidx].avail_freq[cpufreq[cpuidx].nfreq - 1]
-               < cpu_freq) {
+    } else if (cpufreq[cpuidx].avail_freq[cpufreq[cpuidx].nfreq - 1] < cpu_freq) {
         error("Rounding requested frequency %d "
-              "down to highest available %d", cpu_freq,
-              cpufreq[cpuidx].avail_freq[cpufreq[cpuidx].nfreq - 1]);
+              "down to highest available %d", cpu_freq, cpufreq[cpuidx].avail_freq[cpufreq[cpuidx].nfreq - 1]);
         return cpufreq[cpuidx].avail_freq[cpufreq[cpuidx].nfreq - 1];
     }
 
@@ -971,8 +918,7 @@ _cpu_freq_freqspec_num(uint32_t cpu_freq, int cpuidx) {
 			 * safe to advance due to bounds checks above here */
         if (cpu_freq < cpufreq[cpuidx].avail_freq[j]) {
             info("Rounding requested frequency %d "
-                 "up to next available %d", cpu_freq,
-                 cpufreq[cpuidx].avail_freq[j]);
+                 "up to next available %d", cpu_freq, cpufreq[cpuidx].avail_freq[j]);
             return cpufreq[cpuidx].avail_freq[j];
         }
     }
@@ -984,8 +930,7 @@ _cpu_freq_freqspec_num(uint32_t cpu_freq, int cpuidx) {
 /*
  * Initialize data structure
  */
-static void
-_cpu_freq_init_data(int cpx) {
+static void _cpu_freq_init_data(int cpx) {
     /* avail_governors -- set at initialization */
     cpufreq[cpx].org_governor[0] = '\0';
     cpufreq[cpx].new_governor[0] = '\0';
@@ -1002,13 +947,12 @@ _cpu_freq_init_data(int cpx) {
  * Set either current frequency (speed)
  * Or min/max governor base on --cpu-freq parameter
  */
-static void
-_cpu_freq_setup_data(stepd_step_rec_t *job, int cpx) {
+static void _cpu_freq_setup_data(stepd_step_rec_t *job, int cpx) {
     uint32_t freq;
 
-    if ((job->cpu_freq_min == NO_VAL || job->cpu_freq_min == 0)
-        && (job->cpu_freq_max == NO_VAL || job->cpu_freq_max == 0)
-        && (job->cpu_freq_gov == NO_VAL || job->cpu_freq_gov == 0)) {
+    if ((job->cpu_freq_min == NO_VAL || job->cpu_freq_min == 0) &&
+        (job->cpu_freq_max == NO_VAL || job->cpu_freq_max == 0) &&
+        (job->cpu_freq_gov == NO_VAL || job->cpu_freq_gov == 0)) {
         /* If no --cpu-freq, use default governor from conf file.  */
         slurm_ctl_conf_t *conf = slurm_conf_lock();
         job->cpu_freq_gov = conf->cpu_freq_def;
@@ -1021,9 +965,7 @@ _cpu_freq_setup_data(stepd_step_rec_t *job, int cpx) {
     if (_cpu_freq_current_state(cpx) == SLURM_ERROR)
         return;
 
-    if (job->cpu_freq_min == NO_VAL &&
-        job->cpu_freq_max != NO_VAL &&
-        job->cpu_freq_gov == NO_VAL) {
+    if (job->cpu_freq_min == NO_VAL && job->cpu_freq_max != NO_VAL && job->cpu_freq_gov == NO_VAL) {
         /* Pre version 15.08 behavior */
         freq = _cpu_freq_freqspec_num(job->cpu_freq_max, cpx);
         cpufreq[cpx].new_frequency = freq;
@@ -1071,8 +1013,7 @@ _cpu_freq_setup_data(stepd_step_rec_t *job, int cpx) {
  * Returns - enum of governor found
  * 	   - or 0 if not found
  */
-static uint32_t
-_cpu_freq_check_gov(const char *arg, uint32_t illegal) {
+static uint32_t _cpu_freq_check_gov(const char *arg, uint32_t illegal) {
     uint32_t rc = 0;
     if (xstrncasecmp(arg, "co", 2) == 0) {
         rc = CPU_FREQ_CONSERVATIVE;
@@ -1100,15 +1041,13 @@ _cpu_freq_check_gov(const char *arg, uint32_t illegal) {
  *         - enum for synonym
  *         0 on error.
  */
-static uint32_t
-_cpu_freq_check_freq(const char *arg) {
+static uint32_t _cpu_freq_check_freq(const char *arg) {
     char *end;
     uint32_t frequency;
 
     if (xstrncasecmp(arg, "lo", 2) == 0) {
         return CPU_FREQ_LOW;
-    } else if (xstrncasecmp(arg, "him1", 4) == 0 ||
-               xstrncasecmp(arg, "highm1", 6) == 0) {
+    } else if (xstrncasecmp(arg, "him1", 4) == 0 || xstrncasecmp(arg, "highm1", 6) == 0) {
         return CPU_FREQ_HIGHM1;
     } else if (xstrncasecmp(arg, "hi", 2) == 0) {
         return CPU_FREQ_HIGH;
@@ -1125,8 +1064,7 @@ _cpu_freq_check_freq(const char *arg) {
 /*
  * set cpu frequency if possible for each cpu of the job step
  */
-extern void
-cpu_freq_set(stepd_step_rec_t *job) {
+extern void cpu_freq_set(stepd_step_rec_t *job) {
     char freq_detail[100];
     uint32_t freq;
     int i, rc;
@@ -1135,18 +1073,13 @@ cpu_freq_set(stepd_step_rec_t *job) {
         return;
 
     for (i = 0; i < cpu_freq_count; i++) {
-        if (cpufreq[i].new_frequency == NO_VAL
-            && cpufreq[i].new_min_freq == NO_VAL
-            && cpufreq[i].new_max_freq == NO_VAL
-            && cpufreq[i].new_governor[0] == '\0')
+        if (cpufreq[i].new_frequency == NO_VAL && cpufreq[i].new_min_freq == NO_VAL &&
+            cpufreq[i].new_max_freq == NO_VAL && cpufreq[i].new_governor[0] == '\0')
             continue; /* Nothing to set on this CPU */
         if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
             info("cpu_freq: current_state cpu=%d org_min=%u "
-                 "org_freq=%u org_max=%u org_gpv=%s", i,
-                 cpufreq[i].org_min_freq,
-                 cpufreq[i].org_frequency,
-                 cpufreq[i].org_max_freq,
-                 cpufreq[i].org_governor);
+                 "org_freq=%u org_max=%u org_gpv=%s", i, cpufreq[i].org_min_freq, cpufreq[i].org_frequency,
+                 cpufreq[i].org_max_freq, cpufreq[i].org_governor);
         }
 
         /* Max must be set before min, per
@@ -1161,20 +1094,17 @@ cpu_freq_set(stepd_step_rec_t *job) {
                 rc = _cpu_freq_set_gov(job, i, "userspace");
                 if (rc == SLURM_ERROR)
                     return;
-                rc = _cpu_freq_set_scaling_freq(job, i, freq,
-                                                "scaling_setspeed");
+                rc = _cpu_freq_set_scaling_freq(job, i, freq, "scaling_setspeed");
                 if (rc == SLURM_ERROR)
                     continue;
                 if (cpufreq[i].new_governor[0] == '\0') {
                     /* Not requesting new gov, so restore */
-                    rc = _cpu_freq_set_gov(job, i,
-                                           cpufreq[i].org_governor);
+                    rc = _cpu_freq_set_gov(job, i, cpufreq[i].org_governor);
                     if (rc == SLURM_ERROR)
                         continue;
                 }
             }
-            rc = _cpu_freq_set_scaling_freq(job, i, freq,
-                                            "scaling_max_freq");
+            rc = _cpu_freq_set_scaling_freq(job, i, freq, "scaling_max_freq");
             if (rc == SLURM_ERROR)
                 continue;
         }
@@ -1187,20 +1117,17 @@ cpu_freq_set(stepd_step_rec_t *job) {
                 rc = _cpu_freq_set_gov(job, i, "userspace");
                 if (rc == SLURM_ERROR)
                     continue;
-                rc = _cpu_freq_set_scaling_freq(job, i, freq,
-                                                "scaling_setspeed");
+                rc = _cpu_freq_set_scaling_freq(job, i, freq, "scaling_setspeed");
                 if (rc == SLURM_ERROR)
                     continue;
                 if (cpufreq[i].new_governor[0] == '\0') {
                     /* Not requesting new gov, so restore */
-                    rc = _cpu_freq_set_gov(job, i,
-                                           cpufreq[i].org_governor);
+                    rc = _cpu_freq_set_gov(job, i, cpufreq[i].org_governor);
                     if (rc == SLURM_ERROR)
                         continue;
                 }
             }
-            rc = _cpu_freq_set_scaling_freq(job, i, freq,
-                                            "scaling_min_freq");
+            rc = _cpu_freq_set_scaling_freq(job, i, freq, "scaling_min_freq");
             if (rc == SLURM_ERROR)
                 continue;
         }
@@ -1210,9 +1137,7 @@ cpu_freq_set(stepd_step_rec_t *job) {
                 if (rc == SLURM_ERROR)
                     continue;
             }
-            rc = _cpu_freq_set_scaling_freq(job, i,
-                                            cpufreq[i].new_frequency,
-                                            "scaling_setspeed");
+            rc = _cpu_freq_set_scaling_freq(job, i, cpufreq[i].new_frequency, "scaling_setspeed");
             if (rc == SLURM_ERROR)
                 continue;
         }
@@ -1222,17 +1147,12 @@ cpu_freq_set(stepd_step_rec_t *job) {
                 continue;
         }
         if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
-            cpu_freq_debug(NULL, NULL,
-                           freq_detail, sizeof(freq_detail),
-                           NO_VAL, cpufreq[i].new_min_freq,
-                           cpufreq[i].new_max_freq,
-                           cpufreq[i].new_frequency);
+            cpu_freq_debug(NULL, NULL, freq_detail, sizeof(freq_detail), NO_VAL, cpufreq[i].new_min_freq,
+                           cpufreq[i].new_max_freq, cpufreq[i].new_frequency);
             if (cpufreq[i].new_governor[0] != '\0') {
-                info("cpu_freq: set cpu=%d %s Governor=%s",
-                     i, freq_detail, cpufreq[i].new_governor);
+                info("cpu_freq: set cpu=%d %s Governor=%s", i, freq_detail, cpufreq[i].new_governor);
             } else {
-                info("cpu_freq: reset cpu=%d %s", i,
-                     freq_detail);
+                info("cpu_freq: reset cpu=%d %s", i, freq_detail);
             }
         }
     }
@@ -1242,8 +1162,7 @@ cpu_freq_set(stepd_step_rec_t *job) {
  * reset the cpus used by the process to their
  * default frequency and governor type
  */
-extern void
-cpu_freq_reset(stepd_step_rec_t *job) {
+extern void cpu_freq_reset(stepd_step_rec_t *job) {
     int i, rc, fd;
     char freq_detail[100];
     uint32_t jobid;
@@ -1261,10 +1180,8 @@ cpu_freq_reset(stepd_step_rec_t *job) {
 #endif
 
     for (i = 0; i < cpu_freq_count; i++) {
-        if (cpufreq[i].new_frequency == NO_VAL
-            && cpufreq[i].new_min_freq == NO_VAL
-            && cpufreq[i].new_max_freq == NO_VAL
-            && cpufreq[i].new_governor[0] == '\0')
+        if (cpufreq[i].new_frequency == NO_VAL && cpufreq[i].new_min_freq == NO_VAL &&
+            cpufreq[i].new_max_freq == NO_VAL && cpufreq[i].new_governor[0] == '\0')
             continue; /* Nothing to reset on this CPU */
 
         fd = _test_cpu_owner_lock(i, jobid);
@@ -1275,9 +1192,7 @@ cpu_freq_reset(stepd_step_rec_t *job) {
             rc = _cpu_freq_set_gov(job, i, "userspace");
             if (rc == SLURM_ERROR)
                 continue;
-            rc = _cpu_freq_set_scaling_freq(job, i,
-                                            cpufreq[i].org_frequency,
-                                            "scaling_setspeed");
+            rc = _cpu_freq_set_scaling_freq(job, i, cpufreq[i].org_frequency, "scaling_setspeed");
             if (rc == SLURM_ERROR)
                 continue;
             cpufreq[i].new_governor[0] = 'u'; /* force gov reset */
@@ -1286,16 +1201,12 @@ cpu_freq_reset(stepd_step_rec_t *job) {
          * www.kernel.org/doc/Documentation/cpu-freq/user-guide.txt
          */
         if (cpufreq[i].new_max_freq != NO_VAL) {
-            rc = _cpu_freq_set_scaling_freq(job, i,
-                                            cpufreq[i].org_max_freq,
-                                            "scaling_max_freq");
+            rc = _cpu_freq_set_scaling_freq(job, i, cpufreq[i].org_max_freq, "scaling_max_freq");
             if (rc == SLURM_ERROR)
                 continue;
         }
         if (cpufreq[i].new_min_freq != NO_VAL) {
-            rc = _cpu_freq_set_scaling_freq(job, i,
-                                            cpufreq[i].org_min_freq,
-                                            "scaling_min_freq");
+            rc = _cpu_freq_set_scaling_freq(job, i, cpufreq[i].org_min_freq, "scaling_min_freq");
             if (rc == SLURM_ERROR)
                 continue;
         }
@@ -1306,25 +1217,19 @@ cpu_freq_reset(stepd_step_rec_t *job) {
         }
 
         if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
-            cpu_freq_debug(NULL, NULL,
-                           freq_detail, sizeof(freq_detail),
-                           NO_VAL, cpufreq[i].org_min_freq,
-                           cpufreq[i].org_max_freq,
-                           cpufreq[i].org_frequency);
+            cpu_freq_debug(NULL, NULL, freq_detail, sizeof(freq_detail), NO_VAL, cpufreq[i].org_min_freq,
+                           cpufreq[i].org_max_freq, cpufreq[i].org_frequency);
             if (cpufreq[i].new_governor[0] != '\0') {
-                info("cpu_freq: reset cpu=%d %s Governor=%s",
-                     i, freq_detail, cpufreq[i].org_governor);
+                info("cpu_freq: reset cpu=%d %s Governor=%s", i, freq_detail, cpufreq[i].org_governor);
             } else {
-                info("cpu_freq: reset cpu=%d %s", i,
-                     freq_detail);
+                info("cpu_freq: reset cpu=%d %s", i, freq_detail);
             }
         }
     }
 }
 
 /* Convert a cpu_freq number to its equivalent string */
-extern void
-cpu_freq_to_string(char *buf, int buf_size, uint32_t cpu_freq) {
+extern void cpu_freq_to_string(char *buf, int buf_size, uint32_t cpu_freq) {
     if (cpu_freq == CPU_FREQ_LOW)
         snprintf(buf, buf_size, "Low");
     else if (cpu_freq == CPU_FREQ_MEDIUM)
@@ -1349,8 +1254,7 @@ cpu_freq_to_string(char *buf, int buf_size, uint32_t cpu_freq) {
         if (buf_size > 0)
             buf[0] = '\0';
     } else
-        convert_num_unit2((double) cpu_freq, buf, buf_size,
-                          UNIT_KILO, NO_VAL, 1000, 0);
+        convert_num_unit2((double) cpu_freq, buf, buf_size, UNIT_KILO, NO_VAL, 1000, 0);
 }
 
 extern char *cpu_freq_to_cmdline(uint32_t min, uint32_t max, uint32_t gov) {
@@ -1408,8 +1312,7 @@ extern char *cpu_freq_to_cmdline(uint32_t min, uint32_t max, uint32_t gov) {
 /*
  * Set environment variables associated with the frequency variables.
  */
-extern int cpu_freq_set_env(char *var, uint32_t min, uint32_t max,
-                            uint32_t gov) {
+extern int cpu_freq_set_env(char *var, uint32_t min, uint32_t max, uint32_t gov) {
     char *bfall = cpu_freq_to_cmdline(min, max, gov);
     if (bfall && setenvf(NULL, var, "%s", bfall)) {
         xfree(bfall);
@@ -1426,8 +1329,7 @@ extern int cpu_freq_set_env(char *var, uint32_t min, uint32_t max,
  *         - bufsz - size of buffer
  *         - gpvs  - composite enum of governors
  */
-extern void
-cpu_freq_govlist_to_string(char *buf, uint16_t bufsz, uint32_t govs) {
+extern void cpu_freq_govlist_to_string(char *buf, uint16_t bufsz, uint32_t govs) {
     char *list = NULL;
 
     if ((govs & CPU_FREQ_CONSERVATIVE) == CPU_FREQ_CONSERVATIVE) {
@@ -1488,8 +1390,7 @@ cpu_freq_govlist_to_string(char *buf, uint16_t bufsz, uint32_t govs) {
  *	   - freq - pointer to corresponging enum or numberic value
  * Returns - -1 on error, else 0
  */
-extern int
-cpu_freq_verify_def(const char *arg, uint32_t *freq) {
+extern int cpu_freq_verify_def(const char *arg, uint32_t *freq) {
     uint32_t cpufreq = 0;
 
     cpufreq = _cpu_freq_check_gov(arg, CPU_FREQ_USERSPACE);
@@ -1509,8 +1410,7 @@ cpu_freq_verify_def(const char *arg, uint32_t *freq) {
  *	   - govs - pointer to composite of enum for each governor in list
  * Returns - -1 on error, else 0
  */
-extern int
-cpu_freq_verify_govlist(const char *arg, uint32_t *govs) {
+extern int cpu_freq_verify_govlist(const char *arg, uint32_t *govs) {
     char *list, *gov, *savestr = NULL;
     uint32_t agov;
 
@@ -1522,16 +1422,14 @@ cpu_freq_verify_govlist(const char *arg, uint32_t *govs) {
 
     list = xstrdup(arg);
     if ((gov = strtok_r(list, ",", &savestr)) == NULL) {
-        error("cpu_freq_verify_govlist: governor list '%s' invalid",
-              arg);
+        error("cpu_freq_verify_govlist: governor list '%s' invalid", arg);
         return -1;
     }
     do {
         debug3("cpu_freq_verify_govlist: gov = %s", gov);
         agov = _cpu_freq_check_gov(gov, 0);
         if (agov == 0) {
-            error("cpu_freq_verify_govlist: governor '%s' invalid",
-                  gov);
+            error("cpu_freq_verify_govlist: governor '%s' invalid", gov);
             return -1;
         }
         *govs |= agov;
@@ -1564,10 +1462,7 @@ cpu_freq_verify_govlist(const char *arg, uint32_t *govs) {
  * returns -1 on error, 0 otherwise
  */
 extern int
-cpu_freq_verify_cmdline(const char *arg,
-                        uint32_t *cpu_freq_min,
-                        uint32_t *cpu_freq_max,
-                        uint32_t *cpu_freq_gov) {
+cpu_freq_verify_cmdline(const char *arg, uint32_t *cpu_freq_min, uint32_t *cpu_freq_max, uint32_t *cpu_freq_gov) {
     char *poscolon, *posdash;
     char *p1 = NULL, *p2 = NULL, *p3 = NULL;
     uint32_t frequency;
@@ -1577,8 +1472,7 @@ cpu_freq_verify_cmdline(const char *arg,
         cpu_freq_govs = slurm_get_cpu_freq_govs();
 
 
-    if (arg == NULL || cpu_freq_min == NULL || cpu_freq_max == NULL
-        || cpu_freq_gov == NULL) {
+    if (arg == NULL || cpu_freq_min == NULL || cpu_freq_max == NULL || cpu_freq_gov == NULL) {
         return -1;
     }
     *cpu_freq_min = NO_VAL;
@@ -1630,8 +1524,7 @@ cpu_freq_verify_cmdline(const char *arg,
         *cpu_freq_min = *cpu_freq_max;
         *cpu_freq_max = frequency;
         if (*cpu_freq_max < *cpu_freq_min) {
-            error("min cpu-frec (%s) must be < max cpu-freq (%s)",
-                  p1, p2);
+            error("min cpu-frec (%s) must be < max cpu-freq (%s)", p1, p2);
             rc = -1;
             goto clean;
         }
@@ -1654,18 +1547,14 @@ cpu_freq_verify_cmdline(const char *arg,
 
     clean:
     if (*cpu_freq_gov != NO_VAL) {
-        if (((*cpu_freq_gov & cpu_freq_govs)
-             & ~CPU_FREQ_RANGE_FLAG) == 0) {
-            error("governor of %s is not allowed in slurm.conf",
-                  arg);
+        if (((*cpu_freq_gov & cpu_freq_govs) & ~CPU_FREQ_RANGE_FLAG) == 0) {
+            error("governor of %s is not allowed in slurm.conf", arg);
             *cpu_freq_gov = NO_VAL;
             rc = -1;
         }
     }
     if (debug_flags & DEBUG_FLAG_CPU_FREQ) {
-        cpu_freq_debug("command", "NO_VAL", NULL, 0,
-                       *cpu_freq_gov, *cpu_freq_min,
-                       *cpu_freq_max, NO_VAL);
+        cpu_freq_debug("command", "NO_VAL", NULL, 0, *cpu_freq_gov, *cpu_freq_min, *cpu_freq_max, NO_VAL);
     }
     xfree(p1);
     xfree(p2);
@@ -1691,8 +1580,8 @@ cpu_freq_verify_cmdline(const char *arg,
  * Returns 0 if all parameters are NO_VAL (or 0)
  */
 extern int
-cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len,
-               uint32_t gov, uint32_t min, uint32_t max, uint32_t freq) {
+cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len, uint32_t gov, uint32_t min, uint32_t max,
+               uint32_t freq) {
     int rc = 0;
     char bfgov[64], bfmin[32], bfmax[32], bffreq[32];
     char *sep1 = " ", *sep2 = " ", *sep3 = " ";
@@ -1718,8 +1607,7 @@ cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len,
         }
     } else if (noval_str) {
         if (strlen(noval_str) >= sizeof(bfmin)) {
-            error("%s: minimum CPU frequency string too large",
-                  __func__);
+            error("%s: minimum CPU frequency string too large", __func__);
         } else {
             strlcpy(bfmin, noval_str, sizeof(bfmin));
         }
@@ -1736,8 +1624,7 @@ cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len,
         }
     } else if (noval_str) {
         if (strlen(noval_str) >= sizeof(bfmax)) {
-            error("%s: maximum CPU frequency string too large",
-                  __func__);
+            error("%s: maximum CPU frequency string too large", __func__);
         } else {
             strlcpy(bfmax, noval_str, sizeof(bfmax));
         }
@@ -1750,24 +1637,21 @@ cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len,
         cpu_freq_to_string(&bfgov[9], (sizeof(bfgov) - 9), gov);
     } else if (noval_str) {
         if (strlen(noval_str) >= sizeof(bfgov)) {
-            error("%s: max CPU governor string too large",
-                  __func__);
+            error("%s: max CPU governor string too large", __func__);
         } else {
             strlcpy(bfgov, noval_str, sizeof(bfgov));
         }
     }
     if (rc) {
         if (freq_str) {
-            snprintf(freq_str, freq_len, "%s%s%s%s%s%s%s",
-                     bffreq, sep1, bfmin, sep2, bfmax, sep3, bfgov);
+            snprintf(freq_str, freq_len, "%s%s%s%s%s%s%s", bffreq, sep1, bfmin, sep2, bfmax, sep3, bfgov);
         }
     } else {
         if (freq_str)
             freq_str[0] = '\0';
     }
     if (label) {
-        info("cpu-freq: %s :: %s%s%s%s%s%s%s", label,
-             bffreq, sep1, bfmin, sep2, bfmax, sep3, bfgov);
+        info("cpu-freq: %s :: %s%s%s%s%s%s%s", label, bffreq, sep1, bfmin, sep2, bfmax, sep3, bfgov);
     }
     return rc;
 }

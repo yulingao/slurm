@@ -174,8 +174,7 @@ static char __progname[64];
  * Call this to update the ps status display to a fixed prefix plus an
  * indication of what you're currently doing passed in the argument.
  */
-void
-setproctitle(const char *fmt, ...) {
+void setproctitle(const char *fmt, ...) {
 #if SETPROCTITLE_STRATEGY == PS_USE_PSTAT
     union pstun pst;
 #endif
@@ -257,8 +256,7 @@ static void _init__progname(const char *argv0) {
  * strings may be moved, so this should be called before any code that
  * might try to hang onto a getenv() result.
  */
-void
-init_setproctitle(int argc, char **argv) {
+void init_setproctitle(int argc, char **argv) {
 #if SETPROCTITLE_STRATEGY == PS_USE_CLOBBER_ARGV
     char *end_of_area = NULL;
     int i;

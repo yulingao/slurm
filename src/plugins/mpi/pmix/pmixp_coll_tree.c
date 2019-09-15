@@ -69,8 +69,7 @@ static int _pack_coll_info(pmixp_coll_t *coll, Buf buf) {
     return SLURM_SUCCESS;
 }
 
-int pmixp_coll_tree_unpack(Buf buf, pmixp_coll_type_t *type,
-                           int *nodeid, pmixp_proc_t **r, size_t *nr) {
+int pmixp_coll_tree_unpack(Buf buf, pmixp_coll_type_t *type, int *nodeid, pmixp_proc_t **r, size_t *nr) {
     pmixp_proc_t *procs = NULL;
     uint32_t nprocs = 0;
     uint32_t tmp;
@@ -97,8 +96,7 @@ int pmixp_coll_tree_unpack(Buf buf, pmixp_coll_type_t *type,
         /* 3. get namespace/rank of particular process */
         rc = unpackmem(procs[i].nspace, &tmp, buf);
         if (SLURM_SUCCESS != rc) {
-            PMIXP_ERROR("Cannot unpack namespace for process #%d",
-                        i);
+            PMIXP_ERROR("Cannot unpack namespace for process #%d", i);
             return rc;
         }
         procs[i].nspace[tmp] = '\0';
@@ -107,8 +105,7 @@ int pmixp_coll_tree_unpack(Buf buf, pmixp_coll_type_t *type,
         rc = unpack32(&tmp, buf);
         procs[i].rank = tmp;
         if (SLURM_SUCCESS != rc) {
-            PMIXP_ERROR("Cannot unpack ranks for process #%d, nsp=%s",
-                        i, procs[i].nspace);
+            PMIXP_ERROR("Cannot unpack ranks for process #%d, nsp=%s", i, procs[i].nspace);
             return rc;
         }
     }
@@ -121,8 +118,7 @@ static void _reset_coll_ufwd(pmixp_coll_t *coll) {
     /* upward status */
     tree->contrib_children = 0;
     tree->contrib_local = false;
-    memset(tree->contrib_chld, 0,
-           sizeof(tree->contrib_chld[0]) * tree->chldrn_cnt);
+    memset(tree->contrib_chld, 0, sizeof(tree->contrib_chld[0]) * tree->chldrn_cnt);
     tree->serv_offs = pmixp_server_buf_reset(tree->ufwd_buf);
     if (SLURM_SUCCESS != _pack_coll_info(coll, tree->ufwd_buf)) {
         PMIXP_ERROR("Cannot pack ranges to message header!");
@@ -142,8 +138,7 @@ static void _reset_coll_dfwd(pmixp_coll_t *coll) {
     coll->state.tree.dfwd_status = PMIXP_COLL_TREE_SND_NONE;
     coll->state.tree.contrib_prnt = false;
     /* Save the toal service offset */
-    coll->state.tree.dfwd_offset = get_buf_offset(
-            coll->state.tree.dfwd_buf);
+    coll->state.tree.dfwd_offset = get_buf_offset(coll->state.tree.dfwd_buf);
 }
 
 static void _reset_coll(pmixp_coll_t *coll) {
@@ -152,8 +147,7 @@ static void _reset_coll(pmixp_coll_t *coll) {
     switch (tree->state) {
         case PMIXP_COLL_TREE_SYNC:
             /* already reset */
-            xassert(!tree->contrib_local && !tree->contrib_children &&
-                    !tree->contrib_prnt);
+            xassert(!tree->contrib_local && !tree->contrib_children && !tree->contrib_prnt);
             break;
         case PMIXP_COLL_TREE_COLLECT:
         case PMIXP_COLL_TREE_UPFWD:
@@ -183,8 +177,7 @@ static void _reset_coll(pmixp_coll_t *coll) {
         default: PMIXP_ERROR("Bad collective state = %d", (int) tree->state);
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
-            slurm_kill_job_step(pmixp_info_jobid(),
-                                pmixp_info_stepid(), SIGKILL);
+            slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
     }
 }
 
@@ -200,8 +193,7 @@ int pmixp_coll_tree_init(pmixp_coll_t *coll, hostlist_t *hl) {
     tree->state = PMIXP_COLL_TREE_SYNC;
 
     width = slurm_get_tree_width();
-    reverse_tree_info(coll->my_peerid, coll->peers_cnt, width,
-                      &tree->prnt_peerid, &tree->chldrn_cnt, &depth,
+    reverse_tree_info(coll->my_peerid, coll->peers_cnt, width, &tree->prnt_peerid, &tree->chldrn_cnt, &depth,
                       &max_depth);
 
     /* We interested in amount of direct childs */
@@ -209,10 +201,7 @@ int pmixp_coll_tree_init(pmixp_coll_t *coll, hostlist_t *hl) {
     tree->contrib_local = false;
     tree->chldrn_ids = xmalloc(sizeof(int) * width);
     tree->contrib_chld = xmalloc(sizeof(int) * width);
-    tree->chldrn_cnt = reverse_tree_direct_children(coll->my_peerid,
-                                                    coll->peers_cnt,
-                                                    width, depth,
-                                                    tree->chldrn_ids);
+    tree->chldrn_cnt = reverse_tree_direct_children(coll->my_peerid, coll->peers_cnt, width, depth, tree->chldrn_ids);
     if (tree->prnt_peerid == -1) {
         /* if we are the root of the tree:
          * - we don't have a parent;
@@ -221,10 +210,8 @@ int pmixp_coll_tree_init(pmixp_coll_t *coll, hostlist_t *hl) {
          */
         tree->prnt_host = NULL;
         tree->all_chldrn_hl = hostlist_copy(*hl);
-        hostlist_delete_host(tree->all_chldrn_hl,
-                             pmixp_info_hostname());
-        tree->chldrn_str =
-                hostlist_ranged_string_xmalloc(tree->all_chldrn_hl);
+        hostlist_delete_host(tree->all_chldrn_hl, pmixp_info_hostname());
+        tree->chldrn_str = hostlist_ranged_string_xmalloc(tree->all_chldrn_hl);
     } else {
         /* for all other nodes in the tree we need to know:
          * - nodename of our parent;
@@ -328,8 +315,7 @@ static void _ufwd_sent_cb(int rc, pmixp_p2p_ctx_t ctx, void *_vcbdata) {
         goto exit;
     }
 
-    xassert(PMIXP_COLL_TREE_UPFWD == tree->state ||
-            PMIXP_COLL_TREE_UPFWD_WSC == tree->state);
+    xassert(PMIXP_COLL_TREE_UPFWD == tree->state || PMIXP_COLL_TREE_UPFWD_WSC == tree->state);
 
 
     /* Change  the status */
@@ -340,8 +326,7 @@ static void _ufwd_sent_cb(int rc, pmixp_p2p_ctx_t ctx, void *_vcbdata) {
     }
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: state: %s, snd_status=%s",
-                coll, pmixp_coll_tree_state2str(tree->state),
+    PMIXP_DEBUG("%p: state: %s, snd_status=%s", coll, pmixp_coll_tree_state2str(tree->state),
                 pmixp_coll_tree_sndstatus2str(tree->ufwd_status));
 #endif
 
@@ -391,10 +376,8 @@ static void _dfwd_sent_cb(int rc, pmixp_p2p_ctx_t ctx, void *_vcbdata) {
     }
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: state: %s, snd_status=%s, compl_cnt=%d/%d",
-                coll, pmixp_coll_tree_state2str(tree->state),
-                pmixp_coll_tree_sndstatus2str(tree->dfwd_status),
-                tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
+    PMIXP_DEBUG("%p: state: %s, snd_status=%s, compl_cnt=%d/%d", coll, pmixp_coll_tree_state2str(tree->state),
+                pmixp_coll_tree_sndstatus2str(tree->dfwd_status), tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
 #endif
 
     exit:
@@ -427,8 +410,7 @@ static void _libpmix_cb(void *_vcbdata) {
          * we initiated this send.
          * Just exit to avoid data corruption.
          */
-        PMIXP_ERROR("%p: collective was reset: myseq=%u, curseq=%u",
-                    coll, cbdata->seq, coll->seq);
+        PMIXP_ERROR("%p: collective was reset: myseq=%u, curseq=%u", coll, cbdata->seq, coll->seq);
         goto exit;
     }
 
@@ -436,10 +418,8 @@ static void _libpmix_cb(void *_vcbdata) {
 
     tree->dfwd_cb_cnt++;
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: state: %s, snd_status=%s, compl_cnt=%d/%d",
-                coll, pmixp_coll_tree_state2str(tree->state),
-                pmixp_coll_tree_sndstatus2str(tree->dfwd_status),
-                tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
+    PMIXP_DEBUG("%p: state: %s, snd_status=%s, compl_cnt=%d/%d", coll, pmixp_coll_tree_state2str(tree->state),
+                pmixp_coll_tree_sndstatus2str(tree->dfwd_status), tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
 #endif
     _progress_coll_tree(coll);
 
@@ -463,8 +443,7 @@ static int _progress_collect(pmixp_coll_t *coll) {
 
     ep.type = PMIXP_EP_NONE;
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: state=%s, local=%d, child_cntr=%d",
-                coll, pmixp_coll_tree_state2str(tree->state),
+    PMIXP_DEBUG("%p: state=%s, local=%d, child_cntr=%d", coll, pmixp_coll_tree_state2str(tree->state),
                 (int) tree->contrib_local, tree->contrib_children);
 #endif
     /* sanity check */
@@ -477,8 +456,7 @@ static int _progress_collect(pmixp_coll_t *coll) {
         return 0;
     }
 
-    if (!tree->contrib_local ||
-        tree->contrib_children != tree->chldrn_cnt) {
+    if (!tree->contrib_local || tree->contrib_children != tree->chldrn_cnt) {
         /* Not yet ready to go to the next step */
         return 0;
     }
@@ -510,14 +488,11 @@ static int _progress_collect(pmixp_coll_t *coll) {
         ep.type = PMIXP_EP_NOIDEID;
         ep.ep.nodeid = tree->prnt_peerid;
         tree->ufwd_status = PMIXP_COLL_TREE_SND_ACTIVE;
-        PMIXP_DEBUG("%p: send data to %s:%d",
-                    coll, tree->prnt_host, tree->prnt_peerid);
+        PMIXP_DEBUG("%p: send data to %s:%d", coll, tree->prnt_host, tree->prnt_peerid);
     } else {
         /* move data from input buffer to the output */
-        char *dst, *src = get_buf_data(tree->ufwd_buf) +
-                          tree->ufwd_offset;
-        size_t size = get_buf_offset(tree->ufwd_buf) -
-                      tree->ufwd_offset;
+        char *dst, *src = get_buf_data(tree->ufwd_buf) + tree->ufwd_offset;
+        size_t size = get_buf_offset(tree->ufwd_buf) - tree->ufwd_offset;
         pmixp_server_buf_reserve(tree->dfwd_buf, size);
         dst = get_buf_data(tree->dfwd_buf) + tree->dfwd_offset;
         memcpy(dst, src, size);
@@ -535,20 +510,15 @@ static int _progress_collect(pmixp_coll_t *coll) {
         cbdata->seq = coll->seq;
         cbdata->refcntr = 1;
         char *nodename = tree->prnt_host;
-        rc = pmixp_server_send_nb(&ep, PMIXP_MSG_FAN_IN, coll->seq,
-                                  tree->ufwd_buf,
-                                  _ufwd_sent_cb, cbdata);
+        rc = pmixp_server_send_nb(&ep, PMIXP_MSG_FAN_IN, coll->seq, tree->ufwd_buf, _ufwd_sent_cb, cbdata);
 
         if (SLURM_SUCCESS != rc) {
-            PMIXP_ERROR("Cannot send data (size = %u), to %s:%d",
-                        get_buf_offset(tree->ufwd_buf),
-                        nodename, ep.ep.nodeid);
+            PMIXP_ERROR("Cannot send data (size = %u), to %s:%d", get_buf_offset(tree->ufwd_buf), nodename,
+                        ep.ep.nodeid);
             tree->ufwd_status = PMIXP_COLL_TREE_SND_FAILED;
         }
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: fwd to %s:%d, size = %u",
-                    coll, nodename, ep.ep.nodeid,
-                    get_buf_offset(tree->dfwd_buf));
+        PMIXP_DEBUG("%p: fwd to %s:%d, size = %u", coll, nodename, ep.ep.nodeid, get_buf_offset(tree->dfwd_buf));
 #endif
     }
 
@@ -591,12 +561,10 @@ static int _progress_ufwd(pmixp_coll_t *coll) {
             return false;
         default:
             /* Should not happen */
-        PMIXP_ERROR("Bad collective ufwd state=%d",
-                    (int) tree->ufwd_status);
+        PMIXP_ERROR("Bad collective ufwd state=%d", (int) tree->ufwd_status);
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
-            slurm_kill_job_step(pmixp_info_jobid(),
-                                pmixp_info_stepid(), SIGKILL);
+            slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
             return false;
     }
 
@@ -638,57 +606,43 @@ static int _progress_ufwd(pmixp_coll_t *coll) {
     }
 
     for (i = 0; i < ep_cnt; i++) {
-        rc = pmixp_server_send_nb(&ep[i], PMIXP_MSG_FAN_OUT, coll->seq,
-                                  tree->dfwd_buf,
-                                  _dfwd_sent_cb, cbdata);
+        rc = pmixp_server_send_nb(&ep[i], PMIXP_MSG_FAN_OUT, coll->seq, tree->dfwd_buf, _dfwd_sent_cb, cbdata);
 
         if (SLURM_SUCCESS != rc) {
             if (PMIXP_EP_NOIDEID == ep[i].type) {
                 nodename = pmixp_info_job_host(ep[i].ep.nodeid);
                 PMIXP_ERROR("Cannot send data (size = %u), "
-                            "to %s:%d",
-                            get_buf_offset(tree->dfwd_buf),
-                            nodename, ep[i].ep.nodeid);
+                            "to %s:%d", get_buf_offset(tree->dfwd_buf), nodename, ep[i].ep.nodeid);
                 xfree(nodename);
             } else {
                 PMIXP_ERROR("Cannot send data (size = %u), "
-                            "to %s",
-                            get_buf_offset(tree->dfwd_buf),
-                            ep[i].ep.hostlist);
+                            "to %s", get_buf_offset(tree->dfwd_buf), ep[i].ep.hostlist);
             }
             tree->dfwd_status = PMIXP_COLL_TREE_SND_FAILED;
         }
 #ifdef PMIXP_COLL_DEBUG
         if (PMIXP_EP_NOIDEID == ep[i].type) {
             nodename = pmixp_info_job_host(ep[i].ep.nodeid);
-            PMIXP_DEBUG("%p: fwd to %s:%d, size = %u",
-                        coll, nodename, ep[i].ep.nodeid,
-                        get_buf_offset(tree->dfwd_buf));
+            PMIXP_DEBUG("%p: fwd to %s:%d, size = %u", coll, nodename, ep[i].ep.nodeid, get_buf_offset(tree->dfwd_buf));
             xfree(nodename);
         } else {
-            PMIXP_DEBUG("%p: fwd to %s, size = %u",
-                        coll, ep[i].ep.hostlist,
-                        get_buf_offset(tree->dfwd_buf));
+            PMIXP_DEBUG("%p: fwd to %s, size = %u", coll, ep[i].ep.hostlist, get_buf_offset(tree->dfwd_buf));
         }
 #endif
     }
 
     if (coll->cbfunc) {
         char *data = get_buf_data(tree->dfwd_buf) + tree->dfwd_offset;
-        size_t size = get_buf_offset(tree->dfwd_buf) -
-                      tree->dfwd_offset;
+        size_t size = get_buf_offset(tree->dfwd_buf) - tree->dfwd_offset;
         tree->dfwd_cb_wait++;
-        pmixp_lib_modex_invoke(coll->cbfunc, SLURM_SUCCESS,
-                               data, size, coll->cbdata,
-                               _libpmix_cb, (void *) cbdata);
+        pmixp_lib_modex_invoke(coll->cbfunc, SLURM_SUCCESS, data, size, coll->cbdata, _libpmix_cb, (void *) cbdata);
         /* Clear callback info as we are not
          * allowed to use it second time
          */
         coll->cbfunc = NULL;
         coll->cbdata = NULL;
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: local delivery, size = %lu",
-                    coll, size);
+        PMIXP_DEBUG("%p: local delivery, size = %lu", coll, size);
 #endif
     }
 
@@ -722,12 +676,10 @@ static int _progress_ufwd_sc(pmixp_coll_t *coll) {
             break;
         default:
             /* Should not happen */
-        PMIXP_ERROR("Bad collective ufwd state=%d",
-                    (int) tree->ufwd_status);
+        PMIXP_ERROR("Bad collective ufwd state=%d", (int) tree->ufwd_status);
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
-            slurm_kill_job_step(pmixp_info_jobid(),
-                                pmixp_info_stepid(), SIGKILL);
+            slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
             return false;
     }
 
@@ -764,11 +716,8 @@ static int _progress_ufwd_wpc(pmixp_coll_t *coll) {
         cbdata->refcntr = 1;
 
         char *data = get_buf_data(tree->dfwd_buf) + tree->dfwd_offset;
-        size_t size = get_buf_offset(tree->dfwd_buf) -
-                      tree->dfwd_offset;
-        pmixp_lib_modex_invoke(coll->cbfunc, SLURM_SUCCESS, data, size,
-                               coll->cbdata, _libpmix_cb,
-                               (void *) cbdata);
+        size_t size = get_buf_offset(tree->dfwd_buf) - tree->dfwd_offset;
+        pmixp_lib_modex_invoke(coll->cbfunc, SLURM_SUCCESS, data, size, coll->cbdata, _libpmix_cb, (void *) cbdata);
         tree->dfwd_cb_wait++;
         /* Clear callback info as we are not
          * allowed to use it second time
@@ -776,8 +725,7 @@ static int _progress_ufwd_wpc(pmixp_coll_t *coll) {
         coll->cbfunc = NULL;
         coll->cbdata = NULL;
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: local delivery, size = %lu",
-                    coll, size);
+        PMIXP_DEBUG("%p: local delivery, size = %lu", coll, size);
 #endif
     }
 
@@ -814,17 +762,14 @@ static int _progress_dfwd(pmixp_coll_t *coll) {
             break;
         default:
             /* Should not happen */
-        PMIXP_ERROR("Bad collective dfwd state=%d",
-                    (int) tree->dfwd_status);
+        PMIXP_ERROR("Bad collective dfwd state=%d", (int) tree->dfwd_status);
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
-            slurm_kill_job_step(pmixp_info_jobid(),
-                                pmixp_info_stepid(), SIGKILL);
+            slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
             return false;
     }
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: %s seq=%d is DONE", coll,
-                pmixp_coll_type2str(coll->type), coll->seq);
+    PMIXP_DEBUG("%p: %s seq=%d is DONE", coll, pmixp_coll_type2str(coll->type), coll->seq);
 #endif
     _reset_coll(coll);
 
@@ -861,14 +806,12 @@ static void _progress_coll_tree(pmixp_coll_t *coll) {
             case PMIXP_COLL_TREE_DOWNFWD:
                 ret = _progress_dfwd(coll);
                 break;
-            default: PMIXP_ERROR("%p: unknown state = %d",
-                                 coll, tree->state);
+            default: PMIXP_ERROR("%p: unknown state = %d", coll, tree->state);
         }
     } while (ret);
 }
 
-int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size,
-                          void *cbfunc, void *cbdata) {
+int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size, void *cbfunc, void *cbdata) {
     pmixp_coll_tree_t *tree = NULL;
     int ret = SLURM_SUCCESS;
 
@@ -882,9 +825,8 @@ int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size,
     tree = &coll->state.tree;
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: contrib/loc: seqnum=%u, state=%s, size=%zu",
-                coll, coll->seq, pmixp_coll_tree_state2str(tree->state),
-                size);
+    PMIXP_DEBUG("%p: contrib/loc: seqnum=%u, state=%s, size=%zu", coll, coll->seq,
+                pmixp_coll_tree_state2str(tree->state), size);
 #endif
 
     switch (tree->state) {
@@ -912,19 +854,17 @@ int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size,
         case PMIXP_COLL_TREE_UPFWD_WPC:
             /* this is not a correct behavior, respond with an error. */
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: contrib/loc: before prev coll is finished!",
-                    coll);
+        PMIXP_DEBUG("%p: contrib/loc: before prev coll is finished!", coll);
 #endif
             ret = SLURM_ERROR;
             goto exit;
         default:
             /* FATAL: should not happen in normal workflow */
-        PMIXP_ERROR("%p: local contrib while active collective, state = %s",
-                    coll, pmixp_coll_tree_state2str(tree->state));
+        PMIXP_ERROR("%p: local contrib while active collective, state = %s", coll,
+                    pmixp_coll_tree_state2str(tree->state));
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
-            slurm_kill_job_step(pmixp_info_jobid(),
-                                pmixp_info_stepid(), SIGKILL);
+            slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
             ret = SLURM_ERROR;
             goto exit;
     }
@@ -940,8 +880,7 @@ int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size,
     /* save & mark local contribution */
     tree->contrib_local = true;
     pmixp_server_buf_reserve(tree->ufwd_buf, size);
-    memcpy(get_buf_data(tree->ufwd_buf) + get_buf_offset(tree->ufwd_buf),
-           data, size);
+    memcpy(get_buf_data(tree->ufwd_buf) + get_buf_offset(tree->ufwd_buf), data, size);
     set_buf_offset(tree->ufwd_buf, get_buf_offset(tree->ufwd_buf) + size);
 
     /* setup callback info */
@@ -952,8 +891,7 @@ int pmixp_coll_tree_local(pmixp_coll_t *coll, char *data, size_t size,
     _progress_coll_tree(coll);
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: finish, state=%s", coll,
-                pmixp_coll_tree_state2str(tree->state));
+    PMIXP_DEBUG("%p: finish, state=%s", coll, pmixp_coll_tree_state2str(tree->state));
 #endif
 
     exit:
@@ -988,8 +926,7 @@ static char *_chld_ids_str(pmixp_coll_tree_t *tree) {
 }
 
 
-int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
-                          uint32_t seq, Buf buf) {
+int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid, uint32_t seq, Buf buf) {
     char *data_src = NULL, *data_dst = NULL;
     uint32_t size;
     int chld_id;
@@ -1003,17 +940,15 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
     if (0 > (chld_id = _chld_id(tree, peerid))) {
         char *nodename = pmixp_info_job_host(peerid);
         char *avail_ids = _chld_ids_str(tree);
-        PMIXP_DEBUG("%p: contribution from the non-child node %s:%u, acceptable ids: %s",
-                    coll, nodename, peerid, avail_ids);
+        PMIXP_DEBUG("%p: contribution from the non-child node %s:%u, acceptable ids: %s", coll, nodename, peerid,
+                    avail_ids);
         xfree(nodename);
         xfree(avail_ids);
     }
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: contrib/rem from nodeid=%u, childid=%d, state=%s, size=%u",
-                coll, peerid, chld_id,
-                pmixp_coll_tree_state2str(tree->state),
-                remaining_buf(buf));
+    PMIXP_DEBUG("%p: contrib/rem from nodeid=%u, childid=%d, state=%s, size=%u", coll, peerid, chld_id,
+                pmixp_coll_tree_state2str(tree->state), remaining_buf(buf));
 #endif
 
     switch (tree->state) {
@@ -1026,10 +961,8 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
             if (coll->seq != seq) {
                 char *nodename = pmixp_info_job_host(peerid);
                 /* FATAL: should not happen in normal workflow */
-                PMIXP_ERROR("%p: unexpected contrib from %s:%d (child #%d) seq = %d, coll->seq = %d, state=%s",
-                            coll, nodename, peerid, chld_id,
-                            seq, coll->seq,
-                            pmixp_coll_tree_state2str(tree->state));
+                PMIXP_ERROR("%p: unexpected contrib from %s:%d (child #%d) seq = %d, coll->seq = %d, state=%s", coll,
+                            nodename, peerid, chld_id, seq, coll->seq, pmixp_coll_tree_state2str(tree->state));
                 xfree(nodename);
                 goto error;
             }
@@ -1038,8 +971,7 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
         case PMIXP_COLL_TREE_UPFWD_WSC: {
             char *nodename = pmixp_info_job_host(peerid);
             /* FATAL: should not happen in normal workflow */
-            PMIXP_ERROR("%p: unexpected contrib from %s:%d, state = %s",
-                        coll, nodename, peerid,
+            PMIXP_ERROR("%p: unexpected contrib from %s:%d, state = %s", coll, nodename, peerid,
                         pmixp_coll_tree_state2str(tree->state));
             xfree(nodename);
             goto error;
@@ -1050,25 +982,21 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
             /* It looks like a retransmission attempt when remote side
              * identified transmission failure, but we actually successfuly
              * received the message */
-        PMIXP_DEBUG("%p: contrib for the next coll. nodeid=%u, child=%d seq=%u, coll->seq=%u, state=%s",
-                    coll, peerid, chld_id, seq, coll->seq,
-                    pmixp_coll_tree_state2str(tree->state));
+        PMIXP_DEBUG("%p: contrib for the next coll. nodeid=%u, child=%d seq=%u, coll->seq=%u, state=%s", coll, peerid,
+                    chld_id, seq, coll->seq, pmixp_coll_tree_state2str(tree->state));
 #endif
             if ((coll->seq + 1) != seq) {
                 char *nodename = pmixp_info_job_host(peerid);
                 /* should not happen in normal workflow */
-                PMIXP_ERROR("%p: unexpected contrib from %s:%d(x:%d) seq = %d, coll->seq = %d, state=%s",
-                            coll, nodename, peerid, chld_id,
-                            seq, coll->seq,
-                            pmixp_coll_tree_state2str(tree->state));
+                PMIXP_ERROR("%p: unexpected contrib from %s:%d(x:%d) seq = %d, coll->seq = %d, state=%s", coll,
+                            nodename, peerid, chld_id, seq, coll->seq, pmixp_coll_tree_state2str(tree->state));
                 xfree(nodename);
                 goto error;
             }
             break;
         default:
             /* should not happen in normal workflow */
-        PMIXP_ERROR("%p: unknown collective state %s",
-                    coll, pmixp_coll_tree_state2str(tree->state));
+        PMIXP_ERROR("%p: unknown collective state %s", coll, pmixp_coll_tree_state2str(tree->state));
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
             goto error2;
@@ -1082,8 +1010,7 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
         /* May be 0 or 1. If grater - transmission skew, ignore.
          * NOTE: this output is not on the critical path -
          * don't preprocess it out */
-        PMIXP_DEBUG("%p: multiple contribs from %s:%d(x:%d)",
-                    coll, nodename, peerid, chld_id);
+        PMIXP_DEBUG("%p: multiple contribs from %s:%d(x:%d)", coll, nodename, peerid, chld_id);
         /* this is duplication, skip. */
         xfree(nodename);
         goto proceed;
@@ -1092,8 +1019,7 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
     data_src = get_buf_data(buf) + get_buf_offset(buf);
     size = remaining_buf(buf);
     pmixp_server_buf_reserve(tree->ufwd_buf, size);
-    data_dst = get_buf_data(tree->ufwd_buf) +
-               get_buf_offset(tree->ufwd_buf);
+    data_dst = get_buf_data(tree->ufwd_buf) + get_buf_offset(tree->ufwd_buf);
     memcpy(data_dst, data_src, size);
     set_buf_offset(tree->ufwd_buf, get_buf_offset(tree->ufwd_buf) + size);
 
@@ -1106,8 +1032,7 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
     _progress_coll_tree(coll);
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: finish nodeid=%u, child=%d, state=%s",
-                coll, peerid, chld_id,
+    PMIXP_DEBUG("%p: finish nodeid=%u, child=%d, state=%s", coll, peerid, chld_id,
                 pmixp_coll_tree_state2str(tree->state));
 #endif
     /* unlock the structure */
@@ -1118,16 +1043,14 @@ int pmixp_coll_tree_child(pmixp_coll_t *coll, uint32_t peerid,
     pmixp_coll_log(coll);
     _reset_coll(coll);
     error2:
-    slurm_kill_job_step(pmixp_info_jobid(),
-                        pmixp_info_stepid(), SIGKILL);
+    slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
     /* unlock the structure */
     slurm_mutex_unlock(&coll->lock);
 
     return SLURM_ERROR;
 }
 
-int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
-                           uint32_t seq, Buf buf) {
+int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid, uint32_t seq, Buf buf) {
     pmixp_coll_tree_t *tree = NULL;
     char *data_src = NULL, *data_dst = NULL;
     uint32_t size;
@@ -1146,15 +1069,13 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
     if (expected_peerid != peerid) {
         char *nodename = pmixp_info_job_host(peerid);
         /* protect ourselfs if we are running with no asserts */
-        PMIXP_ERROR("%p: parent contrib from bad nodeid=%s:%u, expect=%d",
-                    coll, nodename, peerid, expected_peerid);
+        PMIXP_ERROR("%p: parent contrib from bad nodeid=%s:%u, expect=%d", coll, nodename, peerid, expected_peerid);
         xfree(nodename);
         goto proceed;
     }
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: contrib/rem nodeid=%u: state=%s, size=%u",
-                coll, peerid, pmixp_coll_tree_state2str(tree->state),
+    PMIXP_DEBUG("%p: contrib/rem nodeid=%u: state=%s, size=%u", coll, peerid, pmixp_coll_tree_state2str(tree->state),
                 remaining_buf(buf));
 #endif
 
@@ -1165,17 +1086,15 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
              * identified transmission failure, but we actually successfuly
              * received the message */
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: prev contrib nodeid=%u: seq=%u, cur_seq=%u, state=%s",
-                    coll, peerid, seq, coll->seq,
+        PMIXP_DEBUG("%p: prev contrib nodeid=%u: seq=%u, cur_seq=%u, state=%s", coll, peerid, seq, coll->seq,
                     pmixp_coll_tree_state2str(tree->state));
 #endif
             /* sanity check */
             if ((coll->seq - 1) != seq) {
                 /* FATAL: should not happen in normal workflow */
                 char *nodename = pmixp_info_job_host(peerid);
-                PMIXP_ERROR("%p: unexpected from %s:%d: seq = %d, coll->seq = %d, state=%s",
-                            coll, nodename, peerid, seq, coll->seq,
-                            pmixp_coll_tree_state2str(tree->state));
+                PMIXP_ERROR("%p: unexpected from %s:%d: seq = %d, coll->seq = %d, state=%s", coll, nodename, peerid,
+                            seq, coll->seq, pmixp_coll_tree_state2str(tree->state));
                 xfree(nodename);
                 goto error;
             }
@@ -1187,9 +1106,8 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
              * we chould transit to PMIXP_COLL_UPFWD_WPC immediately */
             /* FATAL: should not happen in normal workflow */
             char *nodename = pmixp_info_job_host(peerid);
-            PMIXP_ERROR("%p: unexpected from %s:%d: seq = %d, coll->seq = %d, state=%s",
-                        coll, nodename, peerid, seq, coll->seq,
-                        pmixp_coll_tree_state2str(tree->state));
+            PMIXP_ERROR("%p: unexpected from %s:%d: seq = %d, coll->seq = %d, state=%s", coll, nodename, peerid, seq,
+                        coll->seq, pmixp_coll_tree_state2str(tree->state));
             xfree(nodename);
             goto error;
         }
@@ -1202,25 +1120,22 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
              * identified transmission failure, but we actually successfuly
              * received the message */
 #ifdef PMIXP_COLL_DEBUG
-        PMIXP_DEBUG("%p: double contrib nodeid=%u seq=%u, cur_seq=%u, state=%s",
-                    coll, peerid, seq, coll->seq,
+        PMIXP_DEBUG("%p: double contrib nodeid=%u seq=%u, cur_seq=%u, state=%s", coll, peerid, seq, coll->seq,
                     pmixp_coll_tree_state2str(tree->state));
 #endif
             /* sanity check */
             if (coll->seq != seq) {
                 char *nodename = pmixp_info_job_host(peerid);
                 /* FATAL: should not happen in normal workflow */
-                PMIXP_ERROR("%p: unexpected contrib from %s:%d: seq = %d, coll->seq = %d, state=%s",
-                            coll, nodename, peerid, seq, coll->seq,
-                            pmixp_coll_tree_state2str(tree->state));
+                PMIXP_ERROR("%p: unexpected contrib from %s:%d: seq = %d, coll->seq = %d, state=%s", coll, nodename,
+                            peerid, seq, coll->seq, pmixp_coll_tree_state2str(tree->state));
                 xfree(nodename);
                 goto error;
             }
             goto proceed;
         default:
             /* should not happen in normal workflow */
-        PMIXP_ERROR("%p: unknown collective state %s",
-                    coll, pmixp_coll_tree_state2str(tree->state));
+        PMIXP_ERROR("%p: unknown collective state %s", coll, pmixp_coll_tree_state2str(tree->state));
             /* collective is spoiled, reset state */
             tree->state = PMIXP_COLL_TREE_SYNC;
             goto error2;
@@ -1234,8 +1149,7 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
         /* May be 0 or 1. If grater - transmission skew, ignore.
          * NOTE: this output is not on the critical path -
          * don't preprocess it out */
-        PMIXP_DEBUG("%p: multiple contributions from parent %s:%d",
-                    coll, nodename, peerid);
+        PMIXP_DEBUG("%p: multiple contributions from parent %s:%d", coll, nodename, peerid);
         xfree(nodename);
         /* this is duplication, skip. */
         goto proceed;
@@ -1246,17 +1160,14 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
     size = remaining_buf(buf);
     pmixp_server_buf_reserve(tree->dfwd_buf, size);
 
-    data_dst = get_buf_data(tree->dfwd_buf) +
-               get_buf_offset(tree->dfwd_buf);
+    data_dst = get_buf_data(tree->dfwd_buf) + get_buf_offset(tree->dfwd_buf);
     memcpy(data_dst, data_src, size);
-    set_buf_offset(tree->dfwd_buf,
-                   get_buf_offset(tree->dfwd_buf) + size);
+    set_buf_offset(tree->dfwd_buf, get_buf_offset(tree->dfwd_buf) + size);
     proceed:
     _progress_coll_tree(coll);
 
 #ifdef PMIXP_COLL_DEBUG
-    PMIXP_DEBUG("%p: finish: nodeid=%u, state=%s",
-                coll, peerid, pmixp_coll_tree_state2str(tree->state));
+    PMIXP_DEBUG("%p: finish: nodeid=%u, state=%s", coll, peerid, pmixp_coll_tree_state2str(tree->state));
 #endif
     /* unlock the structure */
     slurm_mutex_unlock(&coll->lock);
@@ -1266,8 +1177,7 @@ int pmixp_coll_tree_parent(pmixp_coll_t *coll, uint32_t peerid,
     pmixp_coll_log(coll);
     _reset_coll(coll);
     error2:
-    slurm_kill_job_step(pmixp_info_jobid(),
-                        pmixp_info_stepid(), SIGKILL);
+    slurm_kill_job_step(pmixp_info_jobid(), pmixp_info_stepid(), SIGKILL);
     slurm_mutex_unlock(&coll->lock);
 
     return SLURM_ERROR;
@@ -1304,10 +1214,8 @@ void pmixp_coll_tree_log(pmixp_coll_t *coll) {
     pmixp_coll_tree_t *tree = &coll->state.tree;
     char *nodename;
 
-    PMIXP_ERROR("%p: %s state seq=%d contribs: loc=%d/prnt=%d/child=%u",
-                coll, pmixp_coll_type2str(coll->type), coll->seq,
-                tree->contrib_local, tree->contrib_prnt,
-                tree->contrib_children);
+    PMIXP_ERROR("%p: %s state seq=%d contribs: loc=%d/prnt=%d/child=%u", coll, pmixp_coll_type2str(coll->type),
+                coll->seq, tree->contrib_local, tree->contrib_prnt, tree->contrib_children);
     nodename = pmixp_info_job_host(coll->my_peerid);
     PMIXP_ERROR("my peerid: %d:%s", coll->my_peerid, nodename);
     xfree(nodename);
@@ -1315,22 +1223,18 @@ void pmixp_coll_tree_log(pmixp_coll_t *coll) {
     PMIXP_ERROR("root host: %d:%s", tree->root_peerid, nodename);
     xfree(nodename);
     if (tree->prnt_peerid >= 0) {
-        PMIXP_ERROR("prnt host: %d:%s",
-                    tree->prnt_peerid, tree->prnt_host);
+        PMIXP_ERROR("prnt host: %d:%s", tree->prnt_peerid, tree->prnt_host);
         PMIXP_ERROR("prnt contrib:");
-        PMIXP_ERROR("\t [%d:%s] %s", tree->prnt_peerid, tree->prnt_host,
-                    tree->contrib_prnt ? "true" : "false");
+        PMIXP_ERROR("\t [%d:%s] %s", tree->prnt_peerid, tree->prnt_host, tree->contrib_prnt ? "true" : "false");
     }
     if (tree->chldrn_cnt) {
         char *done_contrib = NULL, *wait_contrib = NULL;
-        hostlist_t hl_done_contrib = NULL,
-                hl_wait_contrib = NULL, *tmp_list;
+        hostlist_t hl_done_contrib = NULL, hl_wait_contrib = NULL, *tmp_list;
 
         PMIXP_ERROR("child contribs [%d]:", tree->chldrn_cnt);
         for (i = 0; i < tree->chldrn_cnt; i++) {
             nodename = pmixp_info_job_host(tree->chldrn_ids[i]);
-            tmp_list = tree->contrib_chld[i] ?
-                       &hl_done_contrib : &hl_wait_contrib;
+            tmp_list = tree->contrib_chld[i] ? &hl_done_contrib : &hl_wait_contrib;
 
             if (!*tmp_list)
                 *tmp_list = hostlist_create(nodename);
@@ -1340,32 +1244,22 @@ void pmixp_coll_tree_log(pmixp_coll_t *coll) {
             xfree(nodename);
         }
         if (hl_done_contrib) {
-            done_contrib =
-                    slurm_hostlist_ranged_string_xmalloc(
-                            hl_done_contrib);
+            done_contrib = slurm_hostlist_ranged_string_xmalloc(hl_done_contrib);
             FREE_NULL_HOSTLIST(hl_done_contrib);
         }
 
         if (hl_wait_contrib) {
-            wait_contrib =
-                    slurm_hostlist_ranged_string_xmalloc(
-                            hl_wait_contrib);
+            wait_contrib = slurm_hostlist_ranged_string_xmalloc(hl_wait_contrib);
             FREE_NULL_HOSTLIST(hl_wait_contrib);
         }
-        PMIXP_ERROR("\t done contrib: %s",
-                    done_contrib ? done_contrib : "-");
-        PMIXP_ERROR("\t wait contrib: %s",
-                    wait_contrib ? wait_contrib : "-");
+        PMIXP_ERROR("\t done contrib: %s", done_contrib ? done_contrib : "-");
+        PMIXP_ERROR("\t wait contrib: %s", wait_contrib ? wait_contrib : "-");
         xfree(done_contrib);
         xfree(wait_contrib);
     }
-    PMIXP_ERROR("status: coll=%s upfw=%s dfwd=%s",
-                pmixp_coll_tree_state2str(tree->state),
-                pmixp_coll_tree_sndstatus2str(tree->ufwd_status),
-                pmixp_coll_tree_sndstatus2str(tree->dfwd_status));
-    PMIXP_ERROR("dfwd status: dfwd_cb_cnt=%u, dfwd_cb_wait=%u",
-                tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
-    PMIXP_ERROR("bufs (offset/size): upfw %u/%u, dfwd %u/%u",
-                get_buf_offset(tree->ufwd_buf), size_buf(tree->ufwd_buf),
+    PMIXP_ERROR("status: coll=%s upfw=%s dfwd=%s", pmixp_coll_tree_state2str(tree->state),
+                pmixp_coll_tree_sndstatus2str(tree->ufwd_status), pmixp_coll_tree_sndstatus2str(tree->dfwd_status));
+    PMIXP_ERROR("dfwd status: dfwd_cb_cnt=%u, dfwd_cb_wait=%u", tree->dfwd_cb_cnt, tree->dfwd_cb_wait);
+    PMIXP_ERROR("bufs (offset/size): upfw %u/%u, dfwd %u/%u", get_buf_offset(tree->ufwd_buf), size_buf(tree->ufwd_buf),
                 get_buf_offset(tree->dfwd_buf), size_buf(tree->dfwd_buf));
 }

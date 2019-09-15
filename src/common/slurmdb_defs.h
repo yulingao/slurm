@@ -60,15 +60,7 @@
  * acct_storage_p_get_tres() to reflect things as it is static.
  */
 typedef enum {
-    TRES_CPU = 1,
-    TRES_MEM,
-    TRES_ENERGY,
-    TRES_NODE,
-    TRES_BILLING,
-    TRES_FS_DISK,
-    TRES_VMEM,
-    TRES_PAGES,
-    TRES_STATIC_CNT
+    TRES_CPU = 1, TRES_MEM, TRES_ENERGY, TRES_NODE, TRES_BILLING, TRES_FS_DISK, TRES_VMEM, TRES_PAGES, TRES_STATIC_CNT
 } tres_types_t;
 
 /* These #defines are for the tres_str functions below and should be
@@ -156,8 +148,7 @@ extern slurmdb_admin_level_t str_2_slurmdb_admin_level(char *level);
 /* The next three functions have pointers to assoc_list so do not
  * destroy assoc_list before using the list returned from this function.
  */
-extern List slurmdb_get_hierarchical_sorted_assoc_list(List assoc_list,
-                                                       bool use_lft);
+extern List slurmdb_get_hierarchical_sorted_assoc_list(List assoc_list, bool use_lft);
 
 extern List slurmdb_get_acct_hierarchical_rec_list(List assoc_list);
 
@@ -193,39 +184,29 @@ extern int slurmdb_report_set_start_end_time(time_t *start, time_t *end);
 
 extern uint32_t slurmdb_parse_purge(char *string);
 
-extern char *slurmdb_purge_string(uint32_t purge, char *string, int len,
-                                  bool with_archive);
+extern char *slurmdb_purge_string(uint32_t purge, char *string, int len, bool with_archive);
 
-extern int slurmdb_addto_qos_char_list(List char_list, List qos_list,
-                                       char *names, int option);
+extern int slurmdb_addto_qos_char_list(List char_list, List qos_list, char *names, int option);
 
-extern int slurmdb_send_accounting_update(List update_list, char *cluster,
-                                          char *host, uint16_t port,
-                                          uint16_t rpc_version);
+extern int
+slurmdb_send_accounting_update(List update_list, char *cluster, char *host, uint16_t port, uint16_t rpc_version);
 
-extern slurmdb_report_cluster_rec_t *slurmdb_cluster_rec_2_report(
-        slurmdb_cluster_rec_t *cluster);
+extern slurmdb_report_cluster_rec_t *slurmdb_cluster_rec_2_report(slurmdb_cluster_rec_t *cluster);
 
 /* OUT: job_id_str - filled in with the id of the job/array
  * RET: job_id_str */
-extern char *slurmdb_get_selected_step_id(
-        char *job_id_str, int len,
-        slurmdb_selected_step_t *selected_step);
+extern char *slurmdb_get_selected_step_id(char *job_id_str, int len, slurmdb_selected_step_t *selected_step);
 
 /* OUT: out - copy grp/max/qos limits from in
  * IN:  in  - what to copy from
  */
-extern void slurmdb_copy_assoc_rec_limits(slurmdb_assoc_rec_t *out,
-                                          slurmdb_assoc_rec_t *in);
+extern void slurmdb_copy_assoc_rec_limits(slurmdb_assoc_rec_t *out, slurmdb_assoc_rec_t *in);
 
-extern void slurmdb_copy_cluster_rec(slurmdb_cluster_rec_t *out,
-                                     slurmdb_cluster_rec_t *in);
+extern void slurmdb_copy_cluster_rec(slurmdb_cluster_rec_t *out, slurmdb_cluster_rec_t *in);
 
-extern void slurmdb_copy_federation_rec(slurmdb_federation_rec_t *out,
-                                        slurmdb_federation_rec_t *in);
+extern void slurmdb_copy_federation_rec(slurmdb_federation_rec_t *out, slurmdb_federation_rec_t *in);
 
-extern void slurmdb_copy_qos_rec_limits(slurmdb_qos_rec_t *out,
-                                        slurmdb_qos_rec_t *in);
+extern void slurmdb_copy_qos_rec_limits(slurmdb_qos_rec_t *out, slurmdb_qos_rec_t *in);
 
 extern slurmdb_tres_rec_t *slurmdb_copy_tres_rec(slurmdb_tres_rec_t *tres);
 
@@ -233,8 +214,7 @@ extern List slurmdb_copy_tres_list(List tres);
 
 extern List slurmdb_diff_tres_list(List tres_list_old, List tres_list_new);
 
-extern char *slurmdb_tres_string_combine_lists(
-        List tres_list_old, List tres_list_new);
+extern char *slurmdb_tres_string_combine_lists(List tres_list_old, List tres_list_new);
 
 /* make a tres_string from a given list
  * IN tres - list of slurmdb_tres_rec_t's
@@ -245,8 +225,7 @@ extern char *slurmdb_tres_string_combine_lists(
  */
 extern char *slurmdb_make_tres_string(List tres, uint32_t flags);
 
-extern char *slurmdb_format_tres_str(
-        char *tres_in, List full_tres_list, bool simple);
+extern char *slurmdb_format_tres_str(char *tres_in, List full_tres_list, bool simple);
 
 /*
  * Comparator used for sorting tres by id
@@ -267,18 +246,15 @@ extern int slurmdb_sort_tres_by_id_asc(void *v1, void *v2);
  *                                      TRES_STR_FLAG_REMOVE
  *                                      TRES_STR_FLAG_SORT_ID
  */
-extern void slurmdb_tres_list_from_string(
-        List *tres_list, char *tres, uint32_t flags);
+extern void slurmdb_tres_list_from_string(List *tres_list, char *tres, uint32_t flags);
 
 /* combine a name array and count array into a string */
-extern char *slurmdb_make_tres_string_from_arrays(char **tres_names,
-                                                  uint64_t *tres_cnts,
-                                                  uint32_t tres_cnt,
-                                                  uint32_t flags);
+extern char *
+slurmdb_make_tres_string_from_arrays(char **tres_names, uint64_t *tres_cnts, uint32_t tres_cnt, uint32_t flags);
 
-extern char *slurmdb_make_tres_string_from_simple(
-        char *tres_in, List full_tres_list, int spec_unit,
-        uint32_t convert_flags, uint32_t tres_str_flags, char *nodes);
+extern char *
+slurmdb_make_tres_string_from_simple(char *tres_in, List full_tres_list, int spec_unit, uint32_t convert_flags,
+                                     uint32_t tres_str_flags, char *nodes);
 
 /* Used to combine 2 different TRES strings together
  *
@@ -294,11 +270,9 @@ extern char *slurmdb_make_tres_string_from_simple(
  *                                      TRES_STR_FLAG_NO_NULL
  * RET   : new tres_str_old - the new string (also sent out)
  */
-extern char *slurmdb_combine_tres_strings(
-        char **tres_str_old, char *tres_str_new, uint32_t flags);
+extern char *slurmdb_combine_tres_strings(char **tres_str_old, char *tres_str_new, uint32_t flags);
 
-extern slurmdb_tres_rec_t *slurmdb_find_tres_in_string(
-        char *tres_str_in, int id);
+extern slurmdb_tres_rec_t *slurmdb_find_tres_in_string(char *tres_str_in, int id);
 
 extern uint64_t slurmdb_find_tres_count_in_string(char *tres_str_in, int id);
 
@@ -322,26 +296,17 @@ extern int slurmdb_find_cluster_in_list(void *x, void *key);
 
 extern int slurmdb_find_cluster_accting_tres_in_list(void *x, void *key);
 
-extern int slurmdb_add_cluster_accounting_to_tres_list(
-        slurmdb_cluster_accounting_rec_t *accting,
-        List *tres);
+extern int slurmdb_add_cluster_accounting_to_tres_list(slurmdb_cluster_accounting_rec_t *accting, List *tres);
 
-extern int slurmdb_add_accounting_to_tres_list(
-        slurmdb_accounting_rec_t *accting,
-        List *tres);
+extern int slurmdb_add_accounting_to_tres_list(slurmdb_accounting_rec_t *accting, List *tres);
 
-extern int slurmdb_add_time_from_count_to_tres_list(
-        slurmdb_tres_rec_t *tres_in, List *tres, time_t elapsed);
+extern int slurmdb_add_time_from_count_to_tres_list(slurmdb_tres_rec_t *tres_in, List *tres, time_t elapsed);
 
-extern int slurmdb_sum_accounting_list(
-        slurmdb_cluster_accounting_rec_t *accting,
-        List *total_tres_acct);
+extern int slurmdb_sum_accounting_list(slurmdb_cluster_accounting_rec_t *accting, List *total_tres_acct);
 
-extern void slurmdb_transfer_acct_list_2_tres(
-        List accounting_list, List *tres);
+extern void slurmdb_transfer_acct_list_2_tres(List accounting_list, List *tres);
 
-extern void slurmdb_transfer_tres_time(
-        List *tres_list_out, char *tres_str, int elapsed);
+extern void slurmdb_transfer_tres_time(List *tres_list_out, char *tres_str, int elapsed);
 
 extern int slurmdb_get_tres_base_unit(char *tres_type);
 

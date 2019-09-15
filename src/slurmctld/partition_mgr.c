@@ -100,8 +100,7 @@ static Buf _open_part_state_file(char **state_file);
 
 static int _uid_list_size(uid_t *uid_list_ptr);
 
-static void _unlink_free_nodes(bitstr_t *old_bitmap,
-                               struct part_record *part_ptr);
+static void _unlink_free_nodes(bitstr_t *old_bitmap, struct part_record *part_ptr);
 
 static uid_t *_remove_duplicate_uids(uid_t *);
 
@@ -134,8 +133,7 @@ static int _calc_part_tres(void *x, void *arg) {
     for (i = 0; i < slurmctld_tres_cnt; i++) {
         slurmdb_tres_rec_t *tres_rec = assoc_mgr_tres_array[i];
 
-        if (!xstrcasecmp(tres_rec->type, "bb") ||
-            !xstrcasecmp(tres_rec->type, "license"))
+        if (!xstrcasecmp(tres_rec->type, "bb") || !xstrcasecmp(tres_rec->type, "license"))
             tres_cnt[i] = tres_rec->count;
     }
 
@@ -144,14 +142,10 @@ static int _calc_part_tres(void *x, void *arg) {
      * are configured with the max of all partitions they are in instead of
      * what is configured on this partition.
      */
-    tres_cnt[TRES_ARRAY_BILLING] = assoc_mgr_tres_weighted(
-            tres_cnt, part_ptr->billing_weights,
-            slurmctld_conf.priority_flags, true);
+    tres_cnt[TRES_ARRAY_BILLING] = assoc_mgr_tres_weighted(tres_cnt, part_ptr->billing_weights,
+                                                           slurmctld_conf.priority_flags, true);
 
-    part_ptr->tres_fmt_str =
-            assoc_mgr_make_tres_str_from_array(part_ptr->tres_cnt,
-                                               TRES_STR_CONVERT_UNITS,
-                                               true);
+    part_ptr->tres_fmt_str = assoc_mgr_make_tres_str_from_array(part_ptr->tres_cnt, TRES_STR_CONVERT_UNITS, true);
     return 0;
 }
 
@@ -192,8 +186,7 @@ extern int build_part_bitmap(struct part_record *part_ptr) {
         old_bitmap = NULL;
     } else {
         old_bitmap = bit_copy(part_ptr->node_bitmap);
-        bit_nclear(part_ptr->node_bitmap, 0,
-                   node_record_count - 1);
+        bit_nclear(part_ptr->node_bitmap, 0, node_record_count - 1);
     }
 
     if (part_ptr->nodes == NULL) {    /* no nodes in partition */
@@ -210,16 +203,14 @@ extern int build_part_bitmap(struct part_record *part_ptr) {
     }
     if ((host_list = hostlist_create(part_ptr->nodes)) == NULL) {
         FREE_NULL_BITMAP(old_bitmap);
-        error("hostlist_create error on %s, %m",
-              part_ptr->nodes);
+        error("hostlist_create error on %s, %m", part_ptr->nodes);
         return ESLURM_INVALID_NODE_NAME;
     }
 
     while ((this_node_name = hostlist_shift(host_list))) {
         node_ptr = find_node_record_no_alias(this_node_name);
         if (node_ptr == NULL) {
-            error("build_part_bitmap: invalid node name %s",
-                  this_node_name);
+            error("build_part_bitmap: invalid node name %s", this_node_name);
             free(this_node_name);
             FREE_NULL_BITMAP(old_bitmap);
             hostlist_destroy(host_list);
@@ -228,16 +219,12 @@ extern int build_part_bitmap(struct part_record *part_ptr) {
         part_ptr->total_nodes++;
         if (slurmctld_conf.fast_schedule) {
             part_ptr->total_cpus += node_ptr->config_ptr->cpus;
-            part_ptr->max_cpu_cnt = MAX(part_ptr->max_cpu_cnt,
-                                        node_ptr->config_ptr->cpus);
-            part_ptr->max_core_cnt = MAX(part_ptr->max_core_cnt,
-                                         node_ptr->config_ptr->cores);
+            part_ptr->max_cpu_cnt = MAX(part_ptr->max_cpu_cnt, node_ptr->config_ptr->cpus);
+            part_ptr->max_core_cnt = MAX(part_ptr->max_core_cnt, node_ptr->config_ptr->cores);
         } else {
             part_ptr->total_cpus += node_ptr->cpus;
-            part_ptr->max_cpu_cnt = MAX(part_ptr->max_cpu_cnt,
-                                        node_ptr->cpus);
-            part_ptr->max_core_cnt = MAX(part_ptr->max_core_cnt,
-                                         node_ptr->cores);
+            part_ptr->max_cpu_cnt = MAX(part_ptr->max_cpu_cnt, node_ptr->cpus);
+            part_ptr->max_core_cnt = MAX(part_ptr->max_core_cnt, node_ptr->cores);
         }
         for (i = 0; i < node_ptr->part_cnt; i++) {
             if (node_ptr->part_pptr[i] == part_ptr)
@@ -245,16 +232,12 @@ extern int build_part_bitmap(struct part_record *part_ptr) {
         }
         if (i == node_ptr->part_cnt) { /* Node in new partition */
             node_ptr->part_cnt++;
-            xrealloc(node_ptr->part_pptr, (node_ptr->part_cnt *
-                                           sizeof(struct part_record *)));
+            xrealloc(node_ptr->part_pptr, (node_ptr->part_cnt * sizeof(struct part_record *)));
             node_ptr->part_pptr[node_ptr->part_cnt - 1] = part_ptr;
         }
         if (old_bitmap)
-            bit_clear(old_bitmap,
-                      (int) (node_ptr -
-                             node_record_table_ptr));
-        bit_set(part_ptr->node_bitmap,
-                (int) (node_ptr - node_record_table_ptr));
+            bit_clear(old_bitmap, (int) (node_ptr - node_record_table_ptr));
+        bit_set(part_ptr->node_bitmap, (int) (node_ptr - node_record_table_ptr));
         free(this_node_name);
     }
     hostlist_destroy(host_list);
@@ -266,8 +249,7 @@ extern int build_part_bitmap(struct part_record *part_ptr) {
 }
 
 /* unlink nodes removed from a partition */
-static void _unlink_free_nodes(bitstr_t *old_bitmap,
-                               struct part_record *part_ptr) {
+static void _unlink_free_nodes(bitstr_t *old_bitmap, struct part_record *part_ptr) {
     int i, j, k, update_nodes = 0;
     struct node_record *node_ptr;
 
@@ -283,8 +265,7 @@ static void _unlink_free_nodes(bitstr_t *old_bitmap,
                 continue;
             node_ptr->part_cnt--;
             for (k = j; k < node_ptr->part_cnt; k++) {
-                node_ptr->part_pptr[k] =
-                        node_ptr->part_pptr[k + 1];
+                node_ptr->part_pptr[k] = node_ptr->part_pptr[k + 1];
             }
             break;
         }
@@ -311,8 +292,7 @@ struct part_record *create_part_record(void) {
     part_ptr->name = xstrdup("DEFAULT");
     part_ptr->alternate = xstrdup(default_part.alternate);
     part_ptr->cr_type = default_part.cr_type;
-    part_ptr->job_defaults_list =
-            job_defaults_copy(default_part.job_defaults_list);
+    part_ptr->job_defaults_list = job_defaults_copy(default_part.job_defaults_list);
     part_ptr->flags = default_part.flags;
     part_ptr->grace_time = default_part.grace_time;
     part_ptr->max_share = default_part.max_share;
@@ -330,16 +310,13 @@ struct part_record *create_part_record(void) {
     part_ptr->state_up = default_part.state_up;
 
     if (part_max_priority) {
-        part_ptr->norm_priority =
-                (double) default_part.priority_job_factor /
-                (double) part_max_priority;
+        part_ptr->norm_priority = (double) default_part.priority_job_factor / (double) part_max_priority;
     }
     part_ptr->node_bitmap = NULL;
 
     if (default_part.allow_accounts) {
         part_ptr->allow_accounts = xstrdup(default_part.allow_accounts);
-        accounts_list_build(part_ptr->allow_accounts,
-                            &part_ptr->allow_account_array);
+        accounts_list_build(part_ptr->allow_accounts, &part_ptr->allow_account_array);
     } else
         part_ptr->allow_accounts = NULL;
 
@@ -350,15 +327,13 @@ struct part_record *create_part_record(void) {
 
     if (default_part.allow_qos) {
         part_ptr->allow_qos = xstrdup(default_part.allow_qos);
-        qos_list_build(part_ptr->allow_qos,
-                       &part_ptr->allow_qos_bitstr);
+        qos_list_build(part_ptr->allow_qos, &part_ptr->allow_qos_bitstr);
     } else
         part_ptr->allow_qos = NULL;
 
     if (default_part.deny_accounts) {
         part_ptr->deny_accounts = xstrdup(default_part.deny_accounts);
-        accounts_list_build(part_ptr->deny_accounts,
-                            &part_ptr->deny_account_array);
+        accounts_list_build(part_ptr->deny_accounts, &part_ptr->deny_account_array);
     } else
         part_ptr->deny_accounts = NULL;
 
@@ -375,19 +350,15 @@ struct part_record *create_part_record(void) {
 
         memset(&qos_rec, 0, sizeof(slurmdb_qos_rec_t));
         qos_rec.name = part_ptr->qos_char;
-        if (assoc_mgr_fill_in_qos(
-                acct_db_conn, &qos_rec, accounting_enforce,
-                (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0)
-            != SLURM_SUCCESS) {
+        if (assoc_mgr_fill_in_qos(acct_db_conn, &qos_rec, accounting_enforce,
+                                  (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0) != SLURM_SUCCESS) {
             fatal("Partition %s has an invalid qos (%s), "
-                  "please check your configuration",
-                  part_ptr->name, qos_rec.name);
+                  "please check your configuration", part_ptr->name, qos_rec.name);
         }
     }
 
     if (default_part.allow_alloc_nodes) {
-        part_ptr->allow_alloc_nodes =
-                xstrdup(default_part.allow_alloc_nodes);
+        part_ptr->allow_alloc_nodes = xstrdup(default_part.allow_alloc_nodes);
     }
 
     if (default_part.nodes)
@@ -433,8 +404,7 @@ int dump_all_part_state(void) {
     int error_code = 0, log_fd;
     char *old_file, *new_file, *reg_file;
     /* Locks: Read partition */
-    slurmctld_lock_t part_read_lock =
-            {READ_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
+    slurmctld_lock_t part_read_lock = {READ_LOCK, NO_LOCK, NO_LOCK, READ_LOCK, NO_LOCK};
     Buf buffer = init_buf(high_buffer_size);
     DEF_TIMERS;
 
@@ -460,8 +430,7 @@ int dump_all_part_state(void) {
     lock_state_files();
     log_fd = creat(new_file, 0600);
     if (log_fd < 0) {
-        error("Can't save state, error creating file %s, %m",
-              new_file);
+        error("Can't save state, error creating file %s, %m", new_file);
         error_code = errno;
     } else {
         int pos = 0, nwrite = get_buf_offset(buffer), amount, rc;
@@ -487,13 +456,11 @@ int dump_all_part_state(void) {
     else {            /* file shuffle */
         (void) unlink(old_file);
         if (link(reg_file, old_file)) {
-            debug4("unable to create link for %s -> %s: %m",
-                   reg_file, old_file);
+            debug4("unable to create link for %s -> %s: %m", reg_file, old_file);
         }
         (void) unlink(reg_file);
         if (link(new_file, reg_file)) {
-            debug4("unable to create link for %s -> %s: %m",
-                   new_file, reg_file);
+            debug4("unable to create link for %s -> %s: %m", new_file, reg_file);
         }
         (void) unlink(new_file);
     }
@@ -568,8 +535,7 @@ static Buf _open_part_state_file(char **state_file) {
     xstrcat(*state_file, "/part_state");
     buf = create_mmap_buf(*state_file);
     if (!buf) {
-        error("Could not open partition state file %s: %m",
-              *state_file);
+        error("Could not open partition state file %s: %m", *state_file);
     } else    /* Success */
         return buf;
 
@@ -610,8 +576,7 @@ int load_all_part_state(void) {
     lock_state_files();
     buffer = _open_part_state_file(&state_file);
     if (!buffer) {
-        info("No partition state file (%s) to recover",
-             state_file);
+        info("No partition state file (%s) to recover", state_file);
         xfree(state_file);
         unlock_state_files();
         return ENOENT;
@@ -661,31 +626,19 @@ int load_all_part_state(void) {
             safe_unpack16(&state_up, buffer);
             safe_unpack16(&cr_type, buffer);
 
-            safe_unpackstr_xmalloc(&allow_accounts,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&allow_groups,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&allow_qos,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&qos_char,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&deny_accounts,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&deny_qos,
-                                   &name_len, buffer);
-            safe_unpackstr_xmalloc(&allow_alloc_nodes,
-                                   &name_len, buffer);
+            safe_unpackstr_xmalloc(&allow_accounts, &name_len, buffer);
+            safe_unpackstr_xmalloc(&allow_groups, &name_len, buffer);
+            safe_unpackstr_xmalloc(&allow_qos, &name_len, buffer);
+            safe_unpackstr_xmalloc(&qos_char, &name_len, buffer);
+            safe_unpackstr_xmalloc(&deny_accounts, &name_len, buffer);
+            safe_unpackstr_xmalloc(&deny_qos, &name_len, buffer);
+            safe_unpackstr_xmalloc(&allow_alloc_nodes, &name_len, buffer);
             safe_unpackstr_xmalloc(&alternate, &name_len, buffer);
             safe_unpackstr_xmalloc(&nodes, &name_len, buffer);
-            if ((flags & PART_FLAG_DEFAULT_CLR) ||
-                (flags & PART_FLAG_EXC_USER_CLR) ||
-                (flags & PART_FLAG_HIDDEN_CLR) ||
-                (flags & PART_FLAG_NO_ROOT_CLR) ||
-                (flags & PART_FLAG_ROOT_ONLY_CLR) ||
-                (flags & PART_FLAG_REQ_RESV_CLR) ||
-                (flags & PART_FLAG_LLN_CLR)) {
-                error("Invalid data for partition %s: flags=%u",
-                      part_name, flags);
+            if ((flags & PART_FLAG_DEFAULT_CLR) || (flags & PART_FLAG_EXC_USER_CLR) || (flags & PART_FLAG_HIDDEN_CLR) ||
+                (flags & PART_FLAG_NO_ROOT_CLR) || (flags & PART_FLAG_ROOT_ONLY_CLR) ||
+                (flags & PART_FLAG_REQ_RESV_CLR) || (flags & PART_FLAG_LLN_CLR)) {
+                error("Invalid data for partition %s: flags=%u", part_name, flags);
                 error_code = EINVAL;
             }
         } else {
@@ -695,8 +648,7 @@ int load_all_part_state(void) {
         }
         /* validity test as possible */
         if (state_up > PARTITION_UP) {
-            error("Invalid data for partition %s: state_up=%u",
-                  part_name, state_up);
+            error("Invalid data for partition %s: state_up=%u", part_name, state_up);
             error_code = EINVAL;
         }
         if (error_code) {
@@ -717,12 +669,10 @@ int load_all_part_state(void) {
         }
 
         /* find record and perform update */
-        part_ptr = list_find_first(part_list, &list_find_part,
-                                   part_name);
+        part_ptr = list_find_first(part_list, &list_find_part, part_name);
         part_cnt++;
         if (part_ptr == NULL) {
-            info("%s: partition %s missing from configuration file",
-                 __func__, part_name);
+            info("%s: partition %s missing from configuration file", __func__, part_name);
             part_ptr = create_part_record();
             xfree(part_ptr->name);
             part_ptr->name = xstrdup(part_name);
@@ -754,8 +704,7 @@ int load_all_part_state(void) {
         xfree(part_ptr->allow_accounts);
         part_ptr->allow_accounts = allow_accounts;
         xfree(part_ptr->allow_groups);
-        accounts_list_build(part_ptr->allow_accounts,
-                            &part_ptr->allow_account_array);
+        accounts_list_build(part_ptr->allow_accounts, &part_ptr->allow_account_array);
         part_ptr->allow_groups = allow_groups;
         xfree(part_ptr->allow_qos);
         part_ptr->allow_qos = allow_qos;
@@ -768,13 +717,10 @@ int load_all_part_state(void) {
 
             memset(&qos_rec, 0, sizeof(slurmdb_qos_rec_t));
             qos_rec.name = part_ptr->qos_char;
-            if (assoc_mgr_fill_in_qos(
-                    acct_db_conn, &qos_rec, accounting_enforce,
-                    (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0)
-                != SLURM_SUCCESS) {
+            if (assoc_mgr_fill_in_qos(acct_db_conn, &qos_rec, accounting_enforce,
+                                      (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0) != SLURM_SUCCESS) {
                 error("Partition %s has an invalid qos (%s), "
-                      "please check your configuration",
-                      part_ptr->name, qos_rec.name);
+                      "please check your configuration", part_ptr->name, qos_rec.name);
                 xfree(part_ptr->qos_char);
             }
         }
@@ -785,8 +731,7 @@ int load_all_part_state(void) {
         part_ptr->alternate = alternate;
         xfree(part_ptr->deny_accounts);
         part_ptr->deny_accounts = deny_accounts;
-        accounts_list_build(part_ptr->deny_accounts,
-                            &part_ptr->deny_account_array);
+        accounts_list_build(part_ptr->deny_accounts, &part_ptr->deny_account_array);
         xfree(part_ptr->deny_qos);
         part_ptr->deny_qos = deny_qos;
         qos_list_build(part_ptr->deny_qos, &part_ptr->deny_qos_bitstr);
@@ -869,8 +814,7 @@ extern List get_part_list(char *name, char **err_part) {
             if (job_part_list == NULL) {
                 job_part_list = list_create(NULL);
             }
-            if (!list_find_first(job_part_list, &_match_part_ptr,
-                                 part_ptr)) {
+            if (!list_find_first(job_part_list, &_match_part_ptr, part_ptr)) {
                 list_append(job_part_list, part_ptr);
             }
         } else {
@@ -989,8 +933,7 @@ static void _list_delete_part(void *part_entry) {
                 continue;
             node_ptr->part_cnt--;
             for (k = j; k < node_ptr->part_cnt; k++) {
-                node_ptr->part_pptr[k] =
-                        node_ptr->part_pptr[k + 1];
+                node_ptr->part_pptr[k] = node_ptr->part_pptr[k + 1];
             }
             break;
         }
@@ -1075,9 +1018,8 @@ extern bool part_is_visible(struct part_record *part_ptr, uid_t uid) {
  * NOTE: the buffer at *buffer_ptr must be xfreed by the caller
  * NOTE: change slurm_load_part() in api/part_info.c if data format changes
  */
-extern void pack_all_part(char **buffer_ptr, int *buffer_size,
-                          uint16_t show_flags, uid_t uid,
-                          uint16_t protocol_version) {
+extern void
+pack_all_part(char **buffer_ptr, int *buffer_size, uint16_t show_flags, uid_t uid, uint16_t protocol_version) {
     ListIterator part_iterator;
     struct part_record *part_ptr;
     uint32_t parts_packed;
@@ -1099,8 +1041,7 @@ extern void pack_all_part(char **buffer_ptr, int *buffer_size,
     part_iterator = list_iterator_create(part_list);
     while ((part_ptr = (struct part_record *) list_next(part_iterator))) {
         xassert(part_ptr->magic == PART_MAGIC);
-        if (((show_flags & SHOW_ALL) == 0) &&
-            !part_is_visible(part_ptr, uid))
+        if (((show_flags & SHOW_ALL) == 0) && !part_is_visible(part_ptr, uid))
             continue;
         pack_part(part_ptr, buffer, protocol_version);
         parts_packed++;
@@ -1128,8 +1069,7 @@ extern void pack_all_part(char **buffer_ptr, int *buffer_size,
  * NOTE: if you make any changes here be sure to make the corresponding changes
  *	to _unpack_partition_info_members() in common/slurm_protocol_pack.c
  */
-void pack_part(struct part_record *part_ptr, Buf buffer,
-               uint16_t protocol_version) {
+void pack_part(struct part_record *part_ptr, Buf buffer, uint16_t protocol_version) {
     if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
         if (default_part_loc == part_ptr)
             part_ptr->flags |= PART_FLAG_DEFAULT;
@@ -1170,9 +1110,7 @@ void pack_part(struct part_record *part_ptr, Buf buffer,
         pack_bit_str_hex(part_ptr->node_bitmap, buffer);
         packstr(part_ptr->billing_weights_str, buffer);
         packstr(part_ptr->tres_fmt_str, buffer);
-        (void) slurm_pack_list(part_ptr->job_defaults_list,
-                               job_defaults_pack, buffer,
-                               protocol_version);
+        (void) slurm_pack_list(part_ptr->job_defaults_list, job_defaults_pack, buffer, protocol_version);
     } else {
         error("pack_part: protocol_version "
               "%hu not supported", protocol_version);
@@ -1187,9 +1125,7 @@ void pack_part(struct part_record *part_ptr, Buf buffer,
  * IN fail - whether the inner function should fatal if the string is invalid.
  * RET return SLURM_ERROR on error, SLURM_SUCESS otherwise.
  */
-extern int set_partition_billing_weights(char *billing_weights_str,
-                                         struct part_record *part_ptr,
-                                         bool fail) {
+extern int set_partition_billing_weights(char *billing_weights_str, struct part_record *part_ptr, bool fail) {
     double *tmp = NULL;
 
     if (!billing_weights_str || *billing_weights_str == '\0') {
@@ -1197,15 +1133,12 @@ extern int set_partition_billing_weights(char *billing_weights_str,
         xfree(part_ptr->billing_weights_str);
         xfree(part_ptr->billing_weights);
     } else {
-        if (!(tmp = slurm_get_tres_weight_array(billing_weights_str,
-                                                slurmctld_tres_cnt,
-                                                fail)))
+        if (!(tmp = slurm_get_tres_weight_array(billing_weights_str, slurmctld_tres_cnt, fail)))
             return SLURM_ERROR;
 
         xfree(part_ptr->billing_weights_str);
         xfree(part_ptr->billing_weights);
-        part_ptr->billing_weights_str =
-                xstrdup(billing_weights_str);
+        part_ptr->billing_weights_str = xstrdup(billing_weights_str);
         part_ptr->billing_weights = tmp;
     }
 
@@ -1230,24 +1163,20 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
     }
 
     error_code = SLURM_SUCCESS;
-    part_ptr = list_find_first(part_list, &list_find_part,
-                               part_desc->name);
+    part_ptr = list_find_first(part_list, &list_find_part, part_desc->name);
 
     if (create_flag) {
         if (part_ptr) {
-            verbose("%s: Duplicate partition name for create (%s)",
-                    __func__, part_desc->name);
+            verbose("%s: Duplicate partition name for create (%s)", __func__, part_desc->name);
             return ESLURM_INVALID_PARTITION_NAME;
         }
-        info("%s: partition %s being created", __func__,
-             part_desc->name);
+        info("%s: partition %s being created", __func__, part_desc->name);
         part_ptr = create_part_record();
         xfree(part_ptr->name);
         part_ptr->name = xstrdup(part_desc->name);
     } else {
         if (!part_ptr) {
-            verbose("%s: Update for partition not found (%s)",
-                    __func__, part_desc->name);
+            verbose("%s: Update for partition not found (%s)", __func__, part_desc->name);
             return ESLURM_INVALID_PARTITION_NAME;
         }
     }
@@ -1255,8 +1184,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
     last_part_update = time(NULL);
 
     if (part_desc->billing_weights_str &&
-        set_partition_billing_weights(part_desc->billing_weights_str,
-                                      part_ptr, false)) {
+        set_partition_billing_weights(part_desc->billing_weights_str, part_ptr, false)) {
 
         if (create_flag)
             _delete_part_record(part_ptr->name);
@@ -1267,8 +1195,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
     if (part_desc->cpu_bind) {
         char tmp_str[128];
         slurm_sprint_cpu_bind_type(tmp_str, part_desc->cpu_bind);
-        info("%s: setting CpuBind to %s for partition %s", __func__,
-             tmp_str, part_desc->name);
+        info("%s: setting CpuBind to %s for partition %s", __func__, tmp_str, part_desc->name);
         if (part_desc->cpu_bind == CPU_BIND_OFF)
             part_ptr->cpu_bind = 0;
         else
@@ -1276,131 +1203,107 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
     }
 
     if (part_desc->max_cpus_per_node != NO_VAL) {
-        info("%s: setting MaxCPUsPerNode to %u for partition %s",
-             __func__, part_desc->max_cpus_per_node, part_desc->name);
+        info("%s: setting MaxCPUsPerNode to %u for partition %s", __func__, part_desc->max_cpus_per_node,
+             part_desc->name);
         part_ptr->max_cpus_per_node = part_desc->max_cpus_per_node;
     }
 
     if (part_desc->max_time != NO_VAL) {
-        info("%s: setting max_time to %u for partition %s", __func__,
-             part_desc->max_time, part_desc->name);
+        info("%s: setting max_time to %u for partition %s", __func__, part_desc->max_time, part_desc->name);
         part_ptr->max_time = part_desc->max_time;
     }
 
-    if ((part_desc->default_time != NO_VAL) &&
-        (part_desc->default_time > part_ptr->max_time)) {
-        info("%s: DefaultTime would exceed MaxTime for partition %s",
-             __func__, part_desc->name);
+    if ((part_desc->default_time != NO_VAL) && (part_desc->default_time > part_ptr->max_time)) {
+        info("%s: DefaultTime would exceed MaxTime for partition %s", __func__, part_desc->name);
     } else if (part_desc->default_time != NO_VAL) {
-        info("%s: setting default_time to %u for partition %s",
-             __func__, part_desc->default_time, part_desc->name);
+        info("%s: setting default_time to %u for partition %s", __func__, part_desc->default_time, part_desc->name);
         part_ptr->default_time = part_desc->default_time;
     }
 
     if (part_desc->max_nodes != NO_VAL) {
-        info("%s: setting max_nodes to %u for partition %s", __func__,
-             part_desc->max_nodes, part_desc->name);
+        info("%s: setting max_nodes to %u for partition %s", __func__, part_desc->max_nodes, part_desc->name);
         part_ptr->max_nodes = part_desc->max_nodes;
         part_ptr->max_nodes_orig = part_desc->max_nodes;
     }
 
     if (part_desc->min_nodes != NO_VAL) {
-        info("%s: setting min_nodes to %u for partition %s", __func__,
-             part_desc->min_nodes, part_desc->name);
+        info("%s: setting min_nodes to %u for partition %s", __func__, part_desc->min_nodes, part_desc->name);
         part_ptr->min_nodes = part_desc->min_nodes;
         part_ptr->min_nodes_orig = part_desc->min_nodes;
     }
 
     if (part_desc->grace_time != NO_VAL) {
-        info("%s: setting grace_time to %u for partition %s", __func__,
-             part_desc->grace_time, part_desc->name);
+        info("%s: setting grace_time to %u for partition %s", __func__, part_desc->grace_time, part_desc->name);
         part_ptr->grace_time = part_desc->grace_time;
     }
 
     if (part_desc->flags & PART_FLAG_HIDDEN) {
-        info("%s: setting hidden for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting hidden for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_HIDDEN;
     } else if (part_desc->flags & PART_FLAG_HIDDEN_CLR) {
-        info("%s: clearing hidden for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing hidden for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_HIDDEN);
     }
 
     if (part_desc->flags & PART_FLAG_REQ_RESV) {
-        info("%s: setting req_resv for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting req_resv for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_REQ_RESV;
     } else if (part_desc->flags & PART_FLAG_REQ_RESV_CLR) {
-        info("%s: clearing req_resv for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing req_resv for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_REQ_RESV);
     }
 
     if (part_desc->flags & PART_FLAG_ROOT_ONLY) {
-        info("%s: setting root_only for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting root_only for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_ROOT_ONLY;
     } else if (part_desc->flags & PART_FLAG_ROOT_ONLY_CLR) {
-        info("%s: clearing root_only for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing root_only for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_ROOT_ONLY);
     }
 
     if (part_desc->flags & PART_FLAG_NO_ROOT) {
-        info("%s: setting no_root for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting no_root for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_NO_ROOT;
     } else if (part_desc->flags & PART_FLAG_NO_ROOT_CLR) {
-        info("%s: clearing no_root for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing no_root for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_NO_ROOT);
     }
 
     if (part_desc->flags & PART_FLAG_EXCLUSIVE_USER) {
-        info("%s: setting exclusive_user for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting exclusive_user for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_EXCLUSIVE_USER;
     } else if (part_desc->flags & PART_FLAG_EXC_USER_CLR) {
-        info("%s: clearing exclusive_user for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing exclusive_user for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_EXCLUSIVE_USER);
     }
 
     if (part_desc->flags & PART_FLAG_DEFAULT) {
         if (default_part_name == NULL) {
-            info("%s: setting default partition to %s", __func__,
-                 part_desc->name);
+            info("%s: setting default partition to %s", __func__, part_desc->name);
         } else if (xstrcmp(default_part_name, part_desc->name) != 0) {
-            info("%s: changing default partition from %s to %s",
-                 __func__, default_part_name, part_desc->name);
+            info("%s: changing default partition from %s to %s", __func__, default_part_name, part_desc->name);
         }
         xfree(default_part_name);
         default_part_name = xstrdup(part_desc->name);
         default_part_loc = part_ptr;
         part_ptr->flags |= PART_FLAG_DEFAULT;
-    } else if ((part_desc->flags & PART_FLAG_DEFAULT_CLR) &&
-               (default_part_loc == part_ptr)) {
-        info("%s: clearing default partition from %s", __func__,
-             part_desc->name);
+    } else if ((part_desc->flags & PART_FLAG_DEFAULT_CLR) && (default_part_loc == part_ptr)) {
+        info("%s: clearing default partition from %s", __func__, part_desc->name);
         xfree(default_part_name);
         default_part_loc = NULL;
         part_ptr->flags &= (~PART_FLAG_DEFAULT);
     }
 
     if (part_desc->flags & PART_FLAG_LLN) {
-        info("%s: setting LLN for partition %s", __func__,
-             part_desc->name);
+        info("%s: setting LLN for partition %s", __func__, part_desc->name);
         part_ptr->flags |= PART_FLAG_LLN;
     } else if (part_desc->flags & PART_FLAG_LLN_CLR) {
-        info("%s: clearing LLN for partition %s", __func__,
-             part_desc->name);
+        info("%s: clearing LLN for partition %s", __func__, part_desc->name);
         part_ptr->flags &= (~PART_FLAG_LLN);
     }
 
     if (part_desc->state_up != NO_VAL16) {
-        info("%s: setting state_up to %u for partition %s", __func__,
-             part_desc->state_up, part_desc->name);
+        info("%s: setting state_up to %u for partition %s", __func__, part_desc->state_up, part_desc->name);
         part_ptr->state_up = part_desc->state_up;
     }
 
@@ -1416,14 +1319,12 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             snprintf(tmp_str, sizeof(tmp_str), "NO");
         else
             snprintf(tmp_str, sizeof(tmp_str), "YES:%u", val);
-        info("%s: setting share to %s for partition %s", __func__,
-             tmp_str, part_desc->name);
+        info("%s: setting share to %s for partition %s", __func__, tmp_str, part_desc->name);
         part_ptr->max_share = part_desc->max_share;
     }
 
     if (part_desc->over_time_limit != NO_VAL16) {
-        info("%s: setting OverTimeLimit to %u for partition %s",
-             __func__, part_desc->over_time_limit, part_desc->name);
+        info("%s: setting OverTimeLimit to %u for partition %s", __func__, part_desc->over_time_limit, part_desc->name);
         part_ptr->over_time_limit = part_desc->over_time_limit;
     }
 
@@ -1431,8 +1332,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
         uint16_t new_mode;
         new_mode = part_desc->preempt_mode & (~PREEMPT_MODE_GANG);
         if (new_mode <= PREEMPT_MODE_CANCEL) {
-            info("%s: setting preempt_mode to %s for partition %s",
-                 __func__, preempt_mode_string(new_mode),
+            info("%s: setting preempt_mode to %s for partition %s", __func__, preempt_mode_string(new_mode),
                  part_desc->name);
             part_ptr->preempt_mode = new_mode;
         } else {
@@ -1441,15 +1341,14 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
     }
 
     if (part_desc->priority_tier != NO_VAL16) {
-        info("%s: setting PriorityTier to %u for partition %s",
-             __func__, part_desc->priority_tier, part_desc->name);
+        info("%s: setting PriorityTier to %u for partition %s", __func__, part_desc->priority_tier, part_desc->name);
         part_ptr->priority_tier = part_desc->priority_tier;
     }
 
     if (part_desc->priority_job_factor != NO_VAL16) {
         int redo_prio = 0;
-        info("%s: setting PriorityJobFactor to %u for partition %s",
-             __func__, part_desc->priority_job_factor, part_desc->name);
+        info("%s: setting PriorityJobFactor to %u for partition %s", __func__, part_desc->priority_job_factor,
+             part_desc->name);
 
         if ((part_ptr->priority_job_factor == part_max_priority) &&
             (part_desc->priority_job_factor < part_max_priority))
@@ -1470,81 +1369,63 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             if (redo_prio == 2) {
                 part_max_priority = 1;
                 while ((part2 = list_next(itr))) {
-                    if (part2->priority_job_factor >
-                        part_max_priority)
-                        part_max_priority =
-                                part2->priority_job_factor;
+                    if (part2->priority_job_factor > part_max_priority)
+                        part_max_priority = part2->priority_job_factor;
                 }
                 list_iterator_reset(itr);
             } else
                 part_max_priority = part_ptr->priority_job_factor;
 
             while ((part2 = list_next(itr))) {
-                part2->norm_priority =
-                        (double) part2->priority_job_factor /
-                        (double) part_max_priority;
+                part2->norm_priority = (double) part2->priority_job_factor / (double) part_max_priority;
             }
             list_iterator_destroy(itr);
         } else {
-            part_ptr->norm_priority =
-                    (double) part_ptr->priority_job_factor /
-                    (double) part_max_priority;
+            part_ptr->norm_priority = (double) part_ptr->priority_job_factor / (double) part_max_priority;
         }
     }
 
     if (part_desc->allow_accounts != NULL) {
         xfree(part_ptr->allow_accounts);
-        if ((xstrcasecmp(part_desc->allow_accounts, "ALL") == 0) ||
-            (part_desc->allow_accounts[0] == '\0')) {
-            info("%s: setting AllowAccounts to ALL for partition %s",
-                 __func__, part_desc->name);
+        if ((xstrcasecmp(part_desc->allow_accounts, "ALL") == 0) || (part_desc->allow_accounts[0] == '\0')) {
+            info("%s: setting AllowAccounts to ALL for partition %s", __func__, part_desc->name);
         } else {
             part_ptr->allow_accounts = part_desc->allow_accounts;
             part_desc->allow_accounts = NULL;
-            info("%s: setting AllowAccounts to %s for partition %s",
-                 __func__, part_ptr->allow_accounts,
+            info("%s: setting AllowAccounts to %s for partition %s", __func__, part_ptr->allow_accounts,
                  part_desc->name);
         }
-        accounts_list_build(part_ptr->allow_accounts,
-                            &part_ptr->allow_account_array);
+        accounts_list_build(part_ptr->allow_accounts, &part_ptr->allow_account_array);
     }
 
     if (part_desc->allow_groups != NULL) {
         xfree(part_ptr->allow_groups);
         xfree(part_ptr->allow_uids);
-        if ((xstrcasecmp(part_desc->allow_groups, "ALL") == 0) ||
-            (part_desc->allow_groups[0] == '\0')) {
-            info("%s: setting allow_groups to ALL for partition %s",
-                 __func__, part_desc->name);
+        if ((xstrcasecmp(part_desc->allow_groups, "ALL") == 0) || (part_desc->allow_groups[0] == '\0')) {
+            info("%s: setting allow_groups to ALL for partition %s", __func__, part_desc->name);
         } else {
             part_ptr->allow_groups = part_desc->allow_groups;
             part_desc->allow_groups = NULL;
-            info("%s: setting allow_groups to %s for partition %s",
-                 __func__, part_ptr->allow_groups, part_desc->name);
-            part_ptr->allow_uids =
-                    _get_groups_members(part_ptr->allow_groups);
+            info("%s: setting allow_groups to %s for partition %s", __func__, part_ptr->allow_groups, part_desc->name);
+            part_ptr->allow_uids = _get_groups_members(part_ptr->allow_groups);
             clear_group_cache();
         }
     }
 
     if (part_desc->allow_qos != NULL) {
         xfree(part_ptr->allow_qos);
-        if ((xstrcasecmp(part_desc->allow_qos, "ALL") == 0) ||
-            (part_desc->allow_qos[0] == '\0')) {
-            info("%s: setting AllowQOS to ALL for partition %s",
-                 __func__, part_desc->name);
+        if ((xstrcasecmp(part_desc->allow_qos, "ALL") == 0) || (part_desc->allow_qos[0] == '\0')) {
+            info("%s: setting AllowQOS to ALL for partition %s", __func__, part_desc->name);
         } else {
             part_ptr->allow_qos = part_desc->allow_qos;
             part_desc->allow_qos = NULL;
-            info("%s: setting AllowQOS to %s for partition %s",
-                 __func__, part_ptr->allow_qos, part_desc->name);
+            info("%s: setting AllowQOS to %s for partition %s", __func__, part_ptr->allow_qos, part_desc->name);
         }
         qos_list_build(part_ptr->allow_qos, &part_ptr->allow_qos_bitstr);
     }
 
     if (part_desc->qos_char && part_desc->qos_char[0] == '\0') {
-        info("%s: removing partition QOS %s from partition %s",
-             __func__, part_ptr->qos_char, part_ptr->name);
+        info("%s: removing partition QOS %s from partition %s", __func__, part_ptr->qos_char, part_ptr->name);
         xfree(part_ptr->qos_char);
         part_ptr->qos_ptr = NULL;
     } else if (part_desc->qos_char) {
@@ -1552,19 +1433,14 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
 
         memset(&qos_rec, 0, sizeof(slurmdb_qos_rec_t));
         qos_rec.name = part_desc->qos_char;
-        if (assoc_mgr_fill_in_qos(
-                acct_db_conn, &qos_rec, accounting_enforce,
-                (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0)
-            != SLURM_SUCCESS) {
-            error("%s: invalid qos (%s) given",
-                  __func__, qos_rec.name);
+        if (assoc_mgr_fill_in_qos(acct_db_conn, &qos_rec, accounting_enforce,
+                                  (slurmdb_qos_rec_t * *) & part_ptr->qos_ptr, 0) != SLURM_SUCCESS) {
+            error("%s: invalid qos (%s) given", __func__, qos_rec.name);
             error_code = ESLURM_INVALID_QOS;
             part_ptr->qos_ptr = backup_qos_ptr;
         } else {
             info("%s: changing partition QOS from "
-                 "%s to %s for partition %s",
-                 __func__, part_ptr->qos_char, part_desc->qos_char,
-                 part_ptr->name);
+                 "%s to %s for partition %s", __func__, part_ptr->qos_char, part_desc->qos_char, part_ptr->name);
 
             xfree(part_ptr->qos_char);
             part_ptr->qos_char = xstrdup(part_desc->qos_char);
@@ -1573,30 +1449,24 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
 
     if (part_desc->allow_alloc_nodes != NULL) {
         xfree(part_ptr->allow_alloc_nodes);
-        if ((part_desc->allow_alloc_nodes[0] == '\0') ||
-            (xstrcasecmp(part_desc->allow_alloc_nodes, "ALL") == 0)) {
+        if ((part_desc->allow_alloc_nodes[0] == '\0') || (xstrcasecmp(part_desc->allow_alloc_nodes, "ALL") == 0)) {
             part_ptr->allow_alloc_nodes = NULL;
-            info("%s: setting allow_alloc_nodes to ALL for partition %s",
-                 __func__, part_desc->name);
+            info("%s: setting allow_alloc_nodes to ALL for partition %s", __func__, part_desc->name);
         } else {
-            part_ptr->allow_alloc_nodes = part_desc->
-                    allow_alloc_nodes;
+            part_ptr->allow_alloc_nodes = part_desc->allow_alloc_nodes;
             part_desc->allow_alloc_nodes = NULL;
-            info("%s: setting allow_alloc_nodes to %s for partition %s",
-                 __func__, part_ptr->allow_alloc_nodes,
+            info("%s: setting allow_alloc_nodes to %s for partition %s", __func__, part_ptr->allow_alloc_nodes,
                  part_desc->name);
         }
     }
     if (part_desc->alternate != NULL) {
         xfree(part_ptr->alternate);
-        if ((xstrcasecmp(part_desc->alternate, "NONE") == 0) ||
-            (part_desc->alternate[0] == '\0'))
+        if ((xstrcasecmp(part_desc->alternate, "NONE") == 0) || (part_desc->alternate[0] == '\0'))
             part_ptr->alternate = NULL;
         else
             part_ptr->alternate = xstrdup(part_desc->alternate);
         part_desc->alternate = NULL;
-        info("%s: setting alternate to %s for partition %s",
-             __func__, part_ptr->alternate, part_desc->name);
+        info("%s: setting alternate to %s for partition %s", __func__, part_ptr->alternate, part_desc->name);
     }
 
     if (part_desc->def_mem_per_cpu != NO_VAL64) {
@@ -1609,8 +1479,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             key = "DefMemPerNode";
             value = part_desc->def_mem_per_cpu;
         }
-        info("%s: setting %s to %u for partition %s", __func__,
-             key, value, part_desc->name);
+        info("%s: setting %s to %u for partition %s", __func__, key, value, part_desc->name);
         part_ptr->def_mem_per_cpu = part_desc->def_mem_per_cpu;
     }
 
@@ -1620,14 +1489,11 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             xfree(part_desc->deny_accounts);
         part_ptr->deny_accounts = part_desc->deny_accounts;
         part_desc->deny_accounts = NULL;
-        info("%s: setting DenyAccounts to %s for partition %s",
-             __func__, part_ptr->deny_accounts, part_desc->name);
-        accounts_list_build(part_ptr->deny_accounts,
-                            &part_ptr->deny_account_array);
+        info("%s: setting DenyAccounts to %s for partition %s", __func__, part_ptr->deny_accounts, part_desc->name);
+        accounts_list_build(part_ptr->deny_accounts, &part_ptr->deny_account_array);
     }
     if (part_desc->allow_accounts && part_desc->deny_accounts) {
-        error("%s: Both AllowAccounts and DenyAccounts are defined, DenyAccounts will be ignored",
-              __func__);
+        error("%s: Both AllowAccounts and DenyAccounts are defined, DenyAccounts will be ignored", __func__);
     }
 
     if (part_desc->deny_qos != NULL) {
@@ -1636,13 +1502,11 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             xfree(part_ptr->deny_qos);
         part_ptr->deny_qos = part_desc->deny_qos;
         part_desc->deny_qos = NULL;
-        info("%s: setting DenyQOS to %s for partition %s", __func__,
-             part_ptr->deny_qos, part_desc->name);
+        info("%s: setting DenyQOS to %s for partition %s", __func__, part_ptr->deny_qos, part_desc->name);
         qos_list_build(part_ptr->deny_qos, &part_ptr->deny_qos_bitstr);
     }
     if (part_desc->allow_qos && part_desc->deny_qos) {
-        error("%s: Both AllowQOS and DenyQOS are defined, DenyQOS will be ignored",
-              __func__);
+        error("%s: Both AllowQOS and DenyQOS are defined, DenyQOS will be ignored", __func__);
     }
 
     if (part_desc->max_mem_per_cpu != NO_VAL64) {
@@ -1655,8 +1519,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             key = "MaxMemPerNode";
             value = part_desc->max_mem_per_cpu;
         }
-        info("%s: setting %s to %u for partition %s", __func__,
-             key, value, part_desc->name);
+        info("%s: setting %s to %u for partition %s", __func__, key, value, part_desc->name);
         part_ptr->max_mem_per_cpu = part_desc->max_mem_per_cpu;
     }
 
@@ -1664,17 +1527,13 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
         List new_job_def_list = NULL;
         if (part_desc->job_defaults_str[0] == '\0') {
             FREE_NULL_LIST(part_ptr->job_defaults_list);
-        } else if (job_defaults_list(part_desc->job_defaults_str,
-                                     &new_job_def_list)
-                   != SLURM_SUCCESS) {
-            error("%s: Invalid JobDefaults(%s) given",
-                  __func__, part_desc->job_defaults_str);
+        } else if (job_defaults_list(part_desc->job_defaults_str, &new_job_def_list) != SLURM_SUCCESS) {
+            error("%s: Invalid JobDefaults(%s) given", __func__, part_desc->job_defaults_str);
             error_code = ESLURM_INVALID_JOB_DEFAULTS;
         } else {    /* New list successfully built */
             FREE_NULL_LIST(part_ptr->job_defaults_list);
             part_ptr->job_defaults_list = new_job_def_list;
-            info("%s: Setting JobDefaults to %s for partition %s",
-                 __func__, part_desc->job_defaults_str,
+            info("%s: Setting JobDefaults to %s for partition %s", __func__, part_desc->job_defaults_str,
                  part_desc->name);
         }
     }
@@ -1699,8 +1558,7 @@ extern int update_part(update_part_msg_t *part_desc, bool create_flag) {
             xfree(part_ptr->nodes);
             part_ptr->nodes = backup_node_list;
         } else {
-            info("%s: setting nodes to %s for partition %s",
-                 __func__, part_ptr->nodes, part_desc->name);
+            info("%s: setting nodes to %s for partition %s", __func__, part_ptr->nodes, part_desc->name);
             xfree(backup_node_list);
         }
         update_part_nodes_in_resv(part_ptr);
@@ -1763,9 +1621,7 @@ extern int validate_group(struct part_record *part_ptr, uid_t run_uid) {
      * partition in past 5 seconds, then do not test again for performance
      * reasons. */
     now = time(NULL);
-    if ((run_uid == last_fail_uid) &&
-        (part_ptr == last_fail_part_ptr) &&
-        (difftime(now, last_fail_time) < 5)) {
+    if ((run_uid == last_fail_uid) && (part_ptr == last_fail_part_ptr) && (difftime(now, last_fail_time) < 5)) {
         return 0;
     }
 
@@ -1804,8 +1660,7 @@ extern int validate_group(struct part_record *part_ptr, uid_t run_uid) {
                 xrealloc(buf, buflen);
                 continue;
             }
-            error("%s: Could not find passwd entry for uid %ld",
-                  __func__, (long) run_uid);
+            error("%s: Could not find passwd entry for uid %ld", __func__, (long) run_uid);
             xfree(buf);
             goto fini;
         }
@@ -1823,8 +1678,7 @@ extern int validate_group(struct part_record *part_ptr, uid_t run_uid) {
     grp_buffer = xmalloc(buflen);
     while (1) {
         slurm_seterrno(0);
-        res = getgrgid_r(pwd.pw_gid, &grp, grp_buffer, buflen,
-                         &grp_result);
+        res = getgrgid_r(pwd.pw_gid, &grp, grp_buffer, buflen, &grp_result);
 
         /* We need to check for !grp_result, since it appears some
          * versions of this function do not return an error on
@@ -1836,8 +1690,7 @@ extern int validate_group(struct part_record *part_ptr, uid_t run_uid) {
                 xrealloc(grp_buffer, buflen);
                 continue;
             }
-            error("%s: Could not find group with gid %ld",
-                  __func__, (long) pwd.pw_gid);
+            error("%s: Could not find group with gid %ld", __func__, (long) pwd.pw_gid);
             xfree(buf);
             xfree(grp_buffer);
             goto fini;
@@ -1861,11 +1714,8 @@ extern int validate_group(struct part_record *part_ptr, uid_t run_uid) {
     xfree(grp_buffer);
 
     if (ret == 1) {
-        debug("UID %ld added to AllowGroup %s of partition %s",
-              (long) run_uid, grp.gr_name, part_ptr->name);
-        part_ptr->allow_uids =
-                xrealloc(part_ptr->allow_uids,
-                         (sizeof(uid_t) * (uid_array_len + 1)));
+        debug("UID %ld added to AllowGroup %s of partition %s", (long) run_uid, grp.gr_name, part_ptr->name);
+        part_ptr->allow_uids = xrealloc(part_ptr->allow_uids, (sizeof(uid_t) * (uid_array_len + 1)));
         part_ptr->allow_uids[uid_array_len] = run_uid;
     }
 
@@ -1958,8 +1808,7 @@ void load_part_uid_allow_list(int force) {
     /* only update last_part_update when changes made to avoid restarting
      * backfill scheduler unnecessarily */
     if (updated) {
-        debug2("%s: list updated, resetting last_part_update time",
-               __func__);
+        debug2("%s: list updated, resetting last_part_update time", __func__);
         last_part_update = time(NULL);
     }
 
@@ -2011,8 +1860,7 @@ uid_t *_get_groups_members(char *group_names) {
 
 /* remove_duplicate_uids()
  */
-static uid_t *
-_remove_duplicate_uids(uid_t *u) {
+static uid_t *_remove_duplicate_uids(uid_t *u) {
     int i;
     int j;
     int num;
@@ -2046,8 +1894,7 @@ _remove_duplicate_uids(uid_t *u) {
 
 /* uid_cmp
  */
-static int
-_uid_cmp(const void *x, const void *y) {
+static int _uid_cmp(const void *x, const void *y) {
     uid_t a;
     uid_t b;
 
@@ -2132,8 +1979,7 @@ extern int delete_partition(delete_part_msg_t *part_desc_ptr) {
  * but relies upon schedule() in src/slurmctld/job_scheduler.c to do so.
  */
 extern bool misc_policy_job_runnable_state(struct job_record *job_ptr) {
-    if ((job_ptr->state_reason == FAIL_ACCOUNT) ||
-        (job_ptr->state_reason == FAIL_QOS) ||
+    if ((job_ptr->state_reason == FAIL_ACCOUNT) || (job_ptr->state_reason == FAIL_QOS) ||
         (job_ptr->state_reason == WAIT_NODE_NOT_AVAIL)) {
         return false;
     }
@@ -2147,10 +1993,8 @@ extern bool misc_policy_job_runnable_state(struct job_record *job_ptr) {
  * reason values returned by job_limits_check().
  */
 extern bool part_policy_job_runnable_state(struct job_record *job_ptr) {
-    if ((job_ptr->state_reason == WAIT_PART_DOWN) ||
-        (job_ptr->state_reason == WAIT_PART_INACTIVE) ||
-        (job_ptr->state_reason == WAIT_PART_NODE_LIMIT) ||
-        (job_ptr->state_reason == WAIT_PART_TIME_LIMIT) ||
+    if ((job_ptr->state_reason == WAIT_PART_DOWN) || (job_ptr->state_reason == WAIT_PART_INACTIVE) ||
+        (job_ptr->state_reason == WAIT_PART_NODE_LIMIT) || (job_ptr->state_reason == WAIT_PART_TIME_LIMIT) ||
         (job_ptr->state_reason == WAIT_QOS_THRES)) {
         return false;
     }
@@ -2167,18 +2011,15 @@ extern bool part_policy_job_runnable_state(struct job_record *job_ptr) {
  *		job's state_desc and state_reason fields
  * RET SLURM_SUCCESS or error code
  */
-extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct,
-                                  struct job_record *job_ptr) {
+extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct, struct job_record *job_ptr) {
     char *tmp_err = NULL;
     int i;
 
     if (part_ptr->allow_account_array && part_ptr->allow_account_array[0]) {
         int match = 0;
         if (!acct) {
-            xstrfmtcat(tmp_err,
-                       "Job's account not known, so it can't use this partition "
-                       "(%s allows %s)",
-                       part_ptr->name, part_ptr->allow_accounts);
+            xstrfmtcat(tmp_err, "Job's account not known, so it can't use this partition "
+                                "(%s allows %s)", part_ptr->name, part_ptr->allow_accounts);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);
@@ -2198,11 +2039,8 @@ extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct,
             break;
         }
         if (match == 0) {
-            xstrfmtcat(tmp_err,
-                       "Job's account not permitted to use this partition "
-                       "(%s allows %s not %s)",
-                       part_ptr->name, part_ptr->allow_accounts,
-                       acct);
+            xstrfmtcat(tmp_err, "Job's account not permitted to use this partition "
+                                "(%s allows %s not %s)", part_ptr->name, part_ptr->allow_accounts, acct);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);
@@ -2214,12 +2052,10 @@ extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct,
             }
             return ESLURM_INVALID_ACCOUNT;
         }
-    } else if (part_ptr->deny_account_array &&
-               part_ptr->deny_account_array[0]) {
+    } else if (part_ptr->deny_account_array && part_ptr->deny_account_array[0]) {
         int match = 0;
         if (!acct) {
-            debug2("%s: job's account not known, so couldn't check if it was denied or not",
-                   __func__);
+            debug2("%s: job's account not known, so couldn't check if it was denied or not", __func__);
             return SLURM_SUCCESS;
         }
         for (i = 0; part_ptr->deny_account_array[i]; i++) {
@@ -2229,11 +2065,8 @@ extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct,
             break;
         }
         if (match == 1) {
-            xstrfmtcat(tmp_err,
-                       "Job's account not permitted to use this partition "
-                       "(%s denies %s including %s)",
-                       part_ptr->name, part_ptr->deny_accounts,
-                       acct);
+            xstrfmtcat(tmp_err, "Job's account not permitted to use this partition "
+                                "(%s denies %s including %s)", part_ptr->name, part_ptr->deny_accounts, acct);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);
@@ -2258,17 +2091,14 @@ extern int part_policy_valid_acct(struct part_record *part_ptr, char *acct,
  *		job's state_desc and state_reason fields
  * RET SLURM_SUCCESS or error code
  */
-extern int part_policy_valid_qos(struct part_record *part_ptr,
-                                 slurmdb_qos_rec_t *qos_ptr,
-                                 struct job_record *job_ptr) {
+extern int part_policy_valid_qos(struct part_record *part_ptr, slurmdb_qos_rec_t *qos_ptr, struct job_record *job_ptr) {
     char *tmp_err = NULL;
 
     if (part_ptr->allow_qos_bitstr) {
         int match = 0;
         if (!qos_ptr) {
-            xstrfmtcat(tmp_err,
-                       "Job's QOS not known, so it can't use this partition (%s allows %s)",
-                       part_ptr->name, part_ptr->allow_qos);
+            xstrfmtcat(tmp_err, "Job's QOS not known, so it can't use this partition (%s allows %s)", part_ptr->name,
+                       part_ptr->allow_qos);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);
@@ -2280,14 +2110,11 @@ extern int part_policy_valid_qos(struct part_record *part_ptr,
             }
             return ESLURM_INVALID_QOS;
         }
-        if ((qos_ptr->id < bit_size(part_ptr->allow_qos_bitstr)) &&
-            bit_test(part_ptr->allow_qos_bitstr, qos_ptr->id))
+        if ((qos_ptr->id < bit_size(part_ptr->allow_qos_bitstr)) && bit_test(part_ptr->allow_qos_bitstr, qos_ptr->id))
             match = 1;
         if (match == 0) {
-            xstrfmtcat(tmp_err,
-                       "Job's QOS not permitted to use this partition (%s allows %s not %s)",
-                       part_ptr->name, part_ptr->allow_qos,
-                       qos_ptr->name);
+            xstrfmtcat(tmp_err, "Job's QOS not permitted to use this partition (%s allows %s not %s)", part_ptr->name,
+                       part_ptr->allow_qos, qos_ptr->name);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);
@@ -2302,18 +2129,14 @@ extern int part_policy_valid_qos(struct part_record *part_ptr,
     } else if (part_ptr->deny_qos_bitstr) {
         int match = 0;
         if (!qos_ptr) {
-            debug2("%s: Job's QOS not known, so couldn't check if it was denied or not",
-                   __func__);
+            debug2("%s: Job's QOS not known, so couldn't check if it was denied or not", __func__);
             return SLURM_SUCCESS;
         }
-        if ((qos_ptr->id < bit_size(part_ptr->deny_qos_bitstr)) &&
-            bit_test(part_ptr->deny_qos_bitstr, qos_ptr->id))
+        if ((qos_ptr->id < bit_size(part_ptr->deny_qos_bitstr)) && bit_test(part_ptr->deny_qos_bitstr, qos_ptr->id))
             match = 1;
         if (match == 1) {
-            xstrfmtcat(tmp_err,
-                       "Job's QOS not permitted to use this partition (%s denies %s including %s)",
-                       part_ptr->name, part_ptr->deny_qos,
-                       qos_ptr->name);
+            xstrfmtcat(tmp_err, "Job's QOS not permitted to use this partition (%s denies %s including %s)",
+                       part_ptr->name, part_ptr->deny_qos, qos_ptr->name);
             info("%s: %s", __func__, tmp_err);
             if (job_ptr) {
                 xfree(job_ptr->state_desc);

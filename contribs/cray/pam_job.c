@@ -36,10 +36,12 @@
 #include <errno.h>
 
 #include <sys/syslog.h>
+
 #define error(fmt, args...) syslog(LOG_CRIT, "pam_job: " fmt, ##args);
 
 #define PAM_SM_ACCOUNT
 #define PAM_SM_SESSION
+
 #include <security/_pam_macros.h>
 #include <security/pam_modules.h>
 
@@ -53,48 +55,45 @@
  * Comparing these patches shows that, when using a 2.6 kernel, there are no
  * differences at all in the 23 ioctl calls (last patch was for 2.6.16.21).
  */
-#define JOB_CREATE	_IOWR('A', 1, void *)
+#define JOB_CREATE    _IOWR('A', 1, void *)
 struct job_create {
-	uint64_t	r_jid;		/* Return value of JID */
-	uint64_t	jid;		/* Jid value requested */
-	int		user;		/* UID of user associated with job */
-	int		options;	/* creation options - unused */
+    uint64_t r_jid;        /* Return value of JID */
+    uint64_t jid;        /* Jid value requested */
+    int user;        /* UID of user associated with job */
+    int options;    /* creation options - unused */
 };
 
-PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags,
-				   int argc, const char **argv)
-{
-	struct job_create jcreate = {0};
-	struct passwd *passwd;
-	char *username;
-	int job_ioctl_fd;
+PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+    struct job_create jcreate = {0};
+    struct passwd *passwd;
+    char *username;
+    int job_ioctl_fd;
 
-	if (pam_get_item(pamh, PAM_USER, (void *)&username) != PAM_SUCCESS
-	    || username == NULL) {
-		error("error recovering username");
-		return PAM_SESSION_ERR;
-	}
+    if (pam_get_item(pamh, PAM_USER, (void *) &username) != PAM_SUCCESS || username == NULL) {
+        error("error recovering username");
+        return PAM_SESSION_ERR;
+    }
 
-	passwd = getpwnam(username);
-	if (!passwd) {
-		error("error getting passwd entry for %s", username);
-		return PAM_SESSION_ERR;
-	}
-	jcreate.user = passwd->pw_uid;	/* uid associated with job */
+    passwd = getpwnam(username);
+    if (!passwd) {
+        error("error getting passwd entry for %s", username);
+        return PAM_SESSION_ERR;
+    }
+    jcreate.user = passwd->pw_uid;    /* uid associated with job */
 
-	if ((job_ioctl_fd = open("/proc/job", 0)) < 0) {
-		error("can not open /proc/job: %s", strerror(errno));
-		return PAM_SESSION_ERR;
-	} else if (ioctl(job_ioctl_fd, JOB_CREATE, (void *)&jcreate) != 0) {
-		error("job_create failed (no container): %s", strerror(errno));
-		close(job_ioctl_fd);
-		return PAM_SESSION_ERR;
-	}
-	close(job_ioctl_fd);
+    if ((job_ioctl_fd = open("/proc/job", 0)) < 0) {
+        error("can not open /proc/job: %s", strerror(errno));
+        return PAM_SESSION_ERR;
+    } else if (ioctl(job_ioctl_fd, JOB_CREATE, (void *) &jcreate) != 0) {
+        error("job_create failed (no container): %s", strerror(errno));
+        close(job_ioctl_fd);
+        return PAM_SESSION_ERR;
+    }
+    close(job_ioctl_fd);
 
-	if (jcreate.r_jid == 0)
-		error("WARNING - job containers disabled, no PAGG IDs created");
-	return PAM_SUCCESS;
+    if (jcreate.r_jid == 0)
+        error("WARNING - job containers disabled, no PAGG IDs created");
+    return PAM_SUCCESS;
 }
 
 /*
@@ -102,16 +101,12 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t * pamh, int flags,
  * this account management function for such cases.  Whenever possible, it
  * is still better to use the session management version.
  */
-PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags,
-				int argc, const char **argv)
-{
-	if (pam_sm_open_session(pamh, flags, argc, argv) != PAM_SUCCESS)
-		return PAM_AUTH_ERR;
-	return PAM_SUCCESS;
+PAM_EXTERN int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+    if (pam_sm_open_session(pamh, flags, argc, argv) != PAM_SUCCESS)
+        return PAM_AUTH_ERR;
+    return PAM_SUCCESS;
 }
 
-PAM_EXTERN int pam_sm_close_session(pam_handle_t *pamh, int flags,
-				    int argc, const char **argv)
-{
-	return PAM_SUCCESS;
+PAM_EXTERN int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+    return PAM_SUCCESS;
 }

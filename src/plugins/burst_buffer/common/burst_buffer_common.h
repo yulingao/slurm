@@ -222,21 +222,17 @@ extern void bb_alloc_cache(bb_state_t *state_ptr);
 /* Allocate a per-job burst buffer record for a specific job.
  * Return a pointer to that record.
  * Use bb_free_alloc_buf() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_job_rec(bb_state_t *state_ptr,
-                                    struct job_record *job_ptr,
-                                    bb_job_t *bb_job);
+extern bb_alloc_t *bb_alloc_job_rec(bb_state_t *state_ptr, struct job_record *job_ptr, bb_job_t *bb_job);
 
 /* Allocate a burst buffer record for a job and increase the job priority
  * if so configured.
  * Use bb_free_alloc_buf() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_job(bb_state_t *state_ptr,
-                                struct job_record *job_ptr, bb_job_t *bb_job);
+extern bb_alloc_t *bb_alloc_job(bb_state_t *state_ptr, struct job_record *job_ptr, bb_job_t *bb_job);
 
 /* Allocate a named burst buffer record for a specific user.
  * Return a pointer to that record.
  * Use bb_free_alloc_buf() to purge the returned record. */
-extern bb_alloc_t *bb_alloc_name_rec(bb_state_t *state_ptr, char *name,
-                                     uint32_t user_id);
+extern bb_alloc_t *bb_alloc_name_rec(bb_state_t *state_ptr, char *name, uint32_t user_id);
 
 /* Clear all cached burst buffer records, freeing all memory. */
 extern void bb_clear_cache(bb_state_t *state_ptr);
@@ -248,15 +244,13 @@ extern void bb_clear_config(bb_config_t *config_ptr, bool fini);
 
 /* Find a per-job burst buffer record for a specific job.
  * If not found, return NULL. */
-extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr,
-                                     struct job_record *job_ptr);
+extern bb_alloc_t *bb_find_alloc_rec(bb_state_t *state_ptr, struct job_record *job_ptr);
 
 /* Find a burst buffer record by name
  * bb_name IN - Buffer's name
  * user_id IN - Possible user ID, advisory use only
  * RET the buffer or NULL if not found */
-extern bb_alloc_t *bb_find_name_rec(char *bb_name, uint32_t user_id,
-                                    bb_state_t *state_ptr);
+extern bb_alloc_t *bb_find_name_rec(char *bb_name, uint32_t user_id, bb_state_t *state_ptr);
 
 /* Find a per-user burst buffer record for a specific user ID */
 extern bb_user_t *bb_find_user_rec(uint32_t user_id, bb_state_t *state_ptr);
@@ -303,16 +297,13 @@ extern int bb_job_queue_sort(void *x, void *y);
 extern void bb_load_config(bb_state_t *state_ptr, char *plugin_type);
 
 /* Pack individual burst buffer records into a buffer */
-extern int bb_pack_bufs(uid_t uid, bb_state_t *state_ptr, Buf buffer,
-                        uint16_t protocol_version);
+extern int bb_pack_bufs(uid_t uid, bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version);
 
 /* Pack state and configuration parameters into a buffer */
-extern void bb_pack_state(bb_state_t *state_ptr, Buf buffer,
-                          uint16_t protocol_version);
+extern void bb_pack_state(bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version);
 
 /* Pack individual burst buffer usage records into a buffer (used for limits) */
-extern int bb_pack_usage(uid_t uid, bb_state_t *state_ptr, Buf buffer,
-                         uint16_t protocol_version);
+extern int bb_pack_usage(uid_t uid, bb_state_t *state_ptr, Buf buffer, uint16_t protocol_version);
 
 /* Sort preempt_bb_recs in order of DECREASING use_time */
 extern int bb_preempt_queue_sort(void *x, void *y);
@@ -334,20 +325,18 @@ extern void bb_sleep(bb_state_t *state_ptr, int add_secs);
  * pool IN - Pool containing the burst buffer
  * state_ptr IN - Global state to update
  * update_pool_unfree IN - If true, update the pool's unfree space */
-extern void bb_limit_add(uint32_t user_id, uint64_t bb_size, char *pool,
-                         bb_state_t *state_ptr, bool update_pool_unfree);
+extern void
+bb_limit_add(uint32_t user_id, uint64_t bb_size, char *pool, bb_state_t *state_ptr, bool update_pool_unfree);
 
 /* Release claim against resource limit for a user */
-extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool,
-                         bb_state_t *state_ptr);
+extern void bb_limit_rem(uint32_t user_id, uint64_t bb_size, char *pool, bb_state_t *state_ptr);
 
 /* Log creation of a persistent burst buffer in the database
  * job_ptr IN - Point to job that created, could be NULL at startup
  * bb_alloc IN - Pointer to persistent burst buffer state info
  * state_ptr IN - Pointer to burst_buffer plugin state info
  */
-extern int bb_post_persist_create(struct job_record *job_ptr,
-                                  bb_alloc_t *bb_alloc, bb_state_t *state_ptr);
+extern int bb_post_persist_create(struct job_record *job_ptr, bb_alloc_t *bb_alloc, bb_state_t *state_ptr);
 
 /* Log deletion of a persistent burst buffer in the database */
 extern int bb_post_persist_delete(bb_alloc_t *bb_alloc, bb_state_t *state_ptr);

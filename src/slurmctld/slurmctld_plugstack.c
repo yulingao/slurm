@@ -61,9 +61,7 @@ typedef struct slurmctld_plugstack_ops {
 /*
  * Must be synchronized with slurmctld_plugstack_t above.
  */
-static const char *syms[] = {
-        "slurmctld_plugstack_p_get_config"
-};
+static const char *syms[] = {"slurmctld_plugstack_p_get_config"};
 
 static int g_context_cnt = -1;
 static slurmctld_plugstack_ops_t *ops = NULL;
@@ -92,25 +90,20 @@ extern int slurmctld_plugstack_init(void) {
 
     slurmctld_plugstack_list = slurm_get_slurmctld_plugstack();
     g_context_cnt = 0;
-    if ((slurmctld_plugstack_list == NULL) ||
-        (slurmctld_plugstack_list[0] == '\0'))
+    if ((slurmctld_plugstack_list == NULL) || (slurmctld_plugstack_list[0] == '\0'))
         goto fini;
 
     names = slurmctld_plugstack_list;
     while ((type = strtok_r(names, ",", &last))) {
-        xrealloc(ops, (sizeof(slurmctld_plugstack_ops_t) *
-                       (g_context_cnt + 1)));
-        xrealloc(g_context,
-                 (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
+        xrealloc(ops, (sizeof(slurmctld_plugstack_ops_t) * (g_context_cnt + 1)));
+        xrealloc(g_context, (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
         if (xstrncmp(type, "slurmctld/", 10) == 0)
             type += 10; /* backward compatibility */
         type = xstrdup_printf("slurmctld/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;

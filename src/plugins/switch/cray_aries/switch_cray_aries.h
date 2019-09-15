@@ -150,8 +150,7 @@ extern int get_mem_scaling(stepd_step_rec_t *job);
 // Implemented in util.c
 extern int list_str_to_array(char *list, int *cnt, int32_t **numbers);
 
-extern void alpsc_debug(const char *file, int line, const char *func,
-                        int rc, int expected_rc, const char *alpsc_func,
+extern void alpsc_debug(const char *file, int line, const char *func, int rc, int expected_rc, const char *alpsc_func,
                         char **err_msg);
 
 extern int remove_spool_files(uint64_t apid);

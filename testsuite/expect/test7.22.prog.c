@@ -37,31 +37,23 @@
 /*
  * All spank plugins must define this macro for the Slurm plugin loader.
  */
-SPANK_PLUGIN(test_suite, 1);
+SPANK_PLUGIN(test_suite,
+1);
 
 /*
  *  Provide a --test_suite=[opt_arg] option to sbatch:
  */
-struct spank_option spank_options[] =
-{
-	{ "test_suite_prolog",
-	  "[opt_arg_sbatch]",
-	  "Registered component of slurm test suite.",
-	  2,
-	  0,
-	  NULL
-	},
-	SPANK_OPTIONS_TABLE_END
-};
+struct spank_option spank_options[] = {
+        {"test_suite_prolog", "[opt_arg_sbatch]", "Registered component of slurm test suite.", 2, 0, NULL},
+        SPANK_OPTIONS_TABLE_END};
 
 /*  Called from both srun and slurmd */
-int slurm_spank_init(spank_t sp, int ac, char **av)
-{
-	spank_context_t context;
+int slurm_spank_init(spank_t sp, int ac, char **av) {
+    spank_context_t context;
 
-	context = spank_context();
-	if (spank_option_register(sp, spank_options) != ESPANK_SUCCESS)
-		slurm_error("spank_option_register error");
+    context = spank_context();
+    if (spank_option_register(sp, spank_options) != ESPANK_SUCCESS)
+        slurm_error("spank_option_register error");
 
-	return (0);
+    return (0);
 }

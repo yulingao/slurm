@@ -60,11 +60,7 @@ typedef struct slurm_power_ops {
  * These strings must be kept in the same order as the fields
  * declared for slurm_power_ops_t.
  */
-static const char *syms[] = {
-        "power_p_job_resume",
-        "power_p_job_start",
-        "power_p_reconfig"
-};
+static const char *syms[] = {"power_p_job_resume", "power_p_job_start", "power_p_reconfig"};
 
 static int g_context_cnt = -1;
 static slurm_power_ops_t *ops = NULL;
@@ -95,17 +91,14 @@ extern int power_g_init(void) {
     names = power_plugin_list;
     while ((type = strtok_r(names, ",", &last))) {
         xrealloc(ops, (sizeof(slurm_power_ops_t) * (g_context_cnt + 1)));
-        xrealloc(g_context,
-                 (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
+        xrealloc(g_context, (sizeof(plugin_context_t * ) * (g_context_cnt + 1)));
         if (xstrncmp(type, "power/", 6) == 0)
             type += 6; /* backward compatibility */
         type = xstrdup_printf("power/%s", type);
-        g_context[g_context_cnt] = plugin_context_create(
-                plugin_type, type, (void **) &ops[g_context_cnt],
-                syms, sizeof(syms));
+        g_context[g_context_cnt] = plugin_context_create(plugin_type, type, (void **) &ops[g_context_cnt], syms,
+                                                         sizeof(syms));
         if (!g_context[g_context_cnt]) {
-            error("cannot create %s context for %s",
-                  plugin_type, type);
+            error("cannot create %s context for %s", plugin_type, type);
             rc = SLURM_ERROR;
             xfree(type);
             break;
@@ -183,8 +176,7 @@ extern void power_g_job_start(struct job_record *job_ptr) {
 }
 
 /* Pack a power management data structure */
-extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer,
-                                 uint16_t protocol_version) {
+extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer, uint16_t protocol_version) {
     if (!power) {
         pack32(NO_VAL, buffer);
     } else {
@@ -194,8 +186,7 @@ extern void power_mgmt_data_pack(power_mgmt_data_t *power, Buf buffer,
 
 /* Unpack a power management data structure
  * Use power_mgmt_data_free() to free the returned structure */
-extern int power_mgmt_data_unpack(power_mgmt_data_t **power, Buf buffer,
-                                  uint16_t protocol_version) {
+extern int power_mgmt_data_unpack(power_mgmt_data_t **power, Buf buffer, uint16_t protocol_version) {
     power_mgmt_data_t *power_ptr = xmalloc(sizeof(power_mgmt_data_t));
 
     safe_unpack32(&power_ptr->cap_watts, buffer);

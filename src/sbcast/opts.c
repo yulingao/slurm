@@ -76,23 +76,20 @@ extern void parse_command_line(int argc, char **argv) {
     char *end_ptr = NULL, *env_val = NULL, *sep, *tmp;
     int opt_char;
     int option_index;
-    static struct option long_options[] = {
-            {"compress", optional_argument, 0, 'C'},
-            {"fanout",   required_argument, 0, 'F'},
-            {"force",    no_argument,       0, 'f'},
-            {"jobid",    required_argument, 0, 'j'},
-            {"preserve", no_argument,       0, 'p'},
-            {"size",     required_argument, 0, 's'},
-            {"timeout",  required_argument, 0, 't'},
-            {"verbose",  no_argument,       0, 'v'},
-            {"version",  no_argument,       0, 'V'},
-            {"help",     no_argument,       0, OPT_LONG_HELP},
-            {"usage",    no_argument,       0, OPT_LONG_USAGE},
-            {NULL, 0,                       0, 0}
-    };
+    static struct option long_options[] = {{"compress", optional_argument, 0, 'C'},
+                                           {"fanout",   required_argument, 0, 'F'},
+                                           {"force",    no_argument,       0, 'f'},
+                                           {"jobid",    required_argument, 0, 'j'},
+                                           {"preserve", no_argument,       0, 'p'},
+                                           {"size",     required_argument, 0, 's'},
+                                           {"timeout",  required_argument, 0, 't'},
+                                           {"verbose",  no_argument,       0, 'v'},
+                                           {"version",  no_argument,       0, 'V'},
+                                           {"help",     no_argument,       0, OPT_LONG_HELP},
+                                           {"usage",    no_argument,       0, OPT_LONG_USAGE},
+                                           {NULL, 0,                       0, 0}};
 
-    if ((sbcast_parameters = slurm_get_sbcast_parameters()) &&
-        (tmp = strcasestr(sbcast_parameters, "Compression="))) {
+    if ((sbcast_parameters = slurm_get_sbcast_parameters()) && (tmp = strcasestr(sbcast_parameters, "Compression="))) {
         tmp += 12;
         sep = strchr(tmp, ',');
         if (sep)
@@ -123,12 +120,10 @@ extern void parse_command_line(int argc, char **argv) {
         params.timeout = (atoi(env_val) * 1000);
 
     optind = 0;
-    while ((opt_char = getopt_long(argc, argv, "CfF:j:ps:t:vV",
-                                   long_options, &option_index)) != -1) {
+    while ((opt_char = getopt_long(argc, argv, "CfF:j:ps:t:vV", long_options, &option_index)) != -1) {
         switch (opt_char) {
             case (int) '?':
-                fprintf(stderr,
-                        "Try \"sbcast --help\" for more information\n");
+                fprintf(stderr, "Try \"sbcast --help\" for more information\n");
                 exit(1);
                 break;
             case (int) 'C':
@@ -143,8 +138,7 @@ extern void parse_command_line(int argc, char **argv) {
             case (int) 'j':
                 params.job_id = strtol(optarg, &end_ptr, 10);
                 if (end_ptr[0] == '+') {
-                    params.pack_job_offset =
-                            strtol(end_ptr + 1, &end_ptr, 10);
+                    params.pack_job_offset = strtol(end_ptr + 1, &end_ptr, 10);
                 }
                 if (end_ptr[0] == '.')
                     params.step_id = strtol(end_ptr + 1, NULL, 10);
@@ -174,8 +168,7 @@ extern void parse_command_line(int argc, char **argv) {
     }
 
     if ((argc - optind) != 2) {
-        fprintf(stderr, "Need two file names, have %d names\n",
-                (argc - optind));
+        fprintf(stderr, "Need two file names, have %d names\n", (argc - optind));
         fprintf(stderr, "Try \"sbcast --help\" for more information\n");
         exit(1);
     }
@@ -196,8 +189,7 @@ extern void parse_command_line(int argc, char **argv) {
 
     if (argv[optind + 1][0] == '/') {
         params.dst_fname = xstrdup(argv[optind + 1]);
-    } else if (sbcast_parameters &&
-               (tmp = strcasestr(sbcast_parameters, "DestDir="))) {
+    } else if (sbcast_parameters && (tmp = strcasestr(sbcast_parameters, "DestDir="))) {
         tmp += 8;
         sep = strchr(tmp, ',');
         if (sep)
@@ -254,17 +246,13 @@ static void _print_options(void) {
         if (params.pack_job_offset == NO_VAL) {
             info("jobid      = %u", params.job_id);
         } else {
-            info("jobid      = %u+%u",
-                 params.job_id, params.pack_job_offset);
+            info("jobid      = %u+%u", params.job_id, params.pack_job_offset);
         }
     } else {
         if (params.pack_job_offset == NO_VAL) {
-            info("jobid      = %u.%u", params.job_id,
-                 params.step_id);
+            info("jobid      = %u.%u", params.job_id, params.step_id);
         } else {
-            info("jobid      = %u+%u.%u",
-                 params.job_id, params.pack_job_offset,
-                 params.step_id);
+            info("jobid      = %u+%u.%u", params.job_id, params.pack_job_offset, params.step_id);
         }
     }
     info("preserve   = %s", params.preserve ? "true" : "false");

@@ -62,8 +62,7 @@
 	return SLURM_SUCCESS;
 }*/
 
-extern int slurm_load_layout(char *layout_type, char *entities, char *type,
-                             uint32_t flags, layout_info_msg_t **resp) {
+extern int slurm_load_layout(char *layout_type, char *entities, char *type, uint32_t flags, layout_info_msg_t **resp) {
     int rc;
     slurm_msg_t req_msg;
     slurm_msg_t resp_msg;
@@ -80,8 +79,7 @@ extern int slurm_load_layout(char *layout_type, char *entities, char *type,
     req_msg.msg_type = REQUEST_LAYOUT_INFO;
     req_msg.data = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -103,8 +101,7 @@ extern int slurm_load_layout(char *layout_type, char *entities, char *type,
     return SLURM_SUCCESS;
 }
 
-void slurm_print_layout_info(FILE *out, layout_info_msg_t *layout_info_ptr,
-                             int one_liner) {
+void slurm_print_layout_info(FILE *out, layout_info_msg_t *layout_info_ptr, int one_liner) {
     char *nl;
     int i;
     for (i = 0; i < layout_info_ptr->record_count; i++) {

@@ -52,9 +52,7 @@
 //#define SLURMSTEPD_MEMCHECK 4	/* Run slurmstepd with valgrind/helgrind */
 
 typedef enum slurmd_step_tupe {
-    LAUNCH_BATCH_JOB = 0,
-    LAUNCH_TASKS,
-    DEFUNCT_SPAWN_TASKS /* DEFUNCT */
+    LAUNCH_BATCH_JOB = 0, LAUNCH_TASKS, DEFUNCT_SPAWN_TASKS /* DEFUNCT */
 } slurmd_step_type_t;
 
 /*

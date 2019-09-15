@@ -70,8 +70,7 @@ extern int acct_gather_interconnect_g_node_update(void);
  *                      definitions
  *      full_options_cnt -- count of plugin local definitions
  */
-extern int acct_gather_interconnect_g_conf_options(s_p_options_t **full_options,
-                                                   int *full_options_cnt);
+extern int acct_gather_interconnect_g_conf_options(s_p_options_t **full_options, int *full_options_cnt);
 
 /*
  * set plugin local conf from acct_gather.conf into its structure

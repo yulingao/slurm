@@ -46,8 +46,7 @@ static List track_script_thd_list = NULL;
 
 static void _track_script_rec_destroy(void *arg) {
     track_script_rec_t *r = (track_script_rec_t *) arg;
-    debug3("destroying job %u script thread, tid %lu",
-           r->job_id, r->tid);
+    debug3("destroying job %u script thread, tid %lu", r->job_id, r->tid);
     slurm_cond_destroy(&r->timer_cond);
     slurm_mutex_destroy(&r->timer_mutex);
     xfree(r);
@@ -74,8 +73,7 @@ static void _track_script_rec_cleanup(track_script_rec_t *r) {
     struct timeval tvnow;
     struct timespec abs;
 
-    debug("script for jobid=%u found running, tid=%lu, force ending.",
-          r->job_id, (unsigned long) r->tid);
+    debug("script for jobid=%u found running, tid=%lu, force ending.", r->job_id, (unsigned long) r->tid);
 
     _kill_script(r);
 
@@ -92,8 +90,7 @@ static void _track_script_rec_cleanup(track_script_rec_t *r) {
      */
     if (r->cpid != 0) {
         slurm_mutex_lock(&r->timer_mutex);
-        rc = pthread_cond_timedwait(&r->timer_cond, &r->timer_mutex,
-                                    &abs);
+        rc = pthread_cond_timedwait(&r->timer_cond, &r->timer_mutex, &abs);
         slurm_mutex_unlock(&r->timer_mutex);
     }
 
@@ -110,8 +107,7 @@ static int _flush_job(void *r, void *x) {
     if (rec->job_id != job_id)
         return 0;
 
-    debug("%s: killing running script for completed job %u, pid %u",
-          __func__, job_id, rec->cpid);
+    debug("%s: killing running script for completed job %u, pid %u", __func__, job_id, rec->cpid);
 
     _kill_script(r);
 
@@ -135,8 +131,7 @@ static int _reset_cpid(void *object, void *key) {
     if (!_match_tid(object, &((track_script_rec_t *) key)->tid))
         return 0;
 
-    ((track_script_rec_t *) object)->cpid =
-            ((track_script_rec_t *) key)->cpid;
+    ((track_script_rec_t *) object)->cpid = ((track_script_rec_t *) key)->cpid;
 
     /*
      * When we find the one we care about we can break out of the for_each
@@ -151,25 +146,20 @@ extern void track_script_init(void) {
 
 extern void track_script_flush(void) {
     /* kill all scripts we are tracking */
-    (void) list_for_each(track_script_thd_list,
-                         (ListForF) _track_script_rec_cleanup, NULL);
+    (void) list_for_each(track_script_thd_list, (ListForF) _track_script_rec_cleanup, NULL);
     (void) list_flush(track_script_thd_list);
 }
 
 extern void track_script_flush_job(uint32_t job_id) {
-    (void) list_for_each(track_script_thd_list,
-                         (ListFindF) _flush_job,
-                         &job_id);
+    (void) list_for_each(track_script_thd_list, (ListFindF) _flush_job, &job_id);
 }
 
 extern void track_script_fini(void) {
     FREE_NULL_LIST(track_script_thd_list);
 }
 
-extern track_script_rec_t *track_script_rec_add(
-        uint32_t job_id, pid_t cpid, pthread_t tid) {
-    track_script_rec_t *track_script_rec =
-            xmalloc(sizeof(track_script_rec_t));
+extern track_script_rec_t *track_script_rec_add(uint32_t job_id, pid_t cpid, pthread_t tid) {
+    track_script_rec_t *track_script_rec = xmalloc(sizeof(track_script_rec_t));
 
     track_script_rec->job_id = job_id;
     track_script_rec->cpid = cpid;
@@ -181,14 +171,12 @@ extern track_script_rec_t *track_script_rec_add(
     return track_script_rec;
 }
 
-extern bool track_script_broadcast(track_script_rec_t *track_script_rec,
-                                   int status) {
+extern bool track_script_broadcast(track_script_rec_t *track_script_rec, int status) {
     bool rc = false;
 
     /* I was killed by slurmtrack, bail out right now */
     slurm_mutex_lock(&track_script_rec->timer_mutex);
-    if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGKILL)
-        && track_script_rec->cpid == -1) {
+    if (WIFSIGNALED(status) && (WTERMSIG(status) == SIGKILL) && track_script_rec->cpid == -1) {
         slurm_cond_broadcast(&track_script_rec->timer_cond);
         rc = true;
     }
@@ -202,8 +190,7 @@ extern void track_script_remove(pthread_t tid) {
     if (!list_delete_all(track_script_thd_list, _match_tid, &tid))
         error("%s: thread %lu not found", __func__, tid);
     else
-        debug2("%s: thread running script from job removed",
-               __func__);
+        debug2("%s: thread running script from job removed", __func__);
 }
 
 extern void track_script_reset_cpid(pthread_t tid, pid_t cpid) {

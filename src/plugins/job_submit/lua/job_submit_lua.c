@@ -221,12 +221,10 @@ static int _log_lua_user_msg(lua_State *L) {
     return (0);
 }
 
-static const struct luaL_Reg slurm_functions[] = {
-        {"log",      _log_lua_msg},
-        {"error",    _log_lua_error},
-        {"user_msg", _log_lua_user_msg},
-        {NULL, NULL}
-};
+static const struct luaL_Reg slurm_functions[] = {{"log",      _log_lua_msg},
+                                                  {"error",    _log_lua_error},
+                                                  {"user_msg", _log_lua_user_msg},
+                                                  {NULL, NULL}};
 
 /* Get the default account for a user (or NULL if not present) */
 static char *_get_default_account(uint32_t user_id) {
@@ -234,8 +232,7 @@ static char *_get_default_account(uint32_t user_id) {
 
     memset(&user, 0, sizeof(slurmdb_user_rec_t));
     user.uid = user_id;
-    if (assoc_mgr_fill_in_user(acct_db_conn, &user, accounting_enforce,
-                               NULL, false) != SLURM_ERROR) {
+    if (assoc_mgr_fill_in_user(acct_db_conn, &user, accounting_enforce, NULL, false) != SLURM_ERROR) {
         return user.default_acct;
     } else {
         return NULL;
@@ -257,8 +254,7 @@ static char *_get_default_qos(uint32_t user_id, char *account, char *partition) 
         assoc.acct = _get_default_account(user_id);
     }
 
-    if (assoc_mgr_fill_in_assoc(acct_db_conn, &assoc, accounting_enforce,
-                                NULL, false) != SLURM_ERROR)
+    if (assoc_mgr_fill_in_assoc(acct_db_conn, &assoc, accounting_enforce, NULL, false) != SLURM_ERROR)
         qos_id = assoc.def_qos_id;
 
     if (!qos_id)
@@ -266,8 +262,7 @@ static char *_get_default_qos(uint32_t user_id, char *account, char *partition) 
 
     memset(&qos, 0, sizeof(slurmdb_qos_rec_t));
     qos.id = qos_id;
-    if (assoc_mgr_fill_in_qos(acct_db_conn, &qos, accounting_enforce,
-                              NULL, false) != SLURM_ERROR) {
+    if (assoc_mgr_fill_in_qos(acct_db_conn, &qos, accounting_enforce, NULL, false) != SLURM_ERROR) {
         return qos.name;
     } else {
         return NULL;
@@ -279,8 +274,7 @@ static char *_get_default_qos(uint32_t user_id, char *account, char *partition) 
  * This is an incomplete list of job record fields. Add more as needed and
  * send patches to slurm-dev@schedmd.com.
  */
-static int _job_rec_field(const struct job_record *job_ptr,
-                          const char *name) {
+static int _job_rec_field(const struct job_record *job_ptr, const char *name) {
     int i;
 
     if (job_ptr == NULL) {
@@ -341,16 +335,13 @@ static int _job_rec_field(const struct job_record *job_ptr,
         else
             lua_pushnumber(L, 0);
     } else if (!xstrcmp(name, "min_mem_per_node")) {
-        if (job_ptr->details &&
-            !(job_ptr->details->pn_min_memory & MEM_PER_CPU))
+        if (job_ptr->details && !(job_ptr->details->pn_min_memory & MEM_PER_CPU))
             lua_pushnumber(L, job_ptr->details->pn_min_memory);
         else
             lua_pushnil(L);
     } else if (!xstrcmp(name, "min_mem_per_cpu")) {
-        if (job_ptr->details &&
-            (job_ptr->details->pn_min_memory & MEM_PER_CPU))
-            lua_pushnumber(L, job_ptr->details->pn_min_memory &
-                              ~MEM_PER_CPU);
+        if (job_ptr->details && (job_ptr->details->pn_min_memory & MEM_PER_CPU))
+            lua_pushnumber(L, job_ptr->details->pn_min_memory & ~MEM_PER_CPU);
         else
             lua_pushnil(L);
     } else if (!xstrcmp(name, "min_nodes")) {
@@ -403,20 +394,16 @@ static int _job_rec_field(const struct job_record *job_ptr,
         if (job_ptr->site_factor == NO_VAL)
             lua_pushnumber(L, job_ptr->site_factor);
         else
-            lua_pushnumber(L,
-                           (((int64_t) job_ptr->site_factor)
-                            - NICE_OFFSET));
+            lua_pushnumber(L, (((int64_t) job_ptr->site_factor) - NICE_OFFSET));
     } else if (!xstrcmp(name, "spank_job_env")) {
-        if ((job_ptr->spank_job_env_size == 0) ||
-            (job_ptr->spank_job_env == NULL)) {
+        if ((job_ptr->spank_job_env_size == 0) || (job_ptr->spank_job_env == NULL)) {
             lua_pushnil(L);
         } else {
             lua_newtable(L);
             for (i = 0; i < job_ptr->spank_job_env_size; i++) {
                 if (job_ptr->spank_job_env[i] != NULL) {
                     lua_pushnumber(L, i);
-                    lua_pushstring(L,
-                                   job_ptr->spank_job_env[i]);
+                    lua_pushstring(L, job_ptr->spank_job_env[i]);
                     lua_settable(L, -3);
                 }
             }
@@ -497,8 +484,7 @@ static void _update_jobs_global(void) {
         lua_setmetatable(L, -2);
 
         /* Lua copies passed strings, so we can reuse the buffer. */
-        snprintf(job_id_buf, sizeof(job_id_buf),
-                 "%d", job_ptr->job_id);
+        snprintf(job_id_buf, sizeof(job_id_buf), "%d", job_ptr->job_id);
         lua_setfield(L, -2, job_id_buf);
     }
     last_lua_jobs_update = last_job_update;
@@ -508,8 +494,7 @@ static void _update_jobs_global(void) {
     lua_pop(L, 1);
 }
 
-static int _resv_field(const slurmctld_resv_t *resv_ptr,
-                       const char *name) {
+static int _resv_field(const slurmctld_resv_t *resv_ptr, const char *name) {
     if (resv_ptr == NULL) {
         error("_resv_field: resv_ptr is NULL");
         lua_pushnil(L);
@@ -620,19 +605,16 @@ static int _set_job_env_field(lua_State *L) {
     } else {
         value_str = luaL_checkstring(L, 3);
         for (i = 0; job_desc->environment[i]; i++) {
-            if (!xstrncmp(job_desc->environment[i], name_eq,
-                          name_len)) {
+            if (!xstrncmp(job_desc->environment[i], name_eq, name_len)) {
                 job_desc->environment[i][name_len] = '\0';
                 xstrcat(job_desc->environment[i], value_str);
                 break;
             }
         }
         if (!job_desc->environment[i]) {
-            job_desc->environment = xrealloc(job_desc->environment,
-                                             sizeof(char *) * (i + 2));
+            job_desc->environment = xrealloc(job_desc->environment, sizeof(char *) * (i + 2));
             for (j = i; j >= 1; j--) {
-                job_desc->environment[j] =
-                        job_desc->environment[j - 1];
+                job_desc->environment[j] = job_desc->environment[j - 1];
             }
             job_desc->environment[0] = xstrdup(name_eq);
             xstrcat(job_desc->environment[0], value_str);
@@ -644,8 +626,7 @@ static int _set_job_env_field(lua_State *L) {
     return 0;
 }
 
-static int _job_env_field(const struct job_descriptor *job_desc,
-                          const char *name) {
+static int _job_env_field(const struct job_descriptor *job_desc, const char *name) {
     char *name_eq = "";
     int i, name_len;
 
@@ -660,10 +641,8 @@ static int _job_env_field(const struct job_descriptor *job_desc,
         lua_pushnil(L);
     } else {
         for (i = 0; job_desc->environment[i]; i++) {
-            if (!xstrncmp(job_desc->environment[i], name_eq,
-                          name_len)) {
-                lua_pushstring(L, job_desc->environment[i] +
-                                  name_len);
+            if (!xstrncmp(job_desc->environment[i], name_eq, name_len)) {
+                lua_pushstring(L, job_desc->environment[i] + name_len);
                 break;
             }
         }
@@ -710,8 +689,7 @@ static void _push_job_env(struct job_descriptor *job_desc) {
     lua_setmetatable(L, -2);
 }
 
-static int _get_job_req_field(const struct job_descriptor *job_desc,
-                              const char *name) {
+static int _get_job_req_field(const struct job_descriptor *job_desc, const char *name) {
     int i;
 
     if (job_desc == NULL) {
@@ -728,8 +706,7 @@ static int _get_job_req_field(const struct job_descriptor *job_desc,
     } else if (!xstrcmp(name, "argc")) {
         lua_pushnumber(L, job_desc->argc);
     } else if (!xstrcmp(name, "argv")) {
-        if ((job_desc->argc == 0) ||
-            (job_desc->argv == NULL)) {
+        if ((job_desc->argc == 0) || (job_desc->argv == NULL)) {
             lua_pushnil(L);
         } else {
             lua_newtable(L);
@@ -774,9 +751,7 @@ static int _get_job_req_field(const struct job_descriptor *job_desc,
     } else if (!xstrcmp(name, "default_account")) {
         lua_pushstring(L, _get_default_account(job_desc->user_id));
     } else if (!xstrcmp(name, "default_qos")) {
-        lua_pushstring(L, _get_default_qos(job_desc->user_id,
-                                           job_desc->account,
-                                           job_desc->partition));
+        lua_pushstring(L, _get_default_qos(job_desc->user_id, job_desc->account, job_desc->partition));
     } else if (!xstrcmp(name, "delay_boot")) {
         lua_pushnumber(L, job_desc->delay_boot);
     } else if (!xstrcmp(name, "dependency")) {
@@ -812,11 +787,9 @@ static int _get_job_req_field(const struct job_descriptor *job_desc,
         lua_pushstring(L, job_desc->mem_per_tres);
     } else if (!xstrcmp(name, "min_cpus")) {
         lua_pushnumber(L, job_desc->min_cpus);
-    } else if (!xstrcmp(name, "min_mem_per_node") &&
-               !(job_desc->pn_min_memory & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "min_mem_per_node") && !(job_desc->pn_min_memory & MEM_PER_CPU)) {
         lua_pushnumber(L, job_desc->pn_min_memory);
-    } else if (!xstrcmp(name, "min_mem_per_cpu") &&
-               (job_desc->pn_min_memory & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "min_mem_per_cpu") && (job_desc->pn_min_memory & MEM_PER_CPU)) {
         lua_pushnumber(L, (job_desc->pn_min_memory & (~MEM_PER_CPU)));
     } else if (!xstrcmp(name, "min_nodes")) {
         lua_pushnumber(L, job_desc->min_nodes);
@@ -872,24 +845,20 @@ static int _get_job_req_field(const struct job_descriptor *job_desc,
         if (job_desc->site_factor == NO_VAL)
             lua_pushnumber(L, job_desc->site_factor);
         else
-            lua_pushnumber(L,
-                           (((int64_t) job_desc->site_factor)
-                            - NICE_OFFSET));
+            lua_pushnumber(L, (((int64_t) job_desc->site_factor) - NICE_OFFSET));
     } else if (!xstrcmp(name, "sockets_per_board")) {
         lua_pushnumber(L, job_desc->sockets_per_board);
     } else if (!xstrcmp(name, "sockets_per_node")) {
         lua_pushnumber(L, job_desc->sockets_per_node);
     } else if (!xstrcmp(name, "spank_job_env")) {
-        if ((job_desc->spank_job_env_size == 0) ||
-            (job_desc->spank_job_env == NULL)) {
+        if ((job_desc->spank_job_env_size == 0) || (job_desc->spank_job_env == NULL)) {
             lua_pushnil(L);
         } else {
             lua_newtable(L);
             for (i = 0; i < job_desc->spank_job_env_size; i++) {
                 if (job_desc->spank_job_env[i] != NULL) {
                     lua_pushnumber(L, i);
-                    lua_pushstring(L,
-                                   job_desc->spank_job_env[i]);
+                    lua_pushstring(L, job_desc->spank_job_env[i]);
                     lua_settable(L, -3);
                 }
             }
@@ -1150,8 +1119,7 @@ static int _set_job_req_field(lua_State *L) {
     } else if (!xstrcmp(name, "site_factor")) {
         job_desc->site_factor = luaL_checknumber(L, 3);
         if (job_desc->site_factor != NO_VAL)
-            job_desc->site_factor =
-                    NICE_OFFSET + job_desc->site_factor;
+            job_desc->site_factor = NICE_OFFSET + job_desc->site_factor;
     } else if (!xstrcmp(name, "sockets_per_node")) {
         job_desc->sockets_per_node = luaL_checknumber(L, 3);
     } else if (!xstrcmp(name, "std_err")) {
@@ -1259,8 +1227,7 @@ static void _push_job_rec(struct job_record *job_ptr) {
  * This is an incomplete list of partition record fields. Add more as needed
  * and send patches to slurm-dev@schedmd.com
  */
-static int _part_rec_field(const struct part_record *part_ptr,
-                           const char *name) {
+static int _part_rec_field(const struct part_record *part_ptr, const char *name) {
     if (part_ptr == NULL) {
         error("_get_part_field: part_ptr is NULL");
         lua_pushnil(L);
@@ -1278,11 +1245,9 @@ static int _part_rec_field(const struct part_record *part_ptr,
         lua_pushstring(L, part_ptr->billing_weights_str);
     } else if (!xstrcmp(name, "default_time")) {
         lua_pushnumber(L, part_ptr->default_time);
-    } else if (!xstrcmp(name, "def_mem_per_cpu") &&
-               (part_ptr->def_mem_per_cpu & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "def_mem_per_cpu") && (part_ptr->def_mem_per_cpu & MEM_PER_CPU)) {
         lua_pushnumber(L, part_ptr->def_mem_per_cpu & (~MEM_PER_CPU));
-    } else if (!xstrcmp(name, "def_mem_per_node") &&
-               !(part_ptr->def_mem_per_cpu & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "def_mem_per_node") && !(part_ptr->def_mem_per_cpu & MEM_PER_CPU)) {
         lua_pushnumber(L, part_ptr->def_mem_per_cpu);
     } else if (!xstrcmp(name, "deny_accounts")) {
         lua_pushstring(L, part_ptr->deny_accounts);
@@ -1297,11 +1262,9 @@ static int _part_rec_field(const struct part_record *part_ptr,
         lua_pushnumber(L, part_ptr->flags);
     } else if (!xstrcmp(name, "max_cpus_per_node")) {
         lua_pushnumber(L, part_ptr->max_cpus_per_node);
-    } else if (!xstrcmp(name, "max_mem_per_cpu") &&
-               (part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "max_mem_per_cpu") && (part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
         lua_pushnumber(L, part_ptr->max_mem_per_cpu & (~MEM_PER_CPU));
-    } else if (!xstrcmp(name, "max_mem_per_node") &&
-               !(part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
+    } else if (!xstrcmp(name, "max_mem_per_node") && !(part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
         lua_pushnumber(L, part_ptr->max_mem_per_cpu);
     } else if (!xstrcmp(name, "max_nodes")) {
         lua_pushnumber(L, part_ptr->max_nodes);
@@ -1352,8 +1315,7 @@ static int _part_rec_field_index(lua_State *L) {
     return _part_rec_field(part_ptr, name);
 }
 
-static bool _user_can_use_part(uint32_t user_id, uint32_t submit_uid,
-                               struct part_record *part_ptr) {
+static bool _user_can_use_part(uint32_t user_id, uint32_t submit_uid, struct part_record *part_ptr) {
     int i;
 
     if (user_id == 0) {
@@ -1405,8 +1367,7 @@ static void _push_partition_list(uint32_t user_id, uint32_t submit_uid) {
     list_iterator_destroy(part_iterator);
 }
 
-static void _lua_table_register(lua_State *L, const char *libname,
-                                const luaL_Reg *l) {
+static void _lua_table_register(lua_State *L, const char *libname, const luaL_Reg *l) {
 #if LUA_VERSION_NUM == 501
     luaL_register(L, libname, l);
 #else
@@ -1433,44 +1394,28 @@ static void _register_lua_slurm_output_functions(void) {
     /*
      *  Create more user-friendly lua versions of Slurm log functions.
      */
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.error (string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.error (string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_error");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (0, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (0, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_info");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (1, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (1, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_verbose");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (2, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (2, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_debug");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (3, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (3, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_debug2");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (4, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (4, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_debug3");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.log (5, string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.log (5, string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_debug4");
-    snprintf(tmp_string, sizeof(tmp_string),
-             "slurm.user_msg (string.format(%s({...})))",
-             unpack_str);
+    snprintf(tmp_string, sizeof(tmp_string), "slurm.user_msg (string.format(%s({...})))", unpack_str);
     luaL_loadstring(L, tmp_string);
     lua_setfield(L, -2, "log_user");
 
@@ -1606,18 +1551,13 @@ static int _check_lua_script_function(const char *name) {
 static int _check_lua_script_functions(void) {
     int rc = 0;
     int i;
-    const char *fns[] = {
-            "slurm_job_submit",
-            "slurm_job_modify",
-            NULL
-    };
+    const char *fns[] = {"slurm_job_submit", "slurm_job_modify", NULL};
 
     i = 0;
     do {
         if (_check_lua_script_function(fns[i]) < 0) {
             error("job_submit/lua: %s: "
-                  "missing required function %s",
-                  lua_script_path, fns[i]);
+                  "missing required function %s", lua_script_path, fns[i]);
             rc = -1;
         }
     } while (fns[++i]);
@@ -1633,17 +1573,14 @@ static int _load_script(void) {
     if (stat(lua_script_path, &st) != 0) {
         if (L_orig) {
             (void) error("Unable to stat %s, "
-                         "using old script: %s",
-                         lua_script_path, strerror(errno));
+                         "using old script: %s", lua_script_path, strerror(errno));
             return SLURM_SUCCESS;
         }
-        return error("Unable to stat %s: %s",
-                     lua_script_path, strerror(errno));
+        return error("Unable to stat %s: %s", lua_script_path, strerror(errno));
     }
 
     if (st.st_mtime <= lua_script_last_loaded) {
-        debug3("%s: skipping loading Lua script: %s", __func__,
-               lua_script_path);
+        debug3("%s: skipping loading Lua script: %s", __func__, lua_script_path);
         return SLURM_SUCCESS;
     }
     debug3("%s: loading Lua script: %s", __func__, lua_script_path);
@@ -1659,14 +1596,12 @@ static int _load_script(void) {
     luaL_openlibs(L);
     if (luaL_loadfile(L, lua_script_path)) {
         if (L_orig) {
-            (void) error("lua: %s: %s, using previous script",
-                         lua_script_path, lua_tostring(L, -1));
+            (void) error("lua: %s: %s, using previous script", lua_script_path, lua_tostring(L, -1));
             lua_close(L);
             L = L_orig;
             return SLURM_SUCCESS;
         }
-        rc = error("lua: %s: %s", lua_script_path,
-                   lua_tostring(L, -1));
+        rc = error("lua: %s: %s", lua_script_path, lua_tostring(L, -1));
         lua_pop(L, 1);
         return rc;
     }
@@ -1684,14 +1619,12 @@ static int _load_script(void) {
     if (lua_pcall(L, 0, 1, 0) != 0) {
         if (L_orig) {
             (void) error("job_submit/lua: %s: %s, "
-                         "using previous script",
-                         lua_script_path, lua_tostring(L, -1));
+                         "using previous script", lua_script_path, lua_tostring(L, -1));
             lua_close(L);
             L = L_orig;
             return SLURM_SUCCESS;
         }
-        rc = error("job_submit/lua: %s: %s",
-                   lua_script_path, lua_tostring(L, -1));
+        rc = error("job_submit/lua: %s: %s", lua_script_path, lua_tostring(L, -1));
         lua_pop(L, 1);
         return rc;
     }
@@ -1703,14 +1636,12 @@ static int _load_script(void) {
     if (rc != SLURM_SUCCESS) {
         if (L_orig) {
             (void) error("job_submit/lua: %s: returned %d "
-                         "on load, using previous script",
-                         lua_script_path, rc);
+                         "on load, using previous script", lua_script_path, rc);
             lua_close(L);
             L = L_orig;
             return SLURM_SUCCESS;
         }
-        (void) error("job_submit/lua: %s: returned %d on load",
-                     lua_script_path, rc);
+        (void) error("job_submit/lua: %s: returned %d on load", lua_script_path, rc);
         lua_pop(L, 1);
         return rc;
     }
@@ -1723,8 +1654,7 @@ static int _load_script(void) {
         if (L_orig) {
             (void) error("job_submit/lua: %s: "
                          "required function(s) not present, "
-                         "using previous script",
-                         lua_script_path);
+                         "using previous script", lua_script_path);
             lua_close(L);
             L = L_orig;
             return SLURM_SUCCESS;
@@ -1768,8 +1698,7 @@ int fini(void) {
 
 
 /* Lua script hook called for "submit job" event. */
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
-                      char **err_msg) {
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
     int rc = SLURM_ERROR;
     slurm_mutex_lock(&lua_lock);
 
@@ -1792,14 +1721,12 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
     lua_pushnumber(L, submit_uid);
     _stack_dump("job_submit, before lua_pcall", L);
     if (lua_pcall(L, 3, 1, 0) != 0) {
-        error("%s/lua: %s: %s",
-              __func__, lua_script_path, lua_tostring(L, -1));
+        error("%s/lua: %s: %s", __func__, lua_script_path, lua_tostring(L, -1));
     } else {
         if (lua_isnumber(L, -1)) {
             rc = lua_tonumber(L, -1);
         } else {
-            info("%s/lua: %s: non-numeric return code",
-                 __func__, lua_script_path);
+            info("%s/lua: %s: non-numeric return code", __func__, lua_script_path);
             rc = SLURM_SUCCESS;
         }
         lua_pop(L, 1);
@@ -1816,8 +1743,7 @@ extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
 }
 
 /* Lua script hook called for "modify job" event. */
-extern int job_modify(struct job_descriptor *job_desc,
-                      struct job_record *job_ptr, uint32_t submit_uid) {
+extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
     int rc = SLURM_ERROR;
     slurm_mutex_lock(&lua_lock);
 
@@ -1838,14 +1764,12 @@ extern int job_modify(struct job_descriptor *job_desc,
     lua_pushnumber(L, submit_uid);
     _stack_dump("job_modify, before lua_pcall", L);
     if (lua_pcall(L, 4, 1, 0) != 0) {
-        error("%s/lua: %s: %s",
-              __func__, lua_script_path, lua_tostring(L, -1));
+        error("%s/lua: %s: %s", __func__, lua_script_path, lua_tostring(L, -1));
     } else {
         if (lua_isnumber(L, -1)) {
             rc = lua_tonumber(L, -1);
         } else {
-            info("%s/lua: %s: non-numeric return code",
-                 __func__, lua_script_path);
+            info("%s/lua: %s: non-numeric return code", __func__, lua_script_path);
             rc = SLURM_SUCCESS;
         }
         lua_pop(L, 1);

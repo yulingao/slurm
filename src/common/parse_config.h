@@ -291,9 +291,8 @@ typedef struct conf_file_options {
     char *key;
     slurm_parser_enum_t type;
 
-    int (*handler)(void **data, slurm_parser_enum_t type,
-                   const char *key, const char *value,
-                   const char *line, char **leftover);
+    int (*handler)(void **data, slurm_parser_enum_t type, const char *key, const char *value, const char *line,
+                   char **leftover);
 
     void (*destroy)(void *data);
 
@@ -311,8 +310,7 @@ void s_p_hashtbl_destroy(s_p_hashtbl_t *hashtbl);
  * IN ignore_new - do not treat unrecognized keywords as a fatal error,
  *                 print debug() message and continue
  */
-int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
-                   bool ignore_new);
+int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename, bool ignore_new);
 
 /* Returns SLURM_SUCCESS if buffer was opened and parse correctly.
  * buffer must be a valid Buf bufferonly containing strings.The parsing
@@ -322,8 +320,7 @@ int s_p_parse_file(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, char *filename,
  * IN ignore_new - do not treat unrecognized keywords as a fatal error,
  *                 print debug() message and continue
  */
-int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val,
-                     Buf buffer, bool ignore_new);
+int s_p_parse_buffer(s_p_hashtbl_t *hashtbl, uint32_t *hash_val, Buf buffer, bool ignore_new);
 
 /*
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
@@ -334,8 +331,7 @@ int s_p_parse_pair(s_p_hashtbl_t *hashtbl, const char *key, const char *value);
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
  * Set the operator of the updated s_p_values_t to the provided one.
  */
-int s_p_parse_pair_with_op(s_p_hashtbl_t *hashtbl, const char *key,
-                           const char *value, slurm_parser_operator_t opt);
+int s_p_parse_pair_with_op(s_p_hashtbl_t *hashtbl, const char *key, const char *value, slurm_parser_operator_t opt);
 
 /*
  * Returns 1 if the line is parsed cleanly, and 0 otherwise.
@@ -358,19 +354,16 @@ void s_p_hashtbl_merge(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl);
 /* Like s_p_hashtbl_merge, but if for a key, data exists in both tables, data
  * is swapped.
  */
-void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl,
-                                s_p_hashtbl_t *from_hashtbl);
+void s_p_hashtbl_merge_override(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl);
 
 /*
  * Mainly to enable a generic set of option to be merged with a specific set
  * of options.
  */
-void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl,
-                            s_p_hashtbl_t *from_hashtbl);
+void s_p_hashtbl_merge_keys(s_p_hashtbl_t *to_hashtbl, s_p_hashtbl_t *from_hashtbl);
 
-int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
-                            const char *key, const char *value,
-                            const char *line, char **leftover);
+int
+s_p_parse_line_complete(s_p_hashtbl_t *hashtbl, const char *key, const char *value, const char *line, char **leftover);
 
 /*
  * s_p_parse_line_expanded
@@ -395,10 +388,8 @@ int s_p_parse_line_complete(s_p_hashtbl_t *hashtbl,
  * IN line - only used for logging
  * IN leftover - used by s_p_parse_line
  */
-int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl,
-                            s_p_hashtbl_t ***data, int *data_count,
-                            const char *key, const char *value,
-                            const char *line, char **leftover);
+int s_p_parse_line_expanded(const s_p_hashtbl_t *hashtbl, s_p_hashtbl_t ***data, int *data_count, const char *key,
+                            const char *value, const char *line, char **leftover);
 
 /*
  * s_p_get_string
@@ -449,8 +440,7 @@ int s_p_get_long(long *num, const char *key, const s_p_hashtbl_t *hashtbl);
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_uint16(uint16_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl);
+int s_p_get_uint16(uint16_t *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_uint32
@@ -466,8 +456,7 @@ int s_p_get_uint16(uint16_t *num, const char *key,
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_uint32(uint32_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl);
+int s_p_get_uint32(uint32_t *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_uint64
@@ -483,8 +472,7 @@ int s_p_get_uint32(uint32_t *num, const char *key,
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_uint64(uint64_t *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl);
+int s_p_get_uint64(uint64_t *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_float
@@ -500,8 +488,7 @@ int s_p_get_uint64(uint64_t *num, const char *key,
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_float(float *num, const char *key,
-                  const s_p_hashtbl_t *hashtbl);
+int s_p_get_float(float *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_double
@@ -517,8 +504,7 @@ int s_p_get_float(float *num, const char *key,
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_double(double *num, const char *key,
-                   const s_p_hashtbl_t *hashtbl);
+int s_p_get_double(double *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_long_double
@@ -534,8 +520,7 @@ int s_p_get_double(double *num, const char *key,
  * Returns 1 when a value was set for "key" during parsing and "num"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_long_double(long double *num, const char *key,
-                        const s_p_hashtbl_t *hashtbl);
+int s_p_get_long_double(long double *num, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_operator
@@ -552,8 +537,7 @@ int s_p_get_long_double(long double *num, const char *key,
  * Returns 1 when a operator was set for "key" during parsing and
  *     "operator" was successfully set, otherwise returns 0;
  */
-int s_p_get_operator(slurm_parser_operator_t *opt, const char *key,
-                     const s_p_hashtbl_t *hashtbl);
+int s_p_get_operator(slurm_parser_operator_t *opt, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_pointer
@@ -589,16 +573,13 @@ int s_p_get_pointer(void **ptr, const char *key, const s_p_hashtbl_t *hashtbl);
  * Returns 1 when a value was set for "key" during parsing and "ptr"
  *   was successfully set, otherwise returns 0;
  */
-int s_p_get_array(void **ptr_array[], int *count,
-                  const char *key, const s_p_hashtbl_t *hashtbl);
+int s_p_get_array(void **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /** works like s_p_get_array but each item of the array is a s_p_hashtbl_t */
-int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count,
-                 const char *key, const s_p_hashtbl_t *hashtbl);
+int s_p_get_line(s_p_hashtbl_t **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /** works like s_p_get_array but each item of the array is a s_p_hashtbl_t */
-int s_p_get_expline(s_p_hashtbl_t **ptr_array[], int *count,
-                    const char *key, const s_p_hashtbl_t *hashtbl);
+int s_p_get_expline(s_p_hashtbl_t **ptr_array[], int *count, const char *key, const s_p_hashtbl_t *hashtbl);
 
 /*
  * s_p_get_boolean
@@ -622,8 +603,7 @@ int s_p_get_boolean(bool *flag, const char *key, const s_p_hashtbl_t *hashtbl);
  *
  * Primarily for debugging purposes.
  */
-void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
-                     const s_p_options_t options[]);
+void s_p_dump_values(const s_p_hashtbl_t *hashtbl, const s_p_options_t options[]);
 
 
 /*
@@ -633,9 +613,7 @@ void s_p_dump_values(const s_p_hashtbl_t *hashtbl,
  * Primarily for sending a table across the network so you don't have to read a
  * file in.
  */
-extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl,
-                            const s_p_options_t options[],
-                            const uint32_t cnt);
+extern Buf s_p_pack_hashtbl(const s_p_hashtbl_t *hashtbl, const s_p_options_t options[], const uint32_t cnt);
 
 /*
  * Given a buffer, unpack key, type, op and value into a hashtbl.
@@ -650,8 +628,6 @@ extern s_p_hashtbl_t *s_p_unpack_hashtbl(Buf buffer);
  *
  * Used if the full set of options are not available from one location.
  */
-extern void transfer_s_p_options(s_p_options_t **full_options,
-                                 s_p_options_t *options,
-                                 int *full_options_cnt);
+extern void transfer_s_p_options(s_p_options_t **full_options, s_p_options_t *options, int *full_options_cnt);
 
 #endif /* !_PARSE_CONFIG_H */

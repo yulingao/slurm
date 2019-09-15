@@ -39,8 +39,7 @@
 
 #include "pmixp_dconn.h"
 
-int pmixp_dconn_ucx_prepare(pmixp_dconn_handlers_t *handlers,
-                            char **ep_data, size_t *ep_len);
+int pmixp_dconn_ucx_prepare(pmixp_dconn_handlers_t *handlers, char **ep_data, size_t *ep_len);
 
 void pmixp_dconn_ucx_stop();
 

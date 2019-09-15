@@ -60,8 +60,7 @@ extern int slurm_load_federation(void **fed_pptr) {
     req_msg.msg_type = REQUEST_FED_INFO;
     req_msg.data = NULL;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
-                                       working_cluster_rec) < 0)
+    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
         return SLURM_ERROR;
 
     switch (resp_msg.msg_type) {
@@ -110,8 +109,7 @@ extern void slurm_print_federation(void *ptr) {
         cluster_name = slurm_get_cluster_name();
 
     left_col_size = strlen("federation:");
-    printf("%-*s %s\n", left_col_size, "Federation:",
-           fed->name);
+    printf("%-*s %s\n", left_col_size, "Federation:", fed->name);
     list_sort(fed->cluster_list, (ListCmpF) _sort_clusters_by_name);
     itr = list_iterator_create(fed->cluster_list);
 
@@ -124,12 +122,9 @@ extern void slurm_print_federation(void *ptr) {
         features = slurm_char_list_to_xstr(cluster->fed.feature_list);
         tmp_str = slurmdb_cluster_fed_states_str(cluster->fed.state);
 
-        printf("%-*s %s:%s:%d ID:%d FedState:%s Features:%s\n",
-               left_col_size, "Self:", cluster->name,
-               cluster->control_host ? cluster->control_host : "",
-               cluster->control_port,
-               cluster->fed.id, (tmp_str ? tmp_str : ""),
-               features ? features : "");
+        printf("%-*s %s:%s:%d ID:%d FedState:%s Features:%s\n", left_col_size, "Self:", cluster->name,
+               cluster->control_host ? cluster->control_host : "", cluster->control_port, cluster->fed.id,
+               (tmp_str ? tmp_str : ""), features ? features : "");
 
         xfree(features);
         break;
@@ -146,15 +141,10 @@ extern void slurm_print_federation(void *ptr) {
 
         features = slurm_char_list_to_xstr(cluster->fed.feature_list);
         tmp_str = slurmdb_cluster_fed_states_str(cluster->fed.state);
-        printf("%-*s %s:%s:%d ID:%d FedState:%s Features:%s PersistConnSend/Recv:%s/%s Synced:%s\n",
-               left_col_size, "Sibling:", cluster->name,
-               cluster->control_host ? cluster->control_host : "",
-               cluster->control_port,
-               cluster->fed.id, (tmp_str ? tmp_str : ""),
-               features ? features : "",
-               cluster->fed.send ? "Yes" : "No",
-               cluster->fed.recv ? "Yes" : "No",
-               cluster->fed.sync_recvd ? "Yes" : "No");
+        printf("%-*s %s:%s:%d ID:%d FedState:%s Features:%s PersistConnSend/Recv:%s/%s Synced:%s\n", left_col_size,
+               "Sibling:", cluster->name, cluster->control_host ? cluster->control_host : "", cluster->control_port,
+               cluster->fed.id, (tmp_str ? tmp_str : ""), features ? features : "", cluster->fed.send ? "Yes" : "No",
+               cluster->fed.recv ? "Yes" : "No", cluster->fed.sync_recvd ? "Yes" : "No");
 
         xfree(features);
     }

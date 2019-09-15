@@ -98,19 +98,14 @@ extern int acct_gather_conf_init(void) {
 
     /* get options from plugins using acct_gather.conf */
 
-    rc += acct_gather_energy_g_conf_options(&full_options,
-                                            &full_options_cnt);
-    rc += acct_gather_profile_g_conf_options(&full_options,
-                                             &full_options_cnt);
-    rc += acct_gather_interconnect_g_conf_options(&full_options,
-                                                  &full_options_cnt);
-    rc += acct_gather_filesystem_g_conf_options(&full_options,
-                                                &full_options_cnt);
+    rc += acct_gather_energy_g_conf_options(&full_options, &full_options_cnt);
+    rc += acct_gather_profile_g_conf_options(&full_options, &full_options_cnt);
+    rc += acct_gather_interconnect_g_conf_options(&full_options, &full_options_cnt);
+    rc += acct_gather_filesystem_g_conf_options(&full_options, &full_options_cnt);
     /* ADD MORE HERE */
 
     /* for the NULL at the end */
-    xrealloc(full_options,
-             ((full_options_cnt + 1) * sizeof(s_p_options_t)));
+    xrealloc(full_options, ((full_options_cnt + 1) * sizeof(s_p_options_t)));
 
     /**************************************************/
 
@@ -122,22 +117,19 @@ extern int acct_gather_conf_init(void) {
         debug2("Reading acct_gather.conf file %s", conf_path);
 
         tbl = s_p_hashtbl_create(full_options);
-        if (s_p_parse_file(tbl, NULL, conf_path, false) ==
-            SLURM_ERROR) {
+        if (s_p_parse_file(tbl, NULL, conf_path, false) == SLURM_ERROR) {
             fatal("Could not open/read/parse acct_gather.conf file "
                   "%s.  Many times this is because you have "
                   "defined options for plugins that are not "
                   "loaded.  Please check your slurm.conf file "
                   "and make sure the plugins for the options "
-                  "listed are loaded.",
-                  conf_path);
+                  "listed are loaded.", conf_path);
         }
     }
 
     rc += _process_tbl(tbl);
 
-    acct_gather_options_buf = s_p_pack_hashtbl(
-            tbl, full_options, full_options_cnt);
+    acct_gather_options_buf = s_p_pack_hashtbl(tbl, full_options, full_options_cnt);
 
     for (i = 0; i < full_options_cnt; i++)
         xfree(full_options[i].key);
@@ -260,8 +252,7 @@ extern int acct_gather_parse_freq(int type, char *freq) {
                for task.
             */
             freq_int = _get_int(freq);
-            if ((freq_int == -1)
-                && (sub_str = xstrcasestr(freq, "task=")))
+            if ((freq_int == -1) && (sub_str = xstrcasestr(freq, "task=")))
                 freq_int = _get_int(sub_str + 5);
             break;
         case PROFILE_FILESYSTEM:
@@ -281,8 +272,7 @@ extern int acct_gather_parse_freq(int type, char *freq) {
     return freq_int;
 }
 
-extern int acct_gather_check_acct_freq_task(uint64_t job_mem_lim,
-                                            char *acctg_freq) {
+extern int acct_gather_check_acct_freq_task(uint64_t job_mem_lim, char *acctg_freq) {
     int task_freq;
     static uint32_t acct_freq_task = NO_VAL;
 
@@ -316,8 +306,7 @@ extern int acct_gather_check_acct_freq_task(uint64_t job_mem_lim,
     } else if (task_freq > acct_freq_task) {
         error("Can't set frequency to %d, it is higher than %u.  "
               "We need it to be at least at this level to "
-              "monitor memory usage.",
-              task_freq, acct_freq_task);
+              "monitor memory usage.", task_freq, acct_freq_task);
         slurm_seterrno(ESLURMD_INVALID_ACCT_FREQ);
         return 1;
     }

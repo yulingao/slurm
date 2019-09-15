@@ -122,8 +122,7 @@ int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid);
 
 int slurm_get_cpuset(char *path, pid_t pid, size_t size, cpu_set_t *mask);
 
-int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
-                     const cpu_set_t *mask);
+int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size, const cpu_set_t *mask);
 
 /*** from numa.c ***/
 #ifdef HAVE_NUMA

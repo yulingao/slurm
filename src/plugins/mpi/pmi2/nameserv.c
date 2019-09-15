@@ -53,8 +53,7 @@ typedef struct name_port {
  */
 static name_port_t *local_name_list = NULL;
 
-extern char *
-name_lookup_local(char *name) {
+extern char *name_lookup_local(char *name) {
     name_port_t *np;
 
     np = local_name_list;
@@ -64,8 +63,7 @@ name_lookup_local(char *name) {
     return np ? xstrdup(np->port) : NULL;
 }
 
-extern int
-name_publish_local(char *name, char *port) {
+extern int name_publish_local(char *name, char *port) {
     name_port_t *np;
 
     np = local_name_list;
@@ -84,8 +82,7 @@ name_publish_local(char *name, char *port) {
     return SLURM_SUCCESS;
 }
 
-extern int
-name_unpublish_local(char *name) {
+extern int name_unpublish_local(char *name) {
     name_port_t *np, **pprev;
 
     pprev = &local_name_list;
@@ -106,8 +103,7 @@ name_unpublish_local(char *name) {
     return SLURM_SUCCESS;
 }
 
-extern int
-name_publish_up(char *name, char *port) {
+extern int name_publish_up(char *name, char *port) {
     Buf buf = NULL, resp_buf = NULL;
     uint32_t size, tmp_32;
     int rc;
@@ -133,8 +129,7 @@ name_publish_up(char *name, char *port) {
     return rc;
 }
 
-extern int
-name_unpublish_up(char *name) {
+extern int name_unpublish_up(char *name) {
     Buf buf = NULL, resp_buf = NULL;
     uint32_t size, tmp_32;
     int rc;
@@ -160,8 +155,7 @@ name_unpublish_up(char *name) {
 }
 
 
-extern char *
-name_lookup_up(char *name) {
+extern char *name_lookup_up(char *name) {
     Buf buf = NULL, resp_buf = NULL;
     uint32_t size;
     char *port = NULL;

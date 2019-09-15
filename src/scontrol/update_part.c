@@ -43,9 +43,7 @@
 #include "src/common/slurm_resource_info.h"
 #include "src/scontrol/scontrol.h"
 
-extern int
-scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
-                            update_part_msg_t *part_msg_ptr) {
+extern int scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr, update_part_msg_t *part_msg_ptr) {
     int i, min, max;
     char *tag, *val;
     int taglen, vallen;
@@ -89,8 +87,7 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
             part_msg_ptr->max_time = max_time;
             (*update_cnt_ptr)++;
         } else if (xstrncasecmp(tag, "CpuBind", MAX(taglen, 7)) == 0) {
-            if (xlate_cpu_bind_str(val, &part_msg_ptr->cpu_bind) !=
-                SLURM_SUCCESS) {
+            if (xlate_cpu_bind_str(val, &part_msg_ptr->cpu_bind) != SLURM_SUCCESS) {
                 exit_code = 1;
                 error("Invalid input %s", argv[i]);
                 return SLURM_ERROR;
@@ -105,24 +102,19 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
             }
             part_msg_ptr->default_time = default_time;
             (*update_cnt_ptr)++;
-        } else if (xstrncasecmp(tag, "MaxCPUsPerNode",
-                                MAX(taglen, 4)) == 0) {
-            if ((xstrcasecmp(val, "UNLIMITED") == 0) ||
-                (xstrcasecmp(val, "INFINITE") == 0)) {
+        } else if (xstrncasecmp(tag, "MaxCPUsPerNode", MAX(taglen, 4)) == 0) {
+            if ((xstrcasecmp(val, "UNLIMITED") == 0) || (xstrcasecmp(val, "INFINITE") == 0)) {
                 part_msg_ptr->max_cpus_per_node = INFINITE;
-            } else if (parse_uint32(val, &part_msg_ptr->
-                    max_cpus_per_node)) {
+            } else if (parse_uint32(val, &part_msg_ptr->max_cpus_per_node)) {
                 error("Invalid MaxCPUsPerNode value: %s", val);
                 return SLURM_ERROR;
             }
             (*update_cnt_ptr)++;
         } else if (xstrncasecmp(tag, "MaxNodes", MAX(taglen, 4)) == 0) {
             min = 1;
-            if ((xstrcasecmp(val, "UNLIMITED") == 0) ||
-                (xstrcasecmp(val, "INFINITE") == 0)) {
+            if ((xstrcasecmp(val, "UNLIMITED") == 0) || (xstrcasecmp(val, "INFINITE") == 0)) {
                 part_msg_ptr->max_nodes = INFINITE;
-            } else if (!get_resource_arg_range(val, "MaxNodes",
-                                               &min, &max, false)) {
+            } else if (!get_resource_arg_range(val, "MaxNodes", &min, &max, false)) {
                 exit_code = 1;
             } else {
                 part_msg_ptr->max_nodes = min;
@@ -227,29 +219,20 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
             if (xstrncasecmp(val, "NO", MAX(vallen, 1)) == 0) {
                 part_msg_ptr->max_share = 1;
 
-            } else if (xstrncasecmp(val, "EXCLUSIVE",
-                                    MAX(vallen, 1)) == 0) {
+            } else if (xstrncasecmp(val, "EXCLUSIVE", MAX(vallen, 1)) == 0) {
                 part_msg_ptr->max_share = 0;
 
-            } else if (xstrncasecmp(val, "YES", MAX(vallen, 1))
-                       == 0) {
+            } else if (xstrncasecmp(val, "YES", MAX(vallen, 1)) == 0) {
                 if (colon_pos) {
-                    part_msg_ptr->max_share =
-                            (uint16_t) strtol(colon_pos + 1,
-                                              (char **) NULL, 10);
+                    part_msg_ptr->max_share = (uint16_t) strtol(colon_pos + 1, (char **) NULL, 10);
                 } else {
                     part_msg_ptr->max_share = (uint16_t) 4;
                 }
-            } else if (xstrncasecmp(val, "FORCE", MAX(vallen, 1))
-                       == 0) {
+            } else if (xstrncasecmp(val, "FORCE", MAX(vallen, 1)) == 0) {
                 if (colon_pos) {
-                    part_msg_ptr->max_share =
-                            (uint16_t) strtol(colon_pos + 1,
-                                              (char **) NULL, 10) |
-                            SHARED_FORCE;
+                    part_msg_ptr->max_share = (uint16_t) strtol(colon_pos + 1, (char **) NULL, 10) | SHARED_FORCE;
                 } else {
-                    part_msg_ptr->max_share =
-                            (uint16_t) 4 | SHARED_FORCE;
+                    part_msg_ptr->max_share = (uint16_t) 4 | SHARED_FORCE;
                 }
             } else {
                 exit_code = 1;
@@ -258,14 +241,10 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
                 return SLURM_ERROR;
             }
             (*update_cnt_ptr)++;
-        } else if (xstrncasecmp(tag, "OverTimeLimit", MAX(taglen, 5))
-                   == 0) {
-            if ((xstrcasecmp(val, "UNLIMITED") == 0) ||
-                (xstrcasecmp(val, "INFINITE") == 0)) {
-                part_msg_ptr->over_time_limit =
-                        INFINITE16;
-            } else if (parse_uint16(val, &part_msg_ptr->
-                    over_time_limit)) {
+        } else if (xstrncasecmp(tag, "OverTimeLimit", MAX(taglen, 5)) == 0) {
+            if ((xstrcasecmp(val, "UNLIMITED") == 0) || (xstrcasecmp(val, "INFINITE") == 0)) {
+                part_msg_ptr->over_time_limit = INFINITE16;
+            } else if (parse_uint16(val, &part_msg_ptr->over_time_limit)) {
                 error("Invalid OverTimeLimit value: %s", val);
                 return SLURM_ERROR;
             }
@@ -284,14 +263,11 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
                 error("Invalid Priority value: %s", val);
                 return SLURM_ERROR;
             }
-            part_msg_ptr->priority_job_factor =
-                    part_msg_ptr->priority_tier;
+            part_msg_ptr->priority_job_factor = part_msg_ptr->priority_tier;
             (*update_cnt_ptr)++;
         } else if (!xstrncasecmp(tag, "PriorityJobFactor", MAX(taglen, 3))) {
-            if (parse_uint16(val,
-                             &part_msg_ptr->priority_job_factor)) {
-                error("Invalid PriorityJobFactor value: %s",
-                      val);
+            if (parse_uint16(val, &part_msg_ptr->priority_job_factor)) {
+                error("Invalid PriorityJobFactor value: %s", val);
                 return SLURM_ERROR;
             }
             (*update_cnt_ptr)++;
@@ -379,14 +355,12 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
         } else if (!xstrncasecmp(tag, "JobDefaults", MAX(taglen, 4))) {
             part_msg_ptr->job_defaults_str = val;
             (*update_cnt_ptr)++;
-        } else if (!xstrncasecmp(tag, "TresBillingWeights",
-                                 MAX(taglen, 1))) {
+        } else if (!xstrncasecmp(tag, "TresBillingWeights", MAX(taglen, 1))) {
             part_msg_ptr->billing_weights_str = val;
             (*update_cnt_ptr)++;
         } else {
             exit_code = 1;
-            error("Update of this parameter is not supported: %s\n",
-                  argv[i]);
+            error("Update of this parameter is not supported: %s\n", argv[i]);
             error("Request aborted");
             return SLURM_ERROR;
         }
@@ -403,8 +377,7 @@ scontrol_parse_part_options(int argc, char **argv, int *update_cnt_ptr,
  * RET SLURM_SUCCESS if no slurm error, errno otherwise. parsing error prints
  *			error message and returns SLURM_SUCCESS
  */
-extern int
-scontrol_update_part(int argc, char **argv) {
+extern int scontrol_update_part(int argc, char **argv) {
     int update_cnt = 0;
     update_part_msg_t part_msg;
     int err;
@@ -441,8 +414,7 @@ scontrol_update_part(int argc, char **argv) {
  * RET SLURM_SUCCESS if no slurm error, errno otherwise. parsing error prints
  *			error message and returns SLURM_SUCCESS
  */
-extern int
-scontrol_create_part(int argc, char **argv) {
+extern int scontrol_create_part(int argc, char **argv) {
     int update_cnt = 0;
     update_part_msg_t part_msg;
     int err;
