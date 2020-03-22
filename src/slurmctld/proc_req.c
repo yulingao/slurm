@@ -259,6 +259,8 @@ void slurmctld_req(slurm_msg_t *msg, connection_arg_t *arg)
 	int i, rpc_type_index = -1, rpc_user_index = -1;
 	uint32_t rpc_uid;
 
+	printf("this is slurmctld_req!!!!\n");
+
 	if (arg && (arg->newsockfd >= 0))
 		fd_set_nonblocking(arg->newsockfd);
 
@@ -6016,6 +6018,7 @@ inline static void _slurm_rpc_trigger_set(slurm_msg_t *msg)
 	debug("Processing RPC: REQUEST_TRIGGER_SET from uid=%d", uid);
 
 	printf("this is trigger rpc set\n");
+
 	if (validate_slurm_user(uid) || allow_user_triggers)
 	{
 		rc = trigger_set(uid, gid, trigger_ptr);
