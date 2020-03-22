@@ -5106,8 +5106,11 @@ extern int slurm_send_recv_msg(int fd, slurm_msg_t *req,
 		resp->conn = req->conn;
 	}
 
+	printf("8\n");
+
 	if (slurm_send_node_msg(fd, req) >= 0)
 	{
+		printf("8\n");
 		/* no need to adjust and timeouts here since we are not
 		   forwarding or expecting anything other than 1 message
 		   and the regular timeout will be altered in
