@@ -35,7 +35,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/param.h>    /* for OPEN_MAX on macOS */
+#include <sys/param.h>	/* for OPEN_MAX on macOS */
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -54,39 +54,40 @@
 
 static slurm_rlimits_info_t rlimits_info[] = {
 
-        /*  resource,        name,       propagate_flag  */
+		/*  resource,        name,       propagate_flag  */
 
 #ifdef RLIMIT_CPU
-        {RLIMIT_CPU, "CPU", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_CPU,      "CPU",      PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_FSIZE
-        {RLIMIT_FSIZE, "FSIZE", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_FSIZE,    "FSIZE",    PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_DATA
-        {RLIMIT_DATA, "DATA", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_DATA,     "DATA",     PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_STACK
-        {RLIMIT_STACK, "STACK", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_STACK,    "STACK",    PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_CORE
-        {RLIMIT_CORE, "CORE", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_CORE,     "CORE",     PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_RSS
-        {RLIMIT_RSS, "RSS", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_RSS,      "RSS",      PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_NPROC
-        {RLIMIT_NPROC, "NPROC", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_NPROC,    "NPROC",    PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_NOFILE
-        {RLIMIT_NOFILE, "NOFILE", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_NOFILE,   "NOFILE",   PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_MEMLOCK
-        {RLIMIT_MEMLOCK, "MEMLOCK", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_MEMLOCK,  "MEMLOCK",  PROPAGATE_RLIMITS_NOT_SET },
 #endif
 #ifdef RLIMIT_AS
-        {RLIMIT_AS, "AS", PROPAGATE_RLIMITS_NOT_SET},
+		{ RLIMIT_AS,       "AS",       PROPAGATE_RLIMITS_NOT_SET },
 #endif
-        {0, NULL, PROPAGATE_RLIMITS_NOT_SET}};
+		{ 0,               NULL,       PROPAGATE_RLIMITS_NOT_SET }
+};
 
 
 static bool rlimits_were_parsed = false;
@@ -94,10 +95,12 @@ static bool rlimits_were_parsed = false;
 /*
  * Return a pointer to the private rlimits info array.
  */
-slurm_rlimits_info_t *get_slurm_rlimits_info(void) {
-    xassert(rlimits_were_parsed == true);
+slurm_rlimits_info_t *
+get_slurm_rlimits_info( void )
+{
+	xassert( rlimits_were_parsed == true );
 
-    return rlimits_info;
+	return rlimits_info;
 }
 
 
@@ -111,100 +114,105 @@ slurm_rlimits_info_t *get_slurm_rlimits_info(void) {
  * Return 0 on success, or -1 if the 'rlimits_str' input parameter contains
  * a name that is not in rlimits_info[].
  */
-int parse_rlimits(char *rlimits_str, int propagate_flag) {
-    slurm_rlimits_info_t *rli;    /* ptr iterator for rlimits_info[] */
-    char *tp;    /* token ptr */
-    bool found;
-    bool propagate_none = false;
-    char *rlimits_str_dup;
+int
+parse_rlimits( char *rlimits_str, int propagate_flag )
+{
+	slurm_rlimits_info_t *rli;	/* ptr iterator for rlimits_info[] */
+	char		     *tp;	/* token ptr */
+	bool		     found;
+	bool		     propagate_none = false;
+	char		     *rlimits_str_dup;
 
-    xassert(rlimits_str);
+	xassert( rlimits_str );
 
-    if (xstrcmp(rlimits_str, "NONE") == 0) {
-        propagate_none = true;
-        propagate_flag = !propagate_flag;
-    }
+	if (xstrcmp(rlimits_str, "NONE") == 0) {
+		propagate_none = true;
+		propagate_flag = !propagate_flag;
+	}
 
-    if (propagate_none || xstrcmp(rlimits_str, "ALL") == 0) {
-        /*
-         * Propagate flag value applies to all rlimits
-         */
-        for (rli = rlimits_info; rli->name; rli++)
-            rli->propagate_flag = propagate_flag;
-        rlimits_were_parsed = true;
-        return (0);
-    }
+	if (propagate_none || xstrcmp( rlimits_str, "ALL" ) == 0) {
+		/*
+		 * Propagate flag value applies to all rlimits
+		 */
+		for (rli = rlimits_info; rli->name; rli++)
+			rli->propagate_flag = propagate_flag;
+		rlimits_were_parsed = true;
+		return( 0 );
+	}
 
-    /*
-     * Since parse_rlimits may be called multiple times, we
-     * need to reinitialize the propagate flags when individual
-     * rlimits are specified.
-     */
-    if (rlimits_were_parsed)
-        for (rli = rlimits_info; rli->name; rli++)
-            rli->propagate_flag = PROPAGATE_RLIMITS_NOT_SET;
+	/*
+	 * Since parse_rlimits may be called multiple times, we
+	 * need to reinitialize the propagate flags when individual
+	 * rlimits are specified.
+	 */
+	if (rlimits_were_parsed)
+		for (rli = rlimits_info; rli->name; rli++)
+			rli->propagate_flag = PROPAGATE_RLIMITS_NOT_SET;
 
-    rlimits_str_dup = xstrdup(rlimits_str);
-    tp = strtok(rlimits_str_dup, RLIMIT_DELIMS);
-    while (tp != NULL) {
-        found = false;
-        for (rli = rlimits_info; rli->name; rli++) {
-            /*
-             * Accept either "RLIMIT_CORE" or "CORE"
-             */
-            if (xstrncmp(tp, RLIMIT_, LEN_RLIMIT_) == 0)
-                tp += LEN_RLIMIT_;
-            if (xstrcmp(tp, rli->name))
-                continue;
-            rli->propagate_flag = propagate_flag;
-            found = true;
-            break;
-        }
-        if (found == false) {
-            error("Bad rlimit name: %s", tp);
-            xfree(rlimits_str_dup);
-            return (-1);
-        }
-        tp = strtok(NULL, RLIMIT_DELIMS);
-    }
-    xfree(rlimits_str_dup);
+	rlimits_str_dup = xstrdup( rlimits_str );
+	tp = strtok( rlimits_str_dup, RLIMIT_DELIMS );
+	while (tp != NULL) {
+		found = false;
+		for (rli = rlimits_info; rli->name; rli++) {
+			/*
+			 * Accept either "RLIMIT_CORE" or "CORE"
+			 */
+			if (xstrncmp( tp, RLIMIT_, LEN_RLIMIT_ ) == 0)
+				tp += LEN_RLIMIT_;
+			if (xstrcmp( tp, rli->name ))
+				continue;
+			rli->propagate_flag = propagate_flag;
+			found = true;
+			break;
+		}
+		if (found == false) {
+			error( "Bad rlimit name: %s", tp );
+			xfree( rlimits_str_dup );
+			return( -1 );
+		}
+		tp = strtok( NULL, RLIMIT_DELIMS );
+	}
+	xfree( rlimits_str_dup );
 
-    /*
-     * Any rlimits that weren't in the 'rlimits_str' parameter get the
-     * opposite propagate flag value.
-     */
-    for (rli = rlimits_info; rli->name; rli++)
-        if (rli->propagate_flag == PROPAGATE_RLIMITS_NOT_SET)
-            rli->propagate_flag = (!propagate_flag);
+	/*
+	 * Any rlimits that weren't in the 'rlimits_str' parameter get the
+	 * opposite propagate flag value.
+	 */
+	for (rli = rlimits_info; rli->name; rli++)
+		if (rli->propagate_flag == PROPAGATE_RLIMITS_NOT_SET)
+			rli->propagate_flag = ( ! propagate_flag );
 
-    rlimits_were_parsed = true;
-    return (0);
+	rlimits_were_parsed = true;
+	return( 0 );
 }
 
-extern void print_rlimits(void) {
-    slurm_rlimits_info_t *rli;    /* ptr iterator for rlimits_info[] */
-    struct rlimit rlp;
+extern void print_rlimits(void)
+{
+	slurm_rlimits_info_t *rli;	/* ptr iterator for rlimits_info[] */
+	struct rlimit rlp;
 
-    for (rli = rlimits_info; rli->name; rli++) {
-        if (getrlimit(rli->resource, &rlp) == 0) {
-            printf("SLURM_RLIMIT_%s=%lu\n", rli->name, (unsigned long) rlp.rlim_cur);
-        }
-    }
+	for (rli = rlimits_info; rli->name; rli++) {
+		if (getrlimit(rli->resource, &rlp) == 0) {
+			printf("SLURM_RLIMIT_%s=%lu\n", rli->name,
+			       (unsigned long) rlp.rlim_cur);
+		}
+	}
 }
 
-extern void rlimits_maximize_nofile(void) {
-    struct rlimit rlim;
+extern void rlimits_maximize_nofile(void)
+{
+	struct rlimit rlim;
 
-    if (getrlimit(RLIMIT_NOFILE, &rlim) < 0)
-        error("getrlimit(RLIMIT_NOFILE): %m");
+	if (getrlimit(RLIMIT_NOFILE, &rlim) < 0)
+		error("getrlimit(RLIMIT_NOFILE): %m");
 
-    if (rlim.rlim_cur < rlim.rlim_max) {
+	if (rlim.rlim_cur < rlim.rlim_max) {
 #if defined(__APPLE__)
-        rlim.rlim_cur = MIN(OPEN_MAX, rlim.rlim_max);
+		rlim.rlim_cur = MIN(OPEN_MAX, rlim.rlim_max);
 #else
-        rlim.rlim_cur = rlim.rlim_max;
+		rlim.rlim_cur = rlim.rlim_max;
 #endif
-        if (setrlimit(RLIMIT_NOFILE, &rlim) < 0)
-            error("Unable to increase maximum number of open files: %m");
-    }
+		if (setrlimit(RLIMIT_NOFILE, &rlim) < 0)
+			error("Unable to increase maximum number of open files: %m");
+	}
 }

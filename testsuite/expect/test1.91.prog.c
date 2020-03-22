@@ -27,8 +27,6 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 #define _GNU_SOURCE
-#define __USE_GNU
-
 #include <errno.h>
 #include <inttypes.h>
 #include <sched.h>
@@ -39,81 +37,89 @@
 
 #include "config.h"
 
-static void _load_mask(cpu_set_t *mask) {
-    int rc;
+static void _load_mask(cpu_set_t *mask)
+{
+	int rc;
 
-    rc = sched_getaffinity((pid_t) 0, sizeof(cpu_set_t), mask);
-    if (rc != 0) {
-        fprintf(stderr, "ERROR: sched_getaffinity: %s\n", strerror(errno));
-        exit(1);
-    }
+	rc = sched_getaffinity((pid_t) 0, sizeof(cpu_set_t), mask);
+	if (rc != 0) {
+		fprintf(stderr, "ERROR: sched_getaffinity: %s\n",
+			strerror(errno));
+		exit(1);
+	}
 }
 
-int val_to_char(int v) {
-    if (v >= 0 && v < 10)
-        return '0' + v;
-    else if (v >= 10 && v < 16)
-        return ('a' - 10) + v;
-    else
-        return -1;
+int val_to_char(int v)
+{
+	if (v >= 0 && v < 10)
+		return '0' + v;
+	else if (v >= 10 && v < 16)
+		return ('a' - 10) + v;
+	else
+		return -1;
 }
 
-static char *_cpuset_to_str(const cpu_set_t *mask, char *str, int size) {
-    int base, cnt;
-    char *ptr = str;
-    char *ret = NULL;
+static char *_cpuset_to_str(const cpu_set_t *mask, char *str, int size)
+{
+	int base, cnt;
+	char *ptr = str;
+	char *ret = NULL;
 
-    for (base = CPU_SETSIZE - 4; base >= 0; base -= 4) {
-        char val = 0;
-        if (++cnt >= size)
-            break;
-        if (CPU_ISSET(base, mask))
-            val |= 1;
-        if (CPU_ISSET(base + 1, mask))
-            val |= 2;
-        if (CPU_ISSET(base + 2, mask))
-            val |= 4;
-        if (CPU_ISSET(base + 3, mask))
-            val |= 8;
-        if (!ret && val)
-            ret = ptr;
-        *ptr++ = val_to_char(val);
-    }
-    *ptr = '\0';
-    return ret ? ret : ptr - 1;
+	for (base = CPU_SETSIZE - 4; base >= 0; base -= 4) {
+		char val = 0;
+		if (++cnt >= size)
+			break;
+		if (CPU_ISSET(base, mask))
+			val |= 1;
+		if (CPU_ISSET(base + 1, mask))
+			val |= 2;
+		if (CPU_ISSET(base + 2, mask))
+			val |= 4;
+		if (CPU_ISSET(base + 3, mask))
+			val |= 8;
+		if (!ret && val)
+			ret = ptr;
+		*ptr++ = val_to_char(val);
+	}
+	*ptr = '\0';
+	return ret ? ret : ptr - 1;
 }
 
-static uint64_t _mask_to_int(cpu_set_t *mask) {
-    uint64_t i, rc = 0;
+static uint64_t _mask_to_int(cpu_set_t *mask)
+{
+	uint64_t i, rc = 0;
 
-    for (i = 0; i < CPU_SETSIZE; i++) {
-        if (CPU_ISSET(i, mask)) {
-            if (i > 63) {
-                printf("OVERFLOW\n");
-                rc = 999999999;
-                break;
-            }
-            rc += (((uint64_t) 1) << i);
-        }
-    }
-    return rc;
+	for (i = 0; i < CPU_SETSIZE; i++) {
+		if (CPU_ISSET(i, mask)) {
+			if (i > 63) {
+				printf("OVERFLOW\n");
+				rc = 999999999;
+				break;
+			}
+			rc += (((uint64_t) 1) << i);
+		}
+	}
+	return rc;
 }
 
-int main(int argc, char **argv) {
-    char mask_str[2048], *task_str;
-    cpu_set_t mask;
-    int task_id;
+int main (int argc, char **argv)
+{
+	char mask_str[2048], *task_str;
+	cpu_set_t mask;
+	int task_id;
 
-    _load_mask(&mask);
-    /* On POE systems, MP_CHILD is equivalent to SLURM_PROCID */
-    if (((task_str = getenv("SLURM_PROCID")) == NULL) && ((task_str = getenv("MP_CHILD")) == NULL)) {
-        fprintf(stderr, "ERROR: getenv(SLURM_PROCID) failed\n");
-        exit(1);
-    }
-    task_id = atoi(task_str);
-    /* NOTE: The uint64_t number is subject to overflow if there are
-     * >64 CPUs on a compute node, but the hex value will be valid */
-    printf("TASK_ID:%d,MASK:%"PRIu64":0x%s\n", task_id, _mask_to_int(&mask),
-           _cpuset_to_str(&mask, mask_str, sizeof(mask_str)));
-    exit(0);
+	_load_mask(&mask);
+	/* On POE systems, MP_CHILD is equivalent to SLURM_PROCID */
+	if (((task_str = getenv("SLURM_PROCID")) == NULL) &&
+	    ((task_str = getenv("MP_CHILD")) == NULL)) {
+		fprintf(stderr, "ERROR: getenv(SLURM_PROCID) failed\n");
+		exit(1);
+	}
+	task_id = atoi(task_str);
+	/* NOTE: The uint64_t number is subject to overflow if there are
+	 * >64 CPUs on a compute node, but the hex value will be valid */
+	printf("TASK_ID:%d,MASK:%"PRIu64":0x%s\n", task_id,
+	       _mask_to_int(&mask),
+	       _cpuset_to_str(&mask, mask_str, sizeof(mask_str)));
+	exit(0);
 }

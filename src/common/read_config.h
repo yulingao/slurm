@@ -48,7 +48,6 @@
 #include "src/common/list.h"
 #include "src/common/slurm_protocol_defs.h"
 #include "src/common/parse_config.h"
-#include "pack.h"
 
 extern slurm_ctl_conf_t slurmctld_conf;
 extern char *default_slurm_config_file;
@@ -62,234 +61,238 @@ extern uint16_t drop_priv_flag;
 #define ACCOUNTING_ENFORCE_ASSOCS 0x0001
 #define ACCOUNTING_ENFORCE_LIMITS 0x0002
 #define ACCOUNTING_ENFORCE_WCKEYS 0x0004
-#define ACCOUNTING_ENFORCE_QOS 0x0008
-#define ACCOUNTING_ENFORCE_SAFE 0x0010
+#define ACCOUNTING_ENFORCE_QOS    0x0008
+#define ACCOUNTING_ENFORCE_SAFE   0x0010
 #define ACCOUNTING_ENFORCE_NO_JOBS 0x0020
 #define ACCOUNTING_ENFORCE_NO_STEPS 0x0040
-#define ACCOUNTING_ENFORCE_TRES 0x0080
+#define ACCOUNTING_ENFORCE_TRES   0x0080
 
-#define DEFAULT_ACCOUNTING_TRES "cpu,mem,energy,node,billing,fs/disk,vmem,pages"
-#define DEFAULT_ACCOUNTING_DB "slurm_acct_db"
-#define DEFAULT_ACCOUNTING_ENFORCE 0
+#define DEFAULT_ACCOUNTING_TRES  "cpu,mem,energy,node,billing,fs/disk,vmem,pages"
+#define DEFAULT_ACCOUNTING_DB      "slurm_acct_db"
+#define DEFAULT_ACCOUNTING_ENFORCE  0
 #define DEFAULT_ACCOUNTING_STORAGE_TYPE "accounting_storage/none"
-#define DEFAULT_AUTH_TYPE "auth/munge"
+#define DEFAULT_AUTH_TYPE          "auth/munge"
 #define DEFAULT_BATCH_START_TIMEOUT 10
-#define DEFAULT_COMPLETE_WAIT 0
-#define DEFAULT_CRED_TYPE "cred/munge"
-#define DEFAULT_EPILOG_MSG_TIME 2000
-#define DEFAULT_EXT_SENSORS_TYPE "ext_sensors/none"
-#define DEFAULT_FAST_SCHEDULE 1
-#define DEFAULT_FIRST_JOB_ID 1
-#define DEFAULT_GET_ENV_TIMEOUT 2
-#define DEFAULT_GROUP_TIME 600
-#define DEFAULT_GROUP_FORCE 1 /* if set, update group membership \
-							   * info even if no updates to      \
-							   * /etc/group file */
+#define DEFAULT_COMPLETE_WAIT       0
+#define DEFAULT_CRED_TYPE           "cred/munge"
+#define DEFAULT_EPILOG_MSG_TIME     2000
+#define DEFAULT_EXT_SENSORS_TYPE    "ext_sensors/none"
+#define DEFAULT_FAST_SCHEDULE       1
+#define DEFAULT_FIRST_JOB_ID        1
+#define DEFAULT_GET_ENV_TIMEOUT     2
+#define DEFAULT_GROUP_TIME          600
+#define DEFAULT_GROUP_FORCE         1	/* if set, update group membership
+					 * info even if no updates to
+					 * /etc/group file */
 /* NOTE: DEFAULT_INACTIVE_LIMIT must be 0 for Blue Gene/L systems */
-#define DEFAULT_INACTIVE_LIMIT 0
-#define DEFAULT_JOB_ACCT_GATHER_TYPE "jobacct_gather/none"
+#define DEFAULT_INACTIVE_LIMIT      0
+#define DEFAULT_JOB_ACCT_GATHER_TYPE  "jobacct_gather/none"
 #define JOB_ACCT_GATHER_TYPE_NONE "jobacct_gather/none"
-#define DEFAULT_JOB_ACCT_GATHER_FREQ "30"
+#define DEFAULT_JOB_ACCT_GATHER_FREQ  "30"
 #define DEFAULT_ACCT_GATHER_ENERGY_TYPE "acct_gather_energy/none"
 #define DEFAULT_ACCT_GATHER_PROFILE_TYPE "acct_gather_profile/none"
 #define DEFAULT_ACCT_GATHER_INTERCONNECT_TYPE "acct_gather_interconnect/none"
 #define DEFAULT_ACCT_GATHER_FILESYSTEM_TYPE "acct_gather_filesystem/none"
 #define ACCOUNTING_STORAGE_TYPE_NONE "accounting_storage/none"
-#define DEFAULT_CORE_SPEC_PLUGIN "core_spec/none"
-#define DEFAULT_DISABLE_ROOT_JOBS 0
+#define DEFAULT_CORE_SPEC_PLUGIN    "core_spec/none"
+#define DEFAULT_DISABLE_ROOT_JOBS   0
 #define DEFAULT_ENFORCE_PART_LIMITS 0
-#define DEFAULT_JOB_CKPT_DIR "/var/slurm/checkpoint"
-#define DEFAULT_JOB_COMP_TYPE "jobcomp/none"
-#define DEFAULT_JOB_COMP_LOC "/var/log/slurm_jobcomp.log"
-#define DEFAULT_JOB_COMP_DB "slurm_jobcomp_db"
+#define DEFAULT_JOB_CKPT_DIR        "/var/slurm/checkpoint"
+#define DEFAULT_JOB_COMP_TYPE       "jobcomp/none"
+#define DEFAULT_JOB_COMP_LOC        "/var/log/slurm_jobcomp.log"
+#define DEFAULT_JOB_COMP_DB         "slurm_jobcomp_db"
 #if defined HAVE_NATIVE_CRAY
-#define DEFAULT_ALLOW_SPEC_RESOURCE_USAGE 1
-#define DEFAULT_JOB_CONTAINER_PLUGIN "job_container/cncu"
+#  define DEFAULT_ALLOW_SPEC_RESOURCE_USAGE 1
+#  define DEFAULT_JOB_CONTAINER_PLUGIN  "job_container/cncu"
 #else
-#define DEFAULT_ALLOW_SPEC_RESOURCE_USAGE 0
-#define DEFAULT_JOB_CONTAINER_PLUGIN "job_container/none"
+#  define DEFAULT_ALLOW_SPEC_RESOURCE_USAGE 0
+#  define DEFAULT_JOB_CONTAINER_PLUGIN "job_container/none"
 #endif
-#define DEFAULT_KEEP_ALIVE_TIME (NO_VAL16)
-#define DEFAULT_KILL_ON_BAD_EXIT 0
-#define DEFAULT_KILL_TREE 0
-#define DEFAULT_KILL_WAIT 30
-#define DEFAULT_LAUNCH_TYPE "launch/slurm"
-#define DEFAULT_MAIL_PROG "/bin/mail"
-#define DEFAULT_MAIL_PROG_ALT "/usr/bin/mail"
-#define DEFAULT_MAX_ARRAY_SIZE 1001
-#define DEFAULT_MAX_JOB_COUNT 10000
-#define DEFAULT_MAX_JOB_ID 0x03ff0000
-#define DEFAULT_MAX_STEP_COUNT 40000
-#define DEFAULT_MCS_PLUGIN "mcs/none"
-#define DEFAULT_MEM_PER_CPU 0
-#define DEFAULT_MAX_MEM_PER_CPU 0
-#define DEFAULT_MIN_JOB_AGE 300
-#define DEFAULT_MPI_DEFAULT "none"
+#define DEFAULT_KEEP_ALIVE_TIME     (NO_VAL16)
+#define DEFAULT_KILL_ON_BAD_EXIT    0
+#define DEFAULT_KILL_TREE           0
+#define DEFAULT_KILL_WAIT           30
+#define DEFAULT_LAUNCH_TYPE         "launch/slurm"
+#define DEFAULT_MAIL_PROG           "/bin/mail"
+#define DEFAULT_MAIL_PROG_ALT       "/usr/bin/mail"
+#define DEFAULT_MAX_ARRAY_SIZE      1001
+#define DEFAULT_MAX_JOB_COUNT       10000
+#define DEFAULT_MAX_JOB_ID          0x03ff0000
+#define DEFAULT_MAX_STEP_COUNT      40000
+#define DEFAULT_MCS_PLUGIN          "mcs/none"
+#define DEFAULT_MEM_PER_CPU         0
+#define DEFAULT_MAX_MEM_PER_CPU     0
+#define DEFAULT_MIN_JOB_AGE         300
+#define DEFAULT_MPI_DEFAULT         "none"
 #define DEFAULT_MSG_AGGR_WINDOW_MSGS 1
 #define DEFAULT_MSG_AGGR_WINDOW_TIME 100
-#define DEFAULT_MSG_TIMEOUT 10
-#define DEFAULT_POWER_PLUGIN ""
-#define DEFAULT_CHECKPOINT_TYPE "checkpoint/none"
-#define DEFAULT_PROCTRACK_TYPE "proctrack/cgroup"
-#define DEFAULT_PREEMPT_TYPE "preempt/none"
-#define DEFAULT_PRIORITY_DECAY 604800    /* 7 days */
+#define DEFAULT_MSG_TIMEOUT         10
+#define DEFAULT_POWER_PLUGIN        ""
+#define DEFAULT_CHECKPOINT_TYPE     "checkpoint/none"
+#if defined WITH_CGROUP
+#  define DEFAULT_PROCTRACK_TYPE      "proctrack/cgroup"
+#else
+#  define DEFAULT_PROCTRACK_TYPE      "proctrack/pgid"
+#endif
+#define DEFAULT_PREEMPT_TYPE        "preempt/none"
+#define DEFAULT_PRIORITY_DECAY      604800 /* 7 days */
 #define DEFAULT_PRIORITY_CALC_PERIOD 300 /* in seconds */
-#define DEFAULT_PRIORITY_TYPE "priority/basic"
+#define DEFAULT_PRIORITY_TYPE       "priority/basic"
 #define DEFAULT_RECONF_KEEP_PART_STATE 0
-#define DEFAULT_RETURN_TO_SERVICE 0
-#define DEFAULT_RESUME_RATE 300
-#define DEFAULT_RESUME_TIMEOUT 60
-#define DEFAULT_ROUTE_PLUGIN "route/default"
-#define DEFAULT_SAVE_STATE_LOC "/var/spool"
-#define DEFAULT_SCHED_LOG_LEVEL 0
-#define DEFAULT_SCHED_TIME_SLICE 30
-#define DEFAULT_SCHEDTYPE "sched/backfill"
+#define DEFAULT_RETURN_TO_SERVICE   0
+#define DEFAULT_RESUME_RATE         300
+#define DEFAULT_RESUME_TIMEOUT      60
+#define DEFAULT_ROUTE_PLUGIN   	    "route/default"
+#define DEFAULT_SAVE_STATE_LOC      "/var/spool"
+#define DEFAULT_SCHED_LOG_LEVEL     0
+#define DEFAULT_SCHED_TIME_SLICE    30
+#define DEFAULT_SCHEDTYPE           "sched/backfill"
 #if defined HAVE_NATIVE_CRAY
-#define DEFAULT_SELECT_TYPE "select/cray_aries"
+#  define DEFAULT_SELECT_TYPE       "select/cray_aries"
 #else
-#define DEFAULT_SELECT_TYPE "select/linear"
+#  define DEFAULT_SELECT_TYPE       "select/linear"
 #endif
-#define DEFAULT_SITE_FACTOR_PLUGIN "site_factor/none"
-#define DEFAULT_SLURMCTLD_PIDFILE "/var/run/slurmctld.pid"
-#define DEFAULT_SLURMCTLD_TIMEOUT 120
-#define DEFAULT_SLURMD_PIDFILE "/var/run/slurmd.pid"
-#define DEFAULT_SLURMD_TIMEOUT 300
-#define DEFAULT_SPOOLDIR "/var/spool/slurmd"
-#define DEFAULT_STORAGE_HOST "localhost"
-#define DEFAULT_STORAGE_LOC "/var/log/slurm_jobacct.log"
-#define DEFAULT_STORAGE_USER "root"
-#define DEFAULT_STORAGE_PORT 0
-#define DEFAULT_MYSQL_PORT 3306
-#define DEFAULT_SUSPEND_RATE 60
-#define DEFAULT_SUSPEND_TIME 0
-#define DEFAULT_SUSPEND_TIMEOUT 30
+#define DEFAULT_SITE_FACTOR_PLUGIN  "site_factor/none"
+#define DEFAULT_SLURMCTLD_PIDFILE   "/var/run/slurmctld.pid"
+#define DEFAULT_SLURMCTLD_TIMEOUT   120
+#define DEFAULT_SLURMD_PIDFILE      "/var/run/slurmd.pid"
+#define DEFAULT_SLURMD_TIMEOUT      300
+#define DEFAULT_SPOOLDIR            "/var/spool/slurmd"
+#define DEFAULT_STORAGE_HOST        "localhost"
+#define DEFAULT_STORAGE_LOC         "/var/log/slurm_jobacct.log"
+#define DEFAULT_STORAGE_USER        "root"
+#define DEFAULT_STORAGE_PORT        0
+#define DEFAULT_MYSQL_PORT          3306
+#define DEFAULT_SUSPEND_RATE        60
+#define DEFAULT_SUSPEND_TIME        0
+#define DEFAULT_SUSPEND_TIMEOUT     30
 #if defined HAVE_NATIVE_CRAY
-#define DEFAULT_SWITCH_TYPE "switch/cray_aries"
+#  define DEFAULT_SWITCH_TYPE         "switch/cray_aries"
 #else
-#define DEFAULT_SWITCH_TYPE "switch/none"
+#  define DEFAULT_SWITCH_TYPE         "switch/none"
 #endif
-#define DEFAULT_TASK_PLUGIN "task/none"
-#define DEFAULT_TCP_TIMEOUT 2
-#define DEFAULT_TMP_FS "/tmp"
+#define DEFAULT_TASK_PLUGIN         "task/none"
+#define DEFAULT_TCP_TIMEOUT         2
+#define DEFAULT_TMP_FS              "/tmp"
 #if defined HAVE_3D
-#define DEFAULT_TOPOLOGY_PLUGIN "topology/3d_torus"
+#  define DEFAULT_TOPOLOGY_PLUGIN     "topology/3d_torus"
 #else
-#define DEFAULT_TOPOLOGY_PLUGIN "topology/none"
+#  define DEFAULT_TOPOLOGY_PLUGIN     "topology/none"
 #endif
-#define DEFAULT_WAIT_TIME 0
-#define DEFAULT_TREE_WIDTH 50
-#define DEFAULT_UNKILLABLE_TIMEOUT 60 /* seconds */
+#define DEFAULT_WAIT_TIME           0
+#  define DEFAULT_TREE_WIDTH        50
+#define DEFAULT_UNKILLABLE_TIMEOUT  60 /* seconds */
 
 /* MAX_TASKS_PER_NODE is defined in slurm.h
  */
-#define DEFAULT_MAX_TASKS_PER_NODE MAX_TASKS_PER_NODE
+#define DEFAULT_MAX_TASKS_PER_NODE  MAX_TASKS_PER_NODE
 
 typedef struct slurm_conf_frontend {
-    char *allow_groups;  /* allowed group string */
-    char *allow_users;   /* allowed user string */
-    char *deny_groups;   /* denied group string */
-    char *deny_users;    /* denied user string */
-    char *frontends;     /* frontend node name */
-    char *addresses;     /* frontend node address */
-    uint16_t port;         /* frontend specific port */
-    char *reason;         /* reason for down frontend node */
-    uint16_t node_state; /* enum node_states, ORed with
+	char *allow_groups;		/* allowed group string */
+	char *allow_users;		/* allowed user string */
+	char *deny_groups;		/* denied group string */
+	char *deny_users;		/* denied user string */
+	char *frontends;		/* frontend node name */
+	char *addresses;		/* frontend node address */
+	uint16_t port;			/* frontend specific port */
+	char *reason;			/* reason for down frontend node */
+	uint16_t node_state;		/* enum node_states, ORed with
 					 * NODE_STATE_NO_RESPOND if not
 					 * responding */
 } slurm_conf_frontend_t;
 
 typedef struct slurm_conf_node {
-    char *nodenames;
-    char *hostnames;
-    char *addresses;
-    char *gres;    /* arbitrary list of node's generic resources */
-    char *feature; /* arbitrary list of node's features */
-    char *port_str;
-    uint32_t cpu_bind;         /* default CPU bind type */
-    uint16_t cpus;             /* count of cpus running on the node */
-    char *cpu_spec_list;     /* arbitrary list of specialized cpus */
-    uint16_t boards;         /* number of boards per node */
-    uint16_t sockets;         /* number of sockets per node */
-    uint16_t cores;             /* number of cores per CPU */
-    uint16_t core_spec_cnt;  /* number of specialized cores */
-    uint16_t threads;         /* number of threads per core */
-    uint64_t real_memory;    /* MB real memory on the node */
-    uint64_t mem_spec_limit; /* MB real memory for memory specialization */
-    char *reason;
-    char *state;
-    uint32_t tmp_disk;        /* MB total storage in TMP_FS file system */
-    char *tres_weights_str; /* per TRES billing weight string */
-    uint32_t weight;        /* arbitrary priority of node for
+	char *nodenames;
+	char *hostnames;
+	char *addresses;
+	char *gres;		/* arbitrary list of node's generic resources */
+	char *feature;		/* arbitrary list of node's features */
+	char *port_str;
+	uint32_t cpu_bind;	/* default CPU bind type */
+	uint16_t cpus;		/* count of cpus running on the node */
+	char *cpu_spec_list;	/* arbitrary list of specialized cpus */
+	uint16_t boards; 	/* number of boards per node */
+	uint16_t sockets;       /* number of sockets per node */
+	uint16_t cores;         /* number of cores per CPU */
+	uint16_t core_spec_cnt;	/* number of specialized cores */
+	uint16_t threads;       /* number of threads per core */
+	uint64_t real_memory;	/* MB real memory on the node */
+	uint64_t mem_spec_limit; /* MB real memory for memory specialization */
+	char *reason;
+	char *state;
+	uint32_t tmp_disk;	/* MB total storage in TMP_FS file system */
+	char *tres_weights_str;	/* per TRES billing weight string */
+	uint32_t weight;	/* arbitrary priority of node for
 				 * scheduling work on */
 } slurm_conf_node_t;
 
 typedef struct slurm_conf_partition {
-    char *allow_alloc_nodes;      /* comma delimited list of allowed
+	char *allow_alloc_nodes;/* comma delimited list of allowed
 				 * allocating nodes
 				 * NULL indicates all */
-    char *allow_accounts;          /* comma delimited list of accounts,
+	char *allow_accounts;   /* comma delimited list of accounts,
 				 * NULL indicates all */
-    char *allow_groups;              /* comma delimited list of groups,
+	char *allow_groups;	/* comma delimited list of groups,
 				 * NULL indicates all */
-    char *allow_qos;              /* comma delimited list of qos,
+	char *allow_qos;        /* comma delimited list of qos,
 			         * NULL indicates all */
-    char *alternate;              /* name of alternate partition */
-    char *billing_weights_str;    /* per TRES billing weights */
-    uint32_t cpu_bind;              /* default CPU binding type */
-    uint16_t cr_type;              /* Custom CR values for partition (supported
+	char *alternate;	/* name of alternate partition */
+	char *billing_weights_str;/* per TRES billing weights */
+	uint32_t cpu_bind;	/* default CPU binding type */
+	uint16_t cr_type;	/* Custom CR values for partition (supported
 				 * by select/cons_res plugin only) */
-    uint64_t def_mem_per_cpu;     /* default MB memory per allocated CPU */
-    bool default_flag;              /* Set if default partition */
-    uint32_t default_time;          /* minutes or INFINITE */
-    char *deny_accounts;          /* comma delimited list of denied accounts,
+	uint64_t def_mem_per_cpu; /* default MB memory per allocated CPU */
+	bool default_flag;	/* Set if default partition */
+	uint32_t default_time;	/* minutes or INFINITE */
+	char *deny_accounts;    /* comma delimited list of denied accounts,
 				 * NULL indicates all */
-    char *deny_qos;                  /* comma delimited list of denied qos,
+	char *deny_qos;		/* comma delimited list of denied qos,
 				 * NULL indicates all */
-    uint16_t disable_root_jobs;   /* if set then user root can't run
+	uint16_t disable_root_jobs; /* if set then user root can't run
 				     * jobs if NO_VAL use global
 				     * default */
-    uint16_t exclusive_user;      /* 1 if node allocations by user */
-    uint32_t grace_time;          /* default grace time for partition */
-    bool hidden_flag;              /* 1 if hidden by default */
-    List job_defaults_list;          /* List of job_defaults_t elements */
-    bool lln_flag;                  /* 1 if nodes are selected in LLN order */
-    uint32_t max_cpus_per_node;   /* maximum allocated CPUs per node */
-    uint16_t max_share;              /* number of jobs to gang schedule */
-    uint32_t max_time;              /* minutes or INFINITE */
-    uint64_t max_mem_per_cpu;     /* maximum MB memory per allocated CPU */
-    uint32_t max_nodes;              /* per job or INFINITE */
-    uint32_t min_nodes;              /* per job */
-    char *name;                      /* name of the partition */
-    char *nodes;                  /* comma delimited list names of nodes */
-    uint16_t over_time_limit;     /* job's time limit can be exceeded by this
+	uint16_t exclusive_user; /* 1 if node allocations by user */
+	uint32_t grace_time;	/* default grace time for partition */
+	bool     hidden_flag;	/* 1 if hidden by default */
+	List job_defaults_list;	/* List of job_defaults_t elements */
+	bool     lln_flag;	/* 1 if nodes are selected in LLN order */
+	uint32_t max_cpus_per_node; /* maximum allocated CPUs per node */
+	uint16_t max_share;	/* number of jobs to gang schedule */
+	uint32_t max_time;	/* minutes or INFINITE */
+	uint64_t max_mem_per_cpu; /* maximum MB memory per allocated CPU */
+	uint32_t max_nodes;	/* per job or INFINITE */
+	uint32_t min_nodes;	/* per job */
+	char	*name;		/* name of the partition */
+	char 	*nodes;		/* comma delimited list names of nodes */
+	uint16_t over_time_limit; /* job's time limit can be exceeded by this
 				   * number of minutes before cancellation */
-    uint16_t preempt_mode;          /* See PREEMPT_MODE_* in slurm/slurm.h */
-    uint16_t priority_job_factor; /* job priority weight factor */
-    uint16_t priority_tier;          /* tier for scheduling and preemption */
-    char *qos_char;                  /* Name of QOS associated with partition */
-    bool req_resv_flag;              /* 1 if partition can only be used in a
+	uint16_t preempt_mode;	/* See PREEMPT_MODE_* in slurm/slurm.h */
+	uint16_t priority_job_factor;	/* job priority weight factor */
+	uint16_t priority_tier;	/* tier for scheduling and preemption */
+	char    *qos_char;      /* Name of QOS associated with partition */
+	bool     req_resv_flag; /* 1 if partition can only be used in a
 				 * reservation */
-    bool root_only_flag;          /* 1 if allocate/submit RPC can only be
+	bool     root_only_flag;/* 1 if allocate/submit RPC can only be
 				   issued by user root */
-    uint16_t state_up;              /* for states see PARTITION_* in slurm.h */
-    uint32_t total_nodes;          /* total number of nodes in the partition */
-    uint32_t total_cpus;          /* total number of cpus in the partition */
+	uint16_t state_up;	/* for states see PARTITION_* in slurm.h */
+	uint32_t total_nodes;	/* total number of nodes in the partition */
+	uint32_t total_cpus;	/* total number of cpus in the partition */
 } slurm_conf_partition_t;
 
 typedef struct slurm_conf_downnodes {
-    char *nodenames;
-    char *reason;
-    char *state;
+	char *nodenames;
+	char *reason;
+	char *state;
 } slurm_conf_downnodes_t;
 
 typedef struct {
-    char *name;
-    char *value;
+	char *name;
+	char *value;
 } config_key_pair_t;
 
 typedef struct {
-    char *name;
-    List key_pairs;
+	char *name;
+	List key_pairs;
 } config_plugin_params_t;
 
 /*
@@ -330,7 +333,8 @@ extern char *job_defaults_str(List in_list);
 extern void job_defaults_pack(void *in, uint16_t protocol_version, Buf buffer);
 
 /* Unpack a job_defaults_t element. Used by slurm_pack_list() */
-extern int job_defaults_unpack(void **out, uint16_t protocol_version, Buf buffer);
+extern int job_defaults_unpack(void **out, uint16_t protocol_version,
+			       Buf buffer);
 
 /*
  * list_find_frontend - find an entry in the front_end list, see list.h for
@@ -338,16 +342,9 @@ extern int job_defaults_unpack(void **out, uint16_t protocol_version, Buf buffer
  * IN key - is feature name or NULL for all features
  * RET 1 if found, 0 otherwise
  */
-extern int list_find_frontend(void *front_end_entry, void *key);
+extern int list_find_frontend (void *front_end_entry, void *key);
 
 /*
-slurm_conf_init   从文件中加载slurm配置。
-@file_name  要读取的slurm配置文件的名称如果file_name为空，则此例程将尝试使用SLURM_CONF环境变量中的值。否则，它将使用编译后的默认文件名。
-如果对slurm_con_init的调用已经初始化了conf结构，那么在调用slurm_con_destroy之前，任何后续调用都不会执行任何操作。
-@返回 如果初始化了conf文件，返回SLURM_SUCCESS。如果slurm conf已经初始化，返回SLURM_ERROR。
-注意:调用者不能持有slurm_con_lock()。
-
-
  * slurm_conf_init - load the slurm configuration from the a file.
  * IN file_name - name of the slurm configuration file to be read
  *	If file_name is NULL, then this routine tries to use
@@ -394,6 +391,7 @@ extern slurm_ctl_conf_t *slurm_conf_lock(void);
 
 extern void slurm_conf_unlock(void);
 
+
 /*
  * Set "ptr_array" with the pointer to an array of pointers to
  * slurm_conf_frontend_t structures.
@@ -429,7 +427,8 @@ extern int slurm_conf_downnodes_array(slurm_conf_downnodes_t **ptr_array[]);
 /*
  * slurm_reset_alias - Reset the address and hostname of a specific node name
  */
-extern void slurm_reset_alias(char *node_name, char *node_addr, char *node_hostname);
+extern void slurm_reset_alias(char *node_name, char *node_addr,
+			      char *node_hostname);
 
 /*
  * slurm_conf_get_hostname - Return the NodeHostname for given NodeName
@@ -510,9 +509,10 @@ extern int slurm_conf_get_addr(const char *node_name, slurm_addr_t *address);
  *
  * NOTE: Caller must NOT be holding slurm_conf_lock().
  */
-extern int
-slurm_conf_get_cpus_bsct(const char *node_name, uint16_t *cpus, uint16_t *boards, uint16_t *sockets, uint16_t *cores,
-                         uint16_t *threads);
+extern int slurm_conf_get_cpus_bsct(const char *node_name,
+				    uint16_t *cpus, uint16_t *boards,
+				    uint16_t *sockets, uint16_t *cores,
+				    uint16_t *threads);
 
 /*
  * slurm_conf_get_res_spec_info - Return resource specialization info
@@ -521,8 +521,10 @@ slurm_conf_get_cpus_bsct(const char *node_name, uint16_t *cpus, uint16_t *boards
  *
  * NOTE: Caller must NOT be holding slurm_conf_lock().
  */
-extern int slurm_conf_get_res_spec_info(const char *node_name, char **cpu_spec_list, uint16_t *core_spec_cnt,
-                                        uint64_t *mem_spec_limit);
+extern int slurm_conf_get_res_spec_info(const char *node_name,
+					char **cpu_spec_list,
+					uint16_t *core_spec_cnt,
+					uint64_t *mem_spec_limit);
 
 /*
  * init_slurm_conf - initialize or re-initialize the slurm configuration
@@ -530,7 +532,7 @@ extern int slurm_conf_get_res_spec_info(const char *node_name, char **cpu_spec_l
  *	file pathname (slurm_conf) is not changed.
  * IN/OUT ctl_conf_ptr - pointer to data structure to be initialized
  */
-extern void init_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr);
+extern void init_slurm_conf (slurm_ctl_conf_t *ctl_conf_ptr);
 
 /*
  * free_slurm_conf - free all storage associated with a slurm_ctl_conf_t.
@@ -538,7 +540,8 @@ extern void init_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr);
  * IN purge_node_hash - purge system-wide node hash table if set,
  *			set to zero if clearing private copy of config data
  */
-extern void free_slurm_conf(slurm_ctl_conf_t *ctl_conf_ptr, bool purge_node_hash);
+extern void free_slurm_conf (slurm_ctl_conf_t *ctl_conf_ptr,
+			     bool purge_node_hash);
 
 /*
  * gethostname_short - equivalent to gethostname(), but return only the first
@@ -557,7 +560,8 @@ extern int gethostname_short(char *name, size_t len);
  *
  * Returns an xmalloc()ed string which the caller must free with xfree().
  */
-extern char *slurm_conf_expand_slurmd_path(const char *path, const char *node_name);
+extern char *slurm_conf_expand_slurmd_path(const char *path,
+					   const char *node_name);
 
 /*
  * prolog_flags2str - convert a PrologFlags uint16_t to the equivalent string
@@ -596,27 +600,27 @@ extern char *reconfig_flags2str(uint16_t reconfig_flags);
 extern uint16_t reconfig_str2flags(char *reconfig_flags);
 
 extern void destroy_config_plugin_params(void *object);
-
-extern void pack_config_plugin_params(void *in, uint16_t protocol_version, Buf buff);
-
-extern int unpack_config_plugin_params(void **object, uint16_t protocol_version, Buf buff);
-
-extern void pack_config_plugin_params_list(void *in, uint16_t protocol_version, Buf buff);
-
-extern int unpack_config_plugin_params_list(void **object, uint16_t protocol_version, Buf buff);
+extern void pack_config_plugin_params(void *in, uint16_t protocol_version,
+				      Buf buff);
+extern int unpack_config_plugin_params(void **object, uint16_t protocol_version,
+				       Buf buff);
+extern void pack_config_plugin_params_list(void *in, uint16_t protocol_version,
+					   Buf buff);
+extern int unpack_config_plugin_params_list(void **object,
+					    uint16_t protocol_version,
+					    Buf buff);
 
 extern void destroy_config_key_pair(void *object);
-
-extern void pack_key_pair_list(void *key_pairs, uint16_t protocol_version, Buf buffer);
-
-extern int unpack_key_pair_list(void **key_pairs, uint16_t protocol_version, Buf buffer);
-
-extern void pack_config_key_pair(void *in, uint16_t protocol_version, Buf buffer);
-
-extern int unpack_config_key_pair(void **object, uint16_t protocol_version, Buf buffer);
+extern void pack_key_pair_list(void *key_pairs, uint16_t protocol_version,
+			       Buf buffer);
+extern int unpack_key_pair_list(void **key_pairs, uint16_t protocol_version,
+				Buf buffer);
+extern void pack_config_key_pair(void *in, uint16_t protocol_version,
+				 Buf buffer);
+extern int unpack_config_key_pair(void **object, uint16_t protocol_version,
+				  Buf buffer);
 
 extern int sort_key_pairs(void *v1, void *v2);
-
 /*
  * Return the pathname of the extra .conf file
  * return value must be xfreed
@@ -643,6 +647,7 @@ extern char *xlate_features(char *job_features);
  * 	host_list. See build_node_details().
  * RET return SLURM_SUCCESS on success, SLURM_ERROR otherwise.
  */
-extern int add_remote_nodes_to_conf_tbls(char *node_list, slurm_addr_t *node_addrs);
+extern int add_remote_nodes_to_conf_tbls(char *node_list,
+					 slurm_addr_t *node_addrs);
 
 #endif /* !_READ_CONFIG_H */

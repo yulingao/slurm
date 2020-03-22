@@ -37,69 +37,68 @@
 #include "src/common/slurm_protocol_api.h"
 
 typedef struct env_options {
-    int ntasks; /* --ntasks=n,      -n n	*/
-    char *task_count;
-    bool ntasks_set;                 /* true if ntasks explicitly set */
-    bool cpus_set;                     /* true if cpus_per_task explicitly set */
-    task_dist_states_t distribution; /* --distribution=, -m dist	*/
-    uint16_t plane_size;             /* plane_size for SLURM_DIST_PLANE */
-    cpu_bind_type_t cpu_bind_type;     /* --cpu-bind=			*/
-    char *cpu_bind;           /* binding map for map/mask_cpu	*/
-    uint32_t cpu_freq_min; /* Minimum cpu frequency  */
-    uint32_t cpu_freq_max; /* Maximum cpu frequency  */
-    uint32_t cpu_freq_gov; /* cpu frequency governor */
-    mem_bind_type_t mem_bind_type; /* --mem-bind=			*/
-    char *mem_bind;    /* binding map for tasks to memory	*/
-    bool overcommit;   /* --overcommit,   -O		*/
-    int slurmd_debug;  /* --slurmd-debug, -D           */
-    bool labelio;      /* --label-output, -l		*/
-    dynamic_plugin_data_t *select_jobinfo;
-    int nhosts;
-    char *nodelist;        /* nodelist in string form */
-    char *partition;    /* partition name */
-    char **env;            /* job environment */
-    uint16_t comm_port; /* srun's communication port */
-    slurm_addr_t *cli;  /* launch node address */
-    slurm_addr_t *self;
-    char *job_name; /* assigned job name */
-    int jobid;        /* assigned job id */
-    int stepid;        /* assigned step id */
-    int procid;        /* global task id (across nodes) */
-    int localid;    /* local task id (within node) */
-    int nodeid;
-    int cpus_per_task;     /* --cpus-per-task=n, -c n	*/
-    int ntasks_per_node;   /* --ntasks-per-node=n		*/
-    int ntasks_per_socket; /* --ntasks-per-socket=n	*/
-    int ntasks_per_core;   /* --ntasks-per-core=n		*/
-    int cpus_on_node;
-    pid_t task_pid;
-    char *sgtids;          /* global ranks array of integers */
-    uint16_t pty_port;    /* used to communicate window size changes */
-    uint16_t ws_col;      /* window size, columns */
-    uint16_t ws_row;      /* window size, row count */
-    uint16_t restart_cnt; /* count of job restarts	*/
-    uint16_t batch_flag;  /* 1 if batch: queued job with script */
-    uint32_t uid;          /* user ID */
-    char *user_name;      /* user name */
-    char *account;          /* job's account */
-    char *qos;              /* job's qos */
-    char *resv_name;      /* job's reservation */
+	int ntasks;		/* --ntasks=n,      -n n	*/
+	char *task_count;
+	bool ntasks_set;	/* true if ntasks explicitly set */
+	bool cpus_set;		/* true if cpus_per_task explicitly set */
+	task_dist_states_t distribution; /* --distribution=, -m dist	*/
+	uint16_t plane_size;         /* plane_size for SLURM_DIST_PLANE */
+	cpu_bind_type_t
+		cpu_bind_type;	/* --cpu-bind=			*/
+	char *cpu_bind;		/* binding map for map/mask_cpu	*/
+	uint32_t cpu_freq_min;  /* Minimum cpu frequency  */
+	uint32_t cpu_freq_max;  /* Maximum cpu frequency  */
+	uint32_t cpu_freq_gov;  /* cpu frequency governor */
+	mem_bind_type_t
+		mem_bind_type;	/* --mem-bind=			*/
+	char *mem_bind;		/* binding map for tasks to memory	*/
+	bool overcommit;	/* --overcommit,   -O		*/
+	int  slurmd_debug;	/* --slurmd-debug, -D           */
+	bool labelio;		/* --label-output, -l		*/
+	dynamic_plugin_data_t *select_jobinfo;
+	int nhosts;
+	char *nodelist;		/* nodelist in string form */
+	char *partition;	/* partition name */
+	char **env;             /* job environment */
+	uint16_t comm_port;	/* srun's communication port */
+	slurm_addr_t *cli;	/* launch node address */
+	slurm_addr_t *self;
+	char *job_name;		/* assigned job name */
+	int jobid;		/* assigned job id */
+	int stepid;	        /* assigned step id */
+	int procid;		/* global task id (across nodes) */
+	int localid;		/* local task id (within node) */
+	int nodeid;
+	int cpus_per_task;	/* --cpus-per-task=n, -c n	*/
+	int ntasks_per_node;	/* --ntasks-per-node=n		*/
+	int ntasks_per_socket;	/* --ntasks-per-socket=n	*/
+	int ntasks_per_core;	/* --ntasks-per-core=n		*/
+	int cpus_on_node;
+	pid_t task_pid;
+	char *sgtids;		/* global ranks array of integers */
+	uint16_t pty_port;	/* used to communicate window size changes */
+	uint16_t ws_col;	/* window size, columns */
+	uint16_t ws_row;	/* window size, row count */
+	uint16_t restart_cnt;	/* count of job restarts	*/
+	uint16_t batch_flag;	/* 1 if batch: queued job with script */
+	uint32_t uid;		/* user ID */
+	char *user_name;	/* user name */
+	char *account;          /* job's account */
+	char *qos;              /* job's qos */
+	char *resv_name;        /* job's reservation */
 } env_t;
+
 
 /* NOTE: These functions operate on the job's current environment
  * if env is NULL, otherwise they operate on the argument array */
-int envcount(char **env);
+int	envcount (char **env);
+char *	getenvp(char **env, const char *name);
+int	setenvf(char ***envp, const char *name, const char *fmt, ...)
+		__attribute__ ((format (printf, 3, 4)));
+int	setenvfs(const char *fmt, ...);
+void	unsetenvp(char **env, const char *name);
 
-char *getenvp(char **env, const char *name);
-
-int setenvf(char ***envp, const char *name, const char *fmt, ...)
-__attribute__((format(printf, 3, 4)));
-
-int setenvfs(const char *fmt, ...);
-
-void unsetenvp(char **env, const char *name);
-
-int setup_env(env_t *env, bool preserve_env);
+int	setup_env(env_t *env, bool preserve_env);
 
 /**********************************************************************
  * Newer environment variable handling scheme
@@ -126,8 +125,9 @@ int setup_env(env_t *env, bool preserve_env);
  * Sets OBSOLETE variables:
  *	? probably only needed for users...
  */
-extern int env_array_for_job(char ***dest, const resource_allocation_response_msg_t *alloc, const job_desc_msg_t *desc,
-                             int pack_offset);
+extern int env_array_for_job(char ***dest,
+			     const resource_allocation_response_msg_t *alloc,
+			     const job_desc_msg_t *desc, int pack_offset);
 
 /*
  * Set in "dest" the environment variables relevant to a Slurm batch
@@ -152,7 +152,9 @@ extern int env_array_for_job(char ***dest, const resource_allocation_response_ms
  *	SLURM_TASKS_PER_NODE <- poorly named, really CPUs per node
  *	? probably only needed for users...
  */
-extern int env_array_for_batch_job(char ***dest, const batch_job_launch_msg_t *batch, const char *node_name);
+extern int env_array_for_batch_job(char ***dest,
+				   const batch_job_launch_msg_t *batch,
+				   const char* node_name);
 
 /*
  * Set in "dest" the environment variables relevant to a Slurm job step,
@@ -183,8 +185,11 @@ extern int env_array_for_batch_job(char ***dest, const batch_job_launch_msg_t *b
  *
  */
 extern void
-env_array_for_step(char ***dest, const job_step_create_response_msg_t *step, launch_tasks_request_msg_t *launch,
-                   uint16_t launcher_port, bool preserve_env);
+env_array_for_step(char ***dest,
+		   const job_step_create_response_msg_t *step,
+		   launch_tasks_request_msg_t *launch,
+		   uint16_t launcher_port,
+		   bool preserve_env);
 
 /*
  * Return an empty environment variable array (contains a single
@@ -193,8 +198,6 @@ env_array_for_step(char ***dest, const job_step_create_response_msg_t *step, lau
 char **env_array_create(void);
 
 /*
-取消设置用户当前环境中的所有环境变量。
-
  * Unset all of the environment variables in a user's current
  * environment.
  */
@@ -231,7 +234,8 @@ void env_array_free(char **env_array);
  *
  * Return 1 on success, and 0 on error.
  */
-int env_array_append(char ***array_ptr, const char *name, const char *value);
+int env_array_append(char ***array_ptr, const char *name,
+		     const char *value);
 
 /*
  * Append a single environment variable to an environment variable array,
@@ -242,8 +246,9 @@ int env_array_append(char ***array_ptr, const char *name, const char *value);
  *
  * Return 1 on success, and 0 on error.
  */
-int env_array_append_fmt(char ***array_ptr, const char *name, const char *value_fmt, ...)
-__attribute__((format(printf, 3, 4)));
+int env_array_append_fmt(char ***array_ptr, const char *name,
+			 const char *value_fmt, ...)
+  __attribute__ ((format (printf, 3, 4)));
 
 /*
  * Append a single environment variable to an environment variable array
@@ -253,7 +258,8 @@ __attribute__((format(printf, 3, 4)));
  *
  * Return 1 on success, and 0 on error.
  */
-int env_array_overwrite(char ***array_ptr, const char *name, const char *value);
+int env_array_overwrite(char ***array_ptr, const char *name,
+			const char *value);
 
 /*
  * Append a single environment variable to an environment variable array
@@ -265,8 +271,9 @@ int env_array_overwrite(char ***array_ptr, const char *name, const char *value);
  *
  * Return 1 on success, and 0 on error.
  */
-int env_array_overwrite_fmt(char ***array_ptr, const char *name, const char *value_fmt, ...)
-__attribute__((format(printf, 3, 4)));
+int env_array_overwrite_fmt(char ***array_ptr, const char *name,
+			    const char *value_fmt, ...)
+  __attribute__ ((format (printf, 3, 4)));
 
 /*
  * Append a single environment variable to an environment variable array
@@ -278,8 +285,9 @@ __attribute__((format(printf, 3, 4)));
  *
  * Return 1 on success, and 0 on error.
  */
-int env_array_overwrite_pack_fmt(char ***array_ptr, const char *name, int pack_offset, const char *value_fmt, ...)
-__attribute__((format(printf, 4, 5)));
+int env_array_overwrite_pack_fmt(char ***array_ptr, const char *name,
+				 int pack_offset, const char *value_fmt, ...)
+  __attribute__ ((format (printf, 4, 5)));
 
 /*
  * Set in the running process's environment all of the environment
@@ -309,7 +317,8 @@ char **env_array_from_file(const char *filename);
  * NOTE: The calling process must have an effective uid of root for
  * this function to succeed.
  */
-char **env_array_user_default(const char *username, int timeout, int mode, bool no_cache);
+char **env_array_user_default(const char *username, int timeout, int mode,
+			      bool no_cache);
 
 /*
  * Return a string representation of an array of uint16_t elements.
@@ -337,7 +346,9 @@ extern char *uint16_array_to_str(int array_len, const uint16_t *array);
  * This function returns the string representation of the compressed
  * array.  Free with xfree().
  */
-char *uint32_compressed_to_str(uint32_t array_len, const uint16_t *array, const uint32_t *array_reps);
+char *uint32_compressed_to_str(uint32_t array_len,
+			       const uint16_t *array,
+			       const uint32_t *array_reps);
 
 /*
  * Set TRES related env vars. Set here rather than env_array_for_job() since

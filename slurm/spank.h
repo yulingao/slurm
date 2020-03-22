@@ -40,11 +40,11 @@
 
 /*  SPANK handle. Plug-in's context for running Slurm job
  */
-typedef struct spank_handle *spank_t;
+typedef struct spank_handle * spank_t;
 
 /*  Prototype for all spank plugin operations
  */
-typedef int (spank_f)(spank_t spank, int ac, char *argv[]);
+typedef int (spank_f) (spank_t spank, int ac, char *argv[]);
 
 /*  SPANK plugin operations. SPANK plugin should have at least one of
  *   these functions defined non-NULL.
@@ -170,18 +170,18 @@ typedef enum spank_item spank_item_t;
 /*  SPANK error codes.
  */
 enum spank_err {
-    ESPANK_SUCCESS = 0, /* Success.                                      */
-    ESPANK_ERROR = 1, /* Generic error.                                */
-    ESPANK_BAD_ARG = 2, /* Bad argument.                                 */
-    ESPANK_NOT_TASK = 3, /* Not in task context.                          */
-    ESPANK_ENV_EXISTS = 4, /* Environment variable exists && !overwrite     */
+    ESPANK_SUCCESS     = 0, /* Success.                                      */
+    ESPANK_ERROR       = 1, /* Generic error.                                */
+    ESPANK_BAD_ARG     = 2, /* Bad argument.                                 */
+    ESPANK_NOT_TASK    = 3, /* Not in task context.                          */
+    ESPANK_ENV_EXISTS  = 4, /* Environment variable exists && !overwrite     */
     ESPANK_ENV_NOEXIST = 5, /* No such environment variable                  */
-    ESPANK_NOSPACE = 6, /* Buffer too small.                             */
-    ESPANK_NOT_REMOTE = 7, /* Function only may be called in remote context */
-    ESPANK_NOEXIST = 8, /* Id/pid doesn't exist on this node             */
-    ESPANK_NOT_EXECD = 9, /* Lookup by pid requested, but no tasks running */
-    ESPANK_NOT_AVAIL = 10,/* SPANK item not available from this callback   */
-    ESPANK_NOT_LOCAL = 11,/* Function only valid in local/alloc context    */
+    ESPANK_NOSPACE     = 6, /* Buffer too small.                             */
+    ESPANK_NOT_REMOTE  = 7, /* Function only may be called in remote context */
+    ESPANK_NOEXIST     = 8, /* Id/pid doesn't exist on this node             */
+    ESPANK_NOT_EXECD   = 9, /* Lookup by pid requested, but no tasks running */
+    ESPANK_NOT_AVAIL   = 10,/* SPANK item not available from this callback   */
+    ESPANK_NOT_LOCAL   = 11,/* Function only valid in local/alloc context    */
 };
 
 typedef enum spank_err spank_err_t;
@@ -214,14 +214,14 @@ typedef enum spank_context spank_context_t;
  *   specifies whether this call is being made locally (e.g. in srun)
  *   or remotely (e.g. in slurmstepd/slurmd).
  */
-typedef int (*spank_opt_cb_f)(int val, const char *optarg, int remote);
+typedef int (*spank_opt_cb_f) (int val, const char *optarg, int remote);
 
 struct spank_option {
-    char *name;    /* long option provided by plugin               */
-    char *arginfo; /* one word description of argument if required */
-    char *usage;   /* Usage text                                   */
-    int has_arg; /* Does option require argument?                */
-    int val;     /* value to return using callback               */
+    char *         name;    /* long option provided by plugin               */
+    char *         arginfo; /* one word description of argument if required */
+    char *         usage;   /* Usage text                                   */
+    int            has_arg; /* Does option require argument?                */
+    int            val;     /* value to return using callback               */
     spank_opt_cb_f cb;      /* Callback function to check option value      */
 };
 
@@ -231,7 +231,7 @@ struct spank_option {
  *   in "allocator" mode (sbatch/salloc), use the preferred
  *   spank_option_register function described below.
  */
-extern struct spank_option spank_options[];
+extern struct spank_option spank_options [];
 
 /*
  *  SPANK plugin option table must end with the following entry:
@@ -253,7 +253,7 @@ extern "C" {
 /*
  *  Return the string representation of a spank_err_t error code.
  */
-const char *spank_strerror(spank_err_t err);
+const char *spank_strerror (spank_err_t err);
 
 /*
  *  Determine whether a given spank plugin symbol is supported
@@ -264,7 +264,7 @@ const char *spank_strerror(spank_err_t err);
  *  = 0   The symbol is not supported
  *  = -1  Invalid argument
  */
-int spank_symbol_supported(const char *symbol);
+int spank_symbol_supported (const char *symbol);
 
 /*
  *  Determine whether plugin is loaded in "remote" context
@@ -274,7 +274,7 @@ int spank_symbol_supported(const char *symbol);
  *  = 0   not remote context
  *  < 0   spank handle was not valid.
  */
-int spank_remote(spank_t spank);
+int spank_remote (spank_t spank);
 
 /*
  *  Return the context in which the calling plugin is loaded.
@@ -282,7 +282,7 @@ int spank_remote(spank_t spank);
  *  Returns the spank_context for the calling plugin, or SPANK_CTX_ERROR
  *   if the current context cannot be determined.
  */
-spank_context_t spank_context(void);
+spank_context_t spank_context (void);
 
 /*
  *  Register a plugin-provided option dynamically. This function
@@ -298,7 +298,7 @@ spank_context_t spank_context(void);
  *  Returns ESPANK_SUCCESS on successful registration of the option
  *   or ESPANK_BAD_ARG if not called from slurm_spank_init().
  */
-spank_err_t spank_option_register(spank_t spank, struct spank_option *opt);
+spank_err_t spank_option_register (spank_t spank, struct spank_option *opt);
 
 /*
  *  Check whether spank plugin option [opt] has been activated.
@@ -315,7 +315,8 @@ spank_err_t spank_option_register(spank_t spank, struct spank_option *opt);
  *    such as NULL opt, NULL opt->name, or NULL optarg when opt->has_arg != 0.
  *   ESPANK_NOT_AVAIL if called from improper context.
  */
-spank_err_t spank_option_getopt(spank_t spank, struct spank_option *opt, char **optarg);
+spank_err_t spank_option_getopt (spank_t spank, struct spank_option *opt,
+	char **optarg);
 
 
 /*  Get the value for the current job or task item specified,
@@ -331,7 +332,7 @@ spank_err_t spank_option_getopt(spank_t spank, struct spank_option *opt, char **
  *   is called from an invalid context, and ESPANK_NOT_REMOTE
  *   if not called from slurmstepd context or spank_local_user_init.
  */
-spank_err_t spank_get_item(spank_t spank, spank_item_t item, ...);
+spank_err_t spank_get_item (spank_t spank, spank_item_t item, ...);
 
 /*  Place a copy of environment variable "var" from the job's environment
  *   into buffer "buf" of size "len."
@@ -342,7 +343,7 @@ spank_err_t spank_get_item(spank_t spank, spank_item_t item, ...);
  *    ESPANK_NOSPACE      = buffer too small, truncation occurred.
  *    ESPANK_NOT_REMOTE   = not called in remote context (i.e. from slurmd).
  */
-spank_err_t spank_getenv(spank_t spank, const char *var, char *buf, int len);
+spank_err_t spank_getenv (spank_t spank, const char *var, char *buf, int len);
 
 /*
  *  Set the environment variable "var" to "val" in the environment of
@@ -354,7 +355,8 @@ spank_err_t spank_getenv(spank_t spank, const char *var, char *buf, int len);
  *     ESPANK_BAD_ARG     = spank handle invalid or var/val are NULL.
  *     ESPANK_NOT_REMOTE  = not called from slurmstepd.
  */
-spank_err_t spank_setenv(spank_t spank, const char *var, const char *val, int overwrite);
+spank_err_t spank_setenv (spank_t spank, const char *var, const char *val,
+        int overwrite);
 
 /*
  *  Unset environment variable "var" in the environment of current job or
@@ -364,7 +366,7 @@ spank_err_t spank_setenv(spank_t spank, const char *var, const char *val, int ov
  *    ESPANK_BAD_ARG   = spank handle invalid or var is NULL.
  *    ESPANK_NOT_REMOTE = not called from slurmstepd.
  */
-spank_err_t spank_unsetenv(spank_t spank, const char *var);
+spank_err_t spank_unsetenv (spank_t spank, const char *var);
 
 /*
  *  Set an environment variable "name" to "value" in the "job control"
@@ -378,7 +380,8 @@ spank_err_t spank_unsetenv(spank_t spank, const char *var);
  *     ESPANK_ENV_EXISTS  = var exists in control env and overwrite == 0.
  *     ESPANK_NOT_LOCAL   = not called in local context
  */
-spank_err_t spank_job_control_setenv(spank_t sp, const char *name, const char *value, int overwrite);
+spank_err_t spank_job_control_setenv (spank_t sp, const char *name,
+        const char *value, int overwrite);
 
 /*
  *  Place a copy of environment variable "name" from the job control
@@ -390,7 +393,8 @@ spank_err_t spank_job_control_setenv(spank_t sp, const char *name, const char *v
  *     ESPANK_NOSPACE     = buffer too small, truncation occurred.
  *     ESPANK_NOT_LOCAL   = not called in local context
  */
-spank_err_t spank_job_control_getenv(spank_t sp, const char *name, char *buf, int len);
+spank_err_t spank_job_control_getenv (spank_t sp, const char *name,
+        char *buf, int len);
 
 /*
  *  Unset environment variable "name" in the job control environment.
@@ -399,28 +403,23 @@ spank_err_t spank_job_control_getenv(spank_t sp, const char *name, char *buf, in
  *     ESPANK_BAD_ARG   = invalid spank handle or var is NULL
  *     ESPANK_NOT_LOCAL   = not called in local context
  */
-spank_err_t spank_job_control_unsetenv(spank_t sp, const char *name);
+spank_err_t spank_job_control_unsetenv (spank_t sp, const char *name);
 
 /*
  *  Slurm logging functions which are exported to plugins.
  */
-extern void slurm_info(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
-
-extern void slurm_error(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
-
-extern void slurm_verbose(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
-
-extern void slurm_debug(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
-
-extern void slurm_debug2(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
-
-extern void slurm_debug3(const char *format, ...)
-__attribute__ ((format (printf, 1, 2)));
+extern void slurm_info (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+extern void slurm_error (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+extern void slurm_verbose (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+extern void slurm_debug (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+extern void slurm_debug2 (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+extern void slurm_debug3 (const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
 
 #ifdef __cplusplus
 }

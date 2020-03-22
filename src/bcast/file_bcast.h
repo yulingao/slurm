@@ -41,31 +41,31 @@
 #include "src/common/slurm_protocol_defs.h"
 
 struct bcast_parameters {
-    uint32_t block_size;
-    uint16_t compress;
-    char *dst_fname;
-    int fanout;
-    bool force;
-    uint32_t job_id;        /* Job ID or Pack Job ID */
-    uint32_t pack_job_offset;    /* Pack Job Offset or NO_VAL */
-    bool preserve;
-    char *src_fname;
-    uint32_t step_id;
-    int timeout;
-    int verbose;
+	uint32_t block_size;
+	uint16_t compress;
+	char *dst_fname;
+	int fanout;
+	bool force;
+	uint32_t job_id;		/* Job ID or Pack Job ID */
+	uint32_t pack_job_offset;	/* Pack Job Offset or NO_VAL */
+	bool preserve;
+	char *src_fname;
+	uint32_t step_id;
+	int timeout;
+	int verbose;
 };
 
 typedef struct file_bcast_info {
-    void *data;        /* mmap of file data */
-    int fd;            /* file descriptor */
-    uint64_t file_size;    /* file size */
-    char *fname;        /* filename */
-    gid_t gid;        /* gid of owner */
-    uint32_t job_id;    /* job id */
-    time_t last_update;    /* transfer last block received */
-    int received_blocks;    /* number of blocks received */
-    time_t start_time;    /* transfer start time */
-    uid_t uid;        /* uid of owner */
+	void *data;		/* mmap of file data */
+	int fd;			/* file descriptor */
+	uint64_t file_size;	/* file size */
+	char *fname;		/* filename */
+	gid_t gid;		/* gid of owner */
+	uint32_t job_id;	/* job id */
+	time_t last_update;	/* transfer last block received */
+	int received_blocks;	/* number of blocks received */
+	time_t start_time;	/* transfer start time */
+	uid_t uid;		/* uid of owner */
 } file_bcast_info_t;
 
 extern int bcast_file(struct bcast_parameters *params);

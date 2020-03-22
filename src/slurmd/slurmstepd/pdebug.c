@@ -52,129 +52,141 @@
  * Prepare task for parallel debugger attach
  * Returns SLURM_SUCCESS or SLURM_ERROR.
  */
-int pdebug_trace_process(stepd_step_rec_t *job, pid_t pid) {
-    /*  If task to be debugged, wait for it to stop via
-     *  child's ptrace(PTRACE_TRACEME), then SIGSTOP, and
-     *  ptrace(PTRACE_DETACH).
-     */
+int
+pdebug_trace_process(stepd_step_rec_t *job, pid_t pid)
+{
+	/*  If task to be debugged, wait for it to stop via
+	 *  child's ptrace(PTRACE_TRACEME), then SIGSTOP, and
+	 *  ptrace(PTRACE_DETACH).
+	 */
 
-    if (job->flags & LAUNCH_PARALLEL_DEBUG) {
-        int status;
-        waitpid(pid, &status, WUNTRACED);
-        if (!WIFSTOPPED(status)) {
-            int i;
-            error("pdebug_trace_process WIFSTOPPED false"
-                  " for pid %d", pid);
-            if (WIFEXITED(status)) {
-                error("Process %d exited \"normally\""
-                      " with return code %d", pid, WEXITSTATUS(status));
-            } else if (WIFSIGNALED(status)) {
-                error("Process %d killed by signal %d", pid, WTERMSIG(status));
-            }
+	if (job->flags & LAUNCH_PARALLEL_DEBUG) {
+		int status;
+		waitpid(pid, &status, WUNTRACED);
+		if (!WIFSTOPPED(status)) {
+			int i;
+			error("pdebug_trace_process WIFSTOPPED false"
+			      " for pid %d", pid);
+			if (WIFEXITED(status)) {
+				error("Process %d exited \"normally\""
+				      " with return code %d",
+				      pid,
+				      WEXITSTATUS(status));
+			} else if (WIFSIGNALED(status)) {
+				error("Process %d killed by signal %d",
+				      pid, WTERMSIG(status));
+			}
 
-            /*
-             * Mark this process as complete since it died
-             * prematurely.
-             */
-            for (i = 0; i < job->node_tasks; i++) {
-                if (job->task[i]->pid == pid) {
-                    job->task[i]->state = STEPD_STEP_TASK_COMPLETE;
-                }
-            }
+			/*
+			 * Mark this process as complete since it died
+			 * prematurely.
+			 */
+			for (i = 0; i < job->node_tasks; i++) {
+				if (job->task[i]->pid == pid) {
+					job->task[i]->state =
+						STEPD_STEP_TASK_COMPLETE;
+				}
+			}
 
-            return SLURM_ERROR;
-        }
-        if ((pid > (pid_t) 0) && (kill(pid, SIGSTOP) < 0)) {
-            error("kill(%lu): %m", (unsigned long) pid);
-            return SLURM_ERROR;
-        }
+			return SLURM_ERROR;
+		}
+		if ((pid > (pid_t) 0) && (kill(pid, SIGSTOP) < 0)) {
+			error("kill(%lu): %m", (unsigned long) pid);
+			return SLURM_ERROR;
+		}
 
 #ifdef BSD
-        if (_PTRACE(PT_DETACH, pid, (caddr_t) 1, 0)) {
+		if (_PTRACE(PT_DETACH, pid, (caddr_t)1, 0)) {
 #elif defined(PT_DETACH)
-            if (_PTRACE(PT_DETACH, pid, NULL, 0)) {
+		if (_PTRACE(PT_DETACH, pid, NULL, 0)) {
 #else
-            if (_PTRACE(PTRACE_DETACH, pid, NULL, 0)) {
+		if (_PTRACE(PTRACE_DETACH, pid, NULL, 0)) {
 #endif
-            error("ptrace(%lu): %m", (unsigned long) pid);
-            return SLURM_ERROR;
-        }
-    }
-    return SLURM_SUCCESS;
+			error("ptrace(%lu): %m", (unsigned long) pid);
+			return SLURM_ERROR;
+		}
+	}
+	return SLURM_SUCCESS;
 }
 
 /*
  * Stop current task on exec() for connection from a parallel debugger
  */
-void pdebug_stop_current(stepd_step_rec_t *job) {
-    /*
-     * Stop the task on exec for TotalView to connect
-     */
-    if ((job->flags & LAUNCH_PARALLEL_DEBUG)
-        #ifdef BSD
-        && (_PTRACE(PT_TRACE_ME, 0, (caddr_t) 0, 0) < 0))
+void
+pdebug_stop_current(stepd_step_rec_t *job)
+{
+	/*
+	 * Stop the task on exec for TotalView to connect
+	 */
+	if ((job->flags & LAUNCH_PARALLEL_DEBUG)
+#ifdef BSD
+	     && (_PTRACE(PT_TRACE_ME, 0, (caddr_t)0, 0) < 0) )
 #elif defined(PT_TRACE_ME)
-        && (_PTRACE(PT_TRACE_ME, 0, NULL, 0) < 0) )
+	     && (_PTRACE(PT_TRACE_ME, 0, NULL, 0) < 0) )
 #else
-        && (_PTRACE(PTRACE_TRACEME, 0, NULL, 0) < 0) )
+	     && (_PTRACE(PTRACE_TRACEME, 0, NULL, 0) < 0) )
 #endif
-        error("ptrace: %m");
+		error("ptrace: %m");
 }
 
 /* Check if this PID should be woken for TotalView partitial attach */
-static int _being_traced(pid_t pid) {
-    FILE *fp = NULL;
-    size_t n = 0, max_len;
-    int tracer_id = 0;
-    char *match = NULL;
-    char buf[2048] = {0};
-    char sp[PATH_MAX] = {0};
+static int _being_traced(pid_t pid)
+{
+	FILE *fp = NULL;
+	size_t n = 0, max_len;
+	int tracer_id = 0;
+	char *match = NULL;
+	char buf[2048] = {0};
+	char sp[PATH_MAX] = {0};
 
-    if (snprintf(sp, PATH_MAX, "/proc/%lu/status", (unsigned long) pid) == -1)
-        return -1;
-    if ((fp = fopen((const char *) sp, "r")) == NULL)
-        return -1;
+	if (snprintf(sp, PATH_MAX, "/proc/%lu/status",(unsigned long)pid) == -1)
+		return -1;
+	if ((fp = fopen((const char *)sp, "r")) == NULL)
+		return -1;
 
-    max_len = sizeof(buf) - 1;
-    n = fread(buf, 1, max_len, fp);
-    fclose(fp);
-    if ((n == 0) || (n == max_len))
-        return -1;
-    buf[n] = '\0';    /* Ensure string is terminated */
-    if ((match = strstr(buf, "TracerPid:")) == NULL)
-        return -1;
-    if (sscanf(match, "TracerPid:\t%d", &tracer_id) == EOF)
-        return -1;
-    return tracer_id;
+	max_len = sizeof(buf) - 1;
+	n = fread(buf, 1, max_len, fp);
+	fclose(fp);
+	if ((n == 0) || (n == max_len))
+		return -1;
+	buf[n] = '\0';	/* Ensure string is terminated */
+	if ((match = strstr(buf, "TracerPid:")) == NULL)
+		return -1;
+	if (sscanf(match, "TracerPid:\t%d", &tracer_id) == EOF)
+		return -1;
+	return tracer_id;
 }
 
-static bool _pid_to_wake(pid_t pid) {
-    int rc = 0;
+static bool _pid_to_wake(pid_t pid)
+{
+	int rc = 0;
 
-    if ((rc = _being_traced(pid)) == -1) {
-        /* If an error occurred (e.g., /proc FS doesn't exist
-         * or TracerPid field doesn't exist, it is better to wake
-         * up the target process -- at the expense of potential
-         * side effects on the debugger. */
-        debug("_pid_to_wake(%lu): %m\n", (unsigned long) pid);
-        errno = 0;
-        rc = 0;
-    }
-    return (rc == 0) ? true : false;
+	if ((rc = _being_traced(pid)) == -1) {
+		/* If an error occurred (e.g., /proc FS doesn't exist
+		 * or TracerPid field doesn't exist, it is better to wake
+		 * up the target process -- at the expense of potential
+		 * side effects on the debugger. */
+		debug("_pid_to_wake(%lu): %m\n", (unsigned long) pid);
+		errno = 0;
+		rc = 0;
+	}
+	return (rc == 0) ? true : false;
 }
 
 /*
  * Wake tasks currently stopped for parallel debugger attach
  */
-void pdebug_wake_process(stepd_step_rec_t *job, pid_t pid) {
-    if ((job->flags & LAUNCH_PARALLEL_DEBUG) && (pid > (pid_t) 0)) {
-        if (_pid_to_wake(pid)) {
-            if (kill(pid, SIGCONT) < 0)
-                error("kill(%lu): %m", (unsigned long) pid);
-            else
-                debug("woke pid %lu", (unsigned long) pid);
-        } else {
-            debug("pid %lu not stopped or being traced", (unsigned long) pid);
-        }
-    }
+void pdebug_wake_process(stepd_step_rec_t *job, pid_t pid)
+{
+	if ((job->flags & LAUNCH_PARALLEL_DEBUG) && (pid > (pid_t) 0)) {
+		if (_pid_to_wake(pid)) {
+			if (kill(pid, SIGCONT) < 0)
+				error("kill(%lu): %m", (unsigned long) pid);
+			else
+				debug("woke pid %lu", (unsigned long) pid);
+		} else {
+			debug("pid %lu not stopped or being traced",
+			      (unsigned long) pid);
+		}
+	}
 }

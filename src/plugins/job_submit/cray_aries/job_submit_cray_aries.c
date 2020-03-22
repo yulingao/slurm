@@ -73,9 +73,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Job submit Cray/Aries plugin";
-const char plugin_type[] = "job_submit/cray_aries";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Job submit Cray/Aries plugin";
+const char plugin_type[]       	= "job_submit/cray_aries";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 #define CRAY_GRES "craynetwork"
 #define CRAY_GRES_POSTFIX CRAY_GRES":1"
@@ -83,35 +83,41 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 /*
  * Append CRAY_GRES_POSTFIX to the gres provided by the user
  */
-static void _append_gres(struct job_descriptor *job_desc) {
-    if (job_desc->tres_per_node == NULL) {
-        job_desc->tres_per_node = xstrdup(CRAY_GRES_POSTFIX);
-    } else if (strlen(job_desc->tres_per_node) == 0) {
-        xstrcat(job_desc->tres_per_node, CRAY_GRES_POSTFIX);
-    } else if (strstr(job_desc->tres_per_node, CRAY_GRES) == NULL) {
-        // Don't append if they already specified craynetwork
-        // Allows the user to ask for more or less than the default
-        xstrcat(job_desc->tres_per_node, "," CRAY_GRES_POSTFIX);
-    }
+static void _append_gres(struct job_descriptor *job_desc)
+{
+	if (job_desc->tres_per_node == NULL) {
+		job_desc->tres_per_node = xstrdup(CRAY_GRES_POSTFIX);
+	} else if (strlen(job_desc->tres_per_node) == 0) {
+		xstrcat(job_desc->tres_per_node, CRAY_GRES_POSTFIX);
+	} else if (strstr(job_desc->tres_per_node, CRAY_GRES) == NULL) {
+		// Don't append if they already specified craynetwork
+		// Allows the user to ask for more or less than the default
+		xstrcat(job_desc->tres_per_node, "," CRAY_GRES_POSTFIX);
+	}
 }
 
-int init(void) {
-    return SLURM_SUCCESS;
+int init (void)
+{
+	return SLURM_SUCCESS;
 }
 
-int fini(void) {
-    return SLURM_SUCCESS;
+int fini (void)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid) {
-    _append_gres(job_desc);
-    return SLURM_SUCCESS;
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid)
+{
+	_append_gres(job_desc);
+	return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
-    /* Don't call this on modify it shouldn't be needed and will
-     * mess things up if modifying a running job
-     */
-    //_append_gres(job_desc);
-    return SLURM_SUCCESS;
+extern int job_modify(struct job_descriptor *job_desc,
+		      struct job_record *job_ptr, uint32_t submit_uid)
+{
+	/* Don't call this on modify it shouldn't be needed and will
+	 * mess things up if modifying a running job
+	 */
+	//_append_gres(job_desc);
+	return SLURM_SUCCESS;
 }

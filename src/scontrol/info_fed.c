@@ -36,11 +36,12 @@
 
 #include "scontrol.h"
 
-extern void scontrol_print_federation(void) {
-    void *fed = NULL;
+extern void scontrol_print_federation(void)
+{
+	void *fed = NULL;
 
-    if (!slurm_load_federation(&fed)) {
-        slurm_print_federation(fed);
-        slurm_destroy_federation_rec(fed);
-    }
+	if (!slurm_load_federation(&fed)) {
+		slurm_print_federation(fed);
+		slurm_destroy_federation_rec(fed);
+	}
 }

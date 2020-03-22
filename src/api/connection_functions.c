@@ -42,16 +42,17 @@
 #include "slurm/slurmdb.h"
 
 #include "src/common/slurm_accounting_storage.h"
-
 /*
  * get a new connection to the slurmdb
  * RET: pointer used to access db
  */
-extern void *slurmdb_connection_get(void) {
-    char *cluster_name = slurm_get_cluster_name();
-    void *db_conn = acct_storage_g_get_connection(NULL, 0, NULL, 1, cluster_name);
-    xfree(cluster_name);
-    return db_conn;
+extern void *slurmdb_connection_get(void)
+{
+	char *cluster_name = slurm_get_cluster_name();
+	void *db_conn = acct_storage_g_get_connection(NULL, 0, NULL,
+						      1, cluster_name);
+	xfree(cluster_name);
+	return db_conn;
 }
 
 /*
@@ -60,11 +61,14 @@ extern void *slurmdb_connection_get(void) {
  *                           slurm_persist_conn.h.
  * RET: pointer used to access db
  */
-extern void *slurmdb_connection_get2(uint16_t *persist_conn_flags) {
-    char *cluster_name = slurm_get_cluster_name();
-    void *db_conn = acct_storage_g_get_connection(NULL, 0, persist_conn_flags, 1, cluster_name);
-    xfree(cluster_name);
-    return db_conn;
+extern void *slurmdb_connection_get2(uint16_t *persist_conn_flags)
+{
+	char *cluster_name = slurm_get_cluster_name();
+	void *db_conn = acct_storage_g_get_connection(NULL, 0,
+						      persist_conn_flags,
+						      1, cluster_name);
+	xfree(cluster_name);
+	return db_conn;
 }
 
 /*
@@ -73,8 +77,9 @@ extern void *slurmdb_connection_get2(uint16_t *persist_conn_flags) {
  *         slurmdb_connection_get() which will be freed.
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_connection_close(void **db_conn) {
-    return acct_storage_g_close_connection(db_conn);
+extern int slurmdb_connection_close(void **db_conn)
+{
+	return acct_storage_g_close_connection(db_conn);
 }
 
 /*
@@ -83,6 +88,7 @@ extern int slurmdb_connection_close(void **db_conn) {
  * IN: bool - true will commit changes false will rollback
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_connection_commit(void *db_conn, bool commit) {
-    return acct_storage_g_commit(db_conn, commit);
+extern int slurmdb_connection_commit(void *db_conn, bool commit)
+{
+	return acct_storage_g_commit(db_conn, commit);
 }

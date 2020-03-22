@@ -43,15 +43,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-extern char **command_argv;
-extern int command_argc;
-extern pid_t command_pid;
+extern char **  command_argv;
+extern int      command_argc;
+extern pid_t    command_pid;
 extern uint64_t debug_flags;
 
-enum possible_allocation_states {
-    NOT_GRANTED, GRANTED, REVOKED
-};
+enum possible_allocation_states {NOT_GRANTED, GRANTED, REVOKED};
 extern enum possible_allocation_states allocation_state;
 extern pthread_mutex_t allocation_state_lock;
 
-#endif    /* _HAVE_SALLOC_H */
+#endif	/* _HAVE_SALLOC_H */

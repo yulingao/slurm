@@ -70,90 +70,109 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Checkpoint NONE plugin";
-const char plugin_type[] = "checkpoint/none";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Checkpoint NONE plugin";
+const char plugin_type[]       	= "checkpoint/none";
+const uint32_t plugin_version	= SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    return SLURM_SUCCESS;
+extern int init ( void )
+{
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    return SLURM_SUCCESS;
+extern int fini ( void )
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * The remainder of this file implements the standard Slurm checkpoint API.
  */
 
-extern int slurm_ckpt_op(uint32_t job_id, uint32_t step_id, struct step_record *step_ptr, uint16_t op, uint16_t data,
-                         char *image_dir, time_t *event_time, uint32_t *error_code, char **error_msg) {
-    return ESLURM_NOT_SUPPORTED;
+extern int slurm_ckpt_op (uint32_t job_id, uint32_t step_id,
+			  struct step_record *step_ptr, uint16_t op,
+			  uint16_t data, char *image_dir, time_t * event_time,
+			  uint32_t *error_code, char **error_msg )
+{
+	return ESLURM_NOT_SUPPORTED;
 }
 
-extern int slurm_ckpt_comp(struct step_record *step_ptr, time_t event_time, uint32_t error_code, char *error_msg) {
-    return ESLURM_NOT_SUPPORTED;
+extern int slurm_ckpt_comp (struct step_record * step_ptr, time_t event_time,
+		uint32_t error_code, char *error_msg)
+{
+	return ESLURM_NOT_SUPPORTED;
 }
 
-extern int slurm_ckpt_alloc_job(check_jobinfo_t *jobinfo) {
-    return SLURM_SUCCESS;
+extern int slurm_ckpt_alloc_job(check_jobinfo_t *jobinfo)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_free_job(check_jobinfo_t jobinfo) {
-    return SLURM_SUCCESS;
+extern int slurm_ckpt_free_job(check_jobinfo_t jobinfo)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_pack_job(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version) {
-    uint32_t size;
+extern int slurm_ckpt_pack_job(check_jobinfo_t jobinfo, Buf buffer,
+			       uint16_t protocol_version)
+{
+	uint32_t size;
 
-    size = 0;
-    if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        pack16(CHECK_NONE, buffer);
-        pack32(size, buffer);
-    }
-    return SLURM_SUCCESS;
+	size = 0;
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+		pack16(CHECK_NONE, buffer);
+		pack32(size, buffer);
+	}
+	return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_unpack_job(check_jobinfo_t jobinfo, Buf buffer, uint16_t protocol_version) {
-    uint16_t id;
-    uint32_t x;
-    uint32_t size;
+extern int slurm_ckpt_unpack_job(check_jobinfo_t jobinfo, Buf buffer,
+				 uint16_t protocol_version)
+{
+	uint16_t id;
+	uint32_t x;
+	uint32_t size;
 
-    if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        safe_unpack16(&id, buffer);
-        safe_unpack32(&size, buffer);
-        if (id != CHECK_NONE) {
-            x = get_buf_offset(buffer);
-            set_buf_offset(buffer, x + size);
-        }
-    }
-    return SLURM_SUCCESS;
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+		safe_unpack16(&id, buffer);
+		safe_unpack32(&size, buffer);
+		if (id != CHECK_NONE) {
+			x = get_buf_offset(buffer);
+			set_buf_offset(buffer, x + size);
+		}
+	}
+	return SLURM_SUCCESS;
 
-    unpack_error:
-    return SLURM_ERROR;
+unpack_error:
+	return SLURM_ERROR;
 }
 
-extern check_jobinfo_t slurm_ckpt_copy_job(check_jobinfo_t jobinfo) {
-    return NULL;
+extern check_jobinfo_t slurm_ckpt_copy_job(check_jobinfo_t jobinfo)
+{
+	return NULL;
 }
 
-extern int slurm_ckpt_task_comp(struct step_record *step_ptr, uint32_t task_id, time_t event_time, uint32_t error_code,
-                                char *error_msg) {
-    return SLURM_SUCCESS;
+extern int slurm_ckpt_task_comp (struct step_record * step_ptr,
+				 uint32_t task_id, time_t event_time,
+				 uint32_t error_code, char *error_msg )
+{
+	return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_stepd_prefork(void *slurmd_job) {
-    return SLURM_SUCCESS;
+extern int slurm_ckpt_stepd_prefork(void *slurmd_job)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int slurm_ckpt_signal_tasks(void *slurmd_job) {
-    return ESLURM_NOT_SUPPORTED;
+extern int slurm_ckpt_signal_tasks(void *slurmd_job)
+{
+	return ESLURM_NOT_SUPPORTED;
 }
 
-extern int slurm_ckpt_restart_task(void *slurmd_job, char *image_dir, int gtid) {
-    return ESLURM_NOT_SUPPORTED;
+extern int slurm_ckpt_restart_task(void *slurmd_job, char *image_dir, int gtid)
+{
+	return ESLURM_NOT_SUPPORTED;
 }

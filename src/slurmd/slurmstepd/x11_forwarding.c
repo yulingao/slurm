@@ -80,88 +80,92 @@ static char *x11_target = NULL;
 /* X11 display port on target (if not a UNIX socket). */
 static uint16_t x11_target_port = 0;
 
-static void *_eio_thread(void *arg) {
-    eio_handle_mainloop(eio_handle);
-    return NULL;
+static void *_eio_thread(void *arg)
+{
+	eio_handle_mainloop(eio_handle);
+	return NULL;
 }
 
-static bool _x11_socket_readable(eio_obj_t *obj) {
-    if (obj->shutdown) {
-        if (obj->fd != -1)
-            close(obj->fd);
-        obj->fd = -1;
-        return false;
-    }
-    return true;
+static bool _x11_socket_readable(eio_obj_t *obj)
+{
+        if (obj->shutdown) {
+		if (obj->fd != -1)
+			close(obj->fd);
+		obj->fd = -1;
+                return false;
+	}
+        return true;
 }
 
-static int _x11_socket_read(eio_obj_t *obj, List objs) {
-    eio_obj_t *e1, *e2;
-    slurm_msg_t req, resp;
-    net_forward_msg_t rpc;
-    slurm_addr_t sin;
-    int *local, *remote;
-    int rc;
+static int _x11_socket_read(eio_obj_t *obj, List objs)
+{
+	eio_obj_t *e1, *e2;
+	slurm_msg_t req, resp;
+	net_forward_msg_t rpc;
+	slurm_addr_t sin;
+	int *local, *remote;
+	int rc;
 
-    local = xmalloc(sizeof(*local));
-    remote = xmalloc(sizeof(*remote));
+	local = xmalloc(sizeof(*local));
+	remote = xmalloc(sizeof(*remote));
 
-    if ((*local = slurm_accept_msg_conn(obj->fd, &sin)) == -1) {
-        error("accept call failure, shutting down");
-        goto shutdown;
-    }
+	if ((*local = slurm_accept_msg_conn(obj->fd, &sin)) == -1) {
+		error("accept call failure, shutting down");
+		goto shutdown;
+	}
 
-    *remote = slurm_open_msg_conn(&alloc_node);
-    if (*remote < 0) {
-        error("%s: slurm_open_msg_conn: %m", __func__);
-        goto shutdown;
-    }
+	*remote = slurm_open_msg_conn(&alloc_node);
+	if (*remote < 0) {
+		error("%s: slurm_open_msg_conn: %m", __func__);
+		goto shutdown;
+	}
 
-    rpc.job_id = job_id;
-    rpc.flags = 0;
-    rpc.port = x11_target_port;
-    rpc.target = x11_target;
+	rpc.job_id = job_id;
+	rpc.flags = 0;
+	rpc.port = x11_target_port;
+	rpc.target = x11_target;
 
-    slurm_msg_t_init(&req);
-    slurm_msg_t_init(&resp);
+	slurm_msg_t_init(&req);
+	slurm_msg_t_init(&resp);
 
-    req.msg_type = SRUN_NET_FORWARD;
-    req.data = &rpc;
+	req.msg_type = SRUN_NET_FORWARD;
+	req.data = &rpc;
 
-    slurm_send_recv_msg(*remote, &req, &resp, 0);
+	slurm_send_recv_msg(*remote, &req, &resp, 0);
 
-    if (resp.msg_type != RESPONSE_SLURM_RC) {
-        error("Unexpected response on setup, forwarding failed.");
-        slurm_free_msg_members(&resp);
-        goto shutdown;
-    }
+	if (resp.msg_type != RESPONSE_SLURM_RC) {
+		error("Unexpected response on setup, forwarding failed.");
+		slurm_free_msg_members(&resp);
+		goto shutdown;
+	}
 
-    if ((rc = slurm_get_return_code(resp.msg_type, resp.data))) {
-        error("Error setting up X11 forwarding from remote: %s", slurm_strerror(rc));
-        slurm_free_msg_members(&resp);
-        goto shutdown;
-    }
+	if ((rc = slurm_get_return_code(resp.msg_type, resp.data))) {
+		error("Error setting up X11 forwarding from remote: %s",
+		      slurm_strerror(rc));
+		slurm_free_msg_members(&resp);
+		goto shutdown;
+	}
 
-    slurm_free_msg_members(&resp);
+	slurm_free_msg_members(&resp);
 
-    /* setup eio to handle both sides of the connection now */
-    e1 = eio_obj_create(*local, &half_duplex_ops, remote);
-    e2 = eio_obj_create(*remote, &half_duplex_ops, local);
-    eio_new_obj(eio_handle, e1);
-    eio_new_obj(eio_handle, e2);
+	/* setup eio to handle both sides of the connection now */
+	e1 = eio_obj_create(*local, &half_duplex_ops, remote);
+	e2 = eio_obj_create(*remote, &half_duplex_ops, local);
+	eio_new_obj(eio_handle, e1);
+	eio_new_obj(eio_handle, e2);
 
-    debug("%s: X11 forwarding setup successful", __func__);
+	debug("%s: X11 forwarding setup successful", __func__);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 
-    shutdown:
-    debug2("%s: error, shutting down", __func__);
-    if (*local != -1)
-        close(*local);
-    xfree(local);
-    xfree(remote);
+shutdown:
+	debug2("%s: error, shutting down", __func__);
+	if (*local != -1)
+		close(*local);
+	xfree(local);
+	xfree(remote);
 
-    return SLURM_ERROR;
+	return SLURM_ERROR;
 }
 
 /*
@@ -170,39 +174,43 @@ static int _x11_socket_read(eio_obj_t *obj, List objs) {
  * IN: uid
  * OUT: an xmalloc'd string, or NULL on error.
  */
-static char *_get_home(uid_t uid) {
-    struct passwd pwd, *pwd_ptr = NULL;
-    char pwd_buf[PW_BUF_SIZE];
+static char *_get_home(uid_t uid)
+{
+	struct passwd pwd, *pwd_ptr = NULL;
+	char pwd_buf[PW_BUF_SIZE];
 
-    if (slurm_getpwuid_r(uid, &pwd, pwd_buf, PW_BUF_SIZE, &pwd_ptr) || (pwd_ptr == NULL)) {
-        error("%s: getpwuid_r(%u):%m", __func__, uid);
-        return NULL;
-    }
+	if (slurm_getpwuid_r(uid, &pwd, pwd_buf, PW_BUF_SIZE, &pwd_ptr)
+	    || (pwd_ptr == NULL)) {
+		error("%s: getpwuid_r(%u):%m", __func__, uid);
+		return NULL;
+	}
 
-    return xstrdup(pwd.pw_dir);
+	return xstrdup(pwd.pw_dir);
 }
 
-static void _shutdown_x11(int signal) {
-    if (signal != SIGTERM)
-        return;
+static void _shutdown_x11(int signal)
+{
+	if (signal != SIGTERM)
+		return;
 
-    debug("x11 forwarding shutdown in progress");
+	debug("x11 forwarding shutdown in progress");
 
-    eio_signal_shutdown(eio_handle);
+	eio_signal_shutdown(eio_handle);
 
-    if (xauthority) {
-        if (local_xauthority) {
-            if (unlink(xauthority))
-                error("%s: problem unlinking xauthority file %s: %m", __func__, xauthority);
-        } else
-            x11_delete_xauth(xauthority, hostname, x11_display);
+	if (xauthority) {
+		if (local_xauthority) {
+			if (unlink(xauthority))
+				error("%s: problem unlinking xauthority file %s: %m",
+				      __func__, xauthority);
+		} else
+			x11_delete_xauth(xauthority, hostname, x11_display);
 
-        xfree(xauthority);
-    }
+		xfree(xauthority);
+	}
 
-    info("x11 forwarding shutdown complete");
+	info("x11 forwarding shutdown complete");
 
-    exit(0);
+	exit(0);
 }
 
 /*
@@ -214,117 +222,126 @@ static void _shutdown_x11(int signal) {
  * OUT: tmp_xauthority - XAUTHORITY file in use
  * OUT: SLURM_SUCCESS or SLURM_ERROR
  */
-extern int setup_x11_forward(stepd_step_rec_t *job, int *display, char **tmp_xauthority) {
-    int listen_socket = -1;
-    uint16_t port;
-    /*
-     * Range of ports we'll accept locally. This corresponds to X11
-     * displays of 20 through 99. Intentionally skipping [10 - 19]
-     * as 'ssh -X' will start at 10 and work up from there.
-     */
-    uint16_t ports[2] = {6020, 6099};
-    int sig_array[2] = {SIGTERM, 0};
-    /*
-     * EIO handles both the local listening socket, as well as the individual
-     * forwarded connections.
-     */
-    eio_obj_t *obj;
-    static struct io_operations x11_socket_ops = {.readable = _x11_socket_readable, .handle_read = _x11_socket_read,};
+extern int setup_x11_forward(stepd_step_rec_t *job, int *display,
+			     char **tmp_xauthority)
+{
+	int listen_socket = -1;
+	uint16_t port;
+	/*
+	 * Range of ports we'll accept locally. This corresponds to X11
+	 * displays of 20 through 99. Intentionally skipping [10 - 19]
+	 * as 'ssh -X' will start at 10 and work up from there.
+	 */
+	uint16_t ports[2] = {6020, 6099};
+	int sig_array[2] = {SIGTERM, 0};
+	/*
+	 * EIO handles both the local listening socket, as well as the individual
+	 * forwarded connections.
+	 */
+	eio_obj_t *obj;
+	static struct io_operations x11_socket_ops = {
+		.readable = _x11_socket_readable,
+		.handle_read = _x11_socket_read,
+	};
 
-    *tmp_xauthority = NULL;
-    job_id = job->jobid;
-    x11_target = xstrdup(job->x11_target);
-    x11_target_port = job->x11_target_port;
+	*tmp_xauthority = NULL;
+	job_id = job->jobid;
+	x11_target = xstrdup(job->x11_target);
+	x11_target_port = job->x11_target_port;
 
-    xsignal(SIGTERM, _shutdown_x11);
-    xsignal_unblock(sig_array);
+	xsignal(SIGTERM, _shutdown_x11);
+	xsignal_unblock(sig_array);
 
-    slurm_set_addr(&alloc_node, job->x11_alloc_port, job->x11_alloc_host);
+	slurm_set_addr(&alloc_node, job->x11_alloc_port, job->x11_alloc_host);
 
-    debug("X11Parameters: %s", conf->x11_params);
+	debug("X11Parameters: %s", conf->x11_params);
 
-    /*
-     * Switch uid/gid to the user using seteuid/setegid.
-     * DO NOT use setuid/setgid as a user could then attach to this
-     * process and try to recover any sensitive data that may be in memory.
-     */
-    if (setegid(job->gid)) {
-        error("%s: setegid failed: %m", __func__);
-        goto shutdown;
-    }
-    if (setgroups(1, &job->gid)) {
-        error("%s: setgroups failed: %m", __func__);
-        goto shutdown;
-    }
-    if (seteuid(job->uid)) {
-        error("%s: seteuid failed: %m", __func__);
-        goto shutdown;
-    }
+	/*
+	 * Switch uid/gid to the user using seteuid/setegid.
+	 * DO NOT use setuid/setgid as a user could then attach to this
+	 * process and try to recover any sensitive data that may be in memory.
+	 */
+	if (setegid(job->gid)) {
+		error("%s: setegid failed: %m", __func__);
+		goto shutdown;
+	}
+	if (setgroups(1, &job->gid)) {
+		error("%s: setgroups failed: %m", __func__);
+		goto shutdown;
+	}
+	if (seteuid(job->uid)) {
+		error("%s: seteuid failed: %m", __func__);
+		goto shutdown;
+	}
 
-    if (xstrcasestr(conf->x11_params, "home_xauthority")) {
-        char *home = NULL;
-        if (!(home = _get_home(job->uid))) {
-            error("could not find HOME in environment");
-            goto shutdown;
-        }
-        xauthority = xstrdup_printf("%s/.Xauthority", home);
-        xfree(home);
-    } else {
-        /* use a node-local XAUTHORITY file instead of ~/.Xauthority */
-        int fd;
-        local_xauthority = true;
-        xauthority = xstrdup_printf("%s/.Xauthority-XXXXXX", conf->tmpfs);
+	if (xstrcasestr(conf->x11_params, "home_xauthority")) {
+		char *home = NULL;
+		if (!(home = _get_home(job->uid))) {
+			error("could not find HOME in environment");
+			goto shutdown;
+		}
+		xauthority = xstrdup_printf("%s/.Xauthority", home);
+		xfree(home);
+	} else {
+		/* use a node-local XAUTHORITY file instead of ~/.Xauthority */
+		int fd;
+		local_xauthority = true;
+		xauthority = xstrdup_printf("%s/.Xauthority-XXXXXX",
+					    conf->tmpfs);
 
-        /* protect against weak file permissions in old glibc */
-        umask(0077);
-        if ((fd = mkstemp(xauthority)) == -1) {
-            error("%s: failed to create temporary XAUTHORITY file: %m", __func__);
-            goto shutdown;
-        }
-        close(fd);
-    }
+		/* protect against weak file permissions in old glibc */
+		umask(0077);
+		if ((fd = mkstemp(xauthority)) == -1) {
+			error("%s: failed to create temporary XAUTHORITY file: %m",
+			      __func__);
+			goto shutdown;
+		}
+		close(fd);
+	}
 
-    /*
-     * Slurm uses the shortened hostname by default (and discards any
-     * domain component), which can cause problems for some sites.
-     * So retrieve the raw value from gethostname() again.
-     */
-    if (gethostname(hostname, sizeof(hostname)))
-        fatal("%s: gethostname failed: %m", __func__);
+	/*
+	 * Slurm uses the shortened hostname by default (and discards any
+	 * domain component), which can cause problems for some sites.
+	 * So retrieve the raw value from gethostname() again.
+	 */
+	if (gethostname(hostname, sizeof(hostname)))
+		fatal("%s: gethostname failed: %m", __func__);
 
-    if (net_stream_listen_ports(&listen_socket, &port, ports, true) == -1) {
-        error("failed to open local socket");
-        goto shutdown;
-    }
+	if (net_stream_listen_ports(&listen_socket, &port, ports, true) == -1) {
+		error("failed to open local socket");
+		goto shutdown;
+	}
 
-    x11_display = port - X11_TCP_PORT_OFFSET;
-    if (x11_set_xauth(xauthority, job->x11_magic_cookie, hostname, x11_display)) {
-        error("%s: failed to run xauth", __func__);
-        goto shutdown;
-    }
+	x11_display = port - X11_TCP_PORT_OFFSET;
+	if (x11_set_xauth(xauthority, job->x11_magic_cookie,
+			  hostname, x11_display)) {
+		error("%s: failed to run xauth", __func__);
+		goto shutdown;
+	}
 
-    info("X11 forwarding established on DISPLAY=%s:%d.0", hostname, x11_display);
+	info("X11 forwarding established on DISPLAY=%s:%d.0",
+	     hostname, x11_display);
 
-    eio_handle = eio_handle_create(0);
-    obj = eio_obj_create(listen_socket, &x11_socket_ops, NULL);
-    eio_new_initial_obj(eio_handle, obj);
-    slurm_thread_create_detached(NULL, _eio_thread, NULL);
+	eio_handle = eio_handle_create(0);
+	obj = eio_obj_create(listen_socket, &x11_socket_ops, NULL);
+	eio_new_initial_obj(eio_handle, obj);
+	slurm_thread_create_detached(NULL, _eio_thread, NULL);
 
-    /*
-     * EIO connection handling thread still running. Return now to signal
-     * that the forwarding code setup has completed successfully, and let
-     * steps needing X11 forwarding service launch.
-     */
-    *display = x11_display;
-    *tmp_xauthority = xstrdup(xauthority);
+	/*
+	 * EIO connection handling thread still running. Return now to signal
+	 * that the forwarding code setup has completed successfully, and let
+	 * steps needing X11 forwarding service launch.
+	 */
+	*display = x11_display;
+	*tmp_xauthority = xstrdup(xauthority);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 
-    shutdown:
-    xfree(x11_target);
-    xfree(xauthority);
-    if (listen_socket != -1)
-        close(listen_socket);
+shutdown:
+	xfree(x11_target);
+	xfree(xauthority);
+	if (listen_socket != -1)
+		close(listen_socket);
 
-    return SLURM_ERROR;
+	return SLURM_ERROR;
 }

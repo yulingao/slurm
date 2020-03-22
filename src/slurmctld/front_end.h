@@ -90,7 +90,8 @@ extern void log_front_end_state(void);
  * NOTE: the caller must xfree the buffer at *buffer_ptr
  * NOTE: READ lock_slurmctld config before entry
  */
-extern void pack_all_front_end(char **buffer_ptr, int *buffer_size, uid_t uid, uint16_t protocol_version);
+extern void pack_all_front_end(char **buffer_ptr, int *buffer_size, uid_t uid,
+			       uint16_t protocol_version);
 
 /*
  * purge_front_end_state - purge all front end node state
@@ -115,7 +116,8 @@ extern void restore_front_end_state(int recover);
  * IN front_end_pt - pointer to the front end node
  * IN reason - why the node is DOWN
  */
-extern void set_front_end_down(front_end_record_t *front_end_ptr, char *reason);
+extern void set_front_end_down (front_end_record_t *front_end_ptr,
+				char *reason);
 
 /*
  * sync_front_end_state - synchronize job pointers and front-end node state

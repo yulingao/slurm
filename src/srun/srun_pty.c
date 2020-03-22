@@ -58,109 +58,114 @@
 #include "srun_pty.h"
 
 /*  Processed by pty_thr() */
-static int pty_sigarray[] = {SIGWINCH, 0};
+static int pty_sigarray[] = { SIGWINCH, 0 };
 static int winch;
 
 /*
  * Static prototypes
  */
-static void _handle_sigwinch(int sig);
-
-static void *_pty_thread(void *arg);
+static void   _handle_sigwinch(int sig);
+static void * _pty_thread(void *arg);
 
 /* Set pty window size in job structure
  * RET 0 on success, -1 on error */
-int set_winsize(srun_job_t *job) {
-    struct winsize ws;
+int set_winsize(srun_job_t *job)
+{
+	struct winsize ws;
 
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
-        error("ioctl(TIOCGWINSZ): %m");
-        return -1;
-    }
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws)) {
+		error("ioctl(TIOCGWINSZ): %m");
+		return -1;
+	}
 
-    job->ws_row = ws.ws_row;
-    job->ws_col = ws.ws_col;
-    debug2("winsize %u:%u", job->ws_row, job->ws_col);
-    return 0;
+	job->ws_row = ws.ws_row;
+	job->ws_col = ws.ws_col;
+	debug2("winsize %u:%u", job->ws_row, job->ws_col);
+	return 0;
 }
 
 /* SIGWINCH should already be blocked by srun/libsrun/srun_job.c */
-void block_sigwinch(void) {
-    xsignal_block(pty_sigarray);
+void block_sigwinch(void)
+{
+	xsignal_block(pty_sigarray);
 }
 
-void pty_thread_create(srun_job_t *job) {
-    slurm_addr_t pty_addr;
-    uint16_t *ports;
+void pty_thread_create(srun_job_t *job)
+{
+	slurm_addr_t pty_addr;
+	uint16_t *ports;
 
-    if ((ports = slurm_get_srun_port_range()))
-        job->pty_fd = slurm_init_msg_engine_ports(ports);
-    else
-        job->pty_fd = slurm_init_msg_engine_port(0);
+	if ((ports = slurm_get_srun_port_range()))
+		job->pty_fd = slurm_init_msg_engine_ports(ports);
+	else
+		job->pty_fd = slurm_init_msg_engine_port(0);
 
-    if (job->pty_fd < 0) {
-        error("init_msg_engine_port: %m");
-        return;
-    }
-    if (slurm_get_stream_addr(job->pty_fd, &pty_addr) < 0) {
-        error("slurm_get_stream_addr: %m");
-        return;
-    }
-    job->pty_port = ntohs(((struct sockaddr_in) pty_addr).sin_port);
-    debug2("initialized job control port %hu", job->pty_port);
+	if (job->pty_fd < 0) {
+		error("init_msg_engine_port: %m");
+		return;
+	}
+	if (slurm_get_stream_addr(job->pty_fd, &pty_addr) < 0) {
+		error("slurm_get_stream_addr: %m");
+		return;
+	}
+	job->pty_port = ntohs(((struct sockaddr_in) pty_addr).sin_port);
+	debug2("initialized job control port %hu", job->pty_port);
 
-    slurm_thread_create_detached(NULL, _pty_thread, job);
+	slurm_thread_create_detached(NULL, _pty_thread, job);
 }
 
-static void _handle_sigwinch(int sig) {
-    winch = 1;
-    xsignal(SIGWINCH, _handle_sigwinch);
+static void  _handle_sigwinch(int sig)
+{
+	winch = 1;
+	xsignal(SIGWINCH, _handle_sigwinch);
 }
 
-static void _notify_winsize_change(int fd, srun_job_t *job) {
-    pty_winsz_t winsz;
-    int len;
-    char buf[4];
+static void _notify_winsize_change(int fd, srun_job_t *job)
+{
+	pty_winsz_t winsz;
+	int len;
+	char buf[4];
 
-    if (fd < 0) {
-        error("pty: no file to write window size changes to");
-        return;
-    }
+	if (fd < 0) {
+		error("pty: no file to write window size changes to");
+		return;
+	}
 
-    winsz.cols = htons(job->ws_col);
-    winsz.rows = htons(job->ws_row);
-    memcpy(buf, &winsz.cols, 2);
-    memcpy(buf + 2, &winsz.rows, 2);
-    len = slurm_write_stream(fd, buf, 4);
-    if (len < sizeof(winsz))
-        error("pty: window size change notification error: %m");
+	winsz.cols = htons(job->ws_col);
+	winsz.rows = htons(job->ws_row);
+	memcpy(buf, &winsz.cols, 2);
+	memcpy(buf+2, &winsz.rows, 2);
+	len = slurm_write_stream(fd, buf, 4);
+	if (len < sizeof(winsz))
+		error("pty: window size change notification error: %m");
 }
 
-static void *_pty_thread(void *arg) {
-    int fd = -1;
-    srun_job_t *job = (srun_job_t *) arg;
-    slurm_addr_t client_addr;
+static void *_pty_thread(void *arg)
+{
+	int fd = -1;
+	srun_job_t *job = (srun_job_t *) arg;
+	slurm_addr_t client_addr;
 
-    xsignal_unblock(pty_sigarray);
-    xsignal(SIGWINCH, _handle_sigwinch);
+	xsignal_unblock(pty_sigarray);
+	xsignal(SIGWINCH, _handle_sigwinch);
 
-    if ((fd = slurm_accept_msg_conn(job->pty_fd, &client_addr)) < 0) {
-        error("pty: accept failure: %m");
-        return NULL;
-    }
+	if ((fd = slurm_accept_msg_conn(job->pty_fd, &client_addr)) < 0) {
+		error("pty: accept failure: %m");
+		return NULL;
+	}
 
-    while (job->state <= SRUN_JOB_RUNNING) {
-        debug2("waiting for SIGWINCH");
-        if ((poll(NULL, 0, -1) < 1) && (errno != EINTR)) {
-            debug("%s: poll error %m", __func__);
-            continue;
-        }
-        if (winch) {
-            set_winsize(job);
-            _notify_winsize_change(fd, job);
-        }
-        winch = 0;
-    }
-    close(fd);
-    return NULL;
+	while (job->state <= SRUN_JOB_RUNNING) {
+		debug2("waiting for SIGWINCH");
+		if ((poll(NULL, 0, -1) < 1) && (errno != EINTR)) {
+			debug("%s: poll error %m", __func__);
+			continue;
+		}
+		if (winch) {
+			set_winsize(job);
+			_notify_winsize_change(fd, job);
+		}
+		winch = 0;
+	}
+	close(fd);
+	return NULL;
 }

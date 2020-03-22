@@ -44,7 +44,8 @@
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
+extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid,
+			      uint32_t protocol_version);
 
 /*
  * Remove a job's failed or failing node from its allocation
@@ -53,7 +54,8 @@ extern char *drain_nodes_user(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_ve
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *drop_node(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
+extern char *drop_node(char *cmd_ptr, uid_t cmd_uid,
+		       uint32_t protocol_version);
 
 /*
  * Identify a job's failed and failing nodes
@@ -62,13 +64,13 @@ extern char *drop_node(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
+extern char *fail_nodes(char *cmd_ptr, uid_t cmd_uid,
+			uint32_t protocol_version);
 
 extern void job_begin_callback(struct job_record *job_ptr);
-
 extern void job_fini_callback(struct job_record *job_ptr);
-
-extern void node_fail_callback(struct job_record *job_ptr, struct node_record *node_ptr);
+extern void node_fail_callback(struct job_record *job_ptr,
+			       struct node_record *node_ptr);
 
 /*
  * Register a callback port for job events, set port to zero to clear
@@ -78,7 +80,9 @@ extern void node_fail_callback(struct job_record *job_ptr, struct node_record *n
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *register_callback(char *cmd_ptr, uid_t cmd_uid, slurm_addr_t cli_addr, uint32_t protocol_version);
+extern char *register_callback(char *cmd_ptr, uid_t cmd_uid,
+			       slurm_addr_t cli_addr,
+			       uint32_t protocol_version);
 
 /*
  * Replace a job's failed or failing node
@@ -87,7 +91,8 @@ extern char *register_callback(char *cmd_ptr, uid_t cmd_uid, slurm_addr_t cli_ad
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *replace_node(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
+extern char *replace_node(char *cmd_ptr, uid_t cmd_uid,
+			  uint32_t protocol_version);
 
 /*
  * Restore all nonstop plugin state information
@@ -106,7 +111,8 @@ extern int save_nonstop_state(void);
  * protocol_version IN - Communication protocol version number
  * RET - Response string, must be freed by the user
  */
-extern char *show_config(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
+extern char *show_config(char *cmd_ptr, uid_t cmd_uid,
+			 uint32_t protocol_version);
 
 /*
  * Report nonstop plugin state information for a particular job
@@ -132,4 +138,4 @@ extern void term_state_thread(void);
  */
 extern char *time_incr(char *cmd_ptr, uid_t cmd_uid, uint32_t protocol_version);
 
-#endif    /* _HAVE_NONSTOP_DO_WORK_H */
+#endif	/* _HAVE_NONSTOP_DO_WORK_H */

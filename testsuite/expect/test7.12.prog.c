@@ -30,47 +30,49 @@
 #include <slurm/slurm.h>
 #include <slurm/slurm_errno.h>
 
-int main(int argc, char **argv) {
-    int i, rc = 0;
-    uint32_t job_id = 0, step_id = 0;
-    job_step_stat_response_msg_t *resp = NULL;
-    job_step_stat_t *step_stat = NULL;
-    ListIterator itr;
-    job_info_msg_t *job_info_msg;
-    slurm_job_info_t *job_ptr;
+int main(int argc, char **argv)
+{
+	int i, rc = 0;
+	uint32_t job_id = 0, step_id = 0;
+	job_step_stat_response_msg_t *resp = NULL;
+	job_step_stat_t *step_stat = NULL;
+	ListIterator itr;
+	job_info_msg_t *job_info_msg;
+	slurm_job_info_t *job_ptr;
 
-    if (argc < 3) {
-        printf("Usage: job_id step_id\n");
-        exit(1);
-    }
-    job_id = atoi(argv[1]);
-    step_id = atoi(argv[2]);
-    printf("job_id:%u step_id:%u\n", job_id, step_id);
+	if (argc < 3) {
+		printf("Usage: job_id step_id\n");
+		exit(1);
+	}
+	job_id = atoi(argv[1]);
+	step_id = atoi(argv[2]);
+	printf("job_id:%u step_id:%u\n", job_id, step_id);
 
-    rc = slurm_job_step_stat(job_id, step_id, NULL, NO_VAL16, &resp);
-    if (rc != SLURM_SUCCESS) {
-        slurm_perror("slurm_job_step_stat");
-        exit(1);
-    }
+	rc = slurm_job_step_stat(job_id, step_id, NULL, NO_VAL16, &resp);
+	if (rc != SLURM_SUCCESS) {
+		slurm_perror("slurm_job_step_stat");
+		exit(1);
+	}
 
-    itr = slurm_list_iterator_create(resp->stats_list);
-    while ((step_stat = slurm_list_next(itr))) {
-        for (i = 0; i < step_stat->step_pids->pid_cnt; i++)
-            printf("pid:%u\n", step_stat->step_pids->pid[i]);
-    }
-    slurm_list_iterator_destroy(itr);
-    slurm_job_step_pids_response_msg_free(resp);
+	itr = slurm_list_iterator_create(resp->stats_list);
+	while ((step_stat = slurm_list_next(itr))) {
+		for (i = 0; i < step_stat->step_pids->pid_cnt; i++)
+			printf("pid:%u\n", step_stat->step_pids->pid[i]);
+	}
+	slurm_list_iterator_destroy(itr);
+	slurm_job_step_pids_response_msg_free(resp);
 
-    rc = slurm_load_job(&job_info_msg, job_id, SHOW_ALL);
-    if (rc != SLURM_SUCCESS) {
-        slurm_perror("slurm_load_job");
-        exit(1);
-    }
-    for (i = 0; i < job_info_msg->record_count; i++) {
-        job_ptr = job_info_msg->job_array + i;
-        printf("job_id:%u name:%s user_id:%u\n", job_ptr->job_id, job_ptr->name, job_ptr->user_id);
-    }
-    slurm_free_job_info_msg(job_info_msg);
+	rc = slurm_load_job(&job_info_msg, job_id, SHOW_ALL);
+	if (rc != SLURM_SUCCESS) {
+		slurm_perror("slurm_load_job");
+		exit(1);
+	}
+	for (i = 0; i < job_info_msg->record_count; i++) {
+		job_ptr = job_info_msg->job_array + i;
+		printf("job_id:%u name:%s user_id:%u\n",
+		       job_ptr->job_id, job_ptr->name, job_ptr->user_id);
+	}
+	slurm_free_job_info_msg(job_info_msg);
 
-    exit(0);
+	exit(0);
 }

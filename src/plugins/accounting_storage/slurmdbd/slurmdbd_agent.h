@@ -44,7 +44,8 @@
  * callbacks IN - make agent to process RPCs and contains callback pointers
  * persist_conn_flags OUT - fill in from response of slurmdbd
  * Returns SLURM_SUCCESS or an error code */
-extern int open_slurmdbd_conn(const slurm_trigger_callbacks_t *callbacks, uint16_t *persist_conn_flags);
+extern int open_slurmdbd_conn(const slurm_trigger_callbacks_t *callbacks,
+			      uint16_t *persist_conn_flags);
 
 /* Close the SlurmDBD socket connection */
 extern int close_slurmdbd_conn(void);
@@ -60,12 +61,16 @@ extern int send_slurmdbd_msg(uint16_t rpc_version, slurmdbd_msg_t *req);
  * The RPC will not be queued if an error occurs.
  * The "resp" message must be freed by the caller.
  * Returns SLURM_SUCCESS or an error code */
-extern int send_recv_slurmdbd_msg(uint16_t rpc_version, slurmdbd_msg_t *req, slurmdbd_msg_t *resp);
+extern int send_recv_slurmdbd_msg(uint16_t rpc_version,
+					slurmdbd_msg_t *req,
+					slurmdbd_msg_t *resp);
 
 /* Send an RPC to the SlurmDBD and wait for the return code reply.
  * The RPC will not be queued if an error occurs.
  * Returns SLURM_SUCCESS or an error code */
-extern int send_slurmdbd_recv_rc_msg(uint16_t rpc_version, slurmdbd_msg_t *req, int *rc);
+extern int send_slurmdbd_recv_rc_msg(uint16_t rpc_version,
+				     slurmdbd_msg_t *req,
+				     int *rc);
 
 /* Return true if connection to slurmdbd is active, false otherwise. */
 extern bool slurmdbd_conn_active(void);

@@ -80,69 +80,69 @@
 /* On output, use fields 12-37 from JOB_STEP */
 
 typedef enum {
-    PRINT_ACT_CPUFREQ,
-    PRINT_AVECPU,
-    PRINT_AVEDISKREAD,
-    PRINT_AVEDISKWRITE,
-    PRINT_AVEPAGES,
-    PRINT_AVERSS,
-    PRINT_AVEVSIZE,
-    PRINT_CONSUMED_ENERGY,
-    PRINT_CONSUMED_ENERGY_RAW,
-    PRINT_JOBID,
-    PRINT_MAXDISKREAD,
-    PRINT_MAXDISKREADNODE,
-    PRINT_MAXDISKREADTASK,
-    PRINT_MAXDISKWRITE,
-    PRINT_MAXDISKWRITENODE,
-    PRINT_MAXDISKWRITETASK,
-    PRINT_MAXPAGES,
-    PRINT_MAXPAGESNODE,
-    PRINT_MAXPAGESTASK,
-    PRINT_MAXRSS,
-    PRINT_MAXRSSNODE,
-    PRINT_MAXRSSTASK,
-    PRINT_MAXVSIZE,
-    PRINT_MAXVSIZENODE,
-    PRINT_MAXVSIZETASK,
-    PRINT_MINCPU,
-    PRINT_MINCPUNODE,
-    PRINT_MINCPUTASK,
-    PRINT_NODELIST,
-    PRINT_NTASKS,
-    PRINT_PIDS,
-    PRINT_REQ_CPUFREQ_MIN,
-    PRINT_REQ_CPUFREQ_MAX,
-    PRINT_REQ_CPUFREQ_GOV,
-    PRINT_TRESUIA,
-    PRINT_TRESUIM,
-    PRINT_TRESUIMN,
-    PRINT_TRESUIMT,
-    PRINT_TRESUIMI,
-    PRINT_TRESUIMIN,
-    PRINT_TRESUIMIT,
-    PRINT_TRESUIT,
-    PRINT_TRESUOA,
-    PRINT_TRESUOM,
-    PRINT_TRESUOMN,
-    PRINT_TRESUOMT,
-    PRINT_TRESUOMI,
-    PRINT_TRESUOMIN,
-    PRINT_TRESUOMIT,
-    PRINT_TRESUOT,
+		PRINT_ACT_CPUFREQ,
+		PRINT_AVECPU,
+		PRINT_AVEDISKREAD,
+		PRINT_AVEDISKWRITE,
+		PRINT_AVEPAGES,
+		PRINT_AVERSS,
+		PRINT_AVEVSIZE,
+		PRINT_CONSUMED_ENERGY,
+		PRINT_CONSUMED_ENERGY_RAW,
+		PRINT_JOBID,
+		PRINT_MAXDISKREAD,
+		PRINT_MAXDISKREADNODE,
+		PRINT_MAXDISKREADTASK,
+		PRINT_MAXDISKWRITE,
+		PRINT_MAXDISKWRITENODE,
+		PRINT_MAXDISKWRITETASK,
+		PRINT_MAXPAGES,
+		PRINT_MAXPAGESNODE,
+		PRINT_MAXPAGESTASK,
+		PRINT_MAXRSS,
+		PRINT_MAXRSSNODE,
+		PRINT_MAXRSSTASK,
+		PRINT_MAXVSIZE,
+		PRINT_MAXVSIZENODE,
+		PRINT_MAXVSIZETASK,
+		PRINT_MINCPU,
+		PRINT_MINCPUNODE,
+		PRINT_MINCPUTASK,
+		PRINT_NODELIST,
+		PRINT_NTASKS,
+		PRINT_PIDS,
+		PRINT_REQ_CPUFREQ_MIN,
+		PRINT_REQ_CPUFREQ_MAX,
+		PRINT_REQ_CPUFREQ_GOV,
+		PRINT_TRESUIA,
+		PRINT_TRESUIM,
+		PRINT_TRESUIMN,
+		PRINT_TRESUIMT,
+		PRINT_TRESUIMI,
+		PRINT_TRESUIMIN,
+		PRINT_TRESUIMIT,
+		PRINT_TRESUIT,
+		PRINT_TRESUOA,
+		PRINT_TRESUOM,
+		PRINT_TRESUOMN,
+		PRINT_TRESUOMT,
+		PRINT_TRESUOMI,
+		PRINT_TRESUOMIN,
+		PRINT_TRESUOMIT,
+		PRINT_TRESUOT,
 } sstat_print_types_t;
 
 
 typedef struct {
-    int opt_all_steps;    /* --allsteps */
-    char *opt_field_list;    /* --fields= */
-    int opt_help;        /* --help */
-    List opt_job_list;    /* --jobs */
-    int opt_noheader;    /* can only be cleared */
-    int opt_verbose;    /* --verbose */
-    bool pid_format;
-    uint32_t convert_flags;
-    int units;        /* --units*/
+	int opt_all_steps;	/* --allsteps */
+	char *opt_field_list;	/* --fields= */
+	int opt_help;		/* --help */
+	List opt_job_list;	/* --jobs */
+	int opt_noheader;	/* can only be cleared */
+	int opt_verbose;	/* --verbose */
+	bool pid_format;
+	uint32_t convert_flags;
+	int units;		/* --units*/
 } sstat_parameters_t;
 
 extern List print_fields_list;
@@ -153,8 +153,8 @@ extern int field_count;
 
 extern List jobs;
 
-extern int printfields[MAX_PRINTFIELDS],    /* Indexed into fields[] */
-        nprintfields;
+extern int printfields[MAX_PRINTFIELDS],	/* Indexed into fields[] */
+	nprintfields;
 
 /* process.c */
 void aggregate_stats(slurmdb_stats_t *dest, slurmdb_stats_t *from);

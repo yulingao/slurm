@@ -45,105 +45,123 @@ static int xfailed;
 
 static char buffer[512];
 
-void wait(void) {
+void
+wait (void)
+{
 #ifdef _DEJAGNU_WAIT_
-    fd_set rfds;
-    struct timeval tv;
+  fd_set rfds;
+  struct timeval tv;
 
-    FD_ZERO (&rfds);
-    tv.tv_sec = 0;
-    tv.tv_usec = 1;
+  FD_ZERO (&rfds);
+  tv.tv_sec = 0;
+  tv.tv_usec = 1;
 
-    select (0, &rfds, NULL, NULL, &tv);
+  select (0, &rfds, NULL, NULL, &tv);
 #endif
 }
 
-static inline void pass(const char *fmt, ...) {
-    va_list ap;
+static inline void
+pass (const char* fmt, ...)
+{
+  va_list ap;
 
-    passed++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tPASSED: %s\n", buffer);
-    wait();
+  passed++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tPASSED: %s\n", buffer);
+  wait ();
 }
 
-static inline void xpass(const char *fmt, ...) {
-    va_list ap;
+static inline void
+xpass (const char* fmt, ...)
+{
+  va_list ap;
 
-    passed++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tXPASSED: %s\n", buffer);
-    wait();
+  passed++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tXPASSED: %s\n", buffer);
+  wait ();
 }
 
-static inline void fail(const char *fmt, ...) {
-    va_list ap;
+static inline void
+fail (const char* fmt, ...)
+{
+  va_list ap;
 
-    failed++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tFAILED: %s\n", buffer);
-    wait();
+  failed++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tFAILED: %s\n", buffer);
+  wait ();
 }
 
-static inline void xfail(const char *fmt, ...) {
-    va_list ap;
+static inline void
+xfail (const char* fmt, ...)
+{
+  va_list ap;
 
-    failed++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tXFAILED: %s\n", buffer);
-    wait();
+  failed++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tXFAILED: %s\n", buffer);
+  wait ();
 }
 
-static inline void untested(const char *fmt, ...) {
-    va_list ap;
+static inline void
+untested (const char* fmt, ...)
+{
+  va_list ap;
 
-    untest++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tUNTESTED: %s\n", buffer);
-    wait();
+  untest++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tUNTESTED: %s\n", buffer);
+  wait ();
 }
 
-static inline void unresolved(const char *fmt, ...) {
-    va_list ap;
+static inline void
+unresolved (const char* fmt, ...)
+{
+  va_list ap;
 
-    unresolve++;
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tUNRESOLVED: %s\n", buffer);
-    wait();
+  unresolve++;
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tUNRESOLVED: %s\n", buffer);
+  wait ();
 }
 
-static inline void note(const char *fmt, ...) {
-    va_list ap;
+static inline void
+note (const char* fmt, ...)
+{
+  va_list ap;
 
-    va_start (ap, fmt);
-    vsnprintf (buffer, sizeof(buffer), fmt, ap);
-    va_end (ap);
-    printf("\tNOTE: %s\n", buffer);
-    wait();
+  va_start (ap, fmt);
+  vsnprintf (buffer, sizeof (buffer), fmt, ap);
+  va_end (ap);
+  printf ("\tNOTE: %s\n", buffer);
+  wait ();
 }
 
-static inline void totals(void) {
-    printf("\nTotals:\n");
-    printf("\t#passed:\t\t%d\n", passed);
-    printf("\t#real failed:\t\t%d\n", failed);
-    if (xfailed)
-        printf("\t#expected failures:\t\t%d\n", xfailed);
-    if (untest)
-        printf("\t#untested:\t\t%d\n", untest);
-    if (unresolve)
-        printf("\t#unresolved:\t\t%d\n", unresolve);
+static inline void
+totals (void)
+{
+  printf ("\nTotals:\n");
+  printf ("\t#passed:\t\t%d\n", passed);
+  printf ("\t#real failed:\t\t%d\n", failed);
+  if (xfailed)
+    printf ("\t#expected failures:\t\t%d\n", xfailed);
+  if (untest)
+    printf ("\t#untested:\t\t%d\n", untest);
+  if (unresolve)
+    printf ("\t#unresolved:\t\t%d\n", unresolve);
 }
 
 #ifdef __cplusplus
@@ -181,113 +199,113 @@ class TestState {
   void testrun (bool b, std::string s)
     {
       if (b)
-    pass (s);
+	pass (s);
       else
-    fail (s);
+	fail (s);
     }
 
     void pass (std::string s)
       {
-    passed++;
-    laststate = PASSED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[PASSED] << s << std::endl;
+	passed++;
+	laststate = PASSED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[PASSED] << s << std::endl;
       }
 
     void pass (const char *c)
       {
-    std::string s = c;
-    pass (s);
+	std::string s = c;
+	pass (s);
       }
 
     void xpass (std::string s)
       {
-    xpassed++;
-    laststate = PASSED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[XPASSED] << s << std::endl;
+	xpassed++;
+	laststate = PASSED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[XPASSED] << s << std::endl;
       }
 
     void xpass (const char *c)
       {
-    std::string s = c;
-    xpass (s);
+	std::string s = c;
+	xpass (s);
       }
 
     void fail (std::string s)
       {
-    failed++;
-    laststate = FAILED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[FAILED] << s << std::endl;
+	failed++;
+	laststate = FAILED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[FAILED] << s << std::endl;
       }
 
     void fail (const char *c)
       {
-    std::string s = c;
-    fail (s);
+	std::string s = c;
+	fail (s);
       }
 
     void xfail (std::string s)
       {
-    xfailed++;
-    laststate = XFAILED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[XFAILED] << s << std::endl;
+	xfailed++;
+	laststate = XFAILED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[XFAILED] << s << std::endl;
       }
 
     void xfail (const char *c)
       {
-    std::string s = c;
-    xfail (s);
+	std::string s = c;
+	xfail (s);
       }
 
     void untested (std::string s)
       {
-    untest++;
-    laststate = UNTESTED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[UNTESTED] << s << std::endl;
+	untest++;
+	laststate = UNTESTED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[UNTESTED] << s << std::endl;
       }
 
     void untested (const char *c)
       {
-    std::string s = c;
-    untested (s);
+	std::string s = c;
+	untested (s);
       }
 
     void unresolved (std::string s)
       {
-    unresolve++;
-    laststate = UNRESOLVED;
-    lastmsg = s;
-    std::cout << "\t" << outstate[UNRESOLVED] << s << std::endl;
+	unresolve++;
+	laststate = UNRESOLVED;
+	lastmsg = s;
+	std::cout << "\t" << outstate[UNRESOLVED] << s << std::endl;
       }
 
     void unresolved (const char *c)
       {
-    std::string s = c;
-    unresolved (s);
+	std::string s = c;
+	unresolved (s);
       }
 
     void totals (void)
       {
-    std::cout << "\t#passed:\t\t" << passed << std::endl;
-    std::cout << "\t#real failed:\t\t" << failed << std::endl;
-    if (xfailed)
-      std::cout << "\t#expected failures:\t\t" << xfailed << std::endl;
-    if (xpassed)
-      std::cout << "\t#unexpected passes:\t\t" << xpassed << std::endl;
-    if (untest)
-      std::cout << "\t#untested:\t\t" << untest << std::endl;
-    if (unresolve)
-      std::cout << "\t#unresolved:\t\t" << unresolve << std::endl;
+	std::cout << "\t#passed:\t\t" << passed << std::endl;
+	std::cout << "\t#real failed:\t\t" << failed << std::endl;
+	if (xfailed)
+	  std::cout << "\t#expected failures:\t\t" << xfailed << std::endl;
+	if (xpassed)
+	  std::cout << "\t#unexpected passes:\t\t" << xpassed << std::endl;
+	if (untest)
+	  std::cout << "\t#untested:\t\t" << untest << std::endl;
+	if (unresolve)
+	  std::cout << "\t#unresolved:\t\t" << unresolve << std::endl;
       }
 
     // This is so this class can be printed in an ostream.
     friend std::ostream & operator << (std::ostream &os, TestState& t)
       {
-    return os << "\t" << outstate[t.laststate] << t.lastmsg ;
+	return os << "\t" << outstate[t.laststate] << t.lastmsg ;
       }
 
     int GetState (void) { return laststate; }

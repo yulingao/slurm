@@ -73,64 +73,68 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Job submit defaults plugin";
-const char plugin_type[] = "job_submit/defaults";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Job submit defaults plugin";
+const char plugin_type[]       	= "job_submit/defaults";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*****************************************************************************\
  * We've provided a simple example of the type of things you can do with this
  * plugin. If you develop another plugin that may be of interest to others
  * please post it to slurm-dev@schedmd.com  Thanks!
 \*****************************************************************************/
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
+		      char **err_msg)
+{
 #if 0
-    uint16_t acctg_freq = 0;
-    if (job_desc->acctg_freq)
-        acctg_freq = atoi(job_desc->acctg_freq);
-    /* This example code will prevent users from setting an accounting
-     * frequency of less than 30 seconds in order to ensure more precise
-     *  accounting. Also remove any QOS value set by the user in order
-     * to use the default value from the database. */
-    if (acctg_freq < MIN_ACCTG_FREQUENCY) {
-        info("Changing accounting frequency of submitted job "
-             "from %u to %u",
-             acctg_freq, MIN_ACCTG_FREQUENCY);
-        job_desc->acctg_freq = xstrdup_printf(
-            "%d", MIN_ACCTG_FREQUENCY);
-        if (err_msg)
-            *err_msg = xstrdup("Changed job frequency");
-    }
+	uint16_t acctg_freq = 0;
+	if (job_desc->acctg_freq)
+		acctg_freq = atoi(job_desc->acctg_freq);
+	/* This example code will prevent users from setting an accounting
+	 * frequency of less than 30 seconds in order to ensure more precise
+	 *  accounting. Also remove any QOS value set by the user in order
+	 * to use the default value from the database. */
+	if (acctg_freq < MIN_ACCTG_FREQUENCY) {
+		info("Changing accounting frequency of submitted job "
+		     "from %u to %u",
+		     acctg_freq, MIN_ACCTG_FREQUENCY);
+		job_desc->acctg_freq = xstrdup_printf(
+			"%d", MIN_ACCTG_FREQUENCY);
+		if (err_msg)
+			*err_msg = xstrdup("Changed job frequency");
+	}
 
-    if (job_desc->qos) {
-        info("Clearing QOS (%s) from submitted job", job_desc->qos);
-        xfree(job_desc->qos);
-    }
+	if (job_desc->qos) {
+		info("Clearing QOS (%s) from submitted job", job_desc->qos);
+		xfree(job_desc->qos);
+	}
 #endif
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
+extern int job_modify(struct job_descriptor *job_desc,
+		      struct job_record *job_ptr, uint32_t submit_uid)
+{
 #if 0
-    uint16_t acctg_freq = 0;
-    if (job_desc->acctg_freq)
-        acctg_freq = atoi(job_desc->acctg_freq);
-    /* This example code will prevent users from setting an accounting
-     * frequency of less than 30 seconds in order to ensure more precise
-     *  accounting. Also remove any QOS value set by the user in order
-     * to use the default value from the database. */
-    if (acctg_freq < MIN_ACCTG_FREQUENCY) {
-        info("Changing accounting frequency of modify job %u "
-             "from %u to %u", job_ptr->job_id,
-             job_desc->acctg_freq, MIN_ACCTG_FREQUENCY);
-        job_desc->acctg_freq = xstrdup_printf(
-            "%d", MIN_ACCTG_FREQUENCY);
-    }
+	uint16_t acctg_freq = 0;
+	if (job_desc->acctg_freq)
+		acctg_freq = atoi(job_desc->acctg_freq);
+	/* This example code will prevent users from setting an accounting
+	 * frequency of less than 30 seconds in order to ensure more precise
+	 *  accounting. Also remove any QOS value set by the user in order
+	 * to use the default value from the database. */
+	if (acctg_freq < MIN_ACCTG_FREQUENCY) {
+		info("Changing accounting frequency of modify job %u "
+		     "from %u to %u", job_ptr->job_id,
+		     job_desc->acctg_freq, MIN_ACCTG_FREQUENCY);
+		job_desc->acctg_freq = xstrdup_printf(
+			"%d", MIN_ACCTG_FREQUENCY);
+	}
 
-    if (job_desc->qos) {
-        info("Clearing QOS (%s) from modify of job %u",
-             job_desc->qos, job_ptr->job_id);
-        xfree(job_desc->qos);
-    }
+	if (job_desc->qos) {
+		info("Clearing QOS (%s) from modify of job %u",
+		     job_desc->qos, job_ptr->job_id);
+		xfree(job_desc->qos);
+	}
 #endif
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }

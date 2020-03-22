@@ -62,6 +62,7 @@ extern int cli_filter_plugin_fini(void);
  **************************************************************************
  */
 
+
 /*
  * Execute the setup_defaults() function in each cli filter plugin.
  * setup_defaults() is executed before the CLI performs option processing
@@ -95,11 +96,6 @@ extern int cli_filter_plugin_setup_defaults(slurm_opt_t *opt, bool early);
 extern int cli_filter_plugin_pre_submit(slurm_opt_t *opt, int offset);
 
 /*
-在每个cli过滤器插件中执行post_submit()函数。post_submit()在CLI收到带有jobid的控制器的响应后执行。这主要用于日志记录。在这个阶段，插件不应该试图读取或修改任何参数，因为字符串接口可能不稳定。相反，这主要用于使用从pre_submit()钩子收集的数据进行日志记录。
-IN offset	- hetjob偏移量(第一个包为0，第二个包为1，依此类推)
-IN jobid	- 从控制器返回的作业标识符
-IN stepid	- 步骤标识符(如果没有设置NOVAL)
-
  * Execute the post_submit() function in each cli filter plugin.
  * post_submit() is executed after the CLI receives a response from the
  * controller with the jobid. This is primarily for logging. The plugin
@@ -111,6 +107,7 @@ IN stepid	- 步骤标识符(如果没有设置NOVAL)
  * IN jobid	- job identifier back from the controller.
  * IN stepid	- step identifier (NOVAL if not set)
  */
-extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid, uint32_t stepid);
+extern void cli_filter_plugin_post_submit(int offset, uint32_t jobid,
+					  uint32_t stepid);
 
 #endif /* !_CLI_FILTER_H */

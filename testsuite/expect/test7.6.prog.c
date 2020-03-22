@@ -30,29 +30,34 @@
 
 #define COMM_TAG 1000
 
-static void pass_its_neighbor(const int rank, const int size, const int *buf) {
-    MPI_Request request[2];
-    MPI_Status status[2];
+static void pass_its_neighbor(const int rank, const int size, const int* buf)
+{
+	MPI_Request request[2];
+	MPI_Status status[2];
 
-    MPI_Irecv((void *) buf, 1, MPI_INT, ((rank + size - 1) % size), COMM_TAG, MPI_COMM_WORLD, &request[0]);
-    MPI_Isend((void *) &rank, 1, MPI_INT, ((rank + 1) % size), COMM_TAG, MPI_COMM_WORLD, &request[1]);
-    MPI_Waitall(2, request, status);
+	MPI_Irecv((void *)buf, 1, MPI_INT, ((rank+size-1)%size), COMM_TAG,
+		MPI_COMM_WORLD, &request[0]);
+	MPI_Isend((void *)&rank, 1, MPI_INT, ((rank+1)%size), COMM_TAG,
+		MPI_COMM_WORLD, &request[1]);
+	MPI_Waitall(2, request, status);
 
-    fprintf(stdout, "Rank[%d] I just received msg from Rank %d\n", rank, *buf);
+	fprintf(stdout, "Rank[%d] I just received msg from Rank %d\n",
+		rank, *buf);
 }
 
-int main(int argc, char *argv[]) {
-    int size, rank, buf;
+int main(int argc, char * argv[])
+{
+	int size, rank,buf;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    sleep(6);
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	sleep(6);
 
-    buf = rank;    /* we only pass rank */
+	buf = rank;	/* we only pass rank */
 
-    pass_its_neighbor(rank, size, &buf);
+	pass_its_neighbor(rank, size, &buf);
 
-    MPI_Finalize();
-    return 0;
+	MPI_Finalize();
+	return 0;
 }

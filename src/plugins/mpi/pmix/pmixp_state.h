@@ -52,11 +52,11 @@
 typedef struct {
 #ifndef NDEBUG
 #define PMIXP_STATE_MAGIC 0xFEEDCAFE
-    int magic;
+	int magic;
 #endif
-    List coll;
-    eio_handle_t *srv_handle;
-    pthread_mutex_t lock;
+	List coll;
+	eio_handle_t *srv_handle;
+	pthread_mutex_t lock;
 } pmixp_state_t;
 
 extern pmixp_state_t _pmixp_state;
@@ -66,20 +66,23 @@ extern pmixp_state_t _pmixp_state;
  */
 
 int pmixp_state_init(void);
-
 void pmixp_state_finalize(void);
 
-static inline void pmixp_state_sanity_check(void) {
-    xassert(_pmixp_state.magic == PMIXP_STATE_MAGIC);
+static inline void pmixp_state_sanity_check(void)
+{
+	xassert(_pmixp_state.magic == PMIXP_STATE_MAGIC);
 }
 
 /*
  * Collective state
  */
 
-pmixp_coll_t *pmixp_state_coll_get(pmixp_coll_type_t type, const pmixp_proc_t *ranges, size_t nranges);
-
-pmixp_coll_t *pmixp_state_coll_new(pmixp_coll_type_t type, const pmixp_proc_t *ranges, size_t nranges);
+pmixp_coll_t *pmixp_state_coll_get(pmixp_coll_type_t type,
+				   const pmixp_proc_t *ranges,
+				   size_t nranges);
+pmixp_coll_t *pmixp_state_coll_new(pmixp_coll_type_t type,
+				   const pmixp_proc_t *ranges,
+				   size_t nranges);
 
 void pmixp_state_coll_cleanup(void);
 

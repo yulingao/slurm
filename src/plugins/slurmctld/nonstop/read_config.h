@@ -43,13 +43,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define DEFAULT_NONSTOP_PORT        6820
+#define DEFAULT_NONSTOP_PORT		6820
 
 /* Configuration data types */
 typedef struct spare_node_resv {
-    uint32_t node_cnt;    /* count of hot spare nodes		*/
-    char *partition;    /* name of partition to be used		*/
-    struct part_record *part_ptr;    /* pointer to partition used	*/
+	uint32_t node_cnt;	/* count of hot spare nodes		*/
+	char *partition;	/* name of partition to be used		*/
+	struct part_record *part_ptr;	/* pointer to partition used	*/
 } spare_node_resv_t;
 
 extern char *nonstop_control_addr;
@@ -79,7 +79,6 @@ extern munge_ctx_t ctx;
 /* Load configuration file contents into global variables.
  * Call nonstop_free_config to free memory. */
 extern void nonstop_read_config(void);
-
 extern void nonstop_free_config(void);
 
 /* Create reservations to contain hot-spare nodes
@@ -90,4 +89,4 @@ extern void create_hot_spare_resv(void);
  * a key,pair values and store it into List. */
 extern void nonstop_read_config_list(List data);
 
-#endif    /* _HAVE_NONSTOP_READ_CONFIG_H */
+#endif	/* _HAVE_NONSTOP_READ_CONFIG_H */

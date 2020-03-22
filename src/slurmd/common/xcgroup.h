@@ -48,27 +48,27 @@
 
 // http://lists.debian.org/debian-boot/2012/04/msg00047.html
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
-#define    MS_NOSUID    MNT_NOSUID
-#define    MS_NOEXEC    MNT_NOEXEC
-#define    MS_NODEV    0
+#define	MS_NOSUID	MNT_NOSUID
+#define	MS_NOEXEC	MNT_NOEXEC
+#define	MS_NODEV	0
 
-#define    umount(d)    unmount(d, 0)
+#define	umount(d)	unmount(d, 0)
 #endif
 
 typedef struct xcgroup_ns {
-    char *mnt_point;  /* mount point to use for the associated cgroup */
-    char *mnt_args;   /* mount args to use in addition */
+	char* mnt_point;  /* mount point to use for the associated cgroup */
+	char* mnt_args;   /* mount args to use in addition */
 
-    char *subsystems; /* list of comma separated subsystems to provide */
+	char* subsystems; /* list of comma separated subsystems to provide */
 } xcgroup_ns_t;
 
 typedef struct xcgroup {
-    xcgroup_ns_t *ns; /* xcgroup namespace of this xcgroup */
-    char *name;    /* name of the xcgroup relative to the ns */
-    char *path;    /* absolute path of the xcgroup in the ns */
-    uid_t uid;     /* uid of the owner */
-    gid_t gid;     /* gid of the owner */
-    int fd;      /* used for locking */
+	xcgroup_ns_t* ns; /* xcgroup namespace of this xcgroup */
+	char*    name;    /* name of the xcgroup relative to the ns */
+	char*    path;    /* absolute path of the xcgroup in the ns */
+	uid_t    uid;     /* uid of the owner */
+	gid_t    gid;     /* gid of the owner */
+	int      fd;      /* used for locking */
 } xcgroup_t;
 
 /*
@@ -78,12 +78,13 @@ typedef struct xcgroup {
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_ns_create(xcgroup_ns_t *cgns, char *mnt_args, char *subsys);
+int xcgroup_ns_create(xcgroup_ns_t* cgns, char* mnt_args,
+		      char* subsys);
 
 /*
  * destroy a cgroup namespace
  */
-void xcgroup_ns_destroy(xcgroup_ns_t *cgns);
+void xcgroup_ns_destroy(xcgroup_ns_t* cgns);
 
 /*
  * mount a cgroup namespace
@@ -94,7 +95,7 @@ void xcgroup_ns_destroy(xcgroup_ns_t *cgns);
  *
  * If an error occurs, errno will be set.
  */
-int xcgroup_ns_mount(xcgroup_ns_t *cgns);
+int xcgroup_ns_mount(xcgroup_ns_t* cgns);
 
 /*
  * umount a cgroup namespace
@@ -105,7 +106,7 @@ int xcgroup_ns_mount(xcgroup_ns_t *cgns);
  *
  * If an error occurs, errno will be set.
  */
-int xcgroup_ns_umount(xcgroup_ns_t *cgns);
+int xcgroup_ns_umount(xcgroup_ns_t* cgns);
 
 /*
  * test if cgroup namespace is currently available (mounted)
@@ -114,7 +115,7 @@ int xcgroup_ns_umount(xcgroup_ns_t *cgns);
  *  - 0 if not available
  *  - 1 if available
  */
-int xcgroup_ns_is_available(xcgroup_ns_t *cgns);
+int xcgroup_ns_is_available(xcgroup_ns_t* cgns);
 
 /*
  * load a cgroup from a cgroup namespace given a pid
@@ -123,7 +124,7 @@ int xcgroup_ns_is_available(xcgroup_ns_t *cgns);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_ns_find_by_pid(xcgroup_ns_t *cgns, xcgroup_t *cg, pid_t pid);
+int xcgroup_ns_find_by_pid(xcgroup_ns_t* cgns, xcgroup_t* cg, pid_t pid);
 
 /*
  * load a cgroup namespace
@@ -141,12 +142,13 @@ int xcgroup_ns_load(xcgroup_ns_t *cgns, char *subsys);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_create(xcgroup_ns_t *cgns, xcgroup_t *cg, char *uri, uid_t uid, gid_t gid);
+int xcgroup_create(xcgroup_ns_t* cgns, xcgroup_t* cg,
+		   char* uri, uid_t uid, gid_t gid);
 
 /*
  * destroy a cgroup internal structure
  */
-void xcgroup_destroy(xcgroup_t *cg);
+void xcgroup_destroy(xcgroup_t* cg);
 
 /*
  * lock a cgroup (must have been instantiated)
@@ -156,7 +158,7 @@ void xcgroup_destroy(xcgroup_t *cg);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_lock(xcgroup_t *cg);
+int xcgroup_lock(xcgroup_t* cg);
 
 /*
  * unlock a cgroup
@@ -165,7 +167,7 @@ int xcgroup_lock(xcgroup_t *cg);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_unlock(xcgroup_t *cg);
+int xcgroup_unlock(xcgroup_t* cg);
 
 /*
  * instantiate a cgroup in a cgroup namespace (mkdir)
@@ -174,7 +176,7 @@ int xcgroup_unlock(xcgroup_t *cg);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_instantiate(xcgroup_t *cg);
+int xcgroup_instantiate(xcgroup_t* cg);
 
 /*
  * load a cgroup from a cgroup namespace into a structure
@@ -183,7 +185,7 @@ int xcgroup_instantiate(xcgroup_t *cg);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_load(xcgroup_ns_t *cgns, xcgroup_t *cg, char *uri);
+int xcgroup_load(xcgroup_ns_t* cgns, xcgroup_t* cg, char* uri);
 
 /*
  * delete a cgroup instance in a cgroup namespace (rmdir)
@@ -192,7 +194,7 @@ int xcgroup_load(xcgroup_ns_t *cgns, xcgroup_t *cg, char *uri);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_delete(xcgroup_t *cg);
+int xcgroup_delete(xcgroup_t* cg);
 
 /*
  * add a list of pids to a cgroup
@@ -201,7 +203,7 @@ int xcgroup_delete(xcgroup_t *cg);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_add_pids(xcgroup_t *cg, pid_t *pids, int npids);
+int xcgroup_add_pids(xcgroup_t* cg, pid_t* pids, int npids);
 
 /*
  * extract the pids list of a cgroup
@@ -212,7 +214,7 @@ int xcgroup_add_pids(xcgroup_t *cg, pid_t *pids, int npids);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_get_pids(xcgroup_t *cg, pid_t **pids, int *npids);
+int xcgroup_get_pids(xcgroup_t* cg, pid_t **pids, int *npids);
 
 /*
  * set a cgroup parameter
@@ -226,7 +228,7 @@ int xcgroup_get_pids(xcgroup_t *cg, pid_t **pids, int *npids);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_set_param(xcgroup_t *cg, char *parameter, char *content);
+int xcgroup_set_param(xcgroup_t* cg, char* parameter, char* content);
 
 /*
  * get a cgroup parameter
@@ -242,7 +244,8 @@ int xcgroup_set_param(xcgroup_t *cg, char *parameter, char *content);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_get_param(xcgroup_t *cg, char *param, char **content, size_t *csize);
+int xcgroup_get_param(xcgroup_t* cg, char* param, char **content,
+		      size_t *csize);
 
 /*
  * set a cgroup parameter in the form of a uint32_t
@@ -256,7 +259,7 @@ int xcgroup_get_param(xcgroup_t *cg, char *param, char **content, size_t *csize)
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_set_uint32_param(xcgroup_t *cg, char *parameter, uint32_t value);
+int xcgroup_set_uint32_param(xcgroup_t* cg, char* parameter, uint32_t value);
 
 /*
  * get a cgroup parameter in the form of a uint32_t
@@ -270,7 +273,7 @@ int xcgroup_set_uint32_param(xcgroup_t *cg, char *parameter, uint32_t value);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_get_uint32_param(xcgroup_t *cg, char *param, uint32_t *value);
+int xcgroup_get_uint32_param(xcgroup_t* cg, char* param, uint32_t* value);
 
 /*
  * set a cgroup parameter in the form of a uint64_t
@@ -284,7 +287,7 @@ int xcgroup_get_uint32_param(xcgroup_t *cg, char *param, uint32_t *value);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_set_uint64_param(xcgroup_t *cg, char *parameter, uint64_t value);
+int xcgroup_set_uint64_param(xcgroup_t* cg, char* parameter, uint64_t value);
 
 /*
  * get a cgroup parameter in the form of a uint64_t
@@ -298,7 +301,7 @@ int xcgroup_set_uint64_param(xcgroup_t *cg, char *parameter, uint64_t value);
  *  - XCGROUP_ERROR
  *  - XCGROUP_SUCCESS
  */
-int xcgroup_get_uint64_param(xcgroup_t *cg, char *param, uint64_t *value);
+int xcgroup_get_uint64_param(xcgroup_t* cg, char* param, uint64_t* value);
 
 
 /*

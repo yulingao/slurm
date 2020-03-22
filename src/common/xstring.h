@@ -38,22 +38,24 @@
 \*****************************************************************************/
 
 #ifndef _XSTRING_H
-#define _XSTRING_H 1
+#define _XSTRING_H	1
 
 #include "src/common/macros.h"
 
-#define xstrcat(__p, __q) _xstrcat(&(__p), __q)
-#define xstrncat(__p, __q, __l) _xstrncat(&(__p), __q, __l)
-#define xstrcatchar(__p, __c) _xstrcatchar(&(__p), __c)
-#define xstrftimecat(__p, __fmt) _xstrftimecat(&(__p), __fmt)
-#define xiso8601timecat(__p, __msec) _xiso8601timecat(&(__p), __msec)
-#define xrfc5424timecat(__p, __msec) _xrfc5424timecat(&(__p), __msec)
-#define xstrfmtcat(__p, __fmt, args...) _xstrfmtcat(&(__p), __fmt, ##args)
-#define xmemcat(__p, __s, __e) _xmemcat(&(__p), __s, __e)
+#define xstrcat(__p, __q)		_xstrcat(&(__p), __q)
+#define xstrncat(__p, __q, __l)		_xstrncat(&(__p), __q, __l)
+#define xstrcatchar(__p, __c)		_xstrcatchar(&(__p), __c)
+#define xstrftimecat(__p, __fmt)	_xstrftimecat(&(__p), __fmt)
+#define xiso8601timecat(__p, __msec)            _xiso8601timecat(&(__p), __msec)
+#define xrfc5424timecat(__p, __msec)            _xrfc5424timecat(&(__p), __msec)
+#define xstrfmtcat(__p, __fmt, args...)	_xstrfmtcat(&(__p), __fmt, ## args)
+#define xstrfmtcatat(__p, __q, __fmt, args...) \
+	_xstrfmtcatat(&(__p), __q, __fmt, ## args)
+#define xmemcat(__p, __s, __e)          _xmemcat(&(__p), __s, __e)
 #define xstrsubstitute(__p, __pat, __rep) _xstrsubstitute(&(__p), __pat, __rep)
-#define xstrsubstituteall(__p, __pat, __rep)    \
-  while (_xstrsubstitute(&(__p), __pat, __rep)) \
-    ;
+#define xstrsubstituteall(__p, __pat, __rep)			\
+	while (_xstrsubstitute(&(__p), __pat, __rep))		\
+		;
 
 /*
 ** The following functions take a ptr to a string and expand the
@@ -102,7 +104,14 @@ void _xrfc5424timecat(char **str, bool);
 ** return value is result from vsnprintf(3)
 */
 int _xstrfmtcat(char **str, const char *fmt, ...)
-__attribute__((format(printf, 2, 3)));
+  __attribute__ ((format (printf, 2, 3)));
+
+/*
+ * Concatenate printf-style formatted string onto str at position pos.
+ * Return value is result from vsnprintf(3).
+ */
+int _xstrfmtcatat(char **str, char **pos, const char *fmt, ...)
+	__attribute__ ((format (printf, 3, 4)));
 
 /*
 ** concatenate range of memory from start to end (not including end)
@@ -119,7 +128,7 @@ char *xstrdup(const char *str);
 ** strdup formatted which uses xmalloc routines
 */
 char *xstrdup_printf(const char *fmt, ...)
-__attribute__((format(printf, 1, 2)));
+  __attribute__ ((format (printf, 1, 2)));
 
 /*
 ** strndup which uses xmalloc routines
@@ -132,7 +141,6 @@ char *xstrndup(const char *str, size_t n);
 long int xstrntol(const char *str, char **endptr, size_t n, int base);
 
 /*
-替换libc basename
 ** replacement for libc basename
 */
 char *xbasename(char *path);

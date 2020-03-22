@@ -53,10 +53,11 @@ int MPIR_acquired_pre_main;
 char *totalview_jobid;
 char *totalview_stepid;
 
-void MPIR_Breakpoint(void) {
-    /*
-     * This just notifies parallel debugger that some event of
-     *  interest occurred.
-     */
-    debug("In MPIR_Breakpoint");
+void MPIR_Breakpoint(void)
+{
+	/*
+	 * This just notifies parallel debugger that some event of
+	 *  interest occurred.
+	 */
+	debug("In MPIR_Breakpoint");
 }

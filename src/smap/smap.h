@@ -84,48 +84,46 @@
 #include "src/common/xstring.h"
 
 /* getopt_long options, integers but not characters */
-#define OPT_LONG_HELP    0x100
-#define OPT_LONG_USAGE    0x101
+#define OPT_LONG_HELP	0x100
+#define OPT_LONG_USAGE	0x101
 
-enum {
-    JOBS, RESERVATIONS, PARTITION
-};
+enum { JOBS, RESERVATIONS, PARTITION };
 
 /* Input parameters */
 typedef struct {
-    bool all_flag;
-    List clusters;
-    int cluster_base;
-    uint16_t cluster_dims;
-    uint32_t cluster_flags;
-    bool commandline;
-    int display;
-    int iterate;
-    bool no_header;
-    hostlist_t hl;
-    int verbose;
+	bool all_flag;
+	List clusters;
+	int cluster_base;
+	uint16_t cluster_dims;
+	uint32_t cluster_flags;
+	bool commandline;
+	int display;
+	int iterate;
+	bool no_header;
+	hostlist_t hl;
+	int verbose;
 } smap_parameters_t;
 
 /*
  * smap_node_t: node within the allocation system.
  */
 typedef struct {
-    /* coordinates of midplane */
-    uint16_t *coord;
-    /* coordinates on display screen */
-    int grid_xcord, grid_ycord;
-    /* color of letter used in smap */
-    int color;
-    /* midplane index used for easy look up of the miplane */
-    int index;
-    /* letter used in smap */
-    char letter;
-    uint32_t state;
+	/* coordinates of midplane */
+	uint16_t *coord;
+	/* coordinates on display screen */
+	int grid_xcord, grid_ycord;
+	/* color of letter used in smap */
+	int color;
+	/* midplane index used for easy look up of the miplane */
+	int index;
+	/* letter used in smap */
+	char letter;
+	uint32_t state;
 } smap_node_t;
 
 typedef struct {
-    int node_cnt;
-    smap_node_t **grid;
+	int node_cnt;
+	smap_node_t **grid;
 } smap_system_t;
 
 extern WINDOW *grid_win;
@@ -145,31 +143,20 @@ extern smap_system_t *smap_system_ptr;
 extern int quiet_flag;
 
 extern void init_grid(node_info_msg_t *node_info_ptr, int cols);
-
 extern void update_grid(node_info_msg_t *node_info_ptr);
-
 extern void clear_grid(void);
-
 extern void free_grid(void);
-
 extern int *get_cluster_dims(node_info_msg_t *node_info_ptr);
-
 extern void set_grid_inx(int start, int end, int count);
-
 extern void print_grid(void);
-
 bitstr_t *get_requested_node_bitmap(void);
 
 extern void parse_command_line(int argc, char **argv);
-
 extern void print_date(void);
-
 extern void clear_window(WINDOW *win);
 
 extern void get_slurm_part(void);
-
 extern void get_job(void);
-
 extern void get_reservation(void);
 
 #endif

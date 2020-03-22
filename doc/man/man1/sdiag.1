@@ -1,4 +1,4 @@
-.TH sdiag "1" "Slurm Commands" "June 2019" "Slurm Commands"
+.TH sdiag "1" "Slurm Commands" "May 2019" "Slurm Commands"
 
 .SH "NAME"
 .LP
@@ -33,12 +33,13 @@ bottleneck.
 \fBAgent queue size\fR
 Slurm design has scalability in mind and sending messages to thousands of nodes
 is not a trivial task. The agent mechanism helps to control communication
-between the slurm daemons and the controller for a best effort. If this values
-is close to MAX_AGENT_CNT there could be some delays affecting jobs management.
+between slurmctld and the slurmd daemons for a best effort. This value denotes
+the count of enqueued outgoing RPC requests in an internal retry list.
 
 .TP
 \fBAgent count\fR
-Number of active agent threads.
+Number of agent threads. Each of these agent threads can create in turn a group
+of up to 2 + AGENT_THREAD_COUNT active threads at a time.
 
 .TP
 \fBDBD Agent queue size\fR
@@ -221,18 +222,6 @@ A job once for each partition it requested.
 A pending job array will normally be counted as one job (tasks of a job array
 which have already been started/requeued or individually modified will already
 have individual job records and are each counted as a separate job).
-
-.TP
-\fBLast table size\fR
-Count of different time slots tested by the backfill scheduler in its last
-iteration.
-
-.TP
-\fBMean table size\fR
-Mean count of different time slots tested by the backfill scheduler.
-Larger counts increase the time required for the backfill operation.
-The table size is influenced by many schuling parameters, including:
-bf_min_age_reserve, bf_min_prio_reserve, bf_resolution, and bf_window.
 
 .TP
 \fBLatency for 1000 calls to gettimeofday()\fR

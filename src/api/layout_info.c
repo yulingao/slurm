@@ -62,53 +62,58 @@
 	return SLURM_SUCCESS;
 }*/
 
-extern int slurm_load_layout(char *layout_type, char *entities, char *type, uint32_t flags, layout_info_msg_t **resp) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    layout_info_request_msg_t req;
+extern int slurm_load_layout (char *layout_type, char *entities, char *type,
+			      uint32_t flags, layout_info_msg_t **resp)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
+	layout_info_request_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.layout_type = layout_type;
-    req.entities = entities;
-    req.type = type;
-    req.flags = flags;
-    req_msg.msg_type = REQUEST_LAYOUT_INFO;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+	req.layout_type  = layout_type;
+	req.entities     = entities;
+	req.type         = type;
+	req.flags        = flags;
+	req_msg.msg_type = REQUEST_LAYOUT_INFO;
+	req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_LAYOUT_INFO:
-            *resp = (layout_info_msg_t *) resp_msg.data;
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            *resp = NULL;
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
+	switch (resp_msg.msg_type) {
+	case RESPONSE_LAYOUT_INFO:
+		*resp = (layout_info_msg_t *) resp_msg.data;
+		break;
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		*resp = NULL;
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-void slurm_print_layout_info(FILE *out, layout_info_msg_t *layout_info_ptr, int one_liner) {
-    char *nl;
-    int i;
-    for (i = 0; i < layout_info_ptr->record_count; i++) {
-        if (one_liner) {
-            while ((nl = strchr(layout_info_ptr->records[i], '\n')))
-                nl[0] = ' ';
-        }
-        fprintf(out, "%s", layout_info_ptr->records[i]);
-    }
+void slurm_print_layout_info ( FILE* out, layout_info_msg_t *layout_info_ptr,
+			       int one_liner )
+{
+	char *nl;
+	int i;
+	for (i = 0; i < layout_info_ptr->record_count; i++) {
+		if (one_liner) {
+			while ((nl = strchr(layout_info_ptr->records[i], '\n')))
+				nl[0] = ' ';
+		}
+		fprintf ( out, "%s", layout_info_ptr->records[i]);
+	}
 }

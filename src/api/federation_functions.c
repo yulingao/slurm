@@ -46,11 +46,13 @@
  * IN:  list List of slurmdb_federation_rec_t *
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_federations_add(void *db_conn, List federation_list) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern int slurmdb_federations_add(void *db_conn, List federation_list)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_add_federations(db_conn, db_api_uid, federation_list);
+	return acct_storage_g_add_federations(db_conn, db_api_uid,
+					      federation_list);
 }
 
 /*
@@ -59,12 +61,15 @@ extern int slurmdb_federations_add(void *db_conn, List federation_list) {
  * IN:  slurmdb_federation_rec_t  *fed
  * RET: List containing (char *'s) else NULL on error
  */
-extern List
-slurmdb_federations_modify(void *db_conn, slurmdb_federation_cond_t *fed_cond, slurmdb_federation_rec_t *fed) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_federations_modify(void *db_conn,
+				       slurmdb_federation_cond_t *fed_cond,
+				       slurmdb_federation_rec_t *fed)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_modify_federations(db_conn, db_api_uid, fed_cond, fed);
+	return acct_storage_g_modify_federations(db_conn, db_api_uid, fed_cond,
+						 fed);
 }
 
 /*
@@ -72,11 +77,13 @@ slurmdb_federations_modify(void *db_conn, slurmdb_federation_cond_t *fed_cond, s
  * IN:  slurmdb_federation_cond_t *fed_cond
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_federations_remove(void *db_conn, slurmdb_federation_cond_t *fed_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_federations_remove(void *db_conn,
+				       slurmdb_federation_cond_t *fed_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_remove_federations(db_conn, db_api_uid, fed_cond);
+	return acct_storage_g_remove_federations(db_conn, db_api_uid, fed_cond);
 }
 
 /*
@@ -85,9 +92,11 @@ extern List slurmdb_federations_remove(void *db_conn, slurmdb_federation_cond_t 
  * RET: List of slurmdb_federation_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_federations_get(void *db_conn, slurmdb_federation_cond_t *fed_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_federations_get(void *db_conn,
+				    slurmdb_federation_cond_t *fed_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_get_federations(db_conn, db_api_uid, fed_cond);
+	return acct_storage_g_get_federations(db_conn, db_api_uid, fed_cond);
 }

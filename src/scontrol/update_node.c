@@ -51,192 +51,220 @@
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int scontrol_update_node(int argc, char **argv) {
-    int i, j, rc = 0, update_cnt = 0;
-    update_node_msg_t node_msg;
-    char *reason_str = NULL;
-    char *tag, *val;
-    int tag_len, val_len;
+extern int
+scontrol_update_node (int argc, char **argv)
+{
+	int i, j, rc = 0, update_cnt = 0;
+	update_node_msg_t node_msg;
+	char *reason_str = NULL;
+	char *tag, *val;
+	int tag_len, val_len;
 
-    slurm_init_update_node_msg(&node_msg);
-    for (i = 0; i < argc; i++) {
-        tag = argv[i];
-        val = strchr(argv[i], '=');
-        if (val) {
-            tag_len = val - argv[i];
-            val++;
-            val_len = strlen(val);
-        } else {
-            exit_code = 1;
-            error("Invalid input: %s  Request aborted", argv[i]);
-            return -1;
-        }
+	slurm_init_update_node_msg(&node_msg);
+	for (i = 0; i < argc; i++) {
+		tag = argv[i];
+		val = strchr(argv[i], '=');
+		if (val) {
+			tag_len = val - argv[i];
+			val++;
+			val_len = strlen(val);
+		} else {
+			exit_code = 1;
+			error("Invalid input: %s  Request aborted", argv[i]);
+			return -1;
+		}
 
-        if (xstrncasecmp(tag, "NodeAddr", MAX(tag_len, 5)) == 0) {
-            node_msg.node_addr = val;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "NodeHostName", MAX(tag_len, 5)) == 0) {
-            node_msg.node_hostname = val;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "NodeName", MAX(tag_len, 1)) == 0) {
-            node_msg.node_names = val;
-        } else if (!xstrncasecmp(tag, "ActiveFeatures", MAX(tag_len, 3))) {
-            node_msg.features_act = val;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "CpuBind", MAX(tag_len, 7)) == 0) {
-            if (xlate_cpu_bind_str(val, &node_msg.cpu_bind) != SLURM_SUCCESS) {
-                exit_code = 1;
-                error("Invalid input %s", argv[i]);
-                return -1;
-            }
-            update_cnt++;
+		if (xstrncasecmp(tag, "NodeAddr", MAX(tag_len, 5)) == 0) {
+			node_msg.node_addr = val;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "NodeHostName", MAX(tag_len, 5))
+			   == 0) {
+			node_msg.node_hostname = val;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "NodeName", MAX(tag_len, 1)) == 0) {
+			node_msg.node_names = val;
+		} else if (!xstrncasecmp(tag, "ActiveFeatures",
+					 MAX(tag_len,3))) {
+			node_msg.features_act = val;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "CpuBind", MAX(tag_len, 7)) == 0) {
+			if (xlate_cpu_bind_str(val, &node_msg.cpu_bind) !=
+			    SLURM_SUCCESS) {
+				exit_code = 1;
+				error("Invalid input %s", argv[i]);
+				return -1;
+			}
+			update_cnt++;
 
 
-        } else if (!xstrncasecmp(tag, "Features", MAX(tag_len, 1)) ||
-                   !xstrncasecmp(tag, "AvailableFeatures", MAX(tag_len, 3))) {
-            node_msg.features = val;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "Gres", MAX(tag_len, 1)) == 0) {
-            node_msg.gres = val;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "Weight", MAX(tag_len, 1)) == 0) {
-            /* Logic borrowed from function _handle_uint32 */
-            char *endptr;
-            unsigned long num;
-            errno = 0;
-            num = strtoul(val, &endptr, 0);
-            if ((endptr[0] == 'k') || (endptr[0] == 'K')) {
-                num *= 1024;
-                endptr++;
-            }
-            if ((num == 0 && errno == EINVAL) || (*endptr != '\0')) {
-                if ((xstrcasecmp(val, "UNLIMITED") == 0) || (xstrcasecmp(val, "INFINITE") == 0)) {
-                    num = INFINITE;
-                } else {
-                    error("Weight value (%s) is not a "
-                          "valid number", val);
-                    break;
-                }
-            } else if (errno == ERANGE) {
-                error("Weight value (%s) is out of range", val);
-                break;
-            } else if (val[0] == '-') {
-                error("Weight value (%s) is less than zero", val);
-                break;
-            } else if (num > 0xfffffff0) {
-                error("Weight value (%s) is greater than %u", val, 0xfffffff0);
-                break;
-            }
-            node_msg.weight = num;
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "Reason", MAX(tag_len, 1)) == 0) {
-            int len;
+		} else if (!xstrncasecmp(tag, "Features", MAX(tag_len, 1)) ||
+			   !xstrncasecmp(tag, "AvailableFeatures",
+					 MAX(tag_len,3))) {
+			node_msg.features = val;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "Gres", MAX(tag_len, 1)) == 0) {
+			node_msg.gres = val;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "Weight", MAX(tag_len,1)) == 0) {
+			/* Logic borrowed from function _handle_uint32 */
+			char *endptr;
+			unsigned long num;
+			errno = 0;
+			num = strtoul(val, &endptr, 0);
+			if ((endptr[0] == 'k') || (endptr[0] == 'K')) {
+				num *= 1024;
+				endptr++;
+			}
+			if ((num == 0 && errno == EINVAL)
+        		            || (*endptr != '\0')) {
+				if ((xstrcasecmp(val, "UNLIMITED") == 0) ||
+				    (xstrcasecmp(val, "INFINITE")  == 0)) {
+					num = INFINITE;
+				} else {
+					error("Weight value (%s) is not a "
+					      "valid number", val);
+					break;
+				}
+			} else if (errno == ERANGE) {
+				error("Weight value (%s) is out of range",
+				      val);
+				break;
+			} else if (val[0] == '-') {
+				error("Weight value (%s) is less than zero",
+				      val);
+				break;
+			} else if (num > 0xfffffff0) {
+				error("Weight value (%s) is greater than %u",
+					val, 0xfffffff0);
+				break;
+			}
+			node_msg.weight = num;
+			update_cnt++;
+		} else if (xstrncasecmp(tag, "Reason", MAX(tag_len, 1)) == 0) {
+			int len;
 
-            if (*val == '"')
-                reason_str = xstrdup(val + 1);
-            else
-                reason_str = xstrdup(val);
+			if (*val == '"')
+				reason_str = xstrdup(val + 1);
+			else
+				reason_str = xstrdup(val);
 
-            len = strlen(reason_str) - 1;
-            if ((len >= 0) && (reason_str[len] == '"'))
-                reason_str[len] = '\0';
+			len = strlen(reason_str) - 1;
+			if ((len >= 0) && (reason_str[len] == '"'))
+				reason_str[len] = '\0';
 
-            node_msg.reason = reason_str;
-            if ((getlogin() == NULL) || (uid_from_string(getlogin(), &node_msg.reason_uid) < 0)) {
-                node_msg.reason_uid = getuid();
-            }
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "State", MAX(tag_len, 1)) == 0) {
-            if (cluster_flags & CLUSTER_FLAG_CRAY_A) {
-                fprintf(stderr, "%s can not be changed through Slurm. Use native Cray tools such as xtprocadmin(8)\n",
-                        argv[i]);
-                fprintf(stderr, "Request aborted\n");
-                exit_code = 1;
-                goto done;
-            }
-            if (xstrncasecmp(val, "NoResp", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_NO_RESPOND;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "CANCEL_REBOOT", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_CANCEL_REBOOT;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "DRAIN", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_DRAIN;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "FAIL", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_FAIL;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "FUTURE", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_FUTURE;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "RESUME", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_RESUME;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "POWER_DOWN", MAX(val_len, 7)) == 0) {
-                node_msg.node_state = NODE_STATE_POWER_SAVE;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "POWER_UP", MAX(val_len, 7)) == 0) {
-                node_msg.node_state = NODE_STATE_POWER_UP;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "UNDRAIN", MAX(val_len, 3)) == 0) {
-                node_msg.node_state = NODE_STATE_UNDRAIN;
-                update_cnt++;
-            } else {
-                uint32_t state_val = NO_VAL;
-                for (j = 0; j < NODE_STATE_END; j++) {
-                    if (xstrncasecmp(node_state_string(j), val, MAX(val_len, 3)) == 0) {
-                        state_val = (uint32_t) j;
-                        break;
-                    }
-                }
-                if (j == NODE_STATE_END) {
-                    exit_code = 1;
-                    fprintf(stderr, "Invalid input: %s\n", argv[i]);
-                    fprintf(stderr, "Request aborted\n");
-                    fprintf(stderr, "Valid states are: ");
-                    fprintf(stderr, "NoResp DRAIN FAIL FUTURE RESUME "
-                                    "POWER_DOWN POWER_UP UNDRAIN");
-                    fprintf(stderr, "\n");
-                    fprintf(stderr, "Not all states are valid "
-                                    "given a node's prior "
-                                    "state\n");
-                    goto done;
-                }
-                node_msg.node_state = state_val;
-                update_cnt++;
-            }
-        } else {
-            exit_code = 1;
-            fprintf(stderr, "Update of this parameter is not "
-                            "supported: %s\n", argv[i]);
-            fprintf(stderr, "Request aborted\n");
-            goto done;
-        }
-    }
+			node_msg.reason = reason_str;
+			if ((getlogin() == NULL) ||
+			    (uid_from_string(getlogin(),
+					     &node_msg.reason_uid) < 0)) {
+				node_msg.reason_uid = getuid();
+			}
+			update_cnt++;
+		}
+		else if (xstrncasecmp(tag, "State", MAX(tag_len, 1)) == 0) {
+			if (cluster_flags & CLUSTER_FLAG_CRAY_A) {
+				fprintf (stderr, "%s can not be changed through Slurm. Use native Cray tools such as xtprocadmin(8)\n", argv[i]);
+				fprintf (stderr, "Request aborted\n");
+				exit_code = 1;
+				goto done;
+			}
+			if (xstrncasecmp(val, "NoResp",
+				        MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_NO_RESPOND;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "CANCEL_REBOOT",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_CANCEL_REBOOT;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "DRAIN",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_DRAIN;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "FAIL",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_FAIL;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "FUTURE",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_FUTURE;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "RESUME",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_RESUME;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "POWER_DOWN",
+				   MAX(val_len, 7)) == 0) {
+				node_msg.node_state = NODE_STATE_POWER_SAVE;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "POWER_UP",
+				   MAX(val_len, 7)) == 0) {
+				node_msg.node_state = NODE_STATE_POWER_UP;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "UNDRAIN",
+				   MAX(val_len, 3)) == 0) {
+				node_msg.node_state = NODE_STATE_UNDRAIN;
+				update_cnt++;
+			} else {
+				uint32_t state_val = NO_VAL;
+				for (j = 0; j < NODE_STATE_END; j++) {
+					if (xstrncasecmp(node_state_string(j),
+							 val,
+							 MAX(val_len, 3)) == 0){
+						state_val = (uint32_t) j;
+						break;
+					}
+				}
+				if (j == NODE_STATE_END) {
+					exit_code = 1;
+					fprintf(stderr, "Invalid input: %s\n",
+						argv[i]);
+					fprintf (stderr, "Request aborted\n");
+					fprintf (stderr, "Valid states are: ");
+					fprintf (stderr,
+						 "NoResp DRAIN FAIL FUTURE RESUME "
+						 "POWER_DOWN POWER_UP UNDRAIN");
+					fprintf (stderr, "\n");
+					fprintf (stderr,
+						 "Not all states are valid "
+						 "given a node's prior "
+						 "state\n");
+					goto done;
+				}
+				node_msg.node_state = state_val;
+				update_cnt++;
+			}
+		} else {
+			exit_code = 1;
+			fprintf (stderr, "Update of this parameter is not "
+				 "supported: %s\n", argv[i]);
+			fprintf (stderr, "Request aborted\n");
+			goto done;
+		}
+	}
 
-    if (((node_msg.node_state == NODE_STATE_DOWN) || (node_msg.node_state == NODE_STATE_DRAIN) ||
-         (node_msg.node_state == NODE_STATE_FAIL)) && ((node_msg.reason == NULL) || (strlen(node_msg.reason) == 0))) {
-        exit_code = 1;
-        fprintf(stderr, "You must specify a reason when DOWNING or "
-                        "DRAINING a node. Request denied\n");
-        goto done;
-    }
+	if (((node_msg.node_state == NODE_STATE_DOWN)  ||
+	     (node_msg.node_state == NODE_STATE_DRAIN) ||
+	     (node_msg.node_state == NODE_STATE_FAIL)) &&
+	    ((node_msg.reason == NULL) || (strlen(node_msg.reason) == 0))) {
+		exit_code = 1;
+		fprintf(stderr, "You must specify a reason when DOWNING or "
+			"DRAINING a node. Request denied\n");
+		goto done;
+	}
 
-    if (update_cnt == 0) {
-        exit_code = 1;
-        fprintf(stderr, "No changes specified\n");
-        return 0;
-    }
+	if (update_cnt == 0) {
+		exit_code = 1;
+		fprintf (stderr, "No changes specified\n");
+		return 0;
+	}
 
-    rc = slurm_update_node(&node_msg);
+	rc = slurm_update_node(&node_msg);
 
-    done:
-    xfree(reason_str);
-    if (rc) {
-        exit_code = 1;
-        return slurm_get_errno();
-    } else
-        return 0;
+done:	xfree(reason_str);
+	if (rc) {
+		exit_code = 1;
+		return slurm_get_errno ();
+	} else
+		return 0;
 }
 
 /*
@@ -247,92 +275,103 @@ extern int scontrol_update_node(int argc, char **argv) {
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int scontrol_update_front_end(int argc, char **argv) {
-    int i, rc = 0, update_cnt = 0;
-    update_front_end_msg_t front_end_msg;
-    char *reason_str = NULL;
-    char *tag, *val;
-    int tag_len, val_len;
+extern int
+scontrol_update_front_end (int argc, char **argv)
+{
+	int i, rc = 0, update_cnt = 0;
+	update_front_end_msg_t front_end_msg;
+	char *reason_str = NULL;
+	char *tag, *val;
+	int tag_len, val_len;
 
-    slurm_init_update_front_end_msg(&front_end_msg);
-    for (i = 0; i < argc; i++) {
-        tag = argv[i];
-        val = strchr(argv[i], '=');
-        if (val) {
-            tag_len = val - argv[i];
-            val++;
-            val_len = strlen(val);
-        } else {
-            exit_code = 1;
-            error("Invalid input: %s  Request aborted", argv[i]);
-            return -1;
-        }
-        if (xstrncasecmp(tag, "FrontendName", MAX(tag_len, 1)) == 0)
-            front_end_msg.name = val;
-        else if (xstrncasecmp(tag, "Reason", MAX(tag_len, 1)) == 0) {
-            int len;
-            if (*val == '"')
-                reason_str = xstrdup(val + 1);
-            else
-                reason_str = xstrdup(val);
+	slurm_init_update_front_end_msg(&front_end_msg);
+	for (i=0; i<argc; i++) {
+		tag = argv[i];
+		val = strchr(argv[i], '=');
+		if (val) {
+			tag_len = val - argv[i];
+			val++;
+			val_len = strlen(val);
+		} else {
+			exit_code = 1;
+			error("Invalid input: %s  Request aborted", argv[i]);
+			return -1;
+		}
+		if (xstrncasecmp(tag, "FrontendName", MAX(tag_len, 1)) == 0)
+			front_end_msg.name = val;
+		else if (xstrncasecmp(tag, "Reason", MAX(tag_len, 1)) == 0) {
+			int len;
+			if (*val == '"')
+				reason_str = xstrdup(val + 1);
+			else
+				reason_str = xstrdup(val);
 
-            len = strlen(reason_str) - 1;
-            if ((len >= 0) && (reason_str[len] == '"'))
-                reason_str[len] = '\0';
+			len = strlen(reason_str) - 1;
+			if ((len >= 0) && (reason_str[len] == '"'))
+				reason_str[len] = '\0';
 
-            front_end_msg.reason = reason_str;
-            if ((getlogin() == NULL) || (uid_from_string(getlogin(), &front_end_msg.reason_uid) < 0)) {
-                front_end_msg.reason_uid = getuid();
-            }
-            update_cnt++;
-        } else if (xstrncasecmp(tag, "State", MAX(tag_len, 1)) == 0) {
-            if (xstrncasecmp(val, "DRAIN", MAX(val_len, 3)) == 0) {
-                front_end_msg.node_state = NODE_STATE_DRAIN;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "DOWN", MAX(val_len, 3)) == 0) {
-                front_end_msg.node_state = NODE_STATE_DOWN;
-                update_cnt++;
-            } else if (xstrncasecmp(val, "RESUME", MAX(val_len, 3)) == 0) {
-                front_end_msg.node_state = NODE_RESUME;
-                update_cnt++;
-            } else {
-                exit_code = 1;
-                fprintf(stderr, "Invalid input: %s\n"
-                                "Request aborted\n"
-                                "Valid states are: DRAIN RESUME\n", argv[i]);
-                goto done;
-            }
-        } else {
-            exit_code = 1;
-            fprintf(stderr, "Update of this parameter is not "
-                            "supported: %s\n", argv[i]);
-            fprintf(stderr, "Request aborted\n");
-            goto done;
-        }
-    }
+			front_end_msg.reason = reason_str;
+			if ((getlogin() == NULL) ||
+			    (uid_from_string(getlogin(),
+					     &front_end_msg.reason_uid) < 0)) {
+				front_end_msg.reason_uid = getuid();
+			}
+			update_cnt++;
+		}
+		else if (xstrncasecmp(tag, "State", MAX(tag_len, 1)) == 0) {
+			if (xstrncasecmp(val, "DRAIN", MAX(val_len, 3)) == 0) {
+				front_end_msg.node_state = NODE_STATE_DRAIN;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "DOWN",
+						MAX(val_len, 3)) == 0) {
+				front_end_msg.node_state = NODE_STATE_DOWN;
+				update_cnt++;
+			} else if (xstrncasecmp(val, "RESUME",
+						MAX(val_len, 3)) == 0) {
+				front_end_msg.node_state = NODE_RESUME;
+				update_cnt++;
+			} else {
+				exit_code = 1;
+				fprintf(stderr,
+					 "Invalid input: %s\n"
+					 "Request aborted\n"
+					 "Valid states are: DRAIN RESUME\n",
+					 argv[i]);
+				goto done;
+			}
+		} else {
+			exit_code = 1;
+			fprintf(stderr, "Update of this parameter is not "
+				"supported: %s\n", argv[i]);
+			fprintf(stderr, "Request aborted\n");
+			goto done;
+		}
+	}
 
-    if (((front_end_msg.node_state == NODE_STATE_DOWN) || (front_end_msg.node_state == NODE_STATE_DRAIN) ||
-         (front_end_msg.node_state == NODE_STATE_FAIL)) &&
-        ((front_end_msg.reason == NULL) || (strlen(front_end_msg.reason) == 0))) {
-        exit_code = 1;
-        fprintf(stderr, "You must specify a reason when DOWNING or DRAINING a frontend node\n"
-                        "Request aborted\n");
-        goto done;
-    }
+	if (((front_end_msg.node_state == NODE_STATE_DOWN)  ||
+	     (front_end_msg.node_state == NODE_STATE_DRAIN) ||
+	     (front_end_msg.node_state == NODE_STATE_FAIL)) &&
+	    ((front_end_msg.reason == NULL) ||
+	     (strlen(front_end_msg.reason) == 0))) {
+		exit_code = 1;
+		fprintf(stderr,
+			"You must specify a reason when DOWNING or DRAINING a frontend node\n"
+			"Request aborted\n");
+		goto done;
+	}
 
-    if (update_cnt == 0) {
-        exit_code = 1;
-        fprintf(stderr, "No changes specified\n");
-        return 0;
-    }
+	if (update_cnt == 0) {
+		exit_code = 1;
+		fprintf(stderr, "No changes specified\n");
+		return 0;
+	}
 
-    rc = slurm_update_front_end(&front_end_msg);
+	rc = slurm_update_front_end(&front_end_msg);
 
-    done:
-    xfree(reason_str);
-    if (rc) {
-        exit_code = 1;
-        return slurm_get_errno();
-    } else
-        return 0;
+done:	xfree(reason_str);
+	if (rc) {
+		exit_code = 1;
+		return slurm_get_errno ();
+	} else
+		return 0;
 }

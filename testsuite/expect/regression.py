@@ -33,7 +33,6 @@ import time
 from optparse import OptionParser
 from optparse import OptionValueError
 
-
 def main(argv=None):
     try:
         from subprocess import Popen
@@ -65,15 +64,15 @@ def main(argv=None):
 
     # Sanity check
     if not os.path.isfile('globals'):
-        print >> sys.stderr, 'ERROR: "globals" not here as needed'
+        print >>sys.stderr, 'ERROR: "globals" not here as needed'
         return -1
 
-        # Clear any environment variables that could break the tests.
-        # Cray sets some squeue format options that break tests
-        del os.environ['SQUEUE_ALL']
-        del os.environ['SQUEUE_SORT']
-        del os.environ['SQUEUE_FORMAT']
-        del os.environ['SQUEUE_FORMAT2']
+	# Clear any environment variables that could break the tests.
+	# Cray sets some squeue format options that break tests
+	del os.environ['SQUEUE_ALL']
+	del os.environ['SQUEUE_SORT']
+	del os.environ['SQUEUE_FORMAT']
+	del os.environ['SQUEUE_FORMAT2']
 
     # Read the current working directory and build a sorted list
     # of the available tests.
@@ -84,24 +83,24 @@ def main(argv=None):
             major = int(match.group(1))
             minor = int(match.group(2))
             if not test_in_list(major, minor, options.exclude_tests) \
-                    and (not options.include_tests
-                         or test_in_list(major, minor, options.include_tests)):
+                   and (not options.include_tests
+                        or test_in_list(major, minor, options.include_tests)):
                 tests.append((major, minor, filename))
     if not tests:
-        print >> sys.stderr, 'ERROR: no test files found in current working directory'
+        print >>sys.stderr, 'ERROR: no test files found in current working directory'
         return -1
     tests.sort(test_cmp)
 
     # Now run the tests
     start_time = time.time()
-    print >> sys.stdout, 'Started:', time.asctime(time.localtime(start_time))
+    print >>sys.stdout, 'Started:', time.asctime(time.localtime(start_time))
     sys.stdout.flush()
     for test in tests:
-        sys.stdout.write('Running test %d.%d ' % (test[0], test[1]))
+        sys.stdout.write('Running test %d.%d ' % (test[0],test[1]))
         sys.stdout.flush()
-        testlog_name = 'test%d.%d.log' % (test[0], test[1])
+        testlog_name = 'test%d.%d.log' % (test[0],test[1])
         try:
-            os.remove(testlog_name + '.failed')
+            os.remove(testlog_name+'.failed')
         except:
             pass
         testlog = file(testlog_name, 'w+')
@@ -112,11 +111,11 @@ def main(argv=None):
                         stdout=testlog, stderr=testlog).wait()
         if options.time_individual:
             t2 = time.time()
-            minutes = int(t2 - t1) / 60
-            seconds = (t2 - t1) % 60
+            minutes = int(t2-t1)/60
+            seconds = (t2-t1)%60
             if minutes > 0:
-                sys.stdout.write('%d min ' % (minutes))
-            sys.stdout.write('%.2f sec ' % (seconds))
+                sys.stdout.write('%d min '%(minutes))
+            sys.stdout.write('%.2f sec '%(seconds))
 
         testlog.close()
         if retcode == 0:
@@ -127,42 +126,40 @@ def main(argv=None):
                     os.remove(testlog_name)
                 except IOError as e:
                     print >> sys.stderr, 'ERROR failed to close %s %s' \
-                                         % (testlog_name, e)
+                        % (testlog_name, e)
         else:
             failed_tests.append(test)
-            os.rename(testlog_name, testlog_name + '.failed')
+            os.rename(testlog_name, testlog_name+'.failed')
             sys.stdout.write('FAILED!\n')
             if options.stop_on_first_fail:
                 break
         sys.stdout.flush()
 
     end_time = time.time()
-    print >> sys.stdout, 'Ended:', time.asctime(time.localtime(end_time))
-    print >> sys.stdout, '\nTestsuite ran for %d minutes %d seconds' \
-                         % ((end_time - start_time) / 60, (end_time - start_time) % 60)
-    print >> sys.stdout
-    print >> sys.stdout, 'Completions  :', len(passed_tests)
-    print >> sys.stdout, 'Failures     :', len(failed_tests)
+    print >>sys.stdout, 'Ended:', time.asctime(time.localtime(end_time))
+    print >>sys.stdout, '\nTestsuite ran for %d minutes %d seconds'\
+          %((end_time-start_time)/60,(end_time-start_time)%60)
+    print >>sys.stdout
+    print >>sys.stdout, 'Completions  :', len(passed_tests)
+    print >>sys.stdout, 'Failures     :', len(failed_tests)
     if len(failed_tests) > 0:
-        print >> sys.stdout, 'Failed tests : ',
+        print >>sys.stdout, 'Failed tests : ',
         first = True
         for test in failed_tests:
             if first:
                 first = False
             else:
                 sys.stdout.write(', ')
-            sys.stdout.write('%d.%d' % (test[0], test[1]))
+            sys.stdout.write('%d.%d'%(test[0], test[1]))
         sys.stdout.write('\n')
         sys.stdout.flush()
         return 1
-
 
 def test_cmp(testA, testB):
     rc = cmp(testA[0], testB[0])
     if rc != 0:
         return rc
     return cmp(testA[1], testB[1])
-
 
 def test_in_list(major, minor, test_list):
     '''Test for whether a test numbered major.minor is in test_list.
@@ -180,10 +177,9 @@ def test_in_list(major, minor, test_list):
         return False
     for test in test_list:
         if ((test[0] == '*' or test[0] == major)
-                and (test[1] == '*' or test[1] == minor)):
+            and (test[1] == '*' or test[1] == minor)):
             return True
     return False
-
 
 def test_parser(option, opt_str, value, parser):
     '''Option callback function for the optparse.OptionParser class.
@@ -232,7 +228,6 @@ def test_parser(option, opt_str, value, parser):
             minor = int(minor)
         l.append((major, minor))
 
-
 class poor_Popen_substitute:
     '''subprocess.Popen work-alike function.
 
@@ -241,7 +236,6 @@ class poor_Popen_substitute:
     subset of Popen functionality need by this program if run under
     older python interpreters.
     '''
-
     def __init__(self, args, shell=False, stdout=None, stderr=None):
         if shell is not False:
             raise Exception("This substitute Popen only supports shell=True")
@@ -268,7 +262,6 @@ class poor_Popen_substitute:
     def wait(self):
         (pid, rc) = os.waitpid(self.pid, 0)
         return rc
-
 
 if __name__ == "__main__":
     sys.exit(main())

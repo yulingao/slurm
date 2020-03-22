@@ -55,17 +55,21 @@
  * IN resv_info_ptr - reservation information message pointer
  * IN one_liner - print as a single line if true
  */
-void slurm_print_reservation_info_msg(FILE *out, reserve_info_msg_t *resv_info_ptr, int one_liner) {
-    int i;
-    reserve_info_t *resv_ptr = resv_info_ptr->reservation_array;
-    char time_str[32];
+void slurm_print_reservation_info_msg ( FILE* out,
+		reserve_info_msg_t * resv_info_ptr, int one_liner )
+{
+	int i ;
+	reserve_info_t * resv_ptr = resv_info_ptr->reservation_array ;
+	char time_str[32];
 
-    slurm_make_time_str((time_t * ) & resv_info_ptr->last_update, time_str, sizeof(time_str));
-    fprintf(out, "Reservation data as of %s, record count %d\n", time_str, resv_info_ptr->record_count);
+	slurm_make_time_str( (time_t *)&resv_info_ptr->last_update, time_str,
+			     sizeof(time_str));
+	fprintf( out, "Reservation data as of %s, record count %d\n",
+		time_str, resv_info_ptr->record_count);
 
-    for (i = 0; i < resv_info_ptr->record_count; i++) {
-        slurm_print_reservation_info(out, &resv_ptr[i], one_liner);
-    }
+	for (i = 0; i < resv_info_ptr->record_count; i++) {
+		slurm_print_reservation_info ( out, & resv_ptr[i], one_liner );
+	}
 
 }
 
@@ -76,10 +80,12 @@ void slurm_print_reservation_info_msg(FILE *out, reserve_info_msg_t *resv_info_p
  * IN resv_ptr - an individual reservation information record pointer
  * IN one_liner - print as a single line if true
  */
-void slurm_print_reservation_info(FILE *out, reserve_info_t *resv_ptr, int one_liner) {
-    char *print_this = slurm_sprint_reservation_info(resv_ptr, one_liner);
-    fprintf(out, "%s", print_this);
-    xfree(print_this);
+void slurm_print_reservation_info ( FILE* out, reserve_info_t * resv_ptr,
+				    int one_liner )
+{
+	char *print_this = slurm_sprint_reservation_info(resv_ptr, one_liner);
+	fprintf ( out, "%s", print_this);
+	xfree(print_this);
 }
 
 
@@ -91,63 +97,75 @@ void slurm_print_reservation_info(FILE *out, reserve_info_t *resv_ptr, int one_l
  * RET out - char * containing formatted output (must be freed after call)
  *           NULL is returned on failure.
  */
-char *slurm_sprint_reservation_info(reserve_info_t *resv_ptr, int one_liner) {
-    char tmp1[32], tmp2[32], tmp3[32], *flag_str = NULL;
-    char *state = "INACTIVE";
-    char *out = NULL, *watts_str = NULL;
-    uint32_t duration;
-    time_t now = time(NULL);
-    char *line_end = (one_liner) ? " " : "\n   ";
-    int i;
+char *slurm_sprint_reservation_info ( reserve_info_t * resv_ptr,
+				      int one_liner )
+{
+	char tmp1[32], tmp2[32], tmp3[32], *flag_str = NULL;
+	char *state="INACTIVE";
+	char *out = NULL, *watts_str = NULL;
+	uint32_t duration;
+	time_t now = time(NULL);
+	char *line_end = (one_liner) ? " " : "\n   ";
+	int i;
 
-    /****** Line ******/
-    slurm_make_time_str(&resv_ptr->start_time, tmp1, sizeof(tmp1));
-    slurm_make_time_str(&resv_ptr->end_time, tmp2, sizeof(tmp2));
-    if (resv_ptr->end_time >= resv_ptr->start_time) {
-        duration = difftime(resv_ptr->end_time, resv_ptr->start_time);
-        secs2time_str(duration, tmp3, sizeof(tmp3));
-    } else {
-        snprintf(tmp3, sizeof(tmp3), "N/A");
-    }
-    xstrfmtcat(out, "ReservationName=%s StartTime=%s EndTime=%s Duration=%s", resv_ptr->name, tmp1, tmp2, tmp3);
-    xstrcat(out, line_end);
+	/****** Line ******/
+	slurm_make_time_str(&resv_ptr->start_time, tmp1, sizeof(tmp1));
+	slurm_make_time_str(&resv_ptr->end_time,   tmp2, sizeof(tmp2));
+	if (resv_ptr->end_time >= resv_ptr->start_time) {
+		duration = difftime(resv_ptr->end_time, resv_ptr->start_time);
+		secs2time_str(duration, tmp3, sizeof(tmp3));
+	} else {
+		snprintf(tmp3, sizeof(tmp3), "N/A");
+	}
+	xstrfmtcat(out,
+		 "ReservationName=%s StartTime=%s EndTime=%s Duration=%s",
+		 resv_ptr->name, tmp1, tmp2, tmp3);
+	xstrcat(out, line_end);
 
-    /****** Line ******/
-    flag_str = reservation_flags_string(resv_ptr->flags);
+	/****** Line ******/
+	flag_str = reservation_flags_string(resv_ptr->flags);
 
-    xstrfmtcat(out, "Nodes=%s NodeCnt=%u CoreCnt=%u Features=%s "
-                    "PartitionName=%s Flags=%s", resv_ptr->node_list,
-               (resv_ptr->node_cnt == NO_VAL) ? 0 : resv_ptr->node_cnt, resv_ptr->core_cnt, resv_ptr->features,
-               resv_ptr->partition, flag_str);
-    xfree(flag_str);
-    xstrcat(out, line_end);
+	xstrfmtcat(out, "Nodes=%s NodeCnt=%u CoreCnt=%u Features=%s "
+		   "PartitionName=%s Flags=%s",
+		   resv_ptr->node_list,
+		   (resv_ptr->node_cnt == NO_VAL) ? 0 : resv_ptr->node_cnt,
+		   resv_ptr->core_cnt, resv_ptr->features, resv_ptr->partition,
+		   flag_str);
+	xfree(flag_str);
+	xstrcat(out, line_end);
 
-    /****** Line (optional) ******/
-    for (i = 0; i < resv_ptr->core_spec_cnt; i++) {
-        xstrfmtcat(out, "  NodeName=%s CoreIDs=%s", resv_ptr->core_spec[i].node_name, resv_ptr->core_spec[i].core_id);
-        xstrcat(out, line_end);
-    }
+	/****** Line (optional) ******/
+	for (i = 0; i < resv_ptr->core_spec_cnt; i++) {
+		xstrfmtcat(out,
+			 "  NodeName=%s CoreIDs=%s",
+			 resv_ptr->core_spec[i].node_name,
+			 resv_ptr->core_spec[i].core_id);
+		xstrcat(out, line_end);
+	}
 
-    /****** Line ******/
-    xstrfmtcat(out, "TRES=%s", resv_ptr->tres_str);
-    xstrcat(out, line_end);
+	/****** Line ******/
+	xstrfmtcat(out,
+		   "TRES=%s", resv_ptr->tres_str);
+	xstrcat(out, line_end);
 
-    /****** Line ******/
-    watts_str = state_control_watts_to_str(resv_ptr->resv_watts);
-    if ((resv_ptr->start_time <= now) && (resv_ptr->end_time >= now))
-        state = "ACTIVE";
-    xstrfmtcat(out, "Users=%s Accounts=%s Licenses=%s State=%s BurstBuffer=%s "
-                    "Watts=%s", resv_ptr->users, resv_ptr->accounts, resv_ptr->licenses, state, resv_ptr->burst_buffer,
-               watts_str);
-    xfree(watts_str);
+	/****** Line ******/
+	watts_str = state_control_watts_to_str(resv_ptr->resv_watts);
+	if ((resv_ptr->start_time <= now) && (resv_ptr->end_time >= now))
+		state = "ACTIVE";
+	xstrfmtcat(out,
+		   "Users=%s Accounts=%s Licenses=%s State=%s BurstBuffer=%s "
+		   "Watts=%s", resv_ptr->users, resv_ptr->accounts,
+		   resv_ptr->licenses, state, resv_ptr->burst_buffer, watts_str);
+	xfree(watts_str);
 
-    if (one_liner)
-        xstrcat(out, "\n");
-    else
-        xstrcat(out, "\n\n");
+	if (one_liner)
+		xstrcat(out, "\n");
+	else
+		xstrcat(out, "\n\n");
 
-    return out;
+	return out;
 }
+
 
 
 /*
@@ -159,38 +177,41 @@ char *slurm_sprint_reservation_info(reserve_info_t *resv_ptr, int one_liner) {
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_reservation_info_msg
  */
-extern int slurm_load_reservations(time_t update_time, reserve_info_msg_t **resp) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    resv_info_request_msg_t req;
+extern int slurm_load_reservations (time_t update_time,
+				    reserve_info_msg_t **resp)
+{
+        int rc;
+        slurm_msg_t req_msg;
+        slurm_msg_t resp_msg;
+        resv_info_request_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.last_update = update_time;
-    req_msg.msg_type = REQUEST_RESERVATION_INFO;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+        req.last_update  = update_time;
+        req_msg.msg_type = REQUEST_RESERVATION_INFO;
+        req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_RESERVATION_INFO:
-            *resp = (reserve_info_msg_t *) resp_msg.data;
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            *resp = NULL;
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
+	switch (resp_msg.msg_type) {
+	case RESPONSE_RESERVATION_INFO:
+		*resp = (reserve_info_msg_t *) resp_msg.data;
+		break;
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		*resp = NULL;
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }

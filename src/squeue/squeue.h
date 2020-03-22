@@ -59,74 +59,69 @@
 #include "src/squeue/print.h"
 
 typedef struct job_step {
-    uint32_t job_id;
-    uint32_t array_id;
-    uint32_t step_id;
+	uint32_t job_id;
+	uint32_t array_id;
+	uint32_t step_id;
 } squeue_job_step_t;
 
 struct squeue_parameters {
-    bool all_flag;
-    bool array_flag;
-    bool array_unique_flag;
-    bool federation_flag;
-    int iterate;
-    bool job_flag;
-    bool local_flag;
-    bool sibling_flag;
-    bool start_flag;
-    bool step_flag;
-    bool long_format;
-    bool long_list;
-    bool no_header; /* 不显示头信息 */
-    bool priority_flag;
-    int verbose;
+	bool all_flag;
+	bool array_flag;
+	bool array_unique_flag;
+	bool federation_flag;
+	int  iterate;
+	bool job_flag;
+	bool local_flag;
+	bool sibling_flag;
+	bool start_flag;
+	bool step_flag;
+	bool long_format;
+	bool long_list;
+	bool no_header;
+	bool priority_flag;
+	int  verbose;
 
-    char *accounts;
-    List clusters;
-    uint32_t cluster_flags;
-    char *format;
-    char *format_long;
-    char *jobs;
-    char *names;
-    hostset_t nodes;
-    char *licenses;
-    char *partitions;
-    char *qoss;
-    char *reservation;
-    char *sort;
-    char *states;
-    char *steps;
-    char *users;
+	char* accounts;
+	List clusters;
+	uint32_t cluster_flags;
+	char* format;
+	char* format_long;
+	char* jobs;
+	char* names;
+	hostset_t nodes;
+	char* licenses;
+	char* partitions;
+	char* qoss;
+	char* reservation;
+	char* sort;
+	char* states;
+	char* steps;
+	char* users;
 
-    uint32_t job_id;  /* set if request for a single job ID */
-    uint32_t user_id; /* set if request for a single user ID */
+	uint32_t job_id;	/* set if request for a single job ID */
+	uint32_t user_id;	/* set if request for a single user ID */
 
-    uint32_t convert_flags;
+	uint32_t convert_flags;
 
-    List account_list;
-    List format_list;
-    List job_list;
-    List licenses_list;
-    List name_list;
-    List part_list;
-    List qos_list;
-    List state_list;
-    List step_list;
-    List user_list;
+	List  account_list;
+	List  format_list;
+	List  job_list;
+	List  licenses_list;
+	List  name_list;
+	List  part_list;
+	List  qos_list;
+	List  state_list;
+	List  step_list;
+	List  user_list;
 };
 
 extern struct squeue_parameters params;
 
-extern void parse_command_line(int argc, char **argv);
-
-extern int parse_format(char *format);
-
-extern int parse_long_format(char *format_long);
-
-extern void sort_job_list(List job_list);
-
-extern void sort_jobs_by_start_time(List job_list);
-
-extern void sort_step_list(List step_list);
+extern void parse_command_line( int argc, char* *argv );
+extern int  parse_format( char* format );
+extern int  parse_long_format( char* format_long);
+extern void sort_job_list( List job_list );
+extern void sort_jobs_by_start_time( List job_list );
+extern void sort_step_list( List step_list );
 
 #endif

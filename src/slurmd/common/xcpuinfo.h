@@ -44,8 +44,8 @@ extern int get_procs(uint16_t *procs);
 
 /* read or load topology and write if needed
  * init and destroy topology must be outside this function */
-extern int xcpuinfo_hwloc_topo_load(void *topology_in, char *topo_file, bool full);
-
+extern int xcpuinfo_hwloc_topo_load(
+	void *topology_in, char *topo_file, bool full);
 /*
  * Get the node's cpu info.
  *
@@ -60,9 +60,11 @@ extern int xcpuinfo_hwloc_topo_load(void *topology_in, char *topo_file, bool ful
  *
  * RET SLURM_SUCCESS on success and 1 or 2 on failure.
  */
-extern int
-xcpuinfo_hwloc_topo_get(uint16_t *cpus, uint16_t *boards, uint16_t *sockets, uint16_t *cores, uint16_t *threads,
-                        uint16_t *block_map_size, uint16_t **block_map, uint16_t **block_map_inv);
+extern int xcpuinfo_hwloc_topo_get(
+	uint16_t *cpus, uint16_t *boards,
+	uint16_t *sockets, uint16_t *cores, uint16_t *threads,
+	uint16_t *block_map_size,
+	uint16_t **block_map, uint16_t **block_map_inv);
 
 /*
  * Initialize xcpuinfo internal data
@@ -94,7 +96,7 @@ int xcpuinfo_fini(void);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_abs_to_mac(char *lrange, char **prange);
+int xcpuinfo_abs_to_mac(char* lrange,char** prange);
 
 /*
  * Use xcpuinfo internal data to convert a machine range
@@ -108,7 +110,7 @@ int xcpuinfo_abs_to_mac(char *lrange, char **prange);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_mac_to_abs(char *lrange, char **prange);
+int xcpuinfo_mac_to_abs(char* lrange,char** prange);
 
 /*
  * Use xcpuinfo internal data to convert an abstract range
@@ -123,7 +125,7 @@ int xcpuinfo_mac_to_abs(char *lrange, char **prange);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_abs_to_map(char *lrange, uint16_t **map, uint16_t *map_size);
+int xcpuinfo_abs_to_map(char* lrange,uint16_t **map,uint16_t *map_size);
 
 /*
  * Use xcpuinfo internal data to convert a machine range
@@ -137,7 +139,7 @@ int xcpuinfo_abs_to_map(char *lrange, uint16_t **map, uint16_t *map_size);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_mac_to_map(char *lrange, uint16_t **map, uint16_t *map_size);
+int xcpuinfo_mac_to_map(char* lrange,uint16_t **map,uint16_t *map_size);
 
 /*
  * Use xcpuinfo internal data to convert a machine map
@@ -149,7 +151,7 @@ int xcpuinfo_mac_to_map(char *lrange, uint16_t **map, uint16_t *map_size);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_map_to_mac(uint16_t *map, uint16_t map_size, char **range);
+int xcpuinfo_map_to_mac(uint16_t *map,uint16_t map_size,char** range);
 
 /*
  * Use xcpuinfo internal data to convert an abstract map of cores
@@ -161,7 +163,8 @@ int xcpuinfo_map_to_mac(uint16_t *map, uint16_t map_size, char **range);
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size);
+int xcpuinfo_absmap_to_macmap(uint16_t *amap,uint16_t amap_size,
+			      uint16_t **bmap,uint16_t *bmap_size);
 
 /*
  * Use xcpuinfo internal data to convert a machine map of cores
@@ -173,6 +176,7 @@ int xcpuinfo_absmap_to_macmap(uint16_t *amap, uint16_t amap_size, uint16_t **bma
  *  - XCPUINFO_ERROR
  *  - XCPUINFO_SUCCESS
  */
-int xcpuinfo_macmap_to_absmap(uint16_t *amap, uint16_t amap_size, uint16_t **bmap, uint16_t *bmap_size);
+int xcpuinfo_macmap_to_absmap(uint16_t *amap,uint16_t amap_size,
+			      uint16_t **bmap,uint16_t *bmap_size);
 
 #endif

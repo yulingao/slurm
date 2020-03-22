@@ -53,201 +53,213 @@ static uint32_t recorded_jobid = NO_VAL;
 static uint32_t recorded_stepid = NO_VAL;
 
 static void *_monitor(void *);
-
 static int _call_external_program(stepd_step_rec_t *job);
 
-void step_terminate_monitor_start(stepd_step_rec_t *job) {
-    slurm_ctl_conf_t *conf;
+void step_terminate_monitor_start(stepd_step_rec_t *job)
+{
+	slurm_ctl_conf_t *conf;
 
-    slurm_mutex_lock(&lock);
+	slurm_mutex_lock(&lock);
 
-    if (running_flag) {
-        slurm_mutex_unlock(&lock);
-        return;
-    }
+	if (running_flag) {
+		slurm_mutex_unlock(&lock);
+		return;
+	}
 
-    conf = slurm_conf_lock();
-    timeout = conf->unkillable_timeout;
-    program_name = xstrdup(conf->unkillable_program);
-    slurm_conf_unlock();
+	conf = slurm_conf_lock();
+	timeout = conf->unkillable_timeout;
+	program_name = xstrdup(conf->unkillable_program);
+	slurm_conf_unlock();
 
-    slurm_thread_create(&tid, _monitor, job);
+	slurm_thread_create(&tid, _monitor, job);
 
-    running_flag = 1;
-    recorded_jobid = job->jobid;
-    recorded_stepid = job->stepid;
+	running_flag = 1;
+	recorded_jobid = job->jobid;
+	recorded_stepid = job->stepid;
 
-    slurm_mutex_unlock(&lock);
+	slurm_mutex_unlock(&lock);
 }
 
-void step_terminate_monitor_stop(void) {
-    slurm_mutex_lock(&lock);
+void step_terminate_monitor_stop(void)
+{
+	slurm_mutex_lock(&lock);
 
-    if (!running_flag) {
-        slurm_mutex_unlock(&lock);
-        return;
-    }
-    if (stop_flag) {
-        error("step_terminate_monitor_stop: already stopped");
-        slurm_mutex_unlock(&lock);
-        return;
-    }
+	if (!running_flag) {
+		slurm_mutex_unlock(&lock);
+		return;
+	}
+	if (stop_flag) {
+		error("step_terminate_monitor_stop: already stopped");
+		slurm_mutex_unlock(&lock);
+		return;
+	}
 
-    stop_flag = 1;
-    debug("step_terminate_monitor_stop signaling condition");
-    slurm_cond_signal(&cond);
-    slurm_mutex_unlock(&lock);
+	stop_flag = 1;
+	debug("step_terminate_monitor_stop signaling condition");
+	slurm_cond_signal(&cond);
+	slurm_mutex_unlock(&lock);
 
-    if (pthread_join(tid, NULL) != 0) {
-        error("step_terminate_monitor_stop: pthread_join: %m");
-    }
+	if (pthread_join(tid, NULL) != 0) {
+		error("step_terminate_monitor_stop: pthread_join: %m");
+	}
 
-    xfree(program_name);
-    return;
-}
-
-
-static void *_monitor(void *arg) {
-    stepd_step_rec_t *job = (stepd_step_rec_t *) arg;
-    struct timespec ts = {0, 0};
-    int rc;
-
-    debug2("step_terminate_monitor will run for %d secs", timeout);
-
-    ts.tv_sec = time(NULL) + 1 + timeout;
-
-    slurm_mutex_lock(&lock);
-    if (stop_flag)
-        goto done;
-
-    rc = pthread_cond_timedwait(&cond, &lock, &ts);
-    if (rc == ETIMEDOUT) {
-        char entity[24], time_str[24];
-        time_t now = time(NULL);
-        int rc;
-
-        _call_external_program(job);
-
-        if (job->stepid == SLURM_BATCH_SCRIPT) {
-            snprintf(entity, sizeof(entity), "JOB %u", job->jobid);
-        } else if (job->stepid == SLURM_EXTERN_CONT) {
-            snprintf(entity, sizeof(entity), "EXTERN STEP FOR %u", job->jobid);
-        } else {
-            snprintf(entity, sizeof(entity), "STEP %u.%u", job->jobid, job->stepid);
-        }
-        slurm_make_time_str(&now, time_str, sizeof(time_str));
-
-        if (job->state < SLURMSTEPD_STEP_RUNNING) {
-            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT RUNNING ***", entity, job->node_name, time_str);
-            rc = ESLURMD_JOB_NOTRUNNING;
-        } else {
-            error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT ENDING WITH SIGNALS ***", entity, job->node_name,
-                  time_str);
-            rc = ESLURMD_KILL_TASK_FAILED;
-        }
-
-        stepd_drain_node(slurm_strerror(rc));
-
-        if (!job->batch) {
-            /* Notify waiting sruns */
-            if (job->stepid != SLURM_EXTERN_CONT)
-                while (stepd_send_pending_exit_msgs(job)) { ; }
-
-            if ((step_complete.rank > -1)) {
-                if (job->aborted)
-                    info("unkillable stepd exiting with aborted job");
-                else
-                    stepd_wait_for_children_slurmstepd(job);
-            }
-            /* Notify parent stepd or ctld directly */
-            stepd_send_step_complete_msgs(job);
-        }
-
-        exit(stepd_cleanup(NULL, job, NULL, NULL, rc, 0));
-    } else if (rc != 0) {
-        error("Error waiting on condition in _monitor: %m");
-    }
-    done:
-    slurm_mutex_unlock(&lock);
-
-    debug2("step_terminate_monitor is stopping");
-    return NULL;
+	xfree(program_name);
+	return;
 }
 
 
-static int _call_external_program(stepd_step_rec_t *job) {
-    int status, rc, opt;
-    pid_t cpid;
-    int max_wait = 300; /* seconds */
-    int time_remaining;
+static void *_monitor(void *arg)
+{
+	stepd_step_rec_t *job = (stepd_step_rec_t *)arg;
+	struct timespec ts = {0, 0};
+	int rc;
 
-    if (program_name == NULL || program_name[0] == '\0')
-        return 0;
+	debug2("step_terminate_monitor will run for %d secs", timeout);
 
-    debug("step_terminate_monitor: unkillable after %d sec, calling: %s", timeout, program_name);
+	ts.tv_sec = time(NULL) + 1 + timeout;
 
-    if (access(program_name, R_OK | X_OK) < 0) {
-        debug("step_terminate_monitor not running %s: %m", program_name);
-        return 0;
-    }
+	slurm_mutex_lock(&lock);
+	if (stop_flag)
+		goto done;
 
-    if ((cpid = fork()) < 0) {
-        error("step_terminate_monitor executing %s: fork: %m", program_name);
-        return -1;
-    }
-    if (cpid == 0) {
-        /* child */
-        char *argv[2];
-        char buf[16];
+	rc = pthread_cond_timedwait(&cond, &lock, &ts);
+	if (rc == ETIMEDOUT) {
+		char entity[24], time_str[24];
+		time_t now = time(NULL);
+		int rc;
 
-        /* container_g_join needs to be called in the
-           forked process part of the fork to avoid a race
-           condition where if this process makes a file or
-           detacts itself from a child before we add the pid
-           to the container in the parent of the fork.
-        */
-        if (container_g_join(recorded_jobid, getuid()) != SLURM_SUCCESS)
-            error("container_g_join(%u): %m", recorded_jobid);
+		_call_external_program(job);
 
-        snprintf(buf, 16, "%u", recorded_jobid);
-        setenv("SLURM_JOBID", buf, 1);
-        setenv("SLURM_JOB_ID", buf, 1);
-        snprintf(buf, 16, "%u", recorded_stepid);
-        setenv("SLURM_STEPID", buf, 1);
-        setenv("SLURM_STEP_ID", buf, 1);
+		if (job->stepid == SLURM_BATCH_SCRIPT) {
+			snprintf(entity, sizeof(entity),
+				 "JOB %u", job->jobid);
+		} else if (job->stepid == SLURM_EXTERN_CONT) {
+			snprintf(entity, sizeof(entity),
+				 "EXTERN STEP FOR %u", job->jobid);
+		} else {
+			snprintf(entity, sizeof(entity), "STEP %u.%u",
+				 job->jobid, job->stepid);
+		}
+		slurm_make_time_str(&now, time_str, sizeof(time_str));
 
-        argv[0] = program_name;
-        argv[1] = NULL;
+		if (job->state < SLURMSTEPD_STEP_RUNNING) {
+			error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT RUNNING ***",
+			      entity, job->node_name, time_str);
+			rc = ESLURMD_JOB_NOTRUNNING;
+		} else {
+			error("*** %s STEPD TERMINATED ON %s AT %s DUE TO JOB NOT ENDING WITH SIGNALS ***",
+			      entity, job->node_name, time_str);
+			rc = ESLURMD_KILL_TASK_FAILED;
+		}
 
-        setpgid(0, 0);
-        execv(program_name, argv);
-        error("step_terminate_monitor execv(): %m");
-        exit(127);
-    }
+		stepd_drain_node(slurm_strerror(rc));
 
-    opt = WNOHANG;
-    time_remaining = max_wait;
-    while (1) {
-        rc = waitpid(cpid, &status, opt);
-        if (rc < 0) {
-            if (errno == EINTR)
-                continue;
-            /* waitpid may very well fail under normal conditions
-               because the wait3() in mgr.c:_wait_for_any_task()
-               may have reaped the return code. */
-            return 0;
-        } else if (rc == 0) {
-            sleep(1);
-            if ((--time_remaining) == 0) {
-                error("step_terminate_monitor: %s still running"
-                      " after %d seconds.  Killing.", program_name, max_wait);
-                killpg(cpid, SIGKILL);
-                opt = 0;
-            }
-        } else {
-            return status;
-        }
-    }
+		if (!job->batch) {
+			/* Notify waiting sruns */
+			if (job->stepid != SLURM_EXTERN_CONT)
+				while (stepd_send_pending_exit_msgs(job)) {;}
 
-    /* NOTREACHED */
+			if ((step_complete.rank > -1)) {
+				if (job->aborted)
+					info("unkillable stepd exiting with aborted job");
+				else
+					stepd_wait_for_children_slurmstepd(job);
+			}
+			/* Notify parent stepd or ctld directly */
+			stepd_send_step_complete_msgs(job);
+		}
+
+	        exit(stepd_cleanup(NULL, job, NULL, NULL, rc, 0));
+	} else if (rc != 0) {
+		error("Error waiting on condition in _monitor: %m");
+	}
+done:
+	slurm_mutex_unlock(&lock);
+
+	debug2("step_terminate_monitor is stopping");
+	return NULL;
+}
+
+
+static int _call_external_program(stepd_step_rec_t *job)
+{
+	int status, rc, opt;
+	pid_t cpid;
+	int max_wait = 300; /* seconds */
+	int time_remaining;
+
+	if (program_name == NULL || program_name[0] == '\0')
+		return 0;
+
+	debug("step_terminate_monitor: unkillable after %d sec, calling: %s",
+	     timeout, program_name);
+
+	if (access(program_name, R_OK | X_OK) < 0) {
+		debug("step_terminate_monitor not running %s: %m",
+		      program_name);
+		return 0;
+	}
+
+	if ((cpid = fork()) < 0) {
+		error("step_terminate_monitor executing %s: fork: %m",
+		      program_name);
+		return -1;
+	}
+	if (cpid == 0) {
+		/* child */
+		char *argv[2];
+		char buf[16];
+
+		/* container_g_join needs to be called in the
+		   forked process part of the fork to avoid a race
+		   condition where if this process makes a file or
+		   detacts itself from a child before we add the pid
+		   to the container in the parent of the fork.
+		*/
+		if (container_g_join(recorded_jobid, getuid())
+		    != SLURM_SUCCESS)
+			error("container_g_join(%u): %m", recorded_jobid);
+
+		snprintf(buf, 16, "%u", recorded_jobid);
+		setenv("SLURM_JOBID", buf, 1);
+		setenv("SLURM_JOB_ID", buf, 1);
+		snprintf(buf, 16, "%u", recorded_stepid);
+		setenv("SLURM_STEPID", buf, 1);
+		setenv("SLURM_STEP_ID", buf, 1);
+
+		argv[0] = program_name;
+		argv[1] = NULL;
+
+		setpgid(0, 0);
+		execv(program_name, argv);
+		error("step_terminate_monitor execv(): %m");
+		exit(127);
+	}
+
+	opt = WNOHANG;
+	time_remaining = max_wait;
+	while (1) {
+		rc = waitpid(cpid, &status, opt);
+		if (rc < 0) {
+			if (errno == EINTR)
+				continue;
+			/* waitpid may very well fail under normal conditions
+			   because the wait3() in mgr.c:_wait_for_any_task()
+			   may have reaped the return code. */
+			return 0;
+		} else if (rc == 0) {
+			sleep(1);
+			if ((--time_remaining) == 0) {
+				error("step_terminate_monitor: %s still running"
+				      " after %d seconds.  Killing.",
+				      program_name, max_wait);
+				killpg(cpid, SIGKILL);
+				opt = 0;
+			}
+		} else  {
+			return status;
+		}
+	}
+
+	/* NOTREACHED */
 }

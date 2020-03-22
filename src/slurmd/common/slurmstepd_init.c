@@ -39,113 +39,117 @@
 #include "src/slurmd/common/slurmstepd_init.h"
 #include "src/common/xstring.h"
 
-#define PROTOCOL_VERSION    "PROTOCOL_VERSION"
+#define PROTOCOL_VERSION	"PROTOCOL_VERSION"
 
 /* Assume that the slurmd and slurmstepd are the same version level when slurmd
  * starts slurmstepd, so we do not need to support different protocol versions
  * for the different message formats. */
-extern void pack_slurmd_conf_lite(slurmd_conf_t *conf, Buf buffer) {
-    xassert(conf != NULL);
-    packstr(PROTOCOL_VERSION, buffer);
-    pack16(SLURM_PROTOCOL_VERSION, buffer);
+extern void pack_slurmd_conf_lite(slurmd_conf_t *conf, Buf buffer)
+{
+	xassert(conf != NULL);
+	packstr(PROTOCOL_VERSION, buffer);
+	pack16(SLURM_PROTOCOL_VERSION, buffer);
 
-    packstr(conf->hostname, buffer);
-    pack16(conf->cpus, buffer);
-    pack16(conf->boards, buffer);
-    pack16(conf->sockets, buffer);
-    pack16(conf->cores, buffer);
-    pack16(conf->threads, buffer);
-    pack64(conf->real_memory_size, buffer);
-    pack16(conf->block_map_size, buffer);
-    pack16_array(conf->block_map, conf->block_map_size, buffer);
-    pack16_array(conf->block_map_inv, conf->block_map_size, buffer);
-    packstr(conf->spooldir, buffer);
-    packstr(conf->node_name, buffer);
-    packstr(conf->logfile, buffer);
-    packstr(conf->task_prolog, buffer);
-    packstr(conf->task_epilog, buffer);
-    packstr(conf->job_acct_gather_freq, buffer);
-    packstr(conf->job_acct_gather_type, buffer);
-    pack16(conf->propagate_prio, buffer);
-    pack64(conf->debug_flags, buffer);
-    pack32(conf->debug_level, buffer);
-    pack32(conf->daemonize, buffer);
-    pack32((uint32_t) conf->slurm_user_id, buffer);
-    pack16(conf->use_pam, buffer);
-    pack32(conf->task_plugin_param, buffer);
-    packstr(conf->node_topo_addr, buffer);
-    packstr(conf->node_topo_pattern, buffer);
-    pack32((uint32_t) conf->port, buffer);
-    pack16(conf->log_fmt, buffer);
-    pack16(conf->job_acct_oom_kill, buffer);
-    pack64(conf->msg_aggr_window_msgs, buffer);
-    packstr(conf->tmpfs, buffer);
-    packstr(conf->x11_params, buffer);
+	packstr(conf->hostname, buffer);
+	pack16(conf->cpus, buffer);
+	pack16(conf->boards, buffer);
+	pack16(conf->sockets, buffer);
+	pack16(conf->cores, buffer);
+	pack16(conf->threads, buffer);
+	pack64(conf->real_memory_size, buffer);
+	pack16(conf->block_map_size, buffer);
+	pack16_array(conf->block_map, conf->block_map_size, buffer);
+	pack16_array(conf->block_map_inv, conf->block_map_size, buffer);
+	packstr(conf->spooldir, buffer);
+	packstr(conf->node_name, buffer);
+	packstr(conf->logfile, buffer);
+	packstr(conf->task_prolog, buffer);
+	packstr(conf->task_epilog, buffer);
+	packstr(conf->job_acct_gather_freq, buffer);
+	packstr(conf->job_acct_gather_type, buffer);
+	pack16(conf->propagate_prio, buffer);
+	pack64(conf->debug_flags, buffer);
+	pack32(conf->debug_level, buffer);
+	pack32(conf->daemonize, buffer);
+	pack32((uint32_t)conf->slurm_user_id, buffer);
+	pack16(conf->use_pam, buffer);
+	pack32(conf->task_plugin_param, buffer);
+	packstr(conf->node_topo_addr, buffer);
+	packstr(conf->node_topo_pattern, buffer);
+	pack32((uint32_t)conf->port, buffer);
+	pack16(conf->log_fmt, buffer);
+	pack16(conf->job_acct_oom_kill, buffer);
+	pack64(conf->msg_aggr_window_msgs, buffer);
+	packstr(conf->tmpfs, buffer);
+	packstr(conf->x11_params, buffer);
 }
 
-extern int unpack_slurmd_conf_lite_no_alloc(slurmd_conf_t *conf, Buf buffer) {
-    uint32_t uint32_tmp;
-    uint16_t protocol_version;
-    char *ver_str = NULL;
+extern int unpack_slurmd_conf_lite_no_alloc(slurmd_conf_t *conf, Buf buffer)
+{
+	uint32_t uint32_tmp;
+	uint16_t protocol_version;
+	char *ver_str = NULL;
 
-    safe_unpackstr_xmalloc(&ver_str, &uint32_tmp, buffer);
-    safe_unpack16(&protocol_version, buffer);
-    xfree(ver_str);
+	safe_unpackstr_xmalloc(&ver_str, &uint32_tmp, buffer);
+	safe_unpack16(&protocol_version, buffer);
+	xfree(ver_str);
 
-    if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        safe_unpackstr_xmalloc(&conf->hostname, &uint32_tmp, buffer);
-        safe_unpack16(&conf->cpus, buffer);
-        safe_unpack16(&conf->boards, buffer);
-        safe_unpack16(&conf->sockets, buffer);
-        safe_unpack16(&conf->cores, buffer);
-        safe_unpack16(&conf->threads, buffer);
-        safe_unpack64(&conf->real_memory_size, buffer);
-        safe_unpack16(&conf->block_map_size, buffer);
-        safe_unpack16_array(&conf->block_map, &uint32_tmp, buffer);
-        safe_unpack16_array(&conf->block_map_inv, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->spooldir, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->node_name, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->logfile, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->task_prolog, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->task_epilog, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->job_acct_gather_freq, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->job_acct_gather_type, &uint32_tmp, buffer);
-        safe_unpack16(&conf->propagate_prio, buffer);
-        safe_unpack64(&conf->debug_flags, buffer);
-        safe_unpack32(&uint32_tmp, buffer);
-        conf->debug_level = uint32_tmp;
-        safe_unpack32(&uint32_tmp, buffer);
-        conf->daemonize = uint32_tmp;
-        safe_unpack32(&uint32_tmp, buffer);
-        conf->slurm_user_id = (uid_t) uint32_tmp;
-        safe_unpack16(&conf->use_pam, buffer);
-        safe_unpack32(&conf->task_plugin_param, buffer);
-        safe_unpackstr_xmalloc(&conf->node_topo_addr, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->node_topo_pattern, &uint32_tmp, buffer);
-        safe_unpack32(&uint32_tmp, buffer);
-        conf->port = uint32_tmp;
-        safe_unpack16(&conf->log_fmt, buffer);
-        safe_unpack16(&conf->job_acct_oom_kill, buffer);
-        safe_unpack64(&conf->msg_aggr_window_msgs, buffer);
-        safe_unpackstr_xmalloc(&conf->tmpfs, &uint32_tmp, buffer);
-        safe_unpackstr_xmalloc(&conf->x11_params, &uint32_tmp, buffer);
-    }
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+		safe_unpackstr_xmalloc(&conf->hostname, &uint32_tmp, buffer);
+		safe_unpack16(&conf->cpus, buffer);
+		safe_unpack16(&conf->boards, buffer);
+		safe_unpack16(&conf->sockets, buffer);
+		safe_unpack16(&conf->cores, buffer);
+		safe_unpack16(&conf->threads, buffer);
+		safe_unpack64(&conf->real_memory_size, buffer);
+		safe_unpack16(&conf->block_map_size, buffer);
+		safe_unpack16_array(&conf->block_map, &uint32_tmp, buffer);
+		safe_unpack16_array(&conf->block_map_inv,  &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->spooldir,    &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->node_name,   &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->logfile,     &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->task_prolog, &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->task_epilog, &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->job_acct_gather_freq, &uint32_tmp,
+				       buffer);
+		safe_unpackstr_xmalloc(&conf->job_acct_gather_type, &uint32_tmp,
+				       buffer);
+		safe_unpack16(&conf->propagate_prio, buffer);
+		safe_unpack64(&conf->debug_flags, buffer);
+		safe_unpack32(&uint32_tmp, buffer);
+		conf->debug_level = uint32_tmp;
+		safe_unpack32(&uint32_tmp, buffer);
+		conf->daemonize = uint32_tmp;
+		safe_unpack32(&uint32_tmp, buffer);
+		conf->slurm_user_id = (uid_t)uint32_tmp;
+		safe_unpack16(&conf->use_pam, buffer);
+		safe_unpack32(&conf->task_plugin_param, buffer);
+		safe_unpackstr_xmalloc(&conf->node_topo_addr, &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->node_topo_pattern, &uint32_tmp, buffer);
+		safe_unpack32(&uint32_tmp, buffer);
+		conf->port = uint32_tmp;
+		safe_unpack16(&conf->log_fmt, buffer);
+		safe_unpack16(&conf->job_acct_oom_kill, buffer);
+		safe_unpack64(&conf->msg_aggr_window_msgs, buffer);
+		safe_unpackstr_xmalloc(&conf->tmpfs, &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&conf->x11_params, &uint32_tmp, buffer);
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 
-    unpack_error:
-    error("unpack_error in unpack_slurmd_conf_lite_no_alloc: %m");
-    xfree(conf->job_acct_gather_freq);
-    xfree(conf->job_acct_gather_type);
-    xfree(conf->hostname);
-    xfree(conf->spooldir);
-    xfree(conf->node_name);
-    xfree(conf->logfile);
-    xfree(conf->task_prolog);
-    xfree(conf->task_epilog);
-    xfree(conf->node_topo_addr);
-    xfree(conf->node_topo_pattern);
-    xfree(conf->tmpfs);
-    xfree(conf->x11_params);
-    return SLURM_ERROR;
+unpack_error:
+	error("unpack_error in unpack_slurmd_conf_lite_no_alloc: %m");
+	xfree(conf->job_acct_gather_freq);
+	xfree(conf->job_acct_gather_type);
+	xfree(conf->hostname);
+	xfree(conf->spooldir);
+	xfree(conf->node_name);
+	xfree(conf->logfile);
+	xfree(conf->task_prolog);
+	xfree(conf->task_epilog);
+	xfree(conf->node_topo_addr);
+	xfree(conf->node_topo_pattern);
+	xfree(conf->tmpfs);
+	xfree(conf->x11_params);
+	return SLURM_ERROR;
 }

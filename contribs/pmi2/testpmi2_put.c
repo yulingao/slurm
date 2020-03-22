@@ -3,7 +3,8 @@
 #include <slurm/pmi2.h>
 
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int spawned, size, rank, appnum;
     int ret;
     char jobid[50];
@@ -18,7 +19,8 @@ int main(int argc, char **argv) {
     }
 
     PMI2_Job_GetId(jobid, sizeof(jobid));
-    printf("spawned=%d, size=%d, rank=%d, appnum=%d, jobid=%s\n", spawned, size, rank, appnum, jobid);
+    printf("spawned=%d, size=%d, rank=%d, appnum=%d, jobid=%s\n",
+           spawned, size, rank, appnum, jobid);
     fflush(stdout);
 
     PMI2_KVS_Fence();

@@ -54,145 +54,161 @@
  * doesn't need to include the slurm.h in the header.
  */
 
-extern uint16_t slurmdb_setup_cluster_dims(void) {
-    return working_cluster_rec ? working_cluster_rec->dimensions : SYSTEM_DIMENSIONS;
+extern uint16_t slurmdb_setup_cluster_dims(void)
+{
+	return working_cluster_rec ?
+		working_cluster_rec->dimensions : SYSTEM_DIMENSIONS;
 }
 
-extern int *slurmdb_setup_cluster_dim_size(void) {
-    if (working_cluster_rec)
-        return working_cluster_rec->dim_size;
+extern int *slurmdb_setup_cluster_dim_size(void)
+{
+	if (working_cluster_rec)
+		return working_cluster_rec->dim_size;
 
-    return NULL;
+	return NULL;
 }
 
-extern bool is_cray_system(void) {
-    if (working_cluster_rec)
-        return working_cluster_rec->flags & CLUSTER_FLAG_CRAY;
+extern bool is_cray_system(void)
+{
+	if (working_cluster_rec)
+		return working_cluster_rec->flags & CLUSTER_FLAG_CRAY;
 
 #ifdef HAVE_NATIVE_CRAY
-    return true;
+	return true;
 #else
-    return false;
+	return false;
 #endif
 }
 
-extern uint16_t slurmdb_setup_cluster_name_dims(void) {
-    if (is_cray_system())
-        return 1;    /* Cray uses 1-dimensional hostlists */
+extern uint16_t slurmdb_setup_cluster_name_dims(void)
+{
+	if (is_cray_system())
+		return 1;	/* Cray uses 1-dimensional hostlists */
 
-    return slurmdb_setup_cluster_dims();
+	return slurmdb_setup_cluster_dims();
 }
 
-extern uint32_t slurmdb_setup_cluster_flags(void) {
-    static uint32_t cluster_flags = NO_VAL;
+extern uint32_t slurmdb_setup_cluster_flags(void)
+{
+	static uint32_t cluster_flags = NO_VAL;
 
-    if (working_cluster_rec)
-        return working_cluster_rec->flags;
-    else if (cluster_flags != NO_VAL)
-        return cluster_flags;
+	if (working_cluster_rec)
+		return working_cluster_rec->flags;
+	else if (cluster_flags != NO_VAL)
+		return cluster_flags;
 
-    cluster_flags = 0;
+	cluster_flags = 0;
 #ifdef MULTIPLE_SLURMD
-    cluster_flags |= CLUSTER_FLAG_MULTSD;
+	cluster_flags |= CLUSTER_FLAG_MULTSD;
 #endif
 #ifdef HAVE_FRONT_END
-    cluster_flags |= CLUSTER_FLAG_FE;
+	cluster_flags |= CLUSTER_FLAG_FE;
 #endif
 #ifdef HAVE_NATIVE_CRAY
-    cluster_flags |= CLUSTER_FLAG_CRAY_N;
+	cluster_flags |= CLUSTER_FLAG_CRAY_N;
 #endif
-    return cluster_flags;
+	return cluster_flags;
 }
 
-static uint32_t _str_2_cluster_flags(char *flags_in) {
-    if (xstrcasestr(flags_in, "AlpsCray") || xstrcasestr(flags_in, "CrayXT"))
-        return CLUSTER_FLAG_CRAY_A;
+static uint32_t _str_2_cluster_flags(char *flags_in)
+{
+	if (xstrcasestr(flags_in, "AlpsCray")
+	    || xstrcasestr(flags_in, "CrayXT"))
+		return CLUSTER_FLAG_CRAY_A;
 
-    if (xstrcasestr(flags_in, "FrontEnd"))
-        return CLUSTER_FLAG_FE;
+	if (xstrcasestr(flags_in, "FrontEnd"))
+		return CLUSTER_FLAG_FE;
 
-    if (xstrcasestr(flags_in, "MultipleSlurmd"))
-        return CLUSTER_FLAG_MULTSD;
+	if (xstrcasestr(flags_in, "MultipleSlurmd"))
+		return CLUSTER_FLAG_MULTSD;
 
-    if (xstrcasestr(flags_in, "Cray"))
-        return CLUSTER_FLAG_CRAY_N;
+	if (xstrcasestr(flags_in, "Cray"))
+		return CLUSTER_FLAG_CRAY_N;
 
-    return (uint32_t) 0;
+	return (uint32_t) 0;
 }
 
 
-extern uint32_t slurmdb_str_2_cluster_flags(char *flags_in) {
-    uint32_t cluster_flags = 0;
-    char *token, *my_flags, *last = NULL;
+extern uint32_t slurmdb_str_2_cluster_flags(char *flags_in)
+{
+	uint32_t cluster_flags = 0;
+	char *token, *my_flags, *last = NULL;
 
-    my_flags = xstrdup(flags_in);
-    token = strtok_r(my_flags, ",", &last);
-    while (token) {
-        cluster_flags |= _str_2_cluster_flags(token);
-        token = strtok_r(NULL, ",", &last);
-    }
-    xfree(my_flags);
+	my_flags = xstrdup(flags_in);
+	token = strtok_r(my_flags, ",", &last);
+	while (token) {
+		cluster_flags |= _str_2_cluster_flags(token);
+		token = strtok_r(NULL, ",", &last);
+	}
+	xfree(my_flags);
 
-    return cluster_flags;
+	return cluster_flags;
 }
 
 /* must xfree() returned string */
-extern char *slurmdb_cluster_flags_2_str(uint32_t flags_in) {
-    char *cluster_flags = NULL;
+extern char *slurmdb_cluster_flags_2_str(uint32_t flags_in)
+{
+	char *cluster_flags = NULL;
 
-    if (flags_in & CLUSTER_FLAG_CRAY_A) {
-        if (cluster_flags)
-            xstrcat(cluster_flags, ",");
-        xstrcat(cluster_flags, "AlpsCray");
-    }
+	if (flags_in & CLUSTER_FLAG_CRAY_A) {
+		if (cluster_flags)
+			xstrcat(cluster_flags, ",");
+		xstrcat(cluster_flags, "AlpsCray");
+	}
 
-    if (flags_in & CLUSTER_FLAG_FE) {
-        if (cluster_flags)
-            xstrcat(cluster_flags, ",");
-        xstrcat(cluster_flags, "FrontEnd");
-    }
+	if (flags_in & CLUSTER_FLAG_FE) {
+		if (cluster_flags)
+			xstrcat(cluster_flags, ",");
+		xstrcat(cluster_flags, "FrontEnd");
+	}
 
-    if (flags_in & CLUSTER_FLAG_MULTSD) {
-        if (cluster_flags)
-            xstrcat(cluster_flags, ",");
-        xstrcat(cluster_flags, "MultipleSlurmd");
-    }
+	if (flags_in & CLUSTER_FLAG_MULTSD) {
+		if (cluster_flags)
+			xstrcat(cluster_flags, ",");
+		xstrcat(cluster_flags, "MultipleSlurmd");
+	}
 
-    if (flags_in & CLUSTER_FLAG_CRAY_N) {
-        if (cluster_flags)
-            xstrcat(cluster_flags, ",");
-        xstrcat(cluster_flags, "Cray");
-    }
+	if (flags_in & CLUSTER_FLAG_CRAY_N) {
+		if (cluster_flags)
+			xstrcat(cluster_flags, ",");
+		xstrcat(cluster_flags, "Cray");
+	}
 
-    if (!cluster_flags)
-        cluster_flags = xstrdup("None");
+	if (!cluster_flags)
+		cluster_flags = xstrdup("None");
 
-    return cluster_flags;
+	return cluster_flags;
 }
 
-extern uint32_t slurmdb_setup_plugin_id_select(void) {
-    return select_get_plugin_id();
+extern uint32_t slurmdb_setup_plugin_id_select(void)
+{
+	return select_get_plugin_id();
 }
 
-extern void slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg) {
-    xassert(msg);
-    xassert(msg->working_cluster_rec);
-    xassert(msg->node_list);
-    xassert(msg->node_addr);
+extern void
+slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg)
+{
+	xassert(msg);
+	xassert(msg->working_cluster_rec);
+	xassert(msg->node_list);
+	xassert(msg->node_addr);
 
-    if (working_cluster_rec)
-        slurmdb_destroy_cluster_rec(working_cluster_rec);
+	if (working_cluster_rec)
+		slurmdb_destroy_cluster_rec(working_cluster_rec);
 
-    working_cluster_rec = (slurmdb_cluster_rec_t *) msg->working_cluster_rec;
-    msg->working_cluster_rec = NULL;
+	working_cluster_rec = (slurmdb_cluster_rec_t *)msg->working_cluster_rec;
+	msg->working_cluster_rec = NULL;
 
-    working_cluster_rec->plugin_id_select = select_get_plugin_id_pos(working_cluster_rec->plugin_id_select);
+	working_cluster_rec->plugin_id_select =
+		select_get_plugin_id_pos(working_cluster_rec->plugin_id_select);
 
-    slurm_set_addr(&working_cluster_rec->control_addr, working_cluster_rec->control_port,
-                   working_cluster_rec->control_host);
+	slurm_set_addr(&working_cluster_rec->control_addr,
+		       working_cluster_rec->control_port,
+		       working_cluster_rec->control_host);
 
-    if (setenvf(NULL, "SLURM_CLUSTER_NAME", "%s", working_cluster_rec->name) < 0)
-        error("unable to set SLURM_CLUSTER_NAME in environment");
+	if (setenvf(NULL, "SLURM_CLUSTER_NAME", "%s",
+		    working_cluster_rec->name) < 0)
+		error("unable to set SLURM_CLUSTER_NAME in environment");
 
-    add_remote_nodes_to_conf_tbls(msg->node_list, msg->node_addr);
+	add_remote_nodes_to_conf_tbls(msg->node_list, msg->node_addr);
 }

@@ -34,8 +34,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
-#define _GNU_SOURCE    /* For POLLRDHUP */
-
+#define _GNU_SOURCE	/* For POLLRDHUP */
 #include <ctype.h>
 #include <poll.h>
 #include <stdlib.h>
@@ -72,41 +71,46 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "power none plugin";
-const char plugin_type[] = "power/none";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "power none plugin";
+const char plugin_type[]        = "power/none";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    debug("%s: %s", plugin_name, __func__);
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	debug("%s: %s", plugin_name, __func__);
+	return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is unloaded. Free all memory.
  */
-extern void fini(void) {
-    debug("%s: %s", plugin_name, __func__);
-    return;
+extern void fini(void)
+{
+	debug("%s: %s", plugin_name, __func__);
+	return;
 }
 
 /* Read the configuration file */
-extern void power_p_reconfig(void) {
-    debug("%s: %s", plugin_name, __func__);
-    return;
+extern void power_p_reconfig(void)
+{
+	debug("%s: %s", plugin_name, __func__);
+	return;
 }
 
 /* Note that a suspended job has been resumed */
-extern void power_p_job_resume(struct job_record *job_ptr) {
-    debug("%s: %s", plugin_name, __func__);
-    return;
+extern void power_p_job_resume(struct job_record *job_ptr)
+{
+	debug("%s: %s", plugin_name, __func__);
+	return;
 }
 
 /* Note that a job has been allocated resources and is ready to start */
-extern void power_p_job_start(struct job_record *job_ptr) {
-    debug("%s: %s", plugin_name, __func__);
-    return;
+extern void power_p_job_start(struct job_record *job_ptr)
+{
+	debug("%s: %s", plugin_name, __func__);
+	return;
 }

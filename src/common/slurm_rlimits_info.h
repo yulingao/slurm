@@ -33,35 +33,34 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
+
 #ifndef __SLURM_RLIMITS_INFO_H__
 #define __SLURM_RLIMITS_INFO_H__
+
 
 /*
  * Values for the propagate rlimits flag.
  */
-#define PROPAGATE_RLIMITS 1 /* The default is to propagate rlimits */
+#define PROPAGATE_RLIMITS    1  /* The default is to propagate rlimits */
 #define NO_PROPAGATE_RLIMITS 0
 #define PROPAGATE_RLIMITS_NOT_SET -1
 
-struct slurm_rlimits_info
-{
-    int resource;       /* Values:  RLIMIT_NPROC, RLIMIT_MEMLOCK, ... */
-    char *name;         /* String: "NPROC",      "MEMLOCK", ...       */
-    int propagate_flag; /* PROPAGATE_RLIMITS or NO_PROPAGATE_RLIMITS  */
+struct slurm_rlimits_info {
+        int  resource;          /* Values:  RLIMIT_NPROC, RLIMIT_MEMLOCK, ... */
+        char *name;             /* String: "NPROC",      "MEMLOCK", ...       */
+	int  propagate_flag;    /* PROPAGATE_RLIMITS or NO_PROPAGATE_RLIMITS  */
 };
 
 typedef struct slurm_rlimits_info slurm_rlimits_info_t;
 
-extern slurm_rlimits_info_t *get_slurm_rlimits_info(void);
 
-extern int parse_rlimits(char *rlimits_str, int propagate_flag);
+extern slurm_rlimits_info_t *get_slurm_rlimits_info( void );
 
-extern void print_rlimits(void);
+extern int parse_rlimits( char *rlimits_str, int propagate_flag );
+
+extern void print_rlimits( void );
 
 /*
- *最大化RLIMIT_NOFILE设置。
- *处理这个问题可以隔离跨平台问题。
- 
  * Max out the RLIMIT_NOFILE setting.
  *
  * Handled through this so cross-platform issues can be isolated.

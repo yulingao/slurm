@@ -40,7 +40,6 @@
 #include "src/common/cpu_frequency.h"
 #include "src/common/parse_time.h"
 #include "slurm.h"
-
 #define FORMAT_STRING_SIZE 34
 
 print_field_t *field = NULL;
@@ -49,390 +48,558 @@ char outbuf[FORMAT_STRING_SIZE];
 
 char *_elapsed_time(long secs, long usecs);
 
-char *_elapsed_time(long secs, long usecs) {
-    long days, hours, minutes, seconds;
-    long subsec = 0;
-    char *str = NULL;
+char *_elapsed_time(long secs, long usecs)
+{
+	long	days, hours, minutes, seconds;
+	long    subsec = 0;
+	char *str = NULL;
 
-    if ((secs < 0) || (secs == NO_VAL))
-        return NULL;
+	if ((secs < 0) || (secs == NO_VAL))
+		return NULL;
 
 
-    while (usecs >= 1E6) {
-        secs++;
-        usecs -= 1E6;
-    }
-    if (usecs > 0) {
-        /* give me 3 significant digits to tack onto the sec */
-        subsec = (usecs / 1000);
-    }
-    seconds = secs % 60;
-    minutes = (secs / 60) % 60;
-    hours = (secs / 3600) % 24;
-    days = secs / 86400;
+	while (usecs >= 1E6) {
+		secs++;
+		usecs -= 1E6;
+	}
+	if (usecs > 0) {
+		/* give me 3 significant digits to tack onto the sec */
+		subsec = (usecs/1000);
+	}
+	seconds =  secs % 60;
+	minutes = (secs / 60)   % 60;
+	hours   = (secs / 3600) % 24;
+	days    =  secs / 86400;
 
-    if (days)
-        str = xstrdup_printf("%ld-%2.2ld:%2.2ld:%2.2ld", days, hours, minutes, seconds);
-    else if (hours)
-        str = xstrdup_printf("%2.2ld:%2.2ld:%2.2ld", hours, minutes, seconds);
-    else
-        str = xstrdup_printf("%2.2ld:%2.2ld.%3.3ld", minutes, seconds, subsec);
-    return str;
+	if (days)
+		str = xstrdup_printf("%ld-%2.2ld:%2.2ld:%2.2ld",
+				     days, hours, minutes, seconds);
+	else if (hours)
+		str = xstrdup_printf("%2.2ld:%2.2ld:%2.2ld",
+				     hours, minutes, seconds);
+	else
+		str = xstrdup_printf("%2.2ld:%2.2ld.%3.3ld",
+				     minutes, seconds, subsec);
+	return str;
 }
 
-static void _print_small_double(char *outbuf, int buf_size, double dub, int units) {
-    if (fuzzy_equal(dub, NO_VAL))
-        return;
+static void _print_small_double(
+	char *outbuf, int buf_size, double dub, int units)
+{
+	if (fuzzy_equal(dub, NO_VAL))
+		return;
 
-    if (dub > 1)
-        convert_num_unit((double) dub, outbuf, buf_size, units, NO_VAL, params.convert_flags);
-    else if (dub > 0)
-        snprintf(outbuf, buf_size, "%.2fM", dub);
-    else
-        snprintf(outbuf, buf_size, "0");
+	if (dub > 1)
+		convert_num_unit((double)dub, outbuf, buf_size, units, NO_VAL,
+				 params.convert_flags);
+	else if (dub > 0)
+		snprintf(outbuf, buf_size, "%.2fM", dub);
+	else
+		snprintf(outbuf, buf_size, "0");
 }
 
-static void _print_tres_field(char *tres_in, char *nodes, bool convert) {
-    char *tmp_char = slurmdb_make_tres_string_from_simple(tres_in, assoc_mgr_tres_list, convert ? params.units : NO_VAL,
-                                                          convert ? params.convert_flags : CONVERT_NUM_UNIT_RAW,
-                                                          TRES_STR_FLAG_BYTES, nodes);
+static void _print_tres_field(char *tres_in, char *nodes, bool convert)
+{
+	char *tmp_char = slurmdb_make_tres_string_from_simple(
+		tres_in, assoc_mgr_tres_list,
+		convert ? params.units : NO_VAL,
+		convert ? params.convert_flags : CONVERT_NUM_UNIT_RAW,
+		TRES_STR_FLAG_BYTES,
+		nodes);
 
-    field->print_routine(field, tmp_char, (curr_inx == field_count));
-    xfree(tmp_char);
-    return;
+	field->print_routine(field, tmp_char, (curr_inx == field_count));
+	xfree(tmp_char);
+	return;
 }
 
-void print_fields(slurmdb_step_rec_t *step) {
+void print_fields(slurmdb_step_rec_t *step)
+{
 //	print_field_t *field = NULL;
 //	int curr_inx = 1;
 //	char outbuf[FORMAT_STRING_SIZE];
 
-    curr_inx = 1;
-    list_iterator_reset(print_fields_itr);
-    while ((field = list_next(print_fields_itr))) {
-        char *tmp_char = NULL;
-        uint64_t tmp_uint64 = NO_VAL64;
+	curr_inx = 1;
+	list_iterator_reset(print_fields_itr);
+	while ((field = list_next(print_fields_itr))) {
+		char *tmp_char = NULL;
+		uint64_t tmp_uint64 = NO_VAL64;
 
-        memset(&outbuf, 0, sizeof(outbuf));
-        switch (field->type) {
-            case PRINT_AVECPU:
-                tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_ave, TRES_CPU);
+		memset(&outbuf, 0, sizeof(outbuf));
+		switch(field->type) {
+		case PRINT_AVECPU:
+			tmp_uint64 = slurmdb_find_tres_count_in_string(
+				step->stats.tres_usage_in_ave, TRES_CPU);
 
-                if (tmp_uint64 != NO_VAL64) {
-                    tmp_uint64 /= CPU_TIME_ADJ;
-                    tmp_char = _elapsed_time((long) tmp_uint64, 0);
-                }
+			if (tmp_uint64 != NO_VAL64) {
+				tmp_uint64 /= CPU_TIME_ADJ;
+				tmp_char = _elapsed_time((long)tmp_uint64, 0);
+			}
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_ACT_CPUFREQ:
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_ACT_CPUFREQ:
 
-                convert_num_unit2((double) step->stats.act_cpufreq, outbuf, sizeof(outbuf), UNIT_KILO, NO_VAL, 1000,
-                                  params.convert_flags & (~CONVERT_NUM_UNIT_EXACT));
+			convert_num_unit2((double)step->stats.act_cpufreq,
+					  outbuf, sizeof(outbuf), UNIT_KILO,
+					  NO_VAL, 1000, params.convert_flags &
+					  (~CONVERT_NUM_UNIT_EXACT));
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_CONSUMED_ENERGY:
-                if (!fuzzy_equal(step->stats.consumed_energy, NO_VAL64)) {
-                    convert_num_unit2((double) step->stats.consumed_energy, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                      1000, params.convert_flags & (~CONVERT_NUM_UNIT_EXACT));
-                }
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_CONSUMED_ENERGY_RAW:
-                field->print_routine(field, step->stats.consumed_energy, (curr_inx == field_count));
-                break;
-            case PRINT_AVEDISKREAD:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_ave, TRES_FS_DISK)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_CONSUMED_ENERGY:
+			if (!fuzzy_equal(step->stats.consumed_energy,
+					 NO_VAL64)) {
+				convert_num_unit2((double)
+						  step->stats.consumed_energy,
+						  outbuf, sizeof(outbuf),
+						  UNIT_NONE, NO_VAL, 1000,
+						  params.convert_flags &
+						  (~CONVERT_NUM_UNIT_EXACT));
+			}
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_CONSUMED_ENERGY_RAW:
+			field->print_routine(field,
+					     step->stats.consumed_energy,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_AVEDISKREAD:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_ave,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    _print_small_double(outbuf, sizeof(outbuf), (double) tmp_uint64, UNIT_NONE);
+			if (tmp_uint64 != NO_VAL64)
+				_print_small_double(outbuf, sizeof(outbuf),
+						    (double)tmp_uint64,
+						    UNIT_NONE);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_AVEDISKWRITE:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_out_ave, TRES_FS_DISK)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_AVEDISKWRITE:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_out_ave,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    _print_small_double(outbuf, sizeof(outbuf), (double) tmp_uint64, UNIT_NONE);
+			if (tmp_uint64 != NO_VAL64)
+				_print_small_double(outbuf, sizeof(outbuf),
+						    (double)tmp_uint64,
+						    UNIT_NONE);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_AVEPAGES:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_ave, TRES_PAGES)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_AVEPAGES:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_ave,
+				     TRES_PAGES)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_AVERSS:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_ave, TRES_MEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_AVERSS:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_ave,
+				     TRES_MEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_AVEVSIZE:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_ave, TRES_VMEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_AVEVSIZE:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_ave,
+				     TRES_VMEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_JOBID:
-                if (step->stepid == SLURM_BATCH_SCRIPT)
-                    snprintf(outbuf, sizeof(outbuf), "%u.batch", step->job_ptr->jobid);
-                else if (step->stepid == SLURM_EXTERN_CONT)
-                    snprintf(outbuf, sizeof(outbuf), "%u.extern", step->job_ptr->jobid);
-                else
-                    snprintf(outbuf, sizeof(outbuf), "%u.%u", step->job_ptr->jobid, step->stepid);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_JOBID:
+			if (step->stepid == SLURM_BATCH_SCRIPT)
+				snprintf(outbuf, sizeof(outbuf), "%u.batch",
+					 step->job_ptr->jobid);
+			else if (step->stepid == SLURM_EXTERN_CONT)
+				snprintf(outbuf, sizeof(outbuf), "%u.extern",
+					 step->job_ptr->jobid);
+			else
+				snprintf(outbuf, sizeof(outbuf), "%u.%u",
+					 step->job_ptr->jobid,
+					 step->stepid);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXDISKREAD:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max, TRES_FS_DISK)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXDISKREAD:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_max,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    _print_small_double(outbuf, sizeof(outbuf), (double) tmp_uint64, UNIT_NONE);
+			if (tmp_uint64 != NO_VAL64)
+				_print_small_double(outbuf, sizeof(outbuf),
+						    (double)tmp_uint64,
+						    UNIT_NONE);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXDISKREADNODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_nodeid, TRES_FS_DISK),
-                        step->nodes);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXDISKREADNODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_in_max_nodeid,
+					TRES_FS_DISK),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MAXDISKREADTASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_taskid,
-                                                                    TRES_FS_DISK)) == INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MAXDISKREADTASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_in_max_taskid,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_MAXDISKWRITE:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_out_max, TRES_FS_DISK)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXDISKWRITE:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_out_max,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    _print_small_double(outbuf, sizeof(outbuf), (double) tmp_uint64, UNIT_NONE);
+			if (tmp_uint64 != NO_VAL64)
+				_print_small_double(outbuf, sizeof(outbuf),
+						    (double)tmp_uint64,
+						    UNIT_NONE);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXDISKWRITENODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_out_max_nodeid, TRES_FS_DISK),
-                        step->nodes);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXDISKWRITENODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_out_max_nodeid,
+					TRES_FS_DISK),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MAXDISKWRITETASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_out_max_taskid,
-                                                                    TRES_FS_DISK)) == INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MAXDISKWRITETASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_out_max_taskid,
+				     TRES_FS_DISK)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_MAXPAGES:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max, TRES_PAGES)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXPAGES:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_max,
+				     TRES_PAGES)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXPAGESNODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_nodeid, TRES_PAGES),
-                        step->nodes);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXPAGESNODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_in_max_nodeid,
+					TRES_PAGES),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MAXPAGESTASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_taskid,
-                                                                    TRES_PAGES)) == INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MAXPAGESTASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_in_max_taskid,
+				     TRES_PAGES)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_MAXRSS:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max, TRES_MEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXRSS:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_max,
+				     TRES_MEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXRSSNODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_nodeid, TRES_MEM), step->nodes);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXRSSNODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_in_max_nodeid,
+					TRES_MEM),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MAXRSSTASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_taskid, TRES_MEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MAXRSSTASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_in_max_taskid,
+				     TRES_MEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_MAXVSIZE:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max, TRES_VMEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXVSIZE:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_max,
+				     TRES_VMEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64)
-                    convert_num_unit((double) tmp_uint64, outbuf, sizeof(outbuf), UNIT_NONE, NO_VAL,
-                                     params.convert_flags);
+			if (tmp_uint64 != NO_VAL64)
+				convert_num_unit((double)tmp_uint64, outbuf,
+					 sizeof(outbuf), UNIT_NONE, NO_VAL,
+					 params.convert_flags);
 
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_MAXVSIZENODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_nodeid, TRES_VMEM),
-                        step->nodes);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MAXVSIZENODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_in_max_nodeid,
+					TRES_VMEM),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MAXVSIZETASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_max_taskid, TRES_VMEM)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MAXVSIZETASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_in_max_taskid,
+				     TRES_VMEM)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_MINCPU:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_min, TRES_CPU)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_MINCPU:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.tres_usage_in_min,
+				     TRES_CPU)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                if (tmp_uint64 != NO_VAL64) {
-                    tmp_uint64 /= CPU_TIME_ADJ;
-                    tmp_char = _elapsed_time((long) tmp_uint64, 0);
-                }
+			if (tmp_uint64 != NO_VAL64) {
+				tmp_uint64 /= CPU_TIME_ADJ;
+				tmp_char = _elapsed_time((long)tmp_uint64, 0);
+			}
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MINCPUNODE:
-                tmp_char = find_hostname(
-                        slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_min_nodeid, TRES_CPU), step->nodes);
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MINCPUNODE:
+			tmp_char = find_hostname(
+				slurmdb_find_tres_count_in_string(
+					step->stats.
+					tres_usage_in_min_nodeid,
+					TRES_CPU),
+				step->nodes);
 
-                field->print_routine(field, tmp_char, (curr_inx == field_count));
-                xfree(tmp_char);
-                break;
-            case PRINT_MINCPUTASK:
-                if ((tmp_uint64 = slurmdb_find_tres_count_in_string(step->stats.tres_usage_in_min_taskid, TRES_CPU)) ==
-                    INFINITE64)
-                    tmp_uint64 = NO_VAL64;
+			field->print_routine(field,
+					     tmp_char,
+					     (curr_inx == field_count));
+			xfree(tmp_char);
+			break;
+		case PRINT_MINCPUTASK:
+			if ((tmp_uint64 = slurmdb_find_tres_count_in_string(
+				     step->stats.
+				     tres_usage_in_min_taskid,
+				     TRES_CPU)) == INFINITE64)
+				tmp_uint64 = NO_VAL64;
 
-                field->print_routine(field, tmp_uint64, (curr_inx == field_count));
-                break;
-            case PRINT_TRESUIA:
-                _print_tres_field(step->stats.tres_usage_in_ave, NULL, 1);
-                break;
-            case PRINT_TRESUIM:
-                _print_tres_field(step->stats.tres_usage_in_max, NULL, 1);
-                break;
-            case PRINT_TRESUIMN:
-                _print_tres_field(step->stats.tres_usage_in_max_nodeid, step->nodes, 0);
-                break;
-            case PRINT_TRESUIMT:
-                _print_tres_field(step->stats.tres_usage_in_max_taskid, NULL, 0);
-                break;
-            case PRINT_TRESUIMI:
-                _print_tres_field(step->stats.tres_usage_in_min, NULL, 1);
-                break;
-            case PRINT_TRESUIMIN:
-                _print_tres_field(step->stats.tres_usage_in_min_nodeid, step->nodes, 0);
-                break;
-            case PRINT_TRESUIMIT:
-                _print_tres_field(step->stats.tres_usage_in_min_taskid, NULL, 0);
-                break;
-            case PRINT_TRESUIT:
-                _print_tres_field(step->stats.tres_usage_in_tot, NULL, 1);
-                break;
-            case PRINT_TRESUOA:
-                _print_tres_field(step->stats.tres_usage_out_ave, NULL, 1);
-                break;
-            case PRINT_TRESUOM:
-                _print_tres_field(step->stats.tres_usage_out_max, NULL, 1);
-                break;
-            case PRINT_TRESUOMN:
-                _print_tres_field(step->stats.tres_usage_out_max_nodeid, step->nodes, 0);
-                break;
-            case PRINT_TRESUOMT:
-                _print_tres_field(step->stats.tres_usage_out_max_taskid, NULL, 0);
-                break;
-            case PRINT_TRESUOMI:
-                _print_tres_field(step->stats.tres_usage_out_min, NULL, 1);
-                break;
-            case PRINT_TRESUOMIN:
-                _print_tres_field(step->stats.tres_usage_out_min_nodeid, step->nodes, 0);
-                break;
-            case PRINT_TRESUOMIT:
-                _print_tres_field(step->stats.tres_usage_out_min_taskid, NULL, 0);
-                break;
-            case PRINT_TRESUOT:
-                _print_tres_field(step->stats.tres_usage_out_tot, NULL, 1);
-                break;
-            case PRINT_NODELIST:
-                field->print_routine(field, step->nodes, (curr_inx == field_count));
-                break;
-            case PRINT_NTASKS:
-                field->print_routine(field, step->ntasks, (curr_inx == field_count));
-                break;
-            case PRINT_PIDS:
-                field->print_routine(field, step->pid_str, (curr_inx == field_count));
-                break;
-            case PRINT_REQ_CPUFREQ_MIN:
-                cpu_freq_to_string(outbuf, sizeof(outbuf), step->req_cpufreq_min);
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_REQ_CPUFREQ_MAX:
-                cpu_freq_to_string(outbuf, sizeof(outbuf), step->req_cpufreq_max);
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            case PRINT_REQ_CPUFREQ_GOV:
-                cpu_freq_to_string(outbuf, sizeof(outbuf), step->req_cpufreq_gov);
-                field->print_routine(field, outbuf, (curr_inx == field_count));
-                break;
-            default:
-                break;
-        }
-        curr_inx++;
-    }
-    printf("\n");
+			field->print_routine(field,
+					     tmp_uint64,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_TRESUIA:
+			_print_tres_field(step->stats.tres_usage_in_ave,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUIM:
+			_print_tres_field(step->stats.tres_usage_in_max,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUIMN:
+			_print_tres_field(step->stats.tres_usage_in_max_nodeid,
+					  step->nodes, 0);
+			break;
+		case PRINT_TRESUIMT:
+			_print_tres_field(step->stats.tres_usage_in_max_taskid,
+					  NULL, 0);
+			break;
+		case PRINT_TRESUIMI:
+			_print_tres_field(step->stats.tres_usage_in_min,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUIMIN:
+			_print_tres_field(step->stats.tres_usage_in_min_nodeid,
+					  step->nodes, 0);
+			break;
+		case PRINT_TRESUIMIT:
+			_print_tres_field(step->stats.tres_usage_in_min_taskid,
+					  NULL, 0);
+			break;
+		case PRINT_TRESUIT:
+			_print_tres_field(step->stats.tres_usage_in_tot,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUOA:
+			_print_tres_field(step->stats.tres_usage_out_ave,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUOM:
+			_print_tres_field(step->stats.tres_usage_out_max,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUOMN:
+			_print_tres_field(step->stats.tres_usage_out_max_nodeid,
+					  step->nodes, 0);
+			break;
+		case PRINT_TRESUOMT:
+			_print_tres_field(step->stats.tres_usage_out_max_taskid,
+					  NULL, 0);
+			break;
+		case PRINT_TRESUOMI:
+			_print_tres_field(step->stats.tres_usage_out_min,
+					  NULL, 1);
+			break;
+		case PRINT_TRESUOMIN:
+			_print_tres_field(step->stats.tres_usage_out_min_nodeid,
+					  step->nodes, 0);
+			break;
+		case PRINT_TRESUOMIT:
+			_print_tres_field(step->stats.tres_usage_out_min_taskid,
+					  NULL, 0);
+			break;
+		case PRINT_TRESUOT:
+			_print_tres_field(step->stats.tres_usage_out_tot,
+					  NULL, 1);
+			break;
+		case PRINT_NODELIST:
+			field->print_routine(field,
+					     step->nodes,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_NTASKS:
+			field->print_routine(field,
+					     step->ntasks,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_PIDS:
+                        field->print_routine(field,
+                                             step->pid_str,
+                                             (curr_inx == field_count));
+                        break;
+		case PRINT_REQ_CPUFREQ_MIN:
+			cpu_freq_to_string(outbuf, sizeof(outbuf),
+					   step->req_cpufreq_min);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_REQ_CPUFREQ_MAX:
+			cpu_freq_to_string(outbuf, sizeof(outbuf),
+					   step->req_cpufreq_max);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		case PRINT_REQ_CPUFREQ_GOV:
+			cpu_freq_to_string(outbuf, sizeof(outbuf),
+					   step->req_cpufreq_gov);
+			field->print_routine(field,
+					     outbuf,
+					     (curr_inx == field_count));
+			break;
+		default:
+			break;
+		}
+		curr_inx++;
+	}
+	printf("\n");
 }

@@ -55,7 +55,6 @@
 #define BUFFER_SIZE 4096
 
 extern List filetxt_jobacct_process_get_jobs(slurmdb_job_cond_t *job_cond);
-
 extern int filetxt_jobacct_process_archive(slurmdb_archive_cond_t *arch_cond);
 
 #endif

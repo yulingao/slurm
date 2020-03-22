@@ -53,56 +53,56 @@
 #include "src/api/step_io.h"
 
 typedef struct {
-    int connected;
-    int *sockets; /* array of socket file descriptors */
+	int connected;
+	int *sockets; /* array of socket file descriptors */
 } user_managed_io_t;
 
 struct step_launch_state {
-    /* This lock protects tasks_started, tasks_exited, node_io_error,
-       io_deadline, abort, and abort_action_taken.  The main thread
-       blocks on cond, waking when a tast starts or exits, or the abort
-       flag is set. */
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
-    int tasks_requested;
-    bitstr_t *tasks_started; /* or attempted to start, but failed */
-    bitstr_t *tasks_exited;  /* or never started correctly */
-    bitstr_t *node_io_error;      /* set after write or read error */
-    pthread_t io_timeout_thread;
-    bool io_timeout_thread_created;
-    time_t *io_deadline;  /* Holds the time by which a "connection okay"
+	/* This lock protects tasks_started, tasks_exited, node_io_error,
+	   io_deadline, abort, and abort_action_taken.  The main thread
+	   blocks on cond, waking when a tast starts or exits, or the abort
+	   flag is set. */
+	pthread_mutex_t lock;
+	pthread_cond_t cond;
+	int tasks_requested;
+	bitstr_t *tasks_started; /* or attempted to start, but failed */
+	bitstr_t *tasks_exited;  /* or never started correctly */
+	bitstr_t *node_io_error;      /* set after write or read error */
+	pthread_t io_timeout_thread;
+	bool	  io_timeout_thread_created;
+	time_t   *io_deadline;  /* Holds the time by which a "connection okay"
 				   message must be received.  Each entry holds
 				   NO_VAL unless the node is suspected to be
 				   down and is being tested. */
-    int io_timeout;    /* num seconds between I/O tests */
-    bool halt_io_test;  /* set to true when I/O test thread should
+	int	 io_timeout;    /* num seconds between I/O tests */
+	bool	 halt_io_test;  /* set to true when I/O test thread should
 				   shut down. */
-    bool abort;
-    bool abort_action_taken;
+	bool abort;
+	bool abort_action_taken;
 
-    /* message thread variables */
-    eio_handle_t *msg_handle;
-    pthread_t msg_thread;
-    /* set to -1 if step launch message handler should not attempt
-       to handle */
-    int slurmctld_socket_fd;
-    uint16_t num_resp_port;
-    uint16_t *resp_port; /* array of message response ports */
+	/* message thread variables */
+	eio_handle_t *msg_handle;
+	pthread_t msg_thread;
+	/* set to -1 if step launch message handler should not attempt
+	   to handle */
+	int slurmctld_socket_fd;
+	uint16_t num_resp_port;
+	uint16_t *resp_port; /* array of message response ports */
 
-    /* io variables */
-    bool user_managed_io;
-    union {
-        client_io_t *normal;
-        user_managed_io_t *user;
-    } io;
+	/* io variables */
+	bool user_managed_io;
+	union {
+		client_io_t *normal;
+		user_managed_io_t *user;
+	} io;
 
-    slurm_step_layout_t *layout; /* a pointer into the ctx
+	slurm_step_layout_t *layout; /* a pointer into the ctx
 					step_resp, do not free */
-    mpi_plugin_client_info_t mpi_info[1];
-    mpi_plugin_client_state_t *mpi_state;
+	mpi_plugin_client_info_t mpi_info[1];
+	mpi_plugin_client_state_t *mpi_state;
 
-    /* user registered callbacks */
-    slurm_step_launch_callbacks_t callback;
+	/* user registered callbacks */
+	slurm_step_launch_callbacks_t callback;
 };
 typedef struct step_launch_state step_launch_state_t;
 
@@ -110,7 +110,7 @@ typedef struct step_launch_state step_launch_state_t;
 /*
  * Create a launch state structure for a specified step context, "ctx".
  */
-struct step_launch_state *step_launch_state_create(slurm_step_ctx_t *ctx);
+struct step_launch_state * step_launch_state_create(slurm_step_ctx_t *ctx);
 
 /*
  * If a steps size has changed update the launch_state structure for a
@@ -140,7 +140,8 @@ int step_launch_notify_io_failure(step_launch_state_t *sls, int node_id);
  * job step setup, clear this flag when the node makes its initial
  * connection.
  */
-int step_launch_clear_questionable_state(step_launch_state_t *sls, int node_id);
+int step_launch_clear_questionable_state(step_launch_state_t *sls, 
+					 int node_id);
 
 
 #endif /* _STEP_LAUNCH_H */

@@ -32,25 +32,26 @@
 #include <time.h>
 #include <unistd.h>
 
-int main(int argc, char **argv) {
-    int i, start;
-    time_t last = time(NULL), now;
+int main(int argc, char **argv)
+{
+	int i, start;
+	time_t last = time(NULL), now;
 
-    if (argc > 1)
-        start = atoi(argv[1]);
-    else
-        start = 30;
+	if (argc > 1)
+		start = atoi(argv[1]);
+	else
+		start = 30;
 
-    for (i = start; i > 0; i--) {
-        fprintf(stdout, "%2.2d  %u\n", i, (unsigned) last);
-        fflush(stdout);
-        sleep(1);
-        now = time(NULL);
-        if (difftime(now, last) > 2)
-            fprintf(stdout, "JobSuspended\n");
-        last = now;
-    }
+	for (i=start; i>0; i--) {
+		fprintf(stdout, "%2.2d  %u\n", i, (unsigned) last);
+		fflush(stdout);
+		sleep(1);
+		now = time(NULL);
+		if (difftime(now, last) > 2)
+			fprintf(stdout, "JobSuspended\n");
+		last = now;
+	}
 
-    fprintf(stdout, "AllDone\n");
-    return (0);
+	fprintf(stdout, "AllDone\n");
+	return (0);
 }

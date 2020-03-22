@@ -89,140 +89,156 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 void *libpmix_plug = NULL;
 
-static void _libpmix_close(void *lib_plug) {
-    xassert(lib_plug);
-    dlclose(lib_plug);
+static void _libpmix_close(void *lib_plug)
+{
+	xassert(lib_plug);
+	dlclose(lib_plug);
 }
 
-static void *_libpmix_open(void) {
-    void *lib_plug = NULL;
-    char *full_path = NULL;
+static void *_libpmix_open(void)
+{
+	void *lib_plug = NULL;
+	char *full_path = NULL;
 
 #ifdef PMIXP_V1_LIBPATH
-    xstrfmtcat(full_path, "%s/", PMIXP_V1_LIBPATH);
+	xstrfmtcat(full_path, "%s/", PMIXP_V1_LIBPATH);
 #elif defined PMIXP_V2_LIBPATH
-    xstrfmtcat(full_path, "%s/", PMIXP_V2_LIBPATH);
+	xstrfmtcat(full_path, "%s/", PMIXP_V2_LIBPATH);
+#elif defined PMIXP_V3_LIBPATH
+	xstrfmtcat(full_path, "%s/", PMIXP_V3_LIBPATH);
 #endif
-    xstrfmtcat(full_path, "libpmix.so");
-    lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
-    xfree(full_path);
+	xstrfmtcat(full_path, "libpmix.so");
 
-    if (lib_plug && (HAVE_PMIX_VER != pmixp_lib_get_version())) {
-        PMIXP_ERROR("pmi/pmix: incorrect PMIx library version loaded %d was loaded, required %d version",
-                    pmixp_lib_get_version(), (int) HAVE_PMIX_VER);
-        _libpmix_close(lib_plug);
-        lib_plug = NULL;
-    }
+	lib_plug = dlopen(full_path, RTLD_LAZY | RTLD_GLOBAL);
+	xfree(full_path);
 
-    return lib_plug;
+	if (lib_plug && (HAVE_PMIX_VER != pmixp_lib_get_version())) {
+		PMIXP_ERROR("pmi/pmix: incorrect PMIx library version loaded %d was loaded, required %d version",
+			    pmixp_lib_get_version(), (int)HAVE_PMIX_VER);
+		_libpmix_close(lib_plug);
+		lib_plug = NULL;
+	}
+
+	return lib_plug;
 }
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    libpmix_plug = _libpmix_open();
-    if (!libpmix_plug) {
-        PMIXP_ERROR("pmi/pmix: can not load PMIx library");
-        return SLURM_ERROR;
-    }
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	libpmix_plug = _libpmix_open();
+	if (!libpmix_plug) {
+		PMIXP_ERROR("pmi/pmix: can not load PMIx library");
+		return SLURM_ERROR;
+	}
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    PMIXP_DEBUG("%s: call fini()", pmixp_info_hostname());
-    pmixp_agent_stop();
-    pmixp_stepd_finalize();
-    _libpmix_close(libpmix_plug);
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	PMIXP_DEBUG("%s: call fini()", pmixp_info_hostname());
+	pmixp_agent_stop();
+	pmixp_stepd_finalize();
+	_libpmix_close(libpmix_plug);
+	return SLURM_SUCCESS;
 }
 
-extern int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
-    int ret;
-    pmixp_debug_hang(0);
-    PMIXP_DEBUG("start");
+extern int p_mpi_hook_slurmstepd_prefork(
+	const stepd_step_rec_t *job, char ***env)
+{
+	int ret;
+	pmixp_debug_hang(0);
+	PMIXP_DEBUG("start");
 
-    if (job->batch)
-        return SLURM_SUCCESS;
+	if (job->batch)
+		return SLURM_SUCCESS;
 
-    if (SLURM_SUCCESS != (ret = pmixp_stepd_init(job, env))) {
-        PMIXP_ERROR("pmixp_stepd_init() failed");
-        goto err_ext;
-    }
-    if (SLURM_SUCCESS != (ret = pmixp_agent_start())) {
-        PMIXP_ERROR("pmixp_agent_start() failed");
-        goto err_ext;
-    }
-    return SLURM_SUCCESS;
+	if (SLURM_SUCCESS != (ret = pmixp_stepd_init(job, env))) {
+		PMIXP_ERROR("pmixp_stepd_init() failed");
+		goto err_ext;
+	}
+	if (SLURM_SUCCESS != (ret = pmixp_agent_start())) {
+		PMIXP_ERROR("pmixp_agent_start() failed");
+		goto err_ext;
+	}
+	return SLURM_SUCCESS;
 
-    err_ext:
-    /* Abort the whole job if error! */
-    slurm_kill_job_step(job->jobid, job->stepid, SIGKILL);
-    return ret;
+err_ext:
+	/* Abort the whole job if error! */
+	slurm_kill_job_step(job->jobid, job->stepid, SIGKILL);
+	return ret;
 }
 
-extern int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
-    char **tmp_env = NULL;
-    pmixp_debug_hang(0);
+extern int p_mpi_hook_slurmstepd_task(
+	const mpi_plugin_task_info_t *job, char ***env)
+{
+	char **tmp_env = NULL;
+	pmixp_debug_hang(0);
 
-    PMIXP_DEBUG("Patch environment for task %d", job->gtaskid);
+	PMIXP_DEBUG("Patch environment for task %d", job->gtaskid);
 
-    pmixp_lib_setup_fork(job->gtaskid, pmixp_info_namespace(), &tmp_env);
-    if (NULL != tmp_env) {
-        int i;
-        for (i = 0; NULL != tmp_env[i]; i++) {
-            char *value = strchr(tmp_env[i], '=');
-            if (NULL != value) {
-                *value = '\0';
-                value++;
-                env_array_overwrite(env, (const char *) tmp_env[i], value);
-            }
-            free(tmp_env[i]);
-        }
-        free(tmp_env);
-        tmp_env = NULL;
-    }
-    return SLURM_SUCCESS;
+	pmixp_lib_setup_fork(job->gtaskid, pmixp_info_namespace(), &tmp_env);
+	if (NULL != tmp_env) {
+		int i;
+		for (i = 0; NULL != tmp_env[i]; i++) {
+			char *value = strchr(tmp_env[i], '=');
+			if (NULL != value) {
+				*value = '\0';
+				value++;
+				env_array_overwrite(env,
+						    (const char *)tmp_env[i],
+						    value);
+			}
+			free(tmp_env[i]);
+		}
+		free(tmp_env);
+		tmp_env = NULL;
+	}
+	return SLURM_SUCCESS;
 }
 
-extern mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
-    static pthread_mutex_t setup_mutex = PTHREAD_MUTEX_INITIALIZER;
-    static pthread_cond_t setup_cond = PTHREAD_COND_INITIALIZER;
-    static char *mapping = NULL;
-    static bool setup_done = false;
-    uint32_t nnodes, ntasks, **tids;
-    uint16_t *task_cnt;
+extern mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(
+	const mpi_plugin_client_info_t *job, char ***env)
+{
+	static pthread_mutex_t setup_mutex = PTHREAD_MUTEX_INITIALIZER;
+	static pthread_cond_t setup_cond  = PTHREAD_COND_INITIALIZER;
+	static char *mapping = NULL;
+	static bool setup_done = false;
+	uint32_t nnodes, ntasks, **tids;
+	uint16_t *task_cnt;
 
-    PMIXP_DEBUG("setup process mapping in srun");
-    if ((job->pack_jobid == NO_VAL) || (job->pack_task_offset == 0)) {
-        nnodes = job->step_layout->node_cnt;
-        ntasks = job->step_layout->task_cnt;
-        task_cnt = job->step_layout->tasks;
-        tids = job->step_layout->tids;
-        mapping = pack_process_mapping(nnodes, ntasks, task_cnt, tids);
-        slurm_mutex_lock(&setup_mutex);
-        setup_done = true;
-        slurm_cond_broadcast(&setup_cond);
-        slurm_mutex_unlock(&setup_mutex);
-    } else {
-        slurm_mutex_lock(&setup_mutex);
-        while (!setup_done)
-            slurm_cond_wait(&setup_cond, &setup_mutex);
-        slurm_mutex_unlock(&setup_mutex);
-    }
+	PMIXP_DEBUG("setup process mapping in srun");
+	if ((job->pack_jobid == NO_VAL) || (job->pack_task_offset == 0)) {
+		nnodes = job->step_layout->node_cnt;
+		ntasks = job->step_layout->task_cnt;
+		task_cnt = job->step_layout->tasks;
+		tids = job->step_layout->tids;
+		mapping = pack_process_mapping(nnodes, ntasks, task_cnt, tids);
+		slurm_mutex_lock(&setup_mutex);
+		setup_done = true;
+		slurm_cond_broadcast(&setup_cond);
+		slurm_mutex_unlock(&setup_mutex);
+	} else {
+		slurm_mutex_lock(&setup_mutex);
+		while (!setup_done)
+			slurm_cond_wait(&setup_cond, &setup_mutex);
+		slurm_mutex_unlock(&setup_mutex);
+	}
 
-    if (NULL == mapping) {
-        PMIXP_ERROR("Cannot create process mapping");
-        return NULL;
-    }
-    setenvf(env, PMIXP_SLURM_MAPPING_ENV, "%s", mapping);
-    xfree(mapping);
+	if (NULL == mapping) {
+		PMIXP_ERROR("Cannot create process mapping");
+		return NULL;
+	}
+	setenvf(env, PMIXP_SLURM_MAPPING_ENV, "%s", mapping);
+	xfree(mapping);
 
-    /* only return NULL on error */
-    return (void *) 0xdeadbeef;
+	/* only return NULL on error */
+	return (void *)0xdeadbeef;
 }
 
-extern int p_mpi_hook_client_fini(void) {
-    return SLURM_SUCCESS;
+extern int p_mpi_hook_client_fini(void)
+{
+	return SLURM_SUCCESS;
 }

@@ -41,46 +41,51 @@
  * scontrol_print_layout - print information about the supplied layout
  * IN layout_type - print information about the supplied layout 
  */
-extern void scontrol_print_layout(int argc, char **argv) {
-    int i = 0, tag_len = 0;
-    char *tag = NULL, *val = NULL;
-    char *layout_type = NULL, *entities = NULL, *type = NULL;
-    uint32_t flags = 0;
-    layout_info_msg_t *layout_info_ptr = NULL;
+extern void
+scontrol_print_layout (int argc, char **argv)
+{
+	int i = 0, tag_len = 0;
+	char *tag = NULL, *val = NULL;
+	char *layout_type = NULL, *entities = NULL, *type = NULL;
+	uint32_t flags = 0;
+	layout_info_msg_t *layout_info_ptr = NULL;
 
-    while (i < argc) {
-        tag = argv[i];
-        tag_len = strlen(tag);
-        val = strchr(argv[i], '=');
+	while (i < argc) {
+		tag = argv[i];
+		tag_len = strlen(tag);
+		val = strchr(argv[i], '=');
 
-        if (val) {
-            tag_len = val - argv[i];
-            val++;
-        } else if (argc > i + 1) {
-            val = argv[i + 1];
-            i++;
-        } else {
-            val = NULL;
-        }
-        if (xstrncasecmp(tag, "layouts", MAX(tag_len, 3)) == 0) {
-            layout_type = val;
-        } else if (xstrncasecmp(tag, "entity", MAX(tag_len, 3)) == 0) {
-            entities = val;
-        } else if (xstrncasecmp(tag, "type", MAX(tag_len, 3)) == 0) {
-            type = val;
-        } else if (xstrncasecmp(tag, "nolayout", MAX(tag_len, 4)) == 0) {
-            flags |= LAYOUTS_DUMP_NOLAYOUT;
-        } else {
-            exit_code = 1;
-            if (quiet_flag != 1)
-                fprintf(stderr, "invalid option for layouts: %s\n", tag);
-        }
-        i++;
-    }
-    if (slurm_load_layout(layout_type, entities, type, flags, &layout_info_ptr) == SLURM_SUCCESS) {
-        slurm_print_layout_info(stdout, layout_info_ptr, one_liner);
-        slurm_free_layout_info_msg(layout_info_ptr);
-    }
+		if (val) {
+			tag_len = val - argv[i];
+			val++;
+		} else if (argc > i+1) {
+			val = argv[i+1];
+			i++;
+		} else {
+			val = NULL;
+		}
+		if (xstrncasecmp(tag, "layouts", MAX(tag_len, 3)) == 0) {
+			layout_type = val;
+		} else if (xstrncasecmp(tag, "entity", MAX(tag_len, 3)) == 0) {
+			entities = val;
+		} else if (xstrncasecmp(tag, "type", MAX(tag_len, 3)) == 0) {
+			type = val;
+		} else if (xstrncasecmp(tag, "nolayout", MAX(tag_len, 4)) ==0) {
+			flags |= LAYOUTS_DUMP_NOLAYOUT;
+		} else {
+			exit_code = 1;
+			if (quiet_flag != 1)
+				fprintf (stderr,
+					 "invalid option for layouts: %s\n",
+					 tag);
+		}
+		i++;
+	}
+	if (slurm_load_layout (layout_type, entities, type, flags,
+			       &layout_info_ptr) == SLURM_SUCCESS) {
+		slurm_print_layout_info ( stdout, layout_info_ptr, one_liner );
+		slurm_free_layout_info_msg (layout_info_ptr);
+	}
 
-    return;
+	return;
 }

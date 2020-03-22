@@ -34,7 +34,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
-#include "src/common/slurm_xlator.h"    /* Must be first */
+#include "src/common/slurm_xlator.h"	/* Must be first */
 #include "src/plugins/slurmctld/nonstop/do_work.h"
 #include "src/plugins/slurmctld/nonstop/read_config.h"
 #include "src/plugins/slurmctld/nonstop/msg.h"
@@ -65,37 +65,40 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Slurmctld Fault Tolerance plugin";
-const char plugin_type[] = "slurmctld/nonstop";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char	plugin_name[]	= "Slurmctld Fault Tolerance plugin";
+const char	plugin_type[]	= "slurmctld/nonstop";
+const uint32_t	plugin_version	= SLURM_VERSION_NUMBER;
 
-extern int init(void) {
-    int rc;
+extern int init(void)
+{
+	int rc;
 
-    nonstop_read_config();
-    init_job_db();
-    create_hot_spare_resv();
-    (void) restore_nonstop_state();
-    rc = spawn_msg_thread() + spawn_state_thread();
-    nonstop_ops.job_begin = job_begin_callback;
-    nonstop_ops.job_fini = job_fini_callback;
-    nonstop_ops.node_fail = node_fail_callback;
-    verbose("%s loaded", plugin_name);
+	nonstop_read_config();
+	init_job_db();
+	create_hot_spare_resv();
+	(void) restore_nonstop_state();
+	rc = spawn_msg_thread() + spawn_state_thread();
+	nonstop_ops.job_begin = job_begin_callback;
+	nonstop_ops.job_fini  = job_fini_callback;
+	nonstop_ops.node_fail = node_fail_callback;
+	verbose("%s loaded", plugin_name);
 
-    return rc;
+	return rc;
 }
 
-extern int fini(void) {
-    term_msg_thread();
-    term_state_thread();
-    nonstop_free_config();
-    term_job_db();
+extern int fini(void)
+{
+	term_msg_thread();
+	term_state_thread();
+	nonstop_free_config();
+	term_job_db();
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
 /* Get node features plugin configuration */
-extern void slurmctld_plugstack_p_get_config(config_plugin_params_t *p) {
-    xstrcat(p->name, plugin_type);
-    nonstop_read_config_list(p->key_pairs);
+extern void slurmctld_plugstack_p_get_config(config_plugin_params_t *p)
+{
+	xstrcat(p->name, plugin_type);
+	nonstop_read_config_list(p->key_pairs);
 }

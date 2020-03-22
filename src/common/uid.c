@@ -63,222 +63,253 @@ static pthread_mutex_t uid_lock = PTHREAD_MUTEX_INITIALIZER;
 static uid_cache_entry_t *uid_cache = NULL;
 static int uid_cache_used = 0;
 
-static int _getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t bufsiz, struct passwd **result) {
-    int rc;
-    while (1) {
-        rc = getpwnam_r(name, pwd, buf, bufsiz, result);
-        if (rc == EINTR)
-            continue;
-        if (rc != 0)
-            *result = NULL;
-        break;
-    }
-    return (rc);
+static int _getpwnam_r (const char *name, struct passwd *pwd, char *buf,
+		size_t bufsiz, struct passwd **result)
+{
+	int rc;
+	while (1) {
+		rc = getpwnam_r(name, pwd, buf, bufsiz, result);
+		if (rc == EINTR)
+			continue;
+		if (rc != 0)
+			*result = NULL;
+		break;
+	}
+	return (rc);
 }
 
-extern int slurm_getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t bufsiz, struct passwd **result) {
-    int rc;
-    while (1) {
-        rc = getpwuid_r(uid, pwd, buf, bufsiz, result);
-        if (rc == EINTR)
-            continue;
-        if (rc != 0)
-            *result = NULL;
-        break;
-    }
-    return rc;
+extern int slurm_getpwuid_r (uid_t uid, struct passwd *pwd, char *buf,
+			     size_t bufsiz, struct passwd **result)
+{
+	int rc;
+	while (1) {
+		rc = getpwuid_r(uid, pwd, buf, bufsiz, result);
+		if (rc == EINTR)
+			continue;
+		if (rc != 0)
+			*result = NULL;
+		break;
+	}
+	return rc;
 }
 
-int uid_from_string(const char *name, uid_t *uidp) {
-    struct passwd pwd, *result;
-    char buffer[PW_BUF_SIZE], *p = NULL;
-    long l;
+int uid_from_string(const char *name, uid_t *uidp)
+{
+	struct passwd pwd, *result;
+	char buffer[PW_BUF_SIZE], *p = NULL;
+	long l;
 
-    if (!name)
-        return -1;
+	if (!name)
+		return -1;
 
-    /*
-     *  Check to see if name is a valid username first.
-     */
-    if ((_getpwnam_r(name, &pwd, buffer, PW_BUF_SIZE, &result) == 0) && result != NULL) {
-        *uidp = result->pw_uid;
-        return 0;
-    }
+	/*
+	 *  Check to see if name is a valid username first.
+	 */
+	if ((_getpwnam_r (name, &pwd, buffer, PW_BUF_SIZE, &result) == 0)
+	    && result != NULL) {
+		*uidp = result->pw_uid;
+		return 0;
+	}
 
-    /*
-     *  If username was not valid, check for a valid UID.
-     */
-    errno = 0;
-    l = strtol(name, &p, 10);
-    if (((errno == ERANGE) && ((l == LONG_MIN) || (l == LONG_MAX))) || (name == p) || (*p != '\0') || (l < 0) ||
-        (l > INT_MAX))
-        return -1;
+	/*
+	 *  If username was not valid, check for a valid UID.
+	 */
+	errno = 0;
+	l = strtol (name, &p, 10);
+	if (((errno == ERANGE) && ((l == LONG_MIN) || (l == LONG_MAX)))
+	   || (name == p)
+	   || (*p != '\0')
+	   || (l < 0)
+	   || (l > INT_MAX))
+		return -1;
 
-    /*
-     *  Now ensure the supplied uid is in the user database
-     */
-    if (slurm_getpwuid_r(l, &pwd, buffer, PW_BUF_SIZE, &result) != 0)
-        return -1;
+	/*
+	 *  Now ensure the supplied uid is in the user database
+	 */
+	if (slurm_getpwuid_r(l, &pwd, buffer, PW_BUF_SIZE, &result) != 0)
+		return -1;
 
-    *uidp = (uid_t) l;
-    return 0;
+	*uidp = (uid_t) l;
+	return 0;
 }
 
 /*
  * Return an xmalloc'd string, or null on error.
  * Caller must free eventually.
  */
-char *uid_to_string_or_null(uid_t uid) {
-    struct passwd pwd, *result;
-    char buffer[PW_BUF_SIZE];
-    char *ustring = NULL;
-    int rc;
+char *uid_to_string_or_null(uid_t uid)
+{
+	struct passwd pwd, *result;
+	char buffer[PW_BUF_SIZE];
+	char *ustring = NULL;
+	int rc;
 
-    /* Suse Linux does not handle multiple users with UID=0 well */
-    if (uid == 0)
-        return xstrdup("root");
+	/* Suse Linux does not handle multiple users with UID=0 well */
+	if (uid == 0)
+		return xstrdup("root");
 
-    rc = slurm_getpwuid_r(uid, &pwd, buffer, PW_BUF_SIZE, &result);
-    if (result && (rc == 0))
-        ustring = xstrdup(result->pw_name);
+	rc = slurm_getpwuid_r(uid, &pwd, buffer, PW_BUF_SIZE, &result);
+	if (result && (rc == 0))
+		ustring = xstrdup(result->pw_name);
 
-    return ustring;
+	return ustring;
 }
 
 /*
  * Convert a uid to an xmalloc'd string.
  * Always returns a string - "nobody" is sent back on error.
  */
-char *uid_to_string(uid_t uid) {
-    char *result = uid_to_string_or_null(uid);
+char *uid_to_string(uid_t uid)
+{
+	char *result = uid_to_string_or_null(uid);
 
-    if (!result)
-        result = xstrdup("nobody");
+	if (!result)
+		result = xstrdup("nobody");
 
-    return result;
+	return result;
 }
 
-static int _uid_compare(const void *a, const void *b) {
-    uid_t ua = *(const uid_t *) a;
-    uid_t ub = *(const uid_t *) b;
-    return ua - ub;
+static int _uid_compare(const void *a, const void *b)
+{
+	uid_t ua = *(const uid_t *)a;
+	uid_t ub = *(const uid_t *)b;
+	return ua - ub;
 }
 
-extern void uid_cache_clear(void) {
-    int i;
+extern void uid_cache_clear(void)
+{
+	int i;
 
-    slurm_mutex_lock(&uid_lock);
-    for (i = 0; i < uid_cache_used; i++)
-        xfree(uid_cache[i].username);
-    xfree(uid_cache);
-    uid_cache_used = 0;
-    slurm_mutex_unlock(&uid_lock);
+	slurm_mutex_lock(&uid_lock);
+	for (i = 0; i < uid_cache_used; i++)
+		xfree(uid_cache[i].username);
+	xfree(uid_cache);
+	uid_cache_used = 0;
+	slurm_mutex_unlock(&uid_lock);
 }
 
-extern char *uid_to_string_cached(uid_t uid) {
-    uid_cache_entry_t *entry;
-    uid_cache_entry_t target = {uid, NULL};
+extern char *uid_to_string_cached(uid_t uid)
+{
+	uid_cache_entry_t *entry;
+	uid_cache_entry_t target = {uid, NULL};
 
-    slurm_mutex_lock(&uid_lock);
-    entry = bsearch(&target, uid_cache, uid_cache_used, sizeof(uid_cache_entry_t), _uid_compare);
-    if (entry == NULL) {
-        uid_cache_entry_t new_entry = {uid, uid_to_string(uid)};
-        uid_cache_used++;
-        uid_cache = xrealloc(uid_cache, sizeof(uid_cache_entry_t) * uid_cache_used);
-        uid_cache[uid_cache_used - 1] = new_entry;
-        qsort(uid_cache, uid_cache_used, sizeof(uid_cache_entry_t), _uid_compare);
-        slurm_mutex_unlock(&uid_lock);
-        return new_entry.username;
-    }
-    slurm_mutex_unlock(&uid_lock);
-    return entry->username;
+	slurm_mutex_lock(&uid_lock);
+	entry = bsearch(&target, uid_cache, uid_cache_used,
+			sizeof(uid_cache_entry_t), _uid_compare);
+	if (entry == NULL) {
+		uid_cache_entry_t new_entry = {uid, uid_to_string(uid)};
+		uid_cache_used++;
+		uid_cache = xrealloc(uid_cache,
+				     sizeof(uid_cache_entry_t)*uid_cache_used);
+		uid_cache[uid_cache_used-1] = new_entry;
+		qsort(uid_cache, uid_cache_used, sizeof(uid_cache_entry_t),
+		      _uid_compare);
+		slurm_mutex_unlock(&uid_lock);
+		return new_entry.username;
+	}
+	slurm_mutex_unlock(&uid_lock);
+	return entry->username;
 }
 
-gid_t gid_from_uid(uid_t uid) {
-    struct passwd pwd, *result;
-    char buffer[PW_BUF_SIZE];
-    gid_t gid;
-    int rc;
+gid_t
+gid_from_uid (uid_t uid)
+{
+	struct passwd pwd, *result;
+	char buffer[PW_BUF_SIZE];
+	gid_t gid;
+	int rc;
 
-    rc = slurm_getpwuid_r(uid, &pwd, buffer, PW_BUF_SIZE, &result);
-    if (result && (rc == 0))
-        gid = result->pw_gid;
-    else
-        gid = (gid_t) -1;
+	rc = slurm_getpwuid_r(uid, &pwd, buffer, PW_BUF_SIZE, &result);
+	if (result && (rc == 0))
+		gid = result->pw_gid;
+	else
+		gid = (gid_t) -1;
 
-    return gid;
+	return gid;
 }
 
-static int _getgrnam_r(const char *name, struct group *grp, char *buf, size_t bufsiz, struct group **result) {
-    int rc;
-    while (1) {
-        rc = getgrnam_r(name, grp, buf, bufsiz, result);
-        if (rc == EINTR)
-            continue;
-        if (rc != 0)
-            *result = NULL;
-        break;
-    }
-    return (rc);
+static int _getgrnam_r (const char *name, struct group *grp, char *buf,
+		size_t bufsiz, struct group **result)
+{
+	int rc;
+	while (1) {
+		rc = getgrnam_r (name, grp, buf, bufsiz, result);
+		if (rc == EINTR)
+			continue;
+		if (rc != 0)
+			*result = NULL;
+		break;
+	}
+	return (rc);
 }
 
-static int _getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t bufsiz, struct group **result) {
-    int rc;
-    while (1) {
-        rc = getgrgid_r(gid, grp, buf, bufsiz, result);
-        if (rc == EINTR)
-            continue;
-        if (rc != 0)
-            *result = NULL;
-        break;
-    }
-    return rc;
+static int _getgrgid_r (gid_t gid, struct group *grp, char *buf,
+		size_t bufsiz, struct group **result)
+{
+	int rc;
+	while (1) {
+		rc = getgrgid_r (gid, grp, buf, bufsiz, result);
+		if (rc == EINTR)
+			continue;
+		if (rc != 0)
+			*result = NULL;
+		break;
+	}
+	return rc;
 }
 
-int gid_from_string(const char *name, gid_t *gidp) {
-    struct group grp, *result;
-    char buffer[PW_BUF_SIZE], *p = NULL;
-    long l;
+int gid_from_string(const char *name, gid_t *gidp)
+{
+	struct group grp, *result;
+	char buffer[PW_BUF_SIZE], *p = NULL;
+	long l;
 
-    if (!name)
-        return -1;
+	if (!name)
+		return -1;
 
-    /*
-     *  Check for valid group name first.
-     */
-    if ((_getgrnam_r(name, &grp, buffer, PW_BUF_SIZE, &result) == 0) && result != NULL) {
-        *gidp = result->gr_gid;
-        return 0;
-    }
+	/*
+	 *  Check for valid group name first.
+	 */
+	if ((_getgrnam_r (name, &grp, buffer, PW_BUF_SIZE, &result) == 0)
+	    && result != NULL) {
+		*gidp = result->gr_gid;
+		return 0;
+	}
 
-    /*
-     *  If group name was not valid, perhaps it is a  valid GID.
-     */
-    errno = 0;
-    l = strtol(name, &p, 10);
-    if (((errno == ERANGE) && ((l == LONG_MIN) || (l == LONG_MAX))) || (name == p) || (*p != '\0') || (l < 0) ||
-        (l > INT_MAX))
-        return -1;
+	/*
+	 *  If group name was not valid, perhaps it is a  valid GID.
+	 */
+	errno = 0;
+	l = strtol (name, &p, 10);
+	if (((errno == ERANGE) && ((l == LONG_MIN) || (l == LONG_MAX)))
+	   || (name == p)
+	   || (*p != '\0')
+	   || (l < 0)
+	   || (l > INT_MAX))
+		return -1;
 
-    /*
-     *  Now ensure the supplied uid is in the user database
-     */
-    if ((_getgrgid_r(l, &grp, buffer, PW_BUF_SIZE, &result) != 0) || result == NULL)
-        return -1;
+	/*
+	 *  Now ensure the supplied uid is in the user database
+	 */
+	if ((_getgrgid_r (l, &grp, buffer, PW_BUF_SIZE, &result) != 0)
+	    || result == NULL)
+		return -1;
 
-    *gidp = (gid_t) l;
-    return 0;
+	*gidp = (gid_t) l;
+	return 0;
 }
 
-char *gid_to_string(gid_t gid) {
-    struct group grp, *result;
-    char buffer[PW_BUF_SIZE], *gstring;
-    int rc;
+char *
+gid_to_string (gid_t gid)
+{
+	struct group grp, *result;
+	char buffer[PW_BUF_SIZE], *gstring;
+	int rc;
 
-    rc = _getgrgid_r(gid, &grp, buffer, PW_BUF_SIZE, &result);
-    if (rc == 0 && result)
-        gstring = xstrdup(result->gr_name);
-    else
-        gstring = xstrdup("nobody");
-    return gstring;
+	rc = _getgrgid_r(gid, &grp, buffer, PW_BUF_SIZE, &result);
+	if (rc == 0 && result)
+		gstring = xstrdup(result->gr_name);
+	else
+		gstring = xstrdup("nobody");
+	return gstring;
 }

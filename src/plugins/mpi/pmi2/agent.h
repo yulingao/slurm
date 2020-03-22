@@ -40,9 +40,8 @@
 
 
 extern int pmi2_start_agent(void);
-
 extern int pmi2_stop_agent(void);
 
 extern void task_finalize(int lrank);
 
-#endif    /* _AGENT_H */
+#endif	/* _AGENT_H */

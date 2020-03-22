@@ -49,26 +49,26 @@ typedef struct slurm_mpi_context *slurm_mpi_context_t;
 typedef void mpi_plugin_client_state_t;
 
 typedef struct {
-    uint32_t jobid;
-    uint32_t pack_jobid;    /* pack job leader or NO_VAL */
-    uint32_t pack_task_offset;   /* Task offset within pack job or NO_VAL */
-    uint32_t stepid;
-    slurm_step_layout_t *step_layout;
+	uint32_t jobid;
+	uint32_t pack_jobid;	/* pack job leader or NO_VAL */
+	uint32_t pack_task_offset;   /* Task offset within pack job or NO_VAL */
+	uint32_t stepid;
+	slurm_step_layout_t *step_layout;
 } mpi_plugin_client_info_t;
 
 typedef struct {
-    uint32_t jobid;  /* Current Slurm job id                      */
-    uint32_t stepid; /* Current step id (or NO_VAL)               */
-    uint32_t nnodes; /* number of nodes in current job step       */
-    uint32_t nodeid; /* relative position of this node in job     */
-    uint32_t ntasks; /* total number of tasks in current job      */
-    uint32_t ltasks; /* number of tasks on *this* (local) node    */
+	uint32_t jobid;  /* Current Slurm job id                      */
+	uint32_t stepid; /* Current step id (or NO_VAL)               */
+	uint32_t nnodes; /* number of nodes in current job step       */
+	uint32_t nodeid; /* relative position of this node in job     */
+	uint32_t ntasks; /* total number of tasks in current job      */
+	uint32_t ltasks; /* number of tasks on *this* (local) node    */
 
-    uint32_t gtaskid;/* global task rank within the job step      */
-    int ltaskid;/* task rank within the local node           */
+	uint32_t gtaskid;/* global task rank within the job step      */
+	int      ltaskid;/* task rank within the local node           */
 
-    slurm_addr_t *self;
-    slurm_addr_t *client;
+	slurm_addr_t *self;
+	slurm_addr_t *client;
 } mpi_plugin_task_info_t;
 
 /**********************************************************************
@@ -84,7 +84,7 @@ typedef struct {
  * This function will remove SLURM_MPI_TYPE from the environment variable
  * array "env", if it exists.
  */
-int mpi_hook_slurmstepd_init(char ***env);
+int mpi_hook_slurmstepd_init (char ***env);
 
 /*
  * Load the plugin (if not already loaded) and call the plugin
@@ -102,10 +102,10 @@ int mpi_hook_slurmstepd_init(char ***env);
  * The returned "env" array may be manipulated (and freed) by using
  * the src/common/env.c:env_array_* functions.
  */
-int mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env);
+int mpi_hook_slurmstepd_task (const mpi_plugin_task_info_t *job, char ***env);
 
 
-int mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env);
+int mpi_hook_slurmstepd_prefork (const stepd_step_rec_t *job, char ***env);
 
 /**********************************************************************
  * Hooks called by client applications.
@@ -119,7 +119,7 @@ int mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env);
  * If "mpi_type" is NULL, the system-default mpi plugin
  * is initialized.
  */
-int mpi_hook_client_init(char *mpi_type);
+int mpi_hook_client_init (char *mpi_type);
 
 /*
  * Call the plugin p_mpi_hook_client_prelaunch() function.
@@ -136,14 +136,15 @@ int mpi_hook_client_init(char *mpi_type);
  * to MPI state for this job step.  Free the state by calling
  * mpi_hook_client_fini().
  */
-mpi_plugin_client_state_t *mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env);
+mpi_plugin_client_state_t *
+mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env);
 
 /* Call the plugin p_mpi_hook_client_fini() function. */
-int mpi_hook_client_fini(mpi_plugin_client_state_t *state);
+int mpi_hook_client_fini (mpi_plugin_client_state_t *state);
 
 /**********************************************************************
  * FIXME - Nobody calls the following function.  Perhaps someone should.
  **********************************************************************/
-int mpi_fini(void);
+int mpi_fini (void);
 
 #endif /* !_SRUN_MPI_H */

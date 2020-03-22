@@ -83,7 +83,8 @@ if (forward_msg(forward_struct, &header) == SLURM_ERROR) {
 }
 
 *********************************************************************/
-extern int forward_msg(forward_struct_t *forward_struct, header_t *header);
+extern int forward_msg(forward_struct_t *forward_struct,
+		       header_t *header);
 
 
 /*
@@ -139,9 +140,7 @@ if(!ret_list || list_count(ret_list) == 0) {
 
 /* destroyers */
 extern void destroy_data_info(void *object);
-
 extern void destroy_forward(forward_t *forward);
-
 extern void destroy_forward_struct(forward_struct_t *forward_struct);
 
 #endif

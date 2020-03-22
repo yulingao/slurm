@@ -54,4 +54,4 @@ extern int resv_port_alloc(struct step_record *step_ptr);
  * RET SLURM_SUCCESS or an error code */
 extern void resv_port_free(struct step_record *step_ptr);
 
-#endif    /* !_HAVE_PORT_MGR_H */
+#endif	/* !_HAVE_PORT_MGR_H */

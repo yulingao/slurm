@@ -56,46 +56,41 @@
  * Double-fork and go into background.
  * Caller is responsible for umasks
  */
-int xdaemon(void) {
-    int devnull;
+int xdaemon(void)
+{
+	int devnull;
 
-    switch (fork()) {
-        case 0 :
-            break;        /* child */
-        case -1 :
-            return -1;
-        default :
-            _exit(0);     /* exit parent */
-    }
+	switch (fork()) {
+		case  0 : break;        /* child */
+		case -1 : return -1;
+		default : _exit(0);     /* exit parent */
+	}
 
-    if (setsid() < 0)
-        return -1;
+	if (setsid() < 0)
+		return -1;
 
-    switch (fork()) {
-        case 0 :
-            break;         /* child */
-        case -1:
-            return -1;
-        default:
-            _exit(0);      /* exit parent */
-    }
+	switch (fork()) {
+		case 0 : break;         /* child */
+		case -1: return -1;
+		default: _exit(0);      /* exit parent */
+	}
 
-    /*
-     * dup stdin, stdout, and stderr onto /dev/null
-     */
-    devnull = open("/dev/null", O_RDWR);
-    if (devnull < 0)
-        error("Unable to open /dev/null: %m");
-    if (dup2(devnull, STDIN_FILENO) < 0)
-        error("Unable to dup /dev/null onto stdin: %m");
-    if (dup2(devnull, STDOUT_FILENO) < 0)
-        error("Unable to dup /dev/null onto stdout: %m");
-    if (dup2(devnull, STDERR_FILENO) < 0)
-        error("Unable to dup /dev/null onto stderr: %m");
-    if (close(devnull) < 0)
-        error("Unable to close /dev/null: %m");
+	/*
+	 * dup stdin, stdout, and stderr onto /dev/null
+	 */
+	devnull = open("/dev/null", O_RDWR);
+	if (devnull < 0)
+		error("Unable to open /dev/null: %m");
+	if (dup2(devnull, STDIN_FILENO) < 0)
+		error("Unable to dup /dev/null onto stdin: %m");
+	if (dup2(devnull, STDOUT_FILENO) < 0)
+		error("Unable to dup /dev/null onto stdout: %m");
+	if (dup2(devnull, STDERR_FILENO) < 0)
+		error("Unable to dup /dev/null onto stderr: %m");
+	if (close(devnull) < 0)
+		error("Unable to close /dev/null: %m");
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -104,102 +99,112 @@ int xdaemon(void) {
  * If pidfd != NULL, the file will be kept open and the fd
  * returned.
  */
-pid_t read_pidfile(const char *pidfile, int *pidfd) {
-    int fd;
-    FILE *fp = NULL;
-    unsigned long pid;
-    pid_t lpid;
+pid_t
+read_pidfile(const char *pidfile, int *pidfd)
+{
+	int fd;
+	FILE *fp = NULL;
+	unsigned long pid;
+	pid_t         lpid;
 
-    if ((fd = open(pidfile, O_RDONLY)) < 0)
-        return ((pid_t) 0);
+	if ((fd = open(pidfile, O_RDONLY)) < 0)
+		return ((pid_t) 0);
 
-    if (!(fp = fdopen(fd, "r"))) {
-        error("Unable to access old pidfile at `%s': %m", pidfile);
-        (void) close(fd);
-        return ((pid_t) 0);
-    }
+	if (!(fp = fdopen(fd, "r"))) {
+		error ("Unable to access old pidfile at `%s': %m", pidfile);
+		(void) close(fd);
+		return ((pid_t) 0);
+	}
 
-    if (fscanf(fp, "%lu", &pid) < 1) {
-        error("Possible corrupt pidfile `%s'", pidfile);
-        (void) close(fd);
-        return ((pid_t) 0);
-    }
+	if (fscanf(fp, "%lu", &pid) < 1) {
+		error ("Possible corrupt pidfile `%s'", pidfile);
+		(void) close(fd);
+		return ((pid_t) 0);
+	}
 
-    if ((lpid = fd_is_read_lock_blocked(fd)) == (pid_t) 0) {
-        verbose("pidfile not locked, assuming no running daemon");
-        (void) close(fd);
-        return ((pid_t) 0);
-    }
+	if ((lpid = fd_is_read_lock_blocked(fd)) == (pid_t) 0) {
+		verbose ("pidfile not locked, assuming no running daemon");
+		(void) close(fd);
+		return ((pid_t) 0);
+	}
 
-    if (lpid != (pid_t) pid)
-        fatal("pidfile locked by %lu but contains pid=%lu", (unsigned long) lpid, (unsigned long) pid);
+	if (lpid != (pid_t) pid)
+		fatal ("pidfile locked by %lu but contains pid=%lu",
+		       (unsigned long) lpid, (unsigned long) pid);
 
-    if (pidfd != NULL)
-        *pidfd = fd;
-    else
-        (void) close(fd);
+	if (pidfd != NULL)
+		*pidfd = fd;
+	else
+		(void) close(fd);
 
 /*	fclose(fp);	NOTE: DO NOT CLOSE, "fd" CONTAINS FILE DESCRIPTOR */
-    return (lpid);
+	return (lpid);
 }
 
 
-int create_pidfile(const char *pidfile, uid_t uid) {
-    FILE *fp;
-    int fd;
 
-    xassert(pidfile != NULL);
-    xassert(pidfile[0] == '/');
+int
+create_pidfile(const char *pidfile, uid_t uid)
+{
+	FILE *fp;
+	int fd;
 
-    fd = open(pidfile, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if (fd < 0) {
-        error("Unable to open pidfile `%s': %m", pidfile);
-        return -1;
-    }
+	xassert(pidfile != NULL);
+	xassert(pidfile[0] == '/');
 
-    if (!(fp = fdopen(fd, "w"))) {
-        error("Unable to access pidfile at `%s': %m", pidfile);
-        (void) close(fd);
-        return -1;
-    }
+	fd = open(pidfile, O_CREAT | O_WRONLY | O_TRUNC | O_CLOEXEC,
+		  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (fd < 0) {
+		error("Unable to open pidfile `%s': %m", pidfile);
+		return -1;
+	}
 
-    if (fd_get_write_lock(fd) < 0) {
-        error("Unable to lock pidfile `%s': %m", pidfile);
-        goto error;
-    }
+	if (!(fp = fdopen(fd, "w"))) {
+		error("Unable to access pidfile at `%s': %m", pidfile);
+		(void) close(fd);
+		return -1;
+	}
 
-    if (fprintf(fp, "%lu\n", (unsigned long) getpid()) == EOF) {
-        error("Unable to write to pidfile `%s': %m", pidfile);
-        goto error;
-    }
+	if (fd_get_write_lock(fd) < 0) {
+		error ("Unable to lock pidfile `%s': %m", pidfile);
+		goto error;
+	}
 
-    fflush(fp);
+	if (fprintf(fp, "%lu\n", (unsigned long) getpid()) == EOF) {
+		error("Unable to write to pidfile `%s': %m", pidfile);
+		goto error;
+	}
 
-    if (uid && (fchown(fd, uid, -1) < 0))
-        error("Unable to reset owner of pidfile: %m");
+	fflush(fp);
+
+	if (uid && (fchown(fd, uid, -1) < 0))
+		error ("Unable to reset owner of pidfile: %m");
 
 /*	fclose(fp);	NOTE: DO NOT CLOSE, "fd" CONTAINS FILE DESCRIPTOR */
-    return fd;
+	return fd;
 
-    error:
-    (void) fclose(fp); /* Ignore errors */
+  error:
+	(void)fclose(fp); /* Ignore errors */
 
-    if (unlink(pidfile) < 0)
-        error("Unable to remove pidfile `%s': %m", pidfile);
-    return -1;
+	if (unlink(pidfile) < 0)
+		error("Unable to remove pidfile `%s': %m", pidfile);
+	return -1;
 }
 
-void test_core_limit(void) {
+void
+test_core_limit(void)
+{
 #ifdef RLIMIT_CORE
-    struct rlimit rlim[1];
-    if (getrlimit(RLIMIT_CORE, rlim) < 0)
-        error("Unable to get core limit");
-    else if (rlim->rlim_cur != RLIM_INFINITY) {
-        rlim->rlim_cur /= 1024;    /* bytes to KB */
-        if (rlim->rlim_cur < 2048) {
-            verbose("Warning: Core limit is only %ld KB", (long int) rlim->rlim_cur);
-        }
-    }
+	struct rlimit rlim[1];
+	if (getrlimit(RLIMIT_CORE, rlim) < 0)
+		error("Unable to get core limit");
+	else if (rlim->rlim_cur != RLIM_INFINITY) {
+		rlim->rlim_cur /= 1024;	/* bytes to KB */
+		if (rlim->rlim_cur < 2048) {
+			verbose("Warning: Core limit is only %ld KB",
+				(long int) rlim->rlim_cur);
+		}
+	}
 #endif
-    return;
+	return;
 }

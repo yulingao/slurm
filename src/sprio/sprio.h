@@ -58,28 +58,28 @@
 #include "src/sprio/print.h"
 
 struct sprio_parameters {
-    bool federation;
-    bool job_flag;
-    bool local;
-    bool long_list;
-    bool no_header;
-    bool normalized;
-    bool sibling;
-    bool weights;
+	bool federation;
+	bool job_flag;
+	bool local;
+	bool long_list;
+	bool no_header;
+	bool normalized;
+	bool sibling;
+	bool weights;
 
-    int verbose;
+	int  verbose;
 
-    List clusters;
+	List clusters;
 
-    char *format;
-    char *jobs;
-    char *parts;
-    char *users;
-    char *sort;
+	char* format;
+	char* jobs;
+	char* parts;
+	char* users;
+	char* sort;
 
-    List format_list;
-    List job_list;
-    List user_list;
+	List  format_list;
+	List  job_list;
+	List  user_list;
 };
 
 /********************
@@ -93,12 +93,10 @@ extern uint32_t weight_fs; /* weight for Fairshare factor */
 extern uint32_t weight_js; /* weight for Job Size factor */
 extern uint32_t weight_part; /* weight for Partition factor */
 extern uint32_t weight_qos; /* weight for QOS factor */
-extern char *weight_tres; /* weight str TRES factors */
+extern char    *weight_tres; /* weight str TRES factors */
 
-extern void parse_command_line(int argc, char **argv);
-
-extern int parse_format(char *format);
-
+extern void parse_command_line( int argc, char* *argv );
+extern int  parse_format( char* format );
 extern void sort_job_list(List job_list);
 
 #endif

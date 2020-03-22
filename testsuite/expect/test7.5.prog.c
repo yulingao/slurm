@@ -36,35 +36,38 @@
 
 int sigterm_cnt = 0;
 
-void sig_handler(int sig) {
-    switch (sig) {
-        case SIGTERM:
-            printf("Received SIGTERM\n");
-            fflush(stdout);
-            sigterm_cnt++;
-            break;
-        default:
-            printf("Received signal %d\n", sig);
-            fflush(stdout);
-    }
+void sig_handler(int sig)
+{
+	switch (sig)
+	{
+		case SIGTERM:
+			printf("Received SIGTERM\n");
+			fflush(stdout);
+			sigterm_cnt++;
+			break;
+		default:
+			printf("Received signal %d\n", sig);
+			fflush(stdout);
+	}
 }
 
-int main(int argc, char **argv) {
-    struct sigaction act;
+int main (int argc, char **argv)
+{
+	struct sigaction act;
 
-    act.sa_handler = sig_handler;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-    if (sigaction(SIGTERM, &act, NULL) < 0) {
-        perror("setting SIGTERM handler");
-        exit(2);
-    }
+	act.sa_handler = sig_handler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	if (sigaction(SIGTERM, &act, NULL) < 0) {
+		perror("setting SIGTERM handler");
+		exit(2);
+	}
 
-    printf("WAITING\n");
-    fflush(stdout);
+	printf("WAITING\n");
+	fflush(stdout);
 
-    sleep(160);
+	sleep(160);
 
-    printf("FINI: term:%d\n", sigterm_cnt);
-    exit(0);
+	printf("FINI: term:%d\n", sigterm_cnt);
+	exit(0);
 }

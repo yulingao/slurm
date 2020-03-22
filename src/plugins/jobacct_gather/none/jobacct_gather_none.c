@@ -75,82 +75,106 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    debug("%s loaded", plugin_name);
-    return SLURM_SUCCESS;
+extern int init ( void )
+{
+	debug("%s loaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    return SLURM_SUCCESS;
+extern int fini ( void )
+{
+	return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin, uint64_t cont_id) {
-    return;
+extern void jobacct_gather_p_poll_data(List task_list, bool pgid_plugin,
+				       uint64_t cont_id)
+{
+	return;
 }
 
-extern jobacctinfo_t *jobacct_gather_p_create(jobacct_id_t *jobacct_id) {
-    return NULL;
+extern jobacctinfo_t *jobacct_gather_p_create(jobacct_id_t *jobacct_id)
+{
+	return NULL;
 }
 
-extern void jobacct_gather_p_destroy(struct jobacctinfo *jobacct) {
-    return;
+extern void jobacct_gather_p_destroy(struct jobacctinfo *jobacct)
+{
+	return;
 }
 
-extern int jobacct_gather_p_setinfo(struct jobacctinfo *jobacct, enum jobacct_data_type type, void *data) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_setinfo(struct jobacctinfo *jobacct,
+				    enum jobacct_data_type type, void *data)
+{
+	return SLURM_SUCCESS;
 
 }
 
-extern int jobacct_gather_p_getinfo(struct jobacctinfo *jobacct, enum jobacct_data_type type, void *data) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_getinfo(struct jobacctinfo *jobacct,
+				    enum jobacct_data_type type, void *data)
+{
+	return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_pack(struct jobacctinfo *jobacct, Buf buffer) {
-    return;
+extern void jobacct_gather_p_pack(struct jobacctinfo *jobacct, Buf buffer)
+{
+	return;
 }
 
-extern int jobacct_gather_p_unpack(struct jobacctinfo **jobacct, Buf buffer) {
-    *jobacct = NULL;
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_unpack(struct jobacctinfo **jobacct, Buf buffer)
+{
+	*jobacct = NULL;
+	return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_aggregate(struct jobacctinfo *dest, struct jobacctinfo *from) {
-    return;
+extern void jobacct_gather_p_aggregate(struct jobacctinfo *dest,
+				       struct jobacctinfo *from)
+{
+	return;
 }
 
-extern int jobacct_gather_p_startpoll(uint16_t frequency) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_startpoll(uint16_t frequency)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int jobacct_gather_p_endpoll(void) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_endpoll(void)
+{
+	return SLURM_SUCCESS;
 }
 
-extern void jobacct_gather_p_suspend_poll(void) {
-    return;
+extern void jobacct_gather_p_suspend_poll(void)
+{
+	return;
 }
 
-extern void jobacct_gather_p_resume_poll(void) {
-    return;
+extern void jobacct_gather_p_resume_poll(void)
+{
+	return;
 }
 
-extern int jobacct_gather_p_set_proctrack_container_id(uint64_t id) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_set_proctrack_container_id(uint64_t id)
+{
+	return SLURM_SUCCESS;
 }
 
-extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id) {
-    return SLURM_SUCCESS;
+extern int jobacct_gather_p_add_task(pid_t pid, jobacct_id_t *jobacct_id)
+{
+	return SLURM_SUCCESS;
 }
 
 
-extern jobacctinfo_t *jobacct_gather_p_stat_task(pid_t pid) {
-    return NULL;
+extern jobacctinfo_t *jobacct_gather_p_stat_task(pid_t pid)
+{
+	return NULL;
 }
 
-extern jobacctinfo_t *jobacct_gather_p_remove_task(pid_t pid) {
-    return NULL;
+extern jobacctinfo_t *jobacct_gather_p_remove_task(pid_t pid)
+{
+	return NULL;
 }
 
-extern void jobacct_gather_p_2_stats(slurmdb_stats_t *stats, struct jobacctinfo *jobacct) {
-    return;
+extern void jobacct_gather_p_2_stats(slurmdb_stats_t *stats,
+				     struct jobacctinfo *jobacct)
+{
+	return;
 }

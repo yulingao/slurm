@@ -43,36 +43,34 @@
 
 #include "src/common/list.h"
 
-typedef struct jag_prec {    /* process record */
-    bool visited;
-    int act_cpufreq;    /* actual average cpu frequency */
-    int last_cpu;    /* last cpu */
-    pid_t pid;
-    pid_t ppid;
-    double ssec; /* system cpu time: To normalize divide by system hertz */
-    /* Units of tres_[in|out] should be raw numbers (bytes/joules) */
-    int tres_count; /* count of tres in the tres_data */
-    acct_gather_data_t *tres_data; /* array of tres data */
-    double usec; /* user cpu time: To normalize divide by system hertz */
+typedef struct jag_prec {	/* process record */
+	bool	visited;
+	int	act_cpufreq;	/* actual average cpu frequency */
+	int	last_cpu;	/* last cpu */
+	pid_t	pid;
+	pid_t	ppid;
+	double  ssec; /* system cpu time: To normalize divide by system hertz */
+	/* Units of tres_[in|out] should be raw numbers (bytes/joules) */
+	int     tres_count; /* count of tres in the tres_data */
+	acct_gather_data_t *tres_data; /* array of tres data */
+	double  usec; /* user cpu time: To normalize divide by system hertz */
 } jag_prec_t;
 
 typedef struct jag_callbacks {
-    void (*prec_extra)(jag_prec_t *prec, uint32_t taskid);
-
-    List (*get_precs)(List task_list, bool pgid_plugin, uint64_t cont_id, struct jag_callbacks *callbacks);
-
-    void (*get_offspring_data)(List prec_list, jag_prec_t *ancestor, pid_t pid);
+	void (*prec_extra) (jag_prec_t *prec, uint32_t taskid);
+	List (*get_precs) (List task_list, bool pgid_plugin, uint64_t cont_id,
+			   struct jag_callbacks *callbacks);
+	void (*get_offspring_data) (List prec_list,
+				    jag_prec_t *ancestor, pid_t pid);
 } jag_callbacks_t;
 
 extern void jag_common_init(long in_hertz);
-
 extern void jag_common_fini(void);
-
 extern void destroy_jag_prec(void *object);
-
 extern void print_jag_prec(jag_prec_t *prec);
 
-extern void
-jag_common_poll_data(List task_list, bool pgid_plugin, uint64_t cont_id, jag_callbacks_t *callbacks, bool profile);
+extern void jag_common_poll_data(
+	List task_list, bool pgid_plugin, uint64_t cont_id,
+	jag_callbacks_t *callbacks, bool profile);
 
 #endif

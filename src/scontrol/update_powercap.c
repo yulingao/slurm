@@ -37,22 +37,23 @@
 #include "src/common/proc_args.h"
 #include "src/scontrol/scontrol.h"
 
-static uint32_t _parse_watts(char *watts_str) {
-    uint32_t watts_num = 0;
-    char *end_ptr = NULL;
+static uint32_t _parse_watts(char * watts_str)
+{
+	uint32_t watts_num = 0;
+	char *end_ptr = NULL;
 
-    if (!xstrcasecmp(watts_str, "n/a") || !xstrcasecmp(watts_str, "none"))
-        return watts_num;
-    if (!xstrcasecmp(watts_str, "INFINITE"))
-        return INFINITE;
-    watts_num = strtol(watts_str, &end_ptr, 10);
-    if ((end_ptr[0] == 'k') || (end_ptr[0] == 'K'))
-        watts_num *= 1000;
-    else if ((end_ptr[0] == 'm') || (end_ptr[0] == 'M'))
-        watts_num *= 1000000;
-    else if (end_ptr[0] != '\0')
-        watts_num = NO_VAL;
-    return watts_num;
+	if (!xstrcasecmp(watts_str, "n/a") || !xstrcasecmp(watts_str, "none"))
+		return watts_num;
+	if (!xstrcasecmp(watts_str, "INFINITE"))
+		return INFINITE;
+	watts_num = strtol(watts_str, &end_ptr, 10);
+	if ((end_ptr[0] == 'k') || (end_ptr[0] == 'K'))
+		watts_num *= 1000;
+	else if ((end_ptr[0] == 'm') || (end_ptr[0] == 'M'))
+		watts_num *= 1000000;
+	else if (end_ptr[0] != '\0')
+		watts_num = NO_VAL;
+	return watts_num;
 }
 
 /*
@@ -63,46 +64,48 @@ static uint32_t _parse_watts(char *watts_str) {
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int scontrol_update_powercap(int argc, char **argv) {
-    update_powercap_msg_t powercap_msg;
-    int i;
-    char *tag, *val;
-    int taglen;
+extern int
+scontrol_update_powercap (int argc, char **argv)
+{
+	update_powercap_msg_t powercap_msg;
+	int i;
+	char *tag, *val;
+	int taglen;
 
-    memset(&powercap_msg, 0, sizeof(update_powercap_msg_t));
-    powercap_msg.power_cap = NO_VAL;
-    powercap_msg.min_watts = NO_VAL;
-    powercap_msg.cur_max_watts = NO_VAL;
-    powercap_msg.adj_max_watts = NO_VAL;
-    powercap_msg.max_watts = NO_VAL;
+	memset(&powercap_msg, 0, sizeof(update_powercap_msg_t));
+	powercap_msg.power_cap = NO_VAL;
+	powercap_msg.min_watts = NO_VAL;
+	powercap_msg.cur_max_watts = NO_VAL;
+	powercap_msg.adj_max_watts = NO_VAL;
+	powercap_msg.max_watts = NO_VAL;
 
-    for (i = 0; i < argc; i++) {
-        tag = argv[i];
-        val = strchr(argv[i], '=');
-        if (val) {
-            taglen = val - argv[i];
-            val++;
-        } else {
-            exit_code = 1;
-            error("Invalid input: %s  Request aborted", argv[i]);
-            return -1;
-        }
+	for (i = 0; i < argc; i++) {
+		tag = argv[i];
+		val = strchr(argv[i], '=');
+		if (val) {
+			taglen = val - argv[i];
+			val++;
+		} else {
+			exit_code = 1;
+			error("Invalid input: %s  Request aborted", argv[i]);
+			return -1;
+		}
 
-        if (xstrncasecmp(tag, "PowerCap", MAX(taglen, 8)) == 0) {
-            powercap_msg.power_cap = _parse_watts(val);
-            break;
-        }
-    }
+		if (xstrncasecmp(tag, "PowerCap", MAX(taglen, 8)) == 0) {
+			powercap_msg.power_cap = _parse_watts(val);
+			break;
+		}
+	}
 
-    if (powercap_msg.power_cap == NO_VAL) {
-        exit_code = 1;
-        error("Invalid PowerCap value.");
-        return 0;
-    }
+	if (powercap_msg.power_cap == NO_VAL) {
+		exit_code = 1;
+		error("Invalid PowerCap value.");
+		return 0;
+	}
 
-    if (slurm_update_powercap(&powercap_msg)) {
-        exit_code = 1;
-        return slurm_get_errno();
-    } else
-        return 0;
+	if (slurm_update_powercap(&powercap_msg)) {
+		exit_code = 1;
+		return slurm_get_errno ();
+	} else
+		return 0;
 }

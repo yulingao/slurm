@@ -75,7 +75,7 @@ extern int container_g_add_cont(uint32_t job_id, uint64_t cont_id);
 extern int container_g_delete(uint32_t job_id);
 
 /* Restore container information */
-extern int container_g_restore(char *dir_name, bool recover);
+extern int container_g_restore(char * dir_name, bool recover);
 
 /* Note change in configuration (e.g. "DebugFlag=JobContainer" set) */
 extern void container_g_reconfig(void);

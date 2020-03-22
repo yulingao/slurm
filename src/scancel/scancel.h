@@ -44,47 +44,40 @@
 #include "src/common/slurmdb_defs.h"
 
 typedef struct scancel_options {
-    char *account;     /* --account=n, -a		*/
-    bool batch;           /* --batch, -b			*/
-    char *sibling;     /* --sibling=<sib_name>		*/
-    bool ctld;           /* --ctld			*/
-    List clusters;     /* --cluster=cluster_name -Mcluster-name */
-    bool full;           /* --full, -f			*/
-    bool hurry;           /* --hurry, -H			*/
-    bool interactive;  /* --interactive, -i		*/
-    char *job_name;    /* --name=n, -nn		*/
-    char *partition;   /* --partition=n, -pn		*/
-    char *qos;           /* --qos=n, -qn			*/
-    char *reservation; /* --reservation=n, -Rn		*/
-    uint16_t signal;   /* --signal=n, -sn		*/
-    uint32_t state;    /* --state=n, -tn		*/
-    uid_t user_id;     /* derived from user_name	*/
-    char *user_name;   /* --user=n, -un		*/
-    int verbose;       /* --verbose, -v		*/
-    char *wckey;       /* --wckey			*/
-    char *nodelist;    /* --nodelist, -w		*/
+	char *account;		/* --account=n, -a		*/
+	bool batch;		/* --batch, -b			*/
+	char *sibling;		/* --sibling=<sib_name>		*/
+	bool ctld;		/* --ctld			*/
+	List clusters;          /* --cluster=cluster_name -Mcluster-name */
+	bool full;		/* --full, -f			*/
+	bool hurry;		/* --hurry, -H			*/
+	bool interactive;	/* --interactive, -i		*/
+	char *job_name;		/* --name=n, -nn		*/
+	char *partition;	/* --partition=n, -pn		*/
+	char *qos;		/* --qos=n, -qn			*/
+	char *reservation;	/* --reservation=n, -Rn		*/
+	uint16_t signal;	/* --signal=n, -sn		*/
+	uint32_t state;		/* --state=n, -tn		*/
+	uid_t user_id;		/* derived from user_name	*/
+	char *user_name;	/* --user=n, -un		*/
+	int verbose;		/* --verbose, -v		*/
+	char *wckey;		/* --wckey			*/
+	char *nodelist;		/* --nodelist, -w		*/
 
-    char **job_list; /* job ID input, NULL termated
+	char **job_list;        /* job ID input, NULL termated
 				 * Expanded in to arrays below	*/
 
-    uint16_t job_cnt;                                       /* count of job_id's specified	*/
-    uint32_t *job_id; /* list of job ID's		*/           /* job全局的id */
-    uint32_t *array_id; /* list of job array task IDs	*/ /* job所在batch中的id */
-    uint32_t *step_id; /* list of job step ID's	*/           /* 作业步 */
-    bool *job_found;                                       /* Set if the job record is found */
-    bool *job_pend;                                           /* Set if job is pending	(author: Set fi job is pending) */
+	uint16_t job_cnt;	/* count of job_id's specified	*/
+	uint32_t *job_id;	/* list of job ID's		*/
+	uint32_t *array_id;	/* list of job array task IDs	*/
+	uint32_t *step_id;	/* list of job step ID's	*/
+	bool *job_found;	/* Set if the job record is found */
+	bool *job_pend;		/* Set fi job is pending	*/
 } opt_t;
 
 opt_t opt;
 
-/* 
-处理参数：
-1. 设置默认值
-2. 使用环境变量更新参数
-3. 使用命令行参数更新参数
-4. 执行一些参数是否合理的验证
-
-process options:
+/* process options:
  * 1. set defaults
  * 2. update options with env vars
  * 3. update options with commandline args
@@ -97,7 +90,5 @@ extern int initialize_and_process_args(int argc, char **argv);
  * job ids is on the command line.
  */
 extern bool has_default_opt(void);
-
 extern bool has_job_steps(void);
-
-#endif /* _HAVE_SCANCEL_H */
+#endif	/* _HAVE_SCANCEL_H */

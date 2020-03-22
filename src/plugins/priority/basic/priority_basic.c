@@ -80,129 +80,153 @@ int slurmctld_tres_cnt = 0;
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Priority BASIC plugin";
-const char plugin_type[] = "priority/basic";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Priority BASIC plugin";
+const char plugin_type[]       	= "priority/basic";
+const uint32_t plugin_version	= SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-int init(void) {
-    debug("%s loaded", plugin_name);
-    return SLURM_SUCCESS;
+int init ( void )
+{
+	debug("%s loaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
-int fini(void) {
-    return SLURM_SUCCESS;
+int fini ( void )
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * The remainder of this file implements the standard Slurm priority API.
  */
 
-extern uint32_t priority_p_set(uint32_t last_prio, struct job_record *job_ptr) {
-    uint32_t new_prio = 1;
+extern uint32_t priority_p_set(uint32_t last_prio, struct job_record *job_ptr)
+{
+	uint32_t new_prio = 1;
 
-    if (job_ptr->direct_set_prio && (job_ptr->priority > 1))
-        return job_ptr->priority;
+	if (job_ptr->direct_set_prio && (job_ptr->priority > 1))
+		return job_ptr->priority;
 
-    if (last_prio >= 2)
-        new_prio = (last_prio - 1);
+	if (last_prio >= 2)
+		new_prio = (last_prio - 1);
 
-    if (job_ptr->details) {
-        int offset = job_ptr->details->nice;
-        offset -= NICE_OFFSET;
-        if ((offset <= 0) || (new_prio > (offset + 1)))
-            new_prio -= offset;
-    }
+	if (job_ptr->details) {
+		int offset = job_ptr->details->nice;
+		offset -= NICE_OFFSET;
+		if ((offset <= 0) || (new_prio > (offset+1)))
+			new_prio -= offset;
+	}
 
-    /* System hold is priority 0 */
-    if (new_prio < 1)
-        new_prio = 1;
+	/* System hold is priority 0 */
+	if (new_prio < 1)
+		new_prio = 1;
 
-    return new_prio;
+	return new_prio;
 }
 
-extern void priority_p_reconfig(bool assoc_clear) {
-    return;
+extern void priority_p_reconfig(bool assoc_clear)
+{
+	return;
 }
 
-extern void priority_p_set_assoc_usage(slurmdb_assoc_rec_t *assoc) {
-    return;
+extern void priority_p_set_assoc_usage(slurmdb_assoc_rec_t *assoc)
+{
+	return;
 }
 
-extern double priority_p_calc_fs_factor(long double usage_efctv, long double shares_norm) {
-    /* This calculation is needed for sshare when ran from a
-     * non-multifactor machine to a multifactor machine.  It
-     * doesn't do anything on regular systems, it should always
-     * return 0 since shares_norm will always be NO_VAL. */
-    double priority_fs;
+extern double priority_p_calc_fs_factor(long double usage_efctv,
+					long double shares_norm)
+{
+	/* This calculation is needed for sshare when ran from a
+	 * non-multifactor machine to a multifactor machine.  It
+	 * doesn't do anything on regular systems, it should always
+	 * return 0 since shares_norm will always be NO_VAL. */
+	double priority_fs;
 
-    xassert(!fuzzy_equal(usage_efctv, NO_VAL));
+	xassert(!fuzzy_equal(usage_efctv, NO_VAL));
 
-    if ((shares_norm <= 0.0) || fuzzy_equal(shares_norm, NO_VAL))
-        priority_fs = 0.0;
-    else
-        priority_fs = pow(2.0, -(usage_efctv / shares_norm));
+	if ((shares_norm <= 0.0) || fuzzy_equal(shares_norm, NO_VAL))
+		priority_fs = 0.0;
+	else
+		priority_fs = pow(2.0, -(usage_efctv / shares_norm));
 
-    return priority_fs;
+	return priority_fs;
 }
 
-extern List priority_p_get_priority_factors_list(priority_factors_request_msg_t *req_msg, uid_t uid) {
-    return (list_create(NULL));
+extern List priority_p_get_priority_factors_list(
+	priority_factors_request_msg_t *req_msg, uid_t uid)
+{
+	return(list_create(NULL));
 }
 
-extern void priority_p_job_end(struct job_record *job_ptr) {
-    uint64_t time_limit_secs = (uint64_t) job_ptr->time_limit * 60;
-    slurmdb_assoc_rec_t *assoc_ptr;
-    int i;
-    uint64_t *unused_tres_run_secs;
-    assoc_mgr_lock_t locks = {NO_LOCK, WRITE_LOCK, NO_LOCK, WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+extern void priority_p_job_end(struct job_record *job_ptr)
+{
+	uint64_t time_limit_secs = (uint64_t)job_ptr->time_limit * 60;
+	slurmdb_assoc_rec_t *assoc_ptr;
+	int i;
+	uint64_t *unused_tres_run_secs;
+	assoc_mgr_lock_t locks = { NO_LOCK, WRITE_LOCK, NO_LOCK,
+				   WRITE_LOCK, NO_LOCK, NO_LOCK, NO_LOCK };
 
-    /* No decaying in basic priority. Just remove the total secs. */
-    unused_tres_run_secs = xmalloc(sizeof(uint64_t) * slurmctld_tres_cnt);
-    for (i = 0; i < slurmctld_tres_cnt; i++) {
-        unused_tres_run_secs[i] = job_ptr->tres_alloc_cnt[i] * time_limit_secs;
-    }
+	/* No decaying in basic priority. Just remove the total secs. */
+	unused_tres_run_secs = xmalloc(sizeof(uint64_t) * slurmctld_tres_cnt);
+	for (i=0; i<slurmctld_tres_cnt; i++) {
+		unused_tres_run_secs[i] =
+			job_ptr->tres_alloc_cnt[i] * time_limit_secs;
+	}
 
-    assoc_mgr_lock(&locks);
-    if (job_ptr->qos_ptr) {
-        slurmdb_qos_rec_t *qos_ptr = job_ptr->qos_ptr;
-        for (i = 0; i < slurmctld_tres_cnt; i++) {
-            if (unused_tres_run_secs[i] > qos_ptr->usage->grp_used_tres_run_secs[i]) {
-                qos_ptr->usage->grp_used_tres_run_secs[i] = 0;
-                debug2("acct_policy_job_fini: "
-                       "grp_used_tres_run_secs "
-                       "underflow for qos %s tres %s", qos_ptr->name, assoc_mgr_tres_name_array[i]);
-            } else
-                qos_ptr->usage->grp_used_tres_run_secs[i] -= unused_tres_run_secs[i];
-        }
-    }
-    assoc_ptr = job_ptr->assoc_ptr;
-    while (assoc_ptr) {
-        /* If the job finished early remove the extra time now. */
-        for (i = 0; i < slurmctld_tres_cnt; i++) {
-            if (unused_tres_run_secs[i] > assoc_ptr->usage->grp_used_tres_run_secs[i]) {
-                assoc_ptr->usage->grp_used_tres_run_secs[i] = 0;
-                debug2("acct_policy_job_fini: "
-                       "grp_used_tres_run_secs "
-                       "underflow for account %s tres %s", assoc_ptr->acct, assoc_mgr_tres_name_array[i]);
+	assoc_mgr_lock(&locks);
+	if (job_ptr->qos_ptr) {
+		slurmdb_qos_rec_t *qos_ptr = job_ptr->qos_ptr;
+		for (i=0; i<slurmctld_tres_cnt; i++) {
+			if (unused_tres_run_secs[i] >
+			    qos_ptr->usage->grp_used_tres_run_secs[i]) {
+				qos_ptr->usage->grp_used_tres_run_secs[i] = 0;
+				debug2("acct_policy_job_fini: "
+				       "grp_used_tres_run_secs "
+				       "underflow for qos %s tres %s",
+				       qos_ptr->name,
+				       assoc_mgr_tres_name_array[i]);
+			} else
+				qos_ptr->usage->grp_used_tres_run_secs[i] -=
+					unused_tres_run_secs[i];
+		}
+	}
+	assoc_ptr = job_ptr->assoc_ptr;
+	while (assoc_ptr) {
+		/* If the job finished early remove the extra time now. */
+		for (i=0; i<slurmctld_tres_cnt; i++) {
+			if (unused_tres_run_secs[i] >
+			    assoc_ptr->usage->grp_used_tres_run_secs[i]) {
+				assoc_ptr->usage->grp_used_tres_run_secs[i] = 0;
+				debug2("acct_policy_job_fini: "
+				       "grp_used_tres_run_secs "
+				       "underflow for account %s tres %s",
+				       assoc_ptr->acct,
+				       assoc_mgr_tres_name_array[i]);
 
-            } else {
-                assoc_ptr->usage->grp_used_tres_run_secs[i] -= unused_tres_run_secs[i];
-                debug4("acct_policy_job_fini: job %u. "
-                       "Removed %"PRIu64" unused seconds "
-                       "from acct %s tres %s "
-                       "grp_used_tres_run_secs = %"PRIu64"", job_ptr->job_id, unused_tres_run_secs[i], assoc_ptr->acct,
-                       assoc_mgr_tres_name_array[i], assoc_ptr->usage->grp_used_tres_run_secs[i]);
-            }
-        }
-        /* now handle all the group limits of the parents */
-        assoc_ptr = assoc_ptr->usage->parent_assoc_ptr;
-    }
-    assoc_mgr_unlock(&locks);
-    xfree(unused_tres_run_secs);
+			} else {
+				assoc_ptr->usage->grp_used_tres_run_secs[i] -=
+					unused_tres_run_secs[i];
+				debug4("acct_policy_job_fini: job %u. "
+				       "Removed %"PRIu64" unused seconds "
+				       "from acct %s tres %s "
+				       "grp_used_tres_run_secs = %"PRIu64"",
+				       job_ptr->job_id, unused_tres_run_secs[i],
+				       assoc_ptr->acct,
+				       assoc_mgr_tres_name_array[i],
+				       assoc_ptr->usage->
+				       grp_used_tres_run_secs[i]);
+			}
+		}
+		/* now handle all the group limits of the parents */
+		assoc_ptr = assoc_ptr->usage->parent_assoc_ptr;
+	}
+	assoc_mgr_unlock(&locks);
+	xfree(unused_tres_run_secs);
 
-    return;
+	return;
 }

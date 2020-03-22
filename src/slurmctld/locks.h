@@ -95,44 +95,48 @@
 
 /* levels of locking required for each data structure */
 typedef enum {
-    NO_LOCK, READ_LOCK, WRITE_LOCK
-} lock_level_t;
+	NO_LOCK,
+	READ_LOCK,
+	WRITE_LOCK
+}	lock_level_t;
 
 /* slurmctld specific data structures to lock via APIs */
 typedef struct {
-    lock_level_t conf;
-    lock_level_t job;
-    lock_level_t node;
-    lock_level_t part;
-    lock_level_t fed;
-} slurmctld_lock_t;
+	lock_level_t conf;
+	lock_level_t job;
+	lock_level_t node;
+	lock_level_t part;
+	lock_level_t fed;
+}	slurmctld_lock_t;
 
 typedef enum {
-    CONF_LOCK, JOB_LOCK, NODE_LOCK, PART_LOCK, FED_LOCK, ENTITY_COUNT
-} lock_datatype_t;
+	CONF_LOCK,
+	JOB_LOCK,
+	NODE_LOCK,
+	PART_LOCK,
+	FED_LOCK,
+	ENTITY_COUNT
+}	lock_datatype_t;
 
 #ifndef NDEBUG
-
 extern bool verify_lock(lock_datatype_t datatype, lock_level_t level);
-
 #endif
 
 /* init_locks - create locks used for slurmctld data structure access
  *	control */
-extern void init_locks(void);
+extern void init_locks ( void );
 
 /* lock_slurmctld - Issue the required lock requests in a well defined order */
-extern void lock_slurmctld(slurmctld_lock_t lock_levels);
+extern void lock_slurmctld (slurmctld_lock_t lock_levels);
 
 /* unlock_slurmctld - Issue the required unlock requests in a well
  *	defined order */
-extern void unlock_slurmctld(slurmctld_lock_t lock_levels);
+extern void unlock_slurmctld (slurmctld_lock_t lock_levels);
 
 extern int report_locks_set(void);
 
 /* un/lock semaphore used for saving state of slurmctld */
-extern void lock_state_files(void);
-
-extern void unlock_state_files(void);
+extern void lock_state_files ( void );
+extern void unlock_state_files ( void );
 
 #endif

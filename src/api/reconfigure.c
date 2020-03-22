@@ -56,21 +56,24 @@ static int _send_message_controller(int dest, slurm_msg_t *req);
  *	reload its configuration file
  * RET 0 or a slurm error code
  */
-int slurm_reconfigure(void) {
-    int rc;
-    slurm_msg_t req;
+int
+slurm_reconfigure (void)
+{
+	int rc;
+	slurm_msg_t req;
 
-    slurm_msg_t_init(&req);
+	slurm_msg_t_init(&req);
 
-    req.msg_type = REQUEST_RECONFIGURE;
+	req.msg_type = REQUEST_RECONFIGURE;
 
-    if (slurm_send_recv_controller_rc_msg(&req, &rc, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_rc_msg(&req, &rc,
+					      working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    if (rc)
-        slurm_seterrno_ret(rc);
+	if (rc)
+		slurm_seterrno_ret(rc);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -78,25 +81,19 @@ int slurm_reconfigure(void) {
  * IN dest - controller to contact (0=primary, 1=backup, 2=backup2, etc.)
  * RET 0 or a slurm error code
  */
-extern int slurm_ping(int dest) {
-    int rc;
-    slurm_msg_t request_msg;
+extern int slurm_ping(int dest)
+{
+	int rc ;
+	slurm_msg_t request_msg ;
 
-    slurm_msg_t_init(&request_msg);
-    request_msg.msg_type = REQUEST_PING;
-    rc = _send_message_controller(dest, &request_msg);
+	slurm_msg_t_init(&request_msg);
+	request_msg.msg_type = REQUEST_PING ;
+	rc = _send_message_controller(dest, &request_msg);
 
-    return rc;
+	return rc;
 }
 
 /*
-slurm_shutdown 发出RPC使Slurm控制器(slurmctld)停止操作，主控制器和所有备份控制器都关闭。
-* IN options - 0:关闭所有slurm守护进程
-* 				1: slurmctld生成一个核心文件
-* 				2:只有slurmctld被关闭(没有核心文件)
-*return 0或slurm错误代码
-
-
  * slurm_shutdown - issue RPC to have Slurm controller (slurmctld)
  *	cease operations, both the primary and all backup controllers
  *	are shutdown.
@@ -105,25 +102,26 @@ slurm_shutdown 发出RPC使Slurm控制器(slurmctld)停止操作，主控制器�
  *              2: only the slurmctld is shutdown (no core file)
  * RET 0 or a slurm error code
  */
-extern int slurm_shutdown(uint16_t options) {
-    slurm_msg_t req_msg;
-    shutdown_msg_t shutdown_msg;
-    int i;
+extern int slurm_shutdown(uint16_t options)
+{
+	slurm_msg_t req_msg;
+	shutdown_msg_t shutdown_msg;
+	int i;
 
-    slurm_msg_t_init(&req_msg);
-    shutdown_msg.options = options;
-    req_msg.msg_type = REQUEST_SHUTDOWN;
-    req_msg.data = &shutdown_msg;
+	slurm_msg_t_init(&req_msg);
+	shutdown_msg.options = options;
+	req_msg.msg_type     = REQUEST_SHUTDOWN;
+	req_msg.data         = &shutdown_msg;
 
-    /*
-     * Explicity send the message to both primary and backup controllers
-     */
-    if (!working_cluster_rec) {
-        uint32_t control_cnt = slurm_get_control_cnt();
-        for (i = 1; i < control_cnt; i++)
-            (void) _send_message_controller(i, &req_msg);
-    }
-    return _send_message_controller(0, &req_msg);
+	/*
+	 * Explicity send the message to both primary and backup controllers
+	 */
+	if (!working_cluster_rec) {
+		uint32_t control_cnt = slurm_get_control_cnt();
+		for (i = 1; i < control_cnt; i++)
+			(void) _send_message_controller(i, &req_msg);
+	}
+	return _send_message_controller(0, &req_msg);
 }
 
 /*
@@ -133,53 +131,57 @@ extern int slurm_shutdown(uint16_t options) {
  * backup_inx IN - Index of BackupController to assume controller (typically 1)
  * RET 0 or a slurm error code
  */
-extern int slurm_takeover(int backup_inx) {
-    slurm_msg_t req_msg;
+extern int slurm_takeover(int backup_inx)
+{
+	slurm_msg_t req_msg;
 
-    slurm_msg_t_init(&req_msg);
-    req_msg.msg_type = REQUEST_TAKEOVER;
-    if (backup_inx < 1)
-        return SLURMCTLD_COMMUNICATIONS_CONNECTION_ERROR;
-    return _send_message_controller(backup_inx, &req_msg);
+	slurm_msg_t_init(&req_msg);
+	req_msg.msg_type     = REQUEST_TAKEOVER;
+	if (backup_inx < 1)
+		return SLURMCTLD_COMMUNICATIONS_CONNECTION_ERROR;
+	return _send_message_controller(backup_inx, &req_msg);
 }
 
-static int _send_message_controller(int dest, slurm_msg_t *req) {
-    int rc = SLURM_SUCCESS;
-    int fd = -1;
-    slurm_msg_t resp_msg;
+static int _send_message_controller(int dest, slurm_msg_t *req)
+{
+	int rc = SLURM_SUCCESS;
+	int fd = -1;
+	slurm_msg_t resp_msg;
 
-    /*
-     * always communicate with a single node (primary or some backup per
-     * value of "dest")
-     */
-    if ((fd = slurm_open_controller_conn_spec(dest, working_cluster_rec)) < 0) {
-        slurm_seterrno_ret(SLURMCTLD_COMMUNICATIONS_CONNECTION_ERROR);
-    }
+	/*
+	 * always communicate with a single node (primary or some backup per
+	 * value of "dest")
+	 */
+	if ((fd = slurm_open_controller_conn_spec(dest,
+						  working_cluster_rec)) < 0) {
+		slurm_seterrno_ret(SLURMCTLD_COMMUNICATIONS_CONNECTION_ERROR);
+	}
 
-    if (slurm_send_node_msg(fd, req) < 0) {
-        close(fd);
-        slurm_seterrno_ret(SLURMCTLD_COMMUNICATIONS_SEND_ERROR);
-    }
-    slurm_msg_t_init(&resp_msg);
+	if (slurm_send_node_msg(fd, req) < 0) {
+		close(fd);
+		slurm_seterrno_ret(SLURMCTLD_COMMUNICATIONS_SEND_ERROR);
+	}
+	slurm_msg_t_init(&resp_msg);
 
-    if ((rc = slurm_receive_msg(fd, &resp_msg, 0)) != 0) {
-        slurm_free_msg_members(&resp_msg);
-        close(fd);
-        return SLURMCTLD_COMMUNICATIONS_RECEIVE_ERROR;
-    }
+	if ((rc = slurm_receive_msg(fd, &resp_msg, 0)) != 0) {
+		slurm_free_msg_members(&resp_msg);
+		close(fd);
+		return SLURMCTLD_COMMUNICATIONS_RECEIVE_ERROR;
+	}
 
-    if (close(fd) != SLURM_SUCCESS)
-        rc = SLURMCTLD_COMMUNICATIONS_SHUTDOWN_ERROR;
-    else if (resp_msg.msg_type != RESPONSE_SLURM_RC)
-        rc = SLURM_UNEXPECTED_MSG_ERROR;
-    else
-        rc = slurm_get_return_code(resp_msg.msg_type, resp_msg.data);
+	if (close(fd) != SLURM_SUCCESS)
+		rc = SLURMCTLD_COMMUNICATIONS_SHUTDOWN_ERROR;
+	else if (resp_msg.msg_type != RESPONSE_SLURM_RC)
+		rc = SLURM_UNEXPECTED_MSG_ERROR;
+	else
+		rc = slurm_get_return_code(resp_msg.msg_type,
+					   resp_msg.data);
 
-    slurm_free_msg_members(&resp_msg);
+	slurm_free_msg_members(&resp_msg);
 
-    if (rc)
-        slurm_seterrno_ret(rc);
-    return rc;
+	if (rc)
+		slurm_seterrno_ret(rc);
+        return rc;
 }
 
 /*
@@ -189,36 +191,39 @@ static int _send_message_controller(int dest, slurm_msg_t *req) {
  * IN debug_flags_set   - new debug flags value
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_minus) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    set_debug_flags_msg_t req;
+extern int
+slurm_set_debugflags (uint64_t debug_flags_plus, uint64_t debug_flags_minus)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
+	set_debug_flags_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.debug_flags_minus = debug_flags_minus;
-    req.debug_flags_plus = debug_flags_plus;
-    req_msg.msg_type = REQUEST_SET_DEBUG_FLAGS;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+	req.debug_flags_minus = debug_flags_minus;
+	req.debug_flags_plus  = debug_flags_plus;
+	req_msg.msg_type = REQUEST_SET_DEBUG_FLAGS;
+	req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
-    return SLURM_SUCCESS;
+	switch (resp_msg.msg_type) {
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
+        return SLURM_SUCCESS;
 }
 
 /*
@@ -226,35 +231,38 @@ extern int slurm_set_debugflags(uint64_t debug_flags_plus, uint64_t debug_flags_
  * IN debug_level - requested debug level
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_set_debug_level(uint32_t debug_level) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    set_debug_level_msg_t req;
+extern int
+slurm_set_debug_level (uint32_t debug_level)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
+	set_debug_level_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.debug_level = debug_level;
-    req_msg.msg_type = REQUEST_SET_DEBUG_LEVEL;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+	req.debug_level  = debug_level;
+	req_msg.msg_type = REQUEST_SET_DEBUG_LEVEL;
+	req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
-    return SLURM_SUCCESS;
+	switch (resp_msg.msg_type) {
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
+        return SLURM_SUCCESS;
 }
 
 /*
@@ -262,35 +270,38 @@ extern int slurm_set_debug_level(uint32_t debug_level) {
  * IN schedlog_level - requested scheduler log level
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-int slurm_set_schedlog_level(uint32_t schedlog_level) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    set_debug_level_msg_t req;
+int
+slurm_set_schedlog_level (uint32_t schedlog_level)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
+	set_debug_level_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.debug_level = schedlog_level;
-    req_msg.msg_type = REQUEST_SET_SCHEDLOG_LEVEL;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+	req.debug_level  = schedlog_level;
+	req_msg.msg_type = REQUEST_SET_SCHEDLOG_LEVEL;
+	req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
-    return SLURM_SUCCESS;
+	switch (resp_msg.msg_type) {
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
+        return SLURM_SUCCESS;
 }
 
 /*
@@ -298,33 +309,35 @@ int slurm_set_schedlog_level(uint32_t schedlog_level) {
  * IN factor  - requested fs dampening factor
  * RET SLURM_SUCCESS on success, otherwise return SLURM_ERROR with errno set
  */
-extern int slurm_set_fs_dampeningfactor(uint16_t factor) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
-    set_fs_dampening_factor_msg_t req;
+extern int slurm_set_fs_dampeningfactor (uint16_t factor)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
+	set_fs_dampening_factor_msg_t req;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    memset(&req, 0, sizeof(req));
-    req.dampening_factor = factor;
-    req_msg.msg_type = REQUEST_SET_FS_DAMPENING_FACTOR;
-    req_msg.data = &req;
+	memset(&req, 0, sizeof(req));
+	req.dampening_factor  = factor;
+	req_msg.msg_type = REQUEST_SET_FS_DAMPENING_FACTOR;
+	req_msg.data     = &req;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
-    return SLURM_SUCCESS;
+	switch (resp_msg.msg_type) {
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
+        return SLURM_SUCCESS;
 }

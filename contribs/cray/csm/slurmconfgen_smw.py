@@ -20,7 +20,6 @@ NAME = 'slurmconfgen_smw.py'
 
 class Gres(object):
     """ A class for generic resources """
-
     def __init__(self, name, count):
         """ Initialize a gres with the given name and count """
         self.name = name

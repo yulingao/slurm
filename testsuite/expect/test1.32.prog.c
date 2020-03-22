@@ -35,45 +35,48 @@
 
 int sigusr1_cnt = 0, sigusr2_cnt = 0;
 
-void sig_handler(int sig) {
-    switch (sig) {
-        case SIGUSR1:
-            printf("Received SIGUSR1\n");
-            fflush(stdout);
-            sigusr1_cnt++;
-            break;
-        case SIGUSR2:
-            printf("Received SIGUSR2\n");
-            fflush(stdout);
-            sigusr2_cnt++;
-            break;
-        default:
-            printf("Received signal %d\n", sig);
-            fflush(stdout);
-    }
+void sig_handler(int sig)
+{
+	switch (sig)
+	{
+		case SIGUSR1:
+			printf("Received SIGUSR1\n");
+			fflush(stdout);
+			sigusr1_cnt++;
+			break;
+		case SIGUSR2:
+			printf("Received SIGUSR2\n");
+			fflush(stdout);
+			sigusr2_cnt++;
+			break;
+		default:
+			printf("Received signal %d\n", sig);
+			fflush(stdout);
+	}
 }
 
-int main(int argc, char **argv) {
-    struct sigaction act;
+int main (int argc, char **argv)
+{
+	struct sigaction act;
 
-    act.sa_handler = sig_handler;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = 0;
-    if (sigaction(SIGUSR1, &act, NULL) < 0) {
-        perror("setting SIGUSR1 handler");
-        exit(2);
-    }
-    if (sigaction(SIGUSR2, &act, NULL) < 0) {
-        perror("setting SIGUSR2 handler");
-        exit(2);
-    }
+	act.sa_handler = sig_handler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	if (sigaction(SIGUSR1, &act, NULL) < 0) {
+		perror("setting SIGUSR1 handler");
+		exit(2);
+	}
+	if (sigaction(SIGUSR2, &act, NULL) < 0) {
+		perror("setting SIGUSR2 handler");
+		exit(2);
+	}
 
-    printf("WAITING\n");
-    fflush(stdout);
+	printf("WAITING\n");
+	fflush(stdout);
 
-    while ((sigusr1_cnt + sigusr2_cnt) < 2) {
-        sleep(1);
-    }
-    printf("FINI: sig1:%d sig2:%d\n", sigusr1_cnt, sigusr2_cnt);
-    exit(0);
+	while ((sigusr1_cnt + sigusr2_cnt) < 2) {
+		sleep(1);
+	}
+	printf("FINI: sig1:%d sig2:%d\n", sigusr1_cnt, sigusr2_cnt);
+	exit(0);
 }

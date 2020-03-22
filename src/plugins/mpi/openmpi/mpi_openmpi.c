@@ -71,26 +71,32 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "OpenMPI plugin";
-const char plugin_type[] = "mpi/openmpi";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "OpenMPI plugin";
+const char plugin_type[]        = "mpi/openmpi";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
-int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
-    debug("mpi/openmpi: slurmstepd prefork");
-    return SLURM_SUCCESS;
+int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env)
+{
+	debug("mpi/openmpi: slurmstepd prefork");
+	return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
-    debug("Using mpi/openmpi");
-    return SLURM_SUCCESS;
+int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job,
+			       char ***env)
+{
+	debug("Using mpi/openmpi");
+	return SLURM_SUCCESS;
 }
 
-mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env) {
-    debug("Using mpi/openmpi");
-    /* only return NULL on error */
-    return (void *) 0xdeadbeef;
+mpi_plugin_client_state_t *
+p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env)
+{
+	debug("Using mpi/openmpi");
+	/* only return NULL on error */
+	return (void *)0xdeadbeef;
 }
 
-int p_mpi_hook_client_fini() {
-    return SLURM_SUCCESS;
+int p_mpi_hook_client_fini()
+{
+	return SLURM_SUCCESS;
 }

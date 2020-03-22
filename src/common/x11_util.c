@@ -62,32 +62,34 @@
  * on a node will decide whether to set the forward up once for the entire
  * job if it matches any of these qualifiers.
  */
-uint16_t x11_str2flags(const char *str) {
-    uint16_t flags = 0;
+uint16_t x11_str2flags(const char *str)
+{
+	uint16_t flags = 0;
 
-    if (!xstrcasecmp(str, "all"))
-        flags |= X11_FORWARD_ALL;
-    if (!xstrcasecmp(str, "batch"))
-        flags |= X11_FORWARD_BATCH;
-    if (!xstrcasecmp(str, "first"))
-        flags |= X11_FORWARD_FIRST;
-    if (!xstrcasecmp(str, "last"))
-        flags |= X11_FORWARD_LAST;
+	if (!xstrcasecmp(str, "all"))
+		flags |= X11_FORWARD_ALL;
+	if (!xstrcasecmp(str, "batch"))
+		flags |= X11_FORWARD_BATCH;
+	if (!xstrcasecmp(str, "first"))
+		flags |= X11_FORWARD_FIRST;
+	if (!xstrcasecmp(str, "last"))
+		flags |= X11_FORWARD_LAST;
 
-    return flags;
+	return flags;
 }
 
-const char *x11_flags2str(uint16_t flags) {
-    if (flags & X11_FORWARD_ALL)
-        return "all";
-    if (flags & X11_FORWARD_BATCH)
-        return "batch";
-    if (flags & X11_FORWARD_FIRST)
-        return "first";
-    if (flags & X11_FORWARD_LAST)
-        return "last";
+const char *x11_flags2str(uint16_t flags)
+{
+	if (flags & X11_FORWARD_ALL)
+		return "all";
+	if (flags & X11_FORWARD_BATCH)
+		return "batch";
+	if (flags & X11_FORWARD_FIRST)
+		return "first";
+	if (flags & X11_FORWARD_LAST)
+		return "last";
 
-    return "unset";
+	return "unset";
 }
 
 /*
@@ -97,162 +99,170 @@ const char *x11_flags2str(uint16_t flags) {
  *
  * Warning - will call exit(-1) if not able to retrieve.
  */
-extern void x11_get_display(uint16_t *port, char **target) {
-    char *display, *port_split, *port_period;
-    *target = NULL;
+extern void x11_get_display(uint16_t *port, char **target)
+{
+	char *display, *port_split, *port_period;
+	*target = NULL;
 
-    display = xstrdup(getenv("DISPLAY"));
+	display = xstrdup(getenv("DISPLAY"));
 
-    if (!display) {
-        error("No DISPLAY variable set, cannot setup x11 forwarding.");
-        exit(-1);
-    }
+	if (!display) {
+		error("No DISPLAY variable set, cannot setup x11 forwarding.");
+		exit(-1);
+	}
 
-    if (display[0] == ':') {
-        struct stat st;
-        char *screen_period;
-        *port = 0;
-        screen_period = strchr(display, '.');
-        if (screen_period)
-            *screen_period = '\0';
-        xstrfmtcat(*target, "/tmp/.X11-unix/X%s", display + 1);
-        xfree(display);
-        if (stat(*target, &st) != 0) {
-            error("Cannot stat() local X11 socket `%s`", *target);
-            exit(-1);
-        }
-        return;
-    }
+	if (display[0] == ':') {
+		struct stat st;
+		char *screen_period;
+		*port = 0;
+		screen_period = strchr(display, '.');
+		if (screen_period)
+			*screen_period = '\0';
+		xstrfmtcat(*target, "/tmp/.X11-unix/X%s", display + 1);
+		xfree(display);
+		if (stat(*target, &st) != 0) {
+			error("Cannot stat() local X11 socket `%s`", *target);
+			exit(-1);
+		}
+		return;
+	}
 
-    /*
-     * Parse out port number
-     * Example: localhost/unix:89.0 or localhost/unix:89
-     */
-    port_split = strchr(display, ':');
-    if (!port_split) {
-        error("Error parsing DISPLAY environment variable. "
-              "Cannot use X11 forwarding.");
-        exit(-1);
-    }
-    *port_split = '\0';
+	/*
+	 * Parse out port number
+	 * Example: localhost/unix:89.0 or localhost/unix:89
+	 */
+	port_split = strchr(display, ':');
+	if (!port_split) {
+		error("Error parsing DISPLAY environment variable. "
+		      "Cannot use X11 forwarding.");
+		exit(-1);
+	}
+	*port_split = '\0';
 
-    /*
-     * Handle the "screen" portion of the display port.
-     * Xorg does not require a screen to be specified, defaults to 0.
-     */
-    port_split++;
-    port_period = strchr(port_split, '.');
-    if (port_period)
-        *port_period = '\0';
+	/*
+	 * Handle the "screen" portion of the display port.
+	 * Xorg does not require a screen to be specified, defaults to 0.
+	 */
+	port_split++;
+	port_period = strchr(port_split, '.');
+	if (port_period)
+		*port_period = '\0';
 
-    *port = atoi(port_split) + X11_TCP_PORT_OFFSET;
-    *target = display;
+	*port = atoi(port_split) + X11_TCP_PORT_OFFSET;
+	*target = display;
 }
 
-extern char *x11_get_xauth(void) {
-    int status, matchlen;
-    char **xauth_argv;
-    regex_t reg;
-    regmatch_t regmatch[2];
-    char *result, *cookie;
-    /*
-     * Two real-world examples:
-     * "zoidberg/unix:10  MIT-MAGIC-COOKIE-1  abcdef0123456789"
-     * "zoidberg:10  MIT-MAGIC-COOKIE-1  abcdef0123456789"
-     *
-     * The "/unix" bit is optional, and captured in "[[:alnum:].-/]+:".
-     * '.' and '-' are also allowed in the hostname portion, so match them
-     * in addition to '/'.
-     *
-     * Warning: the '-' must be either first or last in the [] brackets,
-     * otherwise it will be interpreted as a range instead of the literal
-     * character.
-     */
-    static char *cookie_pattern = "^[[:alnum:]./-]+:[[:digit:]]+"
-                                  "[[:space:]]+MIT-MAGIC-COOKIE-1"
-                                  "[[:space:]]+([[:xdigit:]]+)\n$";
+extern char *x11_get_xauth(void)
+{
+	int status, matchlen;
+	char **xauth_argv;
+	regex_t reg;
+	regmatch_t regmatch[2];
+	char *result, *cookie;
+	/*
+	 * Two real-world examples:
+	 * "zoidberg/unix:10  MIT-MAGIC-COOKIE-1  abcdef0123456789"
+	 * "zoidberg:10  MIT-MAGIC-COOKIE-1  abcdef0123456789"
+	 *
+	 * The "/unix" bit is optional, and captured in "[[:alnum:].-/]+:".
+	 * '.' and '-' are also allowed in the hostname portion, so match them
+	 * in addition to '/'.
+	 *
+	 * Warning: the '-' must be either first or last in the [] brackets,
+	 * otherwise it will be interpreted as a range instead of the literal
+	 * character.
+	 */
+	static char *cookie_pattern = "^[[:alnum:]./-]+:[[:digit:]]+"
+				      "[[:space:]]+MIT-MAGIC-COOKIE-1"
+				      "[[:space:]]+([[:xdigit:]]+)\n$";
 
-    xauth_argv = xmalloc(sizeof(char *) * 10);
-    xauth_argv[0] = xstrdup("xauth");
-    xauth_argv[1] = xstrdup("list");
-    xauth_argv[2] = xstrdup(getenv("DISPLAY"));
+	xauth_argv = xmalloc(sizeof(char *) * 10);
+	xauth_argv[0] = xstrdup("xauth");
+	xauth_argv[1] = xstrdup("list");
+	xauth_argv[2] = xstrdup(getenv("DISPLAY"));
 
-    result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0, &status);
+	result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0,
+			     &status);
 
-    debug2("%s: result from xauth: %s", __func__, result);
+	debug2("%s: result from xauth: %s", __func__, result);
 
-    free_command_argv(xauth_argv);
+	free_command_argv(xauth_argv);
 
-    if (status) {
-        error("Problem running xauth command. "
-              "Cannot use X11 forwarding.");
-        exit(-1);
+	if (status) {
+		error("Problem running xauth command. "
+		      "Cannot use X11 forwarding.");
+		exit(-1);
 
-    }
+	}
 
-    regcomp(&reg, cookie_pattern, REG_EXTENDED);
-    if (regexec(&reg, result, 2, regmatch, 0) == REG_NOMATCH) {
-        error("%s: Could not retrieve magic cookie. "
-              "Cannot use X11 forwarding.", __func__);
-        exit(-1);
-    }
+	regcomp(&reg, cookie_pattern, REG_EXTENDED);
+	if (regexec(&reg, result, 2, regmatch, 0) == REG_NOMATCH) {
+		error("%s: Could not retrieve magic cookie. "
+		      "Cannot use X11 forwarding.", __func__);
+		exit(-1);
+	}
 
-    matchlen = regmatch[1].rm_eo - regmatch[1].rm_so + 1;
-    cookie = xmalloc(matchlen);
-    strlcpy(cookie, result + regmatch[1].rm_so, matchlen);
-    xfree(result);
+	matchlen = regmatch[1].rm_eo - regmatch[1].rm_so + 1;
+	cookie = xmalloc(matchlen);
+	strlcpy(cookie, result + regmatch[1].rm_so, matchlen);
+	xfree(result);
 
-    return cookie;
+	return cookie;
 }
 
-extern int x11_set_xauth(char *xauthority, char *cookie, char *host, uint16_t display) {
-    int i = 0, status;
-    char *result;
-    char **xauth_argv;
+extern int x11_set_xauth(char *xauthority, char *cookie,
+			 char *host, uint16_t display)
+{
+	int i=0, status;
+	char *result;
+	char **xauth_argv;
 
-    xauth_argv = xmalloc(sizeof(char *) * 10);
-    xauth_argv[i++] = xstrdup("xauth");
-    xauth_argv[i++] = xstrdup("-v");
-    xauth_argv[i++] = xstrdup("-f");
-    xauth_argv[i++] = xstrdup(xauthority);
-    xauth_argv[i++] = xstrdup("add");
-    xauth_argv[i++] = xstrdup_printf("%s/unix:%u", host, display);
-    xauth_argv[i++] = xstrdup("MIT-MAGIC-COOKIE-1");
-    xauth_argv[i++] = xstrdup(cookie);
-    xauth_argv[i++] = NULL;
-    xassert(i < 10);
+	xauth_argv = xmalloc(sizeof(char *) * 10);
+	xauth_argv[i++] = xstrdup("xauth");
+	xauth_argv[i++] = xstrdup("-v");
+	xauth_argv[i++] = xstrdup("-f");
+	xauth_argv[i++] = xstrdup(xauthority);
+	xauth_argv[i++] = xstrdup("add");
+	xauth_argv[i++] = xstrdup_printf("%s/unix:%u", host, display);
+	xauth_argv[i++] = xstrdup("MIT-MAGIC-COOKIE-1");
+	xauth_argv[i++] = xstrdup(cookie);
+	xauth_argv[i++] = NULL;
+	xassert(i < 10);
 
-    result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0, &status);
+	result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0,
+			     &status);
 
-    free_command_argv(xauth_argv);
+	free_command_argv(xauth_argv);
 
-    debug2("%s: result from xauth: %s", __func__, result);
-    xfree(result);
+	debug2("%s: result from xauth: %s", __func__, result);
+	xfree(result);
 
-    return status;
+	return status;
 }
 
-extern int x11_delete_xauth(char *xauthority, char *host, uint16_t display) {
-    int i = 0, status;
-    char *result;
-    char **xauth_argv;
+extern int x11_delete_xauth(char *xauthority, char *host, uint16_t display)
+{
+	int i=0, status;
+	char *result;
+	char **xauth_argv;
 
-    xauth_argv = xmalloc(sizeof(char *) * 10);
-    xauth_argv[i++] = xstrdup("xauth");
-    xauth_argv[i++] = xstrdup("-v");
-    xauth_argv[i++] = xstrdup("-f");
-    xauth_argv[i++] = xstrdup(xauthority);
-    xauth_argv[i++] = xstrdup("remove");
-    xauth_argv[i++] = xstrdup_printf("%s/unix:%u", host, display);
-    xauth_argv[i++] = NULL;
-    xassert(i < 10);
+	xauth_argv = xmalloc(sizeof(char *) * 10);
+	xauth_argv[i++] = xstrdup("xauth");
+	xauth_argv[i++] = xstrdup("-v");
+	xauth_argv[i++] = xstrdup("-f");
+	xauth_argv[i++] = xstrdup(xauthority);
+	xauth_argv[i++] = xstrdup("remove");
+	xauth_argv[i++] = xstrdup_printf("%s/unix:%u", host, display);
+	xauth_argv[i++] = NULL;
+	xassert(i < 10);
 
-    result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0, &status);
+	result = run_command("xauth", XAUTH_PATH, xauth_argv, 10000, 0,
+			     &status);
 
-    free_command_argv(xauth_argv);
+	free_command_argv(xauth_argv);
 
-    debug2("%s: result from xauth: %s", __func__, result);
-    xfree(result);
+	debug2("%s: result from xauth: %s", __func__, result);
+	xfree(result);
 
-    return status;
+	return status;
 }

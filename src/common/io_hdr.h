@@ -56,19 +56,19 @@
 #define SLURM_IO_CONNECTION_TEST 4
 
 struct slurm_io_init_msg {
-    uint16_t version;
-    unsigned char cred_signature[SLURM_IO_KEY_SIZE];
-    uint32_t nodeid;
-    uint32_t stdout_objs;
-    uint32_t stderr_objs;
+	uint16_t      version;
+	unsigned char cred_signature[SLURM_IO_KEY_SIZE];
+	uint32_t      nodeid;
+	uint32_t      stdout_objs;
+	uint32_t      stderr_objs;
 };
 
 
 typedef struct slurm_io_header {
-    uint16_t type;
-    uint16_t gtaskid;
-    uint16_t ltaskid;
-    uint32_t length;
+	uint16_t      type;
+	uint16_t      gtaskid;
+	uint16_t      ltaskid;
+	uint32_t      length;
 } io_hdr_t;
 
 extern int g_io_hdr_size;
@@ -77,20 +77,15 @@ extern int g_io_hdr_size;
  * Return the packed size of an IO header in bytes;
  */
 #define io_hdr_packed_size() g_io_hdr_size
-
 void io_hdr_pack(io_hdr_t *hdr, Buf buffer);
-
 int io_hdr_unpack(io_hdr_t *hdr, Buf buffer);
-
 int io_hdr_read_fd(int fd, io_hdr_t *hdr);
 
 /*
  * Validate io init msg
  */
 int io_init_msg_validate(struct slurm_io_init_msg *msg, const char *sig);
-
 int io_init_msg_write_to_fd(int fd, struct slurm_io_init_msg *msg);
-
 int io_init_msg_read_from_fd(int fd, struct slurm_io_init_msg *msg);
 
 #endif /* !_HAVE_IO_HDR_H */

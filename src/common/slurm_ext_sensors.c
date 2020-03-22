@@ -57,162 +57,177 @@
 
 
 typedef struct slurm_ext_sensors_ops {
-    int (*update_component_data)(void);
-
-    int (*get_stepstartdata)(struct step_record *step_rec);
-
-    int (*get_stependdata)(struct step_record *step_rec);
-
-    List (*get_config)(void);
+	int (*update_component_data) (void);
+	int (*get_stepstartdata)     (struct step_record *step_rec);
+	int (*get_stependdata)       (struct step_record *step_rec);
+	List (*get_config)           (void);
 } slurm_ext_sensors_ops_t;
 /*
  * These strings must be kept in the same order as the fields
  * declared for slurm_ext_sensors_ops_t.
  */
-static const char *syms[] = {"ext_sensors_p_update_component_data", "ext_sensors_p_get_stepstartdata",
-                             "ext_sensors_p_get_stependdata", "ext_sensors_p_get_config",};
+static const char *syms[] = {
+	"ext_sensors_p_update_component_data",
+	"ext_sensors_p_get_stepstartdata",
+	"ext_sensors_p_get_stependdata",
+	"ext_sensors_p_get_config",
+};
 
 static slurm_ext_sensors_ops_t ops;
 static plugin_context_t *g_context = NULL;
-static pthread_mutex_t g_context_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_context_lock =	PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
-extern int ext_sensors_init(void) {
-    int retval = SLURM_SUCCESS;
-    char *plugin_type = "ext_sensors";
-    char *type = NULL;
+extern int ext_sensors_init(void)
+{
+	int retval = SLURM_SUCCESS;
+	char *plugin_type = "ext_sensors";
+	char *type = NULL;
 
-    if (init_run && g_context)
-        return retval;
+	if (init_run && g_context)
+		return retval;
 
-    slurm_mutex_lock(&g_context_lock);
+	slurm_mutex_lock(&g_context_lock);
 
-    if (g_context)
-        goto done;
+	if (g_context)
+		goto done;
 
-    type = slurm_get_ext_sensors_type();
+	type = slurm_get_ext_sensors_type();
 
-    g_context = plugin_context_create(plugin_type, type, (void **) &ops, syms, sizeof(syms));
+	g_context = plugin_context_create(
+		plugin_type, type, (void **)&ops, syms, sizeof(syms));
 
-    if (!g_context) {
-        error("cannot create %s context for %s", plugin_type, type);
-        retval = SLURM_ERROR;
-        goto done;
-    }
-    init_run = true;
+	if (!g_context) {
+		error("cannot create %s context for %s", plugin_type, type);
+		retval = SLURM_ERROR;
+		goto done;
+	}
+	init_run = true;
 
-    done:
-    slurm_mutex_unlock(&g_context_lock);
-    xfree(type);
+done:
+	slurm_mutex_unlock(&g_context_lock);
+	xfree(type);
 
-    return retval;
+	return retval;
 }
 
-extern int ext_sensors_fini(void) {
-    int rc;
+extern int ext_sensors_fini(void)
+{
+	int rc;
 
-    if (!g_context)
-        return SLURM_SUCCESS;
+	if (!g_context)
+		return SLURM_SUCCESS;
 
-    init_run = false;
-    rc = plugin_context_destroy(g_context);
-    g_context = NULL;
+	init_run = false;
+	rc = plugin_context_destroy(g_context);
+	g_context = NULL;
 
-    return rc;
+	return rc;
 }
 
-extern ext_sensors_data_t *ext_sensors_alloc(void) {
-    ext_sensors_data_t *ext_sensors = xmalloc(sizeof(struct ext_sensors_data));
+extern ext_sensors_data_t *ext_sensors_alloc(void)
+{
+	ext_sensors_data_t *ext_sensors =
+		xmalloc(sizeof(struct ext_sensors_data));
 
-    ext_sensors->consumed_energy = NO_VAL64;
-    ext_sensors->temperature = NO_VAL;
+	ext_sensors->consumed_energy = NO_VAL64;
+	ext_sensors->temperature = NO_VAL;
 
-    return ext_sensors;
+	return ext_sensors;
 }
 
-extern void ext_sensors_destroy(ext_sensors_data_t *ext_sensors) {
-    xfree(ext_sensors);
+extern void ext_sensors_destroy(ext_sensors_data_t *ext_sensors)
+{
+	xfree(ext_sensors);
 }
 
-extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer, uint16_t protocol_version) {
-    if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        if (!ext_sensors) {
-            pack64(0, buffer);
-            pack32(0, buffer);
-            pack_time((time_t) 0, buffer);
-            pack32(0, buffer);
-            return;
-        }
+extern void ext_sensors_data_pack(ext_sensors_data_t *ext_sensors, Buf buffer,
+				    uint16_t protocol_version)
+{
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+		if (!ext_sensors) {
+			pack64(0, buffer);
+			pack32(0, buffer);
+			pack_time((time_t)0, buffer);
+			pack32(0, buffer);
+			return;
+		}
 
-        pack64(ext_sensors->consumed_energy, buffer);
-        pack32(ext_sensors->temperature, buffer);
-        pack_time(ext_sensors->energy_update_time, buffer);
-        pack32(ext_sensors->current_watts, buffer);
-    }
+		pack64(ext_sensors->consumed_energy, buffer);
+		pack32(ext_sensors->temperature, buffer);
+		pack_time(ext_sensors->energy_update_time, buffer);
+		pack32(ext_sensors->current_watts, buffer);
+	}
 }
 
-extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer, uint16_t protocol_version) {
-    ext_sensors_data_t *ext_sensors_ptr = ext_sensors_alloc();
-    *ext_sensors = ext_sensors_ptr;
-    if (ext_sensors_ptr == NULL)
-        return SLURM_ERROR;
+extern int ext_sensors_data_unpack(ext_sensors_data_t **ext_sensors, Buf buffer,
+				     uint16_t protocol_version)
+{
+	ext_sensors_data_t *ext_sensors_ptr = ext_sensors_alloc();
+	*ext_sensors = ext_sensors_ptr;
+	if (ext_sensors_ptr == NULL)
+		return SLURM_ERROR;
 
-    if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
-        safe_unpack64(&ext_sensors_ptr->consumed_energy, buffer);
-        safe_unpack32(&ext_sensors_ptr->temperature, buffer);
-        safe_unpack_time(&ext_sensors_ptr->energy_update_time, buffer);
-        safe_unpack32(&ext_sensors_ptr->current_watts, buffer);
-    }
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
+		safe_unpack64(&ext_sensors_ptr->consumed_energy, buffer);
+		safe_unpack32(&ext_sensors_ptr->temperature, buffer);
+		safe_unpack_time(&ext_sensors_ptr->energy_update_time, buffer);
+		safe_unpack32(&ext_sensors_ptr->current_watts, buffer);
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 
-    unpack_error:
-    ext_sensors_destroy(ext_sensors_ptr);
-    *ext_sensors = NULL;
-    return SLURM_ERROR;
+unpack_error:
+	ext_sensors_destroy(ext_sensors_ptr);
+	*ext_sensors = NULL;
+	return SLURM_ERROR;
 }
 
-extern int ext_sensors_g_update_component_data(void) {
-    int retval = SLURM_ERROR;
+extern int ext_sensors_g_update_component_data(void)
+{
+	int retval = SLURM_ERROR;
 
-    if (ext_sensors_init() < 0)
-        return retval;
+	if (ext_sensors_init() < 0)
+		return retval;
 
-    retval = (*(ops.update_component_data))();
+	retval = (*(ops.update_component_data))();
 
-    return retval;
+	return retval;
 }
 
-extern int ext_sensors_g_get_stepstartdata(struct step_record *step_rec) {
-    int retval = SLURM_ERROR;
+extern int ext_sensors_g_get_stepstartdata(struct step_record *step_rec)
+{
+	int retval = SLURM_ERROR;
 
-    if (ext_sensors_init() < 0)
-        return retval;
+	if (ext_sensors_init() < 0)
+		return retval;
 
-    retval = (*(ops.get_stepstartdata))(step_rec);
+	retval = (*(ops.get_stepstartdata))(step_rec);
 
-    return retval;
+	return retval;
 }
 
-extern int ext_sensors_g_get_stependdata(struct step_record *step_rec) {
-    int retval = SLURM_ERROR;
+extern int ext_sensors_g_get_stependdata(struct step_record *step_rec)
+{
+	int retval = SLURM_ERROR;
 
-    if (ext_sensors_init() < 0)
-        return retval;
+	if (ext_sensors_init() < 0)
+		return retval;
 
-    retval = (*(ops.get_stependdata))(step_rec);
+	retval = (*(ops.get_stependdata))(step_rec);
 
-    return retval;
+	return retval;
 }
 
-extern int ext_sensors_g_get_config(void *data) {
+extern int ext_sensors_g_get_config(void *data)
+{
 
-    List *tmp_list = (List *) data;
+	List *tmp_list = (List *) data;
 
-    if (ext_sensors_init() < 0)
-        return SLURM_ERROR;
+	if (ext_sensors_init() < 0)
+		return SLURM_ERROR;
 
-    *tmp_list = (*(ops.get_config))();
+	*tmp_list = (*(ops.get_config))();
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }

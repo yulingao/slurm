@@ -41,7 +41,6 @@
 #include "pmixp_common.h"
 
 int pmixp_agent_start(void);
-
 int pmixp_agent_stop(void);
 
 #endif /* PMIXP_AGENT_H */

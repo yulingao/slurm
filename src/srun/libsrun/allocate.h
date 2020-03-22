@@ -54,14 +54,10 @@ extern uint16_t slurmctld_comm_port;
  * Returns a pointer to a resource_allocation_response_msg which must
  * be freed with slurm_free_resource_allocation_response_msg()
  */
-extern resource_allocation_response_msg_t *allocate_nodes(bool handle_signals, slurm_opt_t *opt_local);
+extern resource_allocation_response_msg_t *
+	allocate_nodes(bool handle_signals, slurm_opt_t *opt_local);
 
 /*
-从slurm控制器为异构/包作业分配节点——如果控制器出现故障，则重试尝试，如果当前没有可用资源，则可选择等待资源(参见opt.immediate)
-
-返回指向resource_allocation_response_msg的指针，该指针必须用slurm_free_resource_allocation_response_msg()释放
-
-
  * Allocate nodes for heterogeneous/pack job from the slurm controller -- 
  * retrying the attempt if the controller appears to be down, and optionally
  * waiting for resources if none are currently available (see opt.immediate)
@@ -90,12 +86,9 @@ int slurmctld_msg_init(void);
  * Destroy (free memory from) a job_desc_msg_t object allocated with
  * job_desc_msg_create()
  */
-void job_desc_msg_destroy(job_desc_msg_t *j);
+void job_desc_msg_destroy (job_desc_msg_t *j);
 
 /*
-  检查SLURM_JOB_ID环境变量，如果它是一个有效的job id，则返回一个伪分配响应指针。
-* 如果SLURM_JOB_ID不存在或无效，则返回NULL。
-
  * Check for SLURM_JOB_ID environment variable, and if it is a valid
  * jobid, return a pseudo allocation response pointer.
  *
@@ -104,14 +97,6 @@ void job_desc_msg_destroy(job_desc_msg_t *j);
 extern List existing_allocation(void);
 
 /*
-
-给定存储在“j”中的作业信息，创建一个作业步骤
-返回后，“j”填充job step的信息。
-use_all_cpus ——为真时，使用分配给任务的每个CPU
-opt_local -用于创建作业步骤的选项
-
-如果作业步骤创建失败，返回-1，否则返回0
-
  * Create a job step given the job information stored in 'j'
  * After returning, 'j' is filled in with information for job step.
  * IN use_all_cpus - true to use every CPU allocated to the job

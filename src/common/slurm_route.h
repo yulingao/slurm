@@ -44,8 +44,6 @@
 \*****************************************************************************/
 
 /*
-初始化路由插件。
-
  * Initialize the route plugin.
  *
  * IN - the name of the node this is running on.  Only needed on the slurmd.
@@ -81,7 +79,9 @@ extern int route_fini(void);
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_g_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width);
+extern int route_g_split_hostlist(hostlist_t hl,
+				  hostlist_t** sp_hl,
+				  int* count, uint16_t tree_width);
 
 /*
  * route_g_reconfigure - reset during reconfigure
@@ -97,14 +97,15 @@ extern int route_g_reconfigure(void);
  *
  * RET: slurm_addr_t* - address of node to send messages to be aggregated.
  */
-extern slurm_addr_t *route_g_next_collector(bool *is_collector);
+extern slurm_addr_t* route_g_next_collector ( bool *is_collector );
 
 /*
  * route_g_next_collector_backup
  *
  * RET: slurm_addr_t* - address of backup node to send messages to be aggregated
  */
-extern slurm_addr_t *route_g_next_collector_backup(void);
+extern slurm_addr_t* route_g_next_collector_backup ( void );
+
 
 /*****************************************************************************\
  *  Plugin Common Functions
@@ -130,7 +131,9 @@ extern slurm_addr_t *route_g_next_collector_backup(void);
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_split_hostlist_treewidth(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width);
+extern int route_split_hostlist_treewidth(hostlist_t hl,
+					  hostlist_t** sp_hl,
+					  int* count, uint16_t tree_width);
 
 /*
  * route_next_collector - return address of next collector
@@ -139,7 +142,7 @@ extern int route_split_hostlist_treewidth(hostlist_t hl, hostlist_t **sp_hl, int
  *
  * RET: slurm_addr_t* - address of node to send messages to be aggregated.
  */
-extern slurm_addr_t *route_next_collector(bool *is_collector);
+extern slurm_addr_t* route_next_collector ( bool *is_collector );
 
 /*
  * route_next_collector_backup - get collector backup address based on offset
@@ -147,6 +150,6 @@ extern slurm_addr_t *route_next_collector(bool *is_collector);
  * backup_inx IN - Backup server index (between 1 and MAX_CONTROLLERS-1)
  * RET: slurm_addr_t* - address of backup node to send messages to be aggregated
  */
-extern slurm_addr_t *route_next_collector_backup(int backup_inx);
+extern slurm_addr_t* route_next_collector_backup(int backup_inx);
 
 #endif /*___SLURM_ROUTE_PLUGIN_API_H__*/

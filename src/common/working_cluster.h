@@ -43,7 +43,7 @@ extern uint16_t slurmdb_setup_cluster_dims(void);
 
 /* Return the size of each dimensions in the current working cluster.
  * Returns NULL if information not available or not applicable. */
-extern int *slurmdb_setup_cluster_dim_size(void);
+extern int * slurmdb_setup_cluster_dim_size(void);
 
 /* Return the number of digits required in the numeric suffix of hostnames
  * in the current working cluster */
@@ -52,7 +52,6 @@ extern uint16_t slurmdb_setup_cluster_name_dims(void);
 /* Return true if the working cluster is a Cray system */
 extern bool is_cray_system(void);
 
-/* 返回当前工作集群中的架构标志 */
 /* Return the architecture flags in the current working cluster */
 extern uint32_t slurmdb_setup_cluster_flags(void);
 
@@ -76,6 +75,7 @@ extern uint32_t slurmdb_setup_plugin_id_select(void);
  * Setup the working_cluster_rec with the working_cluster_rec and node_addrs
  * returned in an allocation response msg.
  */
-extern void slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg);
+extern void
+slurm_setup_remote_working_cluster(resource_allocation_response_msg_t *msg);
 
 #endif

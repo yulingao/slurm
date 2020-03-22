@@ -59,7 +59,6 @@
 /*  Define the externally visible functions in this file.
  */
 #define PAM_SM_ACCOUNT
-
 #include <security/pam_modules.h>
 #include <security/_pam_macros.h>
 
@@ -69,7 +68,6 @@
  * results.
  */
 void __attribute__ ((constructor)) libpam_slurm_init(void);
-
 void __attribute__ ((destructor)) libpam_slurm_fini(void);
 
 /*
@@ -82,104 +80,117 @@ void __attribute__ ((destructor)) libpam_slurm_fini(void);
  *   linked against libslurm.
  *
  */
-static void *slurm_h = NULL;
+static void * slurm_h = NULL;
 
 /* This function is necessary because libpam_slurm_init is called without access
  * to the pam handle.
  */
-static void _log_msg(int level, const char *format, ...) {
-    va_list args;
+static void
+_log_msg(int level, const char *format, ...)
+{
+	va_list args;
 
-    openlog(PAM_MODULE_NAME, LOG_CONS | LOG_PID, LOG_AUTHPRIV);
-    va_start(args, format);
-    vsyslog(level, format, args);
-    va_end(args);
-    closelog();
-    return;
+	openlog(PAM_MODULE_NAME, LOG_CONS | LOG_PID, LOG_AUTHPRIV);
+	va_start(args, format);
+	vsyslog(level, format, args);
+	va_end(args);
+	closelog();
+	return;
 }
 
 /*
  *  Sends a message to the application informing the user
  *  that access was denied due to Slurm.
  */
-extern void send_user_msg(pam_handle_t *pamh, const char *mesg) {
-    int retval;
-    struct pam_conv *conv;
-    void *dummy;    /* needed to eliminate warning:
+extern void
+send_user_msg(pam_handle_t *pamh, const char *mesg)
+{
+	int retval;
+	struct pam_conv *conv;
+	void *dummy;    /* needed to eliminate warning:
 			 * dereferencing type-punned pointer will
 			 * break strict-aliasing rules */
-    struct pam_message msg[1];
-    const struct pam_message *pmsg[1];
-    struct pam_response *prsp;
+	struct pam_message msg[1];
+	const struct pam_message *pmsg[1];
+	struct pam_response *prsp;
 
-    info("send_user_msg: %s", mesg);
-    /*  Get conversation function to talk with app.
-     */
-    retval = pam_get_item(pamh, PAM_CONV, (const void **) &dummy);
-    conv = (struct pam_conv *) dummy;
-    if (retval != PAM_SUCCESS) {
-        _log_msg(LOG_ERR, "unable to get pam_conv: %s", pam_strerror(pamh, retval));
-        return;
-    }
+	info("send_user_msg: %s", mesg);
+	/*  Get conversation function to talk with app.
+	 */
+	retval = pam_get_item(pamh, PAM_CONV, (const void **) &dummy);
+	conv = (struct pam_conv *) dummy;
+	if (retval != PAM_SUCCESS) {
+		_log_msg(LOG_ERR, "unable to get pam_conv: %s",
+			 pam_strerror(pamh, retval));
+		return;
+	}
 
-    /*  Construct msg to send to app.
-     */
-    msg[0].msg_style = PAM_ERROR_MSG;
-    msg[0].msg = mesg;
-    pmsg[0] = &msg[0];
-    prsp = NULL;
+	/*  Construct msg to send to app.
+	 */
+	msg[0].msg_style = PAM_ERROR_MSG;
+	msg[0].msg = mesg;
+	pmsg[0] = &msg[0];
+	prsp = NULL;
 
-    /*  Send msg to app and free the (meaningless) rsp.
-     */
-    retval = conv->conv(1, pmsg, &prsp, conv->appdata_ptr);
-    if (retval != PAM_SUCCESS)
-        _log_msg(LOG_ERR, "unable to converse with app: %s", pam_strerror(pamh, retval));
-    if (prsp != NULL)
-        _pam_drop_reply(prsp, 1);
+	/*  Send msg to app and free the (meaningless) rsp.
+	 */
+	retval = conv->conv(1, pmsg, &prsp, conv->appdata_ptr);
+	if (retval != PAM_SUCCESS)
+		_log_msg(LOG_ERR, "unable to converse with app: %s",
+			 pam_strerror(pamh, retval));
+	if (prsp != NULL)
+		_pam_drop_reply(prsp, 1);
 
-    return;
+	return;
 }
 
 /*
  * Dynamically open system's libslurm.so with RTLD_GLOBAL flag.
  * This allows subsequently loaded modules access to libslurm symbols.
  */
-extern void libpam_slurm_init(void) {
-    char libslurmname[64];
+extern void libpam_slurm_init (void)
+{
+	char libslurmname[64];
 
-    if (slurm_h)
-        return;
+	if (slurm_h)
+		return;
 
-    /* First try to use the same libslurm version ("libslurm.so.24.0.0"),
-     * Second try to match the major version number ("libslurm.so.24"),
-     * Otherwise use "libslurm.so" */
-    if (snprintf(libslurmname, sizeof(libslurmname), "libslurm.so.%d.%d.%d", SLURM_API_CURRENT, SLURM_API_REVISION,
-                 SLURM_API_AGE) >= (signed) sizeof(libslurmname)) {
-        _log_msg(LOG_ERR, "Unable to write libslurmname\n");
-    } else if ((slurm_h = dlopen(libslurmname, RTLD_NOW | RTLD_GLOBAL))) {
-        return;
-    } else {
-        _log_msg(LOG_INFO, "Unable to dlopen %s: %s\n", libslurmname, dlerror());
-    }
+	/* First try to use the same libslurm version ("libslurm.so.24.0.0"),
+	 * Second try to match the major version number ("libslurm.so.24"),
+	 * Otherwise use "libslurm.so" */
+	if (snprintf(libslurmname, sizeof(libslurmname),
+			"libslurm.so.%d.%d.%d", SLURM_API_CURRENT,
+			SLURM_API_REVISION, SLURM_API_AGE) >=
+			(signed) sizeof(libslurmname) ) {
+		_log_msg (LOG_ERR, "Unable to write libslurmname\n");
+	} else if ((slurm_h = dlopen(libslurmname, RTLD_NOW|RTLD_GLOBAL))) {
+		return;
+	} else {
+		_log_msg (LOG_INFO, "Unable to dlopen %s: %s\n",
+			libslurmname, dlerror ());
+	}
 
-    if (snprintf(libslurmname, sizeof(libslurmname), "libslurm.so.%d", SLURM_API_CURRENT) >=
-        (signed) sizeof(libslurmname)) {
-        _log_msg(LOG_ERR, "Unable to write libslurmname\n");
-    } else if ((slurm_h = dlopen(libslurmname, RTLD_NOW | RTLD_GLOBAL))) {
-        return;
-    } else {
-        _log_msg(LOG_INFO, "Unable to dlopen %s: %s\n", libslurmname, dlerror());
-    }
+	if (snprintf(libslurmname, sizeof(libslurmname), "libslurm.so.%d",
+			SLURM_API_CURRENT) >= (signed) sizeof(libslurmname) ) {
+		_log_msg (LOG_ERR, "Unable to write libslurmname\n");
+	} else if ((slurm_h = dlopen(libslurmname, RTLD_NOW|RTLD_GLOBAL))) {
+		return;
+	} else {
+		_log_msg (LOG_INFO, "Unable to dlopen %s: %s\n",
+			libslurmname, dlerror ());
+	}
 
-    if (!(slurm_h = dlopen("libslurm.so", RTLD_NOW | RTLD_GLOBAL))) {
-        _log_msg(LOG_ERR, "Unable to dlopen libslurm.so: %s\n", dlerror());
-    }
+	if (!(slurm_h = dlopen("libslurm.so", RTLD_NOW|RTLD_GLOBAL))) {
+		_log_msg (LOG_ERR, "Unable to dlopen libslurm.so: %s\n",
+			  dlerror ());
+	}
 
-    return;
+	return;
 }
 
-extern void libpam_slurm_fini(void) {
-    if (slurm_h)
-        dlclose(slurm_h);
-    return;
+extern void libpam_slurm_fini (void)
+{
+	if (slurm_h)
+		dlclose (slurm_h);
+	return;
 }

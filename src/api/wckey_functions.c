@@ -48,11 +48,12 @@
  * IN:  wckey_list List of slurmdb_wckey_rec_t *
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_wckeys_add(void *db_conn, List wckey_list) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern int slurmdb_wckeys_add(void *db_conn, List wckey_list)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_add_wckeys(db_conn, db_api_uid, wckey_list);
+	return acct_storage_g_add_wckeys(db_conn, db_api_uid, wckey_list);
 }
 
 /*
@@ -61,11 +62,13 @@ extern int slurmdb_wckeys_add(void *db_conn, List wckey_list) {
  * RET: List of slurmdb_wckey_rec_t *
  * note List needs to be freed with slurm_list_destroy() when called
  */
-extern List slurmdb_wckeys_get(void *db_conn, slurmdb_wckey_cond_t *wckey_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_wckeys_get(void *db_conn,
+			       slurmdb_wckey_cond_t *wckey_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_get_wckeys(db_conn, db_api_uid, wckey_cond);
+	return acct_storage_g_get_wckeys(db_conn, db_api_uid, wckey_cond);
 }
 
 /*
@@ -75,11 +78,15 @@ extern List slurmdb_wckeys_get(void *db_conn, slurmdb_wckey_cond_t *wckey_cond) 
  * RET: List containing (char *'s) else NULL on error
  * note List needs to be freed with slurm_list_destroy() when called
  */
-extern List slurmdb_wckeys_modify(void *db_conn, slurmdb_wckey_cond_t *wckey_cond, slurmdb_wckey_rec_t *wckey) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_wckeys_modify(void *db_conn,
+				  slurmdb_wckey_cond_t *wckey_cond,
+				  slurmdb_wckey_rec_t *wckey)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_modify_wckeys(db_conn, db_api_uid, wckey_cond, wckey);
+	return acct_storage_g_modify_wckeys(db_conn, db_api_uid,
+					    wckey_cond, wckey);
 }
 
 /*
@@ -88,9 +95,11 @@ extern List slurmdb_wckeys_modify(void *db_conn, slurmdb_wckey_cond_t *wckey_con
  * RET: List containing (char *'s) else NULL on error
  * note List needs to be freed with slurm_list_destroy() when called
  */
-extern List slurmdb_wckeys_remove(void *db_conn, slurmdb_wckey_cond_t *wckey_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_wckeys_remove(void *db_conn,
+				  slurmdb_wckey_cond_t *wckey_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_remove_wckeys(db_conn, db_api_uid, wckey_cond);
+	return acct_storage_g_remove_wckeys(db_conn, db_api_uid, wckey_cond);
 }

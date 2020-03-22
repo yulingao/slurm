@@ -57,23 +57,29 @@
 #define NO_PARENT -1
 
 typedef enum {
-    PROFILE_ENERGY, PROFILE_TASK, PROFILE_FILESYSTEM, PROFILE_NETWORK, PROFILE_CNT
+	PROFILE_ENERGY,
+	PROFILE_TASK,
+	PROFILE_FILESYSTEM,
+	PROFILE_NETWORK,
+	PROFILE_CNT
 } acct_gather_profile_type_t;
 
 typedef enum {
-    PROFILE_FIELD_NOT_SET, PROFILE_FIELD_UINT64, PROFILE_FIELD_DOUBLE
+	PROFILE_FIELD_NOT_SET,
+	PROFILE_FIELD_UINT64,
+	PROFILE_FIELD_DOUBLE
 } acct_gather_profile_field_type_t;
 
 typedef struct {
-    char *name;
-    acct_gather_profile_field_type_t type;
+	char *name;
+	acct_gather_profile_field_type_t type;
 } acct_gather_profile_dataset_t;
 
 typedef struct {
-    int freq;
-    time_t last_notify;
-    pthread_cond_t notify;
-    pthread_mutex_t notify_mutex;
+	int freq;
+	time_t last_notify;
+	pthread_cond_t notify;
+	pthread_mutex_t notify_mutex;
 } acct_gather_profile_timer_t;
 
 extern acct_gather_profile_timer_t acct_gather_profile_timer[PROFILE_CNT];
@@ -98,16 +104,13 @@ extern uint32_t acct_gather_profile_from_string(const char *profile_str);
 extern bool acct_gather_profile_test(void);
 
 extern char *acct_gather_profile_type_to_string(uint32_t series);
-
 extern uint32_t acct_gather_profile_type_from_string(char *series_str);
 
 extern char *acct_gather_profile_type_t_name(acct_gather_profile_type_t type);
-
-extern char *
-acct_gather_profile_dataset_str(acct_gather_profile_dataset_t *dataset, void *data, char *str, int str_len);
-
+extern char *acct_gather_profile_dataset_str(
+	acct_gather_profile_dataset_t *dataset, void *data,
+	char *str, int str_len);
 extern int acct_gather_profile_startpoll(char *freq, char *freq_def);
-
 extern void acct_gather_profile_endpoll(void);
 
 /* Called from slurmstepd between fork() and exec() of application.
@@ -122,8 +125,8 @@ extern int acct_gather_profile_g_child_forked(void);
  *			definitions
  *	full_options_cnt -- count of plugin local definitions
  */
-extern int acct_gather_profile_g_conf_options(s_p_options_t **full_options, int *full_options_cnt);
-
+extern int acct_gather_profile_g_conf_options(s_p_options_t **full_options,
+					       int *full_options_cnt);
 /*
  * set plugin local conf from acct_gather.conf into its structure
  *
@@ -136,7 +139,8 @@ extern int acct_gather_profile_g_conf_set(s_p_hashtbl_t *tbl);
  * get info from the profile plugin
  *
  */
-extern int acct_gather_profile_g_get(enum acct_gather_profile_info info_type, void *data);
+extern int acct_gather_profile_g_get(enum acct_gather_profile_info info_type,
+				      void *data);
 
 /*
  * Called once per step on each node from slurmstepd, before launching tasks.
@@ -148,7 +152,7 @@ extern int acct_gather_profile_g_get(enum acct_gather_profile_info info_type, vo
  *
  * Returns -- SLURM_SUCCESS or SLURM_ERROR
  */
-extern int acct_gather_profile_g_node_step_start(stepd_step_rec_t *job);
+extern int acct_gather_profile_g_node_step_start(stepd_step_rec_t* job);
 
 /*
  * Called once per step on each node from slurmstepd, after all tasks end.
@@ -191,7 +195,7 @@ extern int acct_gather_profile_g_task_end(pid_t taskpid);
  * Returns -- the identifier of the group on success,
  *            a negative value on failure
  */
-extern int64_t acct_gather_profile_g_create_group(const char *name);
+extern int64_t acct_gather_profile_g_create_group(const char* name);
 
 /*
  * Create a new dataset to record profiling data in the group "parent".
@@ -208,8 +212,9 @@ extern int64_t acct_gather_profile_g_create_group(const char *name);
  * Returns -- an identifier to the dataset on success
  *            a negative value on failure
  */
-extern int
-acct_gather_profile_g_create_dataset(const char *name, int64_t parent, acct_gather_profile_dataset_t *dataset);
+extern int acct_gather_profile_g_create_dataset(
+	const char *name, int64_t parent,
+	acct_gather_profile_dataset_t *dataset);
 
 /*
  * Put data at the Node Samples level. Typically called from something called
@@ -223,7 +228,8 @@ acct_gather_profile_g_create_dataset(const char *name, int64_t parent, acct_gath
  *
  * Returns -- SLURM_SUCCESS or SLURM_ERROR
  */
-extern int acct_gather_profile_g_add_sample_data(int dataset_id, void *data, time_t sample_time);
+extern int acct_gather_profile_g_add_sample_data(int dataset_id, void *data,
+						 time_t sample_time);
 
 /* Get the values from the plugin that are setup in the .conf
  * file. This function should most likely only be called from

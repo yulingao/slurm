@@ -14,10 +14,6 @@ monitoring work (normally a parallel job) on the set of allocated
 nodes. Finally, it arbitrates conflicting requests for resources by
 managing a queue of pending work.
 
-这是Slurm工作负载管理器。Slurm是一个开源的集群资源管理和作业调度系统，它力求简单、可伸缩、可移植、容错和不依赖于互连。Slurm目前只在Linux下进行了测试。
-
-作为集群资源管理器，Slurm提供了三个关键功能。首先,它将对资源(计算节点)的独占和/或非独占访问分配给用户一段时间，以便他们能够执行工作。其次，它提供了一个框架，用于启动、执行和监视一组分配节点上的工作(通常是并行工作)。最后，它通过管理挂起的工作队列来仲裁对资源的冲突请求。
-
 NOTES FOR GITHUB DEVELOPERS
 ---------------------------
 
@@ -67,28 +63,6 @@ quick description of the subdirectories of the Slurm distribution follows:
      Directory for anything that is outside of slurm proper such as a
      different api or such.  To have this build you need to do a
      make contrib/install-contrib.
-
-顶级分发目录包含README和其他高级文档文件，以及用于配置和构建Slurm的脚本(请参阅INSTALL)。子目录包含Slurm的源代码以及DejaGNU测试套件和其他文档。下面简要描述Slurm发行版的子目录:
-   src/ [Slurm 源码]
-   Slurm源代码进一步组织成自解释子目录，如src/api、src/slurmctld等。
-
-   doc/ [Slurm文档]
-   文档目录包含一些latex、html和ascii文本文件、readme和指南。Slurm命令和配置文件的手册页也在doc/目录下。
-
-   etc/ [Slurm配置]
-   etc/目录包含一个示例配置文件，以及一些用于运行Slurm的脚本。
-
-   slurm/ [slurm包含文件]
-   该目录包含已安装的包含文件，如slurm.h和slurm_errno。h，用于根据Slurm API进行编译。
-
-   testsuite/ [Slurm测试套件]
-   testsuite目录包含一组DejaGNU的框架，以及Slurm组件的“make check”类型测试。Expect脚本还有大量的集合。
-
-   auxdir/ [autotools目录]
-   用于配置和构建Slurm的autotools脚本和文件的目录
-
-   contribs/ 【Slurm之外的有用工具】
-   用于slurm之外的任何内容，例如不同的api或其他内容。要得到这个构建，您需要做一个make contrib/install-contrib。
 
 COMPILING AND INSTALLING THE DISTRIBUTION
 -----------------------------------------

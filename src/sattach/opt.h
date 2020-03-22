@@ -43,31 +43,31 @@
 extern int _verbose;
 
 typedef struct sbatch_options {
-    char *progname;        /* argv[0] of this program or
+	char *progname;		/* argv[0] of this program or
 				 * configuration file if multi_prog */
-    char *user;        /* local username		*/
-    uid_t uid;        /* local uid			*/
-    gid_t gid;        /* local gid			*/
-    uid_t euid;        /* effective user --uid=user	*/
-    gid_t egid;        /* effective group --gid=group	*/
-    char *job_name;        /* --job-name=,     -J name	*/
-    uint32_t jobid;
-    uint32_t stepid;
-    bool jobid_set;        /* true of jobid explicitly set */
-    int quiet;
-    int verbose;
-    char *ctrl_comm_ifhn;
-    bool labelio;
-    slurm_step_io_fds_t fds;
-    bool layout_only;
-    bool debugger_test;
-    uint32_t input_filter;
-    bool input_filter_set;
-    uint32_t output_filter;
-    bool output_filter_set;
-    uint32_t error_filter;
-    bool error_filter_set;
-    bool pty;        /* --pty			*/
+	char *user;		/* local username		*/
+	uid_t uid;		/* local uid			*/
+	gid_t gid;		/* local gid			*/
+	uid_t euid;		/* effective user --uid=user	*/
+	gid_t egid;		/* effective group --gid=group	*/
+	char *job_name;		/* --job-name=,     -J name	*/
+	uint32_t jobid;
+	uint32_t stepid;
+	bool jobid_set;		/* true of jobid explicitly set */
+	int quiet;
+	int verbose;
+	char *ctrl_comm_ifhn;
+	bool labelio;
+	slurm_step_io_fds_t fds;
+	bool layout_only;
+	bool debugger_test;
+	uint32_t input_filter;
+	bool input_filter_set;
+	uint32_t output_filter;
+	bool output_filter_set;
+	uint32_t error_filter;
+	bool error_filter_set;
+	bool pty;		/* --pty			*/
 } opt_t;
 
 extern opt_t opt;
@@ -85,4 +85,4 @@ int initialize_and_process_args(int argc, char **argv);
 void set_options(const int argc, char **argv);
 
 
-#endif    /* _HAVE_OPT_H */
+#endif	/* _HAVE_OPT_H */

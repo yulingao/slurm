@@ -33,10 +33,12 @@
 
 typedef unsigned int coord_t; // char,short,int for up to 8,16,32 bits per word
 
-extern void TransposetoAxes(coord_t *X,            // I O  position   [n]
-                            int b,            // I    # bits
-                            int n);           // I    dimension
+extern void TransposetoAxes(
+coord_t* X,            // I O  position   [n]
+int      b,            // I    # bits
+int      n);           // I    dimension
 
-extern void AxestoTranspose(coord_t *X,            // I O  position   [n]
-                            int b,            // I    # bits
-                            int n);           // I    dimension
+extern void AxestoTranspose(
+coord_t* X,            // I O  position   [n]
+int      b,            // I    # bits
+int      n);           // I    dimension

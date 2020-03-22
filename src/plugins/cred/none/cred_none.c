@@ -66,63 +66,73 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Null credential signature plugin";
-const char plugin_type[] = "cred/none";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]	= "Null credential signature plugin";
+const char plugin_type[]	= "cred/none";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 enum {
-    ESIG_INVALID = 5000,
+        ESIG_INVALID = 5000,
 };
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    verbose("%s loaded", plugin_name);
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	verbose("%s loaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is unloaded,
  * free any global memory allocations here to avoid memory leaks.
  */
-extern int fini(void) {
-    verbose("%s unloaded", plugin_name);
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	verbose("%s unloaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
-extern void cred_p_destroy_key(void *key) {
-    return;
+extern void cred_p_destroy_key(void *key)
+{
+	return;
 }
 
-extern void *cred_p_read_private_key(const char *path) {
-    static char *ctx = "null crypto context";
-    return (void *) ctx;
+extern void *cred_p_read_private_key(const char *path)
+{
+	static char *ctx = "null crypto context";
+	return (void *) ctx;
 }
 
-extern void *cred_p_read_public_key(const char *path) {
-    static char *ctx = "null crypto context";
-    return (void *) ctx;
+extern void *cred_p_read_public_key(const char *path)
+{
+	static char *ctx = "null crypto context";
+	return (void *) ctx;
 }
 
-extern const char *cred_p_str_error(int errnum) {
-    if (errnum == ESIG_INVALID)
-        return "Invalid signature";
-    return NULL;
+extern const char *cred_p_str_error(int errnum)
+{
+	if (errnum == ESIG_INVALID)
+		return "Invalid signature";
+	return NULL;
 }
 
 /* NOTE: Caller must xfree the signature returned by sig_pp */
-extern int cred_p_sign(void *key, char *buffer, int buf_size, char **sig_pp, uint32_t *sig_size_p) {
-    *sig_pp = xstrdup("fake signature");
-    *sig_size_p = strlen(*sig_pp);
+extern int cred_p_sign(void *key, char *buffer, int buf_size,
+		       char **sig_pp, uint32_t *sig_size_p)
+{
+	*sig_pp = xstrdup("fake signature");
+	*sig_size_p = strlen(*sig_pp);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size, char *signature, uint32_t sig_size) {
-    char *correct_signature = "fake signature";
-    if (xstrncmp(signature, correct_signature, sig_size))
-        return ESIG_INVALID;
-    return SLURM_SUCCESS;
+extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size,
+			      char *signature, uint32_t sig_size)
+{
+	char *correct_signature = "fake signature";
+	if (xstrncmp(signature, correct_signature, sig_size))
+		return ESIG_INVALID;
+	return SLURM_SUCCESS;
 }

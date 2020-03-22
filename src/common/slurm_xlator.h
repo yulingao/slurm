@@ -123,9 +123,9 @@
 #define	hostlist_delete_nth	slurm_hostlist_delete_nth
 #define	hostlist_deranged_string slurm_hostlist_deranged_string
 #define	hostlist_deranged_string_malloc \
-                slurm_hostlist_deranged_string_malloc
+				slurm_hostlist_deranged_string_malloc
 #define	hostlist_deranged_string_xmalloc \
-                slurm_hostlist_deranged_string_xmalloc
+				slurm_hostlist_deranged_string_xmalloc
 #define	hostlist_destroy	slurm_hostlist_destroy
 #define	hostlist_find		slurm_hostlist_find
 #define	hostlist_iterator_create  slurm_hostlist_iterator_create
@@ -141,9 +141,9 @@
 #define	hostlist_push_list	slurm_hostlist_push_list
 #define	hostlist_ranged_string	slurm_hostlist_ranged_string
 #define	hostlist_ranged_string_malloc \
-                slurm_hostlist_ranged_string_malloc
+				slurm_hostlist_ranged_string_malloc
 #define	hostlist_ranged_string_xmalloc \
-                slurm_hostlist_ranged_string_xmalloc
+				slurm_hostlist_ranged_string_xmalloc
 #define	hostlist_remove		slurm_hostlist_remove
 #define	hostlist_shift		slurm_hostlist_shift
 #define	hostlist_shift_range	slurm_hostlist_shift_range
@@ -199,6 +199,7 @@
 #define	list_find		slurm_list_find
 #define	list_remove		slurm_list_remove
 #define	list_delete_item	slurm_list_delete_item
+#define	list_install_fork_handlers slurm_list_install_fork_handlers
 
 /* log.[ch] functions */
 #define get_log_level		slurm_get_log_level
@@ -218,6 +219,11 @@
 #define	error			slurm_error
 #define	info			slurm_info
 #define	verbose			slurm_verbose
+#define	debug			slurm_debug
+#define	debug2			slurm_debug2
+#define	debug3			slurm_debug3
+#define	debug4			slurm_debug4
+#define	debug5			slurm_debug5
 
 /* macros.h functions
  * None exported today.
@@ -294,7 +300,9 @@
  * The header file used only for #define values. */
 
 /* strlcpy.[ch] functions */
+#ifndef HAVE_STRLCPY
 #define	strlcpy			slurm_strlcpy
+#endif
 
 /* switch.[ch] functions
  * None exported today.

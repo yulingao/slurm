@@ -37,12 +37,6 @@
 #  include "config.h"
 #endif
 
-#define _GNU_SOURCE
-
-#ifndef __USE_GNU
-#  define  __USE_GNU
-#endif
-
 #ifdef HAVE_NUMA
 #  include <numa.h>
 #endif
@@ -55,7 +49,7 @@
 #ifdef __FreeBSD__
 #  include <sys/param.h>
 #  include <sys/cpuset.h>
-typedef cpuset_t cpu_set_t;
+   typedef cpuset_t cpu_set_t;
 #endif
 
 #ifdef HAVE_SYS_PRCTL_H
@@ -102,27 +96,21 @@ typedef cpuset_t cpu_set_t;
 #endif
 
 /*** from affinity.c ***/
-void slurm_chkaffinity(cpu_set_t *mask, stepd_step_rec_t *job, int statval);
-
-int get_cpuset(cpu_set_t *mask, stepd_step_rec_t *job);
-
-void reset_cpuset(cpu_set_t *new_mask, cpu_set_t *cur_mask);
-
-int slurm_setaffinity(pid_t pid, size_t size, const cpu_set_t *mask);
-
-int slurm_getaffinity(pid_t pid, size_t size, cpu_set_t *mask);
+void	slurm_chkaffinity(cpu_set_t *mask, stepd_step_rec_t *job, int statval);
+int	get_cpuset(cpu_set_t *mask, stepd_step_rec_t *job);
+void	reset_cpuset(cpu_set_t *new_mask, cpu_set_t *cur_mask);
+int	slurm_setaffinity(pid_t pid, size_t size, const cpu_set_t *mask);
+int	slurm_getaffinity(pid_t pid, size_t size, cpu_set_t *mask);
 
 /*** from cpuset.c ***/
 #ifdef HAVE_NUMA
 int	slurm_set_memset(char *path, nodemask_t *new_mask);
 int	slurm_memset_available(void);
 #endif
-
-int slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid);
-
-int slurm_get_cpuset(char *path, pid_t pid, size_t size, cpu_set_t *mask);
-
-int slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size, const cpu_set_t *mask);
+int	slurm_build_cpuset(char *base, char *path, uid_t uid, gid_t gid);
+int	slurm_get_cpuset(char *path, pid_t pid, size_t size, cpu_set_t *mask);
+int	slurm_set_cpuset(char *base, char *path, pid_t pid, size_t size,
+		const cpu_set_t *mask);
 
 /*** from numa.c ***/
 #ifdef HAVE_NUMA
@@ -132,8 +120,6 @@ uint16_t slurm_get_numa_node(uint16_t cpuid);
 #endif
 
 /*** from schedutils.c ***/
-int str_to_cpuset(cpu_set_t *mask, const char *str);
-
-int str_to_cnt(const char *str);
-
-char *cpuset_to_str(const cpu_set_t *mask, char *str);
+int	str_to_cpuset(cpu_set_t *mask, const char* str);
+int	str_to_cnt(const char* str);
+char *	cpuset_to_str(const cpu_set_t *mask, char *str);

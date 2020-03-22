@@ -43,64 +43,70 @@
  * RET 0 if no slurm error, errno otherwise. parsing error prints
  *			error message and returns 0
  */
-extern int scontrol_update_layout(int argc, char **argv) {
-    int rc = 0;
-    int i = 0, tag_len = 0;
-    char *tag = NULL, *val = NULL;
-    update_layout_msg_t msg;
-    char *opt = NULL;
+extern int
+scontrol_update_layout (int argc, char **argv)
+{
+	int rc = 0;
+	int i = 0, tag_len = 0;
+	char *tag = NULL, *val = NULL;
+	update_layout_msg_t msg;
+	char *opt = NULL;
 
-    opt = xstrdup_printf(" ");
-    memset(&msg, 0, sizeof(update_layout_msg_t));
-    while (i < argc) {
-        tag = argv[i];
-        val = strchr(argv[i], '=');
-        if (val) {
-            tag_len = val - argv[i];
-            val++;
-        } else {
-            exit_code = 1;
-            fprintf(stderr, "invalid option:%s for layouts "
-                            "(\"=\" mandatory)\n", tag);
-            goto done;
-        }
-        if (xstrncasecmp(tag, "layouts", MAX(tag_len, 2)) == 0) {
-            msg.layout = val;
-        } else if (xstrncasecmp(tag, "entity", MAX(tag_len, 2)) == 0) {
-            msg.arg = xstrdup_printf("Entity=%s", val);
-        } else {
-            xstrcat(opt, tag);
-            xstrcat(opt, " ");
-        }
-        i++;
-    }
+	opt = xstrdup_printf(" ");
+	memset(&msg, 0, sizeof(update_layout_msg_t));
+	while (i < argc) {
+		tag = argv[i];
+		val = strchr(argv[i], '=');
+		if (val) {
+			tag_len = val - argv[i];
+			val++;
+		} else {
+			exit_code = 1;
+			fprintf (stderr,
+				 "invalid option:%s for layouts "
+				 "(\"=\" mandatory)\n",
+				 tag);
+			goto done;
+		}
+		if (xstrncasecmp(tag, "layouts", MAX(tag_len, 2)) == 0) {
+			msg.layout = val;
+		} else if (xstrncasecmp(tag, "entity", MAX(tag_len, 2)) == 0) {
+			msg.arg = xstrdup_printf("Entity=%s", val);
+		} else {
+			xstrcat(opt, tag);
+			xstrcat(opt, " ");
+		}
+		i++;
+	}
 
-    if (msg.layout == NULL) {
-        exit_code = 1;
-        fprintf(stderr, "No valid layout name in update command\n");
-        goto done;
-    }
-    if (msg.arg == NULL) {
-        exit_code = 1;
-        fprintf(stderr, "No valid layout enity in update command\n");
-        goto done;
-    }
-    if (strlen(opt) <= 1) {
-        exit_code = 1;
-        fprintf(stderr, "No valid updates arguments in update command\n");
-        goto done;
-    }
+	if (msg.layout == NULL) {
+		exit_code = 1;
+		fprintf (stderr,
+			 "No valid layout name in update command\n");
+		goto done;
+	}
+	if (msg.arg == NULL) {
+		exit_code = 1;
+		fprintf (stderr,
+			 "No valid layout enity in update command\n");
+		goto done;
+	}
+	if ( strlen(opt) <= 1 ) {
+		exit_code = 1;
+		fprintf (stderr,
+			 "No valid updates arguments in update command\n");
+		goto done;
+	}
 
-    xstrcat(msg.arg, opt);
+	xstrcat(msg.arg, opt);
 
-    rc = slurm_update_layout(&msg);
+	rc = slurm_update_layout(&msg);
 
-    done:
-    xfree(msg.arg);
-    xfree(opt);
-    if (rc) {
-        exit_code = 1;
-        return slurm_get_errno();
-    } else
-        return 0;
+done:	xfree(msg.arg);
+	xfree(opt);
+	if (rc) {	
+		exit_code = 1;
+		return slurm_get_errno ();
+	} else
+		return 0;
 }

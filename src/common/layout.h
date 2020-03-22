@@ -55,15 +55,15 @@
 #define LAYOUT_STRUCT_TREE 1
 
 typedef struct layout_st {
-    char *name;        /* the name of the layout */
-    uint32_t priority; /* the priority of the layout among the others,
+	char* name;        /* the name of the layout */
+	uint32_t priority; /* the priority of the layout among the others,
 			    * might be useful for selecting resources
 			    * refining the results through a list of layouts */
-    int struct_type;   /* type of relational structure (@see entity.h) */
-    char *type;        /* the type of the layout, exp: racking, power...*/
-    union {               /* relational structure used by the layout */
-        xtree_t *tree;
-    };
+	int struct_type;   /* type of relational structure (@see entity.h) */
+	char* type;        /* the type of the layout, exp: racking, power...*/
+	union {	           /* relational structure used by the layout */
+		xtree_t* tree;
+	};
 } layout_t;
 
 /*
@@ -76,13 +76,14 @@ typedef struct layout_st {
  *      the entities managed by this layout (tree structure is the only
  *      relational structure supported for now)
  */
-void layout_init(layout_t *layout, const char *name, const char *type, uint32_t priority, int struct_type);
+void layout_init(layout_t* layout, const char* name, const char* type,
+		 uint32_t priority, int struct_type);
 
 /*
  * layout_free - destroy a particular layout struct 
  * IN layout - the layout struct to free
  */
-void layout_free(layout_t *layout);
+void layout_free(layout_t* layout);
 
 /*
  * layout_get_name - return the name of a layout
@@ -90,7 +91,7 @@ void layout_free(layout_t *layout);
  *
  * Return value is the name of the layout
  */
-const char *layout_get_name(const layout_t *layout);
+const char* layout_get_name(const layout_t* layout);
 
 /*
  * layout_get_type - return the type of a layout
@@ -98,7 +99,7 @@ const char *layout_get_name(const layout_t *layout);
  *
  * Return value is the type of the layout
  */
-const char *layout_get_type(const layout_t *layout);
+const char* layout_get_type(const layout_t* layout);
 
 /*
  * layout_get_priority - return the numeric priority of a layout
@@ -106,7 +107,7 @@ const char *layout_get_type(const layout_t *layout);
  *
  * Return value is the priority of the layout
  */
-uint32_t layout_get_priority(const layout_t *layout);
+uint32_t layout_get_priority(const layout_t* layout);
 
 
 /*
@@ -115,7 +116,7 @@ uint32_t layout_get_priority(const layout_t *layout);
  * IN layout - the layout struct to use
  * IN node - a (void*) pointer to the relational struct node to remove
  */
-void layout_node_delete(layout_t *layout, void *node);
+void layout_node_delete(layout_t* layout, void* node);
 
 
 /*
@@ -124,7 +125,7 @@ void layout_node_delete(layout_t *layout, void *node);
  *
  * Return value is a pointer to the xtree_t struct or NULL if not available
  */
-xtree_t *layout_get_tree(layout_t *layout);
+xtree_t* layout_get_tree(layout_t* layout);
 
 /*
  * layout_hashable_identify - defines a hashable identifying function to
@@ -132,13 +133,14 @@ xtree_t *layout_get_tree(layout_t *layout);
  *
  * Note: it currently just returns the name of the layout
  */
-const char *layout_hashable_identify(void *item);
+const char* layout_hashable_identify(void* item);
 
 /* layout_hashable_identify_by_type - defines a per-type hashable identifying
  *      function to use with xhash.
  *
  * Note: it currently just returns the type of the layout
  */
-void layout_hashable_identify_by_type(void *item, const char **key, uint32_t *key_len);
+void layout_hashable_identify_by_type(void* item, const char** key,
+				      uint32_t* key_len);
 
 #endif /* end of include guard: __LAYOUT_DGR6BCQ2_INC__ */

@@ -78,31 +78,34 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "burst_buffer generic plugin";
-const char plugin_type[] = "burst_buffer/generic";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "burst_buffer generic plugin";
+const char plugin_type[]        = "burst_buffer/generic";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is unloaded. Free all memory.
  */
-extern int fini(void) {
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * Return the total burst buffer size in MB
  */
-extern uint64_t bb_p_get_system_size(void) {
-    uint64_t size = 0;
-    return size;
+extern uint64_t bb_p_get_system_size(void)
+{
+	uint64_t size = 0;
+	return size;
 }
 
 /*
@@ -114,8 +117,9 @@ extern uint64_t bb_p_get_system_size(void) {
  * init_config IN - true if called as part of slurmctld initialization
  * Returns a Slurm errno.
  */
-extern int bb_p_load_state(bool init_config) {
-    return SLURM_SUCCESS;
+extern int bb_p_load_state(bool init_config)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -124,8 +128,9 @@ extern int bb_p_load_state(bool init_config) {
  * argv IN - status command arguments
  * RET status string, release memory using xfree()
  */
-extern char *bb_p_get_status(uint32_t argc, char **argv) {
-    return NULL;
+extern char *bb_p_get_status(uint32_t argc, char **argv)
+{
+	return NULL;
 }
 
 /*
@@ -133,8 +138,9 @@ extern char *bb_p_get_status(uint32_t argc, char **argv) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_reconfig(void) {
-    return SLURM_SUCCESS;
+extern int bb_p_reconfig(void)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -143,8 +149,9 @@ extern int bb_p_reconfig(void) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_state_pack(uid_t uid, Buf buffer, uint16_t protocol_version) {
-    return SLURM_SUCCESS;
+extern int bb_p_state_pack(uid_t uid, Buf buffer, uint16_t protocol_version)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -154,8 +161,10 @@ extern int bb_p_state_pack(uid_t uid, Buf buffer, uint16_t protocol_version) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_validate(struct job_descriptor *job_desc, uid_t submit_uid) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_validate(struct job_descriptor *job_desc,
+			     uid_t submit_uid)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -164,8 +173,9 @@ extern int bb_p_job_validate(struct job_descriptor *job_desc, uid_t submit_uid) 
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_validate2(struct job_record *job_ptr, char **err_msg) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_validate2(struct job_record *job_ptr, char **err_msg)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -175,22 +185,27 @@ extern int bb_p_job_validate2(struct job_record *job_ptr, char **err_msg) {
  * IN/OUT tres_cnt - fill in this already allocated array with tres_cnts
  * IN locked - if the assoc_mgr tres read locked is locked or not
  */
-extern void bb_p_job_set_tres_cnt(struct job_record *job_ptr, uint64_t *tres_cnt, bool locked) {
+extern void bb_p_job_set_tres_cnt(struct job_record *job_ptr,
+				  uint64_t *tres_cnt,
+				  bool locked)
+{
 }
 
 /*
  * For a given job, return our best guess if when it might be able to start
  */
-extern time_t bb_p_job_get_est_start(struct job_record *job_ptr) {
-    time_t est_start = time(NULL);
-    return est_start;
+extern time_t bb_p_job_get_est_start(struct job_record *job_ptr)
+{
+	time_t est_start = time(NULL);
+	return est_start;
 }
 
 /*
  * Attempt to allocate resources and begin file staging for pending jobs.
  */
-extern int bb_p_job_try_stage_in(List job_queue) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_try_stage_in(List job_queue)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -202,8 +217,9 @@ extern int bb_p_job_try_stage_in(List job_queue) {
  *      1 - stage-in complete
  *     -1 - stage-in not started or burst buffer in some unexpected state
  */
-extern int bb_p_job_test_stage_in(struct job_record *job_ptr, bool test_only) {
-    return 1;
+extern int bb_p_job_test_stage_in(struct job_record *job_ptr, bool test_only)
+{
+	return 1;
 }
 
 /* Attempt to claim burst buffer resources.
@@ -212,8 +228,9 @@ extern int bb_p_job_test_stage_in(struct job_record *job_ptr, bool test_only) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_begin(struct job_record *job_ptr) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_begin(struct job_record *job_ptr)
+{
+	return SLURM_SUCCESS;
 }
 
 /* Revoke allocation, but do not release resources.
@@ -222,8 +239,9 @@ extern int bb_p_job_begin(struct job_record *job_ptr) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_revoke_alloc(struct job_record *job_ptr) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_revoke_alloc(struct job_record *job_ptr)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -231,8 +249,9 @@ extern int bb_p_job_revoke_alloc(struct job_record *job_ptr) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_start_stage_out(struct job_record *job_ptr) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_start_stage_out(struct job_record *job_ptr)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -242,8 +261,9 @@ extern int bb_p_job_start_stage_out(struct job_record *job_ptr) {
  *      1 - post_run complete
  *     -1 - fatal error
  */
-extern int bb_p_job_test_post_run(struct job_record *job_ptr) {
-    return 1;
+extern int bb_p_job_test_post_run(struct job_record *job_ptr)
+{
+	return 1;
 }
 
 /*
@@ -253,8 +273,9 @@ extern int bb_p_job_test_post_run(struct job_record *job_ptr) {
  *      1 - stage-out complete
  *     -1 - fatal error
  */
-extern int bb_p_job_test_stage_out(struct job_record *job_ptr) {
-    return 1;
+extern int bb_p_job_test_stage_out(struct job_record *job_ptr)
+{
+	return 1;
 }
 
 /*
@@ -262,14 +283,16 @@ extern int bb_p_job_test_stage_out(struct job_record *job_ptr) {
  *
  * Returns a Slurm errno.
  */
-extern int bb_p_job_cancel(struct job_record *job_ptr) {
-    return SLURM_SUCCESS;
+extern int bb_p_job_cancel(struct job_record *job_ptr)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * Translate a burst buffer string to it's equivalent TRES string
  * Caller must xfree the return value
  */
-extern char *bb_p_xlate_bb_2_tres_str(char *burst_buffer) {
-    return NULL;
+extern char *bb_p_xlate_bb_2_tres_str(char *burst_buffer)
+{
+	return NULL;
 }

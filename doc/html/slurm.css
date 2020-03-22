@@ -1,5 +1,5 @@
 body:before {
-    background: #FCFCFC;
+	background: #FCFCFC;
 }
 
 
@@ -7,13 +7,13 @@ body:before {
 /* ---------------------------- */
 
 .slurm-logo {
-    display: block;
-    width: 100%;
-    height: 0;
-    padding-top: 91.8%;
-    background: url("slurm_logo.png") no-repeat 0 0;
-    background-size: contain;
-    text-indent: -99999em;
+	display: block;
+	width: 100%;
+	height: 0;
+	padding-top: 91.8%;
+	background: url("slurm_logo.png") no-repeat 0 0;
+	background-size: contain;
+	text-indent: -99999em;
 }
 
 
@@ -21,19 +21,19 @@ body:before {
 /* ---------------------------- */
 
 .slurm-title {
-    display: none;
-    max-width: 200px;
-    margin: 0 auto 12px;
-    text-align: center;
+	display: none;
+	max-width: 200px;
+	margin: 0 auto 12px;
+	text-align: center;
 }
 
 .slurm-title__version {
-    color: #888888;
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: .5em;
-    line-height: 1.2em;
-    font-family: 'Ubuntu', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+	color: #888888;
+	font-size: 18px;
+	font-weight: 600;
+	margin-top: .5em;
+	line-height: 1.2em;
+	font-family: 'Ubuntu', 'Source Sans Pro', Helvetica, Arial, sans-serif;
 }
 
 
@@ -41,21 +41,21 @@ body:before {
 /* ---------------------------- */
 
 .slurm-menu__item {
-    margin-bottom: 27px;
+	margin-bottom: 27px;
 }
 
 .slurm-menu__sub {
-    margin-top: 9px;
+	margin-top: 9px;
 }
 
 .slurm-menu__sub li a {
-    text-transform: none;
-    letter-spacing: 0;
+	text-transform: none;
+	letter-spacing: 0;
 }
 
 .slurm-menu__sub a {
-    padding: 2px 18px;
-    font-size: 17px;
+	padding: 2px 18px;
+	font-size: 17px;
 }
 
 
@@ -63,14 +63,14 @@ body:before {
 /* ---------------------------- */
 
 .figure {
-    text-align: center;
-    margin-bottom: 2em;
-    color: #555555;
+	text-align: center;
+	margin-bottom: 2em;
+	color: #555555;
 }
 
 .figure img {
-    margin-bottom: 0.5em;
-    display: inline;
+	margin-bottom: 0.5em;
+	display: inline;
 }
 
 
@@ -78,27 +78,27 @@ body:before {
 /* ---------------------------- */
 
 .slurm-search {
-    background: #FCFCFC;
-    border-bottom: 1px solid #D8D8D8;
-    padding: 14px 0 10px;
-    min-height: 70px;
+	background: #FCFCFC;
+	border-bottom: 1px solid #D8D8D8;
+	padding: 14px 0 10px;
+	min-height: 70px;
 }
 
 #cse * {
-    box-sizing: content-box;
-    overflow: visible;
+	box-sizing: content-box;
+	overflow: visible;
 }
 
 .gsc-input-box {
-    height: auto !important;
+	height: auto !important;
 }
 
 .gsc-search-button {
-    vertical-align: top;
+	vertical-align: top;
 }
 
 .gsc-control-cse {
-    padding: 0 !important;
+	padding: 0 !important;
 }
 
 
@@ -106,11 +106,11 @@ body:before {
 /* ---------------------------- */
 
 .site-masthead__title {
-    float: left;
+	float: left;
 }
 
 .site-masthead__title--slurm {
-    width: 71px;
+	width: 71px;
 }
 
 
@@ -121,49 +121,49 @@ body:before {
 /* Large Size */
 @media screen and (min-width: 54em) {
 
-    body:after {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 70px;
-        content: "";
-        background: linear-gradient(to right, #F5F5F5 0, #F5F5F5 50%, #FCFCFC 50%, #FCFCFC 100%);
-        z-index: -1;
-        border-bottom: 1px solid #D8D8D8;
-    }
+	body:after {
+		position: absolute;
+		top: 0;
+		width: 100%;
+		height: 70px;
+		content: "";
+		background: linear-gradient(to right, #F5F5F5 0, #F5F5F5 50%, #FCFCFC 50%, #FCFCFC 100%);
+		z-index: -1;
+		border-bottom: 1px solid #D8D8D8;
+	}
 
-    .site-header {
-        float: left;
-        width: 360px;
-        min-width: 360px;
-        z-index: 1000;
-        border-bottom-width: 0;
-        border-right-width: 1px;
-        background: #FCFCFC;
-    }
+	.site-header {
+		float: left;
+		width: 360px;
+		min-width: 360px;
+		z-index: 1000;
+		border-bottom-width: 0;
+		border-right-width: 1px;
+		background: #FCFCFC;
+	}
 
-    .site-masthead {
-        overflow: hidden;
-        border-bottom: 1px solid #D8D8D8;
-        background: #F5F5F5;
-        height: 70px
-    }
+	.site-masthead {
+		overflow: hidden;
+		border-bottom: 1px solid #D8D8D8;
+		background: #F5F5F5;
+		height: 70px
+	}
 
-    .site-masthead__title {
-        padding: 18px 0;
-        width: 130px;
-        margin: 0 auto;
-        float: none;
-    }
+	.site-masthead__title {
+		padding: 18px 0;
+		width: 130px;
+		margin: 0 auto;
+		float: none;
+	}
 
-    .site-masthead__title--slurm {
-        position: absolute;
-        left: -99999em;
-    }
+	.site-masthead__title--slurm {
+		position: absolute;
+		left: -99999em;
+	}
 
-    .slurm-title {
-        display: block;
-    }
+	.slurm-title {
+		display: block;
+	}
 }
 
 

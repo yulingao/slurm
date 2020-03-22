@@ -37,7 +37,7 @@
 #ifndef _SLURM_HEARTBEAT_H
 #define _SLURM_HEARTBEAT_H
 
-#include <time.h>    /* for time_t */
+#include <time.h>	/* for time_t */
 
 /* launch heartbeat thread */
 extern void heartbeat_start(void);

@@ -2,7 +2,7 @@
 #include "setup.h"
 
 /* allocate resources to track PMIX_Ring state */
-int pmix_ring_init(const pmi2_job_info_t *job, char ***env);
+int pmix_ring_init(const pmi2_job_info_t* job, char*** env);
 
 /* free resources allocated to track PMIX_Ring state */
 int pmix_ring_finalize();
@@ -16,7 +16,7 @@ int pmix_ring_id_by_rank(int rank);
  *   count - starting rank for our leftmost application process
  *   left  - left value for leftmost application process in our subtree
  *   right - right value for rightmost application process in our subtree */
-int pmix_ring_out(int count, char *left, char *right);
+int pmix_ring_out(int count, char* left, char* right);
 
 /* we get a ring_in message from each child (stepd and application tasks),
  * once we've gotten a message from each child, we send a ring_in message
@@ -31,4 +31,4 @@ int pmix_ring_out(int count, char *left, char *right);
  *   count = sum of counts from all children
  *   left  = left value from leftmost child that specified a left value
  *   right = right value from rightmost child that specified a right value */
-int pmix_ring_in(int ring_id, int count, char *left, char *right);
+int pmix_ring_in(int ring_id, int count, char* left, char* right);

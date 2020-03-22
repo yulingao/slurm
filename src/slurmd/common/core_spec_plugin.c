@@ -46,24 +46,27 @@
 
 
 typedef struct core_spec_ops {
-    int (*core_spec_p_set)(uint64_t cont_id, uint16_t count);
-
-    int (*core_spec_p_clear)(uint64_t cont_id);
-
-    int (*core_spec_p_suspend)(uint64_t cont_id, uint16_t count);
-
-    int (*core_spec_p_resume)(uint64_t cont_id, uint16_t count);
+	int	(*core_spec_p_set)	(uint64_t cont_id, uint16_t count);
+	int	(*core_spec_p_clear)	(uint64_t cont_id);
+	int	(*core_spec_p_suspend)	(uint64_t cont_id, uint16_t count);
+	int	(*core_spec_p_resume)	(uint64_t cont_id, uint16_t count);
 } core_spec_ops_t;
 
 /*
  * Must be synchronized with core_spec_ops_t above.
  */
-static const char *syms[] = {"core_spec_p_set", "core_spec_p_clear", "core_spec_p_suspend", "core_spec_p_resume",};
+static const char *syms[] = {
+	"core_spec_p_set",
+	"core_spec_p_clear",
+	"core_spec_p_suspend",
+	"core_spec_p_resume",
+};
 
-static core_spec_ops_t *ops = NULL;
-static plugin_context_t **g_core_spec_context = NULL;
-static int g_core_spec_context_num = -1;
-static pthread_mutex_t g_core_spec_context_lock = PTHREAD_MUTEX_INITIALIZER;
+static core_spec_ops_t		*ops = NULL;
+static plugin_context_t		**g_core_spec_context = NULL;
+static int			g_core_spec_context_num = -1;
+static pthread_mutex_t		g_core_spec_context_lock =
+					PTHREAD_MUTEX_INITIALIZER;
 static bool init_run = false;
 
 /*
@@ -71,56 +74,66 @@ static bool init_run = false;
  *
  * RET - slurm error code
  */
-extern int core_spec_g_init(void) {
-    int retval = SLURM_SUCCESS;
-    char *plugin_type = "core_spec";
-    char *core_spec_plugin_type = NULL;
-    char *last = NULL, *core_spec_plugin_list, *core_spec = NULL;
+extern int core_spec_g_init(void)
+{
+	int retval = SLURM_SUCCESS;
+	char *plugin_type = "core_spec";
+	char *core_spec_plugin_type = NULL;
+	char *last = NULL, *core_spec_plugin_list, *core_spec = NULL;
 
-    if (init_run && (g_core_spec_context_num >= 0))
-        return retval;
+	if (init_run && (g_core_spec_context_num >= 0))
+		return retval;
 
-    slurm_mutex_lock(&g_core_spec_context_lock);
+	slurm_mutex_lock(&g_core_spec_context_lock);
 
-    if (g_core_spec_context_num >= 0)
-        goto done;
+	if (g_core_spec_context_num >= 0)
+		goto done;
 
-    core_spec_plugin_type = slurm_get_core_spec_plugin();
-    g_core_spec_context_num = 0; /* mark it before anything else */
-    if ((core_spec_plugin_type == NULL) || (core_spec_plugin_type[0] == '\0'))
-        goto done;
+	core_spec_plugin_type = slurm_get_core_spec_plugin();
+	g_core_spec_context_num = 0; /* mark it before anything else */
+	if ((core_spec_plugin_type == NULL) ||
+	    (core_spec_plugin_type[0] == '\0'))
+		goto done;
 
-    core_spec_plugin_list = core_spec_plugin_type;
-    while ((core_spec = strtok_r(core_spec_plugin_list, ",", &last))) {
-        xrealloc(ops, sizeof(core_spec_ops_t) * (g_core_spec_context_num + 1));
-        xrealloc(g_core_spec_context, (sizeof(plugin_context_t * ) * (g_core_spec_context_num + 1)));
-        if (xstrncmp(core_spec, "core_spec/", 10) == 0)
-            core_spec += 10; /* backward compatibility */
-        core_spec = xstrdup_printf("core_spec/%s", core_spec);
-        g_core_spec_context[g_core_spec_context_num] = plugin_context_create(plugin_type, core_spec,
-                                                                             (void **) &ops[g_core_spec_context_num],
-                                                                             syms, sizeof(syms));
-        if (!g_core_spec_context[g_core_spec_context_num]) {
-            error("cannot create %s context for %s", plugin_type, core_spec);
-            xfree(core_spec);
-            retval = SLURM_ERROR;
-            break;
-        }
+	core_spec_plugin_list = core_spec_plugin_type;
+	while ((core_spec =
+		strtok_r(core_spec_plugin_list, ",", &last))) {
+		xrealloc(ops,
+			 sizeof(core_spec_ops_t) *
+			 (g_core_spec_context_num + 1));
+		xrealloc(g_core_spec_context, (sizeof(plugin_context_t *)
+					  * (g_core_spec_context_num + 1)));
+		if (xstrncmp(core_spec, "core_spec/", 10) == 0)
+			core_spec += 10; /* backward compatibility */
+		core_spec = xstrdup_printf("core_spec/%s",
+					       core_spec);
+		g_core_spec_context[g_core_spec_context_num] =
+			plugin_context_create(
+				plugin_type, core_spec,
+				(void **)&ops[g_core_spec_context_num],
+				syms, sizeof(syms));
+		if (!g_core_spec_context[g_core_spec_context_num]) {
+			error("cannot create %s context for %s",
+			      plugin_type, core_spec);
+			xfree(core_spec);
+			retval = SLURM_ERROR;
+			break;
+		}
 
-        xfree(core_spec);
-        g_core_spec_context_num++;
-        core_spec_plugin_list = NULL; /* for next iteration */
-    }
-    init_run = true;
+		xfree(core_spec);
+		g_core_spec_context_num++;
+		core_spec_plugin_list = NULL; /* for next iteration */
+	}
+	init_run = true;
 
-    done:
-    slurm_mutex_unlock(&g_core_spec_context_lock);
-    xfree(core_spec_plugin_type);
+ done:
+	slurm_mutex_unlock(&g_core_spec_context_lock);
+	xfree(core_spec_plugin_type);
 
-    if (retval != SLURM_SUCCESS)
-        core_spec_g_fini();
+	if (retval != SLURM_SUCCESS)
+		core_spec_g_fini();
 
-    return retval;
+	return retval;
 }
 
 /*
@@ -128,29 +141,31 @@ extern int core_spec_g_init(void) {
  *
  * RET - slurm error code
  */
-extern int core_spec_g_fini(void) {
-    int i, rc = SLURM_SUCCESS;
+extern int core_spec_g_fini(void)
+{
+	int i, rc = SLURM_SUCCESS;
 
-    slurm_mutex_lock(&g_core_spec_context_lock);
-    if (!g_core_spec_context)
-        goto done;
+	slurm_mutex_lock(&g_core_spec_context_lock);
+	if (!g_core_spec_context)
+		goto done;
 
-    init_run = false;
-    for (i = 0; i < g_core_spec_context_num; i++) {
-        if (g_core_spec_context[i]) {
-            if (plugin_context_destroy(g_core_spec_context[i]) != SLURM_SUCCESS) {
-                rc = SLURM_ERROR;
-            }
-        }
-    }
+	init_run = false;
+	for (i = 0; i < g_core_spec_context_num; i++) {
+		if (g_core_spec_context[i]) {
+			if (plugin_context_destroy(g_core_spec_context[i])
+			    != SLURM_SUCCESS) {
+				rc = SLURM_ERROR;
+			}
+		}
+	}
 
-    xfree(ops);
-    xfree(g_core_spec_context);
-    g_core_spec_context_num = -1;
+	xfree(ops);
+	xfree(g_core_spec_context);
+	g_core_spec_context_num = -1;
 
-    done:
-    slurm_mutex_unlock(&g_core_spec_context_lock);
-    return rc;
+done:
+	slurm_mutex_unlock(&g_core_spec_context_lock);
+	return rc;
 }
 
 /*
@@ -158,17 +173,19 @@ extern int core_spec_g_fini(void) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_g_set(uint64_t cont_id, uint16_t core_count) {
-    int i, rc = SLURM_SUCCESS;
+extern int core_spec_g_set(uint64_t cont_id, uint16_t core_count)
+{
+	int i, rc = SLURM_SUCCESS;
 
-    if (core_spec_g_init() != SLURM_SUCCESS)
-        return SLURM_ERROR;
+	if (core_spec_g_init() != SLURM_SUCCESS)
+		return SLURM_ERROR;
 
-    for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS)); i++) {
-        rc = (*(ops[i].core_spec_p_set))(cont_id, core_count);
-    }
+	for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS));
+	     i++) {
+		rc = (*(ops[i].core_spec_p_set))(cont_id, core_count);
+	}
 
-    return rc;
+	return rc;
 }
 
 /*
@@ -176,17 +193,19 @@ extern int core_spec_g_set(uint64_t cont_id, uint16_t core_count) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_g_clear(uint64_t cont_id) {
-    int i, rc = SLURM_SUCCESS;
+extern int core_spec_g_clear(uint64_t cont_id)
+{
+	int i, rc = SLURM_SUCCESS;
 
-    if (core_spec_g_init() != SLURM_SUCCESS)
-        return SLURM_ERROR;
+	if (core_spec_g_init() != SLURM_SUCCESS)
+		return SLURM_ERROR;
 
-    for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS)); i++) {
-        rc = (*(ops[i].core_spec_p_clear))(cont_id);
-    }
+	for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS));
+	     i++) {
+		rc = (*(ops[i].core_spec_p_clear))(cont_id);
+	}
 
-    return rc;
+	return rc;
 }
 
 /*
@@ -194,17 +213,19 @@ extern int core_spec_g_clear(uint64_t cont_id) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_g_suspend(uint64_t cont_id, uint16_t count) {
-    int i, rc = SLURM_SUCCESS;
+extern int core_spec_g_suspend(uint64_t cont_id, uint16_t count)
+{
+	int i, rc = SLURM_SUCCESS;
 
-    if (core_spec_g_init() != SLURM_SUCCESS)
-        return SLURM_ERROR;
+	if (core_spec_g_init() != SLURM_SUCCESS)
+		return SLURM_ERROR;
 
-    for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS)); i++) {
-        rc = (*(ops[i].core_spec_p_suspend))(cont_id, count);
-    }
+	for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS));
+	     i++) {
+		rc = (*(ops[i].core_spec_p_suspend))(cont_id, count);
+	}
 
-    return rc;
+	return rc;
 }
 
 /*
@@ -212,15 +233,17 @@ extern int core_spec_g_suspend(uint64_t cont_id, uint16_t count) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_g_resume(uint64_t cont_id, uint16_t count) {
-    int i, rc = SLURM_SUCCESS;
+extern int core_spec_g_resume(uint64_t cont_id, uint16_t count)
+{
+	int i, rc = SLURM_SUCCESS;
 
-    if (core_spec_g_init() != SLURM_SUCCESS)
-        return SLURM_ERROR;
+	if (core_spec_g_init() != SLURM_SUCCESS)
+		return SLURM_ERROR;
 
-    for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS)); i++) {
-        rc = (*(ops[i].core_spec_p_resume))(cont_id, count);
-    }
+	for (i = 0; ((i < g_core_spec_context_num) && (rc == SLURM_SUCCESS));
+	     i++) {
+		rc = (*(ops[i].core_spec_p_resume))(cont_id, count);
+	}
 
-    return rc;
+	return rc;
 }

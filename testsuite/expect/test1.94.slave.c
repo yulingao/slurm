@@ -32,44 +32,48 @@
 
 #define COMM_TAG 1000
 
-static void pass_its_neighbor(const int rank, const int size, const int *buf) {
-    struct utsname uts;
-    MPI_Request request[2];
-    MPI_Status status[2];
+static void pass_its_neighbor(const int rank, const int size, const int* buf)
+{
+	struct utsname uts;
+	MPI_Request request[2];
+	MPI_Status status[2];
 
-    MPI_Irecv((void *) buf, 1, MPI_INT, ((rank + size - 1) % size), COMM_TAG, MPI_COMM_WORLD, &request[0]);
-    MPI_Isend((void *) &rank, 1, MPI_INT, ((rank + 1) % size), COMM_TAG, MPI_COMM_WORLD, &request[1]);
-    MPI_Waitall(2, request, status);
+	MPI_Irecv((void *)buf, 1, MPI_INT, ((rank+size-1)%size), COMM_TAG,
+		MPI_COMM_WORLD, &request[0]);
+	MPI_Isend((void *)&rank, 1, MPI_INT, ((rank+1)%size), COMM_TAG,
+		MPI_COMM_WORLD, &request[1]);
+	MPI_Waitall(2, request, status);
 
-    uname(&uts);
-    fprintf(stdout, "Rank[%d] on %s just received msg from Rank %d\n", rank, uts.nodename, *buf);
+	uname(&uts);
+	fprintf(stdout, "Rank[%d] on %s just received msg from Rank %d\n",
+		rank, uts.nodename, *buf);
 }
 
-int main(int argc, char *argv[]) {
-    int buf, size, rank, rc = 0;
-    MPI_Comm parent;
+int main(int argc, char *argv[]) 
+{ 
+	int buf, size, rank, rc = 0;
+	MPI_Comm parent;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_get_parent(&parent);
-    if (parent == MPI_COMM_NULL) {
-        printf("No parent!\n");
-        rc = 1;
-        goto fini;
-    }
-    MPI_Comm_remote_size(parent, &size);
-    if (size != 1) {
-        printf("Something's wrong with the parent\n");
-        rc = 2;
-        goto fini;
-    }
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //printf("slave rank:%d size:%d\n", rank, size);
-
-    buf = rank;    /* we only pass rank */
-    pass_its_neighbor(rank, size, &buf);
-
-    fini:
-    MPI_Finalize();
-    exit(rc);
+	MPI_Init(&argc, &argv);
+	MPI_Comm_get_parent(&parent);
+	if (parent == MPI_COMM_NULL) {
+		printf("No parent!\n");
+		rc = 1;
+		goto fini;
+	}
+	MPI_Comm_remote_size(parent, &size);
+	if (size != 1) {
+		printf("Something's wrong with the parent\n");
+		rc = 2;
+		goto fini;
+	}
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	//printf("slave rank:%d size:%d\n", rank, size);
+ 
+	buf = rank;	/* we only pass rank */
+	pass_its_neighbor(rank, size, &buf);
+ 
+fini:	MPI_Finalize(); 
+	exit(rc);
 } 

@@ -53,8 +53,8 @@
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
 
-#define RETRY_COUNT        20
-#define RETRY_USEC        100000
+#define RETRY_COUNT		20
+#define RETRY_USEC		100000
 
 /*
  * These variables are required by the generic plugin interface.  If they
@@ -81,15 +81,18 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Munge credential signature plugin";
-const char plugin_type[] = "cred/munge";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]	= "Munge credential signature plugin";
+const char plugin_type[]	= "cred/munge";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*
  *  Error codes local to this plugin:
  */
 enum local_error_code {
-    ESIG_BUF_DATA_MISMATCH = 5000, ESIG_BUF_SIZE_MISMATCH, ESIG_BAD_USERID, ESIG_CRED_REPLAYED,
+	ESIG_BUF_DATA_MISMATCH = 5000,
+	ESIG_BUF_SIZE_MISMATCH,
+	ESIG_BAD_USERID,
+	ESIG_CRED_REPLAYED,
 };
 
 static uid_t slurm_user = 0;
@@ -98,176 +101,193 @@ static uid_t slurm_user = 0;
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    /*
-     * Get slurm user id once. We use it later to verify credentials.
-     */
-    slurm_user = slurm_get_slurm_user_id();
+extern int init(void)
+{
+	/*
+	 * Get slurm user id once. We use it later to verify credentials.
+	 */
+	slurm_user = slurm_get_slurm_user_id();
 
-    verbose("%s loaded", plugin_name);
-    return SLURM_SUCCESS;
+	verbose("%s loaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is unloaded,
  * free any global memory allocations here to avoid memory leaks.
  */
-extern int fini(void) {
-    verbose("%s unloaded", plugin_name);
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	verbose("%s unloaded", plugin_name);
+	return SLURM_SUCCESS;
 }
 
-extern void cred_p_destroy_key(void *key) {
-    munge_ctx_destroy((munge_ctx_t) key);
-    return;
+extern void cred_p_destroy_key(void *key)
+{
+	munge_ctx_destroy((munge_ctx_t) key);
+	return;
 }
 
-static void *_munge_ctx_setup(bool creator) {
-    munge_ctx_t ctx;
-    munge_err_t err;
-    char *opts, *socket;
-    int auth_ttl, rc;
+static void *_munge_ctx_setup(bool creator)
+{
+	munge_ctx_t ctx;
+	munge_err_t err;
+	char *opts, *socket;
+	int auth_ttl, rc;
 
-    if ((ctx = munge_ctx_create()) == NULL) {
-        error("%s: munge_ctx_create failed", __func__);
-        return NULL;
-    }
+	if ((ctx = munge_ctx_create()) == NULL) {
+		error("%s: munge_ctx_create failed", __func__);
+		return NULL;
+	}
 
-    opts = slurm_get_auth_info();
-    socket = slurm_auth_opts_to_socket(opts);
-    if (socket) {
-        rc = munge_ctx_set(ctx, MUNGE_OPT_SOCKET, socket);
-        xfree(socket);
-        if (rc != EMUNGE_SUCCESS) {
-            error("munge_ctx_set failure");
-            munge_ctx_destroy(ctx);
-            return NULL;
-        }
-    }
-    xfree(opts);
+	opts = slurm_get_auth_info();
+	socket = slurm_auth_opts_to_socket(opts);
+	if (socket) {
+		rc = munge_ctx_set(ctx, MUNGE_OPT_SOCKET, socket);
+		xfree(socket);
+		if (rc != EMUNGE_SUCCESS) {
+			error("munge_ctx_set failure");
+			munge_ctx_destroy(ctx);
+			return NULL;
+		}
+	}
+	xfree(opts);
 
-    auth_ttl = slurm_get_auth_ttl();
-    if (auth_ttl)
-        (void) munge_ctx_set(ctx, MUNGE_OPT_TTL, auth_ttl);
+	auth_ttl = slurm_get_auth_ttl();
+	if (auth_ttl)
+		(void) munge_ctx_set(ctx, MUNGE_OPT_TTL, auth_ttl);
 
-    if (creator) {
-        /*
-         * Only allow slurmd_user (usually root) to decode job
-         * credentials created by slurmctld. This provides a slight
-         * layer of extra security, as non-privileged users cannot
-         * get at the contents of job credentials.
-         */
-        err = munge_ctx_set(ctx, MUNGE_OPT_UID_RESTRICTION, slurm_get_slurmd_user_id());
+	if (creator) {
+		/*
+		 * Only allow slurmd_user (usually root) to decode job
+		 * credentials created by slurmctld. This provides a slight
+		 * layer of extra security, as non-privileged users cannot
+		 * get at the contents of job credentials.
+		 */
+		err = munge_ctx_set(ctx, MUNGE_OPT_UID_RESTRICTION,
+				    slurm_get_slurmd_user_id());
 
-        if (err != EMUNGE_SUCCESS) {
-            error("Unable to set uid restriction on munge credentials: %s", munge_ctx_strerror(ctx));
-            munge_ctx_destroy(ctx);
-            return NULL;
-        }
-    }
+		if (err != EMUNGE_SUCCESS) {
+			error("Unable to set uid restriction on munge credentials: %s",
+			      munge_ctx_strerror(ctx));
+			munge_ctx_destroy(ctx);
+			return NULL;
+		}
+	}
 
-    return (void *) ctx;
+	return (void *) ctx;
 }
 
-extern void *cred_p_read_private_key(const char *path) {
-    return _munge_ctx_setup(true);
+extern void *cred_p_read_private_key(const char *path)
+{
+	return _munge_ctx_setup(true);
 }
 
-extern void *cred_p_read_public_key(const char *path) {
-    return _munge_ctx_setup(false);
+extern void *cred_p_read_public_key(const char *path)
+{
+	return _munge_ctx_setup(false);
 }
 
-extern const char *cred_p_str_error(int errnum) {
-    if (errnum == ESIG_BUF_DATA_MISMATCH)
-        return "Credential data mismatch";
-    else if (errnum == ESIG_BUF_SIZE_MISMATCH)
-        return "Credential data size mismatch";
-    else if (errnum == ESIG_BAD_USERID)
-        return "Credential created by invalid user";
-    else if (errnum == ESIG_CRED_REPLAYED)
-        return "Credential replayed";
-    else
-        return munge_strerror((munge_err_t) errnum);
+extern const char *cred_p_str_error(int errnum)
+{
+	if (errnum == ESIG_BUF_DATA_MISMATCH)
+		return "Credential data mismatch";
+	else if (errnum == ESIG_BUF_SIZE_MISMATCH)
+		return "Credential data size mismatch";
+	else if (errnum == ESIG_BAD_USERID)
+		return "Credential created by invalid user";
+	else if (errnum == ESIG_CRED_REPLAYED)
+		return "Credential replayed";
+	else
+		return munge_strerror ((munge_err_t) errnum);
 }
 
 /* NOTE: Caller must xfree the signature returned by sig_pp */
-extern int cred_p_sign(void *key, char *buffer, int buf_size, char **sig_pp, uint32_t *sig_size_p) {
-    int retry = RETRY_COUNT, auth_ttl;
-    char *cred;
-    munge_err_t err;
-    munge_ctx_t ctx = (munge_ctx_t) key;
+extern int cred_p_sign(void *key, char *buffer, int buf_size,
+		       char **sig_pp, uint32_t *sig_size_p)
+{
+	int retry = RETRY_COUNT, auth_ttl;
+	char *cred;
+	munge_err_t err;
+	munge_ctx_t ctx = (munge_ctx_t) key;
 
-    auth_ttl = slurm_get_auth_ttl();
-    if (auth_ttl)
-        (void) munge_ctx_set(ctx, MUNGE_OPT_TTL, auth_ttl);
+	auth_ttl = slurm_get_auth_ttl();
+	if (auth_ttl)
+		(void) munge_ctx_set(ctx, MUNGE_OPT_TTL, auth_ttl);
 
-    again:
-    err = munge_encode(&cred, ctx, buffer, buf_size);
-    if (err != EMUNGE_SUCCESS) {
-        if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge encode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
-            usleep(RETRY_USEC);    /* Likely munged too busy */
-            goto again;
-        }
-        if (err == EMUNGE_SOCKET)  /* Also see MUNGE_OPT_TTL above */
-            error("If munged is up, restart with --num-threads=10");
-        return err;
-    }
+again:
+	err = munge_encode(&cred, ctx, buffer, buf_size);
+	if (err != EMUNGE_SUCCESS) {
+		if ((err == EMUNGE_SOCKET) && retry--) {
+			debug("Munge encode failed: %s (retrying ...)",
+			      munge_ctx_strerror(ctx));
+			usleep(RETRY_USEC);	/* Likely munged too busy */
+			goto again;
+		}
+		if (err == EMUNGE_SOCKET)  /* Also see MUNGE_OPT_TTL above */
+			error("If munged is up, restart with --num-threads=10");
+		return err;
+	}
 
-    *sig_size_p = strlen(cred) + 1;
-    *sig_pp = xstrdup(cred);
-    free(cred);
-    return 0;
+	*sig_size_p = strlen(cred) + 1;
+	*sig_pp = xstrdup(cred);
+	free(cred);
+	return 0;
 }
 
-extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size, char *signature, uint32_t sig_size) {
-    int retry = RETRY_COUNT;
-    uid_t uid;
-    gid_t gid;
-    void *buf_out = NULL;
-    int buf_out_size;
-    int rc = SLURM_SUCCESS;
-    munge_err_t err;
-    munge_ctx_t ctx = (munge_ctx_t) key;
+extern int cred_p_verify_sign(void *key, char *buffer, uint32_t buf_size,
+			      char *signature, uint32_t sig_size)
+{
+	int retry = RETRY_COUNT;
+	uid_t uid;
+	gid_t gid;
+	void *buf_out = NULL;
+	int buf_out_size;
+	int rc = SLURM_SUCCESS;
+	munge_err_t err;
+	munge_ctx_t ctx = (munge_ctx_t) key;
 
-    again:
-    err = munge_decode(signature, ctx, &buf_out, &buf_out_size, &uid, &gid);
+again:
+	err = munge_decode(signature, ctx, &buf_out, &buf_out_size,
+			   &uid, &gid);
 
-    if (err != EMUNGE_SUCCESS) {
-        if ((err == EMUNGE_SOCKET) && retry--) {
-            debug("Munge decode failed: %s (retrying ...)", munge_ctx_strerror(ctx));
-            usleep(RETRY_USEC);    /* Likely munged too busy */
-            goto again;
-        }
-        if (err == EMUNGE_SOCKET)
-            error("If munged is up, restart with --num-threads=10");
+	if (err != EMUNGE_SUCCESS) {
+		if ((err == EMUNGE_SOCKET) && retry--) {
+			debug("Munge decode failed: %s (retrying ...)",
+			      munge_ctx_strerror(ctx));
+			usleep(RETRY_USEC);	/* Likely munged too busy */
+			goto again;
+		}
+		if (err == EMUNGE_SOCKET)
+			error("If munged is up, restart with --num-threads=10");
 
 #ifdef MULTIPLE_SLURMD
-        if (err != EMUNGE_CRED_REPLAYED) {
-            rc = err;
-            goto end_it;
-        } else {
-            debug2("We had a replayed credential, but this is expected in multiple slurmd mode.");
-        }
+		if (err != EMUNGE_CRED_REPLAYED) {
+			rc = err;
+			goto end_it;
+		} else {
+			debug2("We had a replayed credential, but this is expected in multiple slurmd mode.");
+		}
 #else
-        if (err == EMUNGE_CRED_REPLAYED)
-            rc = ESIG_CRED_REPLAYED;
-        else
-            rc = err;
-        goto end_it;
+		if (err == EMUNGE_CRED_REPLAYED)
+			rc = ESIG_CRED_REPLAYED;
+		else
+			rc = err;
+		goto end_it;
 #endif
-    }
+	}
 
-    if ((uid != slurm_user) && (uid != 0)) {
-        error("%s: Unexpected uid (%u) != Slurm uid (%u)", plugin_type, uid, slurm_user);
-        rc = ESIG_BAD_USERID;
-    } else if (buf_size != buf_out_size)
-        rc = ESIG_BUF_SIZE_MISMATCH;
-    else if (memcmp(buffer, buf_out, buf_size))
-        rc = ESIG_BUF_DATA_MISMATCH;
+	if ((uid != slurm_user) && (uid != 0)) {
+		error("%s: Unexpected uid (%u) != Slurm uid (%u)",
+		      plugin_type, uid, slurm_user);
+		rc = ESIG_BAD_USERID;
+	} else if (buf_size != buf_out_size)
+		rc = ESIG_BUF_SIZE_MISMATCH;
+	else if (memcmp(buffer, buf_out, buf_size))
+		rc = ESIG_BUF_DATA_MISMATCH;
 
-    end_it:
-    if (buf_out)
-        free(buf_out);
-    return rc;
+end_it:
+	if (buf_out)
+		free(buf_out);
+	return rc;
 }

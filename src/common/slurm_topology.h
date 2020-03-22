@@ -47,53 +47,51 @@
  *  SWITCH topology data structures
  *  defined here but is really tree plugin related
 \*****************************************************************************/
-struct switch_record
-{
-    uint64_t consumed_energy; /* consumed energy, in joules */
-    int level;                /* level in hierarchy, leaf=0 */
-    uint32_t link_speed;      /* link speed, arbitrary units */
-    char *name;               /* switch name */
-    bitstr_t *node_bitmap;    /* bitmap of all nodes descended from
+struct switch_record {
+	uint64_t consumed_energy;	/* consumed energy, in joules */
+	int level;			/* level in hierarchy, leaf=0 */
+	uint32_t link_speed;		/* link speed, arbitrary units */
+	char *name;			/* switch name */
+	bitstr_t *node_bitmap;		/* bitmap of all nodes descended from
 					 * this switch */
-    char *nodes;              /* name if direct descendant nodes */
-    uint16_t num_switches;    /* number of descendant switches */
-    uint16_t parent;          /* index of parent switch */
-    char *switches;           /* name of direct descendant switches */
-    uint16_t *switch_index;   /* indexes of child switches */
-    uint32_t temp;            /* temperature, in celsius */
+	char *nodes;			/* name if direct descendant nodes */
+	uint16_t  num_switches;         /* number of descendant switches */
+	uint16_t  parent;		/* index of parent switch */
+	char *switches;			/* name of direct descendant switches */
+	uint16_t *switch_index;		/* indexes of child switches */
+	uint32_t temp;			/* temperature, in celsius */
 };
 
-extern struct switch_record *switch_record_table; /* ptr to switch records */
-extern int switch_record_cnt;                     /* size of switch_record_table */
-extern int switch_levels;                         /* number of switch levels     */
+extern struct switch_record *switch_record_table;  /* ptr to switch records */
+extern int switch_record_cnt;		/* size of switch_record_table */
+extern int switch_levels;               /* number of switch levels     */
 
 /*****************************************************************************\
  *  Hypercube SWITCH topology data structures
  *  defined here but is really hypercube plugin related
 \*****************************************************************************/
-struct hypercube_switch
-{
-    int switch_index;      /* index of this switch in switch_record_table */
-    char *switch_name;     /* the name of this switch */
-    bitstr_t *node_bitmap; /* bitmap of nodes connected to this switch */
-    int node_cnt;          /* number of nodes connected to this switch */
-    int avail_cnt;         /* number of available nodes connected to this switch */
-    int32_t *distance;     /*distance to the start (first) switch for each curve */
-    int *node_index;       /* index of the connected nodes in the node_record_table */
+struct hypercube_switch {
+	int switch_index; /* index of this switch in switch_record_table */
+	char *switch_name; /* the name of this switch */
+	bitstr_t *node_bitmap; /* bitmap of nodes connected to this switch */
+	int node_cnt; /* number of nodes connected to this switch */
+	int avail_cnt; /* number of available nodes connected to this switch */
+	int32_t *distance; /*distance to the start (first) switch for each curve */
+	int *node_index; /* index of the connected nodes in the node_record_table */
 };
 
 extern int hypercube_dimensions; /* number of dimensions in hypercube 
  network topolopy - determined by max number of switch connections*/
 
 /* table of hypercube_switch records */
-extern struct hypercube_switch *hypercube_switch_table;
+extern struct hypercube_switch *hypercube_switch_table; 
 extern int hypercube_switch_cnt; /* size of hypercube_switch_table */
 
 /* An array of hilbert curves, where each hilbert curve
  * is a list of pointers to the hypercube_switch records in the 
  * hypercube_switch_table. Each list of pointers is sorted in accordance
  * with the sorting of the Hilbert curve. */
-extern struct hypercube_switch ***hypercube_switches;
+extern struct hypercube_switch ***hypercube_switches; 
 
 /*****************************************************************************\
  *  Slurm topology functions
@@ -104,7 +102,7 @@ extern struct hypercube_switch ***hypercube_switches;
  *
  * Returns a Slurm errno.
  */
-int slurm_topo_init(void);
+int slurm_topo_init( void );
 
 /*
  * Terminate the topology plugin.
@@ -120,24 +118,23 @@ extern int slurm_topo_fini(void);
  */
 
 /*
-系统启动或重新配置后，构建和重新配置拓扑信息
-
  * slurm_topo_build_config - build or rebuild system topology information
  *	after a system startup or reconfiguration.
  */
-extern int slurm_topo_build_config(void);
+extern int slurm_topo_build_config( void );
 
 /*
  * slurm_topo_generate_node_ranking  -  populate node_rank fields
  * NOTE: This operation is only supported by those topology plugins for
  *       which the node ordering between slurmd and slurmctld is invariant.
  */
-extern bool slurm_topo_generate_node_ranking(void);
+extern bool slurm_topo_generate_node_ranking( void );
 
 /*
  * slurm_topo_get_node_addr - build node address and the associated pattern
  *      based on the topology information
  */
-extern int slurm_topo_get_node_addr(char *node_name, char **addr, char **pattern);
+extern int slurm_topo_get_node_addr( char* node_name, char** addr,
+				     char** pattern );
 
 #endif /*__SLURM_CONTROLLER_TOPO_PLUGIN_API_H__*/

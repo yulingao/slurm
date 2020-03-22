@@ -76,7 +76,8 @@
  * IN gres_task_limit - array of task limits based upon job GRES specification,
  *		offset based upon bits set in job_ptr->job_resrcs->node_bitmap
  */
-extern int cr_dist(struct job_record *job_ptr, const uint16_t cr_type, bool preempt_mode, bitstr_t **core_array,
-                   uint32_t *gres_task_limit);
+extern int cr_dist(struct job_record *job_ptr, const uint16_t cr_type,
+		   bool preempt_mode, bitstr_t **core_array,
+		   uint32_t *gres_task_limit);
 
 #endif /* !_CONS_TRES_DIST_TASKS_H */

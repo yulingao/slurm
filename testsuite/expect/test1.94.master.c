@@ -24,43 +24,46 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int main(int argc, char *argv[]) {
-    int world_size, universe_size = 0, *universe_sizep, rank, flag, rc;
-    MPI_Comm everyone;    /* intercommunicator */
+int main(int argc, char *argv[]) 
+{ 
+	int world_size, universe_size = 0, *universe_sizep, rank, flag, rc;
+	MPI_Comm everyone;	/* intercommunicator */
 
-    if (argc < 2) {
-        printf("FAILURE: Usage %s <slave_program>\n", argv[0]);
-        exit(1);
-    }
+	if (argc < 2) {
+		printf("FAILURE: Usage %s <slave_program>\n", argv[0]);
+		exit(1);
+	}
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    if (world_size != 1) {
-        printf("FAILURE: Started %d master processes\n", world_size);
-        exit(1);
-    }
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	if (world_size != 1) {
+		printf("FAILURE: Started %d master processes\n", world_size);
+		exit(1);
+	}
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //printf("master rank:%d\n",rank);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	//printf("master rank:%d\n",rank);
 
-    /* NOTE: Ideally MPI_UNIVERSE_SIZE would be the size of the job
-     * allocation. Presently it is the size of the job step allocation.
-     * In any case, additional tasks can be spawned */
-    MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_UNIVERSE_SIZE, &universe_sizep, &flag);
-    if (flag) {
-        universe_size = *universe_sizep;
-        //printf("MPI_UNIVERSE_SIZE is %d\n", universe_size);
-    }
-    if (universe_size < 2)
-        universe_size = 5;
+	/* NOTE: Ideally MPI_UNIVERSE_SIZE would be the size of the job
+	 * allocation. Presently it is the size of the job step allocation.
+	 * In any case, additional tasks can be spawned */
+	MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_UNIVERSE_SIZE,
+			  &universe_sizep, &flag);
+	if (flag) {
+		universe_size = *universe_sizep;
+		//printf("MPI_UNIVERSE_SIZE is %d\n", universe_size);
+	}
+	if (universe_size < 2)
+		universe_size = 5;
 
-    rc = MPI_Comm_spawn(argv[1], MPI_ARGV_NULL, universe_size - 1, MPI_INFO_NULL, 0, MPI_COMM_SELF, &everyone,
-                        MPI_ERRCODES_IGNORE);
-    if (rc != MPI_SUCCESS) {
-        printf("FAILURE: MPI_Comm_spawn(): %d\n", rc);
-        exit(1);
-    }
+	rc = MPI_Comm_spawn(argv[1], MPI_ARGV_NULL, universe_size-1,  
+			    MPI_INFO_NULL, 0, MPI_COMM_SELF, &everyone,  
+			    MPI_ERRCODES_IGNORE);
+	if (rc != MPI_SUCCESS) {
+		printf("FAILURE: MPI_Comm_spawn(): %d\n", rc);
+		exit(1);
+	}
 
-    MPI_Finalize();
-    exit(0);
+	MPI_Finalize();
+	exit(0);
 } 

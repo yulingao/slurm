@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-
 extern int errno;
-
 #include <string.h>
 #include <dirent.h>
 
@@ -35,34 +33,33 @@ char linkname[FILENAME_MAX];
 char usockname[FILENAME_MAX], lockname[FILENAME_MAX];
 
 int prepare_srv_socket(char *path);
-
 void establish_listen_sock(int jobid, int stepid);
 
 int pid_from_usockname(char *us_name, int jobid);
-
 int run_discovery(int jobid, int stepid, int *is_leader);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int is_leader;
     if (argc < 3) {
-        fprintf(stderr, "Not enough arguments\n");
+        fprintf(stderr,"Not enough arguments\n");
         exit(0);
     }
     my_jobid = atoi(argv[1]);
     my_stepid = atoi(argv[2]);
     snprintf(linkname, FILENAME_MAX, "%s.%d", FILENAME_PREFIX, my_jobid);
     snprintf(usockname, FILENAME_MAX, "%s.%d", linkname, my_stepid);
-    snprintf(lockname, FILENAME_MAX, "%s.lock", usockname);
+    snprintf(lockname, FILENAME_MAX, "%s.lock",usockname);
 
     if (0 > (lockfd = pmix_create_locked(lockname))) {
-        fprintf(stderr, "Can't create lock file %s\n", lockname);
+        fprintf(stderr,"Can't create lock file %s\n", lockname);
         exit(0);
     }
 
     sfd = prepare_srv_socket(usockname);
 
     int i = 0;
-    while (1) {
+    while(1) {
         int fd = run_discovery(my_jobid, my_stepid, &is_leader);
         if (is_leader) {
             fprintf("Iteration %d. I am the leader\n", i);
@@ -75,7 +72,8 @@ int main(int argc, char **argv) {
     }
 }
 
-int run_discovery(int jobid, int my_stepid, int *is_leader) {
+int run_discovery(int jobid, int my_stepid, int *is_leader)
+{
     char lname[FILENAME_MAX], fname[FILENAME_MAX], fname1[FILENAME_MAX];
 
     *is_leader = 0;
@@ -90,14 +88,16 @@ int run_discovery(int jobid, int my_stepid, int *is_leader) {
 }
 
 
-int prepare_srv_socket(char *path) {
+int prepare_srv_socket(char *path)
+{
     static struct sockaddr_un sa;
     int ret = 0;
 
     if (strlen(path) >= sizeof(sa.sun_path)) {
         /*PMIXP_ERROR_STD*/
-        printf("UNIX socket path is too long: %lu, max %lu", (unsigned long) strlen(path),
-               (unsigned long) sizeof(sa.sun_path) - 1);
+        printf("UNIX socket path is too long: %lu, max %lu",
+               (unsigned long)strlen(path),
+               (unsigned long)sizeof(sa.sun_path)-1);
         return SLURM_ERROR;
     }
 
@@ -106,7 +106,8 @@ int prepare_srv_socket(char *path) {
         /* remove old file */
         if (0 != unlink(path)) {
             /*PMIXP_ERROR_STD*/
-            printf("Cannot delete outdated socket fine: %s", path);
+            printf("Cannot delete outdated socket fine: %s",
+                    path);
             return SLURM_ERROR;
         }
     }
@@ -121,7 +122,7 @@ int prepare_srv_socket(char *path) {
     memset(&sa, 0, sizeof(sa));
     sa.sun_family = AF_UNIX;
     strcpy(sa.sun_path, path);
-    if (ret = bind(fd, (struct sockaddr *) &sa, SUN_LEN(&sa))) {
+    if (ret = bind(fd, (struct sockaddr*)&sa, SUN_LEN(&sa))) {
         /*PMIXP_ERROR_STD*/
         printf("Cannot bind() UNIX socket %s", path);
         goto err_fd;
@@ -134,20 +135,22 @@ int prepare_srv_socket(char *path) {
     }
     return fd;
 
-    err_bind:
+err_bind:
     unlink(path);
-    err_fd:
+err_fd:
     close(fd);
     return ret;
 }
 
-int connect_to_server(char *path) {
+int connect_to_server(char *path)
+{
     static struct sockaddr_un sa;
 
     if (strlen(path) >= sizeof(sa.sun_path)) {
         /*PMIXP_ERROR_STD*/
-        printf("UNIX socket path is too long: %lu, max %lu", (unsigned long) strlen(path),
-               (unsigned long) sizeof(sa.sun_path) - 1);
+        printf("UNIX socket path is too long: %lu, max %lu",
+               (unsigned long)strlen(path),
+               (unsigned long)sizeof(sa.sun_path)-1);
         return -1;
     }
 
@@ -157,7 +160,7 @@ int connect_to_server(char *path) {
 
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
-        fprintf(stderr, "Cannot create UNIX socket");
+        fprintf(stderr,"Cannot create UNIX socket");
         return -1;
     }
 
@@ -176,22 +179,26 @@ int connect_to_server(char *path) {
     return fd;
 }
 
-void service_requests(int fd) {
-    while (1) {
+void service_requests(int fd)
+{
+    while(1) {
         int cfd;
         if (0 < (cfd = accept(fd, NULL, 0))) {
             local_records_t rec;
             int ret = read(cfd, &rec, sizeof(rec));
             if (ret != sizeof(rec)) {
-                fprintf("%s:%d: read mismatch: %d vs %d\n", __FILE__, __LINE__, ret, sizeof(rec));
+                fprintf("%s:%d: read mismatch: %d vs %d\n",
+                        __FILE__, __LINE__, ret, sizeof(rec));
                 exit(0);
             }
-            fprintf(stderr, "New client connected: jobid=%d, stepid=%d, fd = %d\n", rec.jobid, rec.stepid, fd);
+            fprintf(stderr,"New client connected: jobid=%d, stepid=%d, fd = %d\n",
+                   rec.jobid, rec.stepid, fd);
         }
     }
 }
 
-void monitor_leader(int fd) {
+void monitor_leader(int fd)
+{
     struct pollfd fds;
     fds.fd = fd;
     fds.events = 0;
@@ -200,10 +207,10 @@ void monitor_leader(int fd) {
 
     int rc = poll(&fds, 1, -1);
     if (rc < 0) {
-        fprintf(stderr, "Get poll error %d: %s", errno, strerror(errno));
+        fprintf(stderr,"Get poll error %d: %s", errno, strerror(errno));
         exit(1);
     }
     if (fds.revents != POLLHUP) {
-        fprintf(stderr, "revents = %x", fds.revents);
+        fprintf(stderr,"revents = %x", fds.revents);
     }
 }

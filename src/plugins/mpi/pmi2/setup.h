@@ -57,54 +57,51 @@
 #include "tree.h"
 
 typedef struct pmi2_job_info {
-    uint32_t jobid;  /* Current Slurm job id                      */
-    uint32_t stepid; /* Current step id (or NO_VAL)               */
-    uint32_t nnodes; /* number of nodes in current job step       */
-    uint32_t nodeid; /* relative position of this node in job     */
-    uint32_t ntasks; /* total number of tasks in current job      */
-    uint32_t ltasks; /* number of tasks on *this* (local) node    */
-    uint32_t *gtids; /* global task ids of the tasks              */
-    uint32_t spawn_seq;    /* seq of spawn. 0 if not spawned */
+	uint32_t jobid;  /* Current Slurm job id                      */
+	uint32_t stepid; /* Current step id (or NO_VAL)               */
+	uint32_t nnodes; /* number of nodes in current job step       */
+	uint32_t nodeid; /* relative position of this node in job     */
+	uint32_t ntasks; /* total number of tasks in current job      */
+	uint32_t ltasks; /* number of tasks on *this* (local) node    */
+	uint32_t *gtids; /* global task ids of the tasks              */
+	uint32_t spawn_seq;	/* seq of spawn. 0 if not spawned */
 
-    int pmi_debugged;    /* whether output verbose PMI messages */
-    char *step_nodelist; /* list of nodes in this job step */
-    char *proc_mapping;  /* processor mapping */
-    char *pmi_jobid;     /* PMI job id */
-    char *spawner_jobid; /* spawner pmi job id */
-    char **job_env;         /* environment of job. use in stepd */
+	int pmi_debugged;    /* whether output verbose PMI messages */
+	char *step_nodelist; /* list of nodes in this job step */
+	char *proc_mapping;  /* processor mapping */
+	char *pmi_jobid;     /* PMI job id */
+	char *spawner_jobid; /* spawner pmi job id */
+	char **job_env;	     /* environment of job. use in stepd */
 
-    MPIR_PROCDESC *MPIR_proctable;    /* used only in srun */
-    slurm_opt_t *srun_opt;        /* used only in srun */
-    char *resv_ports; /* MPI reserved ports */
+	MPIR_PROCDESC *MPIR_proctable;	/* used only in srun */
+	slurm_opt_t *srun_opt;		/* used only in srun */
+	char *resv_ports; /* MPI reserved ports */
 } pmi2_job_info_t;
 
 typedef struct pmi2_tree_info {
-    char *this_node;    /* this nodename */
-    char *parent_node;    /* parent nodename */
-    int parent_id;    /* parent nodeid */
-    int num_children;    /* number of children stepds */
-    int depth;        /* depth in tree */
-    int max_depth;    /* max depth of the tree */
-    uint16_t pmi_port;     /* PMI2 comm port of this srun */
-    slurm_addr_t *srun_addr; /* PMI2 comm address parent srun */
-    uint32_t *children_kvs_seq; /* sequence number of children nodes */
+	char *this_node;	/* this nodename */
+	char *parent_node;	/* parent nodename */
+	int   parent_id;	/* parent nodeid */
+	int   num_children;	/* number of children stepds */
+	int   depth;		/* depth in tree */
+	int   max_depth;	/* max depth of the tree */
+	uint16_t pmi_port;	 /* PMI2 comm port of this srun */
+	slurm_addr_t *srun_addr; /* PMI2 comm address parent srun */
+	uint32_t *children_kvs_seq; /* sequence number of children nodes */
 } pmi2_tree_info_t;
 
 
 extern pmi2_job_info_t job_info;
 extern pmi2_tree_info_t tree_info;
 extern char tree_sock_addr[];
-extern int tree_sock;
+extern int  tree_sock;
 extern int *task_socks;
 #define STEPD_PMI_SOCK(lrank) task_socks[lrank * 2]
 #define TASK_PMI_SOCK(lrank) task_socks[lrank * 2 + 1]
 
 extern bool in_stepd(void);
-
-extern int pmi2_setup_stepd(const stepd_step_rec_t *job, char ***env);
-
-extern int pmi2_setup_srun(const mpi_plugin_client_info_t *job, char ***env);
-
+extern int  pmi2_setup_stepd(const stepd_step_rec_t *job, char ***env);
+extern int  pmi2_setup_srun(const mpi_plugin_client_info_t *job, char ***env);
 extern void pmi2_cleanup_stepd(void);
 
-#endif    /* _SETUP_H */
+#endif	/* _SETUP_H */

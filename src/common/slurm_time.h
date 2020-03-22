@@ -30,22 +30,18 @@
 #include <time.h>
 
 extern char *slurm_ctime(const time_t *timep);
-
 extern char *slurm_ctime_r(const time_t *timep, char *buf);
 
 extern struct tm *slurm_gmtime(const time_t *timep);
-
 extern struct tm *slurm_gmtime_r(const time_t *timep, struct tm *result);
 
 extern struct tm *slurm_localtime(const time_t *timep);
-
 extern struct tm *slurm_localtime_r(const time_t *timep, struct tm *result);
 
 extern time_t slurm_mktime(struct tm *tp);
 
 /* Slurm variants of ctime and ctime_r without a trailing new-line */
 extern char *slurm_ctime2(const time_t *timep);
-
 extern char *slurm_ctime2_r(const time_t *timep, char *time_str);
 
 #endif /* _HAVE_SLURM_TIME_H */

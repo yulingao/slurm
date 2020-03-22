@@ -52,36 +52,26 @@
 #include "src/common/macros.h" /* true and false */
 #include "src/common/slurm_opt.h"
 
-#define DEFAULT_IMMEDIATE 1
-#define MAX_PACK_COUNT 128
+#define DEFAULT_IMMEDIATE	1
+#define MAX_PACK_COUNT		128
 
 /* global variables relating to user options */
 
 extern enum modes mode;
 
-extern int error_exit;     /* exit code for slurm errors */
-extern int immediate_exit; /* exit code for --imediate option & busy */
+extern int	error_exit;	/* exit code for slurm errors */
+extern int	immediate_exit;	/* exit code for --imediate option & busy */
 extern slurm_opt_t opt;
 extern srun_opt_t sropt;
-extern List opt_list;
-extern int sig_array[];
-extern time_t srun_begin_time; /* begin time of srun process */
-extern bool srun_max_timer;
-extern bool srun_shutdown;
-extern bool tres_bind_err_log;
-extern bool tres_freq_err_log;
+extern List	opt_list;
+extern int	sig_array[];
+extern time_t	srun_begin_time; /* begin time of srun process */
+extern bool	srun_max_timer;
+extern bool	srun_shutdown;
+extern bool	tres_bind_err_log;
+extern bool	tres_freq_err_log;
 
 /*
-*流程选项：
- *1.设置默认值
- *2.使用env vars更新选项
- *3.使用命令行参数更新选项
- *4.执行一些选项合理的验证
- *
- *argc IN  - argv中元素的计数
- *argv IN  -要解析的元素数组
- *argc_off OUT  -第一个不可解析元素的偏移量
-
  * process options:
  * 1. set defaults
  * 2. update options with env vars
@@ -97,21 +87,15 @@ extern int initialize_and_process_args(int argc, char **argv, int *argc_off);
 /* external functions available for SPANK plugins to modify the environment
  * exported to the Slurm Prolog and Epilog programs */
 extern char *spank_get_job_env(const char *name);
-
-extern int spank_set_job_env(const char *name, const char *value, int overwrite);
-
-extern int spank_unset_job_env(const char *name);
+extern int   spank_set_job_env(const char *name, const char *value,
+			       int overwrite);
+extern int   spank_unset_job_env(const char *name);
 
 /* Initialize the spank_job_env based upon environment variables set
  *	via salloc or sbatch commands */
 extern void init_spank_env(void);
 
 /*
-查找给定包作业偏移量的选项结构
-* @pack_offset - Offset into pack作业，-1(如果是常规作业)，-2(重置)
-* @返回 -指向下一个匹配的选项结构的指针，如果没有找到，则为空
-
-
  * Find option structure for a given pack job offset
  * pack_offset IN - Offset into pack job, -1 if regular job, -2 to reset
  * RET - Pointer to next matching option structure or NULL if none found
@@ -123,4 +107,4 @@ extern slurm_opt_t *get_next_opt(int pack_offset);
  */
 extern int get_max_pack_group(void);
 
-#endif /* _HAVE_OPT_H */
+#endif	/* _HAVE_OPT_H */

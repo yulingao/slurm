@@ -41,12 +41,9 @@
 #include <inttypes.h>
 
 extern char *job_attr_get(char *key);
-
 extern char *node_attr_get(char *key);
-
-extern int node_attr_put(char *key, char *val);
-
-extern int enqueue_nag_req(int fd, int rank, char *key);
+extern int   node_attr_put(char *key, char *val);
+extern int   enqueue_nag_req(int fd, int rank, char *key);
 
 
-#endif    /* _INFO_H */
+#endif	/* _INFO_H */

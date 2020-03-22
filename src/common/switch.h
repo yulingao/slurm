@@ -51,11 +51,11 @@
 /* opaque data structures - no peeking! */
 #ifndef __switch_jobinfo_t_defined
 #  define __switch_jobinfo_t_defined
-typedef struct switch_jobinfo switch_jobinfo_t;
+   typedef struct switch_jobinfo   switch_jobinfo_t;
 #endif
 #ifndef __switch_node_info_t_defined
 #  define __switch_node_info_t_defined
-typedef struct switch_node_info switch_node_info_t;
+   typedef struct switch_node_info switch_node_info_t;
 #endif
 typedef struct slurm_switch_context slurm_switch_context_t;
 
@@ -64,21 +64,21 @@ typedef struct slurm_switch_context slurm_switch_context_t;
 \*******************************************/
 
 /* initialize the switch plugin */
-extern int switch_init(bool only_default);
+extern int  switch_init(bool only_default);
 
 extern int switch_g_reconfig(void);
 
 extern int switch_g_slurmd_init(void);
 
 /* terminate the switch plugin and free all memory */
-extern int switch_fini(void);
+extern int switch_fini (void);
 
 /* save any global switch state to a file within the specified directory
  * the actual file name used in plugin specific
  * IN dir_name - directory into which switch state is saved
  * RET         - slurm error code
  */
-extern int switch_g_save(char *dir_name);
+extern int  switch_g_save   (char *dir_name);
 
 /* restore any global switch state from a file within the specified directory
  * the actual file name used in plugin specific
@@ -87,12 +87,12 @@ extern int switch_g_save(char *dir_name);
  *               a clean slate.
  * RET         - slurm error code
  */
-extern int switch_g_restore(char *dir_name, bool recover);
+extern int  switch_g_restore(char *dir_name, bool recover);
 
 /* clear all current switch window allocation information
  * RET         - slurm error code
  */
-extern int switch_g_clear(void);
+extern int  switch_g_clear(void);
 
 /******************************************************\
  * JOB-SPECIFIC SWITCH CREDENTIAL MANAGEMENT FUNCIONS *
@@ -105,7 +105,8 @@ extern int switch_g_clear(void);
  * RET         - slurm error code
  * NOTE: storage must be freed using g_switch_g_free_jobinfo
  */
-extern int switch_g_alloc_jobinfo(dynamic_plugin_data_t **jobinfo, uint32_t job_id, uint32_t step_id);
+extern int  switch_g_alloc_jobinfo (dynamic_plugin_data_t **jobinfo,
+				    uint32_t job_id, uint32_t step_id);
 
 /* fill a job's switch credential
  * OUT jobinfo  - storage for a switch job credential
@@ -114,7 +115,9 @@ extern int switch_g_alloc_jobinfo(dynamic_plugin_data_t **jobinfo, uint32_t job_
  * IN  network  - plugin-specific network info (e.g. protocol)
  * NOTE: storage must be freed using g_switch_g_free_jobinfo
  */
-extern int switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo, slurm_step_layout_t *step_layout, char *network);
+extern int  switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo,
+				   slurm_step_layout_t *step_layout,
+				   char *network);
 
 /* duplicate a job's switch credential
  * IN  source  - storage for a switch job credential
@@ -122,12 +125,13 @@ extern int switch_g_build_jobinfo(dynamic_plugin_data_t *jobinfo, slurm_step_lay
  *               duplicated switch job credential
  * NOTE: storage must be freed using g_switch_g_free_jobinfo
  */
-extern int switch_g_duplicate_jobinfo(dynamic_plugin_data_t *source, dynamic_plugin_data_t **dest);
+extern int  switch_g_duplicate_jobinfo(dynamic_plugin_data_t *source,
+				       dynamic_plugin_data_t **dest);
 
 /* free storage previously allocated for a switch job credential
  * IN jobinfo  - the switch job credential to be freed
  */
-extern void switch_g_free_jobinfo(dynamic_plugin_data_t *jobinfo);
+extern void switch_g_free_jobinfo  (dynamic_plugin_data_t *jobinfo);
 
 /* pack a switch job credential into a buffer in machine independent form
  * IN jobinfo  - the switch job credential to be saved
@@ -135,7 +139,8 @@ extern void switch_g_free_jobinfo(dynamic_plugin_data_t *jobinfo);
  * IN protocol_version - version of Slurm we are talking to.
  * RET         - slurm error code
  */
-extern int switch_g_pack_jobinfo(dynamic_plugin_data_t *jobinfo, Buf buffer, uint16_t protocol_version);
+extern int  switch_g_pack_jobinfo  (dynamic_plugin_data_t *jobinfo, Buf buffer,
+				    uint16_t protocol_version);
 
 /* unpack a switch job credential from a buffer
  * OUT jobinfo - the switch job credential read
@@ -144,7 +149,8 @@ extern int switch_g_pack_jobinfo(dynamic_plugin_data_t *jobinfo, Buf buffer, uin
  * RET         - slurm error code
  * NOTE: returned value must be freed using g_switch_g_free_jobinfo
  */
-extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer, uint16_t protocol_version);
+extern int  switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer,
+				    uint16_t protocol_version);
 
 /* get some field from a switch job credential
  * IN jobinfo - the switch job credential
@@ -152,13 +158,15 @@ extern int switch_g_unpack_jobinfo(dynamic_plugin_data_t **jobinfo, Buf buffer, 
  * OUT data - the desired data from the credential
  * RET         - slurm error code
  */
-extern int switch_g_get_jobinfo(dynamic_plugin_data_t *jobinfo, int data_type, void *data);
+extern int  switch_g_get_jobinfo(dynamic_plugin_data_t *jobinfo,
+	int data_type, void *data);
 
 /*
  * Note that the job step associated with the specified nodelist
  * has completed execution.
  */
-extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo, char *nodelist);
+extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo,
+	char *nodelist);
 
 /*
  * Note that the job step has completed execution on the specified
@@ -166,7 +174,8 @@ extern int switch_g_job_step_complete(dynamic_plugin_data_t *jobinfo, char *node
  * nodes, but switch resources associated with it on the specified
  * nodes are no longer in use.
  */
-extern int switch_g_job_step_part_comp(dynamic_plugin_data_t *jobinfo, char *nodelist);
+extern int switch_g_job_step_part_comp(dynamic_plugin_data_t *jobinfo,
+	char *nodelist);
 
 /*
  * Return true if the switch plugin processes partial job step
@@ -182,7 +191,8 @@ extern bool switch_g_part_comp(void);
  * allocated job step, most likely to restore the switch information
  * after a call to switch_g_clear().
  */
-extern int switch_g_job_step_allocated(dynamic_plugin_data_t *jobinfo, char *nodelist);
+extern int switch_g_job_step_allocated(dynamic_plugin_data_t *jobinfo,
+	char *nodelist);
 
 /*
  * Initialize the switch plugin on the slurmctld.
@@ -201,7 +211,8 @@ extern void switch_g_print_jobinfo(FILE *fp, dynamic_plugin_data_t *jobinfo);
  * IN size    - byte size of buf
  * RET        - the string, same as buf
  */
-extern char *switch_g_sprint_jobinfo(dynamic_plugin_data_t *jobinfo, char *buf, size_t size);
+extern char *switch_g_sprint_jobinfo(dynamic_plugin_data_t *jobinfo,
+				     char *buf, size_t size);
 
 /********************************************************************\
  * JOB LAUNCH AND MANAGEMENT FUNCTIONS RELATED TO SWITCH CREDENTIAL *
@@ -280,8 +291,8 @@ extern int switch_g_job_suspend_test(dynamic_plugin_data_t *jobinfo);
  * IN jobinfo - switch information for a job step
  * RET data to be sent with job suspend/resume RPC
  */
-extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo, void **suspend_info);
-
+extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo,
+					  void **suspend_info);
 /*
  * Pack data structure containing information needed to suspend or resume
  * a job
@@ -290,8 +301,8 @@ extern void switch_g_job_suspend_info_get(dynamic_plugin_data_t *jobinfo, void *
  * IN/OUT buffer to hold the data
  * IN protocol_version - version of Slurm we are talking to.
  */
-extern void switch_g_job_suspend_info_pack(void *suspend_info, Buf buffer, uint16_t protocol_version);
-
+extern void switch_g_job_suspend_info_pack(void *suspend_info, Buf buffer,
+					   uint16_t protocol_version);
 /*
  * Unpack data structure containing information needed to suspend or resume
  * a job
@@ -301,8 +312,8 @@ extern void switch_g_job_suspend_info_pack(void *suspend_info, Buf buffer, uint1
  * IN protocol_version - version of Slurm we are talking to.
  * RET SLURM_SUCCESS or error code
  */
-extern int switch_g_job_suspend_info_unpack(void **suspend_info, Buf buffer, uint16_t protocol_version);
-
+extern int switch_g_job_suspend_info_unpack(void **suspend_info, Buf buffer,
+					    uint16_t protocol_version);
 /*
  * Free data structure containing information needed to suspend or resume
  * a job
@@ -351,9 +362,9 @@ extern int switch_g_job_postfini(stepd_step_rec_t *job);
  * (Called from within the process, so it is appropriate to set
  * switch_g specific environment variables here)
  */
-extern int
-switch_g_job_attach(dynamic_plugin_data_t *jobinfo, char ***env, uint32_t nodeid, uint32_t procid, uint32_t nnodes,
-                    uint32_t nprocs, uint32_t rank);
+extern int switch_g_job_attach(dynamic_plugin_data_t *jobinfo, char ***env,
+			       uint32_t nodeid, uint32_t procid,
+			       uint32_t nnodes, uint32_t nprocs, uint32_t rank);
 
 /*
  * Clear switch state on this node
@@ -380,13 +391,15 @@ extern int switch_g_build_node_info(switch_node_info_t *switch_node);
  * Pack the data associated with a node's switch state into a buffer
  * for network transmission.
  */
-extern int switch_g_pack_node_info(switch_node_info_t *switch_node, Buf buffer, uint16_t protocol_version);
+extern int switch_g_pack_node_info(switch_node_info_t *switch_node,
+				   Buf buffer, uint16_t protocol_version);
 
 /*
  * Unpack the data associated with a node's switch state record
  * from a buffer.
  */
-extern int switch_g_unpack_node_info(switch_node_info_t **switch_node, Buf buffer, uint16_t protocol_version);
+extern int switch_g_unpack_node_info(switch_node_info_t **switch_node,
+				     Buf buffer, uint16_t protocol_version);
 
 /*
  * Release the storage associated with a node's switch state record.
@@ -396,7 +409,8 @@ extern int switch_g_free_node_info(switch_node_info_t **switch_node);
 /*
  * Print the contents of a node's switch state record to a buffer.
  */
-extern char *switch_g_sprintf_node_info(switch_node_info_t *switch_node, char *buf, size_t size);
+extern char*switch_g_sprintf_node_info(switch_node_info_t *switch_node,
+	char *buf, size_t size);
 
 /********************************************************************\
  * JOB STEP {PRE,POST}-SUSPEND and {PRE-POST}-RESUME FUNCTIONS      *

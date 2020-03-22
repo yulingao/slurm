@@ -70,9 +70,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "route default plugin";
-const char plugin_type[] = "route/default";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "route default plugin";
+const char plugin_type[]        = "route/default";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 
 /*****************************************************************************\
@@ -82,17 +82,18 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init(void) {
-    verbose("%s loaded", plugin_name);
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	verbose("%s loaded", plugin_name);
+	return SLURM_SUCCESS;
 }
-
 /*
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini(void) {
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	return SLURM_SUCCESS;
 }
 
 /*****************************************************************************\
@@ -113,8 +114,11 @@ extern int fini(void) {
  *       hostlist_destroy by the caller.
  * Note: the hostlist_t array will have to be xfree.
  */
-extern int route_p_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count, uint16_t tree_width) {
-    return route_split_hostlist_treewidth(hl, sp_hl, count, tree_width);
+extern int route_p_split_hostlist(hostlist_t hl,
+				  hostlist_t** sp_hl,
+				  int* count, uint16_t tree_width)
+{
+	return route_split_hostlist_treewidth(hl, sp_hl, count, tree_width);
 }
 
 /*
@@ -122,8 +126,9 @@ extern int route_p_split_hostlist(hostlist_t hl, hostlist_t **sp_hl, int *count,
  *
  * RET: SLURM_SUCCESS - int
  */
-extern int route_p_reconfigure(void) {
-    return SLURM_SUCCESS;
+extern int route_p_reconfigure (void)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -133,8 +138,9 @@ extern int route_p_reconfigure(void) {
  *
  * RET: slurm_addr_t* - address of node to send messages to be aggregated.
  */
-extern slurm_addr_t *route_p_next_collector(bool *is_collector) {
-    return route_next_collector(is_collector);
+extern slurm_addr_t* route_p_next_collector ( bool *is_collector )
+{
+	return route_next_collector(is_collector);
 }
 
 /*
@@ -142,11 +148,12 @@ extern slurm_addr_t *route_p_next_collector(bool *is_collector) {
  *
  * RET: slurm_addr_t* - address of backup node to send messages to be aggregated.
  */
-extern slurm_addr_t *route_p_next_collector_backup(void) {
-    /* return NULL until we have a clearly defined backup.
-     * Otherwise we could get into a sending loop if the primary
-     * fails with us sending to a sibling that may have me as a
-     * parent.
-     */
-    return NULL;
+extern slurm_addr_t* route_p_next_collector_backup ( void )
+{
+	/* return NULL until we have a clearly defined backup.
+	 * Otherwise we could get into a sending loop if the primary
+	 * fails with us sending to a sibling that may have me as a
+	 * parent.
+	 */
+	return NULL;
 }

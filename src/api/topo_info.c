@@ -59,36 +59,38 @@
  * RET 0 or a slurm error code
  * NOTE: free the response using slurm_free_topo_info_msg
  */
-extern int slurm_load_topo(topo_info_response_msg_t **resp) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
+extern int slurm_load_topo(topo_info_response_msg_t **resp)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
-    req_msg.msg_type = REQUEST_TOPO_INFO;
-    req_msg.data = NULL;
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
+	req_msg.msg_type = REQUEST_TOPO_INFO;
+	req_msg.data     = NULL;
 
-    if (slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec) < 0)
-        return SLURM_ERROR;
+	if (slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					   working_cluster_rec) < 0)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_TOPO_INFO:
-            *resp = (topo_info_response_msg_t *) resp_msg.data;
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            slurm_free_return_code_msg(resp_msg.data);
-            if (rc)
-                slurm_seterrno_ret(rc);
-            *resp = NULL;
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-            break;
-    }
+	switch (resp_msg.msg_type) {
+	case RESPONSE_TOPO_INFO:
+		*resp = (topo_info_response_msg_t *) resp_msg.data;
+		break;
+	case RESPONSE_SLURM_RC:
+		rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+		slurm_free_return_code_msg(resp_msg.data);
+		if (rc)
+			slurm_seterrno_ret(rc);
+		*resp = NULL;
+		break;
+	default:
+		slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+		break;
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -99,17 +101,21 @@ extern int slurm_load_topo(topo_info_response_msg_t **resp) {
  * IN topo_info_msg_ptr - switch topology information message pointer
  * IN one_liner - print as a single line if not zero
  */
-extern void slurm_print_topo_info_msg(FILE *out, topo_info_response_msg_t *topo_info_msg_ptr, int one_liner) {
-    int i;
-    topo_info_t *topo_ptr = topo_info_msg_ptr->topo_array;
+extern void slurm_print_topo_info_msg(
+	FILE * out,
+	topo_info_response_msg_t *topo_info_msg_ptr,
+	int one_liner)
+{
+	int i;
+	topo_info_t *topo_ptr = topo_info_msg_ptr->topo_array;
 
-    if (topo_info_msg_ptr->record_count == 0) {
-        error("No topology information available");
-        return;
-    }
+	if (topo_info_msg_ptr->record_count == 0) {
+		error("No topology information available");
+		return;
+	}
 
-    for (i = 0; i < topo_info_msg_ptr->record_count; i++)
-        slurm_print_topo_record(out, &topo_ptr[i], one_liner);
+	for (i = 0; i < topo_info_msg_ptr->record_count; i++)
+		slurm_print_topo_record(out, &topo_ptr[i], one_liner);
 }
 
 /*
@@ -121,26 +127,28 @@ extern void slurm_print_topo_info_msg(FILE *out, topo_info_response_msg_t *topo_
  * RET out - char * containing formatted output (must be freed after call)
  *	   NULL is returned on failure.
  */
-extern void slurm_print_topo_record(FILE *out, topo_info_t *topo_ptr, int one_liner) {
-    char *env, *line = NULL;
-    int max_len = 0, len;
+extern void slurm_print_topo_record(FILE * out, topo_info_t *topo_ptr,
+				    int one_liner)
+{
+	char *env, *line = NULL;
+	int max_len = 0, len;
 
-    if ((env = getenv("SLURM_TOPO_LEN")))
-        max_len = atoi(env);
+	if ((env = getenv("SLURM_TOPO_LEN")))
+		max_len = atoi(env);
 
-    /****** Line 1 ******/
-    len = xstrfmtcat(line, "SwitchName=%s Level=%u LinkSpeed=%u", topo_ptr->name, topo_ptr->level,
-                     topo_ptr->link_speed);
+	/****** Line 1 ******/
+	len = xstrfmtcat(line, "SwitchName=%s Level=%u LinkSpeed=%u",
+			 topo_ptr->name, topo_ptr->level, topo_ptr->link_speed);
 
-    if (topo_ptr->nodes)
-        len += xstrfmtcat(line, " Nodes=%s", topo_ptr->nodes);
+	if (topo_ptr->nodes)
+		len += xstrfmtcat(line, " Nodes=%s", topo_ptr->nodes);
 
-    if (topo_ptr->switches)
-        len += xstrfmtcat(line, " Switches=%s", topo_ptr->switches);
+	if (topo_ptr->switches)
+		len += xstrfmtcat(line, " Switches=%s", topo_ptr->switches);
 
-    if ((max_len > 0) && (len > max_len))
-        line[max_len] = '\0';
+	if ((max_len > 0) && (len > max_len))
+		line[max_len] = '\0';
 
-    fprintf(out, "%s\n", line);
-    xfree(line);
+	fprintf(out, "%s\n", line);
+	xfree(line);
 }

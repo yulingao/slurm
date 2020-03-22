@@ -41,9 +41,9 @@
 #include "client.h"
 
 typedef struct name_port {
-    char *name;
-    char *port;
-    struct name_port *next;
+	char *name;
+	char *port;
+	struct name_port *next;
 } name_port_t;
 
 /*
@@ -53,127 +53,139 @@ typedef struct name_port {
  */
 static name_port_t *local_name_list = NULL;
 
-extern char *name_lookup_local(char *name) {
-    name_port_t *np;
+extern char *
+name_lookup_local (char *name)
+{
+	name_port_t *np;
 
-    np = local_name_list;
-    while (np && xstrcmp(np->name, name))
-        np = np->next;
+	np = local_name_list;
+	while (np && xstrcmp(np->name, name))
+		np = np->next;
 
-    return np ? xstrdup(np->port) : NULL;
+	return np ? xstrdup(np->port) : NULL;
 }
 
-extern int name_publish_local(char *name, char *port) {
-    name_port_t *np;
+extern int
+name_publish_local (char *name, char *port)
+{
+	name_port_t *np;
 
-    np = local_name_list;
-    while (np && xstrcmp(np->name, name))
-        np = np->next;
-    if (np) {
-        xfree(np->port);
-        np->port = xstrdup(port);
-    } else {
-        np = xmalloc(sizeof(name_port_t));
-        np->name = xstrdup(name);
-        np->port = xstrdup(port);
-        np->next = local_name_list;
-        local_name_list = np;
-    }
-    return SLURM_SUCCESS;
+	np = local_name_list;
+	while (np && xstrcmp(np->name, name))
+		np = np->next;
+	if (np) {
+		xfree(np->port);
+		np->port = xstrdup(port);
+	} else {
+		np = xmalloc(sizeof(name_port_t));
+		np->name = xstrdup(name);
+		np->port = xstrdup(port);
+		np->next = local_name_list;
+		local_name_list = np;
+	}
+	return SLURM_SUCCESS;
 }
 
-extern int name_unpublish_local(char *name) {
-    name_port_t *np, **pprev;
+extern int
+name_unpublish_local (char *name)
+{
+	name_port_t *np, **pprev;
 
-    pprev = &local_name_list;
-    np = *pprev;
-    while (np) {
-        if (xstrcmp(np->name, name)) {
-            pprev = &np->next;
-            np = np->next;
-        } else {
-            *pprev = np->next;
-            xfree(np->name);
-            xfree(np->port);
-            xfree(np);
-            np = *pprev;
-            break;
-        }
-    }
-    return SLURM_SUCCESS;
+	pprev = &local_name_list;
+	np = *pprev;
+	while (np) {
+		if (xstrcmp(np->name, name)) {
+			pprev = &np->next;
+			np = np->next;
+		} else {
+			*pprev = np->next;
+			xfree(np->name);
+			xfree(np->port);
+			xfree(np);
+			np = *pprev;
+			break;
+		}
+	}
+	return SLURM_SUCCESS;
 }
 
-extern int name_publish_up(char *name, char *port) {
-    Buf buf = NULL, resp_buf = NULL;
-    uint32_t size, tmp_32;
-    int rc;
+extern int
+name_publish_up(char *name, char *port)
+{
+	Buf buf = NULL, resp_buf = NULL;
+	uint32_t size, tmp_32;
+	int rc;
 
-    buf = init_buf(1024);
-    pack16((uint16_t) TREE_CMD_NAME_PUBLISH, buf);
-    packstr(name, buf);
-    packstr(port, buf);
-    size = get_buf_offset(buf);
+	buf = init_buf(1024);
+	pack16((uint16_t)TREE_CMD_NAME_PUBLISH, buf);
+	packstr(name, buf);
+	packstr(port, buf);
+	size = get_buf_offset(buf);
 
-    rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
-    free_buf(buf);
+	rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
+	free_buf(buf);
 
-    if (rc == SLURM_SUCCESS) {
-        safe_unpack32(&tmp_32, resp_buf);
-        rc = (int) tmp_32;
-    }
+	if (rc == SLURM_SUCCESS) {
+		safe_unpack32(&tmp_32, resp_buf);
+		rc = (int) tmp_32;
+	}
 
-    unpack_error:
-    if (resp_buf)
-        free_buf(resp_buf);
-
-    return rc;
+unpack_error:
+	if (resp_buf)
+		free_buf(resp_buf);
+	
+	return rc;
 }
 
-extern int name_unpublish_up(char *name) {
-    Buf buf = NULL, resp_buf = NULL;
-    uint32_t size, tmp_32;
-    int rc;
+extern int
+name_unpublish_up(char *name)
+{
+	Buf buf = NULL, resp_buf = NULL;
+	uint32_t size, tmp_32;
+	int rc;
 
-    buf = init_buf(1024);
-    pack16((uint16_t) TREE_CMD_NAME_UNPUBLISH, buf);
-    packstr(name, buf);
-    size = get_buf_offset(buf);
+	buf = init_buf(1024);
+	pack16((uint16_t)TREE_CMD_NAME_UNPUBLISH, buf);
+	packstr(name, buf);
+	size = get_buf_offset(buf);
 
-    rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
-    free_buf(buf);
+	rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
+	free_buf(buf);
 
-    if (rc == SLURM_SUCCESS) {
-        safe_unpack32(&tmp_32, resp_buf);
-        rc = (int) tmp_32;
-    }
+	if (rc == SLURM_SUCCESS) {
+		safe_unpack32(&tmp_32, resp_buf);
+		rc = (int) tmp_32;
+	}
 
-    unpack_error:
-    if (resp_buf)
-        free_buf(resp_buf);
-
-    return rc;
+unpack_error:
+	if (resp_buf)
+		free_buf(resp_buf);
+	
+	return rc;
 }
 
 
-extern char *name_lookup_up(char *name) {
-    Buf buf = NULL, resp_buf = NULL;
-    uint32_t size;
-    char *port = NULL;
-    int rc;
+extern char *
+name_lookup_up(char *name)
+{
+	Buf buf = NULL, resp_buf = NULL;
+	uint32_t size;
+	char * port = NULL;
+	int rc;
 
-    buf = init_buf(1024);
-    pack16((uint16_t) TREE_CMD_NAME_LOOKUP, buf);
-    packstr(name, buf);
-    size = get_buf_offset(buf);
+	buf = init_buf(1024);
+	pack16((uint16_t)TREE_CMD_NAME_LOOKUP, buf);
+	packstr(name, buf);
+	size = get_buf_offset(buf);
 
-    rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
-    free_buf(buf);
+	rc = tree_msg_to_srun_with_resp(size, get_buf_data(buf), &resp_buf);
+	free_buf(buf);
 
-    if (rc == SLURM_SUCCESS)
-        safe_unpackstr_xmalloc(&port, (uint32_t *) &size, resp_buf);
-    unpack_error:
-    if (resp_buf)
-        free_buf(resp_buf);
-
-    return port;
+	if (rc == SLURM_SUCCESS)
+		safe_unpackstr_xmalloc(&port, (uint32_t *)&size, resp_buf);
+unpack_error:
+	if (resp_buf)
+		free_buf(resp_buf);
+	
+	return port;
 }

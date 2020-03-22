@@ -73,8 +73,8 @@
  * We use define as user can subscribe to more than one
  * events.
  */
-#define    SMD_EVENT_NODE_FAILED  (1 << 1)    /* node has failed */
-#define SMD_EVENT_NODE_FAILING (1 << 2)    /* node failing can be drained */
-#define    SMD_EVENT_NODE_REPLACE (1 << 3)    /* replacement ready */
+#define	SMD_EVENT_NODE_FAILED  (1 << 1)	/* node has failed */
+#define SMD_EVENT_NODE_FAILING (1 << 2)	/* node failing can be drained */
+#define	SMD_EVENT_NODE_REPLACE (1 << 3)	/* replacement ready */
 
-#endif    /* _HAVE_SMD_NS_H */
+#endif	/* _HAVE_SMD_NS_H */

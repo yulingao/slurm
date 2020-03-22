@@ -42,13 +42,10 @@
 #include "pmixp_nspaces.h"
 
 int pmixp_dmdx_init(void);
-
 int pmixp_dmdx_finalize(void);
-
-int pmixp_dmdx_get(const char *nspace, int rank, void *cbfunc, void *cbdata);
-
+int pmixp_dmdx_get(const char *nspace, int rank,
+		   void *cbfunc, void *cbdata);
 void pmixp_dmdx_process(Buf buf, int nodeid, uint32_t seq);
-
 void pmixp_dmdx_timeout_cleanup(void);
 
 #endif /* PMIXP_DMDX_H */

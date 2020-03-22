@@ -69,138 +69,150 @@ static __thread bool slurmctld_locked = false;
 
 static __thread slurmctld_lock_t thread_locks;
 
-static bool _store_locks(slurmctld_lock_t lock_levels) {
-    if (slurmctld_locked)
-        return false;
-    slurmctld_locked = true;
+static bool _store_locks(slurmctld_lock_t lock_levels)
+{
+	if (slurmctld_locked)
+		return false;
+	slurmctld_locked = true;
 
-    memcpy((void *) &thread_locks, (void *) &lock_levels, sizeof(slurmctld_lock_t));
+	memcpy((void *) &thread_locks, (void *) &lock_levels,
+	       sizeof(slurmctld_lock_t));
 
-    return true;
+	return true;
 }
 
-static bool _clear_locks(slurmctld_lock_t lock_levels) {
-    if (!slurmctld_locked)
-        return false;
-    slurmctld_locked = false;
+static bool _clear_locks(slurmctld_lock_t lock_levels)
+{
+	if (!slurmctld_locked)
+		return false;
+	slurmctld_locked = false;
 
-    if (memcmp((void *) &thread_locks, (void *) &lock_levels, sizeof(slurmctld_lock_t)))
-        return false;
+	if (memcmp((void *) &thread_locks, (void *) &lock_levels,
+		       sizeof(slurmctld_lock_t)))
+		return false;
 
-    memset((void *) &thread_locks, 0, sizeof(slurmctld_lock_t));
+	memset((void *) &thread_locks, 0, sizeof(slurmctld_lock_t));
 
-    return true;
+	return true;
 }
 
-extern bool verify_lock(lock_datatype_t datatype, lock_level_t level) {
-    return (((lock_level_t * ) & thread_locks)[datatype] >= level);
+extern bool verify_lock(lock_datatype_t datatype, lock_level_t level)
+{
+	return (((lock_level_t *) &thread_locks)[datatype] >= level);
 }
-
 #endif
 
 /* lock_slurmctld - Issue the required lock requests in a well defined order */
-extern void lock_slurmctld(slurmctld_lock_t lock_levels) {
-    static bool init_run = false;
-    xassert(_store_locks(lock_levels));
+extern void lock_slurmctld(slurmctld_lock_t lock_levels)
+{
+	static bool init_run = false;
+	xassert(_store_locks(lock_levels));
 
-    if (!init_run) {
-        init_run = true;
-        for (int i = 0; i < ENTITY_COUNT; i++)
-            slurm_rwlock_init(&slurmctld_locks[i]);
-    }
+	if (!init_run) {
+		init_run = true;
+		for (int i = 0; i < ENTITY_COUNT; i++)
+			slurm_rwlock_init(&slurmctld_locks[i]);
+	}
 
-    if (lock_levels.conf == READ_LOCK)
-        slurm_rwlock_rdlock(&slurmctld_locks[CONF_LOCK]);
-    else if (lock_levels.conf == WRITE_LOCK)
-        slurm_rwlock_wrlock(&slurmctld_locks[CONF_LOCK]);
+	if (lock_levels.conf == READ_LOCK)
+		slurm_rwlock_rdlock(&slurmctld_locks[CONF_LOCK]);
+	else if (lock_levels.conf == WRITE_LOCK)
+		slurm_rwlock_wrlock(&slurmctld_locks[CONF_LOCK]);
 
-    if (lock_levels.job == READ_LOCK)
-        slurm_rwlock_rdlock(&slurmctld_locks[JOB_LOCK]);
-    else if (lock_levels.job == WRITE_LOCK)
-        slurm_rwlock_wrlock(&slurmctld_locks[JOB_LOCK]);
+	if (lock_levels.job == READ_LOCK)
+		slurm_rwlock_rdlock(&slurmctld_locks[JOB_LOCK]);
+	else if (lock_levels.job == WRITE_LOCK)
+		slurm_rwlock_wrlock(&slurmctld_locks[JOB_LOCK]);
 
-    if (lock_levels.node == READ_LOCK)
-        slurm_rwlock_rdlock(&slurmctld_locks[NODE_LOCK]);
-    else if (lock_levels.node == WRITE_LOCK)
-        slurm_rwlock_wrlock(&slurmctld_locks[NODE_LOCK]);
+	if (lock_levels.node == READ_LOCK)
+		slurm_rwlock_rdlock(&slurmctld_locks[NODE_LOCK]);
+	else if (lock_levels.node == WRITE_LOCK)
+		slurm_rwlock_wrlock(&slurmctld_locks[NODE_LOCK]);
 
-    if (lock_levels.part == READ_LOCK)
-        slurm_rwlock_rdlock(&slurmctld_locks[PART_LOCK]);
-    else if (lock_levels.part == WRITE_LOCK)
-        slurm_rwlock_wrlock(&slurmctld_locks[PART_LOCK]);
+	if (lock_levels.part == READ_LOCK)
+		slurm_rwlock_rdlock(&slurmctld_locks[PART_LOCK]);
+	else if (lock_levels.part == WRITE_LOCK)
+		slurm_rwlock_wrlock(&slurmctld_locks[PART_LOCK]);
 
-    if (lock_levels.fed == READ_LOCK)
-        slurm_rwlock_rdlock(&slurmctld_locks[FED_LOCK]);
-    else if (lock_levels.fed == WRITE_LOCK)
-        slurm_rwlock_wrlock(&slurmctld_locks[FED_LOCK]);
+	if (lock_levels.fed == READ_LOCK)
+		slurm_rwlock_rdlock(&slurmctld_locks[FED_LOCK]);
+	else if (lock_levels.fed == WRITE_LOCK)
+		slurm_rwlock_wrlock(&slurmctld_locks[FED_LOCK]);
 }
 
 /* unlock_slurmctld - Issue the required unlock requests in a well
  *	defined order */
-extern void unlock_slurmctld(slurmctld_lock_t lock_levels) {
-    xassert(_clear_locks(lock_levels));
+extern void unlock_slurmctld(slurmctld_lock_t lock_levels)
+{
+	xassert(_clear_locks(lock_levels));
 
-    if (lock_levels.fed)
-        slurm_rwlock_unlock(&slurmctld_locks[FED_LOCK]);
+	if (lock_levels.fed)
+		slurm_rwlock_unlock(&slurmctld_locks[FED_LOCK]);
 
-    if (lock_levels.part)
-        slurm_rwlock_unlock(&slurmctld_locks[PART_LOCK]);
+	if (lock_levels.part)
+		slurm_rwlock_unlock(&slurmctld_locks[PART_LOCK]);
 
-    if (lock_levels.node)
-        slurm_rwlock_unlock(&slurmctld_locks[NODE_LOCK]);
+	if (lock_levels.node)
+		slurm_rwlock_unlock(&slurmctld_locks[NODE_LOCK]);
 
-    if (lock_levels.job)
-        slurm_rwlock_unlock(&slurmctld_locks[JOB_LOCK]);
+	if (lock_levels.job)
+		slurm_rwlock_unlock(&slurmctld_locks[JOB_LOCK]);
 
-    if (lock_levels.conf)
-        slurm_rwlock_unlock(&slurmctld_locks[CONF_LOCK]);
+	if (lock_levels.conf)
+		slurm_rwlock_unlock(&slurmctld_locks[CONF_LOCK]);
 }
 
 /*
  * _report_lock_set - report whether the read or write lock is set
  */
-static void _report_lock_set(char **str, lock_datatype_t datatype) {
-    /* the try functions return zero on success */
-    if (slurm_rwlock_tryrdlock(&slurmctld_locks[datatype])) {
-        *str = "W";
-    } else {
-        slurm_rwlock_unlock(&slurmctld_locks[datatype]);
-        if (slurm_rwlock_trywrlock(&slurmctld_locks[datatype]))
-            *str = "R";
-        else
-            slurm_rwlock_unlock(&slurmctld_locks[datatype]);
-    }
+static void _report_lock_set(char **str, lock_datatype_t datatype)
+{
+	/* the try functions return zero on success */
+	if (slurm_rwlock_tryrdlock(&slurmctld_locks[datatype])) {
+		*str = "W";
+	} else {
+		slurm_rwlock_unlock(&slurmctld_locks[datatype]);
+		if (slurm_rwlock_trywrlock(&slurmctld_locks[datatype]))
+			*str = "R";
+		else
+			slurm_rwlock_unlock(&slurmctld_locks[datatype]);
+	}
 }
 
 /*
  * report_locks_set - report any slurmctld locks left set
  * RET count of locks currently set
  */
-int report_locks_set(void) {
-    char *conf = "", *job = "", *node = "", *part = "", *fed = "";
-    int lock_count;
+int report_locks_set(void)
+{
+	char *conf = "", *job = "", *node = "", *part = "", *fed = "";
+	int lock_count;
 
-    _report_lock_set(&conf, CONF_LOCK);
-    _report_lock_set(&job, JOB_LOCK);
-    _report_lock_set(&node, NODE_LOCK);
-    _report_lock_set(&part, PART_LOCK);
-    _report_lock_set(&fed, FED_LOCK);
+	_report_lock_set(&conf, CONF_LOCK);
+	_report_lock_set(&job, JOB_LOCK);
+	_report_lock_set(&node, NODE_LOCK);
+	_report_lock_set(&part, PART_LOCK);
+	_report_lock_set(&fed, FED_LOCK);
 
-    lock_count = strlen(conf) + strlen(job) + strlen(node) + strlen(part) + strlen(fed);
+	lock_count = strlen(conf) + strlen(job) + strlen(node)
+		     + strlen(part) + strlen(fed);
 
-    if (lock_count > 0) {
-        error("Locks left set "
-              "config:%s, job:%s, node:%s, partition:%s, federation:%s", conf, job, node, part, fed);
-    }
-    return lock_count;
+	if (lock_count > 0) {
+		error("Locks left set "
+		      "config:%s, job:%s, node:%s, partition:%s, federation:%s",
+		      conf, job, node, part, fed);
+	}
+	return lock_count;
 }
 
 
 /* un/lock semaphore used for saving state of slurmctld */
-extern void lock_state_files(void) {
-    slurm_mutex_lock(&state_mutex);
+extern void lock_state_files(void)
+{
+	slurm_mutex_lock(&state_mutex);
 }
 
-extern void unlock_state_files(void) {
-    slurm_mutex_unlock(&state_mutex);
+extern void unlock_state_files(void)
+{
+	slurm_mutex_unlock(&state_mutex);
 }

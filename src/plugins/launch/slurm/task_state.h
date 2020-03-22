@@ -45,24 +45,29 @@
 typedef struct task_state_struct *task_state_t;
 
 typedef enum {
-    TS_START_SUCCESS, TS_START_FAILURE, TS_NORMAL_EXIT, TS_ABNORMAL_EXIT
+	TS_START_SUCCESS,
+	TS_START_FAILURE,
+	TS_NORMAL_EXIT,
+	TS_ABNORMAL_EXIT
 } task_state_type_t;
 
-typedef void (*log_f)(const char *, ...);
+typedef void (*log_f) (const char *, ...);
 
 /*
  * Given a pack group and task count, return a task_state structure
  * Free memory using task_state_destroy()
  */
-extern task_state_t
-task_state_create(uint32_t job_id, uint32_t step_id, uint32_t pack_group, int ntasks, uint32_t task_offset);
+extern task_state_t task_state_create(uint32_t job_id, uint32_t step_id,
+				      uint32_t pack_group, int ntasks,
+				      uint32_t task_offset);
 
 /*
  * Find the task_state structure for a given job_id, step_id and/or pack group
  * on a list. Specify values of NO_VAL for values that are not to be matched
  * Returns NULL if not found
  */
-extern task_state_t task_state_find(uint32_t job_id, uint32_t step_id, uint32_t pack_group, List task_state_list);
+extern task_state_t task_state_find(uint32_t job_id, uint32_t step_id,
+				    uint32_t pack_group, List task_state_list);
 
 /*
  * Modify the task count for a previously created task_state structure
@@ -77,7 +82,8 @@ extern void task_state_destroy(task_state_t ts);
 /*
  * Update the state of a specific task ID in a specific task_state structure
  */
-extern void task_state_update(task_state_t ts, int task_id, task_state_type_t t);
+extern void task_state_update(task_state_t ts, int task_id,
+			      task_state_type_t t);
 
 /*
  * Return TRUE if this is the first task exit for this job step (ALL pack jobs)

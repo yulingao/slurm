@@ -54,84 +54,75 @@
 
 /* supported syslog facilities and levels */
 typedef enum {
-    SYSLOG_FACILITY_DAEMON = LOG_DAEMON,
-    SYSLOG_FACILITY_USER = LOG_USER,
-    SYSLOG_FACILITY_AUTH = LOG_AUTH,
+	SYSLOG_FACILITY_DAEMON = 	LOG_DAEMON,
+	SYSLOG_FACILITY_USER = 		LOG_USER,
+	SYSLOG_FACILITY_AUTH = 		LOG_AUTH,
 #ifdef LOG_AUTHPRIV
-    SYSLOG_FACILITY_AUTHPRIV = LOG_AUTHPRIV,
+	SYSLOG_FACILITY_AUTHPRIV =	LOG_AUTHPRIV,
 #endif
-    SYSLOG_FACILITY_LOCAL0 = LOG_LOCAL0,
-    SYSLOG_FACILITY_LOCAL1 = LOG_LOCAL1,
-    SYSLOG_FACILITY_LOCAL2 = LOG_LOCAL2,
-    SYSLOG_FACILITY_LOCAL3 = LOG_LOCAL3,
-    SYSLOG_FACILITY_LOCAL4 = LOG_LOCAL4,
-    SYSLOG_FACILITY_LOCAL5 = LOG_LOCAL5,
-    SYSLOG_FACILITY_LOCAL6 = LOG_LOCAL6,
-    SYSLOG_FACILITY_LOCAL7 = LOG_LOCAL7
-} log_facility_t;
+	SYSLOG_FACILITY_LOCAL0 =	LOG_LOCAL0,
+	SYSLOG_FACILITY_LOCAL1 =	LOG_LOCAL1,
+	SYSLOG_FACILITY_LOCAL2 =	LOG_LOCAL2,
+	SYSLOG_FACILITY_LOCAL3 =	LOG_LOCAL3,
+	SYSLOG_FACILITY_LOCAL4 =	LOG_LOCAL4,
+	SYSLOG_FACILITY_LOCAL5 =	LOG_LOCAL5,
+	SYSLOG_FACILITY_LOCAL6 =	LOG_LOCAL6,
+	SYSLOG_FACILITY_LOCAL7 =	LOG_LOCAL7
+} 	log_facility_t;
 
 /*
  * log levels, logging will occur at or below the selected level
  * QUIET disable logging completely.
  */
 typedef enum {
-    LOG_LEVEL_QUIET = 0,
-    LOG_LEVEL_FATAL,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_VERBOSE,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_DEBUG2,
-    LOG_LEVEL_DEBUG3,
-    LOG_LEVEL_DEBUG4,
-    LOG_LEVEL_DEBUG5,
-    LOG_LEVEL_END
-} log_level_t;
+	LOG_LEVEL_QUIET = 0,
+	LOG_LEVEL_FATAL,
+	LOG_LEVEL_ERROR,
+	LOG_LEVEL_INFO,
+	LOG_LEVEL_VERBOSE,
+	LOG_LEVEL_DEBUG,
+	LOG_LEVEL_DEBUG2,
+	LOG_LEVEL_DEBUG3,
+	LOG_LEVEL_DEBUG4,
+	LOG_LEVEL_DEBUG5,
+	LOG_LEVEL_END
+}	log_level_t;
+
 
 /*
  * log options: Each of stderr, syslog, and logfile can have a different level
  */
 typedef struct {
-    log_level_t stderr_level;  /* max level to log to stderr            */
-    log_level_t syslog_level;  /* max level to log to syslog            */
-    log_level_t logfile_level; /* max level to log to logfile           */
-    bool prefix_level;           /* prefix level (e.g. "debug: ") if true */
-    bool buffered;               /* use internal buffer to never block    */
-} log_options_t;
+	log_level_t stderr_level;   /* max level to log to stderr            */
+	log_level_t syslog_level;   /* max level to log to syslog            */
+	log_level_t logfile_level;  /* max level to log to logfile           */
+	bool prefix_level;          /* prefix level (e.g. "debug: ") if true */
+	bool buffered;              /* use internal buffer to never block    */
+} 	log_options_t;
 
 extern char *slurm_prog_name;
 
 /* some useful initializers for log_options_t
  */
-#define LOG_OPTS_INITIALIZER                                 \
-    {                                                        \
-        LOG_LEVEL_INFO, LOG_LEVEL_INFO, LOG_LEVEL_INFO, 1, 0 \
-    }
+#define LOG_OPTS_INITIALIZER	\
+	{ LOG_LEVEL_INFO, LOG_LEVEL_INFO, LOG_LEVEL_INFO, 1, 0 }
 
-#define LOG_OPTS_SYSLOG_DEFAULT                                \
-    {                                                          \
-        LOG_LEVEL_QUIET, LOG_LEVEL_INFO, LOG_LEVEL_QUIET, 1, 0 \
-    }
+#define LOG_OPTS_SYSLOG_DEFAULT	\
+	{ LOG_LEVEL_QUIET, LOG_LEVEL_INFO, LOG_LEVEL_QUIET, 1, 0 }
 
-#define LOG_OPTS_STDERR_ONLY                                   \
-    {                                                          \
-        LOG_LEVEL_INFO, LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, 1, 0 \
-    }
+#define LOG_OPTS_STDERR_ONLY	\
+	{ LOG_LEVEL_INFO,  LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, 1, 0 }
 
-#define SCHEDLOG_OPTS_INITIALIZER                               \
-    {                                                           \
-        LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, 0, 1 \
-    }
+#define SCHEDLOG_OPTS_INITIALIZER	\
+	{ LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, LOG_LEVEL_QUIET, 0, 1 }
+
 
 /* Functions for filling in a char buffer with a timestamp. */
 size_t rfc2822_timestamp(char *, size_t);
-
 size_t log_timestamp(char *, size_t);
 
+
 /*
-	初始化日志模块(只调用一次)
-	
-	初始化日志互斥量，然后初始化日志数据结构
  * initialize log module (called only once)
  *
  * example:
@@ -147,12 +138,14 @@ size_t log_timestamp(char *, size_t);
  *
  * log function automatically takes the basename() of argv0.
  */
-int log_init(char *argv0, log_options_t opts, log_facility_t fac, char *logfile);
+int log_init(char *argv0, log_options_t opts,
+	      log_facility_t fac, char *logfile);
 
 /*
  * initialize scheduler log module (called only once)
  */
-int sched_log_init(char *argv0, log_options_t opts, log_facility_t fac, char *logfile);
+int sched_log_init(char *argv0, log_options_t opts, log_facility_t fac,
+		   char *logfile);
 
 /* reinitialize log module.
  * Keep same log options as previously initialized log, but reinit mutex
@@ -171,10 +164,7 @@ void log_fini(void);
  */
 void sched_log_fini(void);
 
-/* 
-重新初始化日志数据结构。类似于log_init，但不要初始化日志互斥锁
-
-Alter log facility, options are like log_init() above, except that
+/* Alter log facility, options are like log_init() above, except that
  * an argv0 argument is not passed.
  *
  * This function may be called multiple times.
@@ -243,10 +233,6 @@ extern void log_set_debug_flags(void);
  * For example, if LOG_LEVEL_INFO is returned, we know that all verbose and
  * debug type messages will be ignored. */
 extern int get_log_level(void);
-
-/*
- * Returns the greater of the sched_log_level or the log_level.
- */
 extern int get_sched_log_level(void);
 
 /*
@@ -268,84 +254,32 @@ extern int get_sched_log_level(void);
  * fatal() exits program
  * error() returns SLURM_ERROR
  */
-void log_var(const log_level_t, const char *, ...)
-__attribute__((format(printf, 2, 3)));
-
-void sched_log_var(const log_level_t, const char *, ...)
-__attribute__((format(printf, 2, 3)));
-
-void fatal_abort(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-void fatal(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-int error(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-void info(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-void verbose(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-#define debug(fmt, ...)                                   \
-    do                                                    \
-    {                                                     \
-        if (get_log_level() >= LOG_LEVEL_DEBUG)           \
-            log_var(LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__); \
-    } while (0)
-#define debug2(fmt, ...)                                   \
-    do                                                     \
-    {                                                      \
-        if (get_log_level() >= LOG_LEVEL_DEBUG2)           \
-            log_var(LOG_LEVEL_DEBUG2, fmt, ##__VA_ARGS__); \
-    } while (0)
+void	log_var(const log_level_t, const char *, ...)
+			__attribute__ ((format (printf, 2, 3)));
+void	fatal_abort(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	fatal(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+int	error(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	info(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	verbose(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	debug(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	debug2(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	debug3(const char *, ...) __attribute__ ((format (printf, 1, 2)));
 /*
  * Debug levels higher than debug3 are not written to stderr in the
  * slurmstepd process after stderr is connected back to the client (srun).
  */
-#define debug3(fmt, ...)                                   \
-    do                                                     \
-    {                                                      \
-        if (get_log_level() >= LOG_LEVEL_DEBUG3)           \
-            log_var(LOG_LEVEL_DEBUG3, fmt, ##__VA_ARGS__); \
-    } while (0)
-#define debug4(fmt, ...)                                   \
-    do                                                     \
-    {                                                      \
-        if (get_log_level() >= LOG_LEVEL_DEBUG4)           \
-            log_var(LOG_LEVEL_DEBUG4, fmt, ##__VA_ARGS__); \
-    } while (0)
-#define debug5(fmt, ...)                                   \
-    do                                                     \
-    {                                                      \
-        if (get_log_level() >= LOG_LEVEL_DEBUG5)           \
-            log_var(LOG_LEVEL_DEBUG5, fmt, ##__VA_ARGS__); \
-    } while (0)
+void	debug4(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	debug5(const char *, ...) __attribute__ ((format (printf, 1, 2)));
 
 /*
  * Like above logging messages, but prepend "sched: " to the log entry
  * and route the message into the sched_log if enabled.
  */
-int sched_error(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-void sched_info(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-void sched_verbose(const char *, ...) __attribute__((format(printf, 1, 2)));
-
-#define sched_debug(fmt, ...)                                   \
-    do                                                          \
-    {                                                           \
-        if (get_sched_log_level() >= LOG_LEVEL_DEBUG)           \
-            sched_log_var(LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__); \
-    } while (0)
-#define sched_debug2(fmt, ...)                                   \
-    do                                                           \
-    {                                                            \
-        if (get_sched_log_level() >= LOG_LEVEL_DEBUG2)           \
-            sched_log_var(LOG_LEVEL_DEBUG2, fmt, ##__VA_ARGS__); \
-    } while (0)
-#define sched_debug3(fmt, ...)                                   \
-    do                                                           \
-    {                                                            \
-        if (get_sched_log_level() >= LOG_LEVEL_DEBUG3)           \
-            sched_log_var(LOG_LEVEL_DEBUG3, fmt, ##__VA_ARGS__); \
-    } while (0)
+int	sched_error(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	sched_info(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	sched_verbose(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	sched_debug(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	sched_debug2(const char *, ...) __attribute__ ((format (printf, 1, 2)));
+void	sched_debug3(const char *, ...) __attribute__ ((format (printf, 1, 2)));
 
 #endif /* !_LOG_H */

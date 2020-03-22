@@ -65,50 +65,57 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char *plugin_name = "GPU Generic plugin";
-const char *plugin_type = "gpu/generic";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char	*plugin_name		= "GPU Generic plugin";
+const char	*plugin_type		= "gpu/generic";
+const uint32_t	plugin_version		= SLURM_VERSION_NUMBER;
 
-extern int init(void) {
-    debug("%s: %s loaded", __func__, plugin_name);
+extern int init(void)
+{
+	debug("%s: %s loaded", __func__, plugin_name);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    debug("%s: unloading %s", __func__, plugin_name);
+extern int fini(void)
+{
+	debug("%s: unloading %s", __func__, plugin_name);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int gpu_p_reconfig(void) {
-    return SLURM_SUCCESS;
+extern int gpu_p_reconfig(void)
+{
+	return SLURM_SUCCESS;
 }
 
 
-extern List gpu_p_get_system_gpu_list(node_config_load_t *node_config) {
-    return NULL;
+extern List gpu_p_get_system_gpu_list(node_config_load_t *node_config)
+{
+	return NULL;
 }
 
-extern void gpu_p_step_hardware_init(bitstr_t *usable_gpus, char *tres_freq) {
-    xassert(tres_freq);
-    xassert(usable_gpus);
+extern void gpu_p_step_hardware_init(bitstr_t *usable_gpus, char *tres_freq)
+{
+	xassert(tres_freq);
+	xassert(usable_gpus);
 
-    if (!usable_gpus)
-        return;        /* Job allocated no GPUs */
-    if (!tres_freq)
-        return;        /* No TRES frequency spec */
+	if (!usable_gpus)
+		return;		/* Job allocated no GPUs */
+	if (!tres_freq)
+		return;		/* No TRES frequency spec */
 
-    if (!strstr(tres_freq, "gpu:"))
-        return;        /* No GPU frequency spec */
+	if (!strstr(tres_freq, "gpu:"))
+		return;		/* No GPU frequency spec */
 
-    fprintf(stderr, "GpuFreq=control_disabled\n");
+	fprintf(stderr, "GpuFreq=control_disabled\n");
 }
 
-extern void gpu_p_step_hardware_fini(void) {
-    return;
+extern void gpu_p_step_hardware_fini(void)
+{
+	return;
 }
 
-extern char *gpu_p_test_cpu_conv(char *cpu_range) {
-    return NULL;
+extern char *gpu_p_test_cpu_conv(char *cpu_range)
+{
+	return NULL;
 }

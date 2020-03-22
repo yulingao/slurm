@@ -34,7 +34,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
-#include <limits.h>    /* For LONG_MIN, LONG_MAX */
+#include <limits.h>	/* For LONG_MIN, LONG_MAX */
 #include <stdlib.h>
 
 #include "src/common/xstring.h"
@@ -45,35 +45,40 @@
  * check if TRES frequency setting is allowed on this node
  * if so, create and initialize appropriate data structures
  */
-extern void tres_freq_init(slurmd_conf_t *conf) {
+extern void tres_freq_init(slurmd_conf_t *conf)
+{
 //FIXME - To do
 }
 
 /*
  * free memory from TRES frequency data structures
  */
-extern void tres_freq_fini(void) {
+extern void tres_freq_fini(void)
+{
 //FIXME - To do
 }
 
 /*
  * reset debug flag (slurmd)
  */
-extern void tres_freq_reconfig(void) {
+extern void tres_freq_reconfig(void)
+{
 //FIXME - To do
 }
 
 /*
  * Send the tres_frequency info to slurmstepd
  */
-extern void tres_freq_send_info(int fd) {
+extern void tres_freq_send_info(int fd)
+{
 //FIXME - To do
 }
 
 /*
  * Receive the tres_frequency table info from slurmd
  */
-extern void tres_freq_recv_info(int fd) {
+extern void tres_freq_recv_info(int fd)
+{
 //FIXME - To do
 }
 
@@ -81,7 +86,8 @@ extern void tres_freq_recv_info(int fd) {
  * Validate the TRES frequency to set
  * Called from task cpuset code
  */
-extern void tres_freq_cpuset_validate(stepd_step_rec_t *job) {
+extern void tres_freq_cpuset_validate(stepd_step_rec_t *job)
+{
 //FIXME - To do
 }
 
@@ -89,7 +95,9 @@ extern void tres_freq_cpuset_validate(stepd_step_rec_t *job) {
  * Validate the TRES and select the frequency to set
  * Called from task cgroup code
  */
-extern void tres_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores) {
+extern void tres_freq_cgroup_validate(stepd_step_rec_t *job,
+				      char *step_alloc_cores)
+{
 //FIXME - To do
 }
 
@@ -99,68 +107,72 @@ extern void tres_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_co
  * arg IN - Parameter value to check
  * RET - -1 on error, else 0
  */
-extern int tres_freq_verify_def(const char *arg) {
+extern int tres_freq_verify_def(const char *arg)
+{
 //FIXME - To do
-    return 0;
+	return 0;
 }
 
 /*
  * Test for valid number or name (e.g. high, medium, low, etc.)
  * RET - -1 on error, else 0
  */
-static int _test_val(const char *arg) {
-    char *end_ptr = NULL;
-    long int val;
-    int rc = 0;
+static int _test_val(const char *arg)
+{
+	char *end_ptr = NULL;
+	long int val;
+	int rc = 0;
 
-    if ((arg == NULL) || (arg[0] == '\0'))
-        return -1;
+	if ((arg == NULL) || (arg[0] == '\0'))
+		return -1;
 
-    if ((arg[0] >= '0') && (arg[0] <= '9')) {
-        val = strtol(arg, &end_ptr, 10);
-        if ((val == LONG_MAX) || (val < 0) || (end_ptr[0] != '\0'))
-            rc = -1;
-    } else if (strcmp(arg, "low") && strcmp(arg, "medium") && strcmp(arg, "high") && strcmp(arg, "highm1")) {
-        rc = -1;
-    }
+	if ((arg[0] >= '0') && (arg[0] <= '9')) {
+		val = strtol(arg, &end_ptr, 10);
+		if ((val == LONG_MAX) || (val < 0) || (end_ptr[0] != '\0'))
+			rc = -1;
+	} else if (strcmp(arg, "low")  && strcmp(arg, "medium") &&
+		   strcmp(arg, "high") && strcmp(arg, "highm1")) {
+		rc = -1;
+	}
 
-    return rc;
+	return rc;
 }
 
 /*
  * Test for valid GPU frequency specification
  * RET - -1 on error, else 0
  */
-static int _valid_gpu_freq(const char *arg) {
-    char *eq, *save_ptr = NULL, *tmp, *tok;
-    int rc = 0;
+static int _valid_gpu_freq(const char *arg)
+{
+	char *eq, *save_ptr = NULL, *tmp, *tok;
+	int rc = 0;
 
-    if ((arg == NULL) || (arg[0] == '\0'))
-        return -1;
+	if ((arg == NULL) || (arg[0] == '\0'))
+		return -1;
 
-    tmp = xstrdup(arg);
-    tok = strtok_r(tmp, ",", &save_ptr);
-    while (tok) {
-        eq = strchr(tok, '=');
-        if (!eq) {
-            rc = _test_val(tok);
-            if ((rc != 0) && !strcmp(tok, "verbose"))
-                rc = 0;    /* "verbose" is undocumented option */
-        } else {
-            eq[0] = '\0';
-            if (!strcmp(tok, "memory")) {
-                rc = _test_val(eq + 1);
-            } else {
-                rc = -1;
-            }
-        }
-        if (rc != 0)
-            break;
-        tok = strtok_r(NULL, ",", &save_ptr);
-    }
-    xfree(tmp);
+	tmp = xstrdup(arg);
+	tok = strtok_r(tmp, ",", &save_ptr);
+	while (tok) {
+		eq = strchr(tok, '=');
+		if (!eq) {
+			rc = _test_val(tok);
+			if ((rc != 0) && !strcmp(tok, "verbose"))
+				rc = 0;	/* "verbose" is undocumented option */
+		} else {
+			eq[0] = '\0';
+			if (!strcmp(tok, "memory")) {
+				rc = _test_val(eq + 1);
+			} else {
+				rc = -1;
+			}
+		}
+		if (rc != 0)
+			break;
+		tok = strtok_r(NULL, ",", &save_ptr);
+	}
+	xfree(tmp);
 
-    return rc;
+	return rc;
 }
 
 /*
@@ -172,57 +184,61 @@ static int _valid_gpu_freq(const char *arg) {
  * Example: gpu:medium,memory=high
  *          gpu:450
  */
-extern int tres_freq_verify_cmdline(const char *arg) {
-    char *sep, *save_ptr = NULL, *tmp, *tok;
-    int rc = 0;
+extern int tres_freq_verify_cmdline(const char *arg)
+{
+	char *sep, *save_ptr = NULL, *tmp, *tok;
+	int rc = 0;
 
-    if ((arg == NULL) || (arg[0] == '\0'))
-        return 0;
+	if ((arg == NULL) || (arg[0] == '\0'))
+		return 0;
 
-    tmp = xstrdup(arg);
-    tok = strtok_r(tmp, ";", &save_ptr);
-    while (tok) {
-        sep = strchr(tok, ':');        /* Bad format */
-        if (!sep) {
-            rc = -1;
-            break;
-        }
-        sep[0] = '\0';
-        sep++;
-        if (!strcmp(tok, "gpu")) {    /* Only support GPUs today */
-            if (_valid_gpu_freq(sep) != 0) {
-                rc = -1;
-                break;
-            }
-        } else {
-            rc = -1;
-            break;
-        }
-        tok = strtok_r(NULL, ";", &save_ptr);
-    }
-    xfree(tmp);
+	tmp = xstrdup(arg);
+	tok = strtok_r(tmp, ";", &save_ptr);
+	while (tok) {
+		sep = strchr(tok, ':');		/* Bad format */
+		if (!sep) {
+			rc = -1;
+			break;
+		}
+		sep[0] = '\0';
+		sep++;
+		if (!strcmp(tok, "gpu")) {	/* Only support GPUs today */
+			if (_valid_gpu_freq(sep) != 0) {
+				rc = -1;
+				break;
+			}
+		} else {
+			rc = -1;
+			break;
+		}
+		tok = strtok_r(NULL, ";", &save_ptr);
+	}
+	xfree(tmp);
 
-    return rc;
+	return rc;
 }
 
 /*
  * Set environment variables associated with TRES frequency variables.
  */
-extern int tres_freq_set_env(char *var) {
+extern int tres_freq_set_env(char *var)
+{
 //FIXME - To do
-    return 0;
+	return 0;
 }
 
 /*
  * set TRES frequency values
  */
-extern void tres_freq_set(stepd_step_rec_t *job) {
+extern void tres_freq_set(stepd_step_rec_t *job)
+{
 //FIXME - To do
 }
 
 /*
  * reset TRES frequency values after suspend/resume
  */
-extern void tres_freq_reset(stepd_step_rec_t *job) {
+extern void tres_freq_reset(stepd_step_rec_t *job)
+{
 //FIXME - To do
 }

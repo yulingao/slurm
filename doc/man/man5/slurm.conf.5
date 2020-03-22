@@ -1,4 +1,4 @@
-.TH "slurm.conf" "5" "Slurm Configuration File" "June 2019" "Slurm Configuration File"
+.TH "slurm.conf" "5" "Slurm Configuration File" "July 2019" "Slurm Configuration File"
 
 .SH "NAME"
 slurm.conf \- Slurm configuration file
@@ -74,8 +74,8 @@ If nojobs is set Slurm will not account for any jobs or steps on the system,
 like wise if nosteps is set Slurm will not account for any steps ran limits
 will still be enforced.
 
-If safe is enforced a job will only be launched against an association or qos
-that has a GrpCPUMins limit set if the job will be able to run to completion.
+If safe is enforced, a job will only be launched against an association or qos
+that has a GrpTRESMins limit set if the job will be able to run to completion.
 Without this option set, jobs will be launched as long as their usage
 hasn't reached the cpu-minutes limit which can lead to jobs being
 launched but then killed when the limit is reached.
@@ -149,7 +149,7 @@ Then "gres/gpu:tesla" and "gres/gpu:volta" will track jobs that explicitly
 request those GPU types.
 If a job requests GPUs, but does not explicitly specify the GPU type, then
 it's resource allocation will be accounted for as either "gres/gpu:tesla" or
-"gres/gpu:volta", although the accounting may not match the actualy GPU type
+"gres/gpu:volta", although the accounting may not match the actual GPU type
 allocated to the job and the GPUs allocated to the job could be heterogeneous.
 In an environment containing various GPU types, use of a job_submit plugin
 may be desired in order to force jobs to explicitly specify some GPU type.
@@ -2736,7 +2736,7 @@ submitted to.
 The maximum number of jobs per user association to attempt starting with the
 backfill scheduler.
 This setting is similar to \fBbf_max_job_user\fR but is handy if a user
-has multiple assocations equating to basically different users.
+has multiple associations equating to basically different users.
 One can set this limit to prevent users from flooding the backfill
 queue with jobs that cannot start and that prevent jobs from other users
 to start.
@@ -3257,7 +3257,7 @@ and \fBSelectType=select/cons_tres\fR, use
 \fBCR_CPU\fR, which allocates CPU (threads)
 to jobs without considering their memory consumption.
 .RS
-.TP
+
 The following options are supported for \fBSelectType=select/cray_aries\fR:
 .RS
 .TP
@@ -3271,7 +3271,7 @@ Layer the select/cons_tres plugin under the select/cray_aries plugin, the defaul
 to layer on select/linear.  This also allows all the options available for
 \fBSelectType=select/cons_tres\fR.
 .RE
-.TP
+
 The following options are supported by the \fBSelectType=select/cons_res\fR
 and \fBSelectType=select/cons_tres\fR plugins:
 .RS
@@ -3966,7 +3966,7 @@ resources, thus combining the best of both pieces.
 
 \fBNOTE:\fR For CRAY systems only: task/cgroup must be used with, and listed
 \fBafter\fR task/cray_aries in TaskPlugin. The task/affinity plugin can be listed
-everywhere, but the previous constrain must be satisfied. So for CRAY systems,
+everywhere, but the previous constraint must be satisfied. So for CRAY systems,
 a configuration like this is recommended:
 
 TaskPlugin=task/affinity,task/cray_aries,task/cgroup
@@ -4618,7 +4618,7 @@ The default value is 0.
 \fBTRESWeights\fR TRESWeights are used to calculate a value that represents how
 busy a node is. Currently only used in federation configurations. TRESWeights
 are different from TRESBillingWeights \-\- which is used for fairshare
-calcuations.
+calculations.
 
 TRES weights are specified as a comma\-separated list of
 \fI<TRES Type>\fR=\fI<TRES Weight>\fR pairs.
@@ -5412,8 +5412,8 @@ Available in \fBEpilogSlurmctld\fR only.
 Group ID of the job's owner.
 Available in \fBPrologSlurmctld\fR, \fBEpilogSlurmctld\fR and \fBTaskProlog\fR only.
 .TP
-\fBSLURM_JOB_GRES\fR
-GRES IDs allocated to the job (if any).
+\fBSLURM_JOB_GPUS\fR
+GPU IDs allocated to the job (if any).
 Available in the \fBProlog\fR only.
 .TP
 \fBSLURM_JOB_GROUP\fR

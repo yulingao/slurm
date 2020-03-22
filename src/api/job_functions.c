@@ -47,11 +47,14 @@
  * IN:  slurmdb_job_rec_t *job
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_job_modify(void *db_conn, slurmdb_job_modify_cond_t *job_cond, slurmdb_job_rec_t *job) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_job_modify(void *db_conn,
+			       slurmdb_job_modify_cond_t *job_cond,
+			       slurmdb_job_rec_t *job)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_modify_job(db_conn, db_api_uid, job_cond, job);
+	return acct_storage_g_modify_job(db_conn, db_api_uid, job_cond, job);
 }
 
 /*
@@ -59,11 +62,12 @@ extern List slurmdb_job_modify(void *db_conn, slurmdb_job_modify_cond_t *job_con
  * returns List of slurmdb_job_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_jobs_get(void *db_conn, slurmdb_job_cond_t *job_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_jobs_get(void *db_conn, slurmdb_job_cond_t *job_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return jobacct_storage_g_get_jobs_cond(db_conn, db_api_uid, job_cond);
+	return jobacct_storage_g_get_jobs_cond(db_conn, db_api_uid, job_cond);
 }
 
 /*
@@ -71,28 +75,31 @@ extern List slurmdb_jobs_get(void *db_conn, slurmdb_job_cond_t *job_cond) {
  * IN: jobs, a list of all the runaway jobs
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_jobs_fix_runaway(void *db_conn, List jobs) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern int slurmdb_jobs_fix_runaway(void *db_conn, List jobs)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_fix_runaway_jobs(db_conn, db_api_uid, jobs);
+	return acct_storage_g_fix_runaway_jobs(db_conn, db_api_uid, jobs);
 }
 
 /* initialization of job completion logging */
-extern int slurmdb_jobcomp_init(char *jobcomp_loc) {
-    return g_slurm_jobcomp_init(jobcomp_loc);
+extern int slurmdb_jobcomp_init(char *jobcomp_loc)
+{
+	return g_slurm_jobcomp_init(jobcomp_loc);
 }
 
 /* terminate pthreads and free, general clean-up for termination */
-extern int slurmdb_jobcomp_fini(void) {
-    return g_slurm_jobcomp_fini();
+extern int slurmdb_jobcomp_fini(void)
+{
+	return g_slurm_jobcomp_fini();
 }
-
 /*
  * get info from the storage
  * returns List of jobcomp_job_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_jobcomp_jobs_get(slurmdb_job_cond_t *job_cond) {
-    return g_slurm_jobcomp_get_jobs(job_cond);
+extern List slurmdb_jobcomp_jobs_get(slurmdb_job_cond_t *job_cond)
+{
+	return g_slurm_jobcomp_get_jobs(job_cond);
 }

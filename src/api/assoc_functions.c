@@ -48,11 +48,12 @@
  * IN:  assoc_list List of slurmdb_assoc_rec_t *
  * RET: SLURM_SUCCESS on success SLURM_ERROR else
  */
-extern int slurmdb_associations_add(void *db_conn, List assoc_list) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern int slurmdb_associations_add(void *db_conn, List assoc_list)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_add_assocs(db_conn, db_api_uid, assoc_list);
+	return acct_storage_g_add_assocs(db_conn, db_api_uid, assoc_list);
 }
 
 /*
@@ -61,11 +62,13 @@ extern int slurmdb_associations_add(void *db_conn, List assoc_list) {
  * RET: List of slurmdb_assoc_rec_t *
  * note List needs to be freed when called
  */
-extern List slurmdb_associations_get(void *db_conn, slurmdb_assoc_cond_t *assoc_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_associations_get(void *db_conn,
+				     slurmdb_assoc_cond_t *assoc_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_get_assocs(db_conn, db_api_uid, assoc_cond);
+	return acct_storage_g_get_assocs(db_conn, db_api_uid, assoc_cond);
 }
 
 
@@ -75,11 +78,15 @@ extern List slurmdb_associations_get(void *db_conn, slurmdb_assoc_cond_t *assoc_
  * IN:  slurmdb_assoc_rec_t *assoc
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_associations_modify(void *db_conn, slurmdb_assoc_cond_t *assoc_cond, slurmdb_assoc_rec_t *assoc) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_associations_modify(void *db_conn,
+					slurmdb_assoc_cond_t *assoc_cond,
+					slurmdb_assoc_rec_t *assoc)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_modify_assocs(db_conn, db_api_uid, assoc_cond, assoc);
+	return acct_storage_g_modify_assocs(db_conn, db_api_uid,
+					    assoc_cond, assoc);
 }
 
 /*
@@ -87,9 +94,11 @@ extern List slurmdb_associations_modify(void *db_conn, slurmdb_assoc_cond_t *ass
  * IN:  slurmdb_assoc_cond_t *assoc_cond
  * RET: List containing (char *'s) else NULL on error
  */
-extern List slurmdb_associations_remove(void *db_conn, slurmdb_assoc_cond_t *assoc_cond) {
-    if (db_api_uid == -1)
-        db_api_uid = getuid();
+extern List slurmdb_associations_remove(
+	void *db_conn, slurmdb_assoc_cond_t *assoc_cond)
+{
+	if (db_api_uid == -1)
+		db_api_uid = getuid();
 
-    return acct_storage_g_remove_assocs(db_conn, db_api_uid, assoc_cond);
+	return acct_storage_g_remove_assocs(db_conn, db_api_uid, assoc_cond);
 }

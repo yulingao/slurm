@@ -49,47 +49,43 @@
 
 #define SPANK_OPTION_ENV_PREFIX "_SLURM_SPANK_OPTION_"
 
-struct spank_launcher_job_info
-{
-    uid_t uid;
-    gid_t gid;
-    uint32_t jobid;
-    uint32_t stepid;
-    slurm_step_layout_t *step_layout;
-    int argc;
-    char **argv;
+struct spank_launcher_job_info {
+	uid_t       uid;
+	gid_t       gid;
+	uint32_t    jobid;
+	uint32_t    stepid;
+	slurm_step_layout_t *step_layout;
+	int         argc;
+	char      **argv;
 };
 
-int spank_init(stepd_step_rec_t *job);
+int spank_init (stepd_step_rec_t *job);
 
-/*
-初始化slurm节点和job的插件程序
-*/
-int spank_slurmd_init(void);
+int spank_slurmd_init (void);
 
-int spank_job_prolog(uint32_t jobid, uid_t uid);
+int spank_job_prolog (uint32_t jobid, uid_t uid);
 
-int spank_init_allocator(void);
+int spank_init_allocator (void);
 
-int spank_init_post_opt(void);
+int spank_init_post_opt (void);
 
-int spank_user(stepd_step_rec_t *job);
+int spank_user (stepd_step_rec_t *job);
 
-int spank_local_user(struct spank_launcher_job_info *job);
+int spank_local_user (struct spank_launcher_job_info *job);
 
-int spank_task_privileged(stepd_step_rec_t *job, int taskid);
+int spank_task_privileged (stepd_step_rec_t *job, int taskid);
 
-int spank_user_task(stepd_step_rec_t *job, int taskid);
+int spank_user_task (stepd_step_rec_t *job, int taskid);
 
-int spank_task_post_fork(stepd_step_rec_t *job, int taskid);
+int spank_task_post_fork (stepd_step_rec_t *job, int taskid);
 
-int spank_task_exit(stepd_step_rec_t *job, int taskid);
+int spank_task_exit (stepd_step_rec_t *job, int taskid);
 
-int spank_job_epilog(uint32_t jobid, uid_t uid);
+int spank_job_epilog (uint32_t jobid, uid_t uid);
 
-int spank_slurmd_exit(void);
+int spank_slurmd_exit (void);
 
-int spank_fini(stepd_step_rec_t *job);
+int spank_fini (stepd_step_rec_t *job);
 
 /*
  *  Option processing
@@ -105,13 +101,13 @@ int spank_fini(stepd_step_rec_t *job);
  *   a warning will be printed and the spank option will be disabled.
  *
  */
-struct option *spank_option_table_create(const struct option *orig_options);
+struct option *spank_option_table_create (const struct option *orig_options);
 
 /*
  *  Free memory associated with an option table created by
  *   spank_p[tion_table_create.
  */
-void spank_option_table_destroy(struct option *opt_table);
+void spank_option_table_destroy (struct option *opt_table);
 
 /*
  *  Process all spank options in the environment calling the options callback if
@@ -131,7 +127,7 @@ extern int spank_process_env_options();
  *   the option belongs to a *required* plugin, and the plugin's callback
  *   for that option fails.
  */
-int spank_process_option(int optval, const char *optarg);
+int spank_process_option (int optval, const char *optarg);
 
 /*
  *  Generate --help style output on stream `fp' for all internal spank
@@ -140,12 +136,12 @@ int spank_process_option(int optval, const char *optarg);
  *   after which the usage text may be displayed, and `left_pad' is the
  *   amount of space to pad on the left before printing the --option.
  */
-int spank_print_options(FILE *fp, int width, int left_pad);
+int spank_print_options (FILE *fp, int width, int left_pad);
 
 /*  Set all registered remote options (i.e. those passed to
  *   spank_process_option) in the job options `options'.
  */
-int spank_set_remote_options(job_options_t options);
+int spank_set_remote_options (job_options_t options);
 
 /*  Register any remote spank options that exist in `options'
  *    to their respective spank plugins. This function ends up invoking
@@ -155,7 +151,7 @@ int spank_set_remote_options(job_options_t options);
  *  A warning is printed if no plugin matches a remote option
  *   in the job_options structure, but the funtion does not return failure.
  */
-int spank_get_remote_options(job_options_t options);
+int spank_get_remote_options (job_options_t options);
 
 /*  Register any remote spank options that exist in the environment `env'
  *    to their respective spank plugins. This function ends up invoking
@@ -165,11 +161,11 @@ int spank_get_remote_options(job_options_t options);
  *  A warning is printed if no plugin matches a remote option
  *   in the job_options structure, but the funtion does not return failure.
  */
-int spank_get_remote_options_env(char **env);
+int spank_get_remote_options_env (char **env);
 
 /*  Clear any spank remote options encoded in environment.
  */
-int spank_clear_remote_options_env(char **env);
+int spank_clear_remote_options_env (char **env);
 
 /*
  * spank_get_plugin_names
@@ -230,6 +226,6 @@ extern bool spank_option_isset(char *optname);
  * IN/OUT state	- internal state, should point to NULL for the first call
  * RETURNS	- true if plugin/name/value set; false if no more options
  */
-extern bool spank_option_get_next_set(char **plugin, char **name, char **value, void **state);
-
+extern bool spank_option_get_next_set(char **plugin, char **name,
+				      char **value, void **state);
 #endif /* !_PLUGSTACK_H */

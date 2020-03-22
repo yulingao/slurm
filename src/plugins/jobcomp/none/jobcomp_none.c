@@ -69,16 +69,17 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Job completion logging NONE plugin";
-const char plugin_type[] = "jobcomp/none";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Job completion logging NONE plugin";
+const char plugin_type[]       	= "jobcomp/none";
+const uint32_t plugin_version	= SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-int init(void) {
-    return SLURM_SUCCESS;
+int init ( void )
+{
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -86,22 +87,27 @@ int init(void) {
  * logging API.
  */
 
-int slurm_jobcomp_set_location(char *location) {
-    return SLURM_SUCCESS;
+int slurm_jobcomp_set_location ( char * location )
+{
+	return SLURM_SUCCESS;
 }
 
-int slurm_jobcomp_log_record(struct job_record *job_ptr) {
-    return SLURM_SUCCESS;
+int slurm_jobcomp_log_record ( struct job_record *job_ptr )
+{
+	return SLURM_SUCCESS;
 }
 
-List slurm_jobcomp_get_jobs(void *job_cond) {
-    return NULL;
+List slurm_jobcomp_get_jobs(void *job_cond)
+{
+	return NULL;
 }
 
-int slurm_jobcomp_archive(void *arch_cond) {
-    return SLURM_SUCCESS;
+int slurm_jobcomp_archive(void *arch_cond)
+{
+	return SLURM_SUCCESS;
 }
 
-int fini(void) {
-    return SLURM_SUCCESS;
+int fini ( void )
+{
+	return SLURM_SUCCESS;
 }

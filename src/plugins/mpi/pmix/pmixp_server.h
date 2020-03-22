@@ -41,82 +41,68 @@
 #include "pmixp_common.h"
 
 typedef enum {
-    PMIXP_MSG_NONE, PMIXP_MSG_FAN_IN, PMIXP_MSG_FAN_OUT, PMIXP_MSG_DMDX, PMIXP_MSG_INIT_DIRECT,
+	PMIXP_MSG_NONE,
+	PMIXP_MSG_FAN_IN,
+	PMIXP_MSG_FAN_OUT,
+	PMIXP_MSG_DMDX,
+	PMIXP_MSG_INIT_DIRECT,
 #ifndef NDEBUG
-    PMIXP_MSG_PINGPONG,
+	PMIXP_MSG_PINGPONG,
 #endif
-    PMIXP_MSG_RING
+	PMIXP_MSG_RING
 } pmixp_srv_cmd_t;
 
 typedef enum {
-    /* use non as to check non-init case */
-            PMIXP_EP_NONE = 0, PMIXP_EP_HLIST, PMIXP_EP_NOIDEID
+	/* use non as to check non-init case */
+	PMIXP_EP_NONE = 0,
+	PMIXP_EP_HLIST,
+	PMIXP_EP_NOIDEID
 } pmixp_ep_type_t;
 
 typedef struct {
-    pmixp_ep_type_t type;
-    union {
-        char *hostlist;
-        int nodeid;
-    } ep;
+	pmixp_ep_type_t type;
+	union {
+		char *hostlist;
+		int nodeid;
+	} ep;
 } pmixp_ep_t;
 
-typedef void (*pmixp_server_sent_cb_t)(int rc, pmixp_p2p_ctx_t ctx, void *cb_data);
-
+typedef void (*pmixp_server_sent_cb_t)(int rc, pmixp_p2p_ctx_t ctx,
+				       void *cb_data);
 /* convenience callback to just release sent buffer
  * expects an object of type `Buf` to be passed as `cb_data`
  */
 void pmixp_server_sent_buf_cb(int rc, pmixp_p2p_ctx_t ctx, void *data);
 
 int pmixp_stepd_init(const stepd_step_rec_t *job, char ***env);
-
 int pmixp_stepd_finalize(void);
-
 void pmixp_server_cleanup(void);
-
 int pmix_srun_init(const mpi_plugin_client_info_t *job, char ***env);
-
 void pmixp_server_slurm_conn(int fd);
-
 void pmixp_server_direct_conn(int fd);
-
 int pmixp_server_direct_conn_early(void);
-
-int
-pmixp_server_send_nb(pmixp_ep_t *ep, pmixp_srv_cmd_t type, uint32_t seq, Buf buf, pmixp_server_sent_cb_t complete_cb,
-                     void *cb_data);
-
+int pmixp_server_send_nb(pmixp_ep_t *ep, pmixp_srv_cmd_t type,
+			 uint32_t seq, Buf buf,
+			 pmixp_server_sent_cb_t complete_cb,
+			 void *cb_data);
 Buf pmixp_server_buf_new(void);
-
 size_t pmixp_server_buf_reset(Buf buf);
 
 #ifndef NDEBUG
-
 /* Debug tools used only if debug was enabled */
 void pmixp_server_init_pp(char ***env);
-
 bool pmixp_server_want_pp(void);
-
 void pmixp_server_run_pp(void);
-
 int pmixp_server_pp_send(int nodeid, int size);
-
 int pmixp_server_pp_count(void);
-
 void pmixp_server_pp_inc(void);
-
 void pmixp_server_pp_start(void);
-
 int pmixp_server_pp_warmups(void);
-
 int pmixp_server_pp_same_thread(void);
-
 bool pmixp_server_pp_check_fini(int size);
 
 void pmixp_server_init_cperf(char ***env);
-
 bool pmixp_server_want_cperf(void);
-
 void pmixp_server_run_cperf(void);
 
 #else
@@ -130,11 +116,12 @@ void pmixp_server_run_cperf(void);
 #define pmixp_server_run_cperf();
 #endif
 
-static inline void pmixp_server_buf_reserve(Buf buf, uint32_t size) {
-    if (remaining_buf(buf) < size) {
-        uint32_t to_reserve = size - remaining_buf(buf);
-        grow_buf(buf, to_reserve);
-    }
+static inline void pmixp_server_buf_reserve(Buf buf, uint32_t size)
+{
+	if (remaining_buf(buf) < size) {
+		uint32_t to_reserve = size - remaining_buf(buf);
+		grow_buf(buf, to_reserve);
+	}
 }
 
 #endif /* PMIXP_SERVER_H */

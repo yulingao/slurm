@@ -1,6 +1,6 @@
 Name:		slurm
-Version:	20.02.0
-%define rel	0pre1
+Version:	19.05.2
+%define rel	1
 Release:	%{rel}%{?dist}
 Summary:	Slurm Workload Manager
 

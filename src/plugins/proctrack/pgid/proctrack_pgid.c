@@ -36,7 +36,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
-#define __USE_XOPEN_EXTENDED    /* getpgid */
+#define __USE_XOPEN_EXTENDED	/* getpgid */
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -79,150 +79,165 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Process tracking via process group ID plugin";
-const char plugin_type[] = "proctrack/pgid";
+const char plugin_name[]      = "Process tracking via process group ID plugin";
+const char plugin_type[]      = "proctrack/pgid";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  * are called.  Put global initialization here.
  */
-extern int init(void) {
-    return SLURM_SUCCESS;
+extern int init ( void )
+{
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    return SLURM_SUCCESS;
+extern int fini ( void )
+{
+	return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_create(stepd_step_rec_t *job) {
-    return SLURM_SUCCESS;
+extern int proctrack_p_create ( stepd_step_rec_t *job )
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * Uses job step process group id.
  */
-extern int proctrack_p_add(stepd_step_rec_t *job, pid_t pid) {
-    job->cont_id = (uint64_t) job->pgid;
-    return SLURM_SUCCESS;
+extern int proctrack_p_add ( stepd_step_rec_t *job, pid_t pid )
+{
+	job->cont_id = (uint64_t)job->pgid;
+	return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_signal(uint64_t id, int signal) {
-    pid_t pid = (pid_t) id;
+extern int proctrack_p_signal  ( uint64_t id, int signal )
+{
+	pid_t pid = (pid_t) id;
 
-    if (!id) {
-        /* no container ID */
-    } else if (pid == getpid() || pid == getpgid(0)) {
-        error("slurm_signal_container would kill caller!");
-    } else {
-        return killpg(pid, signal);
-    }
-    slurm_seterrno(ESRCH);
-    return SLURM_ERROR;
+	if (!id) {
+		/* no container ID */
+	} else if (pid == getpid() || pid == getpgid(0)) {
+		error("slurm_signal_container would kill caller!");
+	} else {
+		return killpg(pid, signal);
+	}
+	slurm_seterrno(ESRCH);
+	return SLURM_ERROR;
 }
 
-extern int proctrack_p_destroy(uint64_t id) {
-    return SLURM_SUCCESS;
+extern int proctrack_p_destroy ( uint64_t id )
+{
+	return SLURM_SUCCESS;
 }
 
-extern uint64_t proctrack_p_find(pid_t pid) {
-    pid_t rc = getpgid(pid);
+extern uint64_t proctrack_p_find(pid_t pid)
+{
+	pid_t rc = getpgid(pid);
 
-    if (rc == -1)
-        return (uint64_t) 0;
-    else
-        return (uint64_t) rc;
+	if (rc == -1)
+		return (uint64_t) 0;
+	else
+		return (uint64_t) rc;
 }
 
-extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid) {
-    pid_t pgid = getpgid(pid);
+extern bool proctrack_p_has_pid(uint64_t cont_id, pid_t pid)
+{
+	pid_t pgid = getpgid(pid);
 
-    if ((pgid == -1) || ((uint64_t) pgid != cont_id))
-        return false;
+	if ((pgid == -1) || ((uint64_t)pgid != cont_id))
+		return false;
 
-    return true;
+	return true;
 }
 
-extern int proctrack_p_wait(uint64_t cont_id) {
-    pid_t pgid = (pid_t) cont_id;
-    int delay = 1;
+extern int
+proctrack_p_wait(uint64_t cont_id)
+{
+	pid_t pgid = (pid_t)cont_id;
+	int delay = 1;
 
-    if (cont_id == 0 || cont_id == 1) {
-        slurm_seterrno(EINVAL);
-        return SLURM_ERROR;
-    }
+	if (cont_id == 0 || cont_id == 1) {
+		slurm_seterrno(EINVAL);
+		return SLURM_ERROR;
+	}
 
-    /* Spin until the process group is gone. */
-    while (killpg(pgid, 0) == 0) {
-        proctrack_p_signal(cont_id, SIGKILL);
-        sleep(delay);
-        if (delay < 120) {
-            delay *= 2;
-        } else {
-            error("%s: Unable to destroy container %"PRIu64" "
-                  "in pgid plugin, giving up after %d sec", __func__, cont_id, delay);
-            break;
-        }
-    }
+	/* Spin until the process group is gone. */
+	while (killpg(pgid, 0) == 0) {
+		proctrack_p_signal(cont_id, SIGKILL);
+		sleep(delay);
+		if (delay < 120) {
+			delay *= 2;
+		} else {
+			error("%s: Unable to destroy container %"PRIu64" "
+			      "in pgid plugin, giving up after %d sec",
+			      __func__, cont_id, delay);
+			break;
+		}
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids) {
-    DIR *dir;
-    struct dirent *de;
-    char path[PATH_MAX], *endptr, *num, *rbuf;
-    ssize_t buf_used;
-    char cmd[1024];
-    char state;
-    int fd, rc = SLURM_SUCCESS;
-    long pid, ppid, pgid, ret_l;
-    pid_t *pid_array = NULL;
-    int pid_count = 0;
+extern int
+proctrack_p_get_pids(uint64_t cont_id, pid_t **pids, int *npids)
+{
+	DIR *dir;
+	struct dirent *de;
+	char path[PATH_MAX], *endptr, *num, *rbuf;
+	ssize_t buf_used;
+	char cmd[1024];
+	char state;
+	int fd, rc = SLURM_SUCCESS;
+	long pid, ppid, pgid, ret_l;
+	pid_t *pid_array = NULL;
+	int pid_count = 0;
 
-    if ((dir = opendir("/proc")) == NULL) {
-        error("opendir(/proc): %m");
-        rc = SLURM_ERROR;
-        goto fini;
-    }
-    rbuf = xmalloc(4096);
-    while ((de = readdir(dir)) != NULL) {
-        num = de->d_name;
-        if ((num[0] < '0') || (num[0] > '9'))
-            continue;
-        ret_l = strtol(num, &endptr, 10);
-        if ((ret_l == LONG_MIN) || (ret_l == LONG_MAX)) {
-            error("couldn't do a strtol on str %s(%ld): %m", num, ret_l);
-            continue;
-        }
-        sprintf(path, "/proc/%s/stat", num);
-        if ((fd = open(path, O_RDONLY)) < 0) {
-            continue;
-        }
-        buf_used = read(fd, rbuf, 4096);
-        if ((buf_used <= 0) || (buf_used >= 4096)) {
-            close(fd);
-            continue;
-        }
-        close(fd);
-        if (sscanf(rbuf, "%ld %s %c %ld %ld", &pid, cmd, &state, &ppid, &pgid) != 5) {
-            continue;
-        }
-        if (pgid != (long) cont_id)
-            continue;
-        if (state == 'Z') {
-            debug3("Defunct process skipped: command=%s state=%c "
-                   "pid=%ld ppid=%ld pgid=%ld", cmd, state, pid, ppid, pgid);
-            continue;    /* Defunct, don't try to kill */
-        }
-        xrealloc(pid_array, sizeof(pid_t) * (pid_count + 1));
-        pid_array[pid_count++] = pid;
-    }
-    xfree(rbuf);
-    closedir(dir);
+	if ((dir = opendir("/proc")) == NULL) {
+		error("opendir(/proc): %m");
+		rc = SLURM_ERROR;
+		goto fini;
+	}
+	rbuf = xmalloc(4096);
+	while ((de = readdir(dir)) != NULL) {
+		num = de->d_name;
+		if ((num[0] < '0') || (num[0] > '9'))
+			continue;
+		ret_l = strtol(num, &endptr, 10);
+		if ((ret_l == LONG_MIN) || (ret_l == LONG_MAX)) {
+			error("couldn't do a strtol on str %s(%ld): %m",
+			      num, ret_l);
+			continue;
+		}
+		sprintf(path, "/proc/%s/stat", num);
+		if ((fd = open(path, O_RDONLY)) < 0) {
+			continue;
+		}
+		buf_used = read(fd, rbuf, 4096);
+		if ((buf_used <= 0) || (buf_used >= 4096)) {
+			close(fd);
+			continue;
+		}
+		close(fd);
+		if (sscanf(rbuf, "%ld %s %c %ld %ld",
+			   &pid, cmd, &state, &ppid, &pgid) != 5) {
+			continue;
+		}
+		if (pgid != (long) cont_id)
+			continue;
+		if (state == 'Z') {
+			debug3("Defunct process skipped: command=%s state=%c "
+			       "pid=%ld ppid=%ld pgid=%ld",
+			       cmd, state, pid, ppid, pgid);
+			continue;	/* Defunct, don't try to kill */
+		}
+		xrealloc(pid_array, sizeof(pid_t) * (pid_count + 1));
+		pid_array[pid_count++] = pid;
+	}
+	xfree(rbuf);
+	closedir(dir);
 
-    fini:
-    *pids = pid_array;
-    *npids = pid_count;
-    return rc;
+fini:	*pids  = pid_array;
+	*npids = pid_count;
+	return rc;
 }

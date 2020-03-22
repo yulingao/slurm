@@ -64,10 +64,8 @@
 #include <syslog.h>
 
 #if defined(__APPLE__)
-
 #  include <sys/times.h>
 #  include <sys/types.h>
-
 #elif defined(__NetBSD__) || defined(__FreeBSD__)
 #  include <sys/times.h> /* for times(3) */
 #else
@@ -110,12 +108,14 @@
  * Output: node_name - filled in with node name
  *         return code - 0 if no error, otherwise errno
  */
-extern int get_mach_name(char *node_name) {
+extern int
+get_mach_name(char *node_name)
+{
     int error_code;
 
     error_code = gethostname_short(node_name, MAX_SLURM_NAME);
     if (error_code != 0)
-        error("get_mach_name: gethostname_short error %d", error_code);
+	error ("get_mach_name: gethostname_short error %d", error_code);
 
     return error_code;
 }
@@ -127,36 +127,38 @@ extern int get_mach_name(char *node_name) {
  * Output: real_memory - the Real Memory size in MB, "1" if error
  *         return code - 0 if no error, otherwise errno
  */
-extern int get_memory(uint64_t *real_memory) {
+extern int get_memory(uint64_t *real_memory)
+{
 #ifdef HAVE__SYSTEM_CONFIGURATION
-    *real_memory = _system_configuration.physmem / (1024 * 1024);
+	*real_memory = _system_configuration.physmem / (1024 * 1024);
 #else
 #  ifdef _SC_PHYS_PAGES
-    long pages;
+	long pages;
 
-    *real_memory = 1;
-    pages = sysconf(_SC_PHYS_PAGES);
-    if (pages < 1) {
-        error("get_memory: error running sysconf(_SC_PHYS_PAGES)");
-        return EINVAL;
-    }
-    *real_memory = (uint64_t) ((float) pages * (sysconf(_SC_PAGE_SIZE) / 1048576.0)); /* Megabytes of memory */
+	*real_memory = 1;
+	pages = sysconf(_SC_PHYS_PAGES);
+	if (pages < 1) {
+		error ("get_memory: error running sysconf(_SC_PHYS_PAGES)");
+		return EINVAL;
+	}
+	*real_memory = (uint64_t)((float)pages * (sysconf(_SC_PAGE_SIZE) /
+			1048576.0)); /* Megabytes of memory */
 #  else  /* !_SC_PHYS_PAGES */
 #    if HAVE_SYSCTLBYNAME
-    int mem;
-    size_t len = sizeof(mem);
-    if (sysctlbyname("hw.physmem", &mem, &len, NULL, 0) == -1) {
-        error("get_memory: error running sysctl(HW_PHYSMEM)");
-        return EINVAL;
-    }
-    *real_memory = mem;
+	int mem;
+	size_t len = sizeof(mem);
+	if (sysctlbyname("hw.physmem", &mem, &len, NULL, 0) == -1) {
+		error("get_memory: error running sysctl(HW_PHYSMEM)");
+		return EINVAL;
+	}
+	*real_memory = mem;
 #    else /* !HAVE_SYSCTLBYNAME */
-    *real_memory = 1;
+	*real_memory = 1;
 #    endif /* HAVE_SYSCTLBYNAME */
 #  endif /* _SC_PHYS_PAGES */
 #endif /* HAVE__SYSTEM_CONFIGURATION */
 
-    return 0;
+	return 0;
 }
 
 
@@ -169,129 +171,134 @@ extern int get_memory(uint64_t *real_memory) {
  * Output: tmp_disk - filled in with disk space size in MB, zero if error
  *         return code - 0 if no error, otherwise errno
  */
-extern int get_tmp_disk(uint32_t *tmp_disk, char *tmp_fs) {
-    int error_code = 0;
+extern int
+get_tmp_disk(uint32_t *tmp_disk, char *tmp_fs)
+{
+	int error_code = 0;
 
 #if defined(HAVE_STATVFS)
-    struct statvfs stat_buf;
-    uint64_t total_size = 0;
-    char *tmp_fs_name = tmp_fs;
+	struct statvfs stat_buf;
+	uint64_t total_size = 0;
+	char *tmp_fs_name = tmp_fs;
 
-    *tmp_disk = 0;
-    total_size = 0;
+	*tmp_disk = 0;
+	total_size = 0;
 
-    if (tmp_fs_name == NULL)
-        tmp_fs_name = "/tmp";
-    if (statvfs(tmp_fs_name, &stat_buf) == 0) {
-        total_size = stat_buf.f_blocks * stat_buf.f_frsize;
-        total_size /= 1024 * 1024;
-    }
-    else if (errno != ENOENT) {
-        error_code = errno;
-        error ("get_tmp_disk: error %d executing statvfs on %s",
-            errno, tmp_fs_name);
-    }
-    *tmp_disk += (uint32_t)total_size;
+	if (tmp_fs_name == NULL)
+		tmp_fs_name = "/tmp";
+	if (statvfs(tmp_fs_name, &stat_buf) == 0) {
+		total_size = stat_buf.f_blocks * stat_buf.f_frsize;
+		total_size /= 1024 * 1024;
+	}
+	else if (errno != ENOENT) {
+		error_code = errno;
+		error ("get_tmp_disk: error %d executing statvfs on %s",
+			errno, tmp_fs_name);
+	}
+	*tmp_disk += (uint32_t)total_size;
 
 #elif defined(HAVE_STATFS)
-    struct statfs stat_buf;
-    long   total_size;
-    float page_size;
-    char *tmp_fs_name = tmp_fs;
+	struct statfs stat_buf;
+	long   total_size;
+	float page_size;
+	char *tmp_fs_name = tmp_fs;
 
-    *tmp_disk = 0;
-    total_size = 0;
-    page_size = (sysconf(_SC_PAGE_SIZE) / 1048576.0); /* MG per page */
+	*tmp_disk = 0;
+	total_size = 0;
+	page_size = (sysconf(_SC_PAGE_SIZE) / 1048576.0); /* MG per page */
 
-    if (tmp_fs_name == NULL)
-        tmp_fs_name = "/tmp";
-    if (statfs(tmp_fs_name, &stat_buf) == 0) {
-        total_size = (long)stat_buf.f_blocks;
-    }
-    else if (errno != ENOENT) {
-        error_code = errno;
-        error ("get_tmp_disk: error %d executing statfs on %s",
-            errno, tmp_fs_name);
-    }
+	if (tmp_fs_name == NULL)
+		tmp_fs_name = "/tmp";
+	if (statfs(tmp_fs_name, &stat_buf) == 0) {
+		total_size = (long)stat_buf.f_blocks;
+	}
+	else if (errno != ENOENT) {
+		error_code = errno;
+		error ("get_tmp_disk: error %d executing statfs on %s",
+			errno, tmp_fs_name);
+	}
 
-    *tmp_disk += (uint32_t)(total_size * page_size);
+	*tmp_disk += (uint32_t)(total_size * page_size);
 #else
-    *tmp_disk = 1;
+	*tmp_disk = 1;
 #endif
-    return error_code;
+	return error_code;
 }
 
-extern int get_up_time(uint32_t *up_time) {
+extern int get_up_time(uint32_t *up_time)
+{
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
-    clock_t tm;
-    struct tms buf;
+	clock_t tm;
+	struct tms buf;
 
-    tm = times(&buf);
-    if (tm == (clock_t) -1) {
-        *up_time = 0;
-        return errno;
-    }
+	tm = times(&buf);
+	if (tm == (clock_t) -1) {
+		*up_time = 0;
+		return errno;
+	}
 
-    *up_time = tm / sysconf(_SC_CLK_TCK);
+	*up_time = tm / sysconf(_SC_CLK_TCK);
 #else
-    /* NOTE for Linux: The return value of times() may overflow the
-     * possible range of type clock_t. There is also an offset of
-     * 429 million seconds on some implementations. We just use the
-     * simpler sysinfo() function instead. */
-    struct sysinfo info;
+	/* NOTE for Linux: The return value of times() may overflow the
+	 * possible range of type clock_t. There is also an offset of
+	 * 429 million seconds on some implementations. We just use the
+	 * simpler sysinfo() function instead. */
+	struct sysinfo info;
 
-    if (sysinfo(&info) < 0) {
-        *up_time = 0;
-        return errno;
-    }
+	if (sysinfo(&info) < 0) {
+		*up_time = 0;
+		return errno;
+	}
 
 
-    if (conf->boot_time) {
-        /* Make node look like it rebooted when slurmd started */
-        static uint32_t orig_uptime = 0;
-        if (orig_uptime == 0)
-            orig_uptime = info.uptime;
-        *up_time = info.uptime - orig_uptime;
-    } else {
-        *up_time = info.uptime;
-    }
+	if (conf->boot_time) {
+		/* Make node look like it rebooted when slurmd started */
+		static uint32_t orig_uptime = 0;
+		if (orig_uptime == 0)
+			orig_uptime = info.uptime;
+		*up_time = info.uptime - orig_uptime;
+	} else {
+		*up_time = info.uptime;
+	}
 #endif
-    return 0;
+	return 0;
 }
 
-extern int get_cpu_load(uint32_t *cpu_load) {
+extern int get_cpu_load(uint32_t *cpu_load)
+{
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
-    /* Not sure how to get CPU load on above systems.
-     * Perhaps some method below works. */
-    *cpu_load = 0;
+	/* Not sure how to get CPU load on above systems.
+	 * Perhaps some method below works. */
+	*cpu_load = 0;
 #else
-    struct sysinfo info;
-    float shift_float = (float) (1 << SI_LOAD_SHIFT);
+	struct sysinfo info;
+	float shift_float = (float) (1 << SI_LOAD_SHIFT);
 
-    if (sysinfo(&info) < 0) {
-        *cpu_load = 0;
-        return errno;
-    }
+	if (sysinfo(&info) < 0) {
+		*cpu_load = 0;
+		return errno;
+	}
 
-    *cpu_load = (info.loads[1] / shift_float) * 100.0;
+	*cpu_load = (info.loads[1] / shift_float) * 100.0;
 #endif
-    return 0;
+	return 0;
 }
 
-extern int get_free_mem(uint64_t *free_mem) {
+extern int get_free_mem(uint64_t *free_mem)
+{
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
-    /* Not sure how to get CPU load on above systems.
-     * Perhaps some method below works. */
-    *free_mem = 0;
+	/* Not sure how to get CPU load on above systems.
+	 * Perhaps some method below works. */
+	*free_mem = 0;
 #else
-    struct sysinfo info;
+	struct sysinfo info;
 
-    if (sysinfo(&info) < 0) {
-        *free_mem = 0;
-        return errno;
-    }
+	if (sysinfo(&info) < 0) {
+		*free_mem = 0;
+		return errno;
+	}
 
-    *free_mem = (((uint64_t )info.freeram)*info.mem_unit)/(1024*1024);
+	*free_mem = (((uint64_t )info.freeram)*info.mem_unit)/(1024*1024);
 #endif
-    return 0;
+	return 0;
 }

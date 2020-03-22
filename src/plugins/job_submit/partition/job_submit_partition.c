@@ -73,9 +73,9 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Job submit partition plugin";
-const char plugin_type[] = "job_submit/partition";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Job submit partition plugin";
+const char plugin_type[]       	= "job_submit/partition";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*****************************************************************************\
  * We've provided a simple example of the type of things you can do with this
@@ -85,100 +85,113 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
 /* Test if this user can run jobs in the selected partition based upon
  * the partition's AllowGroups parameter. */
-static bool _user_access(uid_t run_uid, uint32_t submit_uid, struct part_record *part_ptr) {
-    int i;
+static bool _user_access(uid_t run_uid, uint32_t submit_uid,
+			 struct part_record *part_ptr)
+{
+	int i;
 
-    if (run_uid == 0) {
-        if (part_ptr->flags & PART_FLAG_NO_ROOT)
-            return false;
-        return true;
-    }
+	if (run_uid == 0) {
+		if (part_ptr->flags & PART_FLAG_NO_ROOT)
+			return false;
+		return true;
+	}
 
-    if ((part_ptr->flags & PART_FLAG_ROOT_ONLY) && (submit_uid != 0))
-        return false;
+	if ((part_ptr->flags & PART_FLAG_ROOT_ONLY) && (submit_uid != 0))
+		return false;
 
-    if (part_ptr->allow_uids == NULL)
-        return true;    /* AllowGroups=ALL */
+	if (part_ptr->allow_uids == NULL)
+		return true;	/* AllowGroups=ALL */
 
-    for (i = 0; part_ptr->allow_uids[i]; i++) {
-        if (part_ptr->allow_uids[i] == run_uid)
-            return true;    /* User in AllowGroups */
-    }
-    return false;        /* User not in AllowGroups */
+	for (i=0; part_ptr->allow_uids[i]; i++) {
+		if (part_ptr->allow_uids[i] == run_uid)
+			return true;	/* User in AllowGroups */
+	}
+	return false;		/* User not in AllowGroups */
 }
 
-static bool _valid_memory(struct part_record *part_ptr, struct job_descriptor *job_desc) {
-    uint64_t job_limit, part_limit;
+static bool _valid_memory(struct part_record *part_ptr,
+			  struct job_descriptor *job_desc)
+{
+	uint64_t job_limit, part_limit;
 
-    if (!part_ptr->max_mem_per_cpu)
-        return true;
+	if (!part_ptr->max_mem_per_cpu)
+		return true;
 
-    if (job_desc->pn_min_memory == NO_VAL64)
-        return true;
+	if (job_desc->pn_min_memory == NO_VAL64)
+		return true;
 
-    if ((job_desc->pn_min_memory & MEM_PER_CPU) && (part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
-        /* Perform per CPU memory limit test */
-        job_limit = job_desc->pn_min_memory & (~MEM_PER_CPU);
-        part_limit = part_ptr->max_mem_per_cpu & (~MEM_PER_CPU);
-        if (job_desc->pn_min_cpus != NO_VAL16) {
-            job_limit *= job_desc->pn_min_cpus;
-            part_limit *= job_desc->pn_min_cpus;
-        }
-    } else if (((job_desc->pn_min_memory & MEM_PER_CPU) == 0) && ((part_ptr->max_mem_per_cpu & MEM_PER_CPU) == 0)) {
-        /* Perform per node memory limit test */
-        job_limit = job_desc->pn_min_memory;
-        part_limit = part_ptr->max_mem_per_cpu;
-    } else {
-        /* Can not compare per node to per CPU memory limits */
-        return true;
-    }
+	if ((job_desc->pn_min_memory   & MEM_PER_CPU) &&
+	    (part_ptr->max_mem_per_cpu & MEM_PER_CPU)) {
+		/* Perform per CPU memory limit test */
+		job_limit  = job_desc->pn_min_memory   & (~MEM_PER_CPU);
+		part_limit = part_ptr->max_mem_per_cpu & (~MEM_PER_CPU);
+		if (job_desc->pn_min_cpus != NO_VAL16) {
+			job_limit  *= job_desc->pn_min_cpus;
+			part_limit *= job_desc->pn_min_cpus;
+		}
+	} else if (((job_desc->pn_min_memory   & MEM_PER_CPU) == 0) &&
+		   ((part_ptr->max_mem_per_cpu & MEM_PER_CPU) == 0)) {
+		/* Perform per node memory limit test */
+		job_limit  = job_desc->pn_min_memory;
+		part_limit = part_ptr->max_mem_per_cpu;
+	} else {
+		/* Can not compare per node to per CPU memory limits */
+		return true;
+	}
 
-    if (job_limit > part_limit) {
-        debug("job_submit/partition: skipping partition %s due to "
-              "memory limit (%"PRIu64" > %"PRIu64")", part_ptr->name, job_limit, part_limit);
-        return false;
-    }
+	if (job_limit > part_limit) {
+		debug("job_submit/partition: skipping partition %s due to "
+		      "memory limit (%"PRIu64" > %"PRIu64")",
+		      part_ptr->name, job_limit, part_limit);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 /* This example code will set a job's default partition to the partition with
  * highest priority_tier is available to this user. This is only an example
  * and tremendous flexibility is available. */
-extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid, char **err_msg) {
-    ListIterator part_iterator;
-    struct part_record *part_ptr;
-    struct part_record *top_prio_part = NULL;
+extern int job_submit(struct job_descriptor *job_desc, uint32_t submit_uid,
+		      char **err_msg)
+{
+	ListIterator part_iterator;
+	struct part_record *part_ptr;
+	struct part_record *top_prio_part = NULL;
 
-    if (job_desc->partition)    /* job already specified partition */
-        return SLURM_SUCCESS;
+	if (job_desc->partition)	/* job already specified partition */
+		return SLURM_SUCCESS;
 
-    part_iterator = list_iterator_create(part_list);
-    while ((part_ptr = (struct part_record *) list_next(part_iterator))) {
-        if (!(part_ptr->state_up & PARTITION_SUBMIT))
-            continue;    /* nobody can submit jobs here */
-        if (!_user_access(job_desc->user_id, submit_uid, part_ptr))
-            continue;    /* AllowGroups prevents use */
+	part_iterator = list_iterator_create(part_list);
+	while ((part_ptr = (struct part_record *) list_next(part_iterator))) {
+		if (!(part_ptr->state_up & PARTITION_SUBMIT))
+			continue;	/* nobody can submit jobs here */
+		if (!_user_access(job_desc->user_id, submit_uid, part_ptr))
+			continue;	/* AllowGroups prevents use */
 
-        if (!top_prio_part || (top_prio_part->priority_tier < part_ptr->priority_tier)) {
-            /* Test job specification elements here */
-            if (!_valid_memory(part_ptr, job_desc))
-                continue;
+		if (!top_prio_part ||
+		    (top_prio_part->priority_tier < part_ptr->priority_tier)) {
+			/* Test job specification elements here */
+			if (!_valid_memory(part_ptr, job_desc))
+				continue;
 
-            /* Found higher priority partition */
-            top_prio_part = part_ptr;
-        }
-    }
-    list_iterator_destroy(part_iterator);
+			/* Found higher priority partition */
+			top_prio_part = part_ptr;
+		}
+	}
+	list_iterator_destroy(part_iterator);
 
-    if (top_prio_part) {
-        info("Setting partition of submitted job to %s", top_prio_part->name);
-        job_desc->partition = xstrdup(top_prio_part->name);
-    }
+	if (top_prio_part) {
+		info("Setting partition of submitted job to %s",
+		     top_prio_part->name);
+		job_desc->partition = xstrdup(top_prio_part->name);
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int job_modify(struct job_descriptor *job_desc, struct job_record *job_ptr, uint32_t submit_uid) {
-    return SLURM_SUCCESS;
+extern int job_modify(struct job_descriptor *job_desc,
+		      struct job_record *job_ptr, uint32_t submit_uid)
+{
+	return SLURM_SUCCESS;
 }

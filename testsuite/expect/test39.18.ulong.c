@@ -36,9 +36,9 @@
 \*****************************************************************************/
 
 #include <stdio.h>
-
-int main(int argc, char *argv[]) {
-    printf("%lu\n", sizeof(unsigned long) * 8);
+int main(int argc, char *argv[])
+{
+    printf("%lu\n", sizeof(unsigned long)*8);
     return 0;
 }
 // See https://unix.stackexchange.com/a/115244/303114

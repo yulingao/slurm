@@ -61,39 +61,43 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "mcs none plugin";
-const char plugin_type[] = "mcs/none";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "mcs none plugin";
+const char plugin_type[]        = "mcs/none";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*
  * init() is called when the plugin is loaded, before any other functions
  *	are called.  Put global initialization here.
  */
-extern int init(void) {
-    debug("%s loaded", plugin_name);
+extern int init(void)
+{
+	debug("%s loaded", plugin_name);
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
 /*
  * fini() is called when the plugin is removed. Clear any allocated
  *	storage here.
  */
-extern int fini(void) {
-    debug("%s fini", plugin_name);
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	debug("%s fini", plugin_name);
+	return SLURM_SUCCESS;
 }
 
 /*
  * mcs_p_set_mcs_label() is called to obtain mcs_label.
  */
-extern int mcs_p_set_mcs_label(struct job_record *job_ptr, char *label) {
-    return SLURM_SUCCESS;
+extern int mcs_p_set_mcs_label (struct job_record *job_ptr, char *label)
+{
+	return SLURM_SUCCESS;
 }
 
 /*
  * mcs_p_check_mcs_label() is called to obtain mcs_label.
  */
-extern int mcs_p_check_mcs_label(uint32_t user_id, char *mcs_label) {
-    return SLURM_SUCCESS;
+extern int mcs_p_check_mcs_label (uint32_t user_id, char *mcs_label)
+{
+	return SLURM_SUCCESS;
 }

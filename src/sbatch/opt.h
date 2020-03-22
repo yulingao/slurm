@@ -54,38 +54,34 @@
 #include "src/common/slurm_opt.h"
 
 enum wrappers {
-    WRPR_START, WRPR_BSUB, WRPR_PBS, WRPR_CNT
+	WRPR_START,
+	WRPR_BSUB,
+	WRPR_PBS,
+	WRPR_CNT
 };
 
 typedef struct sbatch_env_opts {
-    uint32_t cpus_per_task;
-    char *dist;
-    char *dist_lllp;
-    char *mem_bind;
-    char *mem_bind_sort;
-    char *mem_bind_verbose;
-    uint32_t ntasks;
-    uint32_t ntasks_per_core;
-    uint32_t ntasks_per_node;
-    uint32_t ntasks_per_socket;
-    uint32_t plane_size;
+	uint32_t cpus_per_task;
+	char *   dist;
+	char *   dist_lllp;
+	char *   mem_bind;
+	char *   mem_bind_sort;
+	char *   mem_bind_verbose;
+	uint32_t ntasks;
+	uint32_t ntasks_per_core;
+	uint32_t ntasks_per_node;
+	uint32_t ntasks_per_socket;
+	uint32_t plane_size;
 } sbatch_env_t;
 
 extern slurm_opt_t opt;
 extern sbatch_opt_t sbopt;
 extern sbatch_env_t pack_env;
-extern int error_exit;
-extern bool is_pack_job;
+extern int   error_exit;
+extern bool  is_pack_job;
 
-/* 
+/*
  * process_options_first_pass()
-在第一次传递中，我们只查看命令行选项，并且只处理几个选项(help、usage、quiet、verbose、version)，并查找脚本名称和参数(如果提供了)。
-
-我们将解析process_options_second_pass()中的环境变量选项、批处理脚本选项和所有其他命令行选项。
-
-返回指向批处理脚本文件名的指针(如果文件名在命令行中提供的话)，否则返回NULL(在这种情况下，脚本需要从标准输入中读取)。
- * 
- * 
  *
  * In this first pass we only look at the command line options, and we
  * will only handle a few options (help, usage, quiet, verbose, version),
@@ -99,24 +95,9 @@ extern bool is_pack_job;
  * line, otherwise return NULL (in which case the script will need to be read
  * from standard input).
  */
-
 extern char *process_options_first_pass(int argc, char **argv);
 
-/* 
-/*流程选项：
- *1.使用脚本中设置的选项更新选项
- *2.使用env vars更新选项
- *3.使用命令行参数更新选项
- *4.执行一些选项合理的验证
- *
- *argc IN  - argv中元素的计数
- *argv IN  -要解析的元素数组
- *argc_off OUT  -第一个不可解析元素的偏移量
- *pack_inx IN  -打包作业组件ID，零原点
- *more_packs OUT  -更多打包要处理的脚本中的作业规范
- 
-
-process options:
+/* process options:
  * 1. update options with option set in the script
  * 2. update options with env vars
  * 3. update options with commandline args
@@ -128,27 +109,29 @@ process options:
  * pack_inx IN - pack job component ID, zero origin
  * more_packs OUT - more packs job specifications in script to process
  */
-extern void
-process_options_second_pass(int argc, char **argv, int *argc_off, int pack_inx, bool *more_packs, const char *file,
-                            const void *script_body, int script_size);
+extern void process_options_second_pass(int argc, char **argv, int *argc_off,
+					int pack_inx, bool *more_packs,
+					const char *file,
+					const void *script_body,
+					int script_size);
 
 /* external functions available for SPANK plugins to modify the environment
  * exported to the Slurm Prolog and Epilog programs */
 extern char *spank_get_job_env(const char *name);
+extern int   spank_set_job_env(const char *name, const char *value,
+			       int overwrite);
+extern int   spank_unset_job_env(const char *name);
 
-extern int spank_set_job_env(const char *name, const char *value, int overwrite);
-
-extern int spank_unset_job_env(const char *name);
 
 extern void init_envs(sbatch_env_t *local_env);
+extern void set_envs(char ***array_ptr, sbatch_env_t *local_env,
+		     int pack_offset);
 
-extern void set_envs(char ***array_ptr, sbatch_env_t *local_env, int pack_offset);
-
-extern char *get_argument(const char *file, int lineno, const char *line, int *skipped);
-
+extern char *get_argument(const char *file, int lineno, const char *line,
+			  int *skipped);
 extern char *next_line(const void *buf, int size, void **state);
 
 /* Translate #BSUB and #PBS directives in job script */
-extern bool xlate_batch_script(const char *file, const void *body, int size, int magic);
-
-#endif /* _HAVE_OPT_H */
+extern bool xlate_batch_script(const char *file, const void *body,
+			       int size, int magic);
+#endif	/* _HAVE_OPT_H */

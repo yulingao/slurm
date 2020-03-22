@@ -41,47 +41,51 @@
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
 /*
-检查此节点上是否允许cpu频率设置
- 如果是，为每个cpu创建并初始化cpu频率表条目
-
  * check if cpu frequency setting is allowed on this node
  * if so, create and initialize the cpu frequency table entry for each cpu
  */
-extern void cpu_freq_init(slurmd_conf_t *conf);
+extern void
+cpu_freq_init(slurmd_conf_t *conf);
 
 /*
  * free memory from cpu frequency table
  */
-extern void cpu_freq_fini(void);
+extern void
+cpu_freq_fini(void);
 
 /*
  * reset debug flag (slurmd)
  */
-extern void cpu_freq_reconfig(void);
+extern void
+cpu_freq_reconfig(void);
 
 /*
  * Send the cpu_frequency table info to slurmstepd
  */
-extern void cpu_freq_send_info(int fd);
+extern void
+cpu_freq_send_info(int fd);
 
 /*
  * Receive the cpu_frequency table info from slurmd
  */
-extern void cpu_freq_recv_info(int fd);
+extern void
+cpu_freq_recv_info(int fd);
 
 /*
  * Validate the cpus and select the frequency to set
  * Called from task cpuset code with job record containing
  *  a pointer to a hex map of the cpus to be used by this step
  */
-extern void cpu_freq_cpuset_validate(stepd_step_rec_t *job);
+extern void
+cpu_freq_cpuset_validate(stepd_step_rec_t *job);
 
 /*
  * Validate the cpus and select the frequency to set
  * Called from task cgroup cpuset code with string containing
  *  the list of cpus to be used by this step
  */
-extern void cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores);
+extern void
+cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cores);
 
 /*
  * Verify slurm.conf CpuFreqGovernors list
@@ -90,7 +94,8 @@ extern void cpu_freq_cgroup_validate(stepd_step_rec_t *job, char *step_alloc_cor
  *	   - govs - pointer to composite of enum for each governor in list
  * Returns - -1 on error, else 0
  */
-extern int cpu_freq_verify_govlist(const char *arg, uint32_t *govs);
+extern int
+cpu_freq_verify_govlist(const char *arg, uint32_t *govs);
 
 /*
  * Verify slurm.conf CpuFreqDef option
@@ -101,7 +106,8 @@ extern int cpu_freq_verify_govlist(const char *arg, uint32_t *govs);
  *	   - freq - pointer to corresponging enum or numberic value
  * Returns - -1 on error, else 0
  */
-extern int cpu_freq_verify_def(const char *arg, uint32_t *freq);
+extern int
+cpu_freq_verify_def(const char *arg, uint32_t *freq);
 
 /*
  * Verify cpu_freq command line option
@@ -128,7 +134,10 @@ extern int cpu_freq_verify_def(const char *arg, uint32_t *freq);
  * returns -1 on error, 0 otherwise
  */
 extern int
-cpu_freq_verify_cmdline(const char *arg, uint32_t *cpu_freq_min, uint32_t *cpu_freq_max, uint32_t *cpu_freq_gov);
+cpu_freq_verify_cmdline(const char *arg,
+		uint32_t *cpu_freq_min,
+		uint32_t *cpu_freq_max,
+		uint32_t *cpu_freq_gov);
 
 /* Convert a composite cpu governor enum to its equivalent string
  *
@@ -136,7 +145,8 @@ cpu_freq_verify_cmdline(const char *arg, uint32_t *cpu_freq_min, uint32_t *cpu_f
  *         - bufsz - size of buffer
  *         - gpvs  - composite enum of governors
  */
-extern void cpu_freq_govlist_to_string(char *buf, uint16_t bufsz, uint32_t govs);
+extern void
+cpu_freq_govlist_to_string(char* buf, uint16_t bufsz, uint32_t govs);
 
 /*
  * Return an xmalloc()'d string representing the original input to --cpu-freq.
@@ -146,20 +156,25 @@ extern char *cpu_freq_to_cmdline(uint32_t min, uint32_t max, uint32_t gov);
 /*
  * Set environment variables associated with the frequency variables.
  */
-extern int cpu_freq_set_env(char *var, uint32_t min, uint32_t max, uint32_t gov);
+extern int
+cpu_freq_set_env(char* var, uint32_t min, uint32_t max, uint32_t gov);
 
 /* Convert a cpu_freq number to its equivalent string */
-extern void cpu_freq_to_string(char *buf, int buf_size, uint32_t cpu_freq);
+extern void
+cpu_freq_to_string(char *buf, int buf_size, uint32_t cpu_freq);
+
 
 /*
  * set the userspace governor and the new frequency value
  */
-extern void cpu_freq_set(stepd_step_rec_t *job);
+extern void
+cpu_freq_set(stepd_step_rec_t *job);
 
 /*
  * reset the governor and cpu frequency to the configured values
  */
-extern void cpu_freq_reset(stepd_step_rec_t *job);
+extern void
+cpu_freq_reset(stepd_step_rec_t *job);
 
 /*
  * Convert frequency parameters to strings
@@ -175,7 +190,7 @@ extern void cpu_freq_reset(stepd_step_rec_t *job);
  * Returns 0 if all parameters are NO_VAL (or 0)
  */
 extern int
-cpu_freq_debug(char *label, char *noval_str, char *freq_str, int freq_len, uint32_t gov, uint32_t min, uint32_t max,
-               uint32_t freq);
+cpu_freq_debug(char* label, char* noval_str, char* freq_str, int freq_len,
+		  uint32_t gov, uint32_t min, uint32_t max, uint32_t freq);
 
 #endif /* _CPU_FREQUENCY_H_ */

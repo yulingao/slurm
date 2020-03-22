@@ -27,7 +27,6 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 #define _GNU_SOURCE
-
 #include <inttypes.h>
 #include <numa.h>
 #include <stdint.h>
@@ -47,47 +46,53 @@
 #  define MY_TEST nodemask_isset
 #endif
 
-static void _load_cpu_mask(MY_MASK *cpu_mask) {
-    *cpu_mask = numa_get_run_node_mask();
+static void _load_cpu_mask(MY_MASK *cpu_mask)
+{
+	*cpu_mask = numa_get_run_node_mask();
 }
 
-static void _load_mem_mask(MY_MASK *mem_mask) {
-    *mem_mask = numa_get_membind();
+static void _load_mem_mask(MY_MASK *mem_mask)
+{
+	*mem_mask = numa_get_membind();
 }
 
-static uint64_t _mask_to_int(MY_MASK *mask) {
-    uint64_t i, rc = 0;
+static uint64_t _mask_to_int(MY_MASK *mask)
+{
+	uint64_t i, rc = 0;
 
-    for (i = 0; i < NUMA_NUM_NODES; i++) {
+	for (i = 0; i < NUMA_NUM_NODES; i++) {
 #if (LIBNUMA_API_VERSION > 1)
-        if (MY_TEST(*mask, i))
+		if (MY_TEST(*mask, i))
 #else
-        if (MY_TEST(mask, i))
+		if (MY_TEST(mask, i))
 #endif
-            rc += (((uint64_t) 1) << i);
-    }
-    return rc;
+			rc += (((uint64_t) 1) << i);
+	}
+	return rc;
 }
 
-int main(int argc, char **argv) {
-    char *task_str;
-    MY_MASK cpu_mask;
-    MY_MASK mem_mask;
-    int task_id;
+int main (int argc, char **argv)
+{
+	char *task_str;
+	MY_MASK cpu_mask;
+	MY_MASK mem_mask;
+	int task_id;
 
-    if (numa_available() < 0) {
-        fprintf(stderr, "ERROR: numa support not available\n");
-        exit(0);
-    }
+	if (numa_available() < 0) {
+		fprintf(stderr, "ERROR: numa support not available\n");
+		exit(0);
+	}
 
-    /* On POE systems, MP_CHILD is equivalent to SLURM_PROCID */
-    if (((task_str = getenv("SLURM_PROCID")) == NULL) && ((task_str = getenv("MP_CHILD")) == NULL)) {
-        fprintf(stderr, "ERROR: getenv(SLURM_PROCID) failed\n");
-        exit(1);
-    }
-    task_id = atoi(task_str);
-    _load_cpu_mask(&cpu_mask);
-    _load_mem_mask(&mem_mask);
-    printf("TASK_ID:%d,CPU_MASK:%"PRIu64",MEM_MASK:%lu\n", task_id, _mask_to_int(&cpu_mask), _mask_to_int(&mem_mask));
-    exit(0);
+	/* On POE systems, MP_CHILD is equivalent to SLURM_PROCID */
+	if (((task_str = getenv("SLURM_PROCID")) == NULL) &&
+	    ((task_str = getenv("MP_CHILD")) == NULL)) {
+		fprintf(stderr, "ERROR: getenv(SLURM_PROCID) failed\n");
+		exit(1);
+	}
+	task_id = atoi(task_str);
+	_load_cpu_mask(&cpu_mask);
+	_load_mem_mask(&mem_mask);
+	printf("TASK_ID:%d,CPU_MASK:%"PRIu64",MEM_MASK:%lu\n",
+		task_id, _mask_to_int(&cpu_mask), _mask_to_int(&mem_mask));
+	exit(0);
 }

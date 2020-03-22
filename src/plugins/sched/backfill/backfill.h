@@ -50,4 +50,4 @@ extern void stop_backfill_agent(void);
 /* Note that slurm.conf has changed */
 extern void backfill_reconfig(void);
 
-#endif    /* _SLURM_BACKFILL_H */
+#endif	/* _SLURM_BACKFILL_H */

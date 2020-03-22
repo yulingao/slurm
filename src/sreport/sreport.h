@@ -68,30 +68,30 @@
 #include "src/common/xstring.h"
 #include "src/common/print_fields.h"
 
-#define CKPT_WAIT    10
-#define    MAX_INPUT_FIELDS 128
+#define CKPT_WAIT	10
+#define	MAX_INPUT_FIELDS 128
 
 typedef enum {
-    GROUP_BY_ACCOUNT,
-    GROUP_BY_ACCOUNT_JOB_SIZE,
-    GROUP_BY_ACCOUNT_JOB_SIZE_DURATION,
-    GROUP_BY_USER,
-    GROUP_BY_USER_JOB_SIZE,
-    GROUP_BY_USER_JOB_SIZE_DURATION,
-    GROUP_BY_NONE
+	GROUP_BY_ACCOUNT,
+	GROUP_BY_ACCOUNT_JOB_SIZE,
+	GROUP_BY_ACCOUNT_JOB_SIZE_DURATION,
+	GROUP_BY_USER,
+	GROUP_BY_USER_JOB_SIZE,
+	GROUP_BY_USER_JOB_SIZE_DURATION,
+	GROUP_BY_NONE
 } report_grouping_t;
 
 extern slurmdb_report_time_format_t time_format;
 extern char *time_format_string;
 extern char *command_name;
-extern int exit_code;    /* sacctmgr's exit code, =1 on any error at any time */
-extern int exit_flag;    /* program to terminate if =1 */
-extern char *fed_name;    /* Set if operating in federation mode */
-extern int input_words;    /* number of words of input permitted */
-extern int quiet_flag;    /* quiet=1, verbose=-1, normal=0 */
-extern char *tres_str;    /* --tres= value */
+extern int exit_code;	/* sacctmgr's exit code, =1 on any error at any time */
+extern int exit_flag;	/* program to terminate if =1 */
+extern char *fed_name;	/* Set if operating in federation mode */
+extern int input_words;	/* number of words of input permitted */
+extern int quiet_flag;	/* quiet=1, verbose=-1, normal=0 */
+extern char *tres_str;	/* --tres= value */
 extern List g_tres_list;/* tres list from database - unaltered */
-extern List tres_list;    /* TRES list based of tres_str (--tres=str) */
+extern List tres_list;	/* TRES list based of tres_str (--tres=str) */
 extern void *db_conn;
 extern int all_clusters_flag;
 extern slurmdb_report_sort_t sort_flag;
@@ -99,18 +99,13 @@ extern char *cluster_flag;
 extern char *tres_usage_str;
 extern bool user_case_norm;
 
-extern void slurmdb_report_print_time(print_field_t *field, uint64_t value, uint64_t total_time, int last);
-
+extern void slurmdb_report_print_time(print_field_t *field,
+			       uint64_t value, uint64_t total_time, int last);
 extern int parse_option_end(char *option);
-
 extern time_t sanity_check_endtime(time_t endtime);
-
 extern char *strip_quotes(char *option, int *increased);
-
 extern int sort_user_dec(void *, void *);
-
 extern int sort_cluster_dec(void *, void *);
-
 extern int sort_assoc_dec(void *, void *);
 
 extern int get_uint(char *in_value, uint32_t *out_value, char *type);
@@ -119,17 +114,19 @@ extern int get_uint(char *in_value, uint32_t *out_value, char *type);
  * allocated seconds.  As we still want to print a line if the usage
  * is zero NULLs must be handled after the function is called.
  */
-extern void
-sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec, slurmdb_tres_rec_t **tres_rec, List cluster_tres_list,
-                      List tres_list, slurmdb_tres_rec_t *tres_rec_in);
+extern void sreport_set_tres_recs(slurmdb_tres_rec_t **cluster_tres_rec,
+				  slurmdb_tres_rec_t **tres_rec,
+				  List cluster_tres_list, List tres_list,
+				  slurmdb_tres_rec_t *tres_rec_in);
 
 /* Since usage columns can get big, instead of always giving a 20
  * column spacing, figure it out here.
  */
 extern void sreport_set_usage_col_width(print_field_t *field, uint64_t number);
 
-extern void sreport_set_usage_column_width(print_field_t *usage_field, print_field_t *energy_field,
-                                           List slurmdb_report_cluster_list);
+extern void sreport_set_usage_column_width(print_field_t *usage_field,
+					   print_field_t *energy_field,
+					   List slurmdb_report_cluster_list);
 
 /* For duplicate user/account records, combine TRES records into the original
  * list and purge the duplicate records */

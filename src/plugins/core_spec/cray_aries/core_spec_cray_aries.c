@@ -79,24 +79,26 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "Cray/Aries core specialization plugin";
-const char plugin_type[] = "core_spec/cray_aries";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]       	= "Cray/Aries core specialization plugin";
+const char plugin_type[]       	= "core_spec/cray_aries";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 static uint64_t debug_flags = 0;
 
 // If job_set_corespec fails, retry this many times to wait
 // for suspends to complete.
 #define CORE_SPEC_RETRIES 5
 
-extern int init(void) {
-    debug_flags = slurm_get_debug_flags();
-    info("%s: init", plugin_type);
-    return SLURM_SUCCESS;
+extern int init(void)
+{
+	debug_flags = slurm_get_debug_flags();
+	info("%s: init", plugin_type);
+	return SLURM_SUCCESS;
 }
 
-extern int fini(void) {
-    info("%s: fini", plugin_type);
-    return SLURM_SUCCESS;
+extern int fini(void)
+{
+	info("%s: fini", plugin_type);
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -104,97 +106,98 @@ extern int fini(void) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_p_set(uint64_t cont_id, uint16_t core_count) {
-    DEF_TIMERS;
-    START_TIMER;
+extern int core_spec_p_set(uint64_t cont_id, uint16_t core_count)
+{
+	DEF_TIMERS;
+	START_TIMER;
 #if _DEBUG
-    char *spec_type;
-    int spec_count;
-    if (core_count == NO_VAL16) {
-        spec_type  = "Cores";
-        spec_count = 0;
-    } else if (core_count & CORE_SPEC_THREAD) {
-        spec_type  = "Threads";
-        spec_count = core_count & (~CORE_SPEC_THREAD);
-    } else {
-        spec_type  = "Cores";
-        spec_count = core_count;
-    }
-    info("core_spec_p_set(%"PRIu64") to %d %s",
-         cont_id, spec_count, spec_type);
+	char *spec_type;
+	int spec_count;
+	if (core_count == NO_VAL16) {
+		spec_type  = "Cores";
+		spec_count = 0;
+	} else if (core_count & CORE_SPEC_THREAD) {
+		spec_type  = "Threads";
+		spec_count = core_count & (~CORE_SPEC_THREAD);
+	} else {
+		spec_type  = "Cores";
+		spec_count = core_count;
+	}
+	info("core_spec_p_set(%"PRIu64") to %d %s",
+	     cont_id, spec_count, spec_type);
 #endif
 
 #ifdef HAVE_NATIVE_CRAY
-    int rc;
-    struct job_set_affinity_info affinity_info;
-    pid_t pid;
-    int i;
+	int rc;
+	struct job_set_affinity_info affinity_info;
+	pid_t pid;
+	int i;
 
-    // Skip core spec setup for no specialized cores
-    if ((core_count == NO_VAL16) ||
-        (core_count == CORE_SPEC_THREAD)) {
-        return SLURM_SUCCESS;
-    }
-    core_count &= (~CORE_SPEC_THREAD);
+	// Skip core spec setup for no specialized cores
+	if ((core_count == NO_VAL16) ||
+	    (core_count == CORE_SPEC_THREAD)) {
+		return SLURM_SUCCESS;
+	}
+	core_count &= (~CORE_SPEC_THREAD);
 
-    // Set the core spec information
-    // Retry because there's a small timing window during preemption
-    // when two core spec jobs can be running at once.
-    for (i = 0; i < CORE_SPEC_RETRIES; i++) {
-        if (i) {
-            sleep(1);
-        }
+	// Set the core spec information
+	// Retry because there's a small timing window during preemption
+	// when two core spec jobs can be running at once.
+	for (i = 0; i < CORE_SPEC_RETRIES; i++) {
+		if (i) {
+			sleep(1);
+		}
 
-        errno = 0;
-        rc = job_set_corespec(cont_id, core_count, NULL);
-        if (rc == 0 || errno != EINVAL) {
-            break;
-        }
-    }
-    if (rc != 0) {
-        debug("job_set_corespec(%"PRIu64", %"PRIu16") failed: %m",
-              cont_id, core_count);
-        return SLURM_ERROR;
-    }
+		errno = 0;
+		rc = job_set_corespec(cont_id, core_count, NULL);
+		if (rc == 0 || errno != EINVAL) {
+			break;
+		}
+	}
+	if (rc != 0) {
+		debug("job_set_corespec(%"PRIu64", %"PRIu16") failed: %m",
+		      cont_id, core_count);
+		return SLURM_ERROR;
+	}
 
-    // Get a pid in the job to use with job_set_affinity
-    pid = job_getprimepid(cont_id);
-    if (pid < 0) {
-        error("job_getprimepid(%"PRIu64") returned %d: %m",
-              cont_id, (int)pid);
-        return SLURM_ERROR;
-    }
+	// Get a pid in the job to use with job_set_affinity
+	pid = job_getprimepid(cont_id);
+	if (pid < 0) {
+		error("job_getprimepid(%"PRIu64") returned %d: %m",
+		      cont_id, (int)pid);
+		return SLURM_ERROR;
+	}
 
-    // Apply the core specialization with job_set_affinity
-    // JOB_AFFINITY_NONE tells the kernel to not alter the process'
-    // affinity unless required (the process is only allowed to run
-    // on cores that will be specialized).
-    memset(&affinity_info, 0, sizeof(struct job_set_affinity_info));
-    affinity_info.cpu_list = JOB_AFFINITY_NONE;
-    rc = job_set_affinity(cont_id, pid, &affinity_info);
-    if (rc != 0) {
-        if (affinity_info.message != NULL) {
-            error("job_set_affinity(%"PRIu64", %zu) failed %s: %m",
-                  cont_id, (size_t)pid, affinity_info.message);
-            free(affinity_info.message);
-        } else {
-            error("job_set_affinity(%"PRIu64", %zu) failed: %m",
-                  cont_id, (size_t)pid);
-        }
-        return SLURM_ERROR;
-    } else if (affinity_info.message != NULL) {
-        info("job_set_affinity(%"PRIu64", %zu): %s",
-             cont_id, (size_t)pid, affinity_info.message);
-        free(affinity_info.message);
-    }
+	// Apply the core specialization with job_set_affinity
+	// JOB_AFFINITY_NONE tells the kernel to not alter the process'
+	// affinity unless required (the process is only allowed to run
+	// on cores that will be specialized).
+	memset(&affinity_info, 0, sizeof(struct job_set_affinity_info));
+	affinity_info.cpu_list = JOB_AFFINITY_NONE;
+	rc = job_set_affinity(cont_id, pid, &affinity_info);
+	if (rc != 0) {
+		if (affinity_info.message != NULL) {
+			error("job_set_affinity(%"PRIu64", %zu) failed %s: %m",
+			      cont_id, (size_t)pid, affinity_info.message);
+			free(affinity_info.message);
+		} else {
+			error("job_set_affinity(%"PRIu64", %zu) failed: %m",
+			      cont_id, (size_t)pid);
+		}
+		return SLURM_ERROR;
+	} else if (affinity_info.message != NULL) {
+		info("job_set_affinity(%"PRIu64", %zu): %s",
+		     cont_id, (size_t)pid, affinity_info.message);
+		free(affinity_info.message);
+	}
 #endif
-    END_TIMER;
-    if (debug_flags & DEBUG_FLAG_TIME_CRAY)
-        INFO_LINE("call took: %s", TIME_STR);
+	END_TIMER;
+	if (debug_flags & DEBUG_FLAG_TIME_CRAY)
+		INFO_LINE("call took: %s", TIME_STR);
 
-    // The code that was here is now performed by
-    // switch_p_job_step_{pre,post}_suspend()
-    return SLURM_SUCCESS;
+	// The code that was here is now performed by
+	// switch_p_job_step_{pre,post}_suspend()
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -202,13 +205,14 @@ extern int core_spec_p_set(uint64_t cont_id, uint16_t core_count) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_p_clear(uint64_t cont_id) {
+extern int core_spec_p_clear(uint64_t cont_id)
+{
 #if _DEBUG
-    info("core_spec_p_clear(%"PRIu64")", cont_id);
+	info("core_spec_p_clear(%"PRIu64")", cont_id);
 #endif
-    // Core specialization is automatically cleared when
-    // the job exits.
-    return SLURM_SUCCESS;
+	// Core specialization is automatically cleared when
+	// the job exits.
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -216,26 +220,27 @@ extern int core_spec_p_clear(uint64_t cont_id) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_p_suspend(uint64_t cont_id, uint16_t core_count) {
+extern int core_spec_p_suspend(uint64_t cont_id, uint16_t core_count)
+{
 #if _DEBUG
-    char *spec_type;
-    int spec_count;
-    if (core_count == NO_VAL16) {
-        spec_type  = "Cores";
-        spec_count = 0;
-    } else if (core_count & CORE_SPEC_THREAD) {
-        spec_type  = "Threads";
-        spec_count = core_count & (~CORE_SPEC_THREAD);
-    } else {
-        spec_type  = "Cores";
-        spec_count = core_count;
-    }
-    info("core_spec_p_suspend(%"PRIu64") count %d %s",
-         cont_id, spec_count, spec_type);
+	char *spec_type;
+	int spec_count;
+	if (core_count == NO_VAL16) {
+		spec_type  = "Cores";
+		spec_count = 0;
+	} else if (core_count & CORE_SPEC_THREAD) {
+		spec_type  = "Threads";
+		spec_count = core_count & (~CORE_SPEC_THREAD);
+	} else {
+		spec_type  = "Cores";
+		spec_count = core_count;
+	}
+	info("core_spec_p_suspend(%"PRIu64") count %d %s",
+	     cont_id, spec_count, spec_type);
 #endif
-    // The code that was here is now performed by
-    // switch_p_job_step_{pre,post}_suspend()
-    return SLURM_SUCCESS;
+	// The code that was here is now performed by
+	// switch_p_job_step_{pre,post}_suspend()
+	return SLURM_SUCCESS;
 }
 
 /*
@@ -243,24 +248,25 @@ extern int core_spec_p_suspend(uint64_t cont_id, uint16_t core_count) {
  *
  * Return SLURM_SUCCESS on success
  */
-extern int core_spec_p_resume(uint64_t cont_id, uint16_t core_count) {
+extern int core_spec_p_resume(uint64_t cont_id, uint16_t core_count)
+{
 #if _DEBUG
-    char *spec_type;
-    int spec_count;
-    if (core_count == NO_VAL16) {
-        spec_type  = "Cores";
-        spec_count = 0;
-    } else if (core_count & CORE_SPEC_THREAD) {
-        spec_type  = "Threads";
-        spec_count = core_count & (~CORE_SPEC_THREAD);
-    } else {
-        spec_type  = "Cores";
-        spec_count = core_count;
-    }
-    info("core_spec_p_resume(%"PRIu64") count %d %s",
-         cont_id, spec_count, spec_type);
+	char *spec_type;
+	int spec_count;
+	if (core_count == NO_VAL16) {
+		spec_type  = "Cores";
+		spec_count = 0;
+	} else if (core_count & CORE_SPEC_THREAD) {
+		spec_type  = "Threads";
+		spec_count = core_count & (~CORE_SPEC_THREAD);
+	} else {
+		spec_type  = "Cores";
+		spec_count = core_count;
+	}
+	info("core_spec_p_resume(%"PRIu64") count %d %s",
+	     cont_id, spec_count, spec_type);
 #endif
-    // The code that was here is now performed by
-    // switch_p_job_step_{pre,post}_resume()
-    return SLURM_SUCCESS;
+	// The code that was here is now performed by
+	// switch_p_job_step_{pre,post}_resume()
+	return SLURM_SUCCESS;
 }

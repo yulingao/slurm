@@ -44,23 +44,23 @@
 
 #include "src/slurmctld/slurmctld.h"
 
-#define AGENT_THREAD_COUNT    10    /* maximum active threads per agent */
-#define COMMAND_TIMEOUT    30    /* command requeue or error, seconds */
+#define AGENT_THREAD_COUNT	10	/* maximum active threads per agent */
+#define COMMAND_TIMEOUT 	30	/* command requeue or error, seconds */
 
 #define LOTS_OF_AGENTS_CNT 50
 #define LOTS_OF_AGENTS ((get_agent_count() <= LOTS_OF_AGENTS_CNT) ? 0 : 1)
 
 typedef struct agent_arg {
-    uint32_t node_count;    /* number of nodes to communicate
+	uint32_t	node_count;	/* number of nodes to communicate
 					 * with */
-    uint16_t retry;        /* if set, keep trying */
-    slurm_addr_t *addr;          /* if set will send to this
+	uint16_t	retry;		/* if set, keep trying */
+	slurm_addr_t    *addr;          /* if set will send to this
 					   addr not hostlist */
-    hostlist_t hostlist;    /* hostlist containing the
+	hostlist_t	hostlist;	/* hostlist containing the
 					 * nodes we are sending to */
-    uint16_t protocol_version; /* protocol version to use */
-    slurm_msg_type_t msg_type;    /* RPC to be issued */
-    void *msg_args;    /* RPC data to be transmitted */
+	uint16_t        protocol_version; /* protocol version to use */
+	slurm_msg_type_t msg_type;	/* RPC to be issued */
+	void		*msg_args;	/* RPC data to be transmitted */
 } agent_arg_t;
 
 /* Start a thread to manage queued agent requests */
@@ -74,7 +74,7 @@ extern void agent_init(void);
  *	hostlist and msg_args) upon completion if AGENT_IS_THREAD is set
  * RET always NULL (function format just for use as pthread)
  */
-extern void *agent(void *args);
+extern void *agent (void *args);
 
 /*
  * agent_queue_request - put a request on the queue for later execution or
@@ -93,7 +93,7 @@ extern void agent_queue_request(agent_arg_t *agent_arg_ptr);
 extern void agent_trigger(int min_wait, bool mail_too);
 
 /* agent_purge - purge all pending RPC requests */
-extern void agent_purge(void);
+extern void agent_purge (void);
 
 /* get_agent_count - find out how many active agents we have */
 extern int get_agent_count(void);
@@ -106,7 +106,7 @@ extern void agent_pack_pending_rpc_stats(Buf buffer);
  * IN job_ptr - job identification
  * IN state_type - job transition type, see MAIL_JOB in slurm.h
  */
-extern void mail_job_info(struct job_record *job_ptr, uint16_t mail_type);
+extern void mail_job_info (struct job_record *job_ptr, uint16_t mail_type);
 
 /* Return length of agent's retry_list */
 extern int retry_list_size(void);

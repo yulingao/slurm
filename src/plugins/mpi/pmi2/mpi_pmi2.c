@@ -74,57 +74,63 @@
  * plugin_version - an unsigned 32-bit integer containing the Slurm version
  * (major.minor.micro combined into a single number).
  */
-const char plugin_name[] = "mpi PMI2 plugin";
-const char plugin_type[] = "mpi/pmi2";
-const uint32_t plugin_version = SLURM_VERSION_NUMBER;
+const char plugin_name[]        = "mpi PMI2 plugin";
+const char plugin_type[]        = "mpi/pmi2";
+const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
 /*
  * The following is executed in slurmstepd.
  */
 
-int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env) {
-    int rc;
+int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job,
+				  char ***env)
+{
+	int rc;
 
-    debug("using mpi/pmi2");
+	debug("using mpi/pmi2");
 
-    if (job->batch)
-        return SLURM_SUCCESS;
+	if (job->batch)
+		return SLURM_SUCCESS;
 
-    rc = pmi2_setup_stepd(job, env);
-    if (rc != SLURM_SUCCESS)
-        return rc;
+	rc = pmi2_setup_stepd(job, env);
+	if (rc != SLURM_SUCCESS)
+		return rc;
 
-    if (pmi2_start_agent() < 0) {
-        error("mpi/pmi2: failed to create pmi2 agent thread");
-        return SLURM_ERROR;
-    }
+	if (pmi2_start_agent() < 0) {
+		error ("mpi/pmi2: failed to create pmi2 agent thread");
+		return SLURM_ERROR;
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
-    int i;
+int p_mpi_hook_slurmstepd_task (const mpi_plugin_task_info_t *job,
+				char ***env)
+{
+	int i;
 
-    env_array_overwrite_fmt(env, "PMI_FD", "%u", TASK_PMI_SOCK(job->ltaskid));
+	env_array_overwrite_fmt(env, "PMI_FD", "%u",
+				TASK_PMI_SOCK(job->ltaskid));
 
-    env_array_overwrite_fmt(env, "PMI_JOBID", "%s", job_info.pmi_jobid);
-    env_array_overwrite_fmt(env, "PMI_RANK", "%u", job->gtaskid);
-    env_array_overwrite_fmt(env, "PMI_SIZE", "%u", job->ntasks);
-    if (job_info.spawn_seq) { /* PMI1.1 needs this env-var */
-        env_array_overwrite_fmt(env, "PMI_SPAWNED", "%u", 1);
-    }
-    /* close unused sockets in task */
-    close(tree_sock);
-    tree_sock = 0;
-    for (i = 0; i < job->ltasks; i++) {
-        close(STEPD_PMI_SOCK(i));
-        STEPD_PMI_SOCK(i) = 0;
-        if (i != job->ltaskid) {
-            close(TASK_PMI_SOCK(i));
-            TASK_PMI_SOCK(i) = 0;
-        }
-    }
-    return SLURM_SUCCESS;
+	env_array_overwrite_fmt(env, "PMI_JOBID", "%s",
+				job_info.pmi_jobid);
+	env_array_overwrite_fmt(env, "PMI_RANK", "%u", job->gtaskid);
+	env_array_overwrite_fmt(env, "PMI_SIZE", "%u", job->ntasks);
+	if (job_info.spawn_seq) { /* PMI1.1 needs this env-var */
+		env_array_overwrite_fmt(env, "PMI_SPAWNED", "%u", 1);
+	}
+	/* close unused sockets in task */
+	close(tree_sock);
+	tree_sock = 0;
+	for (i = 0; i < job->ltasks; i ++) {
+		close(STEPD_PMI_SOCK(i));
+		STEPD_PMI_SOCK(i) = 0;
+		if (i != job->ltaskid) {
+			close(TASK_PMI_SOCK(i));
+			TASK_PMI_SOCK(i) = 0;
+		}
+	}
+	return SLURM_SUCCESS;
 }
 
 
@@ -132,39 +138,43 @@ int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env) {
  * The following is executed in srun.
  */
 
-mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(mpi_plugin_client_info_t *job, char ***env) {
-    int rc;
+mpi_plugin_client_state_t *
+p_mpi_hook_client_prelaunch(mpi_plugin_client_info_t *job, char ***env)
+{
+	int rc;
 
-    debug("mpi/pmi2: client_prelaunch");
+	debug("mpi/pmi2: client_prelaunch");
 
-    rc = pmi2_setup_srun(job, env);
-    if (rc != SLURM_SUCCESS) {
-        return NULL;
-    }
+	rc = pmi2_setup_srun(job, env);
+	if (rc != SLURM_SUCCESS) {
+		return NULL;
+	}
 
-    if (pmi2_start_agent() < 0) {
-        error("failed to start PMI2 agent thread");
-        return NULL;
-    }
+	if (pmi2_start_agent() < 0) {
+		error("failed to start PMI2 agent thread");
+		return NULL;
+	}
 
-    return (void *) 0x12345678;
+	return (void *)0x12345678;
 }
 
-int p_mpi_hook_client_fini(mpi_plugin_client_state_t *state) {
+int p_mpi_hook_client_fini(mpi_plugin_client_state_t *state)
+{
 
-    pmi2_stop_agent();
+	pmi2_stop_agent();
 
-    /* the job may be allocated by this srun.
-     * or exit of this srun may cause the job script to exit.
-     * wait for the spawned steps. */
-    spawn_job_wait();
+	/* the job may be allocated by this srun.
+	 * or exit of this srun may cause the job script to exit.
+	 * wait for the spawned steps. */
+	spawn_job_wait();
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }
 
-extern int fini() {
-    /* cleanup after ourself */
-    pmi2_stop_agent();
-    pmi2_cleanup_stepd();
-    return 0;
+extern int fini()
+{
+	/* cleanup after ourself */
+	pmi2_stop_agent();
+	pmi2_cleanup_stepd();
+	return 0;
 }

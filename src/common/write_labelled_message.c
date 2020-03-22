@@ -48,8 +48,8 @@
 #include "src/common/xmalloc.h"
 #include "src/common/xstring.h"
 
-static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset, uint32_t task_offset);
-
+static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset,
+			  uint32_t task_offset);
 static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len);
 
 /*
@@ -71,70 +71,76 @@ static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len);
  * in a '\n'), then add a newline to the output file, but only
  * in label mode.
  */
-extern int
-write_labelled_message(int fd, void *buf, int len, int task_id, uint32_t pack_offset, uint32_t task_offset, bool label,
-                       int task_id_width) {
-    void *start, *end;
-    char *prefix = NULL, *suffix = NULL;
-    int remaining = len;
-    int written = 0;
-    int line_len;
-    int rc = -1;
+extern int write_labelled_message(int fd, void *buf, int len, int task_id,
+				  uint32_t pack_offset, uint32_t task_offset,
+				  bool label, int task_id_width)
+{
+	void *start, *end;
+	char *prefix = NULL, *suffix = NULL;
+	int remaining = len;
+	int written = 0;
+	int line_len;
+	int rc = -1;
 
-    if (label) {
-        prefix = _build_label(task_id, task_id_width, pack_offset, task_offset);
-    }
+	if (label) {
+		prefix = _build_label(task_id, task_id_width, pack_offset,
+				      task_offset);
+	}
 
-    while (remaining > 0) {
-        start = buf + written;
-        end = memchr(start, '\n', remaining);
-        if (end == NULL) { /* no newline found */
-            if (label)
-                suffix = "\n";
-            rc = _write_line(fd, prefix, suffix, start, remaining);
-            if (rc <= 0) {
-                goto done;
-            } else {
-                remaining -= rc;
-                written += rc;
-            }
-        } else {
-            line_len = (int) (end - start) + 1;
-            rc = _write_line(fd, prefix, suffix, start, line_len);
-            if (rc <= 0) {
-                goto done;
-            } else {
-                remaining -= rc;
-                written += rc;
-            }
-        }
+	while (remaining > 0) {
+		start = buf + written;
+		end = memchr(start, '\n', remaining);
+		if (end == NULL) { /* no newline found */
+			if (label)
+				suffix = "\n";
+			rc = _write_line(fd, prefix, suffix, start, remaining);
+			if (rc <= 0) {
+				goto done;
+			} else {
+				remaining -= rc;
+				written += rc;
+			}
+		} else {
+			line_len = (int)(end - start) + 1;
+			rc = _write_line(fd, prefix, suffix, start, line_len);
+			if (rc <= 0) {
+				goto done;
+			} else {
+				remaining -= rc;
+				written += rc;
+			}
+		}
 
-    }
-    done:
-    xfree(prefix);
-    if (written > 0)
-        return written;
-    else
-        return rc;
+	}
+done:
+	xfree(prefix);
+	if (written > 0)
+		return written;
+	else
+		return rc;
 }
 
 /*
  * Build line label. Call xfree() to release returned memory
  */
-static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset, uint32_t task_offset) {
-    char *buf = NULL;
+static char *_build_label(int task_id, int task_id_width,
+			  uint32_t pack_offset, uint32_t task_offset)
+{
+	char *buf = NULL;
 
-    if (pack_offset != NO_VAL) {
-        if (task_offset != NO_VAL) {
-            xstrfmtcat(buf, "%*d: ", task_id_width, (task_id + task_offset));
-        } else {
-            xstrfmtcat(buf, "P%u %*d: ", pack_offset, task_id_width, task_id);
-        }
-    } else {
-        xstrfmtcat(buf, "%*d: ", task_id_width, task_id);
-    }
+	if (pack_offset != NO_VAL) {
+		if (task_offset != NO_VAL) {
+			xstrfmtcat(buf, "%*d: ", task_id_width,
+				   (task_id + task_offset));
+		} else {
+			xstrfmtcat(buf, "P%u %*d: ", pack_offset, task_id_width,
+				   task_id);
+		}
+	} else {
+		xstrfmtcat(buf, "%*d: ", task_id_width, task_id);
+	}
 
-    return buf;
+	return buf;
 }
 
 /*
@@ -143,44 +149,45 @@ static char *_build_label(int task_id, int task_id_width, uint32_t pack_offset, 
  * I/O from multiple pack-jobs may be present, so add prefix/suffix to buffer
  * before issuing write to avoid interleaved output from multiple components.
  */
-static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len) {
-    int left, n, pre = 0, post = 0;
-    void *ptr, *tmp = NULL;
+static int _write_line(int fd, char *prefix, char *suffix, void *buf, int len)
+{
+	int left, n, pre = 0, post = 0;
+	void *ptr, *tmp = NULL;
 
-    if (prefix || suffix) {
-        if (prefix)
-            pre = strlen(prefix);
-        if (suffix)
-            post = strlen(suffix);
-        tmp = xmalloc(pre + len + post);
-        if (prefix)
-            memcpy(tmp, prefix, pre);
-        memcpy(tmp + pre, buf, len);
-        if (suffix)
-            memcpy(tmp + pre + len, suffix, post);
-        ptr = tmp;
-        left = pre + len + post;
-    } else {
-        ptr = buf;
-        left = len;
-    }
+	if (prefix || suffix) {
+		if (prefix)
+			pre = strlen(prefix);
+		if (suffix)
+			post = strlen(suffix);
+		tmp = xmalloc(pre + len + post);
+		if (prefix)
+			memcpy(tmp, prefix, pre);
+		memcpy(tmp + pre, buf, len);
+		if (suffix)
+			memcpy(tmp + pre + len, suffix, post);
+		ptr = tmp;
+		left = pre + len + post;
+	} else {
+		ptr = buf;
+		left = len;
+	}
 
-    while (left > 0) {
-        again:
-        if ((n = write(fd, ptr, left)) < 0) {
-            if (errno == EINTR)
-                goto again;
-            if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-                debug3("  got EAGAIN in _write_line");
-                goto again;
-            }
-            len = -1;
-            break;
-        }
-        left -= n;
-        ptr += n;
-    }
-    xfree(tmp);
+	while (left > 0) {
+	again:
+		if ((n = write(fd, ptr, left)) < 0) {
+			if (errno == EINTR)
+				goto again;
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+				debug3("  got EAGAIN in _write_line");
+				goto again;
+			}
+			len = -1;
+			break;
+		}
+		left -= n;
+		ptr += n;
+	}
+	xfree(tmp);
 
-    return len;
+	return len;
 }

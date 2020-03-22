@@ -41,67 +41,72 @@
 #include "src/common/slurm_protocol_api.h"
 
 
-extern int slurm_reset_statistics(stats_info_request_msg_t *req) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
+extern int slurm_reset_statistics(stats_info_request_msg_t *req)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    req_msg.msg_type = REQUEST_STATS_INFO;
-    req_msg.data = req;
+	req_msg.msg_type = REQUEST_STATS_INFO;
+	req_msg.data     = req;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
+	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					    working_cluster_rec);
 
-    if (rc == SLURM_ERROR)
-        return SLURM_ERROR;
+	if (rc == SLURM_ERROR)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_STATS_INFO:
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            if (rc)
-                slurm_seterrno_ret(rc);
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-    }
+	switch (resp_msg.msg_type) {
+		case RESPONSE_STATS_INFO:
+			break;
+		case RESPONSE_SLURM_RC:
+			rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+			if (rc)
+				slurm_seterrno_ret(rc);
+			break;
+		default:
+			slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 
 }
 
-extern int slurm_get_statistics(stats_info_response_msg_t **buf, stats_info_request_msg_t *req) {
-    int rc;
-    slurm_msg_t req_msg;
-    slurm_msg_t resp_msg;
+extern int slurm_get_statistics(stats_info_response_msg_t **buf,
+				stats_info_request_msg_t *req)
+{
+	int rc;
+	slurm_msg_t req_msg;
+	slurm_msg_t resp_msg;
 
-    slurm_msg_t_init(&req_msg);
-    slurm_msg_t_init(&resp_msg);
+	slurm_msg_t_init(&req_msg);
+	slurm_msg_t_init(&resp_msg);
 
-    req_msg.msg_type = REQUEST_STATS_INFO;
-    req_msg.data = req;
+	req_msg.msg_type = REQUEST_STATS_INFO;
+	req_msg.data     = req;
 
-    rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg, working_cluster_rec);
+	rc = slurm_send_recv_controller_msg(&req_msg, &resp_msg,
+					    working_cluster_rec);
 
-    if (rc == SLURM_ERROR)
-        return SLURM_ERROR;
+	if (rc == SLURM_ERROR)
+		return SLURM_ERROR;
 
-    switch (resp_msg.msg_type) {
-        case RESPONSE_STATS_INFO:
-            *buf = (stats_info_response_msg_t *) resp_msg.data;
-            break;
-        case RESPONSE_SLURM_RC:
-            rc = ((return_code_msg_t *) resp_msg.data)->return_code;
-            if (rc)
-                slurm_seterrno_ret(rc);
-            buf = NULL;
-            break;
-        default:
-            slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
-    }
+	switch (resp_msg.msg_type) {
+		case RESPONSE_STATS_INFO:
+			*buf = (stats_info_response_msg_t *)resp_msg.data;
+			break;
+		case RESPONSE_SLURM_RC:
+			rc = ((return_code_msg_t *) resp_msg.data)->return_code;
+			if (rc)
+				slurm_seterrno_ret(rc);
+			buf = NULL;
+			break;
+		default:
+			slurm_seterrno_ret(SLURM_UNEXPECTED_MSG_ERROR);
+	}
 
-    return SLURM_SUCCESS;
+	return SLURM_SUCCESS;
 }

@@ -42,24 +42,27 @@
 #define __ACCT_SH5UTIL_H__
 
 typedef enum {
-    SH5UTIL_MODE_MERGE, SH5UTIL_MODE_EXTRACT, SH5UTIL_MODE_ITEM_EXTRACT, SH5UTIL_MODE_ITEM_LIST,
+	SH5UTIL_MODE_MERGE,
+	SH5UTIL_MODE_EXTRACT,
+	SH5UTIL_MODE_ITEM_EXTRACT,
+	SH5UTIL_MODE_ITEM_LIST,
 } sh5util_mode_t;
 
 typedef struct {
-    char *dir;
-    int help;
-    char *input;
-    int job_id;
-    bool keepfiles;
-    char *level;
-    sh5util_mode_t mode;
-    char *node;
-    char *output;
-    char *series;
-    char *data_item;
-    int step_id;
-    char *user;
-    int verbose;
+	char *dir;
+	int help;
+	char *input;
+	int job_id;
+	bool keepfiles;
+	char *level;
+	sh5util_mode_t mode;
+	char *node;
+	char *output;
+	char *series;
+	char *data_item;
+	int step_id;
+	char *user;
+	int verbose;
 } sh5util_opts_t;
 
 extern sh5util_opts_t params;
