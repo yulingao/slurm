@@ -7251,6 +7251,8 @@ static int _process_persist_conn(void *arg,
 								 persist_msg_t *persist_msg,
 								 Buf *out_buffer, uint32_t *uid)
 {
+	printf("this is _process_persist_conn !!\n");
+
 	slurm_msg_t msg;
 	slurm_persist_conn_t *persist_conn = arg;
 
