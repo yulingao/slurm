@@ -5663,6 +5663,7 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
 
 	printf("5\n");
 
+	// 发送信息成功之后会返回0，!0会成立
 	if (!slurm_send_recv_controller_msg(req, &resp, comm_cluster_rec))
 	{
 		printf("5\n");
@@ -5674,9 +5675,10 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
 	}
 	else
 	{
+		printf("ret_c == -1");
 		ret_c = -1;
 	}
-	printf("5\n");
+	printf("ret_c = %d\n", ret_c);
 
 	return ret_c;
 }
