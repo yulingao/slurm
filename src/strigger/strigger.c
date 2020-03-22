@@ -240,6 +240,7 @@ static int _set_trigger(void)
 		printf("2\n");
 		if (slurm_get_errno() != EAGAIN)
 			return 1;
+		printf("2\n");
 		sleep(5);
 	}
 	printf("1\n");
