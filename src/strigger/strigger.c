@@ -71,6 +71,7 @@ int main(int argc, char **argv)
 	log_init("strigger", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
 	printf("this is strigger!! hello world\n");
+	printf("0");
 	slurm_conf_init(NULL);
 	printf("1");
 	parse_command_line(argc, argv);
