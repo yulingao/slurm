@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width" />
+
+	<title>Slurm Workload Manager - acct_gather.conf</title>
+	<link rel="canonical" href="https://slurm.schedmd.com/acct_gather.conf.html" />
+
+	<link rel="shortcut icon" href="favicon.ico" />
+
+	<link rel="stylesheet" type="text/css" href="fonts.css" />
+	<link rel="stylesheet" type="text/css" href="reset.css" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="slurm.css" />
+
+	<script src="jquery.min.js"></script>
+	<script type="text/javascript">
+	jQuery(document).ready(function() {
+		jQuery('.menu-trigger').bind('click touchstart', function() {
+			jQuery(this).find('.menu-trigger__lines').toggleClass('menu-trigger__lines--closed');
+			jQuery(this).parents('.site-header').find('.site-nav').toggleClass('site-nav--active');
+
+			return false;
+		});
+	});
+
+	(function() {
+	  var cx = '011890816164765777536:jvrtxrd3f0w';
+	  var gcse = document.createElement('script');
+	  gcse.type = 'text/javascript';
+	  gcse.async = true;
+	  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+	  var s = document.getElementsByTagName('script')[0];
+	  s.parentNode.insertBefore(gcse, s);
+	})();
+	</script>
+</head>
+
+<body>
+
+<div class="container container--main">
+
+	<header class="site-header" role="banner">
+
+		<div class="site-masthead">
+			<h1 class="site-masthead__title site-masthead__title--slurm">
+				<a href="/" rel="home">
+					<span class="slurm-logo">Slurm Workload Manager</span>
+				</a>
+			</h1>
+			<div class="site-masthead__title">
+				<a href="https://www.schedmd.com/" rel="home">
+					<span class="site-logo">SchedMD</span>
+				</a>
+			</div>
+
+			<button class="site-masthead__trigger menu-trigger" type="button" role="button" aria-label="Toggle Navigation"><span class="menu-trigger__lines"></span></button>
+		</div>
+
+
+		<nav class="site-nav">
+			<h2 class="site-nav__title">Navigation</h2>
+
+			<div class="slurm-title">
+				<div class="slurm-logo"><a href="/">Slurm Workload Manager</a></div>
+				<div class="slurm-title__version">Version 19.05</div>
+			</div>
+
+			<ul class="site-nav__menu site-menu menu" role="navigation">
+				<li class="site-menu__item">
+				        <div>About</div>
+					<ul>
+						<li><a href="overview.html">Overview</a></li>
+						<li><a href="news.html">Release Notes</a></li>
+						<li><a href="team.html">Slurm Team</a></li>
+						<li><a href="meetings.html">Meetings</a></li>
+						<li><a href="testimonials.html">Testimonials</a></li>
+						<li><a href="disclaimer.html">Legal Notices</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Using</div>
+					<ul>
+						<li><a href="tutorials.html">Tutorials</a></li>
+						<li><a href="documentation.html">Documentation</a></li>
+						<li><a href="faq.html">FAQ</a></li>
+						<li><a href="publications.html">Publications</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Installing</div>
+					<ul>
+						<li><a href="download.html">Download</a></li>
+						<li><a href="quickstart_admin.html">Installation Guide</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Getting Help</div>
+					<ul>
+						<li><a href="https://www.schedmd.com/services.php">Support</a></li>
+						<li><a href="mail.html">Mailing Lists</a></li>
+						<li><a href="https://www.schedmd.com/services.php">Training</a></li>
+						<li><a href="troubleshoot.html">Troubleshooting</a></li>
+					</ul>
+				</li>
+			</ul>
+
+		</nav>
+
+	</header>
+
+	<div class="content" role="main">
+		<section class="slurm-search">
+			<div class="container" id="cse">
+				<gcse:search></gcse:search>
+			</div>
+		</section>
+
+		<div class="section">
+			<div class="container">
+
+<H1>acct_gather.conf</H1>
+Section: Slurm Configuration File (5)<BR>Updated: Slurm Configuration File<BR><A HREF="#index">Index</A>
+<A HREF="/man/man2html">Return to Main Contents</A><HR>
+
+<P>
+<A NAME="lbAB">&nbsp;</A>
+<a id="SECTION_NAME"></a>
+<H2>NAME</H2>
+
+acct_gather.conf - Slurm configuration file for the acct_gather plugins
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<a id="SECTION_DESCRIPTION"></a>
+<H2>DESCRIPTION</H2>
+
+<P>
+<B>acct_gather.conf</B> is an ASCII file which defines parameters used by
+Slurm's acct_gather related plugins.
+The file location can be modified at system build time using the
+DEFAULT_SLURM_CONF parameter or at execution time by setting the SLURM_CONF
+environment variable. The file will always be located in the
+same directory as the <B>slurm.conf</B> file.
+<P>
+
+Parameter names are case insensitive.
+Any text following a &quot;#&quot; in the configuration file is treated
+as a comment through the end of that line.
+The size of each line in the file is limited to 1024 characters.
+Changes to the configuration file take effect upon restart of
+Slurm daemons, daemon receipt of the SIGHUP signal, or execution
+of the command &quot;scontrol reconfigure&quot; unless otherwise noted.
+<P>
+<P>
+
+The following acct_gather.conf parameters are defined to control the general
+behavior of various plugins in Slurm.
+<P>
+<P>
+
+The acct_gather.conf file is different than other Slurm .conf files.  Each
+plugin defines which options are available.  So if you do not load the
+respective plugin for an option that option will appear to be unknown by Slurm
+and could cause Slurm not to load.  If you decide to change plugin types you
+might also have to change the related options as well.
+<P>
+<DL COMPACT>
+<a id="OPT_EnergyIPMI"></a>
+<DT><B>EnergyIPMI</B><DD>
+Options used for AcctGatherEnergyType/ipmi are as follows:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_EnergyIPMIFrequency"></a>
+<DT><B>EnergyIPMIFrequency</B>=&lt;number&gt;<DD>
+This parameter is the number of seconds between BMC access samples.
+<P>
+<a id="OPT_EnergyIPMICalcAdjustment"></a>
+<DT><B>EnergyIPMICalcAdjustment</B>=&lt;yes|no&gt;<DD>
+If set to &quot;yes&quot;, the consumption between the last BMC access sample and
+a step consumption update is approximated to get more accurate task consumption.
+The adjustment is made at the step start and each time the
+consumption is updated, including the step end. The approximations are not
+accumulated, only the first and last adjustments are used to calculated the
+consumption. The default is &quot;no&quot;.
+<P>
+<a id="OPT_EnergyIPMIPowerSensors"></a>
+<DT><B>EnergyIPMIPowerSensors</B>=&lt;key=values&gt;<DD>
+Optionally specify the ids of the sensors to used.
+Multiple &lt;key=values&gt; can be set with &quot;;&quot; separators.
+The key &quot;Node&quot; is mandatory and is used to know the consumed energy for nodes
+(scontrol show node) and jobs (sacct).
+Other keys are optional and are named by administrator.
+These keys are useful only when profile is activated for energy to store power
+(in watt) of each key.
+&lt;values&gt; are integers, multiple values can be set with &quot;,&quot; separators.
+The sum of the listed sensors is used for each key.
+EnergyIPMIPowerSensors is optional, default value is &quot;Node=number&quot; where
+&quot;number&quot; is the id of the first power sensor returned by ipmi-sensors.
+<BR>
+
+i.e.
+<BR>
+
+
+EnergyIPMIPowerSensors=Node=16,19,23,26;Socket0=16,23;Socket1=19,26;SSUP=23,26;KNC=16,19
+
+<BR>
+
+EnergyIPMIPowerSensors=Node=29,32;SSUP0=29;SSUP1=32
+<BR>
+
+EnergyIPMIPowerSensors=Node=1280
+<P>
+</DL>
+<P>
+
+The following acct_gather.conf parameters are defined to control the
+IPMI config default values for libipmiconsole.
+<P>
+<DL COMPACT>
+<a id="OPT_EnergyIPMIUsername"></a>
+<DT><B>EnergyIPMIUsername</B>=<I>USERNAME</I><DD>
+Specify BMC Username.
+<P>
+<a id="OPT_EnergyIPMIPassword"></a>
+<DT><B>EnergyIPMIPassword</B>=<I>PASSWORD</I><DD>
+Specify BMC Password.
+</DL>
+</DL>
+
+<P>
+<a id="OPT_ProfileHDF5"></a>
+<DT><B>ProfileHDF5</B><DD>
+Options used for AcctGatherProfileType/hdf5 are as follows:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_ProfileHDF5Dir"></a>
+<DT><B>ProfileHDF5Dir</B>=&lt;path&gt;<DD>
+This parameter is the path to the shared folder into which the
+acct_gather_profile plugin will write detailed data (usually as an HDF5 file).
+The directory is assumed to be on a file system shared by the controller and
+all compute nodes. This is a required parameter.
+<P>
+<a id="OPT_ProfileHDF5Default"></a>
+<DT><B>ProfileHDF5Default</B><DD>
+A comma delimited list of data types to be collected for each job submission.
+Allowed values are:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_All"></a>
+<DT><B>All</B><DD>
+All data types are collected. (Cannot be combined with other values.)
+<P>
+<a id="OPT_None"></a>
+<DT><B>None</B><DD>
+No data types are collected. This is the default.
+(Cannot be combined with other values.)
+<P>
+<a id="OPT_Energy"></a>
+<DT><B>Energy</B><DD>
+Energy data is collected.
+<P>
+<a id="OPT_Filesystem"></a>
+<DT><B>Filesystem</B><DD>
+File system (Lustre) data is collected.
+<P>
+<a id="OPT_Network"></a>
+<DT><B>Network</B><DD>
+Network (InfiniBand) data is collected.
+<P>
+<a id="OPT_Task"></a>
+<DT><B>Task</B><DD>
+Task (I/O, Memory, ...) data is collected.
+<P>
+</DL>
+</DL>
+
+</DL>
+</DL>
+
+<a id="OPT_ProfileInfluxDB"></a>
+<DT><B>ProfileInfluxDB</B><DD>
+Options used for AcctGatherProfileType/influxdb are as follows:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_ProfileInfluxDBDatabase"></a>
+<DT><B>ProfileInfluxDBDatabase</B><DD>
+InfluxDB database name where profiling information is to be written.
+<P>
+<a id="OPT_ProfileInfluxDBDefault"></a>
+<DT><B>ProfileInfluxDBDefault</B><DD>
+A comma delimited list of data types to be collected for each job submission.
+Allowed values are:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_All_1"></a>
+<DT><B>All</B><DD>
+All data types are collected. (Cannot be combined with other values.)
+<P>
+<a id="OPT_None_1"></a>
+<DT><B>None</B><DD>
+No data types are collected. This is the default.
+(Cannot be combined with other values.)
+<P>
+<a id="OPT_Energy_1"></a>
+<DT><B>Energy</B><DD>
+Energy data is collected.
+<P>
+<a id="OPT_Filesystem_1"></a>
+<DT><B>Filesystem</B><DD>
+File system (Lustre) data is collected.
+<P>
+<a id="OPT_Network_1"></a>
+<DT><B>Network</B><DD>
+Network (InfiniBand) data is collected.
+<P>
+<a id="OPT_Task_1"></a>
+<DT><B>Task</B><DD>
+Task (I/O, Memory, ...) data is collected.
+</DL>
+</DL>
+
+<P>
+<a id="OPT_ProfileInfluxDBHost"></a>
+<DT><B>ProfileInfluxDBHost</B>=&lt;hostname&gt;:&lt;port&gt;<DD>
+The hostname of the machine where the influxd instance is executed and the port
+used by the HTTP API. The port used by the HTTP API is the one configured
+through the bind-address influxdb.conf option in the [http] section. Example:
+<P>
+ProfileInfluxDBHost=myinfluxhost:8086
+<P>
+<a id="OPT_ProfileInfluxDBPass"></a>
+<DT><B>ProfileInfluxDBPass</B><DD>
+Optional password for username configured in ProfileInfluxDBUser.
+<P>
+<a id="OPT_ProfileInfluxDBRTPolicy"></a>
+<DT><B>ProfileInfluxDBRTPolicy</B><DD>
+The InfluxDB retention policy name for the database configured in
+ProfileInfluxDBDatabase option.
+<P>
+<a id="OPT_ProfileInfluxDBUser"></a>
+<DT><B>ProfileInfluxDBUser</B><DD>
+Optional InfluxDB username that should be used to gain access to the database
+configured in ProfileInfluxDBDatabase. This is only needed InfluxDB is
+configured with authentication enabled in the [http] config section and a user
+has been granted at least WRITE access to the database. See also
+ProfileInfluxDBPass.
+</DL>
+</DL>
+
+<P>
+<DT>NOTE:<DD>
+This plugin requires the libcurl development files to be installed.
+<DT>NOTE:<DD>
+Information on how to install and configure InfluxDB and manage databases,
+retention policies and such is available on the official webpage.
+<DT>NOTE:<DD>
+Collected information is written from every compute node where a job runs to
+the influxd instance listening on the ProfileInfluxDBHost. In order to avoid
+overloading the influxd instance with incoming connection requests, the plugin
+uses an internal buffer which is filled with samples. Once the buffer is full, a
+HTTP API write request is performed and the buffer is emptied to hold subsequent
+samples. A final request is also performed when a task ends even if the buffer
+isn't full.
+<DT>NOTE:<DD>
+Failed HTTP API write requests are discarded. This means that collected profile
+information in the plugin buffer is lost if it can't be written to the influxd
+database for any reason.
+<DT>NOTE:<DD>
+Plugin messages are logged along with the slurmstepd logs to SlurmdLogFile. In
+order to troubleshoot any issues, it is recommended to temporarily increase
+the slurmd debug level to debug3 and add Profile to the debug flags. This can
+be accomplished by setting the slurm.conf SlurmdDebug and DebugFlags
+respectively or dynamically through scontrol setdebug and setdebugflags.
+<DT>NOTE:<DD>
+Perhaps it's a good idea to use a monitoring and analytics tool such as Grafana
+on top of InfluxDB. This kind of tools permit one to create dashboards, tables, and
+other graphics using the stored time series. This way, it is easier to correlate
+resource usage peaks reported by other node monitoring tools such as Ganglia
+with specific job step tasks.
+<P>
+<a id="OPT_InfinibandOFED"></a>
+<DT><B>InfinibandOFED</B><DD>
+Options used for AcctGatherInfinbandType/ofed are as follows:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<a id="OPT_InfinibandOFEDPort"></a>
+<DT><B>InfinibandOFEDPort</B>=&lt;number&gt;<DD>
+This parameter represents the port number of the local Infiniband card that we are willing to monitor.
+The default port is 1.
+</DL>
+</DL>
+
+
+</DL>
+<A NAME="lbAD">&nbsp;</A>
+<a id="SECTION_EXAMPLE"></a>
+<H2>EXAMPLE</H2>
+
+<P>
+
+<BR>
+
+###
+<BR>
+
+# Slurm acct_gather configuration file
+<BR>
+
+###
+<BR>
+
+# Parameters for AcctGatherEnergy/impi plugin
+<BR>
+
+EnergyIPMIFrequency=10
+<BR>
+
+EnergyIPMICalcAdjustment=yes
+<BR>
+
+#
+<BR>
+
+# Parameters for AcctGatherProfileType/hdf5 plugin
+<BR>
+
+ProfileHDF5Dir=/app/slurm/profile_data
+<BR>
+
+# Parameters for AcctGatherInfiniband/ofed plugin
+<BR>
+
+InfinibandOFEDPort=1
+<BR>
+
+<P>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<a id="SECTION_COPYING"></a>
+<H2>COPYING</H2>
+
+Copyright (C) 2012-2013 Bull.
+Produced at Bull (cf, DISCLAIMER).
+<P>
+
+This file is part of Slurm, a resource management program.
+For details, see &lt;<A HREF="https://slurm.schedmd.com/">https://slurm.schedmd.com/</A>&gt;.
+<P>
+
+Slurm is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.
+<P>
+
+Slurm is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<a id="SECTION_SEE-ALSO"></a>
+<H2>SEE ALSO</H2>
+
+<P>
+
+<B><A HREF="/man/man2html?5+slurm.conf">slurm.conf</A></B>(5)
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAD">EXAMPLE</A><DD>
+<DT><A HREF="#lbAE">COPYING</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 06:40:17 GMT, March 22, 2020
+			</div> <!-- END .container -->
+		</div> <!-- END .section -->
+	</div> <!-- END .content -->
+</div> <!-- END .main -->
+
+<footer class="site-footer" role="contentinfo">
+	<nav class="footer-nav section">
+		<div class="container">
+			<p><a href="disclaimer.html" target="_blank" class="privacy">Legal Notices</a></p>
+		</div>
+	</nav>
+</footer>
+
+<script type='text/javascript'>
+	var custpagename = window.location.href;
+	var urlarray = custpagename.split('#');
+	custpagename = urlarray[1];
+
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			 ga('create', 'UA-47927131-1', 'schedmd.com');
+		ga('send', {'hitType': 'pageview', 'page': custpagename, 'title': custpagename});
+</script>
+
+</body>
+</html>

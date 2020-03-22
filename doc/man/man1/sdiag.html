@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width" />
+
+	<title>Slurm Workload Manager - sdiag</title>
+	<link rel="canonical" href="https://slurm.schedmd.com/sdiag.html" />
+
+	<link rel="shortcut icon" href="favicon.ico" />
+
+	<link rel="stylesheet" type="text/css" href="fonts.css" />
+	<link rel="stylesheet" type="text/css" href="reset.css" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="slurm.css" />
+
+	<script src="jquery.min.js"></script>
+	<script type="text/javascript">
+	jQuery(document).ready(function() {
+		jQuery('.menu-trigger').bind('click touchstart', function() {
+			jQuery(this).find('.menu-trigger__lines').toggleClass('menu-trigger__lines--closed');
+			jQuery(this).parents('.site-header').find('.site-nav').toggleClass('site-nav--active');
+
+			return false;
+		});
+	});
+
+	(function() {
+	  var cx = '011890816164765777536:jvrtxrd3f0w';
+	  var gcse = document.createElement('script');
+	  gcse.type = 'text/javascript';
+	  gcse.async = true;
+	  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+	  var s = document.getElementsByTagName('script')[0];
+	  s.parentNode.insertBefore(gcse, s);
+	})();
+	</script>
+</head>
+
+<body>
+
+<div class="container container--main">
+
+	<header class="site-header" role="banner">
+
+		<div class="site-masthead">
+			<h1 class="site-masthead__title site-masthead__title--slurm">
+				<a href="/" rel="home">
+					<span class="slurm-logo">Slurm Workload Manager</span>
+				</a>
+			</h1>
+			<div class="site-masthead__title">
+				<a href="https://www.schedmd.com/" rel="home">
+					<span class="site-logo">SchedMD</span>
+				</a>
+			</div>
+
+			<button class="site-masthead__trigger menu-trigger" type="button" role="button" aria-label="Toggle Navigation"><span class="menu-trigger__lines"></span></button>
+		</div>
+
+
+		<nav class="site-nav">
+			<h2 class="site-nav__title">Navigation</h2>
+
+			<div class="slurm-title">
+				<div class="slurm-logo"><a href="/">Slurm Workload Manager</a></div>
+				<div class="slurm-title__version">Version 19.05</div>
+			</div>
+
+			<ul class="site-nav__menu site-menu menu" role="navigation">
+				<li class="site-menu__item">
+				        <div>About</div>
+					<ul>
+						<li><a href="overview.html">Overview</a></li>
+						<li><a href="news.html">Release Notes</a></li>
+						<li><a href="team.html">Slurm Team</a></li>
+						<li><a href="meetings.html">Meetings</a></li>
+						<li><a href="testimonials.html">Testimonials</a></li>
+						<li><a href="disclaimer.html">Legal Notices</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Using</div>
+					<ul>
+						<li><a href="tutorials.html">Tutorials</a></li>
+						<li><a href="documentation.html">Documentation</a></li>
+						<li><a href="faq.html">FAQ</a></li>
+						<li><a href="publications.html">Publications</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Installing</div>
+					<ul>
+						<li><a href="download.html">Download</a></li>
+						<li><a href="quickstart_admin.html">Installation Guide</a></li>
+					</ul>
+				</li>
+				<li class="site-menu__item">
+					<div>Getting Help</div>
+					<ul>
+						<li><a href="https://www.schedmd.com/services.php">Support</a></li>
+						<li><a href="mail.html">Mailing Lists</a></li>
+						<li><a href="https://www.schedmd.com/services.php">Training</a></li>
+						<li><a href="troubleshoot.html">Troubleshooting</a></li>
+					</ul>
+				</li>
+			</ul>
+
+		</nav>
+
+	</header>
+
+	<div class="content" role="main">
+		<section class="slurm-search">
+			<div class="container" id="cse">
+				<gcse:search></gcse:search>
+			</div>
+		</section>
+
+		<div class="section">
+			<div class="container">
+
+<H1>sdiag</H1>
+Section: Slurm Commands (1)<BR>Updated: Slurm Commands<BR><A HREF="#index">Index</A>
+<A HREF="/man/man2html">Return to Main Contents</A><HR>
+
+<P>
+<A NAME="lbAB">&nbsp;</A>
+<a id="SECTION_NAME"></a>
+<H2>NAME</H2>
+
+<P>
+
+sdiag - Scheduling diagnostic tool for Slurm
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<a id="SECTION_SYNOPSIS"></a>
+<H2>SYNOPSIS</H2>
+
+<P>
+
+sdiag
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<a id="SECTION_DESCRIPTION"></a>
+<H2>DESCRIPTION</H2>
+
+<P>
+
+sdiag shows information related to slurmctld execution about: threads, agents,
+jobs, and scheduling algorithms. The goal is to obtain data from slurmctld
+behaviour helping to adjust configuration parameters or queues policies. The
+main reason behind is to know Slurm behaviour under systems with a high throughput.
+<P>
+
+It has two execution modes. The default mode <B>--all</B> shows several counters
+and statistics explained later, and there is another execution option
+<B>--reset</B> for resetting those values.
+<P>
+
+Values are reset at midnight UTC time by default.
+<P>
+
+The first block of information is related to global slurmctld execution:
+<DL COMPACT>
+<a id="OPT_Server-thread-count"></a>
+<DT><B>Server thread count</B><DD>
+The number of current active slurmctld threads. A high number would mean a high
+load processing events like job submissions, jobs dispatching, jobs completing,
+etc. If this is often close to MAX_SERVER_THREADS it could point to a potential
+bottleneck.
+<P>
+<a id="OPT_Agent-queue-size"></a>
+<DT><B>Agent queue size</B><DD>
+Slurm design has scalability in mind and sending messages to thousands of nodes
+is not a trivial task. The agent mechanism helps to control communication
+between slurmctld and the slurmd daemons for a best effort. This value denotes
+the count of enqueued outgoing RPC requests in an internal retry list.
+<P>
+<a id="OPT_Agent-count"></a>
+<DT><B>Agent count</B><DD>
+Number of agent threads. Each of these agent threads can create in turn a group
+of up to 2 + AGENT_THREAD_COUNT active threads at a time.
+<P>
+<a id="OPT_DBD-Agent-queue-size"></a>
+<DT><B>DBD Agent queue size</B><DD>
+Slurm queues up the messages intended for the SlurmDBD and processes them in a
+separate thread. If the SlurmDBD, or database, is down then this number will
+increase. The max queue size is calculated as:
+<P>
+MAX(10000, ((max_job_cnt * 2) + (node_record_count * 4)))
+<P>
+If this number begins to grow more than half of the max queue size, the slurmdbd
+and the database should be investigated immediately.
+<P>
+<a id="OPT_Jobs-submitted"></a>
+<DT><B>Jobs submitted</B><DD>
+Number of jobs submitted since last reset
+<P>
+<a id="OPT_Jobs-started"></a>
+<DT><B>Jobs started</B><DD>
+Number of jobs started since last reset. This includes backfilled jobs.
+<P>
+<a id="OPT_Jobs-completed"></a>
+<DT><B>Jobs completed</B><DD>
+Number of jobs completed since last reset.
+<P>
+<a id="OPT_Jobs-canceled"></a>
+<DT><B>Jobs canceled</B><DD>
+Number of jobs canceled since last reset.
+<P>
+<a id="OPT_Jobs-failed"></a>
+<DT><B>Jobs failed</B><DD>
+Number of jobs failed due to slurmd or other internal issues since last reset.
+<P>
+<a id="OPT_Job-states-ts:"></a>
+<DT><B>Job states ts:</B><DD>
+Lists the timestamp of when the following job state counts were gathered.
+<P>
+<a id="OPT_Jobs-pending:"></a>
+<DT><B>Jobs pending:</B><DD>
+Number of jobs pending at the given time of the time stamp above.
+<P>
+<a id="OPT_Jobs-running:"></a>
+<DT><B>Jobs running:</B><DD>
+Number of jobs running at the given time of the time stamp above.
+<P>
+<a id="OPT_Jobs-running-ts:"></a>
+<DT><B>Jobs running ts:</B><DD>
+Time stamp of when the running job count was taken.
+<P>
+</DL>
+<P>
+
+The next block of information is related to main scheduling algorithm based
+on jobs priorities. A scheduling cycle implies to get the job_write_lock lock,
+then trying to get resources for jobs pending, starting from the most priority
+one and going in descendent order. Once a job can not get the resources the
+loop keeps going but just for jobs requesting other partitions. Jobs with
+dependencies or affected  by accounts limits are not processed.
+<P>
+<DL COMPACT>
+<a id="OPT_Last-cycle"></a>
+<DT><B>Last cycle</B><DD>
+Time in microseconds for last scheduling cycle. 
+<P>
+<a id="OPT_Max-cycle"></a>
+<DT><B>Max cycle</B><DD>
+Maximum time in microseconds for any scheduling cycle since last reset.
+<P>
+<a id="OPT_Total-cycles"></a>
+<DT><B>Total cycles</B><DD>
+Total run time in microseconds for all scheduling cycles since last reset.
+Scheduling is performed periodically and (depending upon configuration)
+when a job is submitted or a job is completed.
+<P>
+<a id="OPT_Mean-cycle"></a>
+<DT><B>Mean cycle</B><DD>
+Mean time in microseconds for all scheduling cycles since last reset.
+<P>
+<a id="OPT_Mean-depth-cycle"></a>
+<DT><B>Mean depth cycle</B><DD>
+Mean of cycle depth. Depth means number of jobs processed in a scheduling cycle.
+<P>
+<a id="OPT_Cycles-per-minute"></a>
+<DT><B>Cycles per minute</B><DD>
+Counter of scheduling executions per minute.
+<P>
+<a id="OPT_Last-queue-length"></a>
+<DT><B>Last queue length</B><DD>
+Length of jobs pending queue.
+<P>
+</DL>
+<P>
+
+The next block of information is related to backfilling scheduling algorithm.
+A backfilling scheduling cycle implies to get locks for jobs, nodes and
+partitions objects then trying to get resources for jobs pending. Jobs are
+processed based on priorities. If a job can not get resources the algorithm
+calculates when it could get them obtaining a future start time for the job.
+Then next job is processed and the algorithm tries to get resources for that
+job but avoiding to affect the <I>previous ones</I>, and again it calculates
+the future start time if not current resources available. The backfilling
+algorithm takes more time for each new job to process since more priority jobs
+can not be affected. The algorithm itself takes measures for avoiding a long
+execution cycle and for taking all the locks for too long.
+<P>
+<DL COMPACT>
+<a id="OPT_Total-backfilled-jobs-(since-last-slurm-start)"></a>
+<DT><B>Total backfilled jobs (since last slurm start)</B><DD>
+Number of jobs started thanks to backfilling since last slurm start.
+<P>
+<a id="OPT_Total-backfilled-jobs-(since-last-stats-cycle-start)"></a>
+<DT><B>Total backfilled jobs (since last stats cycle start)</B><DD>
+Number of jobs started thanks to backfilling since last time stats where reset.
+By default these values are reset at midnight UTC time.
+<P>
+<a id="OPT_Total-backfilled-heterogeneous-job-components"></a>
+<DT><B>Total backfilled heterogeneous job components</B><DD>
+Number of heterogeneous job components started thanks to backfilling since
+last Slurm start.
+<P>
+<a id="OPT_Total-cycles_1"></a>
+<DT><B>Total cycles</B><DD>
+Number of backfill scheduling cycles since last reset
+<P>
+<a id="OPT_Last-cycle-when"></a>
+<DT><B>Last cycle when</B><DD>
+Time when last backfill scheduling cycle happened in the format
+&quot;weekday Month MonthDay hour:minute.seconds year&quot;
+<P>
+<a id="OPT_Last-cycle_1"></a>
+<DT><B>Last cycle</B><DD>
+Time in microseconds of last backfill scheduling cycle.
+It counts only execution time, removing sleep time inside a scheduling cycle
+when it executes for an extended period time.
+Note that locks are released during the sleep time so that other work can
+proceed.
+<P>
+<a id="OPT_Max-cycle_1"></a>
+<DT><B>Max cycle</B><DD>
+Time in microseconds of maximum backfill scheduling cycle execution since last reset.
+It counts only execution time, removing sleep time inside a scheduling cycle
+when it executes for an extended period time.
+Note that locks are released during the sleep time so that other work can
+proceed.
+<P>
+<a id="OPT_Mean-cycle_1"></a>
+<DT><B>Mean cycle</B><DD>
+Mean time in microseconds of backfilling scheduling cycles since last reset.
+<P>
+<a id="OPT_Last-depth-cycle"></a>
+<DT><B>Last depth cycle</B><DD>
+Number of processed jobs during last backfilling scheduling cycle. It counts
+every job even if that job can not be started due to dependencies or limits.
+<P>
+<a id="OPT_Last-depth-cycle-(try-sched)"></a>
+<DT><B>Last depth cycle (try sched)</B><DD>
+Number of processed jobs during last backfilling scheduling cycle. It counts
+only jobs with a chance to start using available resources. These
+jobs consume more scheduling time than jobs which are found can not be started
+due to dependencies or limits.
+<P>
+<a id="OPT_Depth-Mean"></a>
+<DT><B>Depth Mean</B><DD>
+Mean count of jobs processed during all backfilling scheduling cycles since last
+reset.
+Jobs which are found to be ineligible to run when examined by the backfill
+scheduler are not counted (e.g. jobs submitted to multiple partitions and
+already started, jobs which have reached a QOS or account limit such as
+maximum running jobs for an account, etc).
+<P>
+<a id="OPT_Depth-Mean-(try-sched)"></a>
+<DT><B>Depth Mean (try sched)</B><DD>
+The subset of Depth Mean that the backfill scheduler attempted to schedule.
+<P>
+<a id="OPT_Last-queue-length_1"></a>
+<DT><B>Last queue length</B><DD>
+Number of jobs pending to be processed by backfilling algorithm.
+A job is counted once for each partition it is queued to use.
+A pending job array will normally be counted as one job (tasks of a job array
+which have already been started/requeued or individually modified will already
+have individual job records and are each counted as a separate job).
+<P>
+<a id="OPT_Queue-length-Mean"></a>
+<DT><B>Queue length Mean</B><DD>
+Mean count of jobs pending to be processed by backfilling algorithm.
+A job once for each partition it requested.
+A pending job array will normally be counted as one job (tasks of a job array
+which have already been started/requeued or individually modified will already
+have individual job records and are each counted as a separate job).
+<P>
+<a id="OPT_Latency-for-1000-calls-to-gettimeofday()"></a>
+<DT><B>Latency for 1000 calls to gettimeofday()</B><DD>
+Latency of 1000 calls to the gettimeofday() syscall in microseconds,
+as measured at controller startup.
+<P>
+</DL>
+<P>
+
+The next blocks of information report the most frequently issued
+remote procedure calls (RPCs), calls made for the Slurmctld daemon to perform
+some action.
+The fourth block reports the RPCs issued by message type.
+You will need to look up those RPC codes in the Slurm source code by looking
+them up in the file src/common/slurm_protocol_defs.h.
+The report includes the number of times each RPC is invoked, the total time
+consumed by all of those RPCs plus the average time consumed by each RPC in
+microseconds.
+The fifth block reports the RPCs issued by user ID, the total number of RPCs
+they have issued, the total time consumed by all of those RPCs plus the average
+time consumed by each RPC in microseconds.
+<P>
+<P>
+
+The sixth block of information, labeled Pending RPC Statistics, shows
+information about pending outgoing RPCs on the slurmctld agent queue.
+The first section of this block shows types of RPCs on the queue and the
+count of each. The second section shows up to the first 25 individual RPCs
+pending on the agent queue, including the type and the destination host list.
+This information is cached and only refreshed on 30 second intervals.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<a id="SECTION_OPTIONS"></a>
+<H2>OPTIONS</H2>
+
+<P>
+
+<P>
+<DL COMPACT>
+<a id="OPT_all"></a>
+<DT><B>-a</B>, <B>--all</B><DD>
+Get and report information. This is the default mode of operation.
+<P>
+<a id="OPT_help"></a>
+<DT><B>-h</B>, <B>--help</B><DD>
+Print description of options and exit.
+<P>
+<a id="OPT_sort-by-id"></a>
+<DT><B>-i</B>, <B>--sort-by-id</B><DD>
+Sort Remote Procedure Call (RPC) data by message type ID and user ID.
+<P>
+<a id="OPT_reset"></a>
+<DT><B>-r</B>, <B>--reset</B><DD>
+Reset counters. Only supported for Slurm operators and administrators.
+<P>
+<a id="OPT_sort-by-time"></a>
+<DT><B>-t</B>, <B>--sort-by-time</B><DD>
+Sort Remote Procedure Call (RPC) data by total run time.
+<P>
+<a id="OPT_sort-by-time2"></a>
+<DT><B>-T</B>, <B>--sort-by-time2</B><DD>
+Sort Remote Procedure Call (RPC) data by average run time.
+<P>
+<a id="OPT_usage"></a>
+<DT><B>--usage</B><DD>
+Print list of options and exit.
+<P>
+<a id="OPT_version"></a>
+<DT><B>-V</B>, <B>--version</B><DD>
+Print current version number and exit.
+<P>
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<a id="SECTION_ENVIRONMENT-VARIABLES"></a>
+<H2>ENVIRONMENT VARIABLES</H2>
+
+<P>
+
+Some <B>sdiag</B> options may be set via environment variables. These
+environment variables, along with their corresponding options, are listed below.
+(Note: commandline options will always override these settings)
+<DL COMPACT>
+<a id="OPT_SLURM_CONF"></a>
+<DT><B>SLURM_CONF</B><DD>
+The location of the Slurm configuration file.
+<P>
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<a id="SECTION_COPYING"></a>
+<H2>COPYING</H2>
+
+Copyright (C) 2010-2011 Barcelona Supercomputing Center.
+<BR>
+
+Copyright (C) 2010-2019 SchedMD LLC.
+<P>
+
+Slurm is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.
+<P>
+
+Slurm is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<a id="SECTION_SEE-ALSO"></a>
+<H2>SEE ALSO</H2>
+
+<P>
+
+<A HREF="/man/man2html?1+sinfo">sinfo</A>(1), <A HREF="/man/man2html?1+squeue">squeue</A>(1), <A HREF="/man/man2html?1+scontrol">scontrol</A>(1), <A HREF="/man/man2html?5+slurm.conf">slurm.conf</A>(5),
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">ENVIRONMENT VARIABLES</A><DD>
+<DT><A HREF="#lbAG">COPYING</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 06:40:16 GMT, March 22, 2020
+			</div> <!-- END .container -->
+		</div> <!-- END .section -->
+	</div> <!-- END .content -->
+</div> <!-- END .main -->
+
+<footer class="site-footer" role="contentinfo">
+	<nav class="footer-nav section">
+		<div class="container">
+			<p><a href="disclaimer.html" target="_blank" class="privacy">Legal Notices</a></p>
+		</div>
+	</nav>
+</footer>
+
+<script type='text/javascript'>
+	var custpagename = window.location.href;
+	var urlarray = custpagename.split('#');
+	custpagename = urlarray[1];
+
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			 ga('create', 'UA-47927131-1', 'schedmd.com');
+		ga('send', {'hitType': 'pageview', 'page': custpagename, 'title': custpagename});
+</script>
+
+</body>
+</html>
