@@ -235,7 +235,9 @@ static int _set_trigger(void)
 	printf("1\n");
 	while (slurm_set_trigger(&ti))
 	{
+		printf("2\n");
 		slurm_perror("slurm_set_trigger");
+		printf("2\n");
 		if (slurm_get_errno() != EAGAIN)
 			return 1;
 		sleep(5);
