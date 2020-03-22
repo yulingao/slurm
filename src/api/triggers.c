@@ -70,7 +70,11 @@ extern int slurm_set_trigger(trigger_info_t *trigger_set)
 	printf("4\n");
 	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
 										  working_cluster_rec) < 0)
+	{
+		printf("4\n");
 		return SLURM_ERROR;
+	}
+
 	printf("4\n");
 	if (rc)
 		slurm_seterrno_ret(rc);
