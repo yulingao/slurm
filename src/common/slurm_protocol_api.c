@@ -5231,7 +5231,6 @@ tryagain:
 	if (comm_cluster_rec)
 		request_msg->flags |= SLURM_GLOBAL_AUTH_KEY;
 
-	printf("7\n");
 	if ((fd = slurm_open_controller_conn(&ctrl_addr, &use_backup,
 										 comm_cluster_rec)) < 0)
 	{
@@ -5239,14 +5238,10 @@ tryagain:
 		goto cleanup;
 	}
 
-	printf("7\n");
-
 	conf = slurm_conf_lock();
 	have_backup = conf->control_cnt > 1;
 	slurmctld_timeout = conf->slurmctld_timeout;
 	slurm_conf_unlock();
-
-	printf("7\n");
 
 	while (retry)
 	{
@@ -5293,8 +5288,10 @@ tryagain:
 			break;
 	}
 
+	printf("7.1\n");
 	if (!rc && (response_msg->msg_type == RESPONSE_SLURM_REROUTE_MSG))
 	{
+		printf("7.11\n");
 		reroute_msg_t *rr_msg = (reroute_msg_t *)response_msg->data;
 
 		/*
@@ -5310,10 +5307,11 @@ tryagain:
 		rr_msg->working_cluster_rec = NULL;
 		goto tryagain;
 	}
+	printf("7.2\n");
 
 	if (comm_cluster_rec != save_comm_cluster_rec)
 		slurmdb_destroy_cluster_rec(comm_cluster_rec);
-
+	printf("7.3\n");
 cleanup:
 	if (rc != 0)
 		_remap_slurmctld_errno();

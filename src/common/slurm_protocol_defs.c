@@ -5367,7 +5367,7 @@ extern uint32_t slurm_get_return_code(slurm_msg_type_t type, void *data)
 		break;
 	case RESPONSE_SLURM_RC:
 		rc = ((return_code_msg_t *)data)->return_code;
-		printf("rc == %d", rc);
+		printf("rc == %d\n", rc);
 		break;
 	case RESPONSE_PING_SLURMD:
 		rc = SLURM_SUCCESS;
