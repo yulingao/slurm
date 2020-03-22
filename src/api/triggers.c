@@ -54,16 +54,17 @@
  */
 extern int slurm_set_trigger(trigger_info_t *trigger_set)
 {
+	printf("4\n");
 	int rc;
 	slurm_msg_t msg;
 	trigger_info_msg_t req;
-	printf("3\n");
+	printf("4\n");
 
 	slurm_msg_t_init(&msg);
 	/*
 	 * Request message:
 	 */
-	printf("3\n");
+	printf("4\n");
 	memset(&req, 0, sizeof(req));
 	req.record_count = 1;
 	req.trigger_array = trigger_set;
