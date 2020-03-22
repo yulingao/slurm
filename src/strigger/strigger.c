@@ -129,9 +129,7 @@ static int _set_trigger(void)
 {
 	trigger_info_t ti;
 	char tmp_c[128];
-	printf("1\n");
 	slurm_init_trigger_msg(&ti);
-	printf("1\n");
 	if (params.job_id)
 	{
 		ti.res_type = TRIGGER_RES_TYPE_JOB;
@@ -158,7 +156,6 @@ static int _set_trigger(void)
 		else
 			ti.res_id = "*";
 	}
-	printf("1\n");
 	if (params.burst_buffer)
 		ti.trig_type |= TRIGGER_TYPE_BURST_BUFFER;
 	if (params.node_down)
@@ -232,18 +229,20 @@ static int _set_trigger(void)
 	ti.flags = params.flags;
 	ti.offset = params.offset + 0x8000;
 	ti.program = params.program;
-	printf("1\n");
 	while (slurm_set_trigger(&ti))
 	{
 		printf("2\n");
 		slurm_perror("slurm_set_trigger");
 		printf("2\n");
 		if (slurm_get_errno() != EAGAIN)
+		{
+			printf("3\n");
 			return 1;
+		}
+
 		printf("2\n");
 		sleep(5);
 	}
-	printf("1\n");
 	verbose("trigger set");
 	return 0;
 }
