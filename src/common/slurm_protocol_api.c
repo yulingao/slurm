@@ -5289,9 +5289,9 @@ tryagain:
 	}
 
 	printf("7.1\n");
+	printf("%d\n", response_msg->data);
 	if (!rc && (response_msg->msg_type == RESPONSE_SLURM_REROUTE_MSG))
 	{
-		printf("7.11\n");
 		reroute_msg_t *rr_msg = (reroute_msg_t *)response_msg->data;
 
 		/*
