@@ -54,30 +54,27 @@
  */
 extern int slurm_set_trigger(trigger_info_t *trigger_set)
 {
-	printf("4\n");
 	int rc;
 	slurm_msg_t msg;
 	trigger_info_msg_t req;
-	printf("4\n");
 
 	slurm_msg_t_init(&msg);
 	/*
 	 * Request message:
 	 */
-	printf("4\n");
 	memset(&req, 0, sizeof(req));
 	req.record_count = 1;
 	req.trigger_array = trigger_set;
 	msg.msg_type = REQUEST_TRIGGER_SET;
 	msg.data = &req;
-	printf("3\n");
+	printf("4\n");
 	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
 										  working_cluster_rec) < 0)
 		return SLURM_ERROR;
-	printf("3\n");
+	printf("4\n");
 	if (rc)
 		slurm_seterrno_ret(rc);
-	printf("3\n");
+	printf("4\n");
 	return SLURM_SUCCESS;
 }
 
