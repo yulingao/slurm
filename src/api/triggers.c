@@ -67,18 +67,15 @@ extern int slurm_set_trigger(trigger_info_t *trigger_set)
 	req.trigger_array = trigger_set;
 	msg.msg_type = REQUEST_TRIGGER_SET;
 	msg.data = &req;
-	printf("4\n");
 	if (slurm_send_recv_controller_rc_msg(&msg, &rc,
 										  working_cluster_rec) < 0)
 	{
-		printf("slurm send recv msg failed\n");
 		return SLURM_ERROR;
 	}
 
 	printf("slurm send recv msg success\n");
 	if (rc)
 		slurm_seterrno_ret(rc);
-	printf("4\n");
 	return SLURM_SUCCESS;
 }
 

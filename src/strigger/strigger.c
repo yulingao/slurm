@@ -236,7 +236,7 @@ static int _set_trigger(void)
 		printf("2\n");
 		if (slurm_get_errno() != EAGAIN)
 		{
-			printf("3\n");
+			printf("error occured\n");
 			return 1;
 		}
 

@@ -557,6 +557,7 @@ char *slurm_strerror(int errnum)
  */
 int slurm_get_errno(void)
 {
+	printf("the errno is %d", errno);
 	return errno;
 }
 

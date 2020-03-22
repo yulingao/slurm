@@ -5228,6 +5228,7 @@ tryagain:
 	if (comm_cluster_rec)
 		request_msg->flags |= SLURM_GLOBAL_AUTH_KEY;
 
+	printf("7\n");
 	if ((fd = slurm_open_controller_conn(&ctrl_addr, &use_backup,
 										 comm_cluster_rec)) < 0)
 	{
@@ -5235,10 +5236,14 @@ tryagain:
 		goto cleanup;
 	}
 
+	printf("7\n");
+
 	conf = slurm_conf_lock();
 	have_backup = conf->control_cnt > 1;
 	slurmctld_timeout = conf->slurmctld_timeout;
 	slurm_conf_unlock();
+
+	printf("7\n");
 
 	while (retry)
 	{
@@ -5247,11 +5252,19 @@ tryagain:
 		 * control, we sleep and retry later
 		 */
 		retry = 0;
+
+		printf("7\n");
+
 		rc = _send_and_recv_msg(fd, request_msg, response_msg, 0);
+
+		printf("7\n");
+
 		if (response_msg->auth_cred)
 			g_slurm_auth_destroy(response_msg->auth_cred);
 		else
 			rc = -1;
+
+		printf("7\n");
 
 		if ((rc == 0) && (!comm_cluster_rec) && (response_msg->msg_type == RESPONSE_SLURM_RC) && ((((return_code_msg_t *)response_msg->data)->return_code) == ESLURM_IN_STANDBY_MODE) && (have_backup) && (difftime(time(NULL), start_time) < (slurmctld_timeout + (slurmctld_timeout / 2))))
 		{
@@ -5661,16 +5674,11 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
 	int ret_c;
 	slurm_msg_t resp;
 
-	printf("5\n");
-
-	// 发送信息成功之后会返回0，!0会成立
+	// 发送信息成功之后会返回0，成功会进入分支
 	if (!slurm_send_recv_controller_msg(req, &resp, comm_cluster_rec))
 	{
-		printf("5\n");
 		*rc = slurm_get_return_code(resp.msg_type, resp.data);
-		printf("5\n");
 		slurm_free_msg_data(resp.msg_type, resp.data);
-		printf("5\n");
 		ret_c = 0;
 	}
 	else
