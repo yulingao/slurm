@@ -1366,6 +1366,7 @@ static void *_service_connection(void *arg)
 {
 
 	printf("this is service connection!!\n");
+
 	connection_arg_t *conn = (connection_arg_t *)arg;
 	void *return_code = NULL;
 	slurm_msg_t msg;

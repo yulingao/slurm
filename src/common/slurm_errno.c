@@ -578,6 +578,6 @@ void slurm_seterrno(int errnum)
  */
 void slurm_perror(const char *msg)
 {
-	printf("this is slurm_perror, and the errno is %d", errno);
+	printf("this is slurm_perror, and the errno is %d\n", errno);
 	fprintf(stderr, "%s: %s\n", msg, slurm_strerror(errno));
 }

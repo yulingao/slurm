@@ -73,7 +73,7 @@ extern int slurm_set_trigger(trigger_info_t *trigger_set)
 		return SLURM_ERROR;
 	}
 
-	printf("slurm send recv msg success\n");
+	printf("slurm send recv msg success, and rc = %d\n", rc);
 	if (rc)
 		slurm_seterrno_ret(rc);
 	return SLURM_SUCCESS;
