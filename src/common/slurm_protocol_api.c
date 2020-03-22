@@ -5689,7 +5689,7 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
 		printf("ret_c == -1");
 		ret_c = -1;
 	}
-	printf("ret_c = %d and rc = %d\n", ret_c, rc);
+	printf("ret_c = %d and rc = %d\n", ret_c, *rc);
 
 	return ret_c;
 }
