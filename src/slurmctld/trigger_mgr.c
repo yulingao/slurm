@@ -428,8 +428,8 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 	lock_slurmctld(job_read_lock);
 	slurm_mutex_lock(&trigger_mutex);
 
-	printf("slurm_user_id, %u", slurmctld_conf.slurm_user_id);
-	printf("uid, %u", uid);
+	printf("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
+	printf("uid, %u\n", uid);
 
 	if ((slurmctld_conf.slurm_user_id != 0) &&
 		(slurmctld_conf.slurm_user_id != uid))

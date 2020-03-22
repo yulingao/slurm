@@ -71,17 +71,17 @@ int main(int argc, char **argv)
 	log_init("strigger", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
 	printf("this is strigger!! hello world\n");
-	printf("0");
+	printf("0\n");
 	slurm_conf_init(NULL);
-	printf("1");
+	printf("1\n");
 	parse_command_line(argc, argv);
-	printf("2");
+	printf("2\n");
 	if (params.verbose)
 	{
 		opts.stderr_level += params.verbose;
 		log_alter(opts, SYSLOG_FACILITY_DAEMON, NULL);
 	}
-	printf("3");
+	printf("3\n");
 	if (params.mode_set)
 		rc = _set_trigger();
 	else if (params.mode_get)
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 		error("Invalid mode");
 		rc = 1;
 	}
-	printf("4");
+	printf("4\n");
 	exit(rc);
 }
 
