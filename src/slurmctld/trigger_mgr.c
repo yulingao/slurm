@@ -172,6 +172,9 @@ static void _dump_trigger_msg(char *header, trigger_info_msg_t *msg)
 /* Validate trigger program */
 static bool _validate_trigger(trig_mgr_info_t *trig_in)
 {
+
+	printf("this is validate trigger program\n");
+
 	struct stat buf;
 	int i, modes;
 	char *program = xstrdup(trig_in->program);
