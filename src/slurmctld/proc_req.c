@@ -2835,6 +2835,8 @@ static void _slurm_rpc_complete_batch_script(slurm_msg_t *msg,
 
 static void _slurm_rpc_dump_batch_script(slurm_msg_t *msg)
 {
+	printf("this is _slurm_rpc_dump_batch_script method!\n");
+
 	DEF_TIMERS;
 	int rc = SLURM_SUCCESS;
 	slurm_msg_t response_msg;
@@ -3600,6 +3602,8 @@ static slurm_addr_t *_build_node_addr(char *node_list, uint32_t node_cnt,
  *	plus sbcast credential */
 static void _slurm_rpc_job_sbcast_cred(slurm_msg_t *msg)
 {
+	printf("_slurm_rpc_job_sbcast_cred\n");
+
 #ifdef HAVE_FRONT_END
 	slurm_send_rc_msg(msg, ESLURM_NOT_SUPPORTED);
 #else
