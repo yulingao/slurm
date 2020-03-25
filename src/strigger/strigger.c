@@ -70,6 +70,7 @@ int main(int argc, char **argv)
 	log_options_t opts = LOG_OPTS_STDERR_ONLY;
 	log_init("strigger", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
+    printf("this is using xcode to code slurm");
 	printf("this is strigger!! hello world\n");
 	slurm_conf_init(NULL);
 	parse_command_line(argc, argv);
