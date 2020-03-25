@@ -4602,9 +4602,12 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 	int rc;
 	void *auth_cred;
 	time_t start_time = time(NULL);
-
+    
+    printf("this is slurm_send_node_msg\n");
+    printf("---------");
 	if (msg->conn)
 	{
+        printf("9.1\n");
 		persist_msg_t persist_msg;
 
 		memset(&persist_msg, 0, sizeof(persist_msg_t));
@@ -4642,6 +4645,8 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 
 		return rc;
 	}
+    
+    printf("9.2\n");
 
 	/*
 	 * Initialize header with Auth credential and message type.
