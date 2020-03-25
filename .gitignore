@@ -63,3 +63,8 @@ TAGS
 
 .vscode
 .idea
+
+.autotools
+.cproject
+.project
+.settings/*
