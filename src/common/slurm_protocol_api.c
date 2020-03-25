@@ -4731,6 +4731,7 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 	/*
 	 * Send message
 	 */
+    printf("9.3\n");
 	rc = slurm_msg_sendto(fd, get_buf_data(buffer),
 						  get_buf_offset(buffer));
 
