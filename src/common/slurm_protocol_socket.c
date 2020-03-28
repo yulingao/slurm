@@ -202,6 +202,8 @@ ssize_t slurm_msg_sendto_timeout(int fd, char *buffer,
 extern int slurm_send_timeout(int fd, char *buf, size_t size,
 			      uint32_t flags, int timeout)
 {
+    printf("this is slurm_send_timeout\n");
+    
 	int rc;
 	int sent = 0;
 	int fd_flags;

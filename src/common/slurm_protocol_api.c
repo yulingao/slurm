@@ -3873,6 +3873,8 @@ fini:
 
 extern int slurm_unpack_received_msg(slurm_msg_t *msg, int fd, Buf buffer)
 {
+	printf("this is slurm_unpack_received_msg\n");
+
 	header_t header;
 	int rc;
 	void *auth_cred = NULL;
@@ -4006,6 +4008,8 @@ total_return:
  */
 int slurm_receive_msg(int fd, slurm_msg_t *msg, int timeout)
 {
+	printf("this is slurm_receive_msg\n");
+
 	char *buf = NULL;
 	size_t buflen = 0;
 	int rc;
@@ -4017,6 +4021,7 @@ int slurm_receive_msg(int fd, slurm_msg_t *msg, int timeout)
 
 	if (msg->conn)
 	{
+		prinf("if msg->conn\n");
 		persist_msg_t persist_msg;
 
 		buffer = slurm_persist_recv_msg(msg->conn);
@@ -5112,8 +5117,6 @@ extern int slurm_send_recv_msg(int fd, slurm_msg_t *req,
 		resp->conn = req->conn;
 	}
 
-	printf("8\n");
-
 	if (slurm_send_node_msg(fd, req) >= 0)
 	{
 		printf("8\n");
@@ -5295,7 +5298,6 @@ tryagain:
 	}
 
 	printf("7.1\n");
-	printf("%d\n", response_msg->data);
 	if (!rc && (response_msg->msg_type == RESPONSE_SLURM_REROUTE_MSG))
 	{
 		reroute_msg_t *rr_msg = (reroute_msg_t *)response_msg->data;

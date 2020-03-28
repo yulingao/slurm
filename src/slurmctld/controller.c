@@ -2401,6 +2401,8 @@ static void *_slurmctld_background(void *no_data)
 			last_ctld_bu_ping = now;
 		}
 
+
+//		在这里进行trigger的处理
 		if (difftime(now, last_trigger) > TRIGGER_INTERVAL)
 		{
 			lock_slurmctld(job_node_read_lock);

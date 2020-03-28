@@ -1794,6 +1794,8 @@ static void _trigger_clone(trig_mgr_info_t *trig_in)
 
 extern void trigger_process(void)
 {
+
+	printf("this is trigger_process\n");
 	ListIterator trig_iter;
 	trig_mgr_info_t *trig_in;
 	time_t now = time(NULL);
