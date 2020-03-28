@@ -6010,6 +6010,8 @@ inline static void _slurm_rpc_trigger_get(slurm_msg_t *msg)
 
 inline static void _slurm_rpc_trigger_set(slurm_msg_t *msg)
 {
+	printf("this is _slurm_rpc_trigger_set\n");
+
 	int rc;
 	uid_t uid = g_slurm_auth_get_uid(msg->auth_cred);
 	gid_t gid = g_slurm_auth_get_gid(msg->auth_cred);
@@ -6021,7 +6023,6 @@ inline static void _slurm_rpc_trigger_set(slurm_msg_t *msg)
 	START_TIMER;
 	debug("Processing RPC: REQUEST_TRIGGER_SET from uid=%d", uid);
 
-	printf("this is trigger rpc set\n");
 
 	if (validate_slurm_user(uid) || allow_user_triggers)
 	{

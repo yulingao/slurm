@@ -1212,6 +1212,8 @@ static void _sig_handler(int signal)
  */
 static void *_slurmctld_rpc_mgr(void *no_data)
 {
+	printf("this is _slurmctld_rpc_mgr\n");
+
 	int newsockfd;
 	struct pollfd *fds;
 	slurm_addr_t cli_addr, srv_addr;
