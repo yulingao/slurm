@@ -4021,7 +4021,7 @@ int slurm_receive_msg(int fd, slurm_msg_t *msg, int timeout)
 
 	if (msg->conn)
 	{
-		prinf("if msg->conn\n");
+		printf("if msg->conn\n");
 		persist_msg_t persist_msg;
 
 		buffer = slurm_persist_recv_msg(msg->conn);
