@@ -173,7 +173,7 @@ static void _dump_trigger_msg(char *header, trigger_info_msg_t *msg)
 static bool _validate_trigger(trig_mgr_info_t *trig_in)
 {
 
-	printf("this is validate trigger program\n");
+	info("this is validate trigger program\n");
 
 	struct stat buf;
 	int i, modes;
