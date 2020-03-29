@@ -263,7 +263,7 @@ static void *_wait_primary_prog(void *arg);
 /* main - slurmctld main function, start various threads and process RPCs */
 int main(int argc, char **argv)
 {
-	printf("this is controller.c\n");
+	printf("this is controller.c  edited by dadan\n");
 
 	int cnt, error_code, i;
 	struct timeval start, now;
