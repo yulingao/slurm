@@ -36,7 +36,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with Slurm; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
-\*****************************************************************************/
+ \*****************************************************************************/
 
 #include "config.h"
 
@@ -98,33 +98,31 @@ uint8_t bu_ctld_failure = 0;
 uint8_t db_failure = 0;
 uint8_t dbd_failure = 0;
 
-typedef struct trig_mgr_info
-{
-	uint32_t child_pid;			/* pid of child process */
-	uint16_t flags;				/* TRIGGER_FLAG_* */
-	uint32_t trig_id;			/* trigger ID */
-	uint16_t res_type;			/* TRIGGER_RES_TYPE_* */
-	char *res_id;				/* node name or job_id (string) */
-	bitstr_t *nodes_bitmap;		/* bitmap of requested nodes (if applicable) */
-	uint32_t job_id;			/* job ID (if applicable) */
+typedef struct trig_mgr_info {
+	uint32_t child_pid; /* pid of child process */
+	uint16_t flags; /* TRIGGER_FLAG_* */
+	uint32_t trig_id; /* trigger ID */
+	uint16_t res_type; /* TRIGGER_RES_TYPE_* */
+	char *res_id; /* node name or job_id (string) */
+	bitstr_t *nodes_bitmap; /* bitmap of requested nodes (if applicable) */
+	uint32_t job_id; /* job ID (if applicable) */
 	struct job_record *job_ptr; /* pointer to job record (if applicable) */
-	uint32_t trig_type;			/* TRIGGER_TYPE_* */
-	time_t trig_time;			/* offset (pending) or time stamp (complete) */
-	uint32_t user_id;			/* user requesting trigger */
-	uint32_t group_id;			/* user's group id */
-	char *program;				/* program to execute */
-	uint8_t state;				/* 0=pending, 1=pulled, 2=completed */
+	uint32_t trig_type; /* TRIGGER_TYPE_* */
+	time_t trig_time; /* offset (pending) or time stamp (complete) */
+	uint32_t user_id; /* user requesting trigger */
+	uint32_t group_id; /* user's group id */
+	char *program; /* program to execute */
+	uint8_t state; /* 0=pending, 1=pulled, 2=completed */
 
 	/* The orig_ fields are used to save  and clone the orignal values */
 	bitstr_t *orig_bitmap; /* bitmap of requested nodes (if applicable) */
-	char *orig_res_id;	   /* original node name or job_id (string) */
-	time_t orig_time;	   /* offset (pending) or time stamp (complete) */
+	char *orig_res_id; /* original node name or job_id (string) */
+	time_t orig_time; /* offset (pending) or time stamp (complete) */
 } trig_mgr_info_t;
 
 /* Prototype for ListDelF */
-void _trig_del(void *x)
-{
-	trig_mgr_info_t *tmp = (trig_mgr_info_t *)x;
+void _trig_del(void *x) {
+	trig_mgr_info_t *tmp = (trig_mgr_info_t*) x;
 	xfree(tmp->res_id);
 	xfree(tmp->orig_res_id);
 	xfree(tmp->program);
@@ -133,71 +131,61 @@ void _trig_del(void *x)
 	xfree(tmp);
 }
 
-static int _trig_offset(uint16_t offset)
-{
+static int _trig_offset(uint16_t offset) {
 	static int rc;
 	rc = offset;
 	rc -= 0x8000;
 	return rc;
 }
 
-static void _dump_trigger_msg(char *header, trigger_info_msg_t *msg)
-{
+static void _dump_trigger_msg(char *header, trigger_info_msg_t *msg) {
 	int i;
 
 	if ((slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) == 0)
 		return;
 
 	info("%s", header);
-	if ((msg == NULL) || (msg->record_count == 0))
-	{
+	if ((msg == NULL) || (msg->record_count == 0)) {
 		info("Trigger has no entries");
 		return;
 	}
 
 	info("INDEX TRIG_ID RES_TYPE RES_ID TRIG_TYPE OFFSET UID PROGRAM");
-	for (i = 0; i < msg->record_count; i++)
-	{
+	for (i = 0; i < msg->record_count; i++) {
 		info("trigger[%u] %u %s %s %s %d %u %s", i,
-			 msg->trigger_array[i].trig_id,
-			 trigger_res_type(msg->trigger_array[i].res_type),
-			 msg->trigger_array[i].res_id,
-			 trigger_type(msg->trigger_array[i].trig_type),
-			 _trig_offset(msg->trigger_array[i].offset),
-			 msg->trigger_array[i].user_id,
-			 msg->trigger_array[i].program);
+				msg->trigger_array[i].trig_id,
+				trigger_res_type(msg->trigger_array[i].res_type),
+				msg->trigger_array[i].res_id,
+				trigger_type(msg->trigger_array[i].trig_type),
+				_trig_offset(msg->trigger_array[i].offset),
+				msg->trigger_array[i].user_id, msg->trigger_array[i].program);
 	}
 }
 
 /* Validate trigger program */
-static bool _validate_trigger(trig_mgr_info_t *trig_in)
-{
+static bool _validate_trigger(trig_mgr_info_t *trig_in) {
 
-	info("this is validate trigger program1111\n");
+	info("this is validate trigger program\n");
 
 	struct stat buf;
 	int i, modes;
 	char *program = xstrdup(trig_in->program);
 
-	for (i = 0; program[i]; i++)
-	{
-		if (isspace(program[i]))
-		{
+	for (i = 0; program[i]; i++) {
+		if (isspace(program[i])) {
 			program[i] = '\0';
 			break;
 		}
 	}
 
-	if (stat(program, &buf) != 0)
-	{
+	if (stat(program, &buf) != 0) {
 		info("trigger program %s not found", trig_in->program);
 		xfree(program);
 		return false;
 	}
 	xfree(program);
 
-	if (!S_ISREG(buf.st_mode))
-	{
+	if (!S_ISREG(buf.st_mode)) {
 		info("trigger program %s not a regular file", trig_in->program);
 		return false;
 	}
@@ -214,15 +202,13 @@ static bool _validate_trigger(trig_mgr_info_t *trig_in)
 	return false;
 }
 
-extern int trigger_pull(trigger_info_msg_t *msg)
-{
+extern int trigger_pull(trigger_info_msg_t *msg) {
 	int rc = SLURM_SUCCESS;
 	ListIterator trig_iter;
 	trigger_info_t *trig_in;
 	trig_mgr_info_t *trig_test;
 
-	if (trigger_list == NULL)
-	{
+	if (trigger_list == NULL) {
 		trigger_list = list_create(_trig_del);
 	}
 
@@ -232,22 +218,18 @@ extern int trigger_pull(trigger_info_msg_t *msg)
 		return ESRCH;
 	trig_in = msg->trigger_array;
 
-	if ((trig_in->res_type != TRIGGER_RES_TYPE_SLURMCTLD) &&
-		(trig_in->res_type != TRIGGER_RES_TYPE_SLURMDBD) &&
-		(trig_in->res_type != TRIGGER_RES_TYPE_DATABASE))
-	{
+	if ((trig_in->res_type != TRIGGER_RES_TYPE_SLURMCTLD)
+			&& (trig_in->res_type != TRIGGER_RES_TYPE_SLURMDBD)
+			&& (trig_in->res_type != TRIGGER_RES_TYPE_DATABASE)) {
 		return EINVAL;
 	}
 
 	/* now look for a valid request */
 	trig_iter = list_iterator_create(trigger_list);
-	while ((trig_test = list_next(trig_iter)))
-	{
-		if ((trig_test->res_type == trig_in->res_type) &&
-			(trig_test->trig_type == trig_in->trig_type))
-		{
-			switch (trig_test->trig_type)
-			{
+	while ((trig_test = list_next(trig_iter))) {
+		if ((trig_test->res_type == trig_in->res_type)
+				&& (trig_test->trig_type == trig_in->trig_type)) {
+			switch (trig_test->trig_type) {
 			case TRIGGER_TYPE_PRI_CTLD_ACCT_FULL:
 				trigger_primary_ctld_acct_full();
 				break;
@@ -274,7 +256,7 @@ extern int trigger_pull(trigger_info_msg_t *msg)
 				break;
 			default:
 				error("trigger_pull call has invalid type: %u",
-					  trig_test->trig_type);
+						trig_test->trig_type);
 				rc = EINVAL;
 				break;
 			}
@@ -285,8 +267,7 @@ extern int trigger_pull(trigger_info_msg_t *msg)
 	return rc;
 }
 
-extern int trigger_clear(uid_t uid, trigger_info_msg_t *msg)
-{
+extern int trigger_clear(uid_t uid, trigger_info_msg_t *msg) {
 	int rc = ESRCH;
 	ListIterator trig_iter;
 	trigger_info_t *trig_in;
@@ -302,37 +283,30 @@ extern int trigger_clear(uid_t uid, trigger_info_msg_t *msg)
 	if (msg->record_count != 1)
 		goto fini;
 	trig_in = msg->trigger_array;
-	if (trig_in->res_type == TRIGGER_RES_TYPE_JOB)
-	{
-		job_id = (uint32_t)atol(trig_in->res_id);
-		if (job_id == 0)
-		{
+	if (trig_in->res_type == TRIGGER_RES_TYPE_JOB) {
+		job_id = (uint32_t) atol(trig_in->res_id);
+		if (job_id == 0) {
 			rc = ESLURM_INVALID_JOB_ID;
 			goto fini;
 		}
-	}
-	else if ((trig_in->trig_id == 0) && (trig_in->user_id == NO_VAL))
-	{
+	} else if ((trig_in->trig_id == 0) && (trig_in->user_id == NO_VAL)) {
 		rc = EINVAL;
 		goto fini;
 	}
 
 	/* now look for a valid request, matching uid */
 	trig_iter = list_iterator_create(trigger_list);
-	while ((trig_test = list_next(trig_iter)))
-	{
-		if (trig_in->trig_id &&
-			(trig_in->trig_id != trig_test->trig_id))
+	while ((trig_test = list_next(trig_iter))) {
+		if (trig_in->trig_id && (trig_in->trig_id != trig_test->trig_id))
 			continue;
 		if (job_id && (job_id != trig_test->job_id))
 			continue;
-		if ((trig_in->user_id != NO_VAL) &&
-			(trig_in->user_id != trig_test->user_id))
+		if ((trig_in->user_id != NO_VAL)
+				&& (trig_in->user_id != trig_test->user_id))
 			continue;
 		if (trig_test->state == 2) /* wait for proc termination */
 			continue;
-		if ((trig_test->user_id != (uint32_t)uid) && (uid != 0))
-		{
+		if ((trig_test->user_id != (uint32_t) uid) && (uid != 0)) {
 			rc = ESLURM_ACCESS_DENIED;
 			continue;
 		}
@@ -342,13 +316,12 @@ extern int trigger_clear(uid_t uid, trigger_info_msg_t *msg)
 	list_iterator_destroy(trig_iter);
 	schedule_trigger_save();
 
-fini:
+	fini:
 	slurm_mutex_unlock(&trigger_mutex);
 	return rc;
 }
 
-extern trigger_info_msg_t *trigger_get(uid_t uid, trigger_info_msg_t *msg)
-{
+extern trigger_info_msg_t* trigger_get(uid_t uid, trigger_info_msg_t *msg) {
 	trigger_info_msg_t *resp_data;
 	ListIterator trig_iter;
 	trigger_info_t *trig_out;
@@ -363,14 +336,13 @@ extern trigger_info_msg_t *trigger_get(uid_t uid, trigger_info_msg_t *msg)
 	resp_data = xmalloc(sizeof(trigger_info_msg_t));
 	resp_data->record_count = list_count(trigger_list);
 	resp_data->trigger_array = xcalloc(resp_data->record_count,
-									   sizeof(trigger_info_t));
+			sizeof(trigger_info_t));
 	trig_iter = list_iterator_create(trigger_list);
 	trig_out = resp_data->trigger_array;
-	while ((trig_in = list_next(trig_iter)))
-	{
+	while ((trig_in = list_next(trig_iter))) {
 		/* Note: Filtering currently done by strigger */
-		if ((trig_in->state >= 1) &&
-			((trig_out->flags & TRIGGER_FLAG_PERM) == 0))
+		if ((trig_in->state >= 1)
+				&& ((trig_out->flags & TRIGGER_FLAG_PERM) == 0))
 			continue; /* no longer pending */
 		trig_out->flags = trig_in->flags;
 		trig_out->trig_id = trig_in->trig_id;
@@ -391,23 +363,20 @@ extern trigger_info_msg_t *trigger_get(uid_t uid, trigger_info_msg_t *msg)
 	return resp_data;
 }
 
-static bool _duplicate_trigger(trigger_info_t *trig_desc)
-{
+static bool _duplicate_trigger(trigger_info_t *trig_desc) {
 	bool found_dup = false;
 	ListIterator trig_iter;
 	trig_mgr_info_t *trig_rec;
 
 	trig_iter = list_iterator_create(trigger_list);
-	while ((trig_rec = list_next(trig_iter)))
-	{
-		if ((trig_desc->flags == trig_rec->flags) &&
-			(trig_desc->res_type == trig_rec->res_type) &&
-			(trig_desc->trig_type == trig_rec->trig_type) &&
-			(trig_desc->offset == trig_rec->trig_time) &&
-			(trig_desc->user_id == trig_rec->user_id) &&
-			!xstrcmp(trig_desc->program, trig_rec->program) &&
-			!xstrcmp(trig_desc->res_id, trig_rec->res_id))
-		{
+	while ((trig_rec = list_next(trig_iter))) {
+		if ((trig_desc->flags == trig_rec->flags)
+				&& (trig_desc->res_type == trig_rec->res_type)
+				&& (trig_desc->trig_type == trig_rec->trig_type)
+				&& (trig_desc->offset == trig_rec->trig_time)
+				&& (trig_desc->user_id == trig_rec->user_id)
+				&& !xstrcmp(trig_desc->program, trig_rec->program)
+				&& !xstrcmp(trig_desc->res_id, trig_rec->res_id)) {
 			found_dup = true;
 			break;
 		}
@@ -416,8 +385,7 @@ static bool _duplicate_trigger(trigger_info_t *trig_desc)
 	return found_dup;
 }
 
-extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
-{
+extern int my_trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 	int i;
 	int rc = SLURM_SUCCESS;
 	uint32_t job_id;
@@ -425,8 +393,8 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 	trig_mgr_info_t *trig_add;
 	struct job_record *job_ptr;
 	/* Read config and job info */
-	slurmctld_lock_t job_read_lock =
-		{READ_LOCK, READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+	slurmctld_lock_t job_read_lock = { READ_LOCK, READ_LOCK, NO_LOCK, NO_LOCK,
+			NO_LOCK };
 
 	lock_slurmctld(job_read_lock);
 	slurm_mutex_lock(&trigger_mutex);
@@ -434,67 +402,57 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 	info("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
 	info("uid, %u\n", uid);
 
-	if ((slurmctld_conf.slurm_user_id != 0) &&
-		(slurmctld_conf.slurm_user_id != uid))
-	{
-		/* If SlurmUser is not root, then it is unable to set the
-		 * appropriate user id and group id for the program to be
-		 * launched. To prevent the launched program for an arbitrary
-		 * user being executed as user SlurmUser, disable all other
-		 * users from setting triggers. */
-		info("Attempt to set trigger by uid %u != SlurmUser", uid);
-		rc = ESLURM_ACCESS_DENIED;
-		goto fini;
-	}
+//	不进行用户的权限校验
 
-	if (trigger_list == NULL)
-	{
+//	if ((slurmctld_conf.slurm_user_id != 0) &&
+//		(slurmctld_conf.slurm_user_id != uid))
+//	{
+//		/* If SlurmUser is not root, then it is unable to set the
+//		 * appropriate user id and group id for the program to be
+//		 * launched. To prevent the launched program for an arbitrary
+//		 * user being executed as user SlurmUser, disable all other
+//		 * users from setting triggers. */
+//		info("Attempt to set trigger by uid %u != SlurmUser", uid);
+//		rc = ESLURM_ACCESS_DENIED;
+//		goto fini;
+//	}
+
+	if (trigger_list == NULL) {
 		trigger_list = list_create(_trig_del);
-	}
-	else if ((uid != 0) &&
-			 (list_count(trigger_list) >= slurmctld_conf.max_job_cnt))
-	{
+	} else if ((uid != 0)
+			&& (list_count(trigger_list) >= slurmctld_conf.max_job_cnt)) {
 		rc = EAGAIN;
 		goto fini;
 	}
 
 	_dump_trigger_msg("trigger_set", msg);
-	for (i = 0; i < msg->record_count; i++)
-	{
+	for (i = 0; i < msg->record_count; i++) {
 		if (msg->trigger_array[i].res_type ==
-			TRIGGER_RES_TYPE_JOB)
-		{
-			job_id = (uint32_t)atol(
-				msg->trigger_array[i].res_id);
+		TRIGGER_RES_TYPE_JOB) {
+			job_id = (uint32_t) atol(msg->trigger_array[i].res_id);
 			job_ptr = find_job_record(job_id);
-			if (job_ptr == NULL)
-			{
+			if (job_ptr == NULL) {
 				rc = ESLURM_INVALID_JOB_ID;
 				continue;
 			}
-			if (IS_JOB_FINISHED(job_ptr))
-			{
+			if (IS_JOB_FINISHED(job_ptr)) {
 				rc = ESLURM_ALREADY_DONE;
 				continue;
 			}
-		}
-		else
-		{
+		} else {
 			job_id = 0;
 			job_ptr = NULL;
-			if ((msg->trigger_array[i].res_id != NULL) &&
-				(msg->trigger_array[i].res_id[0] != '*') &&
-				(node_name2bitmap(msg->trigger_array[i].res_id,
-								  false, &bitmap) != 0))
-			{
+			if ((msg->trigger_array[i].res_id != NULL)
+					&& (msg->trigger_array[i].res_id[0] != '*')
+					&& (node_name2bitmap(msg->trigger_array[i].res_id,
+					false, &bitmap) != 0)) {
 				FREE_NULL_BITMAP(bitmap);
 				rc = ESLURM_INVALID_NODE_NAME;
 				continue;
 			}
 		}
-		msg->trigger_array[i].user_id = (uint32_t)uid;
-		if (_duplicate_trigger(&msg->trigger_array[i]))
-		{
+		msg->trigger_array[i].user_id = (uint32_t) uid;
+		if (_duplicate_trigger(&msg->trigger_array[i])) {
 			FREE_NULL_BITMAP(bitmap);
 			rc = ESLURM_TRIGGER_DUP;
 			continue;
@@ -505,15 +463,13 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 		next_trigger_id++;
 		trig_add->flags = msg->trigger_array[i].flags;
 		trig_add->res_type = msg->trigger_array[i].res_type;
-		if (bitmap)
-		{
+		if (bitmap) {
 			trig_add->nodes_bitmap = bitmap;
 			trig_add->orig_bitmap = bit_copy(bitmap);
 		}
 		trig_add->job_id = job_id;
 		trig_add->job_ptr = job_ptr;
-		if (msg->trigger_array[i].res_id)
-		{
+		if (msg->trigger_array[i].res_id) {
 			trig_add->res_id = msg->trigger_array[i].res_id;
 			trig_add->orig_res_id = xstrdup(trig_add->res_id);
 			msg->trigger_array[i].res_id = NULL; /* moved */
@@ -522,12 +478,11 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 		trig_add->trig_time = msg->trigger_array[i].offset;
 		trig_add->orig_time = msg->trigger_array[i].offset;
 		trig_add->user_id = msg->trigger_array[i].user_id;
-		trig_add->group_id = (uint32_t)gid;
+		trig_add->group_id = (uint32_t) gid;
 		/* move don't copy "program" */
 		trig_add->program = msg->trigger_array[i].program;
 		msg->trigger_array[i].program = NULL;
-		if (!_validate_trigger(trig_add))
-		{
+		if (!_validate_trigger(trig_add)) {
 			rc = ESLURM_ACCESS_DENIED;
 			FREE_NULL_BITMAP(trig_add->nodes_bitmap);
 			FREE_NULL_BITMAP(trig_add->orig_bitmap);
@@ -540,14 +495,127 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 		schedule_trigger_save();
 	}
 
-fini:
+	fini:
+	slurm_mutex_unlock(&trigger_mutex);
+	unlock_slurmctld(job_read_lock);
+	return rc;
+
+}
+
+extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
+	int i;
+	int rc = SLURM_SUCCESS;
+	uint32_t job_id;
+	bitstr_t *bitmap = NULL;
+	trig_mgr_info_t *trig_add;
+	struct job_record *job_ptr;
+	/* Read config and job info */
+	slurmctld_lock_t job_read_lock = { READ_LOCK, READ_LOCK, NO_LOCK, NO_LOCK,
+			NO_LOCK };
+
+	lock_slurmctld(job_read_lock);
+	slurm_mutex_lock(&trigger_mutex);
+
+	info("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
+	info("uid, %u\n", uid);
+
+	if ((slurmctld_conf.slurm_user_id != 0)
+			&& (slurmctld_conf.slurm_user_id != uid)) {
+		/* If SlurmUser is not root, then it is unable to set the
+		 * appropriate user id and group id for the program to be
+		 * launched. To prevent the launched program for an arbitrary
+		 * user being executed as user SlurmUser, disable all other
+		 * users from setting triggers. */
+		info("Attempt to set trigger by uid %u != SlurmUser", uid);
+		rc = ESLURM_ACCESS_DENIED;
+		goto fini;
+	}
+
+	if (trigger_list == NULL) {
+		trigger_list = list_create(_trig_del);
+	} else if ((uid != 0)
+			&& (list_count(trigger_list) >= slurmctld_conf.max_job_cnt)) {
+		rc = EAGAIN;
+		goto fini;
+	}
+
+	_dump_trigger_msg("trigger_set", msg);
+	for (i = 0; i < msg->record_count; i++) {
+		if (msg->trigger_array[i].res_type ==
+		TRIGGER_RES_TYPE_JOB) {
+			job_id = (uint32_t) atol(msg->trigger_array[i].res_id);
+			job_ptr = find_job_record(job_id);
+			if (job_ptr == NULL) {
+				rc = ESLURM_INVALID_JOB_ID;
+				continue;
+			}
+			if (IS_JOB_FINISHED(job_ptr)) {
+				rc = ESLURM_ALREADY_DONE;
+				continue;
+			}
+		} else {
+			job_id = 0;
+			job_ptr = NULL;
+			if ((msg->trigger_array[i].res_id != NULL)
+					&& (msg->trigger_array[i].res_id[0] != '*')
+					&& (node_name2bitmap(msg->trigger_array[i].res_id,
+					false, &bitmap) != 0)) {
+				FREE_NULL_BITMAP(bitmap);
+				rc = ESLURM_INVALID_NODE_NAME;
+				continue;
+			}
+		}
+		msg->trigger_array[i].user_id = (uint32_t) uid;
+		if (_duplicate_trigger(&msg->trigger_array[i])) {
+			FREE_NULL_BITMAP(bitmap);
+			rc = ESLURM_TRIGGER_DUP;
+			continue;
+		}
+		trig_add = xmalloc(sizeof(trig_mgr_info_t));
+		msg->trigger_array[i].trig_id = next_trigger_id;
+		trig_add->trig_id = next_trigger_id;
+		next_trigger_id++;
+		trig_add->flags = msg->trigger_array[i].flags;
+		trig_add->res_type = msg->trigger_array[i].res_type;
+		if (bitmap) {
+			trig_add->nodes_bitmap = bitmap;
+			trig_add->orig_bitmap = bit_copy(bitmap);
+		}
+		trig_add->job_id = job_id;
+		trig_add->job_ptr = job_ptr;
+		if (msg->trigger_array[i].res_id) {
+			trig_add->res_id = msg->trigger_array[i].res_id;
+			trig_add->orig_res_id = xstrdup(trig_add->res_id);
+			msg->trigger_array[i].res_id = NULL; /* moved */
+		}
+		trig_add->trig_type = msg->trigger_array[i].trig_type;
+		trig_add->trig_time = msg->trigger_array[i].offset;
+		trig_add->orig_time = msg->trigger_array[i].offset;
+		trig_add->user_id = msg->trigger_array[i].user_id;
+		trig_add->group_id = (uint32_t) gid;
+		/* move don't copy "program" */
+		trig_add->program = msg->trigger_array[i].program;
+		msg->trigger_array[i].program = NULL;
+		if (!_validate_trigger(trig_add)) {
+			rc = ESLURM_ACCESS_DENIED;
+			FREE_NULL_BITMAP(trig_add->nodes_bitmap);
+			FREE_NULL_BITMAP(trig_add->orig_bitmap);
+			xfree(trig_add->program);
+			xfree(trig_add->res_id);
+			xfree(trig_add);
+			continue;
+		}
+		list_append(trigger_list, trig_add);
+		schedule_trigger_save();
+	}
+
+	fini:
 	slurm_mutex_unlock(&trigger_mutex);
 	unlock_slurmctld(job_read_lock);
 	return rc;
 }
 
-extern void trigger_front_end_down(front_end_record_t *front_end_ptr)
-{
+extern void trigger_front_end_down(front_end_record_t *front_end_ptr) {
 	int inx = front_end_ptr - front_end_nodes;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -559,8 +627,7 @@ extern void trigger_front_end_down(front_end_record_t *front_end_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_front_end_up(front_end_record_t *front_end_ptr)
-{
+extern void trigger_front_end_up(front_end_record_t *front_end_ptr) {
 	int inx = front_end_ptr - front_end_nodes;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -572,8 +639,7 @@ extern void trigger_front_end_up(front_end_record_t *front_end_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_node_down(struct node_record *node_ptr)
-{
+extern void trigger_node_down(struct node_record *node_ptr) {
 	int inx = node_ptr - node_record_table_ptr;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -585,8 +651,7 @@ extern void trigger_node_down(struct node_record *node_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_node_drained(struct node_record *node_ptr)
-{
+extern void trigger_node_drained(struct node_record *node_ptr) {
 	int inx = node_ptr - node_record_table_ptr;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -598,8 +663,7 @@ extern void trigger_node_drained(struct node_record *node_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_node_failing(struct node_record *node_ptr)
-{
+extern void trigger_node_failing(struct node_record *node_ptr) {
 	int inx = node_ptr - node_record_table_ptr;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -611,8 +675,7 @@ extern void trigger_node_failing(struct node_record *node_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_node_up(struct node_record *node_ptr)
-{
+extern void trigger_node_up(struct node_record *node_ptr) {
 	int inx = node_ptr - node_record_table_ptr;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
@@ -624,141 +687,123 @@ extern void trigger_node_up(struct node_record *node_ptr)
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_reconfig(void)
-{
-	slurmctld_lock_t node_read_lock = {.node = READ_LOCK};
+extern void trigger_reconfig(void) {
+	slurmctld_lock_t node_read_lock = { .node = READ_LOCK };
 
 	lock_slurmctld(node_read_lock);
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_node_reconfig = true;
 	if (trigger_down_front_end_bitmap)
 		trigger_down_front_end_bitmap = bit_realloc(
-			trigger_down_front_end_bitmap, node_record_count);
+				trigger_down_front_end_bitmap, node_record_count);
 	if (trigger_up_front_end_bitmap)
-		trigger_up_front_end_bitmap = bit_realloc(
-			trigger_up_front_end_bitmap, node_record_count);
+		trigger_up_front_end_bitmap = bit_realloc(trigger_up_front_end_bitmap,
+				node_record_count);
 	if (trigger_down_nodes_bitmap)
-		trigger_down_nodes_bitmap = bit_realloc(
-			trigger_down_nodes_bitmap, node_record_count);
+		trigger_down_nodes_bitmap = bit_realloc(trigger_down_nodes_bitmap,
+				node_record_count);
 	if (trigger_drained_nodes_bitmap)
-		trigger_drained_nodes_bitmap = bit_realloc(
-			trigger_drained_nodes_bitmap, node_record_count);
+		trigger_drained_nodes_bitmap = bit_realloc(trigger_drained_nodes_bitmap,
+				node_record_count);
 	if (trigger_fail_nodes_bitmap)
-		trigger_fail_nodes_bitmap = bit_realloc(
-			trigger_fail_nodes_bitmap, node_record_count);
+		trigger_fail_nodes_bitmap = bit_realloc(trigger_fail_nodes_bitmap,
+				node_record_count);
 	if (trigger_up_nodes_bitmap)
-		trigger_up_nodes_bitmap = bit_realloc(
-			trigger_up_nodes_bitmap, node_record_count);
+		trigger_up_nodes_bitmap = bit_realloc(trigger_up_nodes_bitmap,
+				node_record_count);
 	slurm_mutex_unlock(&trigger_mutex);
 	unlock_slurmctld(node_read_lock);
 }
 
-extern void trigger_primary_ctld_fail(void)
-{
+extern void trigger_primary_ctld_fail(void) {
 	slurm_mutex_lock(&trigger_mutex);
-	if (ctld_failure != 1)
-	{
+	if (ctld_failure != 1) {
 		trigger_pri_ctld_fail = true;
 		ctld_failure = 1;
 	}
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_ctld_res_op(void)
-{
+extern void trigger_primary_ctld_res_op(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_pri_ctld_res_op = true;
 	ctld_failure = 0;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_ctld_res_ctrl(void)
-{
+extern void trigger_primary_ctld_res_ctrl(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_pri_ctld_res_ctrl = true;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_ctld_acct_full(void)
-{
+extern void trigger_primary_ctld_acct_full(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_pri_ctld_acct_buffer_full = true;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_backup_ctld_fail(int index)
-{
+extern void trigger_backup_ctld_fail(int index) {
 	slurm_mutex_lock(&trigger_mutex);
-	if (bu_ctld_failure != 1)
-	{
+	if (bu_ctld_failure != 1) {
 		trigger_bu_ctld_fail = true;
 		bu_ctld_failure = 1;
 	}
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_backup_ctld_res_op(int index)
-{
+extern void trigger_backup_ctld_res_op(int index) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_bu_ctld_res_op = true;
 	bu_ctld_failure = 0;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_backup_ctld_as_ctrl(void)
-{
+extern void trigger_backup_ctld_as_ctrl(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_bu_ctld_as_ctrl = true;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_dbd_fail(void)
-{
+extern void trigger_primary_dbd_fail(void) {
 	slurm_mutex_lock(&trigger_mutex);
-	if (dbd_failure != 1)
-	{
+	if (dbd_failure != 1) {
 		trigger_pri_dbd_fail = true;
 		dbd_failure = 1;
 	}
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_dbd_res_op(void)
-{
+extern void trigger_primary_dbd_res_op(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_pri_dbd_res_op = true;
 	dbd_failure = 0;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_db_fail(void)
-{
+extern void trigger_primary_db_fail(void) {
 	slurm_mutex_lock(&trigger_mutex);
-	if (db_failure != 1)
-	{
+	if (db_failure != 1) {
 		trigger_pri_db_fail = true;
 		db_failure = 1;
 	}
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_primary_db_res_op(void)
-{
+extern void trigger_primary_db_res_op(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_pri_db_res_op = true;
 	db_failure = 0;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-extern void trigger_burst_buffer(void)
-{
+extern void trigger_burst_buffer(void) {
 	slurm_mutex_lock(&trigger_mutex);
 	trigger_bb_error = true;
 	slurm_mutex_unlock(&trigger_mutex);
 }
 
-static void _dump_trigger_state(trig_mgr_info_t *trig_ptr, Buf buffer)
-{
+static void _dump_trigger_state(trig_mgr_info_t *trig_ptr, Buf buffer) {
 	/* write trigger pull state flags */
 	pack8(ctld_failure, buffer);
 	pack8(bu_ctld_failure, buffer);
@@ -780,8 +825,7 @@ static void _dump_trigger_state(trig_mgr_info_t *trig_ptr, Buf buffer)
 	pack8(trig_ptr->state, buffer);
 }
 
-static int _load_trigger_state(Buf buffer, uint16_t protocol_version)
-{
+static int _load_trigger_state(Buf buffer, uint16_t protocol_version) {
 	trig_mgr_info_t *trig_ptr;
 	uint32_t str_len;
 
@@ -789,8 +833,7 @@ static int _load_trigger_state(Buf buffer, uint16_t protocol_version)
 
 	trig_ptr = xmalloc(sizeof(trig_mgr_info_t));
 
-	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION)
-	{
+	if (protocol_version >= SLURM_MIN_PROTOCOL_VERSION) {
 		/* restore trigger pull state flags */
 		safe_unpack8(&ctld_failure, buffer);
 		safe_unpack8(&bu_ctld_failure, buffer);
@@ -810,37 +853,28 @@ static int _load_trigger_state(Buf buffer, uint16_t protocol_version)
 		safe_unpack32(&trig_ptr->group_id, buffer);
 		safe_unpackstr_xmalloc(&trig_ptr->program, &str_len, buffer);
 		safe_unpack8(&trig_ptr->state, buffer);
-	}
-	else
-	{
+	} else {
 		error("_load_trigger_state: protocol_version "
-			  "%hu not supported",
-			  protocol_version);
+				"%hu not supported", protocol_version);
 		goto unpack_error;
 	}
 
-	if ((trig_ptr->res_type < TRIGGER_RES_TYPE_JOB) ||
-		(trig_ptr->res_type > TRIGGER_RES_TYPE_OTHER) ||
-		(trig_ptr->state > 2))
+	if ((trig_ptr->res_type < TRIGGER_RES_TYPE_JOB)
+			|| (trig_ptr->res_type > TRIGGER_RES_TYPE_OTHER)
+			|| (trig_ptr->state > 2))
 		goto unpack_error;
-	if (trig_ptr->res_type == TRIGGER_RES_TYPE_JOB)
-	{
-		trig_ptr->job_id = (uint32_t)atol(trig_ptr->res_id);
+	if (trig_ptr->res_type == TRIGGER_RES_TYPE_JOB) {
+		trig_ptr->job_id = (uint32_t) atol(trig_ptr->res_id);
 		trig_ptr->job_ptr = find_job_record(trig_ptr->job_id);
-		if ((trig_ptr->job_id == 0) ||
-			(trig_ptr->job_ptr == NULL) ||
-			(IS_JOB_COMPLETED(trig_ptr->job_ptr) &&
-			 trig_ptr->state != 2))
+		if ((trig_ptr->job_id == 0) || (trig_ptr->job_ptr == NULL)
+				|| (IS_JOB_COMPLETED(trig_ptr->job_ptr) && trig_ptr->state != 2))
 			goto unpack_error;
-	}
-	else if (trig_ptr->res_type == TRIGGER_RES_TYPE_NODE)
-	{
+	} else if (trig_ptr->res_type == TRIGGER_RES_TYPE_NODE) {
 		trig_ptr->job_id = 0;
 		trig_ptr->job_ptr = NULL;
-		if ((trig_ptr->res_id != NULL) &&
-			(trig_ptr->res_id[0] != '*') &&
-			(node_name2bitmap(trig_ptr->res_id, false,
-							  &trig_ptr->nodes_bitmap) != 0))
+		if ((trig_ptr->res_id != NULL) && (trig_ptr->res_id[0] != '*')
+				&& (node_name2bitmap(trig_ptr->res_id, false,
+						&trig_ptr->nodes_bitmap) != 0))
 			goto unpack_error;
 	}
 	if (trig_ptr->nodes_bitmap)
@@ -858,8 +892,7 @@ static int _load_trigger_state(Buf buffer, uint16_t protocol_version)
 
 	return SLURM_SUCCESS;
 
-unpack_error:
-	error("Incomplete trigger record");
+	unpack_error: error("Incomplete trigger record");
 	xfree(trig_ptr->res_id);
 	xfree(trig_ptr->program);
 	FREE_NULL_BITMAP(trig_ptr->nodes_bitmap);
@@ -867,8 +900,7 @@ unpack_error:
 	return SLURM_ERROR;
 }
 
-extern int trigger_state_save(void)
-{
+extern int trigger_state_save(void) {
 	/* Save high-water mark to avoid buffer growth with copies */
 	static int high_buffer_size = (1024 * 1024);
 	int error_code = 0, log_fd;
@@ -877,8 +909,8 @@ extern int trigger_state_save(void)
 	ListIterator trig_iter;
 	trig_mgr_info_t *trig_in;
 	/* Locks: Read config */
-	slurmctld_lock_t config_read_lock =
-		{READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK, NO_LOCK};
+	slurmctld_lock_t config_read_lock = { READ_LOCK, NO_LOCK, NO_LOCK, NO_LOCK,
+			NO_LOCK };
 
 	/* write header: version, time */
 	packstr(TRIGGER_STATE_VERSION, buffer);
@@ -908,22 +940,16 @@ extern int trigger_state_save(void)
 
 	lock_state_files();
 	log_fd = creat(new_file, 0600);
-	if (log_fd < 0)
-	{
-		error("Can't save state, create file %s error %m",
-			  new_file);
+	if (log_fd < 0) {
+		error("Can't save state, create file %s error %m", new_file);
 		error_code = errno;
-	}
-	else
-	{
+	} else {
 		int pos = 0, nwrite = get_buf_offset(buffer), amount, rc;
-		char *data = (char *)get_buf_data(buffer);
+		char *data = (char*) get_buf_data(buffer);
 		high_buffer_size = MAX(nwrite, high_buffer_size);
-		while (nwrite > 0)
-		{
+		while (nwrite > 0) {
 			amount = write(log_fd, &data[pos], nwrite);
-			if ((amount < 0) && (errno != EINTR))
-			{
+			if ((amount < 0) && (errno != EINTR)) {
 				error("Error writing file %s, %m", new_file);
 				error_code = errno;
 				break;
@@ -936,25 +962,20 @@ extern int trigger_state_save(void)
 		if (rc && !error_code)
 			error_code = rc;
 	}
-	if (error_code)
-	{
-		(void)unlink(new_file);
-	}
-	else
-	{ /* file shuffle */
-		(void)unlink(old_file);
-		if (link(reg_file, old_file))
-		{
-			debug4("unable to create link for %s -> %s: %m",
-				   reg_file, old_file);
+	if (error_code) {
+		(void) unlink(new_file);
+	} else { /* file shuffle */
+		(void) unlink(old_file);
+		if (link(reg_file, old_file)) {
+			debug4("unable to create link for %s -> %s: %m", reg_file,
+					old_file);
 		}
-		(void)unlink(reg_file);
-		if (link(new_file, reg_file))
-		{
-			debug4("unable to create link for %s -> %s: %m",
-				   new_file, reg_file);
+		(void) unlink(reg_file);
+		if (link(new_file, reg_file)) {
+			debug4("unable to create link for %s -> %s: %m", new_file,
+					reg_file);
 		}
-		(void)unlink(new_file);
+		(void) unlink(new_file);
 	}
 	xfree(old_file);
 	xfree(reg_file);
@@ -968,26 +989,22 @@ extern int trigger_state_save(void)
  * state_file IN - the name of the state save file used
  * RET the file description to read from or error code
  */
-static Buf _open_trigger_state_file(char **state_file)
-{
+static Buf _open_trigger_state_file(char **state_file) {
 	Buf buf;
 
 	*state_file = xstrdup(slurmctld_conf.state_save_location);
 	xstrcat(*state_file, "/trigger_state");
 	if (!(buf = create_mmap_buf(*state_file)))
-		error("Could not open trigger state file %s: %m",
-			  *state_file);
+		error("Could not open trigger state file %s: %m", *state_file);
 	else
 		return buf;
 
 	error("NOTE: Trying backup state save file. Triggers may be lost!");
 	xstrcat(*state_file, ".old");
-	return create_mmap_buf(*state_file);
-	;
+	return create_mmap_buf(*state_file);;
 }
 
-extern void trigger_state_restore(void)
-{
+extern void trigger_state_restore(void) {
 	uint16_t protocol_version = NO_VAL16;
 	int trigger_cnt = 0;
 	char *state_file;
@@ -1000,8 +1017,7 @@ extern void trigger_state_restore(void)
 	xassert(verify_lock(CONF_LOCK, READ_LOCK));
 
 	lock_state_files();
-	if (!(buffer = _open_trigger_state_file(&state_file)))
-	{
+	if (!(buffer = _open_trigger_state_file(&state_file))) {
 		info("No trigger state file (%s) to recover", state_file);
 		xfree(state_file);
 		unlock_state_files();
@@ -1014,12 +1030,12 @@ extern void trigger_state_restore(void)
 	if (ver_str && !xstrcmp(ver_str, TRIGGER_STATE_VERSION))
 		safe_unpack16(&protocol_version, buffer);
 
-	if (protocol_version == NO_VAL16)
-	{
+	if (protocol_version == NO_VAL16) {
 		if (!ignore_state_errors)
-			fatal("Can't recover trigger state, data version incompatible, start with '-i' to ignore this");
+			fatal(
+					"Can't recover trigger state, data version incompatible, start with '-i' to ignore this");
 		error("Can't recover trigger state, data version "
-			  "incompatible");
+				"incompatible");
 		xfree(ver_str);
 		free_buf(buffer);
 		return;
@@ -1029,27 +1045,24 @@ extern void trigger_state_restore(void)
 	safe_unpack_time(&buf_time, buffer);
 	if (trigger_list)
 		list_flush(trigger_list);
-	while (remaining_buf(buffer) > 0)
-	{
+	while (remaining_buf(buffer) > 0) {
 		if (_load_trigger_state(buffer, protocol_version) !=
-			SLURM_SUCCESS)
+		SLURM_SUCCESS)
 			goto unpack_error;
 		trigger_cnt++;
 	}
 	goto fini;
 
-unpack_error:
-	if (!ignore_state_errors)
-		fatal("Incomplete trigger data checkpoint file, start with '-i' to ignore this");
+	unpack_error: if (!ignore_state_errors)
+		fatal(
+				"Incomplete trigger data checkpoint file, start with '-i' to ignore this");
 	error("Incomplete trigger data checkpoint file");
-fini:
-	verbose("State of %d triggers recovered", trigger_cnt);
+	fini: verbose("State of %d triggers recovered", trigger_cnt);
 	free_buf(buffer);
 }
 
 static bool _front_end_job_test(bitstr_t *front_end_bitmap,
-								struct job_record *job_ptr)
-{
+		struct job_record *job_ptr) {
 #ifdef HAVE_FRONT_END
 	int i;
 
@@ -1072,140 +1085,113 @@ static bool _front_end_job_test(bitstr_t *front_end_bitmap,
 }
 
 /* Test if the event has been triggered, change trigger state as needed */
-static void _trigger_job_event(trig_mgr_info_t *trig_in, time_t now)
-{
+static void _trigger_job_event(trig_mgr_info_t *trig_in, time_t now) {
 	xassert(verify_lock(JOB_LOCK, READ_LOCK));
 
 	trig_in->job_ptr = find_job_record(trig_in->job_id);
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_FINI) &&
-		((trig_in->job_ptr == NULL) ||
-		 (IS_JOB_COMPLETED(trig_in->job_ptr))))
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_FINI)
+			&& ((trig_in->job_ptr == NULL)
+					|| (IS_JOB_COMPLETED(trig_in->job_ptr)))) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] event for job %u fini",
-				 trig_in->trig_id, trig_in->job_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] event for job %u fini", trig_in->trig_id,
+					trig_in->job_id);
 		}
 		return;
 	}
 
-	if (trig_in->job_ptr == NULL)
-	{
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for defunct job %u",
-				 trig_in->trig_id, trig_in->job_id);
+	if (trig_in->job_ptr == NULL) {
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for defunct job %u", trig_in->trig_id,
+					trig_in->job_id);
 		}
 		trig_in->state = 2;
 		trig_in->trig_time = now;
 		return;
 	}
 
-	if (!IS_JOB_PENDING(trig_in->job_ptr) &&
-		(trig_in->trig_type & TRIGGER_TYPE_TIME))
-	{
+	if (!IS_JOB_PENDING(trig_in->job_ptr)
+			&& (trig_in->trig_type & TRIGGER_TYPE_TIME)) {
 		long rem_time = (trig_in->job_ptr->end_time - now);
-		if (rem_time <= (0x8000 - trig_in->trig_time))
-		{
+		if (rem_time <= (0x8000 - trig_in->trig_time)) {
 			trig_in->state = 1;
 			trig_in->trig_time = now;
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for job %u time",
-					 trig_in->trig_id, trig_in->job_id);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for job %u time", trig_in->trig_id,
+						trig_in->job_id);
 			}
 			return;
 		}
 	}
 
-	if (trig_in->trig_type & TRIGGER_TYPE_DOWN)
-	{
+	if (trig_in->trig_type & TRIGGER_TYPE_DOWN) {
 		if (_front_end_job_test(trigger_down_front_end_bitmap,
-								trig_in->job_ptr))
-		{
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for job %u down",
-					 trig_in->trig_id, trig_in->job_id);
+				trig_in->job_ptr)) {
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for job %u down", trig_in->trig_id,
+						trig_in->job_id);
 			}
 			trig_in->state = 1;
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 			return;
 		}
 	}
 
-	if (trig_in->trig_type & TRIGGER_TYPE_DOWN)
-	{
-		if (trigger_down_nodes_bitmap &&
-			bit_overlap(trig_in->job_ptr->node_bitmap,
-						trigger_down_nodes_bitmap))
-		{
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for job %u down",
-					 trig_in->trig_id, trig_in->job_id);
+	if (trig_in->trig_type & TRIGGER_TYPE_DOWN) {
+		if (trigger_down_nodes_bitmap
+				&& bit_overlap(trig_in->job_ptr->node_bitmap,
+						trigger_down_nodes_bitmap)) {
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for job %u down", trig_in->trig_id,
+						trig_in->job_id);
 			}
 			trig_in->state = 1;
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 			return;
 		}
 	}
 
-	if (trig_in->trig_type & TRIGGER_TYPE_FAIL)
-	{
-		if (trigger_fail_nodes_bitmap &&
-			bit_overlap(trig_in->job_ptr->node_bitmap,
-						trigger_fail_nodes_bitmap))
-		{
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for job %u node fail",
-					 trig_in->trig_id, trig_in->job_id);
+	if (trig_in->trig_type & TRIGGER_TYPE_FAIL) {
+		if (trigger_fail_nodes_bitmap
+				&& bit_overlap(trig_in->job_ptr->node_bitmap,
+						trigger_fail_nodes_bitmap)) {
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for job %u node fail", trig_in->trig_id,
+						trig_in->job_id);
 			}
 			trig_in->state = 1;
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 			return;
 		}
 	}
 
-	if (trig_in->trig_type & TRIGGER_TYPE_UP)
-	{
-		if (trigger_up_nodes_bitmap &&
-			bit_overlap(trig_in->job_ptr->node_bitmap,
-						trigger_up_nodes_bitmap))
-		{
+	if (trig_in->trig_type & TRIGGER_TYPE_UP) {
+		if (trigger_up_nodes_bitmap
+				&& bit_overlap(trig_in->job_ptr->node_bitmap,
+						trigger_up_nodes_bitmap)) {
 			trig_in->state = 1;
-			trig_in->trig_time = now +
-								 (0x8000 - trig_in->trig_time);
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for job %u up",
-					 trig_in->trig_id, trig_in->job_id);
+			trig_in->trig_time = now + (0x8000 - trig_in->trig_time);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for job %u up", trig_in->trig_id,
+						trig_in->job_id);
 			}
 			return;
 		}
 	}
 }
 
-static void _trigger_front_end_event(trig_mgr_info_t *trig_in, time_t now)
-{
+static void _trigger_front_end_event(trig_mgr_info_t *trig_in, time_t now) {
 	int i;
 
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN) &&
-		(trigger_down_front_end_bitmap != NULL) &&
-		((i = bit_ffs(trigger_down_front_end_bitmap)) != -1))
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN)
+			&& (trigger_down_front_end_bitmap != NULL)
+			&& ((i = bit_ffs(trigger_down_front_end_bitmap)) != -1)) {
 		xfree(trig_in->res_id);
-		for (i = 0; i < front_end_node_cnt; i++)
-		{
+		for (i = 0; i < front_end_node_cnt; i++) {
 			if (!bit_test(trigger_down_front_end_bitmap, i))
 				continue;
 			if (trig_in->res_id != NULL)
@@ -1214,21 +1200,18 @@ static void _trigger_front_end_event(trig_mgr_info_t *trig_in, time_t now)
 		}
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for node %s down",
-				 trig_in->trig_id, trig_in->res_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for node %s down", trig_in->trig_id,
+					trig_in->res_id);
 		}
 		return;
 	}
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_UP) &&
-		(trigger_up_front_end_bitmap != NULL) &&
-		((i = bit_ffs(trigger_up_front_end_bitmap)) != -1))
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_UP)
+			&& (trigger_up_front_end_bitmap != NULL)
+			&& ((i = bit_ffs(trigger_up_front_end_bitmap)) != -1)) {
 		xfree(trig_in->res_id);
-		for (i = 0; i < front_end_node_cnt; i++)
-		{
+		for (i = 0; i < front_end_node_cnt; i++) {
 			if (!bit_test(trigger_up_front_end_bitmap, i))
 				continue;
 			if (trig_in->res_id != NULL)
@@ -1237,20 +1220,16 @@ static void _trigger_front_end_event(trig_mgr_info_t *trig_in, time_t now)
 		}
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for node %s up",
-				 trig_in->trig_id, trig_in->res_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for node %s up", trig_in->trig_id,
+					trig_in->res_id);
 		}
 		return;
 	}
 }
 
-static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now)
-{
-	if ((trig_in->trig_type & TRIGGER_TYPE_BURST_BUFFER) &&
-		trigger_bb_error)
-	{
+static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now) {
+	if ((trig_in->trig_type & TRIGGER_TYPE_BURST_BUFFER) && trigger_bb_error) {
 		trig_in->state = 1;
 		trig_in->trig_time = now;
 		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
@@ -1259,114 +1238,80 @@ static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now)
 	}
 }
 
-static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now)
-{
+static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now) {
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN) &&
-		trigger_down_nodes_bitmap &&
-		(bit_ffs(trigger_down_nodes_bitmap) != -1))
-	{
-		if (trig_in->nodes_bitmap == NULL)
-		{ /* all nodes */
+	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN) && trigger_down_nodes_bitmap
+			&& (bit_ffs(trigger_down_nodes_bitmap) != -1)) {
+		if (trig_in->nodes_bitmap == NULL) { /* all nodes */
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trigger_down_nodes_bitmap);
+			trig_in->res_id = bitmap2node_name(trigger_down_nodes_bitmap);
+			trig_in->state = 1;
+		} else if (bit_overlap(trig_in->nodes_bitmap,
+				trigger_down_nodes_bitmap)) {
+			bit_and(trig_in->nodes_bitmap, trigger_down_nodes_bitmap);
+			xfree(trig_in->res_id);
+			trig_in->res_id = bitmap2node_name(trig_in->nodes_bitmap);
 			trig_in->state = 1;
 		}
-		else if (bit_overlap(trig_in->nodes_bitmap,
-							 trigger_down_nodes_bitmap))
-		{
-			bit_and(trig_in->nodes_bitmap,
-					trigger_down_nodes_bitmap);
-			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trig_in->nodes_bitmap);
-			trig_in->state = 1;
-		}
-		if (trig_in->state == 1)
-		{
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for node %s down",
-					 trig_in->trig_id, trig_in->res_id);
+		if (trig_in->state == 1) {
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for node %s down", trig_in->trig_id,
+						trig_in->res_id);
 			}
 			return;
 		}
 	}
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_DRAINED) &&
-		trigger_drained_nodes_bitmap &&
-		(bit_ffs(trigger_drained_nodes_bitmap) != -1))
-	{
-		if (trig_in->nodes_bitmap == NULL)
-		{ /* all nodes */
+	if ((trig_in->trig_type & TRIGGER_TYPE_DRAINED)
+			&& trigger_drained_nodes_bitmap
+			&& (bit_ffs(trigger_drained_nodes_bitmap) != -1)) {
+		if (trig_in->nodes_bitmap == NULL) { /* all nodes */
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trigger_drained_nodes_bitmap);
+			trig_in->res_id = bitmap2node_name(trigger_drained_nodes_bitmap);
+			trig_in->state = 1;
+		} else if (bit_overlap(trig_in->nodes_bitmap,
+				trigger_drained_nodes_bitmap)) {
+			bit_and(trig_in->nodes_bitmap, trigger_drained_nodes_bitmap);
+			xfree(trig_in->res_id);
+			trig_in->res_id = bitmap2node_name(trig_in->nodes_bitmap);
 			trig_in->state = 1;
 		}
-		else if (bit_overlap(trig_in->nodes_bitmap,
-							 trigger_drained_nodes_bitmap))
-		{
-			bit_and(trig_in->nodes_bitmap,
-					trigger_drained_nodes_bitmap);
-			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trig_in->nodes_bitmap);
-			trig_in->state = 1;
-		}
-		if (trig_in->state == 1)
-		{
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for node %s drained",
-					 trig_in->trig_id, trig_in->res_id);
+		if (trig_in->state == 1) {
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for node %s drained", trig_in->trig_id,
+						trig_in->res_id);
 			}
 			return;
 		}
 	}
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_FAIL) &&
-		trigger_fail_nodes_bitmap &&
-		(bit_ffs(trigger_fail_nodes_bitmap) != -1))
-	{
-		if (trig_in->nodes_bitmap == NULL)
-		{ /* all nodes */
+	if ((trig_in->trig_type & TRIGGER_TYPE_FAIL) && trigger_fail_nodes_bitmap
+			&& (bit_ffs(trigger_fail_nodes_bitmap) != -1)) {
+		if (trig_in->nodes_bitmap == NULL) { /* all nodes */
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trigger_fail_nodes_bitmap);
+			trig_in->res_id = bitmap2node_name(trigger_fail_nodes_bitmap);
+			trig_in->state = 1;
+		} else if (bit_overlap(trig_in->nodes_bitmap,
+				trigger_fail_nodes_bitmap)) {
+			bit_and(trig_in->nodes_bitmap, trigger_fail_nodes_bitmap);
+			xfree(trig_in->res_id);
+			trig_in->res_id = bitmap2node_name(trig_in->nodes_bitmap);
 			trig_in->state = 1;
 		}
-		else if (bit_overlap(trig_in->nodes_bitmap,
-							 trigger_fail_nodes_bitmap))
-		{
-			bit_and(trig_in->nodes_bitmap,
-					trigger_fail_nodes_bitmap);
-			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trig_in->nodes_bitmap);
-			trig_in->state = 1;
-		}
-		if (trig_in->state == 1)
-		{
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for node %s fail",
-					 trig_in->trig_id, trig_in->res_id);
+		if (trig_in->state == 1) {
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for node %s fail", trig_in->trig_id,
+						trig_in->res_id);
 			}
 			return;
 		}
 	}
 
-	if (trig_in->trig_type & TRIGGER_TYPE_IDLE)
-	{
+	if (trig_in->trig_type & TRIGGER_TYPE_IDLE) {
 		/* We need to determine which (if any) of these
 		 * nodes have been idle for at least the offset time */
 		time_t min_idle = now - (trig_in->trig_time - 0x8000);
@@ -1375,80 +1320,57 @@ static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now)
 		bitstr_t *trigger_idle_node_bitmap;
 
 		trigger_idle_node_bitmap = bit_alloc(node_record_count);
-		for (i = 0; i < node_record_count; i++, node_ptr++)
-		{
-			if (!IS_NODE_IDLE(node_ptr) ||
-				(node_ptr->last_idle > min_idle))
+		for (i = 0; i < node_record_count; i++, node_ptr++) {
+			if (!IS_NODE_IDLE(node_ptr) || (node_ptr->last_idle > min_idle))
 				continue;
 			bit_set(trigger_idle_node_bitmap, i);
 		}
-		if (trig_in->nodes_bitmap == NULL)
-		{ /* all nodes */
+		if (trig_in->nodes_bitmap == NULL) { /* all nodes */
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trigger_idle_node_bitmap);
+			trig_in->res_id = bitmap2node_name(trigger_idle_node_bitmap);
 			trig_in->state = 1;
-		}
-		else if (bit_overlap(trig_in->nodes_bitmap,
-							 trigger_idle_node_bitmap))
-		{
-			bit_and(trig_in->nodes_bitmap,
-					trigger_idle_node_bitmap);
+		} else if (bit_overlap(trig_in->nodes_bitmap,
+				trigger_idle_node_bitmap)) {
+			bit_and(trig_in->nodes_bitmap, trigger_idle_node_bitmap);
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trig_in->nodes_bitmap);
+			trig_in->res_id = bitmap2node_name(trig_in->nodes_bitmap);
 			trig_in->state = 1;
 		}
 		FREE_NULL_BITMAP(trigger_idle_node_bitmap);
-		if (trig_in->state == 1)
-		{
+		if (trig_in->state == 1) {
 			trig_in->trig_time = now;
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for node %s idle",
-					 trig_in->trig_id, trig_in->res_id);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for node %s idle", trig_in->trig_id,
+						trig_in->res_id);
 			}
 			return;
 		}
 	}
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_UP) &&
-		trigger_up_nodes_bitmap &&
-		(bit_ffs(trigger_up_nodes_bitmap) != -1))
-	{
-		if (trig_in->nodes_bitmap == NULL)
-		{ /* all nodes */
+	if ((trig_in->trig_type & TRIGGER_TYPE_UP) && trigger_up_nodes_bitmap
+			&& (bit_ffs(trigger_up_nodes_bitmap) != -1)) {
+		if (trig_in->nodes_bitmap == NULL) { /* all nodes */
 			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trigger_up_nodes_bitmap);
+			trig_in->res_id = bitmap2node_name(trigger_up_nodes_bitmap);
+			trig_in->state = 1;
+		} else if (bit_overlap(trig_in->nodes_bitmap,
+				trigger_up_nodes_bitmap)) {
+			bit_and(trig_in->nodes_bitmap, trigger_up_nodes_bitmap);
+			xfree(trig_in->res_id);
+			trig_in->res_id = bitmap2node_name(trig_in->nodes_bitmap);
 			trig_in->state = 1;
 		}
-		else if (bit_overlap(trig_in->nodes_bitmap,
-							 trigger_up_nodes_bitmap))
-		{
-			bit_and(trig_in->nodes_bitmap,
-					trigger_up_nodes_bitmap);
-			xfree(trig_in->res_id);
-			trig_in->res_id = bitmap2node_name(
-				trig_in->nodes_bitmap);
-			trig_in->state = 1;
-		}
-		if (trig_in->state == 1)
-		{
-			trig_in->trig_time = now +
-								 (trig_in->trig_time - 0x8000);
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("trigger[%u] for node %s up",
-					 trig_in->trig_id, trig_in->res_id);
+		if (trig_in->state == 1) {
+			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("trigger[%u] for node %s up", trig_in->trig_id,
+						trig_in->res_id);
 			}
 			return;
 		}
 	}
 
-	if ((trig_in->trig_type & TRIGGER_TYPE_RECONFIG) &&
-		trigger_node_reconfig)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_RECONFIG) && trigger_node_reconfig) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
@@ -1459,172 +1381,137 @@ static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now)
 	}
 }
 
-static void _trigger_slurmctld_event(trig_mgr_info_t *trig_in, time_t now)
-{
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_FAIL) &&
-		trigger_pri_ctld_fail)
-	{
+static void _trigger_slurmctld_event(trig_mgr_info_t *trig_in, time_t now) {
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_FAIL)
+			&& trigger_pri_ctld_fail) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_slurmctld_failure");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for primary_slurmctld_failure",
-				 trig_in->trig_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for primary_slurmctld_failure", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_RES_OP) &&
-		trigger_pri_ctld_res_op)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_RES_OP)
+			&& trigger_pri_ctld_res_op) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
-		trig_in->res_id =
-			xstrdup("primary_slurmctld_resumed_operation");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		trig_in->res_id = xstrdup("primary_slurmctld_resumed_operation");
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for primary_slurmctld_resumed_"
-				 "operation",
-				 trig_in->trig_id);
+					"operation", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_RES_CTRL) &&
-		trigger_pri_ctld_res_ctrl)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_RES_CTRL)
+			&& trigger_pri_ctld_res_ctrl) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_slurmctld_resumed_control");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for primary_slurmctld_resumed_"
-				 "control",
-				 trig_in->trig_id);
+					"control", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_ACCT_FULL) &&
-		trigger_pri_ctld_acct_buffer_full)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_CTLD_ACCT_FULL)
+			&& trigger_pri_ctld_acct_buffer_full) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_slurmctld_acct_buffer_full");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for primary_slurmctld_acct_"
-				 "buffer_full",
-				 trig_in->trig_id);
+					"buffer_full", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_FAIL) &&
-		trigger_bu_ctld_fail)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_FAIL)
+			&& trigger_bu_ctld_fail) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("backup_slurmctld_failure");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for backup_slurmctld_failure",
-				 trig_in->trig_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for backup_slurmctld_failure", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_RES_OP) &&
-		trigger_bu_ctld_res_op)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_RES_OP)
+			&& trigger_bu_ctld_res_op) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("backup_slurmctld_resumed_operation");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for backup_slurmctld_resumed_"
-				 "operation",
-				 trig_in->trig_id);
+					"operation", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_AS_CTRL) &&
-		trigger_bu_ctld_as_ctrl)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_BU_CTLD_AS_CTRL)
+			&& trigger_bu_ctld_as_ctrl) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("backup_slurmctld_assumed_control");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for bu_slurmctld_assumed_control",
-				 trig_in->trig_id);
+					trig_in->trig_id);
 		}
 		return;
 	}
 }
 
-static void _trigger_slurmdbd_event(trig_mgr_info_t *trig_in, time_t now)
-{
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DBD_FAIL) &&
-		trigger_pri_dbd_fail)
-	{
+static void _trigger_slurmdbd_event(trig_mgr_info_t *trig_in, time_t now) {
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DBD_FAIL)
+			&& trigger_pri_dbd_fail) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_slurmdbd_failure");
 		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			info("trigger[%u] for primary_slurmcdbd_failure",
-				 trig_in->trig_id);
+			info("trigger[%u] for primary_slurmcdbd_failure", trig_in->trig_id);
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DBD_RES_OP) &&
-		trigger_pri_dbd_res_op)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DBD_RES_OP)
+			&& trigger_pri_dbd_res_op) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_slurmdbd_resumed_operation");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for primary_slurmdbd_resumed_"
-				 "operation",
-				 trig_in->trig_id);
+					"operation", trig_in->trig_id);
 		}
 		return;
 	}
 }
 
-static void _trigger_database_event(trig_mgr_info_t *trig_in, time_t now)
-{
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DB_FAIL) &&
-		trigger_pri_db_fail)
-	{
+static void _trigger_database_event(trig_mgr_info_t *trig_in, time_t now) {
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DB_FAIL)
+			&& trigger_pri_db_fail) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_database_failure");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
-			info("trigger[%u] for primary_database_failure",
-				 trig_in->trig_id);
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+			info("trigger[%u] for primary_database_failure", trig_in->trig_id);
 		}
 		return;
 	}
-	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DB_RES_OP) &&
-		trigger_pri_db_res_op)
-	{
+	if ((trig_in->trig_type & TRIGGER_TYPE_PRI_DB_RES_OP)
+			&& trigger_pri_db_res_op) {
 		trig_in->state = 1;
 		trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 		xfree(trig_in->res_id);
 		trig_in->res_id = xstrdup("primary_database_resumed_operation");
-		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-		{
+		if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
 			info("trigger[%u] for primary_database_resumed_"
-				 "operation",
-				 trig_in->trig_id);
+					"operation", trig_in->trig_id);
 		}
 		return;
 	}
@@ -1636,8 +1523,7 @@ static void _trigger_database_event(trig_mgr_info_t *trig_in, time_t now)
  * to kill the spawned program after MAX_PROG_TIME. Since triggers are
  * meant primarily for system administrators rather than users, this
  * may be sufficient. */
-static void _trigger_run_program(trig_mgr_info_t *trig_in)
-{
+static void _trigger_run_program(trig_mgr_info_t *trig_in) {
 	char *tmp, *save_ptr = NULL, *tok;
 	char *program, *args[64], user_name[1024];
 	char *pname, *uname;
@@ -1658,11 +1544,9 @@ static void _trigger_run_program(trig_mgr_info_t *trig_in)
 	else
 		pname++;
 	args[0] = xstrdup(pname);
-	for (i = 1; i < 63; i++)
-	{
+	for (i = 1; i < 63; i++) {
 		tok = strtok_r(NULL, " ", &save_ptr);
-		if (!tok)
-		{
+		if (!tok) {
 			args[i] = xstrdup(trig_in->res_id);
 			break;
 		}
@@ -1679,39 +1563,31 @@ static void _trigger_run_program(trig_mgr_info_t *trig_in)
 	xfree(uname);
 
 	child_pid = fork();
-	if (child_pid > 0)
-	{
+	if (child_pid > 0) {
 		trig_in->child_pid = child_pid;
-	}
-	else if (child_pid == 0)
-	{
+	} else if (child_pid == 0) {
 		int i;
 		bool run_as_self = (uid == slurmctld_conf.slurm_user_id);
 
 		for (i = 0; i < 1024; i++)
-			(void)close(i);
+			(void) close(i);
 		setpgid(0, 0);
 		setsid();
-		if ((initgroups(user_name, gid) == -1) && !run_as_self)
-		{
+		if ((initgroups(user_name, gid) == -1) && !run_as_self) {
 			error("trigger: initgroups: %m");
 			exit(1);
 		}
-		if ((setgid(gid) == -1) && !run_as_self)
-		{
+		if ((setgid(gid) == -1) && !run_as_self) {
 			error("trigger: setgid: %m");
 			exit(1);
 		}
-		if ((setuid(uid) == -1) && !run_as_self)
-		{
+		if ((setuid(uid) == -1) && !run_as_self) {
 			error("trigger: setuid: %m");
 			exit(1);
 		}
 		execv(program, args);
 		exit(1);
-	}
-	else
-	{
+	} else {
 		error("fork: %m");
 	}
 	xfree(program);
@@ -1719,32 +1595,26 @@ static void _trigger_run_program(trig_mgr_info_t *trig_in)
 		xfree(args[i]);
 }
 
-static void _clear_event_triggers(void)
-{
-	if (trigger_down_front_end_bitmap)
-	{
-		bit_nclear(trigger_down_front_end_bitmap,
-				   0, (bit_size(trigger_down_front_end_bitmap) - 1));
+static void _clear_event_triggers(void) {
+	if (trigger_down_front_end_bitmap) {
+		bit_nclear(trigger_down_front_end_bitmap, 0,
+				(bit_size(trigger_down_front_end_bitmap) - 1));
 	}
-	if (trigger_up_front_end_bitmap)
-	{
-		bit_nclear(trigger_up_front_end_bitmap,
-				   0, (bit_size(trigger_up_front_end_bitmap) - 1));
+	if (trigger_up_front_end_bitmap) {
+		bit_nclear(trigger_up_front_end_bitmap, 0,
+				(bit_size(trigger_up_front_end_bitmap) - 1));
 	}
-	if (trigger_down_nodes_bitmap)
-	{
-		bit_nclear(trigger_down_nodes_bitmap,
-				   0, (bit_size(trigger_down_nodes_bitmap) - 1));
+	if (trigger_down_nodes_bitmap) {
+		bit_nclear(trigger_down_nodes_bitmap, 0,
+				(bit_size(trigger_down_nodes_bitmap) - 1));
 	}
-	if (trigger_drained_nodes_bitmap)
-	{
-		bit_nclear(trigger_drained_nodes_bitmap,
-				   0, (bit_size(trigger_drained_nodes_bitmap) - 1));
+	if (trigger_drained_nodes_bitmap) {
+		bit_nclear(trigger_drained_nodes_bitmap, 0,
+				(bit_size(trigger_drained_nodes_bitmap) - 1));
 	}
-	if (trigger_up_nodes_bitmap)
-	{
-		bit_nclear(trigger_up_nodes_bitmap,
-				   0, (bit_size(trigger_up_nodes_bitmap) - 1));
+	if (trigger_up_nodes_bitmap) {
+		bit_nclear(trigger_up_nodes_bitmap, 0,
+				(bit_size(trigger_up_nodes_bitmap) - 1));
 	}
 	trigger_node_reconfig = false;
 	trigger_bb_error = false;
@@ -1762,21 +1632,18 @@ static void _clear_event_triggers(void)
 }
 
 /* Make a copy of a trigger and pre-pend it on our list */
-static void _trigger_clone(trig_mgr_info_t *trig_in)
-{
+static void _trigger_clone(trig_mgr_info_t *trig_in) {
 	trig_mgr_info_t *trig_add;
 
 	trig_add = xmalloc(sizeof(trig_mgr_info_t));
 	trig_add->flags = trig_in->flags;
 	trig_add->trig_id = trig_in->trig_id;
 	trig_add->res_type = trig_in->res_type;
-	if (trig_in->orig_res_id)
-	{
+	if (trig_in->orig_res_id) {
 		trig_add->res_id = xstrdup(trig_in->orig_res_id);
 		trig_add->orig_res_id = xstrdup(trig_in->orig_res_id);
 	}
-	if (trig_in->orig_bitmap)
-	{
+	if (trig_in->orig_bitmap) {
 		trig_add->nodes_bitmap = bit_copy(trig_in->orig_bitmap);
 		trig_add->orig_bitmap = bit_copy(trig_in->orig_bitmap);
 	}
@@ -1792,8 +1659,7 @@ static void _trigger_clone(trig_mgr_info_t *trig_in)
 	list_prepend(trigger_list, trig_add);
 }
 
-extern void trigger_process(void)
-{
+extern void trigger_process(void) {
 
 	printf("this is trigger_process\n");
 	ListIterator trig_iter;
@@ -1808,10 +1674,8 @@ extern void trigger_process(void)
 		trigger_list = list_create(_trig_del);
 
 	trig_iter = list_iterator_create(trigger_list);
-	while ((trig_in = list_next(trig_iter)))
-	{
-		if (trig_in->state == 0)
-		{
+	while ((trig_in = list_next(trig_iter))) {
+		if (trig_in->state == 0) {
 			if (trig_in->res_type == TRIGGER_RES_TYPE_OTHER)
 				_trigger_other_event(trig_in, now);
 			else if (trig_in->res_type == TRIGGER_RES_TYPE_JOB)
@@ -1819,90 +1683,68 @@ extern void trigger_process(void)
 			else if (trig_in->res_type == TRIGGER_RES_TYPE_NODE)
 				_trigger_node_event(trig_in, now);
 			else if (trig_in->res_type ==
-					 TRIGGER_RES_TYPE_SLURMCTLD)
+			TRIGGER_RES_TYPE_SLURMCTLD)
 				_trigger_slurmctld_event(trig_in, now);
 			else if (trig_in->res_type ==
-					 TRIGGER_RES_TYPE_SLURMDBD)
+			TRIGGER_RES_TYPE_SLURMDBD)
 				_trigger_slurmdbd_event(trig_in, now);
 			else if (trig_in->res_type ==
-					 TRIGGER_RES_TYPE_DATABASE)
+			TRIGGER_RES_TYPE_DATABASE)
 				_trigger_database_event(trig_in, now);
 			else if (trig_in->res_type ==
-					 TRIGGER_RES_TYPE_FRONT_END)
+			TRIGGER_RES_TYPE_FRONT_END)
 				_trigger_front_end_event(trig_in, now);
 		}
-		if ((trig_in->state == 1) &&
-			(trig_in->trig_time <= now))
-		{
-			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS)
-			{
-				info("launching program for trigger[%u]",
-					 trig_in->trig_id);
-				info("  uid=%u gid=%u program=%s arg=%s",
-					 trig_in->user_id, trig_in->group_id,
-					 trig_in->program, trig_in->res_id);
+		if ((trig_in->state == 1) && (trig_in->trig_time <= now)) {
+			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
+				info("launching program for trigger[%u]", trig_in->trig_id);
+				info("  uid=%u gid=%u program=%s arg=%s", trig_in->user_id,
+						trig_in->group_id, trig_in->program, trig_in->res_id);
 			}
-			if (trig_in->flags & TRIGGER_FLAG_PERM)
-			{
+			if (trig_in->flags & TRIGGER_FLAG_PERM) {
 				_trigger_clone(trig_in);
 			}
 			trig_in->state = 2;
 			trig_in->trig_time = now;
 			state_change = true;
 			_trigger_run_program(trig_in);
-		}
-		else if ((trig_in->state == 2) &&
-				 (difftime(now, trig_in->trig_time) >
-				  MAX_PROG_TIME))
-		{
-			if (trig_in->child_pid != 0)
-			{
+		} else if ((trig_in->state == 2) && (difftime(now, trig_in->trig_time) >
+		MAX_PROG_TIME)) {
+			if (trig_in->child_pid != 0) {
 				killpg(trig_in->child_pid, SIGKILL);
 				rc = waitpid(trig_in->child_pid, &prog_stat,
-							 WNOHANG);
-				if ((rc > 0) && prog_stat)
-				{
+				WNOHANG);
+				if ((rc > 0) && prog_stat) {
 					info("trigger uid=%u type=%s:%s "
-						 "exit=%u:%u",
-						 trig_in->user_id,
-						 trigger_res_type(trig_in->res_type),
-						 trigger_type(trig_in->trig_type),
-						 WIFEXITED(prog_stat),
-						 WTERMSIG(prog_stat));
+							"exit=%u:%u", trig_in->user_id,
+							trigger_res_type(trig_in->res_type),
+							trigger_type(trig_in->trig_type),
+							WIFEXITED(prog_stat), WTERMSIG(prog_stat));
 				}
-				if ((rc == trig_in->child_pid) ||
-					((rc == -1) && (errno == ECHILD)))
+				if ((rc == trig_in->child_pid)
+						|| ((rc == -1) && (errno == ECHILD)))
 					trig_in->child_pid = 0;
 			}
 
-			if (trig_in->child_pid == 0)
-			{
+			if (trig_in->child_pid == 0) {
 				if (slurmctld_conf.debug_flags &
-					DEBUG_FLAG_TRIGGERS)
-				{
-					info("purging trigger[%u]",
-						 trig_in->trig_id);
+				DEBUG_FLAG_TRIGGERS) {
+					info("purging trigger[%u]", trig_in->trig_id);
 				}
 				list_delete_item(trig_iter);
 				state_change = true;
 			}
-		}
-		else if (trig_in->state == 2)
-		{
+		} else if (trig_in->state == 2) {
 			/* Elimiate zombie processes right away.
 			 * Purge trigger entry above MAX_PROG_TIME later */
 			rc = waitpid(trig_in->child_pid, &prog_stat, WNOHANG);
-			if ((rc > 0) && prog_stat)
-			{
-				info("trigger uid=%u type=%s:%s exit=%u:%u",
-					 trig_in->user_id,
-					 trigger_res_type(trig_in->res_type),
-					 trigger_type(trig_in->trig_type),
-					 WIFEXITED(prog_stat),
-					 WTERMSIG(prog_stat));
+			if ((rc > 0) && prog_stat) {
+				info("trigger uid=%u type=%s:%s exit=%u:%u", trig_in->user_id,
+						trigger_res_type(trig_in->res_type),
+						trigger_type(trig_in->trig_type), WIFEXITED(prog_stat),
+						WTERMSIG(prog_stat));
 			}
-			if ((rc == trig_in->child_pid) ||
-				((rc == -1) && (errno == ECHILD)))
+			if ((rc == trig_in->child_pid) || ((rc == -1) && (errno == ECHILD)))
 				trig_in->child_pid = 0;
 		}
 	}
@@ -1914,8 +1756,7 @@ extern void trigger_process(void)
 }
 
 /* Free all allocated memory */
-extern void trigger_fini(void)
-{
+extern void trigger_fini(void) {
 	FREE_NULL_LIST(trigger_list);
 	FREE_NULL_BITMAP(trigger_down_front_end_bitmap);
 	FREE_NULL_BITMAP(trigger_up_front_end_bitmap);
