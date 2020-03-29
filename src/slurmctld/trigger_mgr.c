@@ -173,7 +173,7 @@ static void _dump_trigger_msg(char *header, trigger_info_msg_t *msg)
 static bool _validate_trigger(trig_mgr_info_t *trig_in)
 {
 
-	info("this is validate trigger program\n");
+	info("this is validate trigger program1111\n");
 
 	struct stat buf;
 	int i, modes;
@@ -431,8 +431,8 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg)
 	lock_slurmctld(job_read_lock);
 	slurm_mutex_lock(&trigger_mutex);
 
-	printf("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
-	printf("uid, %u\n", uid);
+	info("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
+	info("uid, %u\n", uid);
 
 	if ((slurmctld_conf.slurm_user_id != 0) &&
 		(slurmctld_conf.slurm_user_id != uid))
