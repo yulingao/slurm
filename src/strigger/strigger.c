@@ -70,8 +70,6 @@ int main(int argc, char **argv)
 	log_options_t opts = LOG_OPTS_STDERR_ONLY;
 	log_init("strigger", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
-    printf("this is using xcode to code slurm\n");
-	printf("this is strigger!! hello world\n");
 	slurm_conf_init(NULL);
 	parse_command_line(argc, argv);
 	if (params.verbose)
@@ -232,16 +230,12 @@ static int _set_trigger(void)
 	ti.program = params.program;
 	while (slurm_set_trigger(&ti))
 	{
-		printf("2\n");
 		slurm_perror("slurm_set_trigger");
-		printf("2\n");
 		if (slurm_get_errno() != EAGAIN)
 		{
 			printf("error occured\n");
 			return 1;
 		}
-
-		printf("2\n");
 		sleep(5);
 	}
 	verbose("trigger set");

@@ -163,7 +163,7 @@ extern ssize_t slurm_msg_recvfrom_timeout(int fd, char **pbuf, size_t *lenp,
 
 extern ssize_t slurm_msg_sendto(int fd, char *buffer, size_t size)
 {
-    printf("9.4\n");
+
 	return slurm_msg_sendto_timeout(fd, buffer, size,
 					(slurm_get_msg_timeout() * 1000));
 }
@@ -202,8 +202,8 @@ ssize_t slurm_msg_sendto_timeout(int fd, char *buffer,
 extern int slurm_send_timeout(int fd, char *buf, size_t size,
 			      uint32_t flags, int timeout)
 {
-    printf("this is slurm_send_timeout\n");
     
+
 	int rc;
 	int sent = 0;
 	int fd_flags;

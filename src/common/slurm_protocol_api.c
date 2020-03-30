@@ -4608,11 +4608,9 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 	void *auth_cred;
 	time_t start_time = time(NULL);
     
-    printf("this is slurm_send_node_msg\n");
-    printf("---------");
 	if (msg->conn)
 	{
-        printf("9.1\n");
+
 		persist_msg_t persist_msg;
 
 		memset(&persist_msg, 0, sizeof(persist_msg_t));
@@ -4651,7 +4649,7 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 		return rc;
 	}
     
-    printf("9.2\n");
+
 
 	/*
 	 * Initialize header with Auth credential and message type.
@@ -4736,7 +4734,7 @@ int slurm_send_node_msg(int fd, slurm_msg_t *msg)
 	/*
 	 * Send message
 	 */
-    printf("9.3\n");
+
 	rc = slurm_msg_sendto(fd, get_buf_data(buffer),
 						  get_buf_offset(buffer));
 
@@ -5119,7 +5117,7 @@ extern int slurm_send_recv_msg(int fd, slurm_msg_t *req,
 
 	if (slurm_send_node_msg(fd, req) >= 0)
 	{
-		printf("8\n");
+
 		/* no need to adjust and timeouts here since we are not
 		   forwarding or expecting anything other than 1 message
 		   and the regular timeout will be altered in
@@ -5260,18 +5258,15 @@ tryagain:
 		 */
 		retry = 0;
 
-		printf("7\n");
-
 		rc = _send_and_recv_msg(fd, request_msg, response_msg, 0);
 
-		printf("7\n");
 
 		if (response_msg->auth_cred)
 			g_slurm_auth_destroy(response_msg->auth_cred);
 		else
 			rc = -1;
 
-		printf("7\n");
+
 
 		if ((rc == 0) && (!comm_cluster_rec) && (response_msg->msg_type == RESPONSE_SLURM_RC) && ((((return_code_msg_t *)response_msg->data)->return_code) == ESLURM_IN_STANDBY_MODE) && (have_backup) && (difftime(time(NULL), start_time) < (slurmctld_timeout + (slurmctld_timeout / 2))))
 		{
@@ -5297,7 +5292,7 @@ tryagain:
 			break;
 	}
 
-	printf("7.1\n");
+
 	if (!rc && (response_msg->msg_type == RESPONSE_SLURM_REROUTE_MSG))
 	{
 		reroute_msg_t *rr_msg = (reroute_msg_t *)response_msg->data;
@@ -5315,11 +5310,11 @@ tryagain:
 		rr_msg->working_cluster_rec = NULL;
 		goto tryagain;
 	}
-	printf("7.2\n");
+
 
 	if (comm_cluster_rec != save_comm_cluster_rec)
 		slurmdb_destroy_cluster_rec(comm_cluster_rec);
-	printf("7.3\n");
+
 cleanup:
 	if (rc != 0)
 		_remap_slurmctld_errno();
@@ -5692,10 +5687,8 @@ extern int slurm_send_recv_controller_rc_msg(slurm_msg_t *req, int *rc,
 	}
 	else
 	{
-		printf("ret_c == -1");
 		ret_c = -1;
 	}
-	printf("ret_c = %d and rc = %d\n", ret_c, *rc);
 
 	return ret_c;
 }
