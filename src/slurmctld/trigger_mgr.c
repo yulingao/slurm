@@ -1236,6 +1236,8 @@ static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now) {
 }
 
 static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now) {
+
+	info("this is _trigger_node_event");
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
 
 	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN) && trigger_down_nodes_bitmap
