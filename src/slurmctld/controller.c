@@ -2405,6 +2405,7 @@ static void *_slurmctld_background(void *no_data)
 
 
 //		在这里进行trigger的处理
+//		每隔15秒进行trigger的检查
 		if (difftime(now, last_trigger) > TRIGGER_INTERVAL)
 		{
 			lock_slurmctld(job_node_read_lock);

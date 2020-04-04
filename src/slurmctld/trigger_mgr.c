@@ -1237,7 +1237,7 @@ static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now) {
 
 static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now) {
 
-	info("this is _trigger_node_event");
+	// 每隔15秒查看一次node的状态
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
 
 	if ((trig_in->trig_type & TRIGGER_TYPE_DOWN) && trigger_down_nodes_bitmap
@@ -1660,7 +1660,6 @@ static void _trigger_clone(trig_mgr_info_t *trig_in) {
 
 extern void trigger_process(void) {
 
-	printf("this is trigger_process\n");
 	ListIterator trig_iter;
 	trig_mgr_info_t *trig_in;
 	time_t now = time(NULL);
@@ -1708,7 +1707,7 @@ extern void trigger_process(void) {
 			state_change = true;
 			_trigger_run_program(trig_in);
 		} else if ((trig_in->state == 2) && (difftime(now, trig_in->trig_time) >
-		MAX_PROG_TIME)) {
+		MAX_PROG_TIME)) {// 大于最大运行时间
 			if (trig_in->child_pid != 0) {
 				killpg(trig_in->child_pid, SIGKILL);
 				rc = waitpid(trig_in->child_pid, &prog_stat,

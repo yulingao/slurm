@@ -3873,8 +3873,6 @@ fini:
 
 extern int slurm_unpack_received_msg(slurm_msg_t *msg, int fd, Buf buffer)
 {
-	printf("this is slurm_unpack_received_msg\n");
-
 	header_t header;
 	int rc;
 	void *auth_cred = NULL;
@@ -4008,7 +4006,6 @@ total_return:
  */
 int slurm_receive_msg(int fd, slurm_msg_t *msg, int timeout)
 {
-	printf("this is slurm_receive_msg\n");
 
 	char *buf = NULL;
 	size_t buflen = 0;
