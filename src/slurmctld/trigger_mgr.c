@@ -1237,6 +1237,7 @@ static void _trigger_other_event(trig_mgr_info_t *trig_in, time_t now) {
 
 static void _trigger_node_event(trig_mgr_info_t *trig_in, time_t now) {
 
+
 	// 每隔15秒查看一次node的状态
 	xassert(verify_lock(NODE_LOCK, READ_LOCK));
 
