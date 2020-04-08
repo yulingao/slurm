@@ -877,8 +877,8 @@ extern int slurm_persist_conn_writeable(slurm_persist_conn_t *persist_conn)
 extern int slurm_persist_send_msg(
 	slurm_persist_conn_t *persist_conn, Buf buffer)
 {
-    printf("--------");
-    printf("this is slurm_persist_send_msg\n");
+//    printf("--------");
+//    printf("this is slurm_persist_send_msg\n");
     
 	uint32_t msg_size, nw_size;
 	char *msg;
@@ -1046,7 +1046,7 @@ extern int slurm_persist_msg_unpack(slurm_persist_conn_t *persist_conn,
 {
 	int rc;
 
-	printf("this is slurm_persist_msg_unpack\n");
+//	printf("this is slurm_persist_msg_unpack\n");
 	xassert(persist_conn);
 	xassert(resp_msg);
 
