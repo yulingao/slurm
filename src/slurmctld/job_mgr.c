@@ -3305,6 +3305,7 @@ extern struct job_record *find_job_record(uint32_t job_id)
 {
 	struct job_record *job_ptr;
 
+	info("jobid == %d", job_id);
 	job_ptr = job_hash[JOB_HASH_INX(job_id)];
 	while (job_ptr) {
 		if (job_ptr->job_id == job_id)
