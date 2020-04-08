@@ -1706,6 +1706,9 @@ extern void trigger_process(void) {
 			trig_in->state = 2;
 			trig_in->trig_time = now;
 			state_change = true;
+
+
+//			在这里运行strigger所带的程序
 			_trigger_run_program(trig_in);
 		} else if ((trig_in->state == 2) && (difftime(now, trig_in->trig_time) >
 		MAX_PROG_TIME)) {// 大于最大运行时间
