@@ -483,7 +483,8 @@ SUBDIRS = \
 	sshare		\
 	sstat		\
 	strigger	\
-	sview
+	sview		\
+	mybatch
 
 all: all-recursive
 
