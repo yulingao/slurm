@@ -81,8 +81,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = sbatch$(EXEEXT)
-subdir = src/sbatch
+bin_PROGRAMS = mybatch$(EXEEXT)
+subdir = src/mybatch
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/auxdir/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -139,7 +139,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_sbatch_OBJECTS = sbatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT)
+am_sbatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT)
 sbatch_OBJECTS = $(am_sbatch_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -456,7 +456,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 CLEANFILES = core.*
 AM_CPPFLAGS = -I$(top_srcdir)
-sbatch_SOURCES = sbatch.c opt.c opt.h xlate.c
+sbatch_SOURCES = mybatch.c opt.c opt.h xlate.c
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
 sbatch_DEPENDENCIES = $(LIB_SLURM_BUILD)
 sbatch_LDADD = $(convenience_libs)
@@ -474,9 +474,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/sbatch/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/mybatch/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/sbatch/Makefile
+	  $(AUTOMAKE) --foreign src/mybatch/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -545,8 +545,8 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-sbatch$(EXEEXT): $(sbatch_OBJECTS) $(sbatch_DEPENDENCIES) $(EXTRA_sbatch_DEPENDENCIES) 
-	@rm -f sbatch$(EXEEXT)
+mybatch$(EXEEXT): $(sbatch_OBJECTS) $(sbatch_DEPENDENCIES) $(EXTRA_sbatch_DEPENDENCIES) 
+	@rm -f mybatch$(EXEEXT)
 	$(AM_V_CCLD)$(sbatch_LINK) $(sbatch_OBJECTS) $(sbatch_LDADD) $(LIBS)
 
 mostlyclean-compile:
@@ -556,7 +556,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/opt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sbatch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mybatch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xlate.Po@am__quote@
 
 .c.o:

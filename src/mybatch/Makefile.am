@@ -1,4 +1,4 @@
-#
+# makefile for mybatch
 
 AUTOMAKE_OPTIONS = foreign
 CLEANFILES = core.*
