@@ -5,9 +5,9 @@ CLEANFILES = core.*
 
 AM_CPPFLAGS = -I$(top_srcdir)
 
-bin_PROGRAMS = sbatch
+bin_PROGRAMS = mybatch
 
-sbatch_SOURCES = sbatch.c opt.c opt.h xlate.c
+mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
 
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
 sbatch_DEPENDENCIES = $(LIB_SLURM_BUILD)

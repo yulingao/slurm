@@ -26,4 +26,5 @@ SUBDIRS =		\
 	sshare		\
 	sstat		\
 	strigger	\
-	sview
+	sview		\
+	mybatch
