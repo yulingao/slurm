@@ -139,17 +139,17 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_sbatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT)
-sbatch_OBJECTS = $(am_sbatch_OBJECTS)
+am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT)
+mybatch_OBJECTS = $(am_mybatch_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-sbatch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+mybatch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(sbatch_LDFLAGS) $(LDFLAGS) -o $@
+	$(mybatch_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -184,8 +184,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(sbatch_SOURCES)
-DIST_SOURCES = $(sbatch_SOURCES)
+SOURCES = $(mybatch_SOURCES)
+DIST_SOURCES = $(mybatch_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -456,11 +456,11 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 CLEANFILES = core.*
 AM_CPPFLAGS = -I$(top_srcdir)
-sbatch_SOURCES = mybatch.c opt.c opt.h xlate.c
+mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
-sbatch_DEPENDENCIES = $(LIB_SLURM_BUILD)
-sbatch_LDADD = $(convenience_libs)
-sbatch_LDFLAGS = -export-dynamic $(CMD_LDFLAGS)
+mybatch_DEPENDENCIES = $(LIB_SLURM_BUILD)
+mybatch_LDADD = $(convenience_libs)
+mybatch_LDFLAGS = -export-dynamic $(CMD_LDFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -545,9 +545,9 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-mybatch$(EXEEXT): $(sbatch_OBJECTS) $(sbatch_DEPENDENCIES) $(EXTRA_sbatch_DEPENDENCIES) 
+mybatch$(EXEEXT): $(mybatch_OBJECTS) $(mybatch_DEPENDENCIES) $(EXTRA_mybatch_DEPENDENCIES) 
 	@rm -f mybatch$(EXEEXT)
-	$(AM_V_CCLD)$(sbatch_LINK) $(sbatch_OBJECTS) $(sbatch_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(mybatch_LINK) $(mybatch_OBJECTS) $(mybatch_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
