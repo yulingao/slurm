@@ -27,4 +27,5 @@ SUBDIRS =		\
 	sstat		\
 	strigger	\
 	sview		\
-	mybatch
+	mybatch		\
+	mytrigger

@@ -1046,20 +1046,17 @@ extern int slurm_persist_msg_unpack(slurm_persist_conn_t *persist_conn,
 {
 	int rc;
 
-//	printf("this is slurm_persist_msg_unpack\n");
 	xassert(persist_conn);
 	xassert(resp_msg);
 
 	if (persist_conn->flags & PERSIST_FLAG_DBD)
 	{
-		printf("9.1\n");
 		rc = unpack_slurmdbd_msg((slurmdbd_msg_t *)resp_msg,
 								 persist_conn->version,
 								 buffer);
 	}
 	else
 	{
-		printf("9.2\n");
 		slurm_msg_t msg;
 
 		slurm_msg_t_init(&msg);
