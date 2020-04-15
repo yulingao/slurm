@@ -15154,7 +15154,7 @@ void batch_requeue_fini(struct job_record  *job_ptr)
 	if (IS_JOB_COMPLETING(job_ptr) ||
 	    !IS_JOB_PENDING(job_ptr) || !job_ptr->batch_flag)
 		return;
-
+	info("this is batch_requeue_fini\n");
 	info("Requeuing %pJ", job_ptr);
 
 	/* Clear everything so this appears to be a new job and then restart
@@ -16580,6 +16580,8 @@ static int _job_requeue(uid_t uid, struct job_record *job_ptr, bool preempt,
  * IN flags - JobExitRequeue | Hold | JobFailed | etc.
  * RET 0 on success, otherwise ESLURM error code
  */
+
+// requeue一个作业，作业id的形式
 extern int job_requeue(uid_t uid, uint32_t job_id, slurm_msg_t *msg,
 		       bool preempt, uint32_t flags)
 {
@@ -16609,6 +16611,7 @@ extern int job_requeue(uid_t uid, uint32_t job_id, slurm_msg_t *msg,
  * IN preempt - true if job being preempted
  * RET 0 on success, otherwise ESLURM error code
  */
+//requeue一个作业，以作业id字符串的形式，以逗号的形式分开的id字符串
 extern int job_requeue2(uid_t uid, requeue_msg_t *req_ptr, slurm_msg_t *msg,
 			bool preempt)
 {
