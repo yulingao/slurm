@@ -1330,6 +1330,7 @@ next_part:			part_ptr = (struct part_record *)
 					continue;
 			}
 		} else {
+
 			job_queue_rec = list_pop(job_queue);
 			if (!job_queue_rec)
 				break;
@@ -1627,6 +1628,7 @@ next_task:
 			goto skip_start;
 		}
 
+//		在这里对作业分配节点
 		error_code = select_nodes(job_ptr, false, NULL, NULL, false,
 					  SLURMDB_JOB_FLAG_SCHED);
 
@@ -1703,6 +1705,8 @@ skip_start:
 		} else if (error_code == SLURM_SUCCESS) {
 			/* job initiated */
 			sched_debug3("%pJ initiated", job_ptr);
+			sched_info("this is job_scheduler.c");
+
 			last_job_update = now;
 			reject_array_job_id = 0;
 			reject_array_part   = NULL;

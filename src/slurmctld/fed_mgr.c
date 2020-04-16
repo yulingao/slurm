@@ -4378,7 +4378,7 @@ extern int fed_mgr_job_requeue_test(struct job_record *job_ptr, uint32_t flags)
  */
 extern int fed_mgr_job_requeue(struct job_record *job_ptr)
 {
-	info("this is fed_mgr_job_requeue");
+//	info("this is fed_mgr_job_requeue");
 
 
 	int rc = SLURM_SUCCESS;

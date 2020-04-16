@@ -2383,6 +2383,9 @@ static void *_slurmctld_background(void *no_data)
 			}
 			slurm_mutex_unlock(&sched_cnt_mutex);
 		}
+
+
+//		在这里一直对作业进行调度
 		if (job_limit != NO_VAL)
 		{
 			lock_slurmctld(job_write_lock2);
