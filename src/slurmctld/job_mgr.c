@@ -15154,7 +15154,7 @@ void batch_requeue_fini(struct job_record  *job_ptr)
 	if (IS_JOB_COMPLETING(job_ptr) ||
 	    !IS_JOB_PENDING(job_ptr) || !job_ptr->batch_flag)
 		return;
-	info("this is batch_requeue_fini\n");
+//	info("this is batch_requeue_fini\n");
 	info("Requeuing %pJ", job_ptr);
 
 	/* Clear everything so this appears to be a new job and then restart
