@@ -100,7 +100,7 @@ static int _set_job_trigger(uint32_t job_id) {
 	params.job_fini = true;
 //	设置program，设置program的路径为/git/slurm/mailmytrigger
 	xfree(params.program);
-	params.program = ;
+	params.program = my_program;
 
 
 	rc = _set_trigger();
