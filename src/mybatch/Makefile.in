@@ -140,7 +140,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 
-am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) ../mytrigger/mytrigger.$(OBJEXT)
+am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) 
 #am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) 
 
 
