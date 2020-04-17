@@ -140,7 +140,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 
-am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) mytrigger.$(OBJEXT)
+am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) ../mytrigger/mytrigger.$(OBJEXT)
 #am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) 
 
 
@@ -460,7 +460,8 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 CLEANFILES = core.*
 AM_CPPFLAGS = -I$(top_srcdir)
-mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c ../mytrigger/mytrigger.c
+mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
+# mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
 mybatch_DEPENDENCIES = $(LIB_SLURM_BUILD)
 mybatch_LDADD = $(convenience_libs)
