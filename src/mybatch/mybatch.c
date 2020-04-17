@@ -285,6 +285,9 @@ int main(int argc, char **argv){
 	}
 
 //	能来到这个地方的，都是成功提交了作业的
+//	在这里给作业加上strigger（mystrigger）
+
+
 
 
 	print_multi_line_string(resp->job_submit_user_msg, -1, LOG_LEVEL_INFO);

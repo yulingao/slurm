@@ -1705,7 +1705,7 @@ skip_start:
 		} else if (error_code == SLURM_SUCCESS) {
 			/* job initiated */
 			sched_debug3("%pJ initiated", job_ptr);
-			sched_info("this is job_scheduler.c");
+//			sched_info("this is job_scheduler.c");
 
 			last_job_update = now;
 			reject_array_job_id = 0;

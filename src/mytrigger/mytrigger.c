@@ -57,6 +57,8 @@
 #include "src/common/xstring.h"
 #include "src/mytrigger/mytrigger.h"
 
+const char * my_program = "/git/slurm/mailmytrigger";
+
 static int _clear_trigger(void);
 static int _get_trigger(void);
 static int _set_trigger(void);
@@ -93,9 +95,17 @@ int main(int argc, char **argv)
 
 static int _set_job_trigger(uint32_t job_id) {
 	int rc = 0;
+//	设置作业id，设置当作业完成时触发，设置program
 	params.job_id = job_id;
 	params.job_fini = true;
+//	设置program，设置program的路径为/git/slurm/mailmytrigger
+	xfree(params.program);
+	params.program = ;
+
+
 	rc = _set_trigger();
+
+	return rc;
 
 }
 

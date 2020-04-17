@@ -61,6 +61,12 @@ autom4te.cache
 /testsuite/expect/*.log*
 TAGS
 
+
+/src/mytrigger/mytrigger
+/src/mybatch/mybatch
+
+
+
 .vscode
 .idea
 
