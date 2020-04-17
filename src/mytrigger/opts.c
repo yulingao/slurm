@@ -585,7 +585,7 @@ extern int _set_job_trigger(uint32_t job_id) {
 
 }
 
-static int _set_trigger(void)
+int _set_trigger(void)
 {
 	trigger_info_t ti;
 	char tmp_c[128];
