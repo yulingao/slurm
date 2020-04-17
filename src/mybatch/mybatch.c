@@ -32,6 +32,10 @@
 
 #include "src/mybatch/opt.h"
 
+#include "src/mytrigger/mytrigger.h"
+
+
+
 #define MAX_RETRIES 15
 
 static void  _add_bb_to_script(char **script_body, char *burst_buffer_file);
