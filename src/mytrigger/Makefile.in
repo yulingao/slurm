@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-# Makefile for mytigger
+# Makefile for mytrigger
 
 
 VPATH = @srcdir@
@@ -83,8 +83,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = mytigger$(EXEEXT)
-subdir = src/mytigger
+bin_PROGRAMS = mytrigger$(EXEEXT)
+subdir = src/mytrigger
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/auxdir/depcomp $(noinst_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -141,16 +141,16 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mytigger_OBJECTS = mytigger.$(OBJEXT) opts.$(OBJEXT)
-mytigger_OBJECTS = $(am_mytigger_OBJECTS)
+am_mytrigger_OBJECTS = mytrigger.$(OBJEXT) opts.$(OBJEXT)
+mytrigger_OBJECTS = $(am_mytrigger_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-mytigger_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+mytrigger_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(mytigger_LDFLAGS) $(LDFLAGS) -o $@
+	$(mytrigger_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -185,8 +185,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(mytigger_SOURCES)
-DIST_SOURCES = $(mytigger_SOURCES)
+SOURCES = $(mytrigger_SOURCES)
+DIST_SOURCES = $(mytrigger_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -457,11 +457,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 AM_CPPFLAGS = -I$(top_srcdir)
-mytigger_LDADD = $(LIB_SLURM) $(DL_LIBS)
-mytigger_DEPENDENCIES = $(LIB_SLURM_BUILD)
-noinst_HEADERS = mytigger.h
-mytigger_SOURCES = mytigger.c opts.c
-mytigger_LDFLAGS = -export-dynamic $(CMD_LDFLAGS)
+mytrigger_LDADD = $(LIB_SLURM) $(DL_LIBS)
+mytrigger_DEPENDENCIES = $(LIB_SLURM_BUILD)
+noinst_HEADERS = mytrigger.h
+mytrigger_SOURCES = mytrigger.c opts.c
+mytrigger_LDFLAGS = -export-dynamic $(CMD_LDFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -475,9 +475,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/mytigger/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/mytrigger/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/mytigger/Makefile
+	  $(AUTOMAKE) --foreign src/mytrigger/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -546,9 +546,9 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-mytigger$(EXEEXT): $(mytigger_OBJECTS) $(mytigger_DEPENDENCIES) $(EXTRA_mytigger_DEPENDENCIES) 
-	@rm -f mytigger$(EXEEXT)
-	$(AM_V_CCLD)$(mytigger_LINK) $(mytigger_OBJECTS) $(mytigger_LDADD) $(LIBS)
+mytrigger$(EXEEXT): $(mytrigger_OBJECTS) $(mytrigger_DEPENDENCIES) $(EXTRA_mytrigger_DEPENDENCIES) 
+	@rm -f mytrigger$(EXEEXT)
+	$(AM_V_CCLD)$(mytrigger_LINK) $(mytrigger_OBJECTS) $(mytrigger_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -556,8 +556,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mytrigger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/opts.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mytigger.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -793,7 +793,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 force:
-$(mytigger_LDADD) : force
+$(mytrigger_LDADD) : force
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

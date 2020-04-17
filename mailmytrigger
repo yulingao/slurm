@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "job finish running :$*" | mail -s "dadan" 987612820@qq.com
