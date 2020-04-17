@@ -139,11 +139,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-
-am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) 
-#am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) 
-
-
+am_mybatch_OBJECTS = mybatch.$(OBJEXT) opt.$(OBJEXT) xlate.$(OBJEXT) \
+	mytrigger.$(OBJEXT)
 mybatch_OBJECTS = $(am_mybatch_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -460,8 +457,7 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 CLEANFILES = core.*
 AM_CPPFLAGS = -I$(top_srcdir)
-mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
-# mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c
+mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c ../mytrigger/mytrigger.c
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
 mybatch_DEPENDENCIES = $(LIB_SLURM_BUILD)
 mybatch_LDADD = $(convenience_libs)
@@ -561,6 +557,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mybatch.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mytrigger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/opt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xlate.Po@am__quote@
 
@@ -584,6 +581,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+mytrigger.o: ../mytrigger/mytrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mytrigger.o -MD -MP -MF $(DEPDIR)/mytrigger.Tpo -c -o mytrigger.o `test -f '../mytrigger/mytrigger.c' || echo '$(srcdir)/'`../mytrigger/mytrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mytrigger.Tpo $(DEPDIR)/mytrigger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../mytrigger/mytrigger.c' object='mytrigger.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mytrigger.o `test -f '../mytrigger/mytrigger.c' || echo '$(srcdir)/'`../mytrigger/mytrigger.c
+
+mytrigger.obj: ../mytrigger/mytrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mytrigger.obj -MD -MP -MF $(DEPDIR)/mytrigger.Tpo -c -o mytrigger.obj `if test -f '../mytrigger/mytrigger.c'; then $(CYGPATH_W) '../mytrigger/mytrigger.c'; else $(CYGPATH_W) '$(srcdir)/../mytrigger/mytrigger.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mytrigger.Tpo $(DEPDIR)/mytrigger.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../mytrigger/mytrigger.c' object='mytrigger.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mytrigger.obj `if test -f '../mytrigger/mytrigger.c'; then $(CYGPATH_W) '../mytrigger/mytrigger.c'; else $(CYGPATH_W) '$(srcdir)/../mytrigger/mytrigger.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
