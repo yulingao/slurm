@@ -7,7 +7,7 @@ AM_CPPFLAGS = -I$(top_srcdir)
 
 bin_PROGRAMS = mybatch
 
-mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c ../mytrigger/mytrigger.c ../mytrigger/opts.c
+mybatch_SOURCES = mybatch.c opt.c opt.h xlate.c ../mytrigger/opts.c
 
 convenience_libs = $(LIB_SLURM) $(DL_LIBS)
 mybatch_DEPENDENCIES = $(LIB_SLURM_BUILD)

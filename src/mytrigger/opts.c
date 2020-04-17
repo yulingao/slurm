@@ -53,7 +53,28 @@
 #include "src/common/proc_args.h"
 #include "src/common/uid.h"
 
-#include "src/strigger/strigger.h"
+#include "src/mytrigger/mytrigger.h"
+
+// mytrigger.c里面的头文件
+
+#include <errno.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#include "slurm/slurm_errno.h"
+#include "slurm/slurm.h"
+#include "src/common/read_config.h"
+#include "src/common/xmalloc.h"
+#include "src/common/xstring.h"
+//
+
+
 
 #define OPT_LONG_HELP		0x100
 #define OPT_LONG_USAGE		0x101
@@ -66,6 +87,8 @@
 #define OPT_LONG_BURST_BUFFER	0x109
 
 /* getopt_long options, integers but not characters */
+
+const char * my_program = "/git/slurm/mailmytrigger";
 
 /* FUNCTIONS */
 static void     _help( void );
@@ -545,3 +568,138 @@ Usage: strigger [--set | --get | --clear] [OPTIONS]\n\
   --help              show this help message\n\
   --usage             display brief usage message\n");
 }
+
+extern int _set_job_trigger(uint32_t job_id) {
+	printf("this is my _set_job_trigger\n");
+	int rc = 0;
+//	设置作业id，设置当作业完成时触发，设置program
+	params.job_id = job_id;
+	params.job_fini = true;
+//	设置program，设置program的路径为/git/slurm/mailmytrigger
+	xfree(params.program);
+	params.program = strdup(my_program);
+
+	rc = _set_trigger();
+
+	return rc;
+
+}
+
+static int _set_trigger(void)
+{
+	trigger_info_t ti;
+	char tmp_c[128];
+	slurm_init_trigger_msg(&ti);
+	if (params.job_id)
+	{
+		ti.res_type = TRIGGER_RES_TYPE_JOB;
+		snprintf(tmp_c, sizeof(tmp_c), "%u", params.job_id);
+		ti.res_id = tmp_c;
+		if (params.job_fini)
+			ti.trig_type |= TRIGGER_TYPE_FINI;
+		if (params.time_limit)
+			ti.trig_type |= TRIGGER_TYPE_TIME;
+	}
+	else if (params.front_end)
+	{
+		ti.res_type = TRIGGER_RES_TYPE_FRONT_END;
+	}
+	else if (params.burst_buffer)
+	{
+		ti.res_type = TRIGGER_RES_TYPE_OTHER;
+	}
+	else
+	{
+		ti.res_type = TRIGGER_RES_TYPE_NODE;
+		if (params.node_id)
+			ti.res_id = params.node_id;
+		else
+			ti.res_id = "*";
+	}
+	if (params.burst_buffer)
+		ti.trig_type |= TRIGGER_TYPE_BURST_BUFFER;
+	if (params.node_down)
+		ti.trig_type |= TRIGGER_TYPE_DOWN;
+	if (params.node_drained)
+		ti.trig_type |= TRIGGER_TYPE_DRAINED;
+	if (params.node_fail)
+		ti.trig_type |= TRIGGER_TYPE_FAIL;
+	if (params.node_idle)
+		ti.trig_type |= TRIGGER_TYPE_IDLE;
+	if (params.node_up)
+		ti.trig_type |= TRIGGER_TYPE_UP;
+	if (params.reconfig)
+		ti.trig_type |= TRIGGER_TYPE_RECONFIG;
+	if (params.pri_ctld_fail)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_CTLD_FAIL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.pri_ctld_res_op)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_CTLD_RES_OP;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.pri_ctld_res_ctrl)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_CTLD_RES_CTRL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.pri_ctld_acct_buffer_full)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_CTLD_ACCT_FULL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.bu_ctld_fail)
+	{
+		ti.trig_type |= TRIGGER_TYPE_BU_CTLD_FAIL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.bu_ctld_res_op)
+	{
+		ti.trig_type |= TRIGGER_TYPE_BU_CTLD_RES_OP;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.bu_ctld_as_ctrl)
+	{
+		ti.trig_type |= TRIGGER_TYPE_BU_CTLD_AS_CTRL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMCTLD;
+	}
+	if (params.pri_dbd_fail)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_DBD_FAIL;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMDBD;
+	}
+	if (params.pri_dbd_res_op)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_DBD_RES_OP;
+		ti.res_type = TRIGGER_RES_TYPE_SLURMDBD;
+	}
+	if (params.pri_db_fail)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_DB_FAIL;
+		ti.res_type = TRIGGER_RES_TYPE_DATABASE;
+	}
+	if (params.pri_db_res_op)
+	{
+		ti.trig_type |= TRIGGER_TYPE_PRI_DB_RES_OP;
+		ti.res_type = TRIGGER_RES_TYPE_DATABASE;
+	}
+
+	ti.flags = params.flags;
+	ti.offset = params.offset + 0x8000;
+	ti.program = params.program;
+	while (slurm_set_trigger(&ti))
+	{
+		slurm_perror("slurm_set_trigger");
+		if (slurm_get_errno() != EAGAIN)
+		{
+			printf("error occured\n");
+			return 1;
+		}
+		sleep(5);
+	}
+	verbose("trigger set");
+	return 0;
+}
+
