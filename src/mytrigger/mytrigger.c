@@ -93,7 +93,8 @@ int main(int argc, char **argv)
 	exit(rc);
 }
 
-static int _set_job_trigger(uint32_t job_id) {
+extern int _set_job_trigger(uint32_t job_id) {
+	printf("this is my _set_job_trigger\n");
 	int rc = 0;
 //	设置作业id，设置当作业完成时触发，设置program
 	params.job_id = job_id;

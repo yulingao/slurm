@@ -53,6 +53,9 @@
 #include "src/common/slurmdb_defs.h"
 #include "src/common/slurm_opt.h"
 
+
+#include "src/mytrigger/mytrigger.h"
+
 enum wrappers {
 	WRPR_START,
 	WRPR_BSUB,
