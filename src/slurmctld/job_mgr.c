@@ -16723,25 +16723,25 @@ extern int job_requeue2(uid_t uid, requeue_msg_t *req_ptr, slurm_msg_t *msg,
 	}
 
     reply:
-	if (msg) {
-		response_init(&resp_msg, msg);
-		if (resp_array) {
-			resp_array_msg = _resp_array_xlate(resp_array, job_id);
-			resp_msg.msg_type  = RESPONSE_JOB_ARRAY_ERRORS;
-			resp_msg.data      = resp_array_msg;
-		} else {
-			resp_msg.msg_type  = RESPONSE_SLURM_RC;
-			rc_msg.return_code = rc;
-			resp_msg.data      = &rc_msg;
-		}
-		slurm_send_node_msg(msg->conn_fd, &resp_msg);
-		info("this is slurm_send_node_msg");
-
-		if (resp_array_msg) {
-			slurm_free_job_array_resp(resp_array_msg);
-			resp_msg.data = NULL;
-		}
-	}
+//	if (msg) {
+//		response_init(&resp_msg, msg);
+//		if (resp_array) {
+//			resp_array_msg = _resp_array_xlate(resp_array, job_id);
+//			resp_msg.msg_type  = RESPONSE_JOB_ARRAY_ERRORS;
+//			resp_msg.data      = resp_array_msg;
+//		} else {
+//			resp_msg.msg_type  = RESPONSE_SLURM_RC;
+//			rc_msg.return_code = rc;
+//			resp_msg.data      = &rc_msg;
+//		}
+//		slurm_send_node_msg(msg->conn_fd, &resp_msg);
+//		info("this is slurm_send_node_msg");
+//
+//		if (resp_array_msg) {
+//			slurm_free_job_array_resp(resp_array_msg);
+//			resp_msg.data = NULL;
+//		}
+//	}
 	_resp_array_free(resp_array);
 
 	FREE_NULL_BITMAP(array_bitmap);
