@@ -5109,6 +5109,7 @@ inline static void _slurm_rpc_requeue(slurm_msg_t *msg) {
     
     lock_slurmctld(job_write_lock);
     if (req_ptr->job_id_str) {
+//    	如果是从console输入的requeue命令，最后都会走到这里
 //    	info("%s", req_ptr->job_id_str);
         error_code = job_requeue2(uid, req_ptr, msg, false);
     } else {

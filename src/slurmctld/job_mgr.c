@@ -16735,6 +16735,7 @@ extern int job_requeue2(uid_t uid, requeue_msg_t *req_ptr, slurm_msg_t *msg,
 			resp_msg.data      = &rc_msg;
 		}
 		slurm_send_node_msg(msg->conn_fd, &resp_msg);
+		info("this is slurm_send_node_msg");
 
 		if (resp_array_msg) {
 			slurm_free_job_array_resp(resp_array_msg);
