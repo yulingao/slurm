@@ -99,24 +99,27 @@
 // 判断作业的状态
 // my code
 // start
-//#define IS_JOB_CANCELLED(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_CANCELLED) == 0))
-//#define IS_JOB_FAILED(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_FAILED) == 0))
-//#define IS_JOB_TIMEOUT(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_TIMEOUT) == 0))
-//#define IS_JOB_NODE_FAIL(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_NODE_FAIL) == 0))
-//#define IS_JOB_PREEMPTED(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_PREEMPTED) == 0))
-//#define IS_JOB_BOOT_FAIL(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_BOOT_FAIL) == 0))
-//#define IS_JOB_DEADLINE(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_DEADLINE) == 0))
-//#define IS_JOB_OOM(_X)		\
-//	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_OOM) == 0))
+/**
+#define IS_JOB_CANCELLED(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_CANCELLED) == 0))
+#define IS_JOB_FAILED(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_FAILED) == 0))
+#define IS_JOB_TIMEOUT(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_TIMEOUT) == 0))
+#define IS_JOB_NODE_FAIL(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_NODE_FAIL) == 0))
+#define IS_JOB_PREEMPTED(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_PREEMPTED) == 0))
+#define IS_JOB_BOOT_FAIL(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_BOOT_FAIL) == 0))
+#define IS_JOB_DEADLINE(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_DEADLINE) == 0))
+#define IS_JOB_OOM(_X)		\
+	(IS_JOB_FINISHED(_X) && ((_X->job_state & JOB_OOM) == 0))
 // source code
 // end
+ *
+ */
 
 
 
