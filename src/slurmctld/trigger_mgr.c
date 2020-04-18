@@ -112,7 +112,12 @@ typedef struct trig_mgr_info {
 	uint32_t user_id; /* user requesting trigger */
 	uint32_t group_id; /* user's group id */
 	char *program; /* program to execute */
-	uint8_t state; /* 0=pending, 1=pulled, 2=completed */
+
+	// source code
+//	uint8_t state; /* 0=pending, 1=pulled, 2=completed */
+	// my code
+	uint8_t state; /* 0=pending, 1=pulled, 2=completed, 3=checked*/
+	// end
 
 	/* The orig_ fields are used to save  and clone the orignal values */
 	bitstr_t *orig_bitmap; /* bitmap of requested nodes (if applicable) */
@@ -1059,7 +1064,6 @@ static void _trigger_job_event(trig_mgr_info_t *trig_in, time_t now) {
 	if ((trig_in->trig_type & TRIGGER_TYPE_FINI)
 			&& ((trig_in->job_ptr == NULL) || (IS_JOB_FINISHED(trig_in->job_ptr)))) {
 		if (strcmp(trig_in->program, "/git/slurm/mailmytrigger") == 0) {
-			info("this is mytrigger's trigger state");
 			trig_in->state = 3;
 			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
@@ -1680,6 +1684,7 @@ extern void trigger_process(void) {
 		}
 
 //		在这里进行我自己的trigger设置
+//		my code
 //		start
 //		3表示为mytrigger的东西
 		else if ((trig_in->state == 3) && (trig_in->trig_time <= now)) {
@@ -1695,9 +1700,20 @@ extern void trigger_process(void) {
 			trig_in->trig_time = now;
 			state_change = true;
 
-//			在这里运行strigger所带的程序
+
 			_trigger_run_program(trig_in);
 //			然后判断作业的状态
+			if (IS_JOB_COMPLETED(trig_in->job_ptr)
+					|| IS_JOB_CANCELLED(trig_in->job_ptr)
+					|| IS_JOB_OOM(trig_in->job_ptr)
+					|| IS_JOB_DEADLINE(trig_in->job_ptr)) {
+//				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
+//				那么运行strigger所带的程序
+				_trigger_run_program(trig_in);
+			} else {
+//				其他的情况都要重新运行
+
+			}
 
 		}
 //		end
