@@ -15043,17 +15043,24 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
 		} else {
 			job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
-//			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
 			job_ptr->details->exc_node_bitmap = bit_copy(job_ptr->node_bitmap);
 		}
-//		strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
-//		info("exc_nodes = %s", job_ptr->details->exc_nodes);
 
 		rc = _job_requeue(uid, job_ptr, preempt, flags);
 	}
 	if (job_ptr && job_ptr->array_recs) {
 		/* This is a job array */
 		job_ptr_done = job_ptr;
+		if (job_ptr->details->exc_nodes != NULL) {
+			if (strlen(job_ptr->details->exc_nodes) != 0) {
+				xstrcatchar(job_ptr->details->exc_nodes, ',');
+			}
+			xstrcat(job_ptr->details->exc_nodes, job_ptr->nodes);
+			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
+		} else {
+			job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
+			job_ptr->details->exc_node_bitmap = bit_copy(job_ptr->node_bitmap);
+		}
 		rc2 = _job_requeue(uid, job_ptr, preempt, flags);
 	}
 	/* Requeue all tasks of this job array */
@@ -15074,7 +15081,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 				job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
 				job_ptr->details->exc_node_bitmap = bit_copy(job_ptr->node_bitmap);
 			}
-			info("jobid=%d, excnodes=%s", job_ptr->job_id, job_ptr->details->exc_nodes);
+//			info("jobid=%d, excnodes=%s", job_ptr->job_id, job_ptr->details->exc_nodes);
 			rc2 = _job_requeue(uid, job_ptr, preempt, flags);
 		}
 		job_ptr = job_ptr->job_array_next_j;
