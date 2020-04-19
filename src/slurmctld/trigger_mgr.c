@@ -1703,14 +1703,14 @@ extern void trigger_process(void) {
 
 			_trigger_run_program(trig_in);
 //			然后判断作业的状态
-			if (IS_JOB_COMPLETED(trig_in->job_ptr)
+			if (IS_JOB_COMPLETE(trig_in->job_ptr)
 					|| IS_JOB_CANCELLED(trig_in->job_ptr)
 					|| IS_JOB_OOM(trig_in->job_ptr)
 					|| IS_JOB_DEADLINE(trig_in->job_ptr)
 					|| trig_in->job_ptr->restart_cnt > 3) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间,重复运行次数大于3
 //				那么运行strigger所带的程序
-				info("uid=%u jobid=%u program=%s has completed mybatch running", trig_in->job_id, trig_in->group_id, trig_in->program);
+				info("uid=%u jobid=%u program=%s has completed mybatch running", trig_in->user_id, trig_in->job_id, trig_in->program);
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
