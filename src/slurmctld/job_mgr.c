@@ -15066,11 +15066,15 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 			//		把作业当前的运行节点加入到作业的排除节点中
 			if (job_ptr->details->exc_nodes != NULL) {
 				if (strlen(job_ptr->details->exc_nodes) != 0) {
-					strcat(job_ptr->details->exc_nodes, ",");
+					xstrcatchar(job_ptr->details->exc_nodes, ',');
 				}
 				strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
+				bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
+			} else {
+				job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
+				job_ptr->details->exc_node_bitmap = bit_copy(job_ptr->node_bitmap);
 			}
-			info("%s", job_ptr->details->exc_nodes);
+			info("jobid=%d, excnodes=%s", job_ptr->job_id, job_ptr->details->exc_nodes);
 			rc2 = _job_requeue(uid, job_ptr, preempt, flags);
 		}
 		job_ptr = job_ptr->job_array_next_j;
