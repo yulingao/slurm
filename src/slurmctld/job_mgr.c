@@ -15034,17 +15034,17 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 					|| ((job_ptr->array_task_id != NO_VAL) && (job_ptr->array_job_id != job_id)))) {
 		/* This is a regular job or single task of job array */
 //		把作业当前的运行节点加入到作业的排除节点中
-		info("%s", job_ptr->nodes);
+//		info("%s", job_ptr->nodes);
 		if (job_ptr->details->exc_nodes != NULL) {
 			if (strlen(job_ptr->details->exc_nodes) != 0) {
 				xstrcatchar(job_ptr->details->exc_nodes, ',');
 			}
 			xstrcat(job_ptr->details->exc_nodes, job_ptr->nodes);
-//			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
+			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
 		} else {
 			job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
 //			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
-			bit_copy(job_ptr->node_bitmap);
+			job_ptr->details->exc_node_bitmap = bit_copy(job_ptr->node_bitmap);
 		}
 //		strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
 //		info("exc_nodes = %s", job_ptr->details->exc_nodes);

@@ -88,6 +88,6 @@ extern struct strigger_parameters params;
 
 extern void parse_command_line(int argc, char **argv);
 
-extern int _set_job_trigger(uint32_t job_id);
+extern int _my_set_job_trigger(uint32_t job_id);
 
 #endif
