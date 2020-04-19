@@ -15037,14 +15037,16 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		info("%s", job_ptr->nodes);
 		if (job_ptr->details->exc_nodes != NULL) {
 			if (strlen(job_ptr->details->exc_nodes) != 0) {
-				strcat(job_ptr->details->exc_nodes, ",");
+				xstrcatchar(job_ptr->details->exc_nodes, ',');
 			}
 			xstrcat(job_ptr->details->exc_nodes, job_ptr->nodes);
+			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
 		} else {
 			job_ptr->details->exc_nodes = xstrdup(job_ptr->nodes);
+			bit_or(job_ptr->details->exc_node_bitmap, job_ptr->node_bitmap);
 		}
 //		strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
-		info("exc_nodes = %s", job_ptr->details->exc_nodes);
+//		info("exc_nodes = %s", job_ptr->details->exc_nodes);
 
 		rc = _job_requeue(uid, job_ptr, preempt, flags);
 	}
