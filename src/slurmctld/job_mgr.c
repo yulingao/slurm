@@ -15025,7 +15025,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		return rc;
 	}
 //	如果作业重复运行次数超过3次，那么中止requeue
-	if (job_ptr->restart_cnt >= 3) {
+	if (job_ptr->restart_cnt > 3) {
 		return rc;
 	}
 //	如果是单个作业
@@ -15034,13 +15034,14 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 					|| ((job_ptr->array_task_id != NO_VAL) && (job_ptr->array_job_id != job_id)))) {
 		/* This is a regular job or single task of job array */
 //		把作业当前的运行节点加入到作业的排除节点中
+		info("%s", job_ptr->nodes);
 		if (job_ptr->details->exc_nodes != NULL) {
 			if (strlen(job_ptr->details->exc_nodes) != 0) {
 				strcat(job_ptr->details->exc_nodes, ",");
 			}
 			strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
 		} else {
-			strcpy(job_ptr->details->exc_nodes, job_ptr->nodes);
+//			strcpy(job_ptr->details->exc_nodes, job_ptr->nodes);
 		}
 		info("%s", job_ptr->details->exc_nodes);
 
