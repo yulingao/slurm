@@ -14994,7 +14994,7 @@ bool preempt) {
 			resp_msg.data = &rc_msg;
 		}
 		slurm_send_node_msg(msg->conn_fd, &resp_msg);
-		info("this is slurm_send_node_msg");
+//		info("this is slurm_send_node_msg");
 
 		if (resp_array_msg) {
 			slurm_free_job_array_resp(resp_array_msg);
