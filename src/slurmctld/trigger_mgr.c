@@ -1706,13 +1706,14 @@ extern void trigger_process(void) {
 			if (IS_JOB_COMPLETED(trig_in->job_ptr)
 					|| IS_JOB_CANCELLED(trig_in->job_ptr)
 					|| IS_JOB_OOM(trig_in->job_ptr)
-					|| IS_JOB_DEADLINE(trig_in->job_ptr)) {
-//				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
+					|| IS_JOB_DEADLINE(trig_in->job_ptr)
+					|| trig_in->job_ptr->restart_cnt > 3) {
+//				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间,重复运行次数大于3
 //				那么运行strigger所带的程序
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
-
+				my_job_requeue(trig_in->user_id, trig_in->job_id, false, 0);
 			}
 
 		}

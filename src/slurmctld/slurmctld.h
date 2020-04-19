@@ -1689,6 +1689,15 @@ extern int job_requeue(uid_t uid, uint32_t job_id, slurm_msg_t *msg,
 extern int job_requeue2(uid_t uid, requeue_msg_t *req_ptr, slurm_msg_t *msg,
 			bool preempt);
 
+
+/**
+ *
+ */
+extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t flags);
+
+
+
+
 /*
  * job_set_top - Move the specified job to the top of the queue (at least
  *	for that user ID, partition, account, and QOS).
