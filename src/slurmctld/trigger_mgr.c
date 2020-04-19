@@ -375,6 +375,8 @@ static bool _duplicate_trigger(trigger_info_t *trig_desc) {
 	return found_dup;
 }
 
+// 不进行权限检查的mytrigger set
+// start
 extern int my_trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 	int i;
 	int rc = SLURM_SUCCESS;
@@ -488,6 +490,7 @@ extern int my_trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 	return rc;
 
 }
+// end
 
 extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 	int i;
@@ -502,8 +505,6 @@ extern int trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 	lock_slurmctld(job_read_lock);
 	slurm_mutex_lock(&trigger_mutex);
 
-//	info("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
-//	info("uid, %u\n", uid);
 
 	if ((slurmctld_conf.slurm_user_id != 0) && (slurmctld_conf.slurm_user_id != uid)) {
 		/* If SlurmUser is not root, then it is unable to set the
@@ -1708,7 +1709,7 @@ extern void trigger_process(void) {
 					|| IS_JOB_OOM(trig_in->job_ptr)
 					|| IS_JOB_DEADLINE(trig_in->job_ptr)
 					|| trig_in->job_ptr->restart_cnt > 3) {
-//				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间,重复运行次数大于3
+//				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u program=%s has completed mybatch running", trig_in->user_id, trig_in->job_id, trig_in->program);
 				_trigger_run_program(trig_in);
