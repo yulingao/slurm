@@ -15040,6 +15040,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 			}
 			strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
 		}
+		info("%s", job_ptr->details->exc_nodes);
 
 		rc = _job_requeue(uid, job_ptr, preempt, flags);
 	}
@@ -15062,6 +15063,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 				}
 				strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
 			}
+			info("%s", job_ptr->details->exc_nodes);
 			rc2 = _job_requeue(uid, job_ptr, preempt, flags);
 		}
 		job_ptr = job_ptr->job_array_next_j;
