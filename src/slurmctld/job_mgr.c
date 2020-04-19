@@ -15039,6 +15039,8 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 				strcat(job_ptr->details->exc_nodes, ",");
 			}
 			strcat(job_ptr->details->exc_nodes, job_ptr->nodes);
+		} else {
+			strcpy(job_ptr->details->exc_nodes, job_ptr->nodes);
 		}
 		info("%s", job_ptr->details->exc_nodes);
 
