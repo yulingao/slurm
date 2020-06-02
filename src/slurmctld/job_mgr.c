@@ -15025,7 +15025,20 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		return rc;
 	}
 //	如果作业重复运行次数超过3次，那么中止requeue
-	if (job_ptr->restart_cnt > 3) {
+//	设置一个作业停止重复提交次数
+//	如果作业超过重复提交次数，那么根据作业运行的情况，返回具体是什么错误
+
+
+//	如果第一次运行成功，那么就不会调用这个方法，不存在这种情况
+//	如果第一次运行失败，第二次运行成功，那么可能是第一次运行的节点上面发生了暂时或者永久性的硬件故障
+//	如果第二次运行失败，第三次运行成功，那么可能是作业编程有死锁或者其他故障的可能
+//	如果运行了3次还是出错，一般是编程故障
+
+//	我可能在这里向作业输出结果。
+
+
+	int job_not_requeue_time = 2;
+	if (job_ptr->restart_cnt > job_not_requeue_time) {
 		return rc;
 	}
 //	如果是单个作业
