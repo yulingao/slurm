@@ -776,6 +776,7 @@ _handle_signal_container(int fd, stepd_step_rec_t *job, uid_t uid)
 		 * but we want messages displayed by default
 		 */
 		if (sig == SIG_TIME_LIMIT) {
+			error("this is dadan's error msg");
 			error("*** %s ON %s CANCELLED AT %s DUE TO TIME LIMIT ***",
 			      entity, job->node_name, time_str);
 			msg_sent = 1;
