@@ -7961,6 +7961,7 @@ void job_time_limit(void) {
 				over_run = now - (over_time_limit * 60);
 			if (job_ptr->end_time <= over_run) {
 				last_job_update = now;
+				info("this is dadan 1");
 				info("Time limit exhausted for %pJ", job_ptr);
 				_job_timed_out(job_ptr, false);
 				job_ptr->state_reason = FAIL_TIMEOUT;
@@ -8203,6 +8204,7 @@ static void _job_timed_out(struct job_record *job_ptr, bool preempted) {
 
 	srun_timeout(job_ptr);
 	if (job_ptr->details) {
+		info("2");
 		time_t now = time(NULL);
 		job_ptr->end_time = now;
 		job_ptr->time_last_active = now;

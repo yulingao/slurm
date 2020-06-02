@@ -705,7 +705,6 @@ rwfail:
 static int
 _handle_signal_container(int fd, stepd_step_rec_t *job, uid_t uid)
 {
-	info("this is _handle_signal_container");
 	int rc = SLURM_SUCCESS;
 	int errnum = 0;
 	int sig, flag;
