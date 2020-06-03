@@ -15035,7 +15035,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 	host_list = hostlist_create(job_ptr->nodes);
 	while ((this_node_name = hostlist_shift(host_list))) {
 		node_ptr = find_node_record(this_node_name);
-		info("job state: %d", node_ptr->node_hostname);
+		info("node state: %d", node_ptr->node_state);
 	}
 
 
