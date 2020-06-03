@@ -15028,6 +15028,16 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	设置一个作业停止重复提交次数
 //	如果作业超过重复提交次数，那么根据作业运行的情况，返回具体是什么错误
 
+//	这里是查找所有节点状态的方法
+	char *this_node_name = NULL;
+	hostlist_t host_list;
+	struct node_record *node_ptr = NULL;
+	host_list = hostlist_create(job_ptr->nodes);
+	while ((this_node_name = hostlist_shift(host_list))) {
+		node_ptr = find_node_record(this_node_name);
+		info("%s", node_ptr->node_hostname);
+	}
+
 
 //	如果第一次运行成功，那么就不会调用这个方法，不存在这种情况
 //	如果第一次运行失败，第二次运行成功，那么可能是第一次运行的节点上面发生了暂时或者永久性的硬件故障
@@ -15038,7 +15048,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	暂时不向作业输出结果了，暂时通过info输出作业结果
 
 
-	int job_not_requeue_time = 2;
+	int job_not_requeue_time = 1;
 	if (job_ptr->restart_cnt > job_not_requeue_time) {
 		return rc;
 	}
