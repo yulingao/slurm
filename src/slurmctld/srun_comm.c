@@ -307,7 +307,6 @@ extern void srun_ping (void)
  */
 extern void srun_step_timeout(struct step_record *step_ptr, time_t timeout_val)
 {
-	info("4");
 	slurm_addr_t *addr;
 	srun_timeout_msg_t *msg_arg;
 
@@ -333,7 +332,6 @@ extern void srun_step_timeout(struct step_record *step_ptr, time_t timeout_val)
  */
 extern void srun_timeout (struct job_record *job_ptr)
 {
-	info("3");
 	slurm_addr_t * addr;
 	srun_timeout_msg_t *msg_arg;
 	ListIterator step_iterator;

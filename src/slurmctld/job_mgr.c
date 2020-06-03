@@ -7961,7 +7961,6 @@ void job_time_limit(void) {
 				over_run = now - (over_time_limit * 60);
 			if (job_ptr->end_time <= over_run) {
 				last_job_update = now;
-				info("this is dadan 1");
 				info("Time limit exhausted for %pJ", job_ptr);
 				_job_timed_out(job_ptr, false);
 				job_ptr->state_reason = FAIL_TIMEOUT;
@@ -8204,7 +8203,6 @@ static void _job_timed_out(struct job_record *job_ptr, bool preempted) {
 
 	srun_timeout(job_ptr);
 	if (job_ptr->details) {
-		info("2");
 		time_t now = time(NULL);
 		job_ptr->end_time = now;
 		job_ptr->time_last_active = now;
@@ -15037,6 +15035,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	如果运行了3次还是出错，一般是编程故障
 
 //	我可能在这里向作业输出结果。
+//	暂时不向作业输出结果了，暂时通过info输出作业结果
 
 
 	int job_not_requeue_time = 2;
