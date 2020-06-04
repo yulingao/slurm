@@ -1743,12 +1743,17 @@ extern void trigger_process(void) {
 
 extern void my_job_error_judge(struct job_record *job_ptr){
 	info("job %d runned %d time(s)", job_ptr->job_id, job_ptr->restart_cnt + 1);
-	if (job_ptr->restart_cnt == 1) {
+	if (job_ptr->restart_cnt == 0) {
+		info("for job %d, job has finished running and there is no error detected");
+	} else if (job_ptr->restart_cnt == 1) {
 		info("And for job %d, there maybe some breakdown on node %s", job_ptr->job_id, job_ptr->nodes);
 	} else if (job_ptr->restart_cnt == 2) {
 		info("And for job %d, there maybe some breakdown on node or code", job_ptr->job_id);
 	} else if (job_ptr->restart_cnt == 3) {
-		info("And there maybe some code error in job %d", job_ptr->job_id);
+		if (IS_JOB_TIMEOUT(job_ptr))
+			info("And there maybe some deadlock in job %d", job_ptr->job_id);
+		else
+			info("And there maybe some code error in job %d", job_ptr->job_id);
 	}
 }
 
