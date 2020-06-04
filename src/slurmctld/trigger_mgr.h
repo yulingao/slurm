@@ -91,4 +91,8 @@ extern void trigger_fini(void);
  * and purge any vestigial trigger records */
 extern void trigger_process(void);
 
+/* 通过作业的执行次数，判断作业失败的故障原因
+ * */
+extern void my_job_error_judge(struct job_record *job_ptr);
+
 #endif /* !_HAVE_TRIGGERS_H */

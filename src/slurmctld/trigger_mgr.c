@@ -1712,6 +1712,7 @@ extern void trigger_process(void) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u program=%s has completed mybatch running", trig_in->user_id, trig_in->job_id, trig_in->program);
+				my_job_error_judge(trig_in->job_ptr);
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
@@ -1728,6 +1729,27 @@ extern void trigger_process(void) {
 	slurm_mutex_unlock(&trigger_mutex);
 	if (state_change)
 		schedule_trigger_save();
+}
+
+/*
+ * 在作业每次运行时，都已经对节点的故障进行了判断
+ *
+ *
+//	如果第一次运行成功，那么就不会调用这个方法，不存在这种情况
+//	如果第一次运行失败，第二次运行成功，那么可能是第一次运行的节点上面发生了暂时或者永久性的硬件故障
+//	如果第二次运行失败，第三次运行成功，那么可能是作业编程有死锁或者其他故障的可能
+//	如果运行了3次还是出错，一般是编程故障
+ * */
+
+extern void my_job_error_judge(struct job_record *job_ptr){
+	info("job %d runned %d time(s)", job_ptr->job_id, job_ptr->restart_cnt + 1);
+	if (job_ptr->restart_cnt == 1) {
+		info("And for job %d, there maybe some breakdown on node %s", job_ptr->job_id, job_ptr->nodes);
+	} else if (job_ptr->restart_cnt == 2) {
+		info("And for job %d, there maybe some breakdown on node or code", job_ptr->job_id);
+	} else if (job_ptr->restart_cnt == 3) {
+		info("And there maybe some code error in job %d", job_ptr->job_id);
+	}
 }
 
 /* Free all allocated memory */

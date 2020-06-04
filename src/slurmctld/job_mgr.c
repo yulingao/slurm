@@ -15028,7 +15028,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	设置一个作业停止重复提交次数
 //	如果作业超过重复提交次数，那么根据作业运行的情况，返回具体是什么错误
 
-	info("job %d run %d times failed", job_id, job_ptr->restart_cnt + 1);
+	info("job %d run %d time failed", job_id, job_ptr->restart_cnt + 1);
 
 //	这里是查找所有节点状态的方法
 	char *this_node_name = NULL;
@@ -15040,7 +15040,10 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		info("node state: %d", node_ptr->node_state);
 //		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
 		if (node_ptr->not_responding) {
-			error("when job %d is running, node %s not respond, may has some hardware problem", job_id, this_node_name);
+			if (IS_NODE_NO_RESPOND(node_ptr)) {
+				info("-1");
+			}
+			error("when job %d is running at %d time, node %s not respond, may has some hardware problem", job_id, job_ptr->restart_cnt + 1, this_node_name);
 //			job_ptr->restart_cnt--;
 		}
 	}
@@ -15050,13 +15053,14 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	如果第一次运行失败，第二次运行成功，那么可能是第一次运行的节点上面发生了暂时或者永久性的硬件故障
 //	如果第二次运行失败，第三次运行成功，那么可能是作业编程有死锁或者其他故障的可能
 //	如果运行了3次还是出错，一般是编程故障
+//	这些我可以在mybatch最后结束的时候，进行判断，不在这里判断。
 
 //	我可能在这里向作业输出结果。
 //	暂时不向作业输出结果了，暂时通过info输出作业结果
 
 
-	int job_not_requeue_time = 1;
-	if (job_ptr->restart_cnt > job_not_requeue_time) {
+	int job_not_requeue_times = 1;
+	if (job_ptr->restart_cnt > job_not_requeue_times) {
 		return rc;
 	}
 //	如果是单个作业
