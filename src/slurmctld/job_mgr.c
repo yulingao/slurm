@@ -15036,6 +15036,10 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 	while ((this_node_name = hostlist_shift(host_list))) {
 		node_ptr = find_node_record(this_node_name);
 		info("node state: %d", node_ptr->node_state);
+		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
+		info("%d", NODE_STATE_COMPLETING);
+		info("%d", NODE_STATE_NO_RESPOND);
+
 	}
 
 
