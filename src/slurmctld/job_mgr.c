@@ -15028,6 +15028,8 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	设置一个作业停止重复提交次数
 //	如果作业超过重复提交次数，那么根据作业运行的情况，返回具体是什么错误
 
+	info("job %d run %d times failed", job_id, job_ptr->restart_cnt + 1);
+
 //	这里是查找所有节点状态的方法
 	char *this_node_name = NULL;
 	hostlist_t host_list;
@@ -15036,10 +15038,11 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 	while ((this_node_name = hostlist_shift(host_list))) {
 		node_ptr = find_node_record(this_node_name);
 		info("node state: %d", node_ptr->node_state);
-		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
-		info("%d", NODE_STATE_COMPLETING);
-		info("%d", NODE_STATE_NO_RESPOND);
-
+//		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
+		if (node_ptr->not_responding) {
+			error("when job %d is running, node %s not respond, may has some hardware problem", job_id, this_node_name);
+//			job_ptr->restart_cnt--;
+		}
 	}
 
 
