@@ -15039,11 +15039,8 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		node_ptr = find_node_record(this_node_name);
 //		info("node state: %d", node_ptr->node_state);
 //		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
-		if (node_ptr->not_responding) {
-			if (IS_NODE_NO_RESPOND(node_ptr)) {
-				info("-1");
-			}
-			error("when job %d is running at %d time, node %s not respond, may has some hardware problem", job_id, job_ptr->restart_cnt + 1, this_node_name);
+		if (IS_NODE_NO_RESPOND(node_ptr)) {
+			error("when job %d is running at %d time(s), node %s not respond, may has some hardware problem", job_id, job_ptr->restart_cnt + 1, this_node_name);
 //			job_ptr->restart_cnt--;
 		}
 	}

@@ -1697,7 +1697,7 @@ extern void trigger_process(void) {
 			if (trig_in->flags & TRIGGER_FLAG_PERM) {
 				_trigger_clone(trig_in);
 			}
-			trig_in->state = 2;
+			trig_in->state = 3;
 			trig_in->trig_time = now;
 			state_change = true;
 
