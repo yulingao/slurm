@@ -1064,7 +1064,7 @@ static void _trigger_job_event(trig_mgr_info_t *trig_in, time_t now) {
 //		start
 	if ((trig_in->trig_type & TRIGGER_TYPE_FINI)
 			&& ((trig_in->job_ptr == NULL) || (IS_JOB_FINISHED(trig_in->job_ptr)))) {
-		if (strcmp(trig_in->program, "/git/slurm/mailmytrigger") == 0) {
+		if (xstrcmp(trig_in->program, "/git/slurm/mailmytrigger") == 0) {
 			trig_in->state = 3;
 			trig_in->trig_time = now + (trig_in->trig_time - 0x8000);
 			if (slurmctld_conf.debug_flags & DEBUG_FLAG_TRIGGERS) {
@@ -1697,7 +1697,8 @@ extern void trigger_process(void) {
 			if (trig_in->flags & TRIGGER_FLAG_PERM) {
 				_trigger_clone(trig_in);
 			}
-			trig_in->state = 3;
+//			把trigger的状态设置成等待状态
+			trig_in->state = 0;
 			trig_in->trig_time = now;
 			state_change = true;
 
