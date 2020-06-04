@@ -1744,7 +1744,7 @@ extern void trigger_process(void) {
 extern void my_job_error_judge(struct job_record *job_ptr){
 	info("job %d runned %d time(s)", job_ptr->job_id, job_ptr->restart_cnt + 1);
 	if (job_ptr->restart_cnt == 0) {
-		info("for job %d, job has finished running and there is no error detected");
+		info("for job %d, job has finished running and there is no error detected", job_ptr->job_id);
 	} else if (job_ptr->restart_cnt == 1) {
 		info("And for job %d, there maybe some breakdown on node %s", job_ptr->job_id, job_ptr->nodes);
 	} else if (job_ptr->restart_cnt == 2) {
