@@ -1695,13 +1695,11 @@ extern void trigger_process(void) {
 						trig_in->res_id);
 			}
 //			需要重新设置一个trigger
-			if (trig_in->flags & TRIGGER_FLAG_PERM) {
-				info("重新设置一个trigger");
-				_trigger_clone(trig_in);
-			}
+//			info("重新设置一个trigger");
+			_trigger_clone(trig_in);
 
 
-			info("enter mytrigger process");
+//			info("enter mytrigger process");
 //			把trigger的状态设置成完成状态
 			trig_in->state = 2;
 			trig_in->trig_time = now;
