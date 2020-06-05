@@ -1694,10 +1694,6 @@ extern void trigger_process(void) {
 				info("  uid=%u gid=%u program=%s arg=%s", trig_in->user_id, trig_in->group_id, trig_in->program,
 						trig_in->res_id);
 			}
-//			需要重新设置一个trigger
-//			info("重新设置一个trigger");
-			_trigger_clone(trig_in);
-
 
 //			info("enter mytrigger process");
 //			把trigger的状态设置成完成状态
@@ -1722,6 +1718,9 @@ extern void trigger_process(void) {
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
+//				重新运行时需要重新设置一个trigger
+				info("重新设置一个trigger");
+				_trigger_clone(trig_in);
 				info("uid=%u jobid=%u program=%s is requeued", trig_in->user_id, trig_in->job_id, trig_in->program);
 				my_job_requeue(trig_in->user_id, trig_in->job_id, false, 0);
 			}
