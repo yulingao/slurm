@@ -1613,6 +1613,7 @@ extern void trigger_process(void) {
 
 	trig_iter = list_iterator_create(trigger_list);
 	while ((trig_in = list_next(trig_iter))) {
+		info("enter trigger_process method");
 		if (trig_in->state == 0) {
 			if (trig_in->res_type == TRIGGER_RES_TYPE_OTHER)
 				_trigger_other_event(trig_in, now);
