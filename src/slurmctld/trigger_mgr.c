@@ -1701,9 +1701,6 @@ extern void trigger_process(void) {
 			trig_in->trig_time = now;
 			state_change = true;
 
-
-
-
 //			_trigger_run_program(trig_in);
 //			然后判断作业的状态
 			if (IS_JOB_COMPLETE(trig_in->job_ptr)
@@ -1714,12 +1711,13 @@ extern void trigger_process(void) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u has completed mybatch running", trig_in->user_id, trig_in->job_id);
-				my_job_error_judge(trig_in->job_ptr);
+				if (!IS_JOB_CANCELLED(trig_in->job_ptr))
+					my_job_error_judge(trig_in->job_ptr);
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
 //				重新运行时需要重新设置一个trigger
-				info("重新设置一个trigger");
+//				info("重新设置一个trigger");
 				_trigger_clone(trig_in);
 				info("uid=%u jobid=%u program=%s is requeued", trig_in->user_id, trig_in->job_id, trig_in->program);
 				my_job_requeue(trig_in->user_id, trig_in->job_id, false, 0);
