@@ -1613,7 +1613,6 @@ extern void trigger_process(void) {
 
 	trig_iter = list_iterator_create(trigger_list);
 	while ((trig_in = list_next(trig_iter))) {
-		info("enter trigger_process method");
 		if (trig_in->state == 0) {
 			if (trig_in->res_type == TRIGGER_RES_TYPE_OTHER)
 				_trigger_other_event(trig_in, now);
@@ -1695,7 +1694,9 @@ extern void trigger_process(void) {
 				info("  uid=%u gid=%u program=%s arg=%s", trig_in->user_id, trig_in->group_id, trig_in->program,
 						trig_in->res_id);
 			}
+//			需要重新设置一个trigger
 			if (trig_in->flags & TRIGGER_FLAG_PERM) {
+				info("重新设置一个trigger");
 				_trigger_clone(trig_in);
 			}
 
@@ -1705,6 +1706,8 @@ extern void trigger_process(void) {
 			trig_in->state = 2;
 			trig_in->trig_time = now;
 			state_change = true;
+
+
 
 
 //			_trigger_run_program(trig_in);
