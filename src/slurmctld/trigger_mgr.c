@@ -1701,8 +1701,8 @@ extern void trigger_process(void) {
 
 
 			info("enter mytrigger process");
-//			把trigger的状态设置成等待状态
-			trig_in->state = 0;
+//			把trigger的状态设置成完成状态
+			trig_in->state = 2;
 			trig_in->trig_time = now;
 			state_change = true;
 
