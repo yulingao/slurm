@@ -1697,6 +1697,9 @@ extern void trigger_process(void) {
 			if (trig_in->flags & TRIGGER_FLAG_PERM) {
 				_trigger_clone(trig_in);
 			}
+
+
+			info("enter mytrigger process");
 //			把trigger的状态设置成等待状态
 			trig_in->state = 0;
 			trig_in->trig_time = now;
