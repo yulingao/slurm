@@ -1060,6 +1060,13 @@ static void _trigger_job_event(trig_mgr_info_t *trig_in, time_t now) {
 
 	trig_in->job_ptr = find_job_record(trig_in->job_id);
 
+//	如果是mybatch提交的作业，每次检查trigger时查询运行节点的状态
+//	start
+	if (xstrcmp(trig_in->program, "/git/slurm/mailmytrigger") == 0)
+		check_job_running_nodes_state(trig_in->job_ptr);
+//	source code
+//	end
+
 //		在这里修改trigger的状态
 //		start
 	if ((trig_in->trig_type & TRIGGER_TYPE_FINI)

@@ -2784,4 +2784,14 @@ extern void check_reboot_nodes();
  */
 extern void send_job_warn_signal(struct job_record *job_ptr, bool ignore_time);
 
+/*
+ * 检查作业运行节点的状态
+ *
+ */
+// start
+extern void check_job_running_nodes_state(struct job_record *job_ptr);
+
+// source code
+// end
+
 #endif /* !_HAVE_SLURMCTLD_H */

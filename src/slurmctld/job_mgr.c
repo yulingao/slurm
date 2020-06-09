@@ -15031,19 +15031,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 	info("job %d run %d time failed", job_id, job_ptr->restart_cnt + 1);
 
 //	这里是查找所有节点状态的方法
-	char *this_node_name = NULL;
-	hostlist_t host_list;
-	struct node_record *node_ptr = NULL;
-	host_list = hostlist_create(job_ptr->nodes);
-	while ((this_node_name = hostlist_shift(host_list))) {
-		node_ptr = find_node_record(this_node_name);
-//		info("node state: %d", node_ptr->node_state);
-//		info("node not responding: (1 for not, 0 for responding) %d", node_ptr->not_responding);
-		if (IS_NODE_NO_RESPOND(node_ptr)) {
-			error("when job %d is running at %d time(s), node %s not respond, may has some hardware problem", job_id, job_ptr->restart_cnt + 1, this_node_name);
-//			job_ptr->restart_cnt--;
-		}
-	}
+//	check_job_running_nodes_state(job_ptr);
 
 
 //	如果第一次运行成功，那么就不会调用这个方法，不存在这种情况
