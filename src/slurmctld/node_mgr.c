@@ -3685,7 +3685,7 @@ extern void check_reboot_nodes() {
 // start
 extern void check_job_running_nodes_state(struct job_record *job_ptr) {
 	//	在requeue时查看所有的节点的状态
-	info("this is check_job_running_nodes_state");
+//	info("this is check_job_running_nodes_state");
 	char *this_node_name = NULL;
 	hostlist_t host_list;
 	struct node_record *node_ptr = NULL;
