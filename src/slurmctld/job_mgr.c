@@ -15013,8 +15013,9 @@ bool preempt) {
  */
 // start
 extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t flags) {
-	int rc = SLURM_SUCCESS, rc2;
+	int rc = SLURM_SUCCESS, rc2 = SLURM_SUCCESS;
 	struct job_record *job_ptr = NULL;
+	struct job_record *validator_ptr = NULL;
 	if (max_array_size == NO_VAL) {
 		max_array_size = slurmctld_conf.max_array_sz;
 	}
@@ -15042,6 +15043,16 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 
 //	我可能在这里向作业输出结果。
 //	暂时不向作业输出结果了，暂时通过info输出作业结果
+
+//	运行验证程序
+	uint32_t validator_id = 683;
+	if (job_ptr->restart_cnt == 0) {
+		validator_ptr = find_job_record(validator_id);
+		job_ptr->details->req_nodes = xstrdup(job_ptr->nodes);
+		job_ptr->details->req_node_bitmap = bit_copy(job_ptr->node_bitmap);
+		rc2 = _job_requeue(uid, validator_ptr, preempt, flags);
+		info("validator requeue and rc2 = %d", rc2);
+	}
 
 
 	int job_not_requeue_times = 1;
