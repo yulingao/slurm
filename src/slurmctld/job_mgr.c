@@ -15048,6 +15048,10 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 	uint32_t validator_id = 683;
 	if (job_ptr->restart_cnt == 0) {
 		validator_ptr = find_job_record(validator_id);
+		if (validator_ptr == NULL) {
+			info("validator program has been invalid");
+			continue;
+		}
 		job_ptr->details->req_nodes = xstrdup(job_ptr->nodes);
 		job_ptr->details->req_node_bitmap = bit_copy(job_ptr->node_bitmap);
 		rc2 = _job_requeue(uid, validator_ptr, preempt, flags);
