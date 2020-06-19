@@ -15050,7 +15050,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 		validator_ptr = find_job_record(validator_id);
 		if (validator_ptr == NULL) {
 			info("validator program has been invalid");
-			continue;
+			break;
 		}
 		job_ptr->details->req_nodes = xstrdup(job_ptr->nodes);
 		job_ptr->details->req_node_bitmap = bit_copy(job_ptr->node_bitmap);
