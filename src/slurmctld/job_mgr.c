@@ -15045,7 +15045,7 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	暂时不向作业输出结果了，暂时通过info输出作业结果
 
 //	运行验证程序
-	uint32_t validator_id = 689;
+	uint32_t validator_id = 690;
 	if (job_ptr->restart_cnt == 0) {
 		validator_ptr = find_job_record(validator_id);
 		if (validator_ptr == NULL) {
