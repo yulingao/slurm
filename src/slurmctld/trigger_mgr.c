@@ -1708,6 +1708,8 @@ extern void trigger_process(void) {
 			trig_in->trig_time = now;
 			state_change = true;
 
+			int job_run_time = 1;
+
 //			_trigger_run_program(trig_in);
 			info("job %u 's runtime is %u second", trig_in->job_id, trig_in->job_ptr->end_time - trig_in->job_ptr->start_time);
 //			然后判断作业的状态
@@ -1715,7 +1717,7 @@ extern void trigger_process(void) {
 					|| IS_JOB_CANCELLED(trig_in->job_ptr)
 					|| IS_JOB_OOM(trig_in->job_ptr)
 					|| IS_JOB_DEADLINE(trig_in->job_ptr)
-					|| trig_in->job_ptr->restart_cnt > 1) {
+					|| trig_in->job_ptr->restart_cnt >= job_run_time) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u has completed mybatch running", trig_in->user_id, trig_in->job_id);
