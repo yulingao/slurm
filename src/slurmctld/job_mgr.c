@@ -15044,6 +15044,9 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 //	我可能在这里向作业输出结果。
 //	暂时不向作业输出结果了，暂时通过info输出作业结果
 
+//	修改作业的启动时间
+	job_ptr->details->begin_time = time(NULL) + 2;
+
 //	运行验证程序
 	uint32_t validator_id = 690;
 	if (job_ptr->restart_cnt == 0) {
