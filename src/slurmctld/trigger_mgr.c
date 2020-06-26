@@ -1709,6 +1709,7 @@ extern void trigger_process(void) {
 			state_change = true;
 
 //			_trigger_run_program(trig_in);
+			info("job %u 's runtime is %u second", trig_in->job_id, trig_in->job_ptr->end_time - trig_in->job_ptr->start_time);
 //			然后判断作业的状态
 			if (IS_JOB_COMPLETE(trig_in->job_ptr)
 					|| IS_JOB_CANCELLED(trig_in->job_ptr)
