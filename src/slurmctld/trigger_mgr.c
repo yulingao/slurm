@@ -1715,7 +1715,7 @@ extern void trigger_process(void) {
 					|| IS_JOB_CANCELLED(trig_in->job_ptr)
 					|| IS_JOB_OOM(trig_in->job_ptr)
 					|| IS_JOB_DEADLINE(trig_in->job_ptr)
-					|| trig_in->job_ptr->restart_cnt > 2) {
+					|| trig_in->job_ptr->restart_cnt > 1) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u has completed mybatch running", trig_in->user_id, trig_in->job_id);
