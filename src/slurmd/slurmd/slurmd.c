@@ -248,8 +248,7 @@ static void      _wait_for_all_threads(int secs);
  *    controller use).
 \**************************************************************************/
 
-int
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	int i, pidfd;
 	int blocked_signals[] = {SIGPIPE, 0};
@@ -443,8 +442,7 @@ _registration_engine(void *arg)
 	return NULL;
 }
 
-static void
-_msg_engine(void)
+static void _msg_engine(void)
 {
 	slurm_addr_t *cli;
 	int sock;

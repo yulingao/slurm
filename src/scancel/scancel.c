@@ -123,8 +123,7 @@ main (int argc, char **argv)
 }
 
 /* _multi_cluster - process job cancellation across a list of clusters */
-static int
-_multi_cluster(List clusters)
+static int _multi_cluster(List clusters)
 {
 	ListIterator itr;
 	int rc = 0, rc2;
@@ -140,8 +139,7 @@ _multi_cluster(List clusters)
 }
 
 /* _proc_cluster - process job cancellation on a specific cluster */
-static int
-_proc_cluster(void)
+static int _proc_cluster(void)
 {
 	int rc, rc2;
 
@@ -173,8 +171,7 @@ _proc_cluster(void)
 /* _load_job_records - load all job information for filtering
  * and verification
  */
-static void
-_load_job_records (void)
+static void _load_job_records (void)
 {
 	int error_code;
 
@@ -547,8 +544,7 @@ static void _cancel_jobid_by_state(uint32_t job_state, int *rc)
 	}
 }
 
-static void
-_cancel_jobs_by_state(uint32_t job_state, int *rc)
+static void _cancel_jobs_by_state(uint32_t job_state, int *rc)
 {
 	int i;
 	job_cancel_info_t *cancel_info;
