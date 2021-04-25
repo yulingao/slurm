@@ -293,6 +293,16 @@ int main(int argc, char **argv){
 //	info("mystrigger");
 //	start
 	_my_set_job_trigger(resp->job_id);
+
+//	同时将job_id输出到文件中，留着失效监控模块使用
+	FILE *fp;
+	fp = fopen("/nfs/data/jobid.txt", "w");
+	if (fp == NULL) {
+		error("File cannot open!");
+	} else {
+		fprintf(fp, "%d\n", resp->job_id);
+	}
+	fclose(fp);
 //	end
 
 
