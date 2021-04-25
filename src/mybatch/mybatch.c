@@ -296,7 +296,7 @@ int main(int argc, char **argv){
 
 //	同时将job_id输出到文件中，留着失效监控模块使用
 	FILE *fp;
-	fp = fopen("/nfs/data/jobid.txt", "w");
+	fp = fopen("/nfs/data/jobid.txt", "a");
 	if (fp == NULL) {
 		error("File cannot open!");
 	} else {
