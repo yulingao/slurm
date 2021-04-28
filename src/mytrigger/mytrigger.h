@@ -82,6 +82,11 @@ struct strigger_parameters {
 	uint32_t trigger_id;
 	uint32_t user_id;
 	int      verbose;
+
+	// 增加一个给python使用
+	// start
+	bool python;
+	// end
 };
 
 extern struct strigger_parameters params;

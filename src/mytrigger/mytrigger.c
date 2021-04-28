@@ -78,6 +78,15 @@ int main(int argc, char **argv)
 		opts.stderr_level += params.verbose;
 		log_alter(opts, SYSLOG_FACILITY_DAEMON, NULL);
 	}
+//	增加python的trigger设置
+//	start
+	if (params.python) {
+		rc = _my_set_job_trigger(params.job_id);
+		info("成功设置的python的trigger");
+		exit(rc);
+	}
+//	end
+
 	if (params.mode_set)
 		rc = _set_trigger();
 	else if (params.mode_get)

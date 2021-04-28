@@ -139,6 +139,10 @@ extern void parse_command_line(int argc, char **argv)
 		{"up",                                  no_argument, 0, 'u'},
 		{"verbose",                             no_argument, 0, 'v'},
 		{"version",                             no_argument, 0, 'V'},
+//		增加一个给python调用
+//		start
+		{"python",                              no_argument, 0, 'p'},
+//		end
 		{"burst_buffer", no_argument,    0, OPT_LONG_BURST_BUFFER},
 		{"clear",     no_argument,       0, OPT_LONG_CLEAR},
 		{"flags",     required_argument, 0, OPT_LONG_FLAGS},
@@ -163,6 +167,12 @@ extern void parse_command_line(int argc, char **argv)
 				"more information\n");
 			exit(1);
 			break;
+//			增加一个给python调用
+//			start
+		case (int)'p':
+			params.python = true;
+			break;
+//			end
 		case (int)'a':
 			params.pri_ctld_fail = true;
 			break;
