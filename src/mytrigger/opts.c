@@ -141,7 +141,7 @@ extern void parse_command_line(int argc, char **argv)
 		{"version",                             no_argument, 0, 'V'},
 //		增加一个给python调用
 //		start
-		{"python",                              no_argument, 0, 'p'},
+		{"python",                              no_argument, 0, 'P'},
 //		end
 		{"burst_buffer", no_argument,    0, OPT_LONG_BURST_BUFFER},
 		{"clear",     no_argument,       0, OPT_LONG_CLEAR},
@@ -169,7 +169,7 @@ extern void parse_command_line(int argc, char **argv)
 			break;
 //			增加一个给python调用
 //			start
-		case (int)'p':
+		case (int)'P':
 			params.python = true;
 			break;
 //			end
