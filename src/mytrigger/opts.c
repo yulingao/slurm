@@ -97,7 +97,7 @@ static void     _print_options( void );
 static void     _usage( void );
 static void     _validate_options( void );
 
-struct strigger_parameters params;
+struct myrequeue_parameters params;
 
 /*
  * parse_command_line, fill in params data structure with data
@@ -159,7 +159,12 @@ extern void parse_command_line(int argc, char **argv)
 
 	optind = 0;
 	while ((opt_char = getopt_long(argc, argv,
-				       "aAbBcCdDeFfgGhHi:Ij:M:n::No:p:QrtuvV",
+//			原来
+//		       	   	   "aAbBcCdDeFfgGhHi:Ij:M:n::No:p:QrtuvV",
+//			增加了一个P，不用带参数
+//			新的
+				       "PaAbBcCdDeFfgGhHi:Ij:M:n::No:p:QrtuvV",
+//			结束
 				       long_options, &option_index)) != -1) {
 		switch (opt_char) {
 		case (int)'?':
@@ -366,6 +371,8 @@ static void _init_options( void )
 	params.node_up      = false;
 	params.user_id      = NO_VAL;
 	params.verbose      = 0;
+//	增加python命令
+	params.python       = false;
 }
 
 /* print the parameters specified */

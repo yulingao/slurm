@@ -28,4 +28,5 @@ SUBDIRS =		\
 	strigger	\
 	sview		\
 	mybatch		\
-	mytrigger
+	mytrigger   \
+	myrequeue

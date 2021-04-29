@@ -1,10 +1,9 @@
 /****************************************************************************\
- *  strigger.h - definitions used for strigger functions
+ *  opts.c - myrequeue command line option processing functions
  *****************************************************************************
- *  Copyright (C) 2007 The Regents of the University of California.
+ *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Copyright (C) 2008-2010 Lawrence Livermore National Security.
  *  Copyright (C) 2010-2016 SchedMD LLC.
- *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Morris Jette <jette1@llnl.gov>
  *  CODE-OCEC-09-009. All rights reserved.
  *
@@ -36,56 +35,88 @@
  *  You should have received a copy of the GNU General Public License along
  *  with Slurm; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
-\****************************************************************************/
+\*****************************************************************************/
 
-#ifndef _STRIGGER_H
-#define _STRIGGER_H
+#define _GNU_SOURCE
 
-#include "slurm/slurm.h"
-#include "src/common/macros.h"
-#include "src/common/slurm_protocol_defs.h"
-#include "src/common/slurmdb_defs.h"
+#include <ctype.h>
+#include <getopt.h>
+#include <limits.h>
+#include <pwd.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-struct myrequeue_parameters {
-	bool     burst_buffer;
-	List     clusters;
-	uint16_t flags;
-	bool     front_end;
-	bool     job_fini;
-	uint32_t job_id;
-	bool     mode_set;
-	bool     mode_get;
-	bool     mode_clear;
-	bool	 pri_ctld_fail;
-	bool	 pri_ctld_res_op;
-	bool	 pri_ctld_res_ctrl;
-	bool	 pri_ctld_acct_buffer_full;
-	bool	 bu_ctld_fail;
-	bool	 bu_ctld_res_op;
-	bool	 bu_ctld_as_ctrl;
-	bool	 pri_dbd_fail;
-	bool	 pri_dbd_res_op;
-	bool	 pri_db_fail;
-	bool	 pri_db_res_op;
-	bool     no_header;
-	bool     node_down;
-	bool     node_drained;
-	char *   node_id;
-	bool     node_fail;
-	bool     node_idle;
-	bool     node_up;
-	int      offset;
-	char *   program;
-	bool     quiet;
-	bool     reconfig;
-	bool     time_limit;
-	uint32_t trigger_id;
-	uint32_t user_id;
-	int      verbose;
-};
+#include "src/common/xmalloc.h"
+#include "src/common/xstring.h"
+#include "src/common/proc_args.h"
+#include "src/common/uid.h"
 
-extern struct myrequeue_parameters params;
+#include "src/myrequeue/myrequeue.h"
 
-extern void parse_command_line(int argc, char **argv);
+/* FUNCTIONS */
+static void     _help( void );
+static void     _init_options( void );
+static void     _validate_options( void );
 
-#endif
+struct myrequeue_parameters params;
+
+/*
+ * parse_command_line, fill in params data structure with data
+ */
+extern void parse_command_line(int argc, char **argv)
+{
+	int opt_char;
+	int option_index;
+	uid_t some_uid;
+	long tmp_l;
+	static struct option long_options[] = {
+		{"jobid",                         required_argument, 0, 'j'},
+		{NULL,        0,                 0, 0}
+	};
+
+	_init_options();
+
+	optind = 0;
+	while ((opt_char = getopt_long(argc, argv,
+				       "j:",
+				       long_options, &option_index)) != -1) {
+		switch (opt_char) {
+		case (int)'j':
+			if (!optarg) /* CLANG Fix */
+				break;
+			tmp_l = atol(optarg);
+			if (tmp_l <= 0) {
+				error("Invalid jobid %s", optarg);
+				exit(1);
+			}
+			params.job_id = tmp_l;
+			break;
+
+		}
+	}
+
+	_validate_options();
+}
+
+/* initialize the parameters */
+static void _init_options( void )
+{
+	params.job_id       = 0;
+}
+
+
+static void _validate_options( void )
+{
+	if (params.job_id == 0) {
+		error("You must specify a --jobid value");
+		exit(1);
+	}
+}
+
+static void _help( void )
+{
+	printf ("\
+  		-j, --jobid=#        specific jobid\n");
+}

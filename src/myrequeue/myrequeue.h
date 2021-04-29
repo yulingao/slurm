@@ -1,5 +1,5 @@
 /****************************************************************************\
- *  strigger.h - definitions used for strigger functions
+ *  myrequeue.h - definitions used for myrequeue functions
  *****************************************************************************
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Copyright (C) 2008-2010 Lawrence Livermore National Security.
@@ -38,8 +38,8 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \****************************************************************************/
 
-#ifndef _STRIGGER_H
-#define _STRIGGER_H
+#ifndef _MYREQUEUE_H
+#define _MYREQUEUE_H
 
 #include "slurm/slurm.h"
 #include "src/common/macros.h"
@@ -47,41 +47,7 @@
 #include "src/common/slurmdb_defs.h"
 
 struct myrequeue_parameters {
-	bool     burst_buffer;
-	List     clusters;
-	uint16_t flags;
-	bool     front_end;
-	bool     job_fini;
 	uint32_t job_id;
-	bool     mode_set;
-	bool     mode_get;
-	bool     mode_clear;
-	bool	 pri_ctld_fail;
-	bool	 pri_ctld_res_op;
-	bool	 pri_ctld_res_ctrl;
-	bool	 pri_ctld_acct_buffer_full;
-	bool	 bu_ctld_fail;
-	bool	 bu_ctld_res_op;
-	bool	 bu_ctld_as_ctrl;
-	bool	 pri_dbd_fail;
-	bool	 pri_dbd_res_op;
-	bool	 pri_db_fail;
-	bool	 pri_db_res_op;
-	bool     no_header;
-	bool     node_down;
-	bool     node_drained;
-	char *   node_id;
-	bool     node_fail;
-	bool     node_idle;
-	bool     node_up;
-	int      offset;
-	char *   program;
-	bool     quiet;
-	bool     reconfig;
-	bool     time_limit;
-	uint32_t trigger_id;
-	uint32_t user_id;
-	int      verbose;
 };
 
 extern struct myrequeue_parameters params;

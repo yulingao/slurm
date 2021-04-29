@@ -1,5 +1,5 @@
-/****************************************************************************\
- *  strigger.h - definitions used for strigger functions
+/*****************************************************************************\
+ *  myrequeue.c - Manage slurm event triggers
  *****************************************************************************
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Copyright (C) 2008-2010 Lawrence Livermore National Security.
@@ -36,56 +36,48 @@
  *  You should have received a copy of the GNU General Public License along
  *  with Slurm; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
-\****************************************************************************/
+\*****************************************************************************/
 
-#ifndef _STRIGGER_H
-#define _STRIGGER_H
+#include <errno.h>
+#include <fcntl.h>
+#include <pwd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
+#include "slurm/slurm_errno.h"
 #include "slurm/slurm.h"
-#include "src/common/macros.h"
-#include "src/common/slurm_protocol_defs.h"
-#include "src/common/slurmdb_defs.h"
 
-struct myrequeue_parameters {
-	bool     burst_buffer;
-	List     clusters;
-	uint16_t flags;
-	bool     front_end;
-	bool     job_fini;
-	uint32_t job_id;
-	bool     mode_set;
-	bool     mode_get;
-	bool     mode_clear;
-	bool	 pri_ctld_fail;
-	bool	 pri_ctld_res_op;
-	bool	 pri_ctld_res_ctrl;
-	bool	 pri_ctld_acct_buffer_full;
-	bool	 bu_ctld_fail;
-	bool	 bu_ctld_res_op;
-	bool	 bu_ctld_as_ctrl;
-	bool	 pri_dbd_fail;
-	bool	 pri_dbd_res_op;
-	bool	 pri_db_fail;
-	bool	 pri_db_res_op;
-	bool     no_header;
-	bool     node_down;
-	bool     node_drained;
-	char *   node_id;
-	bool     node_fail;
-	bool     node_idle;
-	bool     node_up;
-	int      offset;
-	char *   program;
-	bool     quiet;
-	bool     reconfig;
-	bool     time_limit;
-	uint32_t trigger_id;
-	uint32_t user_id;
-	int      verbose;
-};
+#include "src/common/read_config.h"
+#include "src/common/xmalloc.h"
+#include "src/common/xstring.h"
+#include "src/myrequeue/myrequeue.h"
 
-extern struct myrequeue_parameters params;
 
-extern void parse_command_line(int argc, char **argv);
+int main(int argc, char **argv)
+{
+	int rc = 0;
+	log_options_t opts = LOG_OPTS_STDERR_ONLY;
+	log_init("myrequeue", opts, SYSLOG_FACILITY_DAEMON, NULL);
 
-#endif
+	slurm_conf_init(NULL);
+	parse_command_line(argc, argv);
+	info("%d", params.job_id);
+//	将job_id输出到文件中，留着用来requeue
+	FILE *fp;
+	fp = fopen("/nfs/data/requeue_jobid.txt", "a");
+	if (fp == NULL) {
+		error("File cannot open!");
+	} else {
+		fprintf(fp, "%d\n", params.job_id);
+	}
+	fclose(fp);
+//	end
+
+	exit(0);
+}
+
