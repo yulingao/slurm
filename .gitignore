@@ -64,6 +64,7 @@ TAGS
 
 /src/mytrigger/mytrigger
 /src/mybatch/mybatch
+/src/myrequeue/myrequeue
 
 
 *.DS_Store

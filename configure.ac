@@ -600,6 +600,7 @@ AC_CONFIG_FILES([Makefile
 		 testsuite/slurm_unit/common/slurmdb_pack/Makefile
 		 src/mybatch/Makefile
 		 src/mytrigger/Makefile
+		 src/myrequeue/Makefile
 		 ]
 )
 
