@@ -89,7 +89,7 @@ struct mytrigger_parameters {
 	// end
 };
 
-extern struct myrequeue_parameters params;
+extern struct mytrigger_parameters params;
 
 extern void parse_command_line(int argc, char **argv);
 
