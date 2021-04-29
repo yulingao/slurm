@@ -61,10 +61,6 @@
 int main(int argc, char **argv)
 {
 	int rc = 0;
-	int error_code;
-	static uint16_t last_show_flags = 0xffff;
-	uint16_t show_flags = 1;
-	job_info_msg_t * job_info_ptr = NULL;
 
 	log_options_t opts = LOG_OPTS_STDERR_ONLY;
 	log_init("myrequeue", opts, SYSLOG_FACILITY_DAEMON, NULL);
@@ -73,9 +69,6 @@ int main(int argc, char **argv)
 	parse_command_line(argc, argv);
 	uint32_t job_id = params.job_id;
 	info("%d", job_id);
-
-	error_code = slurm_load_job(&job_info_ptr, job_id, show_flags);
-
 
 //	将job_id输出到文件中，留着用来requeue
 	FILE *fp;
