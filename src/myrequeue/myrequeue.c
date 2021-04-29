@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	int rc = 0;
 	int error_code;
 	static uint16_t last_show_flags = 0xffff;
-	uint16_t show_flags = 0;
+	uint16_t show_flags = 1;
 	job_info_msg_t * job_info_ptr = NULL;
 
 	log_options_t opts = LOG_OPTS_STDERR_ONLY;
