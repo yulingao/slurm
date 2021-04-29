@@ -1,5 +1,5 @@
 /****************************************************************************\
- *  strigger.h - definitions used for strigger functions
+ *  mytrigger.h - definitions used for mytrigger functions
  *****************************************************************************
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Copyright (C) 2008-2010 Lawrence Livermore National Security.
@@ -46,7 +46,7 @@
 #include "src/common/slurm_protocol_defs.h"
 #include "src/common/slurmdb_defs.h"
 
-struct strigger_parameters {
+struct mytrigger_parameters {
 	bool     burst_buffer;
 	List     clusters;
 	uint16_t flags;
@@ -89,7 +89,7 @@ struct strigger_parameters {
 	// end
 };
 
-extern struct strigger_parameters params;
+extern struct myrequeue_parameters params;
 
 extern void parse_command_line(int argc, char **argv);
 

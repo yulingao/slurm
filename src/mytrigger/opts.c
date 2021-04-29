@@ -97,7 +97,7 @@ static void     _print_options( void );
 static void     _usage( void );
 static void     _validate_options( void );
 
-struct myrequeue_parameters params;
+struct mytrigger_parameters params;
 
 /*
  * parse_command_line, fill in params data structure with data
