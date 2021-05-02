@@ -1726,7 +1726,6 @@ extern void trigger_process(void) {
 					my_job_error_judge_pyslurm(trig_in->job_ptr);
 				}
 
-
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
