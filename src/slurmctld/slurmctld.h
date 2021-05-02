@@ -1694,6 +1694,7 @@ extern int job_requeue2(uid_t uid, requeue_msg_t *req_ptr, slurm_msg_t *msg,
  *
  */
 extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t flags);
+extern int my_job_requeue_pyslurm(uint32_t job_id);
 
 
 

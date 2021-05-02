@@ -15127,6 +15127,19 @@ extern int my_job_requeue(uid_t uid, uint32_t job_id, bool preempt, uint32_t fla
 
 	return rc;
 }
+
+extern int my_job_requeue_pyslurm(uint32_t job_id) {
+	//	将job_id输出到文件中，留着用来requeue
+	FILE *fp;
+	fp = fopen("/nfs/data/requeue_jobid.txt", "a");
+	if (fp == NULL) {
+		error("File cannot open!");
+	} else {
+		fprintf(fp, "%d\n", job_id);
+	}
+	fclose(fp);
+	//	end
+}
 // end
 
 static int _top_job_flag_clear(void *x, void *arg) {

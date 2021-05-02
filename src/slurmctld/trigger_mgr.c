@@ -1721,8 +1721,12 @@ extern void trigger_process(void) {
 //				如果作业成功完成，作业取消，超出内存限制，超出运行截止时间
 //				那么运行strigger所带的程序
 				info("uid=%u jobid=%u has completed mybatch running", trig_in->user_id, trig_in->job_id);
-				if (!IS_JOB_CANCELLED(trig_in->job_ptr))
-					my_job_error_judge(trig_in->job_ptr);
+				if (!IS_JOB_CANCELLED(trig_in->job_ptr)) {
+//					my_job_error_judge(trig_in->job_ptr);
+					my_job_error_judge_pyslurm(trig_in->job_ptr);
+				}
+
+
 				_trigger_run_program(trig_in);
 			} else {
 //				其他的情况都要重新运行
@@ -1770,6 +1774,19 @@ extern void my_job_error_judge(struct job_record *job_ptr){
 	}
 }
 
+extern void my_job_error_judge_pyslurm(struct job_record *job_ptr) {
+	//	将job_id输出到文件中，留着用来故障的检测
+	FILE *fp;
+	fp = fopen("/nfs/data/fault_diagnosis_jobid.txt", "a");
+	if (fp == NULL) {
+		error("File cannot open!");
+	} else {
+		fprintf(fp, "%d\n", job_ptr->job_id);
+	}
+	fclose(fp);
+	//	end
+}
+
 /* Free all allocated memory */
 extern void trigger_fini(void) {
 	FREE_NULL_LIST(trigger_list);
@@ -1780,3 +1797,4 @@ extern void trigger_fini(void) {
 	FREE_NULL_BITMAP(trigger_fail_nodes_bitmap);
 	FREE_NULL_BITMAP(trigger_up_nodes_bitmap);
 }
+
