@@ -1733,7 +1733,8 @@ extern void trigger_process(void) {
 //				info("重新设置一个trigger");
 				_trigger_clone(trig_in);
 				info("uid=%u jobid=%u program=%s is requeued", trig_in->user_id, trig_in->job_id, trig_in->program);
-				my_job_requeue(trig_in->user_id, trig_in->job_id, false, 0);
+//				my_job_requeue(trig_in->user_id, trig_in->job_id, false, 0);
+				my_job_requeue_pyslurm(trig_in->job_id);
 			}
 
 		}
