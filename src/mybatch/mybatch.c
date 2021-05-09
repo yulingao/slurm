@@ -290,7 +290,6 @@ int main(int argc, char **argv){
 
 //	能来到这个地方的，都是成功提交了作业的
 //	在这里给作业加上strigger（mystrigger）
-//	info("mystrigger");
 //	start
 	_my_set_job_trigger(resp->job_id);
 
