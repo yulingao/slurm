@@ -49,6 +49,10 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+//增加fopen的头文件
+//start
+#include <stdio.h>
+//end
 
 #include "src/common/bitstring.h"
 #include "src/common/fd.h"
@@ -1777,7 +1781,7 @@ extern void my_job_error_judge(struct job_record *job_ptr){
 extern void my_job_error_judge_pyslurm(struct job_record *job_ptr) {
 	//	将job_id输出到文件中，留着用来故障的检测
 	FILE *fp;
-	fp = fopen("/nfs/data/fault_diagnosis_jobid.txt", "a+");
+	fp = fopen("/nfs/data/fault_diagnosis_jobid.txt", "a");
 	if (fp == NULL) {
 		error("fault_diagnosis: File cannot open!");
 	} else {
