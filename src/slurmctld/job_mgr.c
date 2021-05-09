@@ -15133,7 +15133,7 @@ extern int my_job_requeue_pyslurm(uint32_t job_id) {
 	FILE *fp;
 	fp = fopen("/nfs/data/requeue_jobid.txt", "a");
 	if (fp == NULL) {
-		error("File cannot open!");
+		error("requeue: File cannot open!");
 	} else {
 		fprintf(fp, "%d\n", job_id);
 	}

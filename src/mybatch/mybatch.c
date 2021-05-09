@@ -297,7 +297,7 @@ int main(int argc, char **argv){
 	FILE *fp;
 	fp = fopen("/nfs/data/jobid.txt", "a");
 	if (fp == NULL) {
-		error("File cannot open!");
+		error("mybatch: File cannot open!");
 	} else {
 		fprintf(fp, "%d\n", resp->job_id);
 	}

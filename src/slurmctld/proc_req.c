@@ -5092,7 +5092,7 @@ inline static void _slurm_rpc_trigger_set(slurm_msg_t *msg) {
 //	修改权限，使得不是root或者slurmuser用户也能设置trigger
 //	start
 	if (xstrcmp(trigger_ptr->trigger_array->program, "/git/slurm/mailmytrigger") == 0) {
-		info("mytrigger set");
+		info("mytrigger set controller");
 		rc = my_trigger_set(uid, gid, trigger_ptr);
 		END_TIMER2("_slurm_rpc_trigger_set");
 		slurm_send_rc_msg(msg, rc);
