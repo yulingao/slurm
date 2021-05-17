@@ -1780,6 +1780,7 @@ extern void my_job_error_judge(struct job_record *job_ptr){
 
 extern void my_job_error_judge_pyslurm(struct job_record *job_ptr) {
 	//	将job_id输出到文件中，留着用来故障的检测
+
 	FILE *fp;
 	fp = fopen("/nfs/data/fault_diagnosis_jobid.txt", "a");
 	if (fp == NULL) {
