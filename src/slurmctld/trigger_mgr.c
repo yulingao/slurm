@@ -399,6 +399,7 @@ extern int my_trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 
 //	不进行用户的权限校验
 
+
 //	if ((slurmctld_conf.slurm_user_id != 0) &&
 //		(slurmctld_conf.slurm_user_id != uid))
 //	{
