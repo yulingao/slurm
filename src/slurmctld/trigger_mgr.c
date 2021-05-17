@@ -397,6 +397,7 @@ extern int my_trigger_set(uid_t uid, gid_t gid, trigger_info_msg_t *msg) {
 //	info("slurm_user_id, %u\n", slurmctld_conf.slurm_user_id);
 //	info("uid, %u\n", uid);
 
+
 //	不进行用户的权限校验
 
 
